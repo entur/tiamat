@@ -31,4 +31,6 @@ lib/
 gradle/
 gradlew
 gradlew.bat
-    
+
+# OS X file for storing custom attributes of a folder
+.DS_Store

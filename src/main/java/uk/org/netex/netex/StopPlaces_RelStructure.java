@@ -46,7 +46,7 @@ public class StopPlaces_RelStructure
 {
 
     @XmlElement(name = "StopPlaceRef")
-    protected StopPlaceRefStructure stopPlaceRef;
+    protected StopPlaceReference stopPlaceRef;
     @XmlElement(name = "StopPlace")
     protected StopPlace stopPlace;
 
@@ -55,10 +55,10 @@ public class StopPlaces_RelStructure
      * 
      * @return
      *     possible object is
-     *     {@link StopPlaceRefStructure }
+     *     {@link StopPlaceReference }
      *     
      */
-    public StopPlaceRefStructure getStopPlaceRef() {
+    public StopPlaceReference getStopPlaceRef() {
         return stopPlaceRef;
     }
 
@@ -67,10 +67,10 @@ public class StopPlaces_RelStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link StopPlaceRefStructure }
+     *     {@link StopPlaceReference }
      *     
      */
-    public void setStopPlaceRef(StopPlaceRefStructure value) {
+    public void setStopPlaceRef(StopPlaceReference value) {
         this.stopPlaceRef = value;
     }
 

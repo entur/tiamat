@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.XmlType;
     "trainStopAssignmentRefOrTrainStopAssignment"
 })
 @XmlSeeAlso({
-    uk.org.netex.netex.PassengerStopAssignment_VersionStructure.TrainElements.class
+    TrainElements.class
 })
 public class TrainStopAssignments_RelStructure
     extends ContainmentAggregationStructure
