@@ -127,7 +127,6 @@ public class VersionOfObjectRefStructure implements Serializable {
 
     @XmlAttribute(name = "ref", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-
     protected String ref;
 
 

@@ -8,6 +8,9 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -64,35 +67,67 @@ import javax.xml.bind.annotation.XmlType;
     ServiceSite_VersionStructure.class,
     PointOfInterest_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class Site_VersionStructure
     extends SiteElement_VersionStructure
 {
 
     @XmlElement(name = "TopographicPlaceRef")
+    @Transient
     protected TopographicPlaceRefStructure topographicPlaceRef;
+
     @XmlElement(name = "TopographicPlaceView")
+    @Transient
     protected TopographicPlaceView topographicPlaceView;
+
+    @Transient
     protected TopographicPlaceRefs_RelStructure additionalTopographicPlaces;
+
     @XmlElement(name = "SiteType")
     @XmlSchemaType(name = "string")
+    @Transient
     protected SiteTypeEnumeration siteType;
+
     @XmlElement(name = "AtCentre")
+    @Transient
     protected Boolean atCentre;
+
     @XmlElement(name = "Locale")
+    @Transient
     protected LocaleStructure locale;
+
     @XmlElementRef(name = "OrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
+    @Transient
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
+
     @XmlElement(name = "OperatingOrganisationView")
+    @Transient
     protected Organisation_DerivedViewStructure operatingOrganisationView;
+
     @XmlElement(name = "ParentSiteRef")
+    @Embedded
     protected SiteRefStructure parentSiteRef;
+
+    @Transient
     protected SiteRefs_RelStructure adjacentSites;
+
     @XmlElement(name = "ContainedInPlaceRef")
+    @Transient
     protected TopographicPlaceRefStructure containedInPlaceRef;
+
+    @Transient
     protected Levels_RelStructure levels;
+
+    @Transient
     protected SiteEntrances_RelStructure entrances;
+
+    @Transient
     protected EquipmentPlaces_RelStructure equipmentPlaces;
+
+    @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
+
+    @Transient
     protected LocalServices_RelStructure localServices;
 
     /**

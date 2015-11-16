@@ -83,7 +83,7 @@ public class StopPlaceTest {
         stopPlaceRepository.save(stopPlace);
 
 
-        StopPlace actualStopPlace = stopPlaceRepository.getOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
 
         assertThat(actualStopPlace.getPublicCode()).isEqualTo(stopPlace.getPublicCode());
         assertThat(actualStopPlace.getStopPlaceType()).isEqualTo(stopPlace.getStopPlaceType());
