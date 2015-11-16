@@ -159,7 +159,7 @@ public class ObjectRefs_RelStructure
      * {@link JAXBElement }{@code <}{@link DestinationDisplayRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link TypeOfFrameRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link DataSourceRefStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link QuayRefStructure }{@code >}
+     * {@link JAXBElement }{@code <}{@link QuayReference }{@code >}
      * {@link JAXBElement }{@code <}{@link DefaultConnectionRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link TimingPointRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link PathLinkRefStructure }{@code >}

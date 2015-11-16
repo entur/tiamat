@@ -177,7 +177,7 @@ public class DefaultConnection_VersionStructure
      *     {@link JAXBElement }{@code <}{@link SiteRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link StopPlaceEntranceRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link SiteComponentRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link QuayRefStructure }{@code >}
+     *     {@link JAXBElement }{@code <}{@link QuayReference }{@code >}
      *     {@link JAXBElement }{@code <}{@link StopPlaceSpaceRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link ParkingRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link PointOfInterestEntranceRefStructure }{@code >}
@@ -210,7 +210,7 @@ public class DefaultConnection_VersionStructure
      *     {@link JAXBElement }{@code <}{@link SiteRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link StopPlaceEntranceRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link SiteComponentRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link QuayRefStructure }{@code >}
+     *     {@link JAXBElement }{@code <}{@link QuayReference }{@code >}
      *     {@link JAXBElement }{@code <}{@link StopPlaceSpaceRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link ParkingRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link PointOfInterestEntranceRefStructure }{@code >}

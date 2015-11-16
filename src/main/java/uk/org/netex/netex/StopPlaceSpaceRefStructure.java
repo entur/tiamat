@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     AccessSpaceRefStructure.class,
     VehicleStoppingPlaceRefStructure.class,
-    QuayRefStructure.class,
+    QuayReference.class,
     VehicleStoppingPositionRefStructure.class,
     BoardingPositionRefStructure.class
 })

@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
+import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -55,6 +56,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     Quay.class
 })
+@Entity
 public class Quay_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {
@@ -63,25 +65,34 @@ public class Quay_VersionStructure
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
+
     @XmlElement(name = "PlateCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String plateCode;
+
     @XmlElement(name = "ShortCode")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger shortCode;
-    protected DestinationDisplayViews_RelStructure destinations;
+
+    //protected DestinationDisplayViews_RelStructure destinations;
+
     @XmlElement(name = "CompassBearing")
     protected Float compassBearing;
+
     @XmlElement(name = "CompassOctant")
     @XmlSchemaType(name = "string")
     protected CompassBearing8Enumeration compassOctant;
+
     @XmlElement(name = "QuayType")
     @XmlSchemaType(name = "string")
     protected QuayTypeEnumeration quayType;
+
     @XmlElement(name = "ParentQuayRef")
-    protected QuayRefStructure parentQuayRef;
-    protected BoardingPositions_RelStructure boardingPositions;
+    protected QuayReference parentQuayRef;
+
+
+   // protected BoardingPositions_RelStructure boardingPositions;
 
     /**
      * Gets the value of the publicCode property.
@@ -163,10 +174,10 @@ public class Quay_VersionStructure
      *     {@link DestinationDisplayViews_RelStructure }
      *     
      */
-    public DestinationDisplayViews_RelStructure getDestinations() {
+/*    public DestinationDisplayViews_RelStructure getDestinations() {
         return destinations;
     }
-
+*/
     /**
      * Sets the value of the destinations property.
      * 
@@ -175,10 +186,10 @@ public class Quay_VersionStructure
      *     {@link DestinationDisplayViews_RelStructure }
      *     
      */
-    public void setDestinations(DestinationDisplayViews_RelStructure value) {
+/*    public void setDestinations(DestinationDisplayViews_RelStructure value) {
         this.destinations = value;
     }
-
+*/
     /**
      * Gets the value of the compassBearing property.
      * 
@@ -256,10 +267,10 @@ public class Quay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public QuayRefStructure getParentQuayRef() {
+    public QuayReference getParentQuayRef() {
         return parentQuayRef;
     }
 
@@ -268,10 +279,10 @@ public class Quay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public void setParentQuayRef(QuayRefStructure value) {
+    public void setParentQuayRef(QuayReference value) {
         this.parentQuayRef = value;
     }
 
@@ -283,9 +294,9 @@ public class Quay_VersionStructure
      *     {@link BoardingPositions_RelStructure }
      *     
      */
-    public BoardingPositions_RelStructure getBoardingPositions() {
+   /* public BoardingPositions_RelStructure getBoardingPositions() {
         return boardingPositions;
-    }
+    }*
 
     /**
      * Sets the value of the boardingPositions property.
@@ -295,8 +306,8 @@ public class Quay_VersionStructure
      *     {@link BoardingPositions_RelStructure }
      *     
      */
-    public void setBoardingPositions(BoardingPositions_RelStructure value) {
+   /* public void setBoardingPositions(BoardingPositions_RelStructure value) {
         this.boardingPositions = value;
-    }
+    }*/
 
 }

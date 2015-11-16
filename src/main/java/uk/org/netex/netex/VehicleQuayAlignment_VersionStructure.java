@@ -51,7 +51,7 @@ public class VehicleQuayAlignment_VersionStructure
     @XmlElement(name = "VehicleStoppingPlaceRef")
     protected VehicleStoppingPlaceRefStructure vehicleStoppingPlaceRef;
     @XmlElement(name = "QuayRef")
-    protected QuayRefStructure quayRef;
+    protected QuayReference quayRef;
 
     /**
      * Gets the value of the vehicleStoppingPlaceRef property.
@@ -82,10 +82,10 @@ public class VehicleQuayAlignment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public QuayRefStructure getQuayRef() {
+    public QuayReference getQuayRef() {
         return quayRef;
     }
 
@@ -94,10 +94,10 @@ public class VehicleQuayAlignment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public void setQuayRef(QuayRefStructure value) {
+    public void setQuayRef(QuayReference value) {
         this.quayRef = value;
     }
 

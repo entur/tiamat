@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;sequence>
  *           &lt;element ref="{http://www.netex.org.uk/netex}PassengerStopAssignmentRef" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}StopPlaceRef" minOccurs="0"/>
- *           &lt;element name="QuayRef" type="{http://www.netex.org.uk/netex}QuayRefStructure" minOccurs="0"/>
+ *           &lt;element name="QuayRef" type="{http://www.netex.org.uk/netex}QuayReference" minOccurs="0"/>
  *           &lt;element name="QuayName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
  *           &lt;element name="Label" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *         &lt;/sequence>

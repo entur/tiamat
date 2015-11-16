@@ -84,7 +84,7 @@ public class SiteConnectionEndStructure {
     @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
     @XmlElement(name = "QuayRef")
-    protected QuayRefStructure quayRef;
+    protected QuayReference quayRef;
     @XmlElement(name = "StopPlaceEntranceRef")
     protected StopPlaceEntranceRefStructure stopPlaceEntranceRef;
     @XmlElement(name = "PointOfInterestRef")
@@ -255,10 +255,10 @@ public class SiteConnectionEndStructure {
      * 
      * @return
      *     possible object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public QuayRefStructure getQuayRef() {
+    public QuayReference getQuayRef() {
         return quayRef;
     }
 
@@ -267,10 +267,10 @@ public class SiteConnectionEndStructure {
      * 
      * @param value
      *     allowed object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public void setQuayRef(QuayRefStructure value) {
+    public void setQuayRef(QuayReference value) {
         this.quayRef = value;
     }
 

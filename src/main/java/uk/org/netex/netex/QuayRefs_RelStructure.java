@@ -46,7 +46,7 @@ public class QuayRefs_RelStructure
 {
 
     @XmlElement(name = "QuayRef", required = true)
-    protected List<QuayRefStructure> quayRef;
+    protected List<QuayReference> quayRef;
 
     /**
      * Gets the value of the quayRef property.
@@ -66,13 +66,13 @@ public class QuayRefs_RelStructure
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link QuayRefStructure }
+     * {@link QuayReference }
      * 
      * 
      */
-    public List<QuayRefStructure> getQuayRef() {
+    public List<QuayReference> getQuayRef() {
         if (quayRef == null) {
-            quayRef = new ArrayList<QuayRefStructure>();
+            quayRef = new ArrayList<QuayReference>();
         }
         return this.quayRef;
     }

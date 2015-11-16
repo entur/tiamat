@@ -52,7 +52,7 @@ public class Quays_RelStructure
 {
 
     @XmlElements({
-        @XmlElement(name = "QuayRef", type = QuayRefStructure.class),
+        @XmlElement(name = "QuayRef", type = QuayReference.class),
         @XmlElement(name = "Quay", type = Quay.class)
     })
     @Column
@@ -77,7 +77,7 @@ public class Quays_RelStructure
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link QuayRefStructure }
+     * {@link QuayReference }
      * {@link Quay }
      * 
      * 

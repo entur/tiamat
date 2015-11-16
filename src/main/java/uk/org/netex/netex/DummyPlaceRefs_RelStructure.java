@@ -96,7 +96,7 @@ public class DummyPlaceRefs_RelStructure
      * {@link JAXBElement }{@code <}{@link ParkingEntranceForVehiclesRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link StopPlaceEntranceRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link SiteComponentRefStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link QuayRefStructure }{@code >}
+     * {@link JAXBElement }{@code <}{@link QuayReference }{@code >}
      * {@link JAXBElement }{@code <}{@link StopPlaceSpaceRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link ParkingRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link PostalAddressRefStructure }{@code >}

@@ -54,7 +54,7 @@ public class PassengerStopAssignment_VersionStructure
     @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
     @XmlElement(name = "QuayRef")
-    protected QuayRefStructure quayRef;
+    protected QuayReference quayRef;
     @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
     protected TrainElements trainElements;
@@ -88,10 +88,10 @@ public class PassengerStopAssignment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public QuayRefStructure getQuayRef() {
+    public QuayReference getQuayRef() {
         return quayRef;
     }
 
@@ -100,10 +100,10 @@ public class PassengerStopAssignment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link QuayRefStructure }
+     *     {@link QuayReference }
      *     
      */
-    public void setQuayRef(QuayRefStructure value) {
+    public void setQuayRef(QuayReference value) {
         this.quayRef = value;
     }
 

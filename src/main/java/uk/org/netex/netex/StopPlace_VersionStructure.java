@@ -182,11 +182,8 @@ public class StopPlace_VersionStructure
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-//    @OneToOne
-//    protected Quays_RelStructure quays;
-
-//    @OneToOne
-//    protected AccessSpaces_RelStructure accessSpaces;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<QuayReference> quayReferences;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<AccessSpaceRefStructure> accessSpaces;
@@ -693,29 +690,6 @@ public class StopPlace_VersionStructure
         this.weighting = value;
     }
 
-    /**
-     * Gets the value of the quays property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Quays_RelStructure }
-     *     
-     */
-/*    public Quays_RelStructure getQuays() {
-        return quays;
-    }
-*/
-    /**
-     * Sets the value of the quays property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Quays_RelStructure }
-     *     
-     */
-  /*  public void setQuays(Quays_RelStructure value) {
-        this.quays = value;
-    }*/
 
     /**
      * Gets the value of the accessSpaces property.
@@ -882,5 +856,13 @@ public class StopPlace_VersionStructure
 
     public void setAccessSpaces(List<AccessSpaceRefStructure> accessSpaces) {
         this.accessSpaces = accessSpaces;
+    }
+
+    public List<QuayReference> getQuayReferences() {
+        return quayReferences;
+    }
+
+    public void setQuayReferences(List<QuayReference> quayReferences) {
+        this.quayReferences = quayReferences;
     }
 }
