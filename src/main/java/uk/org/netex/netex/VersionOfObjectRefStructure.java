@@ -115,21 +115,20 @@ import java.util.Date;
 })
 @MappedSuperclass
 public class VersionOfObjectRefStructure implements Serializable {
-/*
+
     @XmlValue
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @Id
     protected String value;
-
+/*
     @XmlAttribute(name = "nameOfRefClass")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @Id
-    protected String nameOfRefClass;
+    protected String nameOfRefClass;*/
 
     @XmlAttribute(name = "ref", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @Id
-    protected String ref;*/
+
+    protected String ref;
 
 
     @XmlAttribute(name = "created")
@@ -152,9 +151,9 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link String }
      *     
      */
-  /*  public String getValue() {
+    public String getValue() {
         return value;
-    }*/
+    }
 
     /**
      * Sets the value of the value property.
@@ -164,10 +163,10 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link String }
      *     
      */
-   /* public void setValue(String value) {
+    public void setValue(String value) {
         this.value = value;
     }
-*/
+
     /**
      * Gets the value of the nameOfRefClass property.
      * 
@@ -200,9 +199,9 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link String }
      *     
      */
-   /* public String getRef() {
+    public String getRef() {
         return ref;
-    }*/
+    }
 
     /**
      * Sets the value of the ref property.
@@ -212,10 +211,10 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link String }
      *     
      */
- /*   public void setRef(String value) {
+    public void setRef(String value) {
         this.ref = value;
     }
-*/
+
     /**
      * Gets the value of the created property.
      * 

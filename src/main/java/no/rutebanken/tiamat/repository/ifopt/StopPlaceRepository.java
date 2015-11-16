@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import uk.org.netex.netex.StopPlace;
 
-public interface StopPlaceRepository extends JpaRepository<StopPlace, Long> {
+public interface StopPlaceRepository extends JpaRepository<StopPlace, String> {
 
-    StopPlace findById(String id);
 }
 

@@ -55,12 +55,9 @@ public class BootStrap implements InitializingBean {
         accessSpace.setAccessSpaceType(AccessSpaceTypeEnumeration.CONCOURSE);
         accessSpaceRepository.save(accessSpace);
 
-        AccessSpaceRefStructure accessSpaceRefStructure = new AccessSpaceRefStructure();
-        accessSpaceRefStructure.setReference(accessSpace);
-
-        List<AccessSpaceRefStructure> accessSpaceReferences = new ArrayList<>();
-        accessSpaceReferences.add(accessSpaceRefStructure);
-        stopPlace.setAccessSpaces(accessSpaceReferences);
+        List<AccessSpace> accessSpaces = new ArrayList<>();
+        accessSpaces.add(accessSpace);
+        stopPlace.setAccessSpaces(accessSpaces);
 
         LocationStructure locationStructure = new LocationStructure();
         locationStructure.setLatitude(new BigDecimal(10));
@@ -76,14 +73,10 @@ public class BootStrap implements InitializingBean {
 
         tariffZoneRepository.save(tariffZone);
 
-        TariffZoneRef tariffZoneRef = new TariffZoneRef();
-        tariffZoneRef.setCreated(new Date());
-        tariffZoneRef.setChanged(new Date());
-        tariffZoneRef.setTariffZone(tariffZone);
 
-        List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
-        tariffZoneRefs.add(tariffZoneRef);
-        stopPlace.setTariffZones(tariffZoneRefs);
+        List<TariffZone> tariffZones = new ArrayList<>();
+        tariffZones.add(tariffZone);
+        stopPlace.setTariffZones(tariffZones);
 
         stopPlaceRepository.save(stopPlace);
 

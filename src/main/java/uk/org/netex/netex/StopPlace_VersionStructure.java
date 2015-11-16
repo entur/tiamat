@@ -146,9 +146,8 @@ public class StopPlace_VersionStructure
     @Enumerated(EnumType.STRING)
     protected List<VehicleModeEnumeration> otherTransportModes;
 
-    //@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<TariffZoneRef> tariffZones;
+    private List<TariffZone> tariffZones;
 
     @XmlElement(name = "StopPlaceType")
     @XmlSchemaType(name = "string")
@@ -160,9 +159,6 @@ public class StopPlace_VersionStructure
 
 //    @Embedded
 //    protected ExplicitEquipments_RelStructure unlocalisedEquipments;
-
-    @Embedded
-    private StopPlaceReference parentStopPlaceReference;
 
     @OneToOne
     @Transient
@@ -183,10 +179,10 @@ public class StopPlace_VersionStructure
     protected InterchangeWeightingEnumeration weighting;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<QuayReference> quayReferences;
+    private List<Quay> quays;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<AccessSpaceRefStructure> accessSpaces;
+    private List<AccessSpace> accessSpaces;
 
     @OneToOne
     protected SitePathLinks_RelStructure pathLinks;
@@ -834,35 +830,27 @@ public class StopPlace_VersionStructure
         this.vehicleStoppingPlaces = value;
     }
 
-    public List<TariffZoneRef> getTariffZones() {
+    public List<TariffZone> getTariffZones() {
         return tariffZones;
     }
 
-    public void setTariffZones(List<TariffZoneRef> tariffZones) {
+    public void setTariffZones(List<TariffZone> tariffZones) {
         this.tariffZones = tariffZones;
     }
 
-    public StopPlaceReference getParentStopPlaceReference() {
-        return parentStopPlaceReference;
-    }
-
-    public void setParentStopPlaceReference(StopPlaceReference parentStopPlaceReference) {
-        this.parentStopPlaceReference = parentStopPlaceReference;
-    }
-
-    public List<AccessSpaceRefStructure> getAccessSpaces() {
+    public List<AccessSpace> getAccessSpaces() {
         return accessSpaces;
     }
 
-    public void setAccessSpaces(List<AccessSpaceRefStructure> accessSpaces) {
+    public void setAccessSpaces(List<AccessSpace> accessSpaces) {
         this.accessSpaces = accessSpaces;
     }
 
-    public List<QuayReference> getQuayReferences() {
-        return quayReferences;
+    public List<Quay> getQuays() {
+        return quays;
     }
 
-    public void setQuayReferences(List<QuayReference> quayReferences) {
-        this.quayReferences = quayReferences;
+    public void setQuays(List<Quay> quays) {
+        this.quays = quays;
     }
 }

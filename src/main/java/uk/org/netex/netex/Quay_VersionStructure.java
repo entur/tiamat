@@ -92,7 +92,7 @@ public class Quay_VersionStructure
     protected QuayReference parentQuayRef;
 
 
-   // protected BoardingPositions_RelStructure boardingPositions;
+    //protected BoardingPositions_RelStructure boardingPositions;
 
     /**
      * Gets the value of the publicCode property.

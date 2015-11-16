@@ -38,18 +38,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "StopPlaceRefStructure")
 @Embeddable
 public class StopPlaceReference
-    extends SiteRefStructure
-{
-
-    @OneToOne
-    private StopPlace stopPlace;
-
-    public StopPlace getStopPlace() {
-        return stopPlace;
-    }
-
-    public void setStopPlace(StopPlace stopPlace) {
-        this.stopPlace = stopPlace;
-    }
+    extends SiteRefStructure {
 
 }

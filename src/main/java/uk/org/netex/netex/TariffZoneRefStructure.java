@@ -42,18 +42,5 @@ import javax.xml.bind.annotation.XmlType;
 })
 @MappedSuperclass
 public class TariffZoneRefStructure
-    extends ZoneRefStructure
-{
-
-    @OneToOne
-    private TariffZone tariffZone;
-
-    public TariffZone getTariffZone() {
-        return tariffZone;
-    }
-
-    public void setTariffZone(TariffZone tariffZone) {
-        this.tariffZone = tariffZone;
-    }
-
+    extends ZoneRefStructure {
 }

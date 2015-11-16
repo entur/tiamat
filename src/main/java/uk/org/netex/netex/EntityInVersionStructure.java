@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -67,10 +68,10 @@ public class EntityInVersionStructure
     protected String dataSourceRef;
     @XmlAttribute(name = "created")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar created;
+    protected Date created;
     @XmlAttribute(name = "changed")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar changed;
+    protected Date changed;
     @XmlAttribute(name = "modification")
     protected ModificationEnumeration modification;
     @XmlAttribute(name = "version")
@@ -173,7 +174,7 @@ public class EntityInVersionStructure
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public XMLGregorianCalendar getCreated() {
+    public Date getCreated() {
         return created;
     }
 
@@ -185,7 +186,7 @@ public class EntityInVersionStructure
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setCreated(XMLGregorianCalendar value) {
+    public void setCreated(Date value) {
         this.created = value;
     }
 
@@ -194,10 +195,10 @@ public class EntityInVersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link Date }
      *     
      */
-    public XMLGregorianCalendar getChanged() {
+    public Date getChanged() {
         return changed;
     }
 
@@ -206,10 +207,10 @@ public class EntityInVersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link Date }
      *     
      */
-    public void setChanged(XMLGregorianCalendar value) {
+    public void setChanged(Date value) {
         this.changed = value;
     }
 

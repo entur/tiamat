@@ -54,44 +54,36 @@ public class StopPlaceTest {
         accessSpace.setAccessSpaceType(AccessSpaceTypeEnumeration.CONCOURSE);
         accessSpaceRepository.save(accessSpace);
 
-        AccessSpaceRefStructure accessSpaceRefStructure = new AccessSpaceRefStructure();
-        accessSpaceRefStructure.setReference(accessSpace);
-
-        List<AccessSpaceRefStructure> accessSpaceReferences = new ArrayList<>();
-        accessSpaceReferences.add(accessSpaceRefStructure);
-        stopPlace.setAccessSpaces(accessSpaceReferences);
+        List<AccessSpace> accessSpaces = new ArrayList<>();
+        accessSpaces.add(accessSpace);
+        stopPlace.setAccessSpaces(accessSpaces);
 
         StopPlace anotherStopPlace = new StopPlace();
         anotherStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        anotherStopPlace.setVersion("001");
         stopPlaceRepository.save(anotherStopPlace);
 
         StopPlaceReference stopPlaceReference = new StopPlaceReference();
-        stopPlaceReference.setStopPlace(anotherStopPlace);
+        stopPlaceReference.setRef(anotherStopPlace.getId());
+        stopPlaceReference.setVersion(anotherStopPlace.getVersion());
 
-        stopPlace.setParentStopPlaceReference(stopPlaceReference);
+        stopPlace.setParentSiteRef(stopPlaceReference);
 
         TariffZone tariffZone = new TariffZone();
         tariffZone.setShortName(new MultilingualString("V2", "no", "type"));
 
         tariffZoneRepository.save(tariffZone);
 
-        assertThat(tariffZone.getId()).isNotEmpty();
-
-        TariffZoneRef tariffZoneRef = new TariffZoneRef();
-        tariffZoneRef.setCreated(new Date());
-        tariffZoneRef.setChanged(new Date());
-        tariffZoneRef.setTariffZone(tariffZone);
-
-        List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
-        tariffZoneRefs.add(tariffZoneRef);
-        stopPlace.setTariffZones(tariffZoneRefs);
+        List<TariffZone> tariffZones = new ArrayList<>();
+        tariffZones.add(tariffZone);
+        stopPlace.setTariffZones(tariffZones);
 
         stopPlace.setWeighting(InterchangeWeightingEnumeration.RECOMMENDED_INTERCHANGE);
 
         stopPlaceRepository.save(stopPlace);
 
 
-        StopPlace actualStopPlace = stopPlaceRepository.findById(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.getOne(stopPlace.getId());
 
         assertThat(actualStopPlace.getPublicCode()).isEqualTo(stopPlace.getPublicCode());
         assertThat(actualStopPlace.getStopPlaceType()).isEqualTo(stopPlace.getStopPlaceType());
@@ -104,15 +96,10 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getOtherTransportModes()).contains(VehicleModeEnumeration.AIR);
         assertThat(actualStopPlace.getTariffZones()).isNotEmpty();
         assertThat(actualStopPlace.getWeighting()).isEqualTo(stopPlace.getWeighting());
-        assertThat(actualStopPlace.getTariffZones().get(0).getChanged()).hasSameTimeAs(tariffZoneRef.getChanged());
-        assertThat(actualStopPlace.getParentStopPlaceReference().getStopPlace().getId()).isEqualTo(anotherStopPlace.getId());
+        assertThat(actualStopPlace.getTariffZones().get(0).getId()).isEqualTo(tariffZone.getId());
+        assertThat(actualStopPlace.getParentSiteRef().getRef()).isEqualTo(anotherStopPlace.getId());
         assertThat(actualStopPlace.getLimitedUse()).isEqualTo(stopPlace.getLimitedUse());
 
         assertThat(actualStopPlace.getAccessSpaces().get(0)).isNotNull();
-    }
-
-    @Test
-    public void findAllStopPlaces() {
-        stopPlaceRepository.findAll();
     }
 }
