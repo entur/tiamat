@@ -93,6 +93,8 @@ public class MultilingualString {
 
     /**
      * Gets the value of the lang property.
+     *
+     * Language of string contents.
      * 
      * @return
      *     possible object is
@@ -117,6 +119,8 @@ public class MultilingualString {
 
     /**
      * Gets the value of the textIdType property.
+     *
+     * Resource id of string.
      * 
      * @return
      *     possible object is

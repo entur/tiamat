@@ -8,6 +8,8 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Embeddable;
+import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -34,9 +36,19 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AccessSpaceRefStructure")
+@Embeddable
 public class AccessSpaceRefStructure
     extends StopPlaceSpaceRefStructure
 {
+    @OneToOne
+    private AccessSpace reference;
 
+    public AccessSpace getReference() {
+        return reference;
+    }
+
+    public void setReference(AccessSpace reference) {
+        this.reference = reference;
+    }
 
 }

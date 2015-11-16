@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import java.util.Date;
 
 
 /**
@@ -47,14 +46,14 @@ public class TariffZoneRefStructure
 {
 
     @OneToOne
-    private TariffZone reference;
+    private TariffZone tariffZone;
 
-    public TariffZone getReference() {
-        return reference;
+    public TariffZone getTariffZone() {
+        return tariffZone;
     }
 
-    public void setReference(TariffZone reference) {
-        this.reference = reference;
+    public void setTariffZone(TariffZone tariffZone) {
+        this.tariffZone = tariffZone;
     }
 
 }

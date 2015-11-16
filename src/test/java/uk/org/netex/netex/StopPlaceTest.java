@@ -1,14 +1,14 @@
 package uk.org.netex.netex;
 
 import no.rutebanken.tiamat.TiamatApplication;
+import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,11 +20,14 @@ import static org.assertj.core.api.Assertions.*;
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
 public class StopPlaceTest {
 
-    @Inject
+    @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    @Inject
+    @Autowired
     private TariffZoneRepository tariffZoneRepository;
+
+    @Autowired
+    private AccessSpaceRepository accessSpaceRepository;
 
     @Test
     public void persistStopPlace() {
@@ -36,7 +39,6 @@ public class StopPlaceTest {
         shortName.setValue("Skjervik");
         stopPlace.setShortName(shortName);
         stopPlace.setPublicCode("publicCode");
-        stopPlace.getId();
 
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
 
@@ -45,14 +47,26 @@ public class StopPlaceTest {
         stopPlace.setCoachSubmode(CoachSubmodeEnumeration.REGIONAL_COACH);
         stopPlace.setFunicularSubmode(FunicularSubmodeEnumeration.UNKNOWN);
         stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
+        stopPlace.setLimitedUse(LimitedUseTypeEnumeration.LONG_WALK_TO_ACCESS);
+
+        AccessSpace accessSpace = new AccessSpace();
+        accessSpace.setShortName(new MultilingualString("Østbanehallen", "no", ""));
+        accessSpace.setAccessSpaceType(AccessSpaceTypeEnumeration.CONCOURSE);
+        accessSpaceRepository.save(accessSpace);
+
+        AccessSpaceRefStructure accessSpaceRefStructure = new AccessSpaceRefStructure();
+        accessSpaceRefStructure.setReference(accessSpace);
+
+        List<AccessSpaceRefStructure> accessSpaceReferences = new ArrayList<>();
+        accessSpaceReferences.add(accessSpaceRefStructure);
+        stopPlace.setAccessSpaces(accessSpaceReferences);
 
         StopPlace anotherStopPlace = new StopPlace();
         anotherStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-
         stopPlaceRepository.save(anotherStopPlace);
 
         StopPlaceReference stopPlaceReference = new StopPlaceReference();
-        stopPlaceReference.setReference(anotherStopPlace);
+        stopPlaceReference.setStopPlace(anotherStopPlace);
 
         stopPlace.setParentStopPlaceReference(stopPlaceReference);
 
@@ -66,7 +80,7 @@ public class StopPlaceTest {
         TariffZoneRef tariffZoneRef = new TariffZoneRef();
         tariffZoneRef.setCreated(new Date());
         tariffZoneRef.setChanged(new Date());
-        tariffZoneRef.setReference(tariffZone);
+        tariffZoneRef.setTariffZone(tariffZone);
 
         List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
         tariffZoneRefs.add(tariffZoneRef);
@@ -91,7 +105,10 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getTariffZones()).isNotEmpty();
         assertThat(actualStopPlace.getWeighting()).isEqualTo(stopPlace.getWeighting());
         assertThat(actualStopPlace.getTariffZones().get(0).getChanged()).hasSameTimeAs(tariffZoneRef.getChanged());
-        assertThat(actualStopPlace.getParentStopPlaceReference().getReference().getId()).isEqualTo(anotherStopPlace.getId());
+        assertThat(actualStopPlace.getParentStopPlaceReference().getStopPlace().getId()).isEqualTo(anotherStopPlace.getId());
+        assertThat(actualStopPlace.getLimitedUse()).isEqualTo(stopPlace.getLimitedUse());
+
+        assertThat(actualStopPlace.getAccessSpaces().get(0)).isNotNull();
     }
 
     @Test

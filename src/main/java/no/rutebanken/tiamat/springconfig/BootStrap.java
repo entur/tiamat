@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.springconfig;
 
+import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.slf4j.Logger;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import uk.org.netex.netex.*;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,8 +23,11 @@ public class BootStrap implements InitializingBean {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    @Inject
+    @Autowired
     private TariffZoneRepository tariffZoneRepository;
+
+    @Autowired
+    private AccessSpaceRepository accessSpaceRepository;
 
     /**
      * Set up test object.
@@ -47,6 +50,18 @@ public class BootStrap implements InitializingBean {
 
         stopPlace.setShortName(shortName);
 
+        AccessSpace accessSpace = new AccessSpace();
+        accessSpace.setShortName(new MultilingualString("Østbanehallen", "no", ""));
+        accessSpace.setAccessSpaceType(AccessSpaceTypeEnumeration.CONCOURSE);
+        accessSpaceRepository.save(accessSpace);
+
+        AccessSpaceRefStructure accessSpaceRefStructure = new AccessSpaceRefStructure();
+        accessSpaceRefStructure.setReference(accessSpace);
+
+        List<AccessSpaceRefStructure> accessSpaceReferences = new ArrayList<>();
+        accessSpaceReferences.add(accessSpaceRefStructure);
+        stopPlace.setAccessSpaces(accessSpaceReferences);
+
         LocationStructure locationStructure = new LocationStructure();
         locationStructure.setLatitude(new BigDecimal(10));
         locationStructure.setLongitude(new BigDecimal(20));
@@ -64,7 +79,7 @@ public class BootStrap implements InitializingBean {
         TariffZoneRef tariffZoneRef = new TariffZoneRef();
         tariffZoneRef.setCreated(new Date());
         tariffZoneRef.setChanged(new Date());
-        tariffZoneRef.setReference(tariffZone);
+        tariffZoneRef.setTariffZone(tariffZone);
 
         List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
         tariffZoneRefs.add(tariffZoneRef);

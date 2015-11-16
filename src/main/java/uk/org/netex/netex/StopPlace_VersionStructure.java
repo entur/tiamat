@@ -174,7 +174,7 @@ public class StopPlace_VersionStructure
 
     @XmlElement(name = "LimitedUse")
     @XmlSchemaType(name = "string")
-    @Transient
+    @Enumerated(EnumType.STRING)
     protected LimitedUseTypeEnumeration limitedUse;
 
     @XmlElement(name = "Weighting")
@@ -185,8 +185,11 @@ public class StopPlace_VersionStructure
 //    @OneToOne
 //    protected Quays_RelStructure quays;
 
-    @OneToOne
-    protected AccessSpaces_RelStructure accessSpaces;
+//    @OneToOne
+//    protected AccessSpaces_RelStructure accessSpaces;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<AccessSpaceRefStructure> accessSpaces;
 
     @OneToOne
     protected SitePathLinks_RelStructure pathLinks;
@@ -721,10 +724,9 @@ public class StopPlace_VersionStructure
      *     possible object is
      *     {@link AccessSpaces_RelStructure }
      *     
-     */
-    public AccessSpaces_RelStructure getAccessSpaces() {
-        return accessSpaces;
-    }
+//    public AccessSpaces_RelStructure getAccessSpaces() {
+//        return accessSpaces;
+//    }
 
     /**
      * Sets the value of the accessSpaces property.
@@ -734,9 +736,9 @@ public class StopPlace_VersionStructure
      *     {@link AccessSpaces_RelStructure }
      *     
      */
-    public void setAccessSpaces(AccessSpaces_RelStructure value) {
-        this.accessSpaces = value;
-    }
+ //   public void setAccessSpaces(AccessSpaces_RelStructure value) {
+ //       this.accessSpaces = value;
+ //   }
 
     /**
      * Gets the value of the pathLinks property.
@@ -872,5 +874,13 @@ public class StopPlace_VersionStructure
 
     public void setParentStopPlaceReference(StopPlaceReference parentStopPlaceReference) {
         this.parentStopPlaceReference = parentStopPlaceReference;
+    }
+
+    public List<AccessSpaceRefStructure> getAccessSpaces() {
+        return accessSpaces;
+    }
+
+    public void setAccessSpaces(List<AccessSpaceRefStructure> accessSpaces) {
+        this.accessSpaces = accessSpaces;
     }
 }

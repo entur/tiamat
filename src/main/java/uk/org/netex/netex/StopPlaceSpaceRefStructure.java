@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -41,6 +42,7 @@ import javax.xml.bind.annotation.XmlType;
     VehicleStoppingPositionRefStructure.class,
     BoardingPositionRefStructure.class
 })
+@MappedSuperclass
 public class StopPlaceSpaceRefStructure
     extends SiteComponentRefStructure
 {

@@ -9,7 +9,6 @@
 package uk.org.netex.netex;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -43,14 +42,14 @@ public class StopPlaceReference
 {
 
     @OneToOne
-    private StopPlace reference;
+    private StopPlace stopPlace;
 
-    public StopPlace getReference() {
-        return reference;
+    public StopPlace getStopPlace() {
+        return stopPlace;
     }
 
-    public void setReference(StopPlace reference) {
-        this.reference = reference;
+    public void setStopPlace(StopPlace stopPlace) {
+        this.stopPlace = stopPlace;
     }
 
 }
