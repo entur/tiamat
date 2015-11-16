@@ -208,7 +208,6 @@ import javax.xml.bind.annotation.XmlType;
     InfrastructureJunctionsInFrame_RelStructure.class,
     DisplayAssignmentsInFrame_RelStructure.class,
     VehicleStoppingPositions_RelStructure.class,
-    AccessSpaces_RelStructure.class,
     GroupsOfPlacesInFrame_RelStructure.class,
     TrainComponents_RelStructure.class
 })
