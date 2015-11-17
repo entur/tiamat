@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -54,17 +55,27 @@ import net.opengis.gml._3.PolygonType;
     StopArea_VersionStructure.class,
     Place_VersionStructure.class
 })
+@MappedSuperclass
 public class Zone_VersionStructure
     extends GroupOfPoints_VersionStructure
 {
 
+    @Transient
     protected TypeOfZoneRefs_RelStructure types;
+
     @XmlElement(name = "Centroid")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected SimplePoint_VersionStructure centroid;
+
     @XmlElement(name = "Polygon", namespace = "http://www.opengis.net/gml/3.2")
+    @Transient
     protected PolygonType polygon;
+
+    @Transient
     protected Projections_RelStructure projections;
+
     @XmlElement(name = "ParentZoneRef")
+    @Transient
     protected ZoneRefStructure parentZoneRef;
 
     /**

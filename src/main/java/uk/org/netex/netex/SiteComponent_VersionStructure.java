@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Embedded;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -58,8 +59,11 @@ public abstract class SiteComponent_VersionStructure
 
     @XmlElement(name = "SiteRef")
     protected SiteRefStructure siteRef;
+
     @XmlElement(name = "LevelRef")
+    @Embedded
     protected LevelRefStructure levelRef;
+
     @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
     protected CheckConstraints_RelStructure checkConstraints;

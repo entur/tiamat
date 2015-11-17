@@ -15,6 +15,11 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ *
+ * A place such as platform, stance, or quayside where passengers have access to PT vehicles, Taxi
+ * cars or other means of transportation. A QUAY may contain other sub QUAYs. A child QUAY must be physically
+ * contained within its parent QUAY.
+ *
  * <p>Java class for anonymous complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.

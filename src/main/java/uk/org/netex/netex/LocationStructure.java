@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigDecimal;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import net.opengis.gml._3.DirectPositionType;
+import org.hibernate.annotations.GenericGenerator;
 
 
 /**
@@ -59,24 +61,41 @@ import net.opengis.gml._3.DirectPositionType;
     "pos",
     "precision"
 })
+@Entity
+@Table(name = "location")
 public class LocationStructure {
 
     @XmlElement(name = "Longitude")
+    @Column(precision = 12, scale = 10)
     protected BigDecimal longitude;
+
     @XmlElement(name = "Latitude")
+    @Column(precision = 13, scale = 10)
     protected BigDecimal latitude;
+
     @XmlElement(name = "Altitude")
+    @Transient
     protected BigDecimal altitude;
+
     @XmlElement(namespace = "http://www.opengis.net/gml/3.2")
+    @Transient
     protected DirectPositionType pos;
+
     @XmlElement(name = "Precision")
+    @Transient
     protected BigDecimal precision;
+
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     protected String id;
+
     @XmlAttribute(name = "srsName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @Transient
     protected String srsName;
 
     /**

@@ -44,6 +44,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "MultilingualString", propOrder = {
     "value"
 })
+@Embeddable
 public class MultilingualString {
 
     @XmlValue

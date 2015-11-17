@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Embeddable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -34,6 +35,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LevelRefStructure")
+@Embeddable
 public class LevelRefStructure
     extends VersionOfObjectRefStructure
 {

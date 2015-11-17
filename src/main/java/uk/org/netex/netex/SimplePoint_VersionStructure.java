@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -41,13 +42,17 @@ import javax.xml.bind.annotation.XmlType;
     "name",
     "location"
 })
+@Entity
 public class SimplePoint_VersionStructure
     extends EntityInVersionStructure
 {
 
     @XmlElement(name = "Name")
+    @Embedded
     protected MultilingualString name;
+
     @XmlElement(name = "Location")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected LocationStructure location;
 
     /**
