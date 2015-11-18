@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.springconfig;
 
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
+import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.slf4j.Logger;
@@ -29,13 +30,85 @@ public class BootStrap implements InitializingBean {
     @Autowired
     private AccessSpaceRepository accessSpaceRepository;
 
+    @Autowired
+    private QuayRepository quayRepository;
+
     /**
      * Set up test object.
      */
     @Override
     public void afterPropertiesSet() throws Exception {
+        createExampleStopPlace();
+        createExampleQuay();
+    }
 
+    private void createExampleQuay() {
 
+        Quay quay = new Quay();
+        quay.setVersion("001");
+        quay.setCreated(new Date());
+        quay.setDataSourceRef("nptg:DataSource:NaPTAN");
+        quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
+
+        quay.setName(new MultilingualString("Wimbledon, Stop P", "en", ""));
+        quay.setShortName(new MultilingualString("Wimbledon", "en", ""));
+        quay.setDescription(new MultilingualString("Stop P  is paired with Stop C outside the station", "en", ""));
+
+        quay.setCovered(CoveredEnumeration.COVERED);
+
+        quay.setBoardingUse(true);
+        quay.setAlightingUse(true);
+        quay.setLabel(new MultilingualString("Stop P", "en", ""));
+        quay.setPublicCode("1-2345");
+
+        quay.setCompassOctant(CompassBearing8Enumeration.W);
+        quay.setQuayType(QuayTypeEnumeration.BUS_STOP);
+
+        DestinationDisplayView destinationDisplayView = new DestinationDisplayView();
+        destinationDisplayView.setName(new MultilingualString("Towards London", "en", ""));
+
+        quay.setDestinations(new ArrayList<>());
+        quay.getDestinations().add(destinationDisplayView);
+
+        RoadAddress roadAddress = new RoadAddress();
+        roadAddress.setVersion("any");
+        roadAddress.setRoadName(new MultilingualString("Wimbledon Bridge", "en", ""));
+        roadAddress.setBearingCompass("W");
+        quay.setRoadAddress(roadAddress);
+
+        Location location = new Location();
+        BigDecimal longitude = new BigDecimal("-0.2068758371").setScale(10, BigDecimal.ROUND_CEILING);
+        BigDecimal latitude = new BigDecimal("51.4207729447").setScale(10, BigDecimal.ROUND_CEILING);
+
+        location.setLongitude(longitude);
+        location.setLatitude(latitude);
+
+        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        centroid.setLocation(location);
+        quay.setCentroid(centroid);
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setVersion("any");
+        accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+        quay.setAccessibilityAssessment(accessibilityAssessment);
+
+        LevelRefStructure levelRefStructure = new LevelRefStructure();
+        levelRefStructure.setVersion("001");
+        levelRefStructure.setRef("tbd:Level:9100WIMBLDN_Lvl_ST");
+
+        quay.setLevelRef(levelRefStructure);
+
+        SiteRefStructure siteRefStructure = new SiteRefStructure();
+        siteRefStructure.setVersion("001");
+        siteRefStructure.setRef("napt:StopPlace:490G00272P");
+
+        quay.setSiteRef(siteRefStructure);
+
+        quayRepository.save(quay);
+
+    }
+
+    public void createExampleStopPlace() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         MultilingualString name = new MultilingualString();
