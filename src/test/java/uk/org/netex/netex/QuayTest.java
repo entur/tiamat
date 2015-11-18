@@ -30,14 +30,12 @@ public class QuayTest {
      * @throws ParseException
      */
     @Test
-    public void persistExampleQuay() throws ParseException {
-
+    public void persistQuayWithCommonValues() throws ParseException {
         Quay quay = new Quay();
         quay.setVersion("001");
         quay.setCreated(dateFormat.parse("2010-04-17T09:30:47Z"));
         quay.setDataSourceRef("nptg:DataSource:NaPTAN");
         quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
-        //quay.setId("napt:Quay:490000272P");
 
         quay.setName(new MultilingualString("Wimbledon, Stop P", "en", ""));
         quay.setShortName(new MultilingualString("Wimbledon", "en", ""));
@@ -45,13 +43,10 @@ public class QuayTest {
 
         quay.setCovered(CoveredEnumeration.COVERED);
 
-     //   siteReference(quay);
-
         quay.setBoardingUse(true);
         quay.setAlightingUse(true);
         quay.setLabel(new MultilingualString("Stop P", "en", ""));
         quay.setPublicCode("1-2345");
-        //quay.setDestinationDisplayView
 
         quay.setCompassOctant(CompassBearing8Enumeration.W);
         quay.setQuayType(QuayTypeEnumeration.BUS_STOP);
@@ -163,17 +158,21 @@ public class QuayTest {
         assertThat(actualQuay.getLevelRef().getRef()).isEqualTo(levelRefStructure.getRef());
     }
 
+    @Test
+    public void persistQuayWithSiteReference() {
+        Quay quay = new Quay();
 
-    private void siteReference(Quay quay) {
-        //Reference to stop place
         SiteRefStructure siteRefStructure = new SiteRefStructure();
         siteRefStructure.setVersion("001");
-        siteRefStructure.setValue("napt:StopPlace:490G00272P");
+        siteRefStructure.setRef("napt:StopPlace:490G00272P");
 
         quay.setSiteRef(siteRefStructure);
+
+        quayRepository.save(quay);
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getSiteRef()).isNotNull();
+        assertThat(actualQuay.getSiteRef().getRef()).isEqualTo(siteRefStructure.getRef());
     }
-
-
-
 
 }

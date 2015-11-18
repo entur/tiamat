@@ -59,7 +59,7 @@ public abstract class SiteComponent_VersionStructure
 {
 
     @XmlElement(name = "SiteRef")
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected SiteRefStructure siteRef;
 
     @XmlElement(name = "LevelRef")
