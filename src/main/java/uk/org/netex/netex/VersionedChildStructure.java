@@ -8,6 +8,8 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -69,11 +71,13 @@ import javax.xml.bind.annotation.XmlType;
     UserNeed_VersionedChildStructure.class,
     AlternativeName_VersionedChildStructure.class
 })
+@MappedSuperclass
 public class VersionedChildStructure
     extends EntityInVersionStructure
 {
 
     @XmlElement(name = "Extensions")
+    @Transient
     protected ExtensionsStructure extensions;
 
     /**

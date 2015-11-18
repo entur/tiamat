@@ -43,7 +43,6 @@ public class QuayTest {
         quay.setDescription(new MultilingualString("Stop P  is paired with Stop C outside the station", "en", ""));
 
         //quay.setTypes();
-        accessibilityAssessment(quay);
 
         quay.setCovered(CoveredEnumeration.COVERED);
 
@@ -110,6 +109,26 @@ public class QuayTest {
         assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
     }
 
+    @Test
+    public void persistQuayWithAccessibilityAssessment() {
+        Quay quay = new Quay();
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setVersion("any");
+        accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+        quay.setAccessibilityAssessment(accessibilityAssessment);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
+        AccessibilityAssessment actualAccessibilityAssessment = actualQuay.getAccessibilityAssessment();
+
+        assertThat(actualAccessibilityAssessment.getVersion()).isEqualTo(accessibilityAssessment.getVersion());
+        assertThat(actualAccessibilityAssessment.getMobilityImpairedAccess()).isEqualTo(actualAccessibilityAssessment.getMobilityImpairedAccess());
+        assertThat(actualAccessibilityAssessment.getId()).isEqualTo(actualAccessibilityAssessment.getId());
+    }
 
 
     private void siteReference(Quay quay) {
@@ -127,14 +146,6 @@ public class QuayTest {
         levelRefStructure.setRef("tbd:Level:9100WIMBLDN_Lvl_ST");
 
         quay.setLevelRef(levelRefStructure);
-    }
-
-    private void accessibilityAssessment(Quay quay) {
-        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
-        accessibilityAssessment.setVersion("any");
-        accessibilityAssessment.setId("tbd:AccessibilityAssessment:490000272P");
-        accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
-        quay.setAccessibilityAssessment(accessibilityAssessment);
     }
 
 

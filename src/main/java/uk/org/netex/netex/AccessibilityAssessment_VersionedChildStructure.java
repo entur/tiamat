@@ -8,6 +8,10 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -47,16 +51,24 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     AccessibilityAssessment.class
 })
+@MappedSuperclass
 public class AccessibilityAssessment_VersionedChildStructure
     extends VersionedChildStructure
 {
 
     @XmlElement(name = "MobilityImpairedAccess", required = true)
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess;
+
+    @Transient
     protected AccessibilityLimitations_RelStructure limitations;
+
+    @Transient
     protected Suitabilities_RelStructure suitabilities;
+
     @XmlElement(name = "Comment")
+    @Transient
     protected MultilingualString comment;
 
     /**

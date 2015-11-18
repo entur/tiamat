@@ -11,6 +11,7 @@ package uk.org.netex.netex;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -59,40 +60,66 @@ import javax.xml.bind.annotation.XmlType;
     Site_VersionStructure.class,
     SiteComponent_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class SiteElement_VersionStructure
     extends AddressablePlace_VersionStructure
 {
 
     @XmlElement(name = "AccessibilityAssessment")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected AccessibilityAssessment accessibilityAssessment;
+
     @XmlList
     @XmlElement(name = "AccessModes")
     @XmlSchemaType(name = "anySimpleType")
+    @Transient
     protected List<AccessModeEnumeration> accessModes;
+
     @XmlElement(name = "NameSuffix")
+    @Transient
     protected MultilingualString nameSuffix;
+
+    @Transient
     protected AlternativeNames_RelStructure alternativeNames;
+
     @XmlElement(name = "CrossRoad")
+    @Transient
     protected MultilingualString crossRoad;
+
     @XmlElement(name = "Landmark")
+    @Transient
     protected MultilingualString landmark;
+
     @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
+    @Transient
     protected PublicUseEnumeration publicUse;
+
     @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
+    @Transient
     protected CoveredEnumeration covered;
+
     @XmlElement(name = "Gated")
     @XmlSchemaType(name = "string")
+    @Transient
     protected GatedEnumeration gated;
+
     @XmlElement(name = "Lighting", defaultValue = "wellLit")
     @XmlSchemaType(name = "normalizedString")
+    @Transient
     protected LightingEnumeration lighting;
+
     @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
+    @Transient
     protected Boolean allAreasWheelchairAccessible;
+
     @XmlElement(name = "PersonCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
+    @Transient
     protected BigInteger personCapacity;
+
+    @Transient
     protected SiteFacilitySets_RelStructure facilities;
 
     /**
