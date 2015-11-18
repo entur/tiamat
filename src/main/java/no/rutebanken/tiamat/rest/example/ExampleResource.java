@@ -1,12 +1,10 @@
 package no.rutebanken.tiamat.rest.example;
 
 import no.rutebanken.tiamat.model.example.AnotherExampleEntity;
-import no.rutebanken.tiamat.model.example.ExampleReferenceEntity;
+import no.rutebanken.tiamat.model.example.ExampleEmbeddable;
 import no.rutebanken.tiamat.model.example.ExampleEntity;
 import no.rutebanken.tiamat.repository.example.AnotherExampleEntityRepository;
 import no.rutebanken.tiamat.repository.example.ExampleEntityRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,6 @@ import javax.ws.rs.Produces;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 @Produces("application/json")
@@ -40,15 +37,15 @@ public class ExampleResource {
 		exampleEntity.getReferences().add(new AnotherExampleEntity());
 		exampleEntity.getReferences().add(new AnotherExampleEntity());
 
-		ExampleReferenceEntity exampleReferenceEntity = new ExampleReferenceEntity();
-		exampleReferenceEntity.date = new Date();
-		exampleReferenceEntity.anotherExampleEntity = new AnotherExampleEntity();
-		anotherExampleEntityRepository.save(exampleReferenceEntity.anotherExampleEntity);
+		ExampleEmbeddable embeddable = new ExampleEmbeddable();
+		embeddable.date = new Date();
+		embeddable.anotherExampleEntity = new AnotherExampleEntity();
+		anotherExampleEntityRepository.save(embeddable.anotherExampleEntity);
 
-		List<ExampleReferenceEntity> referenceEntities = new ArrayList<>();
-		referenceEntities.add(exampleReferenceEntity);
+		List<ExampleEmbeddable> embeddables = new ArrayList<>();
+		embeddables.add(embeddable);
 
-		exampleEntity.referenceObjects = referenceEntities;
+		exampleEntity.referenceObjects = embeddables;
 
 		anotherExampleEntityRepository.save(exampleEntity.getReferences());
 		exampleEntity.setName("example entity name");

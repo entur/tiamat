@@ -6,7 +6,7 @@ import javax.persistence.OneToOne;
 import java.util.Date;
 
 @Embeddable
-public class ExampleReferenceEntity {
+public class ExampleEmbeddable {
 
     public Date date;
 

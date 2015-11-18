@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -126,7 +127,7 @@ public class QuayTest {
     }
 
     @Test
-    public void persistQuayWithAccessibilityAssessment() {
+    public void persistQuayWithMobilityImpairedAccessibilityAssessment() {
         Quay quay = new Quay();
 
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
@@ -143,6 +144,39 @@ public class QuayTest {
         assertThat(actualAccessibilityAssessment.getVersion()).isEqualTo(accessibilityAssessment.getVersion());
         assertThat(actualAccessibilityAssessment.getMobilityImpairedAccess()).isEqualTo(actualAccessibilityAssessment.getMobilityImpairedAccess());
         assertThat(actualAccessibilityAssessment.getId()).isEqualTo(actualAccessibilityAssessment.getId());
+    }
+
+    @Test
+    public void persistQuayWithAccessibilityAssessmentLimitation() {
+        Quay quay = new Quay();
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+
+        List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
+
+        AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setVisualSignsAvailable(LimitationStatusEnumeration.TRUE);
+
+        accessibilityLimitations.add(accessibilityLimitation);
+
+        accessibilityAssessment.setLimitations(accessibilityLimitations);
+
+        quay.setAccessibilityAssessment(accessibilityAssessment);
+
+        quayRepository.save(quay);
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
+        List<AccessibilityLimitation> actualAccessibilityLimitations = actualQuay.getAccessibilityAssessment().getLimitations();
+
+        assertThat(actualAccessibilityLimitations).isNotEmpty();
+        AccessibilityLimitation actualAccessibilityLimitation = actualAccessibilityLimitations.get(0);
+        assertThat(actualAccessibilityLimitation).isEqualToComparingFieldByField(accessibilityLimitation);
     }
 
     @Test

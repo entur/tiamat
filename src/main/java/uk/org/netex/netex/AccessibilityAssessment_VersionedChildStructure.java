@@ -8,16 +8,14 @@
 
 package uk.org.netex.netex;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 /**
@@ -61,8 +59,8 @@ public class AccessibilityAssessment_VersionedChildStructure
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess;
 
-    @Transient
-    protected AccessibilityLimitations_RelStructure limitations;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    protected List<AccessibilityLimitation> limitations;
 
     @Transient
     protected Suitabilities_RelStructure suitabilities;
@@ -100,10 +98,10 @@ public class AccessibilityAssessment_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link AccessibilityLimitations_RelStructure }
+     *     {@link List<AccessibilityAssessment> }
      *     
      */
-    public AccessibilityLimitations_RelStructure getLimitations() {
+    public List<AccessibilityLimitation> getLimitations() {
         return limitations;
     }
 
@@ -112,10 +110,10 @@ public class AccessibilityAssessment_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link AccessibilityLimitations_RelStructure }
+     *     {@link List<AccessibilityAssessment> }
      *     
      */
-    public void setLimitations(AccessibilityLimitations_RelStructure value) {
+    public void setLimitations(List<AccessibilityLimitation> value) {
         this.limitations = value;
     }
 

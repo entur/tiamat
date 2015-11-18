@@ -90,6 +90,21 @@ public class BootStrap implements InitializingBean {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
         accessibilityAssessment.setVersion("any");
         accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+
+        List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
+
+        AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setVisualSignsAvailable(LimitationStatusEnumeration.TRUE);
+
+        accessibilityLimitations.add(accessibilityLimitation);
+
+        accessibilityAssessment.setLimitations(accessibilityLimitations);
+
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         LevelRefStructure levelRefStructure = new LevelRefStructure();

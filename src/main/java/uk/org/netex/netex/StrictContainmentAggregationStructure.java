@@ -50,7 +50,6 @@ import javax.xml.bind.annotation.XmlType;
     JourneyPatternWaitTimes_RelStructure.class,
     PointsOnRoute_RelStructure.class,
     LinksInJourneyPattern_RelStructure.class,
-    AccessibilityLimitations_RelStructure.class,
     AccessibilityAssessments_RelStructure.class,
     SchematicMapMembers_RelStructure.class,
     CrewBaseRefs_RelStructure.class,

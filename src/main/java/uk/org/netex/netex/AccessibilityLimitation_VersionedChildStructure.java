@@ -8,6 +8,9 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -50,27 +53,39 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     AccessibilityLimitation.class
 })
+@MappedSuperclass
 public class AccessibilityLimitation_VersionedChildStructure
     extends VersionedChildStructure
 {
 
     @XmlElement(name = "WheelchairAccess", required = true, defaultValue = "false")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration wheelchairAccess;
+
     @XmlElement(name = "StepFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration stepFreeAccess;
+
     @XmlElement(name = "EscalatorFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration escalatorFreeAccess;
+
     @XmlElement(name = "LiftFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration liftFreeAccess;
+
     @XmlElement(name = "AudibleSignalsAvailable", defaultValue = "false")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration audibleSignalsAvailable;
+
     @XmlElement(name = "VisualSignsAvailable", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration visualSignsAvailable;
 
     /**

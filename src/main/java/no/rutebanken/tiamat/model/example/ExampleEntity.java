@@ -21,7 +21,7 @@ public class ExampleEntity implements Serializable {
 	private List<AnotherExampleEntity> references;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	public List<ExampleReferenceEntity> referenceObjects;
+	public List<ExampleEmbeddable> referenceObjects;
 
 	public ExampleEntity() {}
 
