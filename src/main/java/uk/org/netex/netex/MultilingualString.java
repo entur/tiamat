@@ -8,6 +8,8 @@
 
 package uk.org.netex.netex;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import javax.persistence.Embeddable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -78,6 +80,7 @@ public class MultilingualString {
      *     {@link String }
      *     
      */
+    @JsonValue
     public String getValue() {
         return value;
     }
