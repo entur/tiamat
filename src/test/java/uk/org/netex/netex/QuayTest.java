@@ -46,7 +46,6 @@ public class QuayTest {
         quay.setCovered(CoveredEnumeration.COVERED);
 
      //   siteReference(quay);
-        levelReference(quay);
 
         quay.setBoardingUse(true);
         quay.setAlightingUse(true);
@@ -147,6 +146,23 @@ public class QuayTest {
         assertThat(actualAccessibilityAssessment.getId()).isEqualTo(actualAccessibilityAssessment.getId());
     }
 
+    @Test
+    public void persistQuayWithLevelReference() {
+        Quay quay = new Quay();
+
+        LevelRefStructure levelRefStructure = new LevelRefStructure();
+        levelRefStructure.setVersion("001");
+        levelRefStructure.setRef("tbd:Level:9100WIMBLDN_Lvl_ST");
+
+        quay.setLevelRef(levelRefStructure);
+
+        quayRepository.save(quay);
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getLevelRef()).isNotNull();
+        assertThat(actualQuay.getLevelRef().getRef()).isEqualTo(levelRefStructure.getRef());
+    }
+
 
     private void siteReference(Quay quay) {
         //Reference to stop place
@@ -157,13 +173,7 @@ public class QuayTest {
         quay.setSiteRef(siteRefStructure);
     }
 
-    private void levelReference(Quay quay) {
-        LevelRefStructure levelRefStructure = new LevelRefStructure();
-        levelRefStructure.setVersion("001");
-        levelRefStructure.setRef("tbd:Level:9100WIMBLDN_Lvl_ST");
 
-        quay.setLevelRef(levelRefStructure);
-    }
 
 
 }

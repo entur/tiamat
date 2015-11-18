@@ -8,7 +8,7 @@
 
 package uk.org.netex.netex;
 
-import javax.persistence.Embedded;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -53,22 +53,33 @@ import javax.xml.bind.annotation.XmlType;
     ParkingComponent_VersionStructure.class,
     SiteEntrance_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class SiteComponent_VersionStructure
     extends SiteElement_VersionStructure
 {
 
     @XmlElement(name = "SiteRef")
+    @Transient
     protected SiteRefStructure siteRef;
 
     @XmlElement(name = "LevelRef")
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected LevelRefStructure levelRef;
 
     @XmlElement(name = "ClassOfUseRef")
+    @Transient
     protected ClassOfUseRef classOfUseRef;
+
+    @Transient
     protected CheckConstraints_RelStructure checkConstraints;
+
+    @Transient
     protected EquipmentPlaces_RelStructure equipmentPlaces;
+
+    @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
+
+    @Transient
     protected LocalServices_RelStructure localServices;
 
     /**
