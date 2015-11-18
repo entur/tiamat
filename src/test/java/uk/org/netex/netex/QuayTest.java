@@ -57,6 +57,10 @@ public class QuayTest {
 
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
+        String[] verifyColumns = new String[] {"id", "name.value", "version",
+                "created.time", "shortName.value", "covered", "description.value", "publicCode",
+                "label.value", "boardingUse", "compassOctant", "quayType",  "alightingUse"};
+        assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
 
     @Test

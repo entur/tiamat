@@ -97,7 +97,6 @@ public abstract class SiteElement_VersionStructure
 
     @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
-    @Transient
     protected CoveredEnumeration covered;
 
     @XmlElement(name = "Gated")

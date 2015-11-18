@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -49,16 +50,27 @@ import javax.xml.bind.annotation.XmlType;
     BoardingPosition_VersionStructure.class,
     AccessSpace_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class StopPlaceSpace_VersionStructure
     extends StopPlaceComponent_VersionStructure
 {
 
     @XmlElement(name = "BoardingUse", defaultValue = "true")
     protected Boolean boardingUse;
+
     @XmlElement(name = "AlightingUse", defaultValue = "true")
     protected Boolean alightingUse;
+
     @XmlElement(name = "Label")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lang", column = @Column(name = "label_lang")),
+            @AttributeOverride(name = "value", column = @Column(name = "label_val")),
+            @AttributeOverride(name = "textIdType", column = @Column(name = "label_text_id_type"))
+    })
     protected MultilingualString label;
+
+    @Transient
     protected SiteEntrances_RelStructure entrances;
 
     /**
