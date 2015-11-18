@@ -8,6 +8,8 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -58,32 +60,49 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     DestinationDisplayView.class
 })
+@MappedSuperclass
 public class DestinationDisplay_DerivedViewStructure
     extends DerivedViewStructure
 {
 
+    @Transient
     protected KeyListStructure keyList;
+
     @XmlElement(name = "DestinationDisplayRef")
+    @Transient
     protected DestinationDisplayRefStructure destinationDisplayRef;
+
     @XmlElement(name = "Name")
     protected MultilingualString name;
+
     @XmlElement(name = "ShortName")
+    @Transient
     protected MultilingualString shortName;
+
     @XmlElement(name = "SideText")
+    @Transient
     protected MultilingualString sideText;
+
     @XmlElement(name = "FrontText")
+    @Transient
     protected MultilingualString frontText;
+
     @XmlElement(name = "DriverDisplayText")
+    @Transient
     protected MultilingualString driverDisplayText;
+
     @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortCode;
+
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
+
     @XmlElement(name = "PrivateCode")
+    @Transient
     protected PrivateCodeStructure privateCode;
 
     /**

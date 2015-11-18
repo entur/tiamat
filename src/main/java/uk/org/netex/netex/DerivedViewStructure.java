@@ -8,6 +8,12 @@
 
 package uk.org.netex.netex;
 
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -68,12 +74,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     Line_DerivedViewStructure.class,
     Network_DerivedViewStructure.class
 })
+@MappedSuperclass
 public abstract class DerivedViewStructure {
 
     @XmlElement(name = "BrandingRef")
     protected BrandingRefStructure brandingRef;
+
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     protected String id;
 
     /**

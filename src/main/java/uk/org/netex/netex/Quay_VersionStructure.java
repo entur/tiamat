@@ -9,8 +9,8 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
-import javax.persistence.Entity;
-import javax.persistence.Transient;
+import java.util.List;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -76,6 +76,8 @@ public class Quay_VersionStructure
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger shortCode;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<DestinationDisplayView> destinations;
     //protected DestinationDisplayViews_RelStructure destinations;
 
     @XmlElement(name = "CompassBearing")
@@ -176,7 +178,7 @@ public class Quay_VersionStructure
      *     {@link DestinationDisplayViews_RelStructure }
      *     
      */
-/*    public DestinationDisplayViews_RelStructure getDestinations() {
+ /*   public DestinationDisplayViews_RelStructure getDestinations() {
         return destinations;
     }
 */
@@ -188,10 +190,10 @@ public class Quay_VersionStructure
      *     {@link DestinationDisplayViews_RelStructure }
      *     
      */
-/*    public void setDestinations(DestinationDisplayViews_RelStructure value) {
-        this.destinations = value;
-    }
-*/
+ //   public void setDestinations(DestinationDisplayViews_RelStructure value) {
+ //       this.destinations = value;
+ //   }
+
     /**
      * Gets the value of the compassBearing property.
      * 
@@ -286,6 +288,14 @@ public class Quay_VersionStructure
      */
     public void setParentQuayRef(QuayReference value) {
         this.parentQuayRef = value;
+    }
+
+    public List<DestinationDisplayView> getDestinations() {
+        return destinations;
+    }
+
+    public void setDestinations(List<DestinationDisplayView> destinations) {
+        this.destinations = destinations;
     }
 
     /**

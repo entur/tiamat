@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,8 +43,6 @@ public class QuayTest {
         quay.setShortName(new MultilingualString("Wimbledon", "en", ""));
         quay.setDescription(new MultilingualString("Stop P  is paired with Stop C outside the station", "en", ""));
 
-        //quay.setTypes();
-
         quay.setCovered(CoveredEnumeration.COVERED);
 
      //   siteReference(quay);
@@ -64,6 +63,25 @@ public class QuayTest {
 
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
+    }
+
+    @Test
+    public void persistQuayWithDestinations() {
+
+        Quay quay = new Quay();
+        DestinationDisplayView destinationDisplayView = new DestinationDisplayView();
+        destinationDisplayView.setName(new MultilingualString("Towards London", "en", ""));
+
+        quay.setDestinations(new ArrayList<>());
+        quay.getDestinations().add(destinationDisplayView);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getDestinations()).isNotEmpty();
+        DestinationDisplayView actualDestinationDisplayView = actualQuay.getDestinations().get(0);
+        assertThat(actualDestinationDisplayView.getName().getValue()).isEqualTo(destinationDisplayView.getName().getValue());
     }
 
     @Test
@@ -119,7 +137,6 @@ public class QuayTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         quayRepository.save(quay);
-
         Quay actualQuay = quayRepository.findOne(quay.getId());
 
         assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
