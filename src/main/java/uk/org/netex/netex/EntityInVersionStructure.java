@@ -11,6 +11,8 @@ package uk.org.netex.netex;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -56,35 +58,50 @@ import javax.xml.datatype.XMLGregorianCalendar;
     VersionedChildStructure.class,
     DataManagedObjectStructure.class
 })
+@MappedSuperclass
 public class EntityInVersionStructure
     extends EntityStructure
 {
 
+    @Transient
     protected ValidityConditions_RelStructure validityConditions;
+
     @XmlElement(name = "ValidBetween")
+    @Transient
     protected List<ValidBetween> validBetween;
+
     @XmlAttribute(name = "dataSourceRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String dataSourceRef;
+
     @XmlAttribute(name = "created")
     @XmlSchemaType(name = "dateTime")
     protected Date created;
+
     @XmlAttribute(name = "changed")
     @XmlSchemaType(name = "dateTime")
     protected Date changed;
+
     @XmlAttribute(name = "modification")
+    @Transient
     protected ModificationEnumeration modification;
+
     @XmlAttribute(name = "version")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String version;
+
     @XmlAttribute(name = "status")
+    @Transient
     protected StatusEnumeration status;
+
     @XmlAttribute(name = "derivedFromVersionRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String derivedFromVersionRef;
+
     @XmlAttribute(name = "compatibleWithVersionFrameVersionRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String compatibleWithVersionFrameVersionRef;
+
     @XmlAttribute(name = "derivedFromObjectRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String derivedFromObjectRef;

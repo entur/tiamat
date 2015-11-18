@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -42,7 +43,7 @@ import javax.xml.bind.annotation.XmlType;
     PointOfInterestRefStructure.class,
     StopPlaceReference.class
 })
-@MappedSuperclass
+@Entity
 public class SiteRefStructure
     extends SiteElementRefStructure
 {

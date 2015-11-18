@@ -9,6 +9,9 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -53,6 +56,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     RoadAddress.class
 })
+@MappedSuperclass
 public class RoadAddress_VersionStructure
     extends Address_VersionStructure
 {
@@ -61,19 +65,28 @@ public class RoadAddress_VersionStructure
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String gisFeatureRef;
+
     @XmlElement(name = "RoadNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String roadNumber;
+
     @XmlElement(name = "RoadName")
+    @Embedded
     protected MultilingualString roadName;
+
     @XmlElement(name = "BearingCompass")
     protected String bearingCompass;
+
     @XmlElement(name = "BearingDegrees")
     protected BigInteger bearingDegrees;
+
     @XmlElement(name = "OddNumberRange")
+    @Transient
     protected RoadNumberRangeStructure oddNumberRange;
+
     @XmlElement(name = "EvenNumberRange")
+    @Transient
     protected RoadNumberRangeStructure evenNumberRange;
 
     /**

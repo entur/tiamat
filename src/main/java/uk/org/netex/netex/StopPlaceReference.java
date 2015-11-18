@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -36,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StopPlaceRefStructure")
-@Embeddable
+@Entity
 public class StopPlaceReference
     extends SiteRefStructure {
 

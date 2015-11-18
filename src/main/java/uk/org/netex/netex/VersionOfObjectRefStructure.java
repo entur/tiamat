@@ -116,6 +116,11 @@ import java.util.Date;
 @MappedSuperclass
 public class VersionOfObjectRefStructure implements Serializable {
 
+    @Id
+    @GeneratedValue
+    private long id;
+
+
     @XmlValue
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String value;

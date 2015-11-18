@@ -10,6 +10,7 @@ package uk.org.netex.netex;
 
 import java.math.BigInteger;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -89,6 +90,7 @@ public class Quay_VersionStructure
     protected QuayTypeEnumeration quayType;
 
     @XmlElement(name = "ParentQuayRef")
+    @Transient
     protected QuayReference parentQuayRef;
 
 

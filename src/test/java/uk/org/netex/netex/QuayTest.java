@@ -43,7 +43,6 @@ public class QuayTest {
         quay.setDescription(new MultilingualString("Stop P  is paired with Stop C outside the station", "en", ""));
 
         //quay.setTypes();
-        roadAddress(quay);
         accessibilityAssessment(quay);
 
         quay.setCovered(CoveredEnumeration.COVERED);
@@ -69,19 +68,37 @@ public class QuayTest {
     }
 
     @Test
-    public void persistQuayWithLocation() {
+    public void persistQuayWithRoadAddress() {
+        Quay quay = new Quay();
+        RoadAddress roadAddress = new RoadAddress();
+        roadAddress.setVersion("any");
+        roadAddress.setRoadName(new MultilingualString("Wimbledon Bridge", "en", ""));
+        roadAddress.setBearingCompass("W");
+        quay.setRoadAddress(roadAddress);
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getRoadAddress()).isNotNull();
+        assertThat(actualQuay.getRoadAddress().getId()).isEqualTo(quay.getRoadAddress().getId());
+        assertThat(actualQuay.getRoadAddress().getVersion()).isEqualTo(quay.getRoadAddress().getVersion());
+        assertThat(actualQuay.getRoadAddress().getRoadName().getValue()).isEqualTo(quay.getRoadAddress().getRoadName().getValue());
+        assertThat(actualQuay.getRoadAddress().getBearingCompass()).isEqualTo(quay.getRoadAddress().getBearingCompass());
+    }
+
+    @Test
+    public void persistQuayWithCentroid() {
         Quay quay = new Quay();
         Location location = new Location();
         BigDecimal longitude = new BigDecimal("-0.2068758371").setScale(10, BigDecimal.ROUND_CEILING);
-
         BigDecimal latitude = new BigDecimal("51.4207729447").setScale(10, BigDecimal.ROUND_CEILING);
 
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure();
-        simplePoint.setLocation(location);
-        quay.setCentroid(simplePoint);
+        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        centroid.setLocation(location);
+        quay.setCentroid(centroid);
 
         quayRepository.save(quay);
         Quay actualQuay = quayRepository.findOne(quay.getId());
@@ -91,8 +108,9 @@ public class QuayTest {
         assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
         assertThat(actualQuay.getCentroid().getLocation().getLatitude()).isEqualTo(latitude);
         assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
-
     }
+
+
 
     private void siteReference(Quay quay) {
         //Reference to stop place
@@ -119,12 +137,5 @@ public class QuayTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
     }
 
-    private void roadAddress(Quay quay) {
-        RoadAddress roadAddress = new RoadAddress();
-        roadAddress.setId("tbd:RoadAddress:Rd_Addr_03");
-        roadAddress.setVersion("any");
-        roadAddress.setRoadName(new MultilingualString("Wimbledon Bridge", "en", ""));
-        roadAddress.setBearingCompass("W");
-        quay.setRoadAddress(roadAddress);
-    }
+
 }

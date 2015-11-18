@@ -8,9 +8,7 @@
 
 package uk.org.netex.netex;
 
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -105,7 +103,7 @@ public abstract class Site_VersionStructure
     protected Organisation_DerivedViewStructure operatingOrganisationView;
 
     @XmlElement(name = "ParentSiteRef")
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected SiteRefStructure parentSiteRef;
 
     @Transient

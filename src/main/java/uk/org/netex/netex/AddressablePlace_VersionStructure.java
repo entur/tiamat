@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -49,6 +50,7 @@ import javax.xml.bind.annotation.XmlType;
     Garage_VersionStructure.class,
     SiteElement_VersionStructure.class
 })
+@MappedSuperclass
 public class AddressablePlace_VersionStructure
     extends Place_VersionStructure
 {
@@ -60,8 +62,11 @@ public class AddressablePlace_VersionStructure
     @XmlSchemaType(name = "anyURI")
     protected String image;
     @XmlElement(name = "PostalAddress")
+    @Transient
     protected PostalAddress postalAddress;
+
     @XmlElement(name = "RoadAddress")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected RoadAddress roadAddress;
 
     /**
