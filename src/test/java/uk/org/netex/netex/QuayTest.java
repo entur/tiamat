@@ -2,6 +2,7 @@ package uk.org.netex.netex;
 
 import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
+import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,12 @@ public class QuayTest {
     @Autowired
     public QuayRepository quayRepository;
 
+    @Autowired
+    private TariffZoneRepository tariffZoneRepository;
+
     /**
      * Using example data from https://github.com/StichtingOpenGeo/NeTEx/blob/master/examples/functions/stopPlace/Netex_10_StopPlace_uk_ComplexStation_Wimbledon_1.xml
+     *
      * @throws ParseException
      */
     @Test
@@ -57,9 +62,9 @@ public class QuayTest {
 
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
-        String[] verifyColumns = new String[] {"id", "name.value", "version",
+        String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created.time", "shortName.value", "covered", "description.value", "publicCode",
-                "label.value", "boardingUse", "compassOctant", "quayType",  "alightingUse"};
+                "label.value", "boardingUse", "compassOctant", "quayType", "alightingUse"};
         assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
 
@@ -256,6 +261,27 @@ public class QuayTest {
         EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().get(0);
         assertThat(actualEquipmentPosition).isEqualToComparingOnlyGivenFields(equipmentPosition, "description.value", "xOffset", "yOffset");
         assertThat(actualEquipmentPosition.getReferencePointRef().getRef()).isEqualTo(pointRefStructure.getRef());
+    }
+
+    @Test
+    public void persistQuayWithTariffZone() {
+        Quay quay = new Quay();
+
+        TariffZone tariffZone = new TariffZone();
+        tariffZoneRepository.save(tariffZone);
+
+        List<TariffZone> tariffZones = new ArrayList<>();
+        tariffZones.add(tariffZone);
+        quay.setTariffZones(tariffZones);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getTariffZones()).isNotEmpty();
+        TariffZone actualTariffZone = actualQuay.getTariffZones().get(0);
+
+        assertThat(actualTariffZone.getId()).isEqualTo(tariffZone.getId());
     }
 
 }

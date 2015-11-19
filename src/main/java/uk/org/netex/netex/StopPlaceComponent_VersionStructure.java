@@ -10,6 +10,7 @@ package uk.org.netex.netex;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -58,45 +59,69 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     StopPlaceSpace_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class StopPlaceComponent_VersionStructure
     extends SiteComponent_VersionStructure
 {
 
     @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected VehicleModeEnumeration transportMode;
+
     @XmlElement(name = "AirSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected AirSubmodeEnumeration airSubmode;
+
     @XmlElement(name = "BusSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected BusSubmodeEnumeration busSubmode;
+
     @XmlElement(name = "CoachSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected CoachSubmodeEnumeration coachSubmode;
+
     @XmlElement(name = "FunicularSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected FunicularSubmodeEnumeration funicularSubmode;
+
     @XmlElement(name = "MetroSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected MetroSubmodeEnumeration metroSubmode;
+
     @XmlElement(name = "TramSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected TramSubmodeEnumeration tramSubmode;
+
     @XmlElement(name = "TelecabinSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected TelecabinSubmodeEnumeration telecabinSubmode;
+
     @XmlElement(name = "RailSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected RailSubmodeEnumeration railSubmode;
+
     @XmlElement(name = "WaterSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
+    @Transient
     protected WaterSubmodeEnumeration waterSubmode;
+
     @XmlList
     @XmlElement(name = "OtherTransportModes")
     @XmlSchemaType(name = "anySimpleType")
+    @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
-    protected TariffZoneRefs_RelStructure tariffZones;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<TariffZone> tariffZones;
 
     /**
      * Gets the value of the transportMode property.
@@ -367,28 +392,12 @@ public abstract class StopPlaceComponent_VersionStructure
         return this.otherTransportModes;
     }
 
-    /**
-     * Gets the value of the tariffZones property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public TariffZoneRefs_RelStructure getTariffZones() {
+
+    public List<TariffZone> getTariffZones() {
         return tariffZones;
     }
 
-    /**
-     * Sets the value of the tariffZones property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
+    public void setTariffZones(List<TariffZone> tariffZones) {
+        this.tariffZones = tariffZones;
     }
-
 }
