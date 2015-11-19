@@ -1,7 +1,6 @@
 package uk.org.netex.netex;
 
 import no.rutebanken.tiamat.TiamatApplication;
-import no.rutebanken.tiamat.repository.ifopt.LocationRepository;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -211,6 +210,52 @@ public class QuayTest {
 
         assertThat(actualQuay.getSiteRef()).isNotNull();
         assertThat(actualQuay.getSiteRef().getRef()).isEqualTo(siteRefStructure.getRef());
+    }
+
+    @Test
+    public void persistQuayWithEquipmentPlaceThatContainsAnEquipmentPosition() {
+        //arrange
+        PointRefStructure pointRefStructure = new PointRefStructure();
+        pointRefStructure.setRef("tbd:StopPlaceEntrance:9100WIMBLDN_5n6-EL1p");
+        pointRefStructure.setVersion("001");
+
+        EquipmentRefStructure equipmentRefStructure = new EquipmentRefStructure();
+        equipmentRefStructure.setRef("tbd:WaitingRoomEquipment:4900ZZLUWIM3n4_Eq-Seats1");
+
+        EquipmentPosition equipmentPosition = new EquipmentPosition();
+        equipmentPosition.setDescription(new MultilingualString("Seats on Platform 1 and 2. \"0 metres from platform entrance", "en", ""));
+        equipmentPosition.setReferencePointRef(pointRefStructure);
+        equipmentPosition.setXOffset(new BigDecimal(1).setScale(2, BigDecimal.ROUND_HALF_UP));
+        equipmentPosition.setYOffset(new BigDecimal(20).setScale(2, BigDecimal.ROUND_HALF_UP));
+
+        List<EquipmentPosition> equipmentPositions = new ArrayList<>();
+        equipmentPositions.add(equipmentPosition);
+
+        EquipmentPlace equipmentPlace = new EquipmentPlace();
+        equipmentPlace.setModification(ModificationEnumeration.NEW);
+        equipmentPlace.setEquipmentPositions(equipmentPositions);
+        List<EquipmentPlace> equipmentPlaces = new ArrayList<>();
+        equipmentPlaces.add(equipmentPlace);
+
+        Quay quay = new Quay();
+        quay.setEquipmentPlaces(equipmentPlaces);
+
+        // act
+        quayRepository.save(quay);
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        // assert
+        assertThat(actualQuay.getEquipmentPlaces()).isNotNull();
+        List<EquipmentPlace> actualEquipmentPlaces = actualQuay.getEquipmentPlaces();
+
+        assertThat(actualEquipmentPlaces).isNotEmpty();
+        EquipmentPlace actualEquipmentPlace = actualEquipmentPlaces.get(0);
+
+        assertThat(actualEquipmentPlace.getEquipmentPositions()).isNotEmpty();
+
+        EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().get(0);
+        assertThat(actualEquipmentPosition).isEqualToComparingOnlyGivenFields(equipmentPosition, "description.value", "xOffset", "yOffset");
+        assertThat(actualEquipmentPosition.getReferencePointRef().getRef()).isEqualTo(pointRefStructure.getRef());
     }
 
 }

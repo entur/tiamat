@@ -53,7 +53,6 @@ import javax.xml.bind.annotation.XmlType;
     AccessibilityAssessments_RelStructure.class,
     SchematicMapMembers_RelStructure.class,
     CrewBaseRefs_RelStructure.class,
-    EquipmentPositions_RelStructure.class,
     GroupOfPoints_RelStructure.class,
     PointsInJourneyPattern_RelStructure.class,
     ClassificationDescriptors_RelStructure.class,

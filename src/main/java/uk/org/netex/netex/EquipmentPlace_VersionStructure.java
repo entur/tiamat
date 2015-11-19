@@ -8,10 +8,13 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
+import javax.transaction.Transactional;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 /**
@@ -43,35 +46,27 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     EquipmentPlace.class
 })
-public class EquipmentPlace_VersionStructure
-    extends Place_VersionStructure
+@MappedSuperclass
+public class EquipmentPlace_VersionStructure extends Place_VersionStructure
 {
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    protected List<EquipmentPosition> equipmentPositions;
 
-    protected EquipmentPositions_RelStructure equipmentPositions;
+    @Transient
     protected Equipments_RelStructure placeEquipments;
 
     /**
      * Gets the value of the equipmentPositions property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link EquipmentPositions_RelStructure }
-     *     
      */
-    public EquipmentPositions_RelStructure getEquipmentPositions() {
+    public List<EquipmentPosition> getEquipmentPositions() {
         return equipmentPositions;
     }
 
     /**
      * Sets the value of the equipmentPositions property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link EquipmentPositions_RelStructure }
-     *     
      */
-    public void setEquipmentPositions(EquipmentPositions_RelStructure value) {
-        this.equipmentPositions = value;
+    public void setEquipmentPositions(List<EquipmentPosition> equipmentPositions) {
+        this.equipmentPositions = equipmentPositions;
     }
 
     /**

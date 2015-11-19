@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigDecimal;
+import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -51,20 +52,27 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     EquipmentPosition.class
 })
-public class EquipmentPositionStructure
-    extends DataManagedObjectStructure
+@MappedSuperclass
+public class EquipmentPositionStructure extends DataManagedObjectStructure
 {
-
     @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
+    @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
+
     @XmlElement(name = "Description")
     protected MultilingualString description;
+
     @XmlElement(name = "Location")
+    @Transient
     protected LocationStructure location;
+
     @XmlElement(name = "ReferencePointRef")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected PointRefStructure referencePointRef;
+
     @XmlElement(name = "XOffset")
     protected BigDecimal xOffset;
+
     @XmlElement(name = "YOffset")
     protected BigDecimal yOffset;
 

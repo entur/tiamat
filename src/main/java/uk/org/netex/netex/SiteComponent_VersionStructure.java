@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 /**
@@ -73,8 +74,8 @@ public abstract class SiteComponent_VersionStructure
     @Transient
     protected CheckConstraints_RelStructure checkConstraints;
 
-    @Transient
-    protected EquipmentPlaces_RelStructure equipmentPlaces;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    protected List<EquipmentPlace> equipmentPlaces;
 
     @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
@@ -186,7 +187,7 @@ public abstract class SiteComponent_VersionStructure
      *     {@link EquipmentPlaces_RelStructure }
      *     
      */
-    public EquipmentPlaces_RelStructure getEquipmentPlaces() {
+    public List<EquipmentPlace> getEquipmentPlaces() {
         return equipmentPlaces;
     }
 
@@ -198,7 +199,7 @@ public abstract class SiteComponent_VersionStructure
      *     {@link EquipmentPlaces_RelStructure }
      *     
      */
-    public void setEquipmentPlaces(EquipmentPlaces_RelStructure value) {
+    public void setEquipmentPlaces(List<EquipmentPlace> value) {
         this.equipmentPlaces = value;
     }
 

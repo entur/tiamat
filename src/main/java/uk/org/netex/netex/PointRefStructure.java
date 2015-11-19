@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -43,6 +44,7 @@ import javax.xml.bind.annotation.XmlType;
     RoutePointRefStructure.class,
     PointOnLinkRefStructure_.class
 })
+@Entity
 public class PointRefStructure
     extends VersionOfObjectRefStructure
 {
