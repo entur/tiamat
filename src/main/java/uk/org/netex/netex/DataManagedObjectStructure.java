@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -97,14 +98,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-
+    @Transient
     protected KeyListStructure keyList;
+
     @XmlElement(name = "Extensions")
+    @Transient
     protected ExtensionsStructure extensions;
+
     @XmlElement(name = "BrandingRef")
+    @Transient
     protected BrandingRefStructure brandingRef;
+
     @XmlAttribute(name = "responsibilitySetRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @Transient
     protected String responsibilitySetRef;
 
     /**

@@ -284,4 +284,26 @@ public class QuayTest {
         assertThat(actualTariffZone.getId()).isEqualTo(tariffZone.getId());
     }
 
+    @Test
+    public void persistQuayWithRelationToCheckConstraint() {
+        Quay quay = new Quay();
+
+        CheckConstraint checkConstraint = new CheckConstraint();
+        checkConstraint.setName(new MultilingualString("Queue for Ticket Barrier", "en", ""));
+
+        List<CheckConstraint> checkConstraints = new ArrayList<>();
+        checkConstraints.add(checkConstraint);
+        quay.setCheckConstraints(checkConstraints);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getCheckConstraints()).isNotNull();
+        assertThat(actualQuay.getCheckConstraints()).isNotEmpty();
+
+        CheckConstraint actualCheckConstraint = actualQuay.getCheckConstraints().get(0);
+        assertThat(actualCheckConstraint.getName().getValue()).isEqualTo(checkConstraint.getName().getValue());
+    }
+
 }

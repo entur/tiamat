@@ -62,7 +62,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class EntityInVersionStructure
     extends EntityStructure
 {
-
     @Transient
     protected ValidityConditions_RelStructure validityConditions;
 

@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -47,15 +48,31 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     Assignment_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class Assignment_VersionStructure_
     extends DataManagedObjectStructure
 {
 
     @XmlElement(name = "Name")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lang", column = @Column(name = "name_lang")),
+            @AttributeOverride(name = "value", column = @Column(name = "name_val")),
+            @AttributeOverride(name = "textIdType", column = @Column(name = "name_text_id_type"))
+    })
     protected MultilingualString name;
+
     @XmlElement(name = "Description")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lang", column = @Column(name = "description_lang")),
+            @AttributeOverride(name = "value", column = @Column(name = "description_val")),
+            @AttributeOverride(name = "textIdType", column = @Column(name = "description_text_id_type"))
+    })
     protected MultilingualString description;
+
     @XmlAttribute(name = "order")
+    @Transient
     protected BigInteger order;
 
     /**

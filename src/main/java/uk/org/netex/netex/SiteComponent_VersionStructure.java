@@ -71,8 +71,8 @@ public abstract class SiteComponent_VersionStructure
     @Transient
     protected ClassOfUseRef classOfUseRef;
 
-    @Transient
-    protected CheckConstraints_RelStructure checkConstraints;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<CheckConstraint> checkConstraints;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
@@ -156,30 +156,6 @@ public abstract class SiteComponent_VersionStructure
     }
 
     /**
-     * Gets the value of the checkConstraints property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CheckConstraints_RelStructure }
-     *     
-     */
-    public CheckConstraints_RelStructure getCheckConstraints() {
-        return checkConstraints;
-    }
-
-    /**
-     * Sets the value of the checkConstraints property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CheckConstraints_RelStructure }
-     *     
-     */
-    public void setCheckConstraints(CheckConstraints_RelStructure value) {
-        this.checkConstraints = value;
-    }
-
-    /**
      * Gets the value of the equipmentPlaces property.
      * 
      * @return
@@ -251,4 +227,11 @@ public abstract class SiteComponent_VersionStructure
         this.localServices = value;
     }
 
+    public List<CheckConstraint> getCheckConstraints() {
+        return checkConstraints;
+    }
+
+    public void setCheckConstraints(List<CheckConstraint> checkConstraints) {
+        this.checkConstraints = checkConstraints;
+    }
 }
