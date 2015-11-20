@@ -48,6 +48,25 @@ public class StopPlaceTest {
     }
 
     @Test
+    public void persistStopPlaceWithLevels() {
+        StopPlace stopPlace = new StopPlace();
+
+        Level level = new Level();
+        level.setName(new MultilingualString("Erde", "fr", ""));
+        level.setPublicCode("E");
+        level.setVersion("01");
+        stopPlace.getLevels().add(level);
+
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actualStopPlace.getLevels()).isNotEmpty();
+        assertThat(actualStopPlace.getLevels().get(0).getName().getValue()).isEqualTo(level.getName().getValue());
+        assertThat(actualStopPlace.getLevels().get(0).getPublicCode()).isEqualTo(level.getPublicCode());
+        assertThat(actualStopPlace.getLevels().get(0).getVersion()).isEqualTo(level.getVersion());
+    }
+
+    @Test
     public void persistStopPlaceWithTariffZone() {
         StopPlace stopPlace = new StopPlace();
 

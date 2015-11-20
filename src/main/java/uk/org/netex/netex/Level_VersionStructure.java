@@ -8,6 +8,7 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -55,27 +56,40 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     Level.class
 })
+@MappedSuperclass
 public class Level_VersionStructure
     extends DataManagedObjectStructure
 {
 
     @XmlElement(name = "Name")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
+
     @XmlElement(name = "ShortName")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString shortName;
+
     @XmlElement(name = "Description")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString description;
+
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
+
     @XmlElement(name = "PublicUse")
     protected Boolean publicUse;
+
     @XmlElement(name = "AccessibilityAssessment")
+    @Transient
     protected AccessibilityAssessment_VersionedChildStructure accessibilityAssessment;
+
     @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
+
     @XmlElementRef(name = "SiteRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
+    @Transient
     protected JAXBElement<? extends SiteRefStructure> siteRef;
 
     /**

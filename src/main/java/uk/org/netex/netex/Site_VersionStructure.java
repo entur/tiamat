@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -113,8 +115,8 @@ public abstract class Site_VersionStructure
     @Transient
     protected TopographicPlaceRefStructure containedInPlaceRef;
 
-    @Transient
-    protected Levels_RelStructure levels;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private final List<Level> levels = new ArrayList<>();
 
     @Transient
     protected SiteEntrances_RelStructure entrances;
@@ -408,29 +410,6 @@ public abstract class Site_VersionStructure
         this.containedInPlaceRef = value;
     }
 
-    /**
-     * Gets the value of the levels property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Levels_RelStructure }
-     *     
-     */
-    public Levels_RelStructure getLevels() {
-        return levels;
-    }
-
-    /**
-     * Sets the value of the levels property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Levels_RelStructure }
-     *     
-     */
-    public void setLevels(Levels_RelStructure value) {
-        this.levels = value;
-    }
 
     /**
      * Gets the value of the entrances property.
@@ -526,6 +505,10 @@ public abstract class Site_VersionStructure
      */
     public void setLocalServices(LocalServices_RelStructure value) {
         this.localServices = value;
+    }
+
+    public List<Level> getLevels() {
+        return levels;
     }
 
 }
