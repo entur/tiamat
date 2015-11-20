@@ -141,11 +141,8 @@ public class BootStrap implements InitializingBean {
         AccessSpace accessSpace = new AccessSpace();
         accessSpace.setShortName(new MultilingualString("Østbanehallen", "no", ""));
         accessSpace.setAccessSpaceType(AccessSpaceTypeEnumeration.CONCOURSE);
-        accessSpaceRepository.save(accessSpace);
 
-        List<AccessSpace> accessSpaces = new ArrayList<>();
-        accessSpaces.add(accessSpace);
-        stopPlace.setAccessSpaces(accessSpaces);
+        stopPlace.getAccessSpaces().add(accessSpace);
 
         LocationStructure locationStructure = new LocationStructure();
         locationStructure.setLatitude(new BigDecimal(10));

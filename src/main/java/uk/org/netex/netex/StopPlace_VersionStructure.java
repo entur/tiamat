@@ -91,6 +91,7 @@ public class StopPlace_VersionStructure
 
     @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
+    @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
 
     @XmlElement(name = "AirSubmode", defaultValue = "unknown")
@@ -126,7 +127,6 @@ public class StopPlace_VersionStructure
     @XmlElement(name = "TelecabinSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
-    @Transient
     protected TelecabinSubmodeEnumeration telecabinSubmode;
 
     @XmlElement(name = "RailSubmode", defaultValue = "unknown")
@@ -178,11 +178,11 @@ public class StopPlace_VersionStructure
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Quay> quays;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<AccessSpace> accessSpaces;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<AccessSpace> accessSpaces = new ArrayList<>();
 
     @OneToOne
     protected SitePathLinks_RelStructure pathLinks;
@@ -842,9 +842,6 @@ public class StopPlace_VersionStructure
         return accessSpaces;
     }
 
-    public void setAccessSpaces(List<AccessSpace> accessSpaces) {
-        this.accessSpaces = accessSpaces;
-    }
 
     public List<Quay> getQuays() {
         return quays;
