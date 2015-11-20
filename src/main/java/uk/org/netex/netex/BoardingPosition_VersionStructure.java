@@ -8,6 +8,10 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -48,6 +52,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     BoardingPosition.class
 })
+@MappedSuperclass
 public class BoardingPosition_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {
@@ -56,9 +61,13 @@ public class BoardingPosition_VersionStructure
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
+
     @XmlElement(name = "BoardingPositionType")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected BoardingPositionTypeEnumeration boardingPositionType;
+
+    @Transient
     protected EntranceRefs_RelStructure boardingPositionEntrances;
 
     /**

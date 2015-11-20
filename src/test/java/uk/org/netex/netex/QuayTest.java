@@ -327,6 +327,22 @@ public class QuayTest {
     }
 
     @Test
+    public void persistQuayWithBoardingPosition() {
+        BoardingPosition boardingPosition = new BoardingPosition();
+        boardingPosition.setName(new MultilingualString("boarding position", "en", ""));
+        boardingPosition.setPublicCode("A");
+
+        Quay quay = new Quay();
+        quay.getBoardingPositions().add(boardingPosition);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getBoardingPositions()).isNotEmpty();
+    }
+
+    @Test
     public void persistQuayWithParentQuayReference() {
         Quay quay = persistedQuayWithParentReference();
         Quay actualQuay = quayRepository.findOne(quay.getId());

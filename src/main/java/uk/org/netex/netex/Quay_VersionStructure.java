@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -98,7 +99,8 @@ public class Quay_VersionStructure
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected QuayReference parentQuayRef;
 
-
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private final List<BoardingPosition> boardingPositions = new ArrayList<>();
     //protected BoardingPositions_RelStructure boardingPositions;
 
     /**
@@ -300,6 +302,11 @@ public class Quay_VersionStructure
     public void setDestinations(List<DestinationDisplayView> destinations) {
         this.destinations = destinations;
     }
+
+    public List<BoardingPosition> getBoardingPositions() {
+        return boardingPositions;
+    }
+
 
     /**
      * Gets the value of the boardingPositions property.
