@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -23,11 +24,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Type for ALTERNATIVE NAME.
- * 
+ * <p>
  * <p>Java class for AlternativeName_VersionedChildStructure complex type.
- * 
+ * <p>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>
  * <pre>
  * &lt;complexType name="AlternativeName_VersionedChildStructure">
  *   &lt;complexContent>
@@ -47,59 +48,68 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AlternativeName_VersionedChildStructure", propOrder = {
-    "namedObjectRef",
-    "lang",
-    "nameType",
-    "typeOfName",
-    "name",
-    "shortName",
-    "abbreviation",
-    "qualifierName"
+        "namedObjectRef",
+        "lang",
+        "nameType",
+        "typeOfName",
+        "name",
+        "shortName",
+        "abbreviation",
+        "qualifierName"
 })
 @XmlSeeAlso({
-    AlternativeName.class,
-    AlternativeQuayDescriptor_VersionedChildStructure.class
+        AlternativeName.class,
+        AlternativeQuayDescriptor_VersionedChildStructure.class
 })
+@MappedSuperclass
 public class AlternativeName_VersionedChildStructure
-    extends VersionedChildStructure
-{
+        extends VersionedChildStructure {
 
     @XmlElement(name = "NamedObjectRef")
     protected VersionOfObjectRefStructure namedObjectRef;
+
     @XmlElement(name = "Lang")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "language")
     protected String lang;
+
     @XmlElement(name = "NameType", defaultValue = "alias")
     @XmlSchemaType(name = "string")
     protected NameTypeEnumeration nameType;
+
     @XmlElement(name = "TypeOfName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String typeOfName;
+
     @XmlElement(name = "Name", required = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
+
     @XmlElement(name = "ShortName")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString shortName;
+
     @XmlElement(name = "Abbreviation")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString abbreviation;
+
     @XmlElement(name = "QualifierName")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString qualifierName;
+
     @XmlAttribute(name = "order")
+    @Transient
     protected BigInteger order;
 
     /**
      * Gets the value of the namedObjectRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link VersionOfObjectRefStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link VersionOfObjectRefStructure }
      */
     public VersionOfObjectRefStructure getNamedObjectRef() {
         return namedObjectRef;
@@ -107,11 +117,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the namedObjectRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link VersionOfObjectRefStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link VersionOfObjectRefStructure }
      */
     public void setNamedObjectRef(VersionOfObjectRefStructure value) {
         this.namedObjectRef = value;
@@ -119,11 +127,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the lang property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLang() {
         return lang;
@@ -131,11 +137,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the lang property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLang(String value) {
         this.lang = value;
@@ -143,11 +147,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the nameType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NameTypeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link NameTypeEnumeration }
      */
     public NameTypeEnumeration getNameType() {
         return nameType;
@@ -155,11 +157,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the nameType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NameTypeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NameTypeEnumeration }
      */
     public void setNameType(NameTypeEnumeration value) {
         this.nameType = value;
@@ -167,11 +167,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the typeOfName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getTypeOfName() {
         return typeOfName;
@@ -179,11 +177,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the typeOfName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setTypeOfName(String value) {
         this.typeOfName = value;
@@ -191,11 +187,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @return possible object is
+     * {@link MultilingualString }
      */
     public MultilingualString getName() {
         return name;
@@ -203,11 +197,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MultilingualString }
      */
     public void setName(MultilingualString value) {
         this.name = value;
@@ -215,11 +207,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the shortName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @return possible object is
+     * {@link MultilingualString }
      */
     public MultilingualString getShortName() {
         return shortName;
@@ -227,11 +217,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the shortName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MultilingualString }
      */
     public void setShortName(MultilingualString value) {
         this.shortName = value;
@@ -239,11 +227,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the abbreviation property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @return possible object is
+     * {@link MultilingualString }
      */
     public MultilingualString getAbbreviation() {
         return abbreviation;
@@ -251,11 +237,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the abbreviation property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MultilingualString }
      */
     public void setAbbreviation(MultilingualString value) {
         this.abbreviation = value;
@@ -263,11 +247,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the qualifierName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @return possible object is
+     * {@link MultilingualString }
      */
     public MultilingualString getQualifierName() {
         return qualifierName;
@@ -275,11 +257,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the qualifierName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MultilingualString }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MultilingualString }
      */
     public void setQualifierName(MultilingualString value) {
         this.qualifierName = value;
@@ -287,11 +267,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Gets the value of the order property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
+     *
+     * @return possible object is
+     * {@link BigInteger }
      */
     public BigInteger getOrder() {
         return order;
@@ -299,11 +277,9 @@ public class AlternativeName_VersionedChildStructure
 
     /**
      * Sets the value of the order property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BigInteger }
      */
     public void setOrder(BigInteger value) {
         this.order = value;

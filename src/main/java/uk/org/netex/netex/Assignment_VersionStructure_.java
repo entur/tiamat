@@ -54,21 +54,11 @@ public abstract class Assignment_VersionStructure_
 {
 
     @XmlElement(name = "Name")
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "lang", column = @Column(name = "name_lang")),
-            @AttributeOverride(name = "value", column = @Column(name = "name_val")),
-            @AttributeOverride(name = "textIdType", column = @Column(name = "name_text_id_type"))
-    })
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
 
     @XmlElement(name = "Description")
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "lang", column = @Column(name = "description_lang")),
-            @AttributeOverride(name = "value", column = @Column(name = "description_val")),
-            @AttributeOverride(name = "textIdType", column = @Column(name = "description_text_id_type"))
-    })
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString description;
 
     @XmlAttribute(name = "order")

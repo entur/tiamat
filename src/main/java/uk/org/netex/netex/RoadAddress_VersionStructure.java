@@ -9,9 +9,7 @@
 package uk.org.netex.netex;
 
 import java.math.BigInteger;
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -72,7 +70,7 @@ public class RoadAddress_VersionStructure
     protected String roadNumber;
 
     @XmlElement(name = "RoadName")
-    @Embedded
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString roadName;
 
     @XmlElement(name = "BearingCompass")

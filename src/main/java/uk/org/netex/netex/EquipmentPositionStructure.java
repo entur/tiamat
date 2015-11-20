@@ -60,6 +60,7 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 
     @XmlElement(name = "Description")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString description;
 
     @XmlElement(name = "Location")

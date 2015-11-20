@@ -10,7 +10,7 @@ package uk.org.netex.netex;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,8 +46,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "MultilingualString", propOrder = {
     "value"
 })
-@Embeddable
+@Entity
 public class MultilingualString {
+
+    @Id
+    @GeneratedValue
+    private long id;
 
     @XmlValue
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
@@ -149,4 +153,11 @@ public class MultilingualString {
         this.textIdType = value;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

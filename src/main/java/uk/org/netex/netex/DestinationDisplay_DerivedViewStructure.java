@@ -8,8 +8,7 @@
 
 package uk.org.netex.netex;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -73,6 +72,7 @@ public class DestinationDisplay_DerivedViewStructure
     protected DestinationDisplayRefStructure destinationDisplayRef;
 
     @XmlElement(name = "Name")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
 
     @XmlElement(name = "ShortName")

@@ -57,7 +57,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     Quay.class
 })
-@Entity
+@MappedSuperclass
 public class Quay_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {

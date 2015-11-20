@@ -306,4 +306,24 @@ public class QuayTest {
         assertThat(actualCheckConstraint.getName().getValue()).isEqualTo(checkConstraint.getName().getValue());
     }
 
+    @Test
+    public void persistQuayWithAlternativeName() {
+        Quay quay = new Quay();
+
+        AlternativeName alternativeName = new AlternativeName();
+        alternativeName.setShortName(new MultilingualString("short name", "en", ""));
+        alternativeName.setName(new MultilingualString("name", "en", ""));
+
+        quay.getAlternativeNames().add(alternativeName);
+
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+        assertThat(actualQuay.getAlternativeNames()).isNotEmpty();
+        AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().get(0);
+        assertThat(actualAlternativeName.getId()).isEqualTo(actualAlternativeName.getId());
+        assertThat(actualAlternativeName.getName().getValue()).isEqualTo(alternativeName.getName().getValue());
+        assertThat(actualAlternativeName.getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
+    }
+
 }

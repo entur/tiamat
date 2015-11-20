@@ -48,7 +48,7 @@ public class SimplePoint_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    @Embedded
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
 
     @XmlElement(name = "Location")

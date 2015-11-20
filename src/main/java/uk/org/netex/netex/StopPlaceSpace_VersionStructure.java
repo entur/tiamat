@@ -62,12 +62,7 @@ public abstract class StopPlaceSpace_VersionStructure
     protected Boolean alightingUse;
 
     @XmlElement(name = "Label")
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "lang", column = @Column(name = "label_lang")),
-            @AttributeOverride(name = "value", column = @Column(name = "label_val")),
-            @AttributeOverride(name = "textIdType", column = @Column(name = "label_text_id_type"))
-    })
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString label;
 
     @Transient

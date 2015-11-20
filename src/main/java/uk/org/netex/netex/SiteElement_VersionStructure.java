@@ -79,8 +79,8 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected MultilingualString nameSuffix;
 
-    @Transient
-    protected AlternativeNames_RelStructure alternativeNames;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     @XmlElement(name = "CrossRoad")
     @Transient
@@ -206,7 +206,7 @@ public abstract class SiteElement_VersionStructure
      *     {@link AlternativeNames_RelStructure }
      *     
      */
-    public AlternativeNames_RelStructure getAlternativeNames() {
+    public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
 
@@ -218,9 +218,7 @@ public abstract class SiteElement_VersionStructure
      *     {@link AlternativeNames_RelStructure }
      *     
      */
-    public void setAlternativeNames(AlternativeNames_RelStructure value) {
-        this.alternativeNames = value;
-    }
+
 
     /**
      * Gets the value of the crossRoad property.
