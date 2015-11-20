@@ -9,6 +9,7 @@
 package uk.org.netex.netex;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -23,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="QuayReference">
+ * &lt;complexType name="QuayRefStructure">
  *   &lt;simpleContent>
  *     &lt;restriction base="&lt;http://www.netex.org.uk/netex>StopPlaceSpaceRefStructure">
  *       &lt;attribute name="ref" use="required" type="{http://www.netex.org.uk/netex}QuayIdType" />
@@ -36,19 +37,9 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "QuayRefStructure")
-@Embeddable
+@Entity
 public class QuayReference
     extends StopPlaceSpaceRefStructure
 {
 
-    @OneToOne
-    private Quay quay;
-
-    public Quay getQuay() {
-        return quay;
-    }
-
-    public void setQuay(Quay quay) {
-        this.quay = quay;
-    }
 }

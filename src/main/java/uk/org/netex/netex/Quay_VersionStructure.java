@@ -81,18 +81,21 @@ public class Quay_VersionStructure
     //protected DestinationDisplayViews_RelStructure destinations;
 
     @XmlElement(name = "CompassBearing")
+    @Transient
     protected Float compassBearing;
 
     @XmlElement(name = "CompassOctant")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected CompassBearing8Enumeration compassOctant;
 
     @XmlElement(name = "QuayType")
     @XmlSchemaType(name = "string")
+    @Enumerated(EnumType.STRING)
     protected QuayTypeEnumeration quayType;
 
     @XmlElement(name = "ParentQuayRef")
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected QuayReference parentQuayRef;
 
 

@@ -326,4 +326,34 @@ public class QuayTest {
         assertThat(actualAlternativeName.getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }
 
+    @Test
+    public void persistQuayWithParentQuayReference() {
+        Quay quay = persistedQuayWithParentReference();
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay.getParentQuayRef()).isNotNull();
+        assertThat(actualQuay.getParentQuayRef().getRef()).isEqualTo(quay.getParentQuayRef().getRef());
+    }
+
+    @Test
+    public void orphanRemovalOfQuayReference() {
+        Quay quay = persistedQuayWithParentReference();
+
+        quay.setParentQuayRef(null);
+        quayRepository.save(quay);
+
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+        assertThat(actualQuay.getParentQuayRef()).isNull();
+    }
+
+    private Quay persistedQuayWithParentReference() {
+        Quay quay = new Quay();
+
+        QuayReference quayReference = new QuayReference();
+        quayReference.setRef("id-to-parent-quay");
+        quay.setParentQuayRef(quayReference);
+        quayRepository.save(quay);
+
+        return quay;
+    }
 }
