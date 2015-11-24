@@ -11,8 +11,7 @@ package uk.org.netex.netex;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -62,8 +61,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class EntityInVersionStructure
     extends EntityStructure
 {
-    @Transient
-    protected ValidityConditions_RelStructure validityConditions;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private final List<ValidityCondition> validityConditions = new ArrayList<>();
 
     @XmlElement(name = "ValidBetween")
     @Transient
@@ -113,21 +112,11 @@ public class EntityInVersionStructure
      *     {@link ValidityConditions_RelStructure }
      *     
      */
-    public ValidityConditions_RelStructure getValidityConditions() {
+    public List<ValidityCondition> getValidityConditions() {
         return validityConditions;
     }
 
-    /**
-     * Sets the value of the validityConditions property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ValidityConditions_RelStructure }
-     *     
-     */
-    public void setValidityConditions(ValidityConditions_RelStructure value) {
-        this.validityConditions = value;
-    }
+
 
     /**
      * Gets the value of the validBetween property.

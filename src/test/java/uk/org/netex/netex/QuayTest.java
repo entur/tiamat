@@ -160,11 +160,6 @@ public class QuayTest {
 
         AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
         accessibilityLimitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setStepFreeAccess(LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setEscalatorFreeAccess(LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setLiftFreeAccess(LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setVisualSignsAvailable(LimitationStatusEnumeration.TRUE);
 
         accessibilityLimitations.add(accessibilityLimitation);
 
@@ -180,7 +175,7 @@ public class QuayTest {
 
         assertThat(actualAccessibilityLimitations).isNotEmpty();
         AccessibilityLimitation actualAccessibilityLimitation = actualAccessibilityLimitations.get(0);
-        assertThat(actualAccessibilityLimitation).isEqualToComparingFieldByField(accessibilityLimitation);
+        assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(accessibilityLimitation.getWheelchairAccess());
     }
 
     @Test

@@ -120,21 +120,22 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getTariffZones().get(0).getId()).isEqualTo(tariffZone.getId());
     }
 
-    @Ignore
     @Test
     public void persistStopPlaceWithValidityCondition() {
-
-        AvailabilityCondition availabilityCondition = new AvailabilityCondition();
-        availabilityCondition.setFromDate(new Date(1000));
-        availabilityCondition.setToDate(new Date(2000));
 
         StopPlace stopPlace = new StopPlace();
 
         ValidityCondition validityCondition = new ValidityCondition();
+        validityCondition.setName(new MultilingualString("Validity condition", "en", ""));
+
+        stopPlace.getValidityConditions().add(validityCondition);
+
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
 
+        assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
+        assertThat(actualStopPlace.getValidityConditions().get(0).getName().getValue()).isEqualTo(validityCondition.getName().getValue());
     }
 
     @Test

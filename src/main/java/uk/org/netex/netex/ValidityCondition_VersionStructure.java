@@ -8,6 +8,10 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -41,9 +45,53 @@ import javax.xml.bind.annotation.XmlType;
     ValidityRuleParameter_VersionStructure.class,
     ValidBetween_VersionStructure.class
 })
+@MappedSuperclass
 public class ValidityCondition_VersionStructure
     extends DataManagedObjectStructure
 {
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private MultilingualString name;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private MultilingualString description;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private VersionOfObjectRefStructure conditionedObjectRef;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private ValidityConditionRefStructure withConditionRef;
+
+    public MultilingualString getDescription() {
+        return description;
+    }
+
+    public void setDescription(MultilingualString description) {
+        this.description = description;
+    }
+
+    public VersionOfObjectRefStructure getConditionedObjectRef() {
+        return conditionedObjectRef;
+    }
+
+    public void setConditionedObjectRef(VersionOfObjectRefStructure conditionedObjectRef) {
+        this.conditionedObjectRef = conditionedObjectRef;
+    }
+
+    public ValidityConditionRefStructure getWithConditionRef() {
+        return withConditionRef;
+    }
+
+    public void setWithConditionRef(ValidityConditionRefStructure withConditionRef) {
+        this.withConditionRef = withConditionRef;
+    }
+
+
+    public MultilingualString getName() {
+        return name;
+    }
+
+    public void setName(MultilingualString name) {
+        this.name = name;
+    }
 }

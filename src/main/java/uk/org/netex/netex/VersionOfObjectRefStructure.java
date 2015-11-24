@@ -113,7 +113,7 @@ import java.util.Date;
     EquipmentRefStructure.class,
     TypeOfValueRefStructure.class
 })
-@MappedSuperclass
+@Entity
 public class VersionOfObjectRefStructure implements Serializable {
 
     @Id
