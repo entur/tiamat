@@ -121,8 +121,8 @@ public abstract class Site_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @Transient
-    protected EquipmentPlaces_RelStructure equipmentPlaces;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<EquipmentPlace> equipmentPlaces;
 
     @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
@@ -435,29 +435,7 @@ public abstract class Site_VersionStructure
         this.entrances = value;
     }
 
-    /**
-     * Gets the value of the equipmentPlaces property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link EquipmentPlaces_RelStructure }
-     *     
-     */
-    public EquipmentPlaces_RelStructure getEquipmentPlaces() {
-        return equipmentPlaces;
-    }
 
-    /**
-     * Sets the value of the equipmentPlaces property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link EquipmentPlaces_RelStructure }
-     *     
-     */
-    public void setEquipmentPlaces(EquipmentPlaces_RelStructure value) {
-        this.equipmentPlaces = value;
-    }
 
     /**
      * Gets the value of the placeEquipments property.
@@ -511,4 +489,11 @@ public abstract class Site_VersionStructure
         return levels;
     }
 
+    public List<EquipmentPlace> getEquipmentPlaces() {
+        return equipmentPlaces;
+    }
+
+    public void setEquipmentPlaces(List<EquipmentPlace> equipmentPlaces) {
+        this.equipmentPlaces = equipmentPlaces;
+    }
 }

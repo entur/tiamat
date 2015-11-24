@@ -48,6 +48,25 @@ public class StopPlaceTest {
     }
 
     @Test
+    public void persistStopPlaceWithEquipmentPlace() {
+
+        StopPlace stopPlace = new StopPlace();
+
+        EquipmentPlace equipmentPlace = new EquipmentPlace();
+        List<EquipmentPlace> equipmentPlaces = new ArrayList<>();
+        equipmentPlaces.add(equipmentPlace);
+
+        stopPlace.setEquipmentPlaces(equipmentPlaces);
+
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
+        assertThat(actualStopPlace.getEquipmentPlaces().get(0).getId()).isEqualTo(equipmentPlace.getId());
+    }
+
+    @Test
     public void persistStopPlaceWithLevels() {
         StopPlace stopPlace = new StopPlace();
 
@@ -64,6 +83,19 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getLevels().get(0).getName().getValue()).isEqualTo(level.getName().getValue());
         assertThat(actualStopPlace.getLevels().get(0).getPublicCode()).isEqualTo(level.getPublicCode());
         assertThat(actualStopPlace.getLevels().get(0).getVersion()).isEqualTo(level.getVersion());
+    }
+
+    @Test
+    public void persistStopPlaceWithRoadAddress() {
+        StopPlace stopPlace = new StopPlace();
+        RoadAddress roadAddress = new RoadAddress();
+        stopPlace.setRoadAddress(roadAddress);
+
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actualStopPlace.getRoadAddress()).isNotNull();
+        assertThat(actualStopPlace.getRoadAddress().getId()).isEqualTo(roadAddress.getId());
     }
 
     @Test
@@ -110,6 +142,56 @@ public class StopPlaceTest {
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
         assertThat(actualStopPlace.getOtherTransportModes()).contains(VehicleModeEnumeration.AIR);
+    }
+
+    @Test
+    public void persistStopPlaceWithDataSourceRef() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setDataSourceRef("dataSourceRef");
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        assertThat(actualStopPlace.getDataSourceRef()).isEqualTo(stopPlace.getDataSourceRef());
+    }
+
+    @Test
+    public void persistStopPlaceWithCreatedDate() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setCreated(new Date(10000));
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        assertThat(actualStopPlace.getCreated().getTime()).isEqualTo(stopPlace.getCreated().getTime());
+    }
+
+    @Test
+    public void persistStopPlaceWithChangedDate() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setChanged(new Date(10000));
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        assertThat(actualStopPlace.getChanged().getTime()).isEqualTo(stopPlace.getChanged().getTime());
+    }
+
+    @Test
+    public void persistStopPlaceWitAlternativeName() {
+        StopPlace stopPlace = new StopPlace();
+
+        AlternativeName alternativeName = new AlternativeName();
+        alternativeName.setShortName(new MultilingualString("short name", "en", ""));
+        stopPlace.getAlternativeNames().add(alternativeName);
+
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        assertThat(actualStopPlace.getAlternativeNames()).isNotEmpty();
+        assertThat(actualStopPlace.getAlternativeNames().get(0).getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
+    }
+
+    @Test
+    public void persistStopPlaceWithDescription() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setDescription(new MultilingualString("description", "en", ""));
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        assertThat(actualStopPlace.getDescription().getValue()).isEqualTo(stopPlace.getDescription().getValue());
     }
 
     @Test
