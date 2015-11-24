@@ -14,9 +14,10 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * Condition used in order to characterise a given VERSION of a VERSION FRAME. A VALIDITY CONDITION consists of a
+ * parameter (e.g. date, triggering event, etc) and its type of application (e.g. for, from, until, etc.).
+ *
+ *  <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>

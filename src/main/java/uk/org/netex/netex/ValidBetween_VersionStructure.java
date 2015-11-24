@@ -8,10 +8,12 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Date;
 
 
 /**
@@ -45,9 +47,35 @@ import javax.xml.bind.annotation.XmlType;
     SimpleValidityCondition.class,
     ValidBetween.class
 })
+@MappedSuperclass
 public class ValidBetween_VersionStructure
     extends ValidityCondition_VersionStructure
 {
 
+    /**
+     * Start date of AVAILABILITY CONDITION.
+     */
+    private Date fromDate;
 
+    /**
+     * End of AVAILABILITY CONDITION. Date is INCLUSIVE.
+     */
+    private Date toDate;
+
+
+    public Date getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(Date fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public Date getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+        this.toDate = toDate;
+    }
 }
