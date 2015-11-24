@@ -4,6 +4,7 @@ import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,23 @@ public class StopPlaceTest {
 
         assertThat(actualStopPlace.getTariffZones()).isNotEmpty();
         assertThat(actualStopPlace.getTariffZones().get(0).getId()).isEqualTo(tariffZone.getId());
+    }
+
+    @Ignore
+    @Test
+    public void persistStopPlaceWithValidityCondition() {
+
+        AvailabilityCondition availabilityCondition = new AvailabilityCondition();
+        availabilityCondition.setFromDate(new Date(1000));
+        availabilityCondition.setToDate(new Date(2000));
+
+        StopPlace stopPlace = new StopPlace();
+
+        ValidityCondition validityCondition = new ValidityCondition();
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+
     }
 
     @Test
