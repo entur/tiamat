@@ -1,7 +1,6 @@
 package uk.org.netex.netex;
 
 import no.rutebanken.tiamat.TiamatApplication;
-import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.junit.Test;
@@ -25,9 +24,6 @@ public class StopPlaceTest {
 
     @Autowired
     private TariffZoneRepository tariffZoneRepository;
-
-    @Autowired
-    private AccessSpaceRepository accessSpaceRepository;
 
 
     @Test
