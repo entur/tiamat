@@ -4,7 +4,6 @@ import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
@@ -65,6 +64,19 @@ public class StopPlaceTest {
 
         assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
         assertThat(actualStopPlace.getEquipmentPlaces().get(0).getId()).isEqualTo(equipmentPlace.getId());
+    }
+
+    @Test
+    public void persistStopPlaceWithCentroid() {
+
+        StopPlace stopPlace = new StopPlace();
+        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actualStopPlace.getCentroid()).isNotNull();
     }
 
     @Test
