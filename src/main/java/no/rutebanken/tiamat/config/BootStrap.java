@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.springconfig;
+package no.rutebanken.tiamat.config;
 
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
