@@ -1,17 +1,15 @@
 package no.rutebanken.tiamat;
 
-import no.rutebanken.tiamat.model.example.ExampleEntity;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
 import uk.org.netex.netex.StopPlace;
 
 @Configuration
 @EnableAutoConfiguration
-@EntityScan(basePackageClasses={StopPlace.class, ExampleEntity.class})
+@EntityScan(basePackageClasses={StopPlace.class})
 @ComponentScan
 public class TiamatApplication {
 

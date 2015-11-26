@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
-import no.rutebanken.tiamat.ifopt.dto.assembler.SimpleStopPlaceAssembler;
-import no.rutebanken.tiamat.ifopt.dto.dto.SimpleStopPlaceDTO;
+import no.rutebanken.tiamat.ifopt.transfer.assembler.SimpleStopPlaceAssembler;
+import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleStopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

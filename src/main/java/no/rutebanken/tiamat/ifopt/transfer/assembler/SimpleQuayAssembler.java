@@ -1,7 +1,7 @@
-package no.rutebanken.tiamat.ifopt.dto.assembler;
+package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.dto.dto.SimpleQuayDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleQuayDTO;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.Quay;
 

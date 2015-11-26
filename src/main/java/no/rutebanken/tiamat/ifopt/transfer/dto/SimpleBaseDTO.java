@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.ifopt.dto.dto;
+package no.rutebanken.tiamat.ifopt.transfer.dto;
 
 public class SimpleBaseDTO {
 

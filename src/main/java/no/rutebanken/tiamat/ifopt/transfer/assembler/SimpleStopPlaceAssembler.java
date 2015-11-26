@@ -1,7 +1,7 @@
-package no.rutebanken.tiamat.ifopt.dto.assembler;
+package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.dto.dto.SimpleStopPlaceDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleStopPlaceDTO;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.StopPlace;
 
