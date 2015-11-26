@@ -97,7 +97,7 @@ public class QuayTest {
         quay.setRoadAddress(roadAddress);
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
 
         assertThat(actualQuay.getRoadAddress()).isNotNull();
         assertThat(actualQuay.getRoadAddress().getId()).isEqualTo(quay.getRoadAddress().getId());
@@ -140,7 +140,7 @@ public class QuayTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
 
         assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
         AccessibilityAssessment actualAccessibilityAssessment = actualQuay.getAccessibilityAssessment();
@@ -168,7 +168,7 @@ public class QuayTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
 
         assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
         List<AccessibilityLimitation> actualAccessibilityLimitations = actualQuay.getAccessibilityAssessment().getLimitations();
@@ -242,7 +242,7 @@ public class QuayTest {
 
         // act
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
 
         // assert
         assertThat(actualQuay.getEquipmentPlaces()).isNotNull();
@@ -313,7 +313,7 @@ public class QuayTest {
 
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
         assertThat(actualQuay.getAlternativeNames()).isNotEmpty();
         AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().get(0);
         assertThat(actualAlternativeName.getId()).isEqualTo(actualAlternativeName.getId());

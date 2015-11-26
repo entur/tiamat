@@ -56,7 +56,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
         assertThat(actualStopPlace.getEquipmentPlaces().get(0).getId()).isEqualTo(equipmentPlace.getId());
@@ -86,7 +86,7 @@ public class StopPlaceTest {
         stopPlace.getLevels().add(level);
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getLevels()).isNotEmpty();
         assertThat(actualStopPlace.getLevels().get(0).getName().getValue()).isEqualTo(level.getName().getValue());
@@ -101,7 +101,7 @@ public class StopPlaceTest {
         stopPlace.setRoadAddress(roadAddress);
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getRoadAddress()).isNotNull();
         assertThat(actualStopPlace.getRoadAddress().getId()).isEqualTo(roadAddress.getId());
@@ -140,7 +140,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
         assertThat(actualStopPlace.getValidityConditions().get(0).getName().getValue()).isEqualTo(validityCondition.getName().getValue());
@@ -158,7 +158,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
         assertThat(actualStopPlace.getParentSiteRef().getRef()).isEqualTo(stopPlaceReference.getRef());
     }
 
@@ -167,7 +167,7 @@ public class StopPlaceTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
         assertThat(actualStopPlace.getOtherTransportModes()).contains(VehicleModeEnumeration.AIR);
     }
 
@@ -205,9 +205,8 @@ public class StopPlaceTest {
         AlternativeName alternativeName = new AlternativeName();
         alternativeName.setShortName(new MultilingualString("short name", "en", ""));
         stopPlace.getAlternativeNames().add(alternativeName);
-
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
         assertThat(actualStopPlace.getAlternativeNames()).isNotEmpty();
         assertThat(actualStopPlace.getAlternativeNames().get(0).getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }

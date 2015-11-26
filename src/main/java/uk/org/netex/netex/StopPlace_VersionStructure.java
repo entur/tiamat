@@ -135,7 +135,7 @@ public class StopPlace_VersionStructure
     @XmlList
     @XmlElement(name = "OtherTransportModes")
     @XmlSchemaType(name = "anySimpleType")
-    @ElementCollection(targetClass = VehicleModeEnumeration.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = VehicleModeEnumeration.class)
     @Enumerated(EnumType.STRING)
     protected List<VehicleModeEnumeration> otherTransportModes;
 
@@ -171,25 +171,30 @@ public class StopPlace_VersionStructure
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Quay> quays;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @Transient
     protected SitePathLinks_RelStructure pathLinks;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @Transient
     protected PathJunctions_RelStructure pathJunctions;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @Transient
     protected Accesses_RelStructure accesses;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @Transient
     protected VehicleStoppingPlaces_RelStructure vehicleStoppingPlaces;
 
 

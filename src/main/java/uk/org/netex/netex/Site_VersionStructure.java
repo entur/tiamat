@@ -105,7 +105,7 @@ public abstract class Site_VersionStructure
     protected Organisation_DerivedViewStructure operatingOrganisationView;
 
     @XmlElement(name = "ParentSiteRef")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected SiteRefStructure parentSiteRef;
 
     @Transient
@@ -115,13 +115,13 @@ public abstract class Site_VersionStructure
     @Transient
     protected TopographicPlaceRefStructure containedInPlaceRef;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private final List<Level> levels = new ArrayList<>();
 
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<EquipmentPlace> equipmentPlaces;
 
     @Transient

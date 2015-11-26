@@ -8,15 +8,10 @@
 
 package uk.org.netex.netex;
 
-import java.math.BigDecimal;
 import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
+import java.math.BigDecimal;
 
 
 /**
@@ -68,7 +63,7 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
     protected LocationStructure location;
 
     @XmlElement(name = "ReferencePointRef")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL)
     protected PointRefStructure referencePointRef;
 
     @XmlElement(name = "XOffset")

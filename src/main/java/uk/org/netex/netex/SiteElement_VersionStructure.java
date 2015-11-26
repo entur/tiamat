@@ -8,17 +8,11 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlList;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -66,7 +60,7 @@ public abstract class SiteElement_VersionStructure
 {
 
     @XmlElement(name = "AccessibilityAssessment")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected AccessibilityAssessment accessibilityAssessment;
 
     @XmlList
@@ -79,7 +73,7 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected MultilingualString nameSuffix;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     @XmlElement(name = "CrossRoad")

@@ -23,11 +23,22 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         graph.addAttributeNodes("tariffZones");
         graph.addAttributeNodes("accessSpaces");
+        graph.addAttributeNodes("equipmentPlaces");
+        graph.addAttributeNodes("validityConditions");
+        graph.addAttributeNodes("accessibilityAssessment");
+        graph.addAttributeNodes("levels");
+        graph.addAttributeNodes("alternativeNames");
+        graph.addAttributeNodes("otherTransportModes");
+        graph.addAttributeNodes("roadAddress");
+        graph.addAttributeNodes("parentSiteRef");
 
+        return entityManager.find(StopPlace.class, stopPlaceId, hints(graph));
+    }
+
+    private Map<String, Object> hints(EntityGraph<StopPlace> graph) {
         Map<String, Object> hints = new HashMap<>();
         hints.put("javax.persistence.loadgraph", graph);
-
-        return entityManager.find(StopPlace.class, stopPlaceId, hints);
+        return hints;
     }
 
 }

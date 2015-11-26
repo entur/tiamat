@@ -66,7 +66,7 @@ public class AddressablePlace_VersionStructure
     protected PostalAddress postalAddress;
 
     @XmlElement(name = "RoadAddress")
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected RoadAddress roadAddress;
 
     /**
