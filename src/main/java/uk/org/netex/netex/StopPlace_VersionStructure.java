@@ -139,7 +139,7 @@ public class StopPlace_VersionStructure
     @Enumerated(EnumType.STRING)
     protected List<VehicleModeEnumeration> otherTransportModes;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @OneToMany
     private List<TariffZone> tariffZones;
 
     @XmlElement(name = "StopPlaceType")

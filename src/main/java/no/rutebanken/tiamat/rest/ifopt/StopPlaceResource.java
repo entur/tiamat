@@ -1,5 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
+import no.rutebanken.tiamat.ifopt.dto.assembler.SimpleStopPlaceAssembler;
+import no.rutebanken.tiamat.ifopt.dto.dto.SimpleStopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
@@ -20,22 +23,20 @@ public class StopPlaceResource {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Autowired
+    private SimpleStopPlaceAssembler simpleStopPlaceAssembler;
+
     @GET
-    public List<StopPlace> getStopPlaces() {
-        return stopPlaceRepository.findAll();
+    public List<SimpleStopPlaceDTO> getStopPlaces() {
+        List<SimpleStopPlaceDTO> stopPlaces = stopPlaceRepository.findAll().stream()
+                .map(stopPlace -> simpleStopPlaceAssembler.assemble(stopPlace)).collect(Collectors.toList());
+        return stopPlaces;
     }
 
     @GET
     @Path("{id}")
-    public List<StopPlace> getStopPlace(@PathParam("id") String id) {
-
-        List<StopPlace> stopPlaces = stopPlaceRepository.findAll();
-
-        for (StopPlace stopPlace : stopPlaces) {
-            stopPlace.getOtherTransportModes().size();
-
-        }
-        return stopPlaces;
+    public SimpleStopPlaceDTO getStopPlace(@PathParam("id") String id) {
+       return simpleStopPlaceAssembler.assemble(stopPlaceRepository.findOne(id));
     }
 
     /**
@@ -43,7 +44,7 @@ public class StopPlaceResource {
      */
     @GET
     @Path("create")
-    public StopPlace createStopPlace() {
+    public SimpleStopPlaceDTO createStopPlace() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -81,7 +82,7 @@ public class StopPlaceResource {
 
         stopPlaceRepository.save(stopPlace);
 
-        return stopPlace;
+        return simpleStopPlaceAssembler.assemble(stopPlace);
     }
 
 
