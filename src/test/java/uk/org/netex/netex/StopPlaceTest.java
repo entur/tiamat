@@ -37,7 +37,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getAccessSpaces()).isNotEmpty();
         assertThat(actualStopPlace.getAccessSpaces().get(0).getShortName().getValue()).isEqualTo(accessSpace.getShortName().getValue());
@@ -122,7 +122,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getTariffZones()).isNotEmpty();
         assertThat(actualStopPlace.getTariffZones().get(0).getId()).isEqualTo(tariffZone.getId());

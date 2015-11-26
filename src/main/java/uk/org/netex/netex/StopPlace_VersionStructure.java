@@ -174,7 +174,7 @@ public class StopPlace_VersionStructure
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Quay> quays;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
 
     @OneToOne
