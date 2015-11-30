@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.config;
 
+import no.rutebanken.tiamat.gtfs.GtfsStopsReader;
 import no.rutebanken.tiamat.nvdb.service.NvdbSync;
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import uk.org.netex.netex.*;
 
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ import java.util.List;
  * Create some example data.
  */
 @Configuration
+@Profile("default")
 public class BootStrap implements InitializingBean {
 
     private final static Logger logger = LoggerFactory.getLogger(BootStrap.class);
@@ -40,6 +43,9 @@ public class BootStrap implements InitializingBean {
     @Autowired
     private NvdbSync nvdbSync;
 
+    @Autowired
+    private GtfsStopsReader gtfsStopsReader;
+
     /**
      * Set up test object.
      */
@@ -47,8 +53,9 @@ public class BootStrap implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         createExampleStopPlace();
         createExampleQuay();
+//       nvdbSync.fetchNvdb();
 
-       nvdbSync.fetchNvdb();
+        gtfsStopsReader.read();
     }
 
     private void createExampleQuay() {
