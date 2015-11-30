@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Create some example data.
@@ -55,7 +56,7 @@ public class BootStrap implements InitializingBean {
         createExampleQuay();
 //       nvdbSync.fetchNvdb();
 
-        gtfsStopsReader.read();
+        Executors.newSingleThreadExecutor().execute(() -> gtfsStopsReader.read());
     }
 
     private void createExampleQuay() {

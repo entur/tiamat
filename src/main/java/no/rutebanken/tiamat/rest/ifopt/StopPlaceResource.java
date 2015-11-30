@@ -4,13 +4,12 @@ import no.rutebanken.tiamat.ifopt.transfer.assembler.SimpleStopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleStopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.*;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,9 +26,20 @@ public class StopPlaceResource {
     private SimpleStopPlaceAssembler simpleStopPlaceAssembler;
 
     @GET
-    public List<SimpleStopPlaceDTO> getStopPlaces() {
-        List<SimpleStopPlaceDTO> stopPlaces = stopPlaceRepository.findAll().stream()
-                .map(stopPlace -> simpleStopPlaceAssembler.assemble(stopPlace)).collect(Collectors.toList());
+    public List<SimpleStopPlaceDTO> getStopPlaces(
+            @DefaultValue(value="0") @QueryParam(value="page") int page,
+            @DefaultValue(value="20") @QueryParam(value="size") int size) {
+
+        Pageable pageable = new PageRequest(page, size);
+
+        stopPlaceRepository.findAll(pageable);
+
+        List <SimpleStopPlaceDTO> stopPlaces = stopPlaceRepository
+                .findAll(pageable)
+                .getContent()
+                .stream()
+                .map(stopPlace -> simpleStopPlaceAssembler.assemble(stopPlace))
+                .collect(Collectors.toList());
         return stopPlaces;
     }
 
