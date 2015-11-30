@@ -3,6 +3,8 @@ package no.rutebanken.tiamat.rest.ifopt;
 import no.rutebanken.tiamat.ifopt.transfer.assembler.SimpleStopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleStopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 @Path("/stop_place")
 public class StopPlaceResource {
 
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceResource.class);
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
@@ -28,19 +32,30 @@ public class StopPlaceResource {
     @GET
     public List<SimpleStopPlaceDTO> getStopPlaces(
             @DefaultValue(value="0") @QueryParam(value="page") int page,
-            @DefaultValue(value="20") @QueryParam(value="size") int size) {
+            @DefaultValue(value="20") @QueryParam(value="size") int size,
+            @QueryParam(value="name") String name) {
+
+
+        logger.info("Get stop places with names that contains {}", name);
 
         Pageable pageable = new PageRequest(page, size);
 
-        stopPlaceRepository.findAll(pageable);
+        List<StopPlace> stopPlaces;
 
-        List <SimpleStopPlaceDTO> stopPlaces = stopPlaceRepository
-                .findAll(pageable)
-                .getContent()
+        if(name != null && name.length() != 0) {
+            stopPlaces = stopPlaceRepository
+                    .findByNameValueContainingIgnoreCase(name, pageable)
+                    .getContent();
+        } else {
+            stopPlaces = stopPlaceRepository
+                    .findAll(pageable)
+                    .getContent();
+        }
+
+       return stopPlaces
                 .stream()
                 .map(stopPlace -> simpleStopPlaceAssembler.assemble(stopPlace))
                 .collect(Collectors.toList());
-        return stopPlaces;
     }
 
     @GET
