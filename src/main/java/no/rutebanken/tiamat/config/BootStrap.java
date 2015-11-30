@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.config;
 
+import no.rutebanken.tiamat.nvdb.service.NvdbSync;
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
@@ -16,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Create some example data.
+ */
 @Configuration
 public class BootStrap implements InitializingBean {
 
@@ -33,6 +37,9 @@ public class BootStrap implements InitializingBean {
     @Autowired
     private QuayRepository quayRepository;
 
+    @Autowired
+    private NvdbSync nvdbSync;
+
     /**
      * Set up test object.
      */
@@ -40,6 +47,8 @@ public class BootStrap implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         createExampleStopPlace();
         createExampleQuay();
+
+       nvdbSync.fetchNvdb();
     }
 
     private void createExampleQuay() {
