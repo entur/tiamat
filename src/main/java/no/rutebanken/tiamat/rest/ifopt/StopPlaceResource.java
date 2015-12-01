@@ -13,6 +13,7 @@ import uk.org.netex.netex.*;
 
 import javax.ws.rs.*;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,24 @@ public class StopPlaceResource {
     @Path("{id}")
     public SimpleStopPlaceDTO getStopPlace(@PathParam("id") String id) {
        return simpleStopPlaceAssembler.assemble(stopPlaceRepository.findOne(id));
+    }
+
+    @POST
+    @Path("{id}")
+    public SimpleStopPlaceDTO updateStopPlace(SimpleStopPlaceDTO simpleStopPlaceDTO) {
+        logger.info("Save stop place {} with id {}", simpleStopPlaceDTO.name, simpleStopPlaceDTO.id);
+
+        StopPlace stopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
+
+        //Code belongs in service.
+        if(stopPlace != null) {
+            stopPlace.setName(new MultilingualString(simpleStopPlaceDTO.name, "no", ""));
+            stopPlace.setChanged(new Date());
+            stopPlaceRepository.save(stopPlace);
+            return simpleStopPlaceAssembler.assemble(stopPlace);
+        }
+
+        throw new WebApplicationException("Cannot find stop place with id "+simpleStopPlaceDTO.id, 400);
     }
 
     /**
