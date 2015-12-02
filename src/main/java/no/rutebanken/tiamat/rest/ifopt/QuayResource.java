@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
-import no.rutebanken.tiamat.ifopt.transfer.assembler.SimpleQuayAssembler;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleQuayDTO;
+import no.rutebanken.tiamat.ifopt.transfer.assembler.QuayAssembler;
+import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,11 +21,11 @@ public class QuayResource {
     private QuayRepository quayRepository;
 
     @Autowired
-    private SimpleQuayAssembler simpleQuayAssembler;
+    private QuayAssembler quayAssembler;
 
     @GET
-    public List<SimpleQuayDTO> getQuays() {
-        return quayRepository.findAll().stream().map(quay -> simpleQuayAssembler.assemble(quay)).collect(Collectors.toList());
+    public List<QuayDTO> getQuays() {
+        return quayRepository.findAll().stream().map(quay -> quayAssembler.assemble(quay)).collect(Collectors.toList());
     }
 
 }

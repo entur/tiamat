@@ -112,8 +112,9 @@ public class QuayTest {
     public void persistQuayWithCentroid() {
         Quay quay = new Quay();
         Location location = new Location();
-        BigDecimal longitude = new BigDecimal("-0.2068758371").setScale(10, BigDecimal.ROUND_CEILING);
-        BigDecimal latitude = new BigDecimal("51.4207729447").setScale(10, BigDecimal.ROUND_CEILING);
+
+        BigDecimal longitude = new BigDecimal("39.61441").setScale(10, BigDecimal.ROUND_CEILING);
+        BigDecimal latitude = new BigDecimal("-144.22765").setScale(10, BigDecimal.ROUND_CEILING);
 
         location.setLongitude(longitude);
         location.setLatitude(latitude);
@@ -131,6 +132,32 @@ public class QuayTest {
         assertThat(actualQuay.getCentroid().getLocation().getLatitude()).isEqualTo(latitude);
         assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
     }
+
+    @Test
+    public void persistQuayWithCentroidUsingThreeDigitNegativeLatitude() {
+        Quay quay = new Quay();
+        Location location = new Location();
+
+        BigDecimal longitude = new BigDecimal("33.942886").setScale(10, BigDecimal.ROUND_CEILING);
+        BigDecimal latitude = new BigDecimal("-118.411713").setScale(10, BigDecimal.ROUND_CEILING);
+
+        location.setLongitude(longitude);
+        location.setLatitude(latitude);
+
+        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        centroid.setLocation(location);
+        quay.setCentroid(centroid);
+
+        quayRepository.save(quay);
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+
+        assertThat(actualQuay).isNotNull();
+        assertThat(actualQuay.getCentroid()).isNotNull();
+        assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
+        assertThat(actualQuay.getCentroid().getLocation().getLatitude()).isEqualTo(latitude);
+        assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
+    }
+
 
     @Test
     public void persistQuayWithMobilityImpairedAccessibilityAssessment() {

@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
-import no.rutebanken.tiamat.ifopt.transfer.assembler.SimpleStopPlaceAssembler;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimpleStopPlaceDTO;
+import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
+import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +28,10 @@ public class StopPlaceResource {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private SimpleStopPlaceAssembler simpleStopPlaceAssembler;
+    private StopPlaceAssembler stopPlaceAssembler;
 
     @GET
-    public List<SimpleStopPlaceDTO> getStopPlaces(
+    public List<StopPlaceDTO> getStopPlaces(
             @DefaultValue(value="0") @QueryParam(value="page") int page,
             @DefaultValue(value="20") @QueryParam(value="size") int size,
             @QueryParam(value="name") String name) {
@@ -55,19 +55,19 @@ public class StopPlaceResource {
 
        return stopPlaces
                 .stream()
-                .map(stopPlace -> simpleStopPlaceAssembler.assemble(stopPlace))
+                .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
                 .collect(Collectors.toList());
     }
 
     @GET
     @Path("{id}")
-    public SimpleStopPlaceDTO getStopPlace(@PathParam("id") String id) {
-       return simpleStopPlaceAssembler.assemble(stopPlaceRepository.findOne(id));
+    public StopPlaceDTO getStopPlace(@PathParam("id") String id) {
+       return stopPlaceAssembler.assemble(stopPlaceRepository.findOne(id));
     }
 
     @POST
     @Path("{id}")
-    public SimpleStopPlaceDTO updateStopPlace(SimpleStopPlaceDTO simpleStopPlaceDTO) {
+    public StopPlaceDTO updateStopPlace(StopPlaceDTO simpleStopPlaceDTO) {
         logger.info("Save stop place {} with id {}", simpleStopPlaceDTO.name, simpleStopPlaceDTO.id);
 
         StopPlace stopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
@@ -77,7 +77,7 @@ public class StopPlaceResource {
             stopPlace.setName(new MultilingualString(simpleStopPlaceDTO.name, "no", ""));
             stopPlace.setChanged(new Date());
             stopPlaceRepository.save(stopPlace);
-            return simpleStopPlaceAssembler.assemble(stopPlace);
+            return stopPlaceAssembler.assemble(stopPlace);
         }
 
         throw new WebApplicationException("Cannot find stop place with id "+simpleStopPlaceDTO.id, 400);
@@ -88,7 +88,7 @@ public class StopPlaceResource {
      */
     @GET
     @Path("create")
-    public SimpleStopPlaceDTO createStopPlace() {
+    public StopPlaceDTO createStopPlace() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -126,7 +126,7 @@ public class StopPlaceResource {
 
         stopPlaceRepository.save(stopPlace);
 
-        return simpleStopPlaceAssembler.assemble(stopPlace);
+        return stopPlaceAssembler.assemble(stopPlace);
     }
 
 

@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.ifopt.transfer.dto;
 
-public class SimpleQuayDTO extends SimpleBaseDTO {
+public class QuayDTO extends BaseDTO {
 
     public String quayType;
 }
