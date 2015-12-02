@@ -230,7 +230,6 @@ public class StopPlaceTest {
         shortName.setLang("no");
         shortName.setValue("Skjervik");
         stopPlace.setShortName(shortName);
-        stopPlace.setPublicCode("publicCode");
 
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());

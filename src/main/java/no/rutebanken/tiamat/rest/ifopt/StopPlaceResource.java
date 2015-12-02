@@ -72,10 +72,19 @@ public class StopPlaceResource {
 
         StopPlace stopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
 
-        //Code belongs in service.
+        //Code belongs in mapper/class and service.
         if(stopPlace != null) {
             stopPlace.setName(new MultilingualString(simpleStopPlaceDTO.name, "no", ""));
             stopPlace.setChanged(new Date());
+            stopPlace.setShortName(new MultilingualString(simpleStopPlaceDTO.shortName, "no", ""));
+            stopPlace.setDescription(new MultilingualString(simpleStopPlaceDTO.description, "no", ""));
+
+            if(simpleStopPlaceDTO.stopPlaceType != null && !simpleStopPlaceDTO.stopPlaceType.isEmpty()) {
+                stopPlace.setStopPlaceType(StopTypeEnumeration.fromValue(simpleStopPlaceDTO.stopPlaceType));
+            } else {
+                stopPlace.setStopPlaceType(null);
+            }
+
             stopPlaceRepository.save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace);
         }
