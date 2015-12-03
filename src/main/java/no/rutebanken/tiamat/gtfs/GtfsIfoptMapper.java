@@ -16,6 +16,8 @@ public class GtfsIfoptMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(GtfsIfoptMapper.class);
 
+    private static final int DECIMAL_PLACES = 8;
+
     public StopPlace map(Stop stop) {
 
         logger.debug("Mapping data from GTFS stop to IFOPT stop place {} - {}", stop.getId(), stop.getName());
@@ -35,12 +37,19 @@ public class GtfsIfoptMapper {
         logger.trace("Setting location on stop place {} latitude: {}, longitude: {}", stopPlace.getName(), stop.getLat(), stop.getLon());
 
         Location location = new Location();
-        location.setLatitude(new BigDecimal(String.valueOf(stop.getLat())));
-        location.setLongitude(new BigDecimal(String.valueOf(stop.getLon())));
+        location.setLatitude(coordinateFromDouble(stop.getLat()));
+        location.setLongitude(coordinateFromDouble(stop.getLon()));
+
         centroid.setLocation(location);
 
         stopPlace.setCentroid(centroid);
         return stopPlace;
+    }
+
+    public BigDecimal coordinateFromDouble(double coordinate) {
+        BigDecimal result = new BigDecimal(String.valueOf(coordinate)).setScale(DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
+        logger.trace("Coordinate value from double value: {} to BigDecimal value: {}", coordinate, result.toPlainString());
+        return result;
     }
 
 }
