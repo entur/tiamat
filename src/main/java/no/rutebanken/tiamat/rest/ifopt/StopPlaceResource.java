@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
 import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
+import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import uk.org.netex.netex.*;
 
 import javax.ws.rs.*;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,9 @@ public class StopPlaceResource {
 
     @Autowired
     private StopPlaceAssembler stopPlaceAssembler;
+
+    @Autowired
+    private StopPlaceDisassembler stopPlaceDisassembler;
 
     @GET
     public List<StopPlaceDTO> getStopPlaces(
@@ -70,21 +73,9 @@ public class StopPlaceResource {
     public StopPlaceDTO updateStopPlace(StopPlaceDTO simpleStopPlaceDTO) {
         logger.info("Save stop place {} with id {}", simpleStopPlaceDTO.name, simpleStopPlaceDTO.id);
 
-        StopPlace stopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
-
-        //Code belongs in mapper/class and service.
+        StopPlace currentStopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
+        StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDTO);
         if(stopPlace != null) {
-            stopPlace.setName(new MultilingualString(simpleStopPlaceDTO.name, "no", ""));
-            stopPlace.setChanged(new Date());
-            stopPlace.setShortName(new MultilingualString(simpleStopPlaceDTO.shortName, "no", ""));
-            stopPlace.setDescription(new MultilingualString(simpleStopPlaceDTO.description, "no", ""));
-
-            if(simpleStopPlaceDTO.stopPlaceType != null && !simpleStopPlaceDTO.stopPlaceType.isEmpty()) {
-                stopPlace.setStopPlaceType(StopTypeEnumeration.fromValue(simpleStopPlaceDTO.stopPlaceType));
-            } else {
-                stopPlace.setStopPlaceType(null);
-            }
-
             stopPlaceRepository.save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace);
         }
