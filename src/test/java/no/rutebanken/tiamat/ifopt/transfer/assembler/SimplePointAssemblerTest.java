@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.org.netex.netex.Location;
 import uk.org.netex.netex.SimplePoint_VersionStructure;
@@ -18,7 +17,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
-@ActiveProfiles("dev")
 public class SimplePointAssemblerTest {
 
     @Autowired

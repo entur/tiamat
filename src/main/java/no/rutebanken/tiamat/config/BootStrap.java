@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
  * Create some example data.
  */
 @Configuration
-@Profile("default")
+@Profile("bootstrap")
 public class BootStrap implements InitializingBean {
 
     private final static Logger logger = LoggerFactory.getLogger(BootStrap.class);
