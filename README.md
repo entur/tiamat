@@ -24,7 +24,7 @@ spring.datasource.password=<PASSWORD>
 
 To start Tiamat with this configuration, specify **spring.config.location**:
 
-```mvn spring-boot:run -Dspring.config.location=/path/to/application-production.properties```
+```mvn spring-boot:run -Dspring.config.location=/path/to/application.properties```
 
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
@@ -34,7 +34,7 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 ```mvn spring-boot:run -Dspring.profiles.active=bootstrap```
 
 # Run with external config **and** bootstrapped data:
-```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application-production.properties```
+```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties```
 
 # Docker image
  ```mvn -Pf8-build```
