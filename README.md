@@ -41,9 +41,11 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 
 # Run the docker image in, eh, docker
 choose **one** of:
-     * `mvn docker:start`
-     * `docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT`
-* For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
+
+* ```mvn docker:start```
+* ```docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT```
+
+For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
 # See also
