@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
@@ -72,14 +73,16 @@ public class StopPlaceResource {
     	String email = token.getEmail();
     	String firstname = token.getGivenName();
     	String lastname = token.getFamilyName();
+    	String fullname = token.getName();
     	String preferredUsername = token.getPreferredUsername();
-    	String agencyid = (String) token.getOtherClaims().get("agencyid");
-    	String[] representsAgencies = StringUtils.split(agencyid, ";");
+    	List agencyids = (List) token.getOtherClaims().get("agencyid");
+    
     	
     	// all means all agencies, if not a semicolon delimited list of agencies
     	
-    	logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+representsAgencies);;
+    	logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+ToStringBuilder.reflectionToString(agencyids));;
     	
+    	// TODO make sure we only return data according to agencyids
     	
         logger.info("Get stop places with names that contains {}", name);
 
