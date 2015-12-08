@@ -8,8 +8,9 @@ Module also known as the backend for "Holdeplassregisteret"
 # Local run
  ```mvn spring-boot:run```
 
-# Run with production profile
-Run with profile **production** (which means using a postgresql instance configured in application-production.properties). This configuration is separate from the application:
+# Run with external properties file
+To run with PostgreSQL you ned an external application.properties.
+Below is an example of application.properties:
 ```
 spring.jpa.database=POSTGRESQL
 spring.datasource.platform=postgres
@@ -21,17 +22,19 @@ spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
 ```
 
-```mvn spring-boot:run -Dspring.config.location=/path/to/application-production.properties -Dspring.profiles.active=production```
+To start Tiamat with this configuration, specify **spring.config.location**:
 
-Later, we will look into using *etcd*
+```mvn spring-boot:run -Dspring.config.location=/path/to/application-production.properties```
+
+There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
+
+```ONLY_TAGS=rb vagrant provision```
 
 # Run with some bootstrapped data from GTFS stops.txt
 ```mvn spring-boot:run -Dspring.profiles.active=bootstrap```
 
-# Combine profiles
-For instance, run with postgresql (production profile) and load data with the bootstrap profile:
-```mvn spring-boot:run -Dspring.profiles.active=production,bootstrap```
-
+# Run with external config **and** bootstrapped data:
+```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application-production.properties```
 
 # Docker image
  ```mvn -Pf8-build```
