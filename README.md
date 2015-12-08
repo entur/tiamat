@@ -4,7 +4,7 @@ Module also known as "Holdeplassregister"
 
 * Build: `mvn clean install`
 * Local run: `mvn spring-boot:run`
-* Run with profile **production** (which means using a postgresql instance configured in application-production.properties): `mvn clean spring-boot:run -Dspring.profiles.active=production`
+* Run with profile **production** (which means using a postgresql instance configured in application-production.properties): `mvn spring-boot:run -Dspring.profiles.active=production`
 * Docker image: `mvn -Pf8-build`
 * Run the docker image in, eh, docker, choose **one** of:
      * `mvn docker:start`
