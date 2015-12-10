@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.org.netex.netex.Location;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
+import uk.org.netex.netex.SimplePoint;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,7 +28,7 @@ public class SimplePointAssemblerTest {
 
         BigDecimal longitude = new BigDecimal(longitudeString).setScale(10, RoundingMode.HALF_UP);
 
-        SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure();
+        SimplePoint simplePoint = new SimplePoint();
 
         Location location = new Location();
         location.setLongitude(longitude);

@@ -9,7 +9,7 @@ public class StopPlaceRepositoryTest {
 
 
         StopPlace stopPlace = new StopPlace();
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
 
         Location location = new Location();
 

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
+import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 import uk.org.netex.netex.StopTypeEnumeration;
 
@@ -44,7 +44,7 @@ public class StopPlaceDisassembler {
 
         if(simpleStopPlaceDTO.centroid != null) {
             if (destination.getCentroid() == null) {
-                destination.setCentroid(new SimplePoint_VersionStructure());
+                destination.setCentroid(new SimplePoint());
             }
 
             destination.setCentroid(simplePointDisassembler.disassemble(destination.getCentroid(), simpleStopPlaceDTO.centroid));

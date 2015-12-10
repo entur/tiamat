@@ -50,7 +50,7 @@ import java.util.List;
     "validBetween"
 })
 @XmlSeeAlso({
-    SimplePoint_VersionStructure.class,
+    SimplePoint.class,
     VersionedChildStructure.class,
     DataManagedObjectStructure.class
 })

@@ -66,7 +66,7 @@ public class StopPlaceTest {
     public void persistStopPlaceWithCentroid() {
 
         StopPlace stopPlace = new StopPlace();
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 

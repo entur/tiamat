@@ -8,7 +8,13 @@
 
 package uk.org.netex.netex;
 
-import javax.persistence.*;
+import com.vividsolutions.jts.geom.Point;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,12 +24,12 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * Type for a Simple POINT.
  * 
- * <p>Java class for SimplePoint_VersionStructure complex type.
+ * <p>Java class for SimplePoint complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SimplePoint_VersionStructure">
+ * &lt;complexType name="SimplePoint">
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}EntityInVersionStructure">
  *       &lt;sequence>
@@ -43,7 +49,7 @@ import javax.xml.bind.annotation.XmlType;
     "location"
 })
 @Entity
-public class SimplePoint_VersionStructure
+public class SimplePoint
     extends EntityInVersionStructure
 {
 
@@ -54,6 +60,9 @@ public class SimplePoint_VersionStructure
     @XmlElement(name = "Location")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected LocationStructure location;
+
+    @Type(type="org.hibernate.spatial.GeometryType")
+    private Point point;
 
     /**
      * Gets the value of the name property.
@@ -103,4 +112,11 @@ public class SimplePoint_VersionStructure
         this.location = value;
     }
 
+    public Point getPoint() {
+        return point;
+    }
+
+    public void setPoint(Point point) {
+        this.point = point;
+    }
 }

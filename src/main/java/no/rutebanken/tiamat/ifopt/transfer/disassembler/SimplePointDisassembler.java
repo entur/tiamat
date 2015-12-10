@@ -5,14 +5,14 @@ import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.Location;
 import uk.org.netex.netex.LocationStructure;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
+import uk.org.netex.netex.SimplePoint;
 
 import java.math.BigDecimal;
 
 @Component
 public class SimplePointDisassembler {
 
-    public SimplePoint_VersionStructure disassemble(SimplePoint_VersionStructure destination, SimplePointDTO simplePointDTO) {
+    public SimplePoint disassemble(SimplePoint destination, SimplePointDTO simplePointDTO) {
 
         if(simplePointDTO.location == null) return null;
 

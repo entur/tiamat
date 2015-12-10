@@ -117,7 +117,7 @@ public class QuayTest {
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(location);
         quay.setCentroid(centroid);
 
@@ -142,7 +142,7 @@ public class QuayTest {
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(location);
         quay.setCentroid(centroid);
 

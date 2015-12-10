@@ -28,18 +28,16 @@ public class GtfsStopEntityHandler implements EntityHandler {
 
     public void handleEntity(Object bean) {
         if (bean instanceof Stop) {
-            executor.execute(() -> {
-                Stop stop = (Stop) bean;
-                logger.trace("Handle stop {} with id {}", stop.getName(), stop.getId());
-                StopPlace stopPlace = gtfsIfoptMapper.map(stop);
+            Stop stop = (Stop) bean;
+            logger.trace("Handle stop {} with id {}", stop.getName(), stop.getId());
+            StopPlace stopPlace = gtfsIfoptMapper.map(stop);
 
-                try {
-                    stopPlaceRepository.save(stopPlace);
-                } catch (DataIntegrityViolationException e) {
+            try {
+                stopPlaceRepository.save(stopPlace);
+            } catch (DataIntegrityViolationException e) {
 
-                    logger.warn("Error saving stop place with name {}", stopPlace.getName(), e);
-                }
-            });
+                logger.warn("Error saving stop place with name {}", stopPlace.getName(), e);
+            }
         }
     }
 }

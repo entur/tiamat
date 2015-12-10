@@ -2,6 +2,9 @@ package no.rutebanken.tiamat.repository.ifopt;
 
 import uk.org.netex.netex.StopPlace;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 
 public interface StopPlaceRepositoryCustom {
 
@@ -13,4 +16,6 @@ public interface StopPlaceRepositoryCustom {
      * @return the stop place with relations fetched.
      */
     StopPlace findStopPlaceDetailed(String id);
+
+    List<StopPlace> findStopPlacesWithin(BigDecimal xMin, BigDecimal yMin, BigDecimal xMax, BigDecimal yMax);
 }

@@ -1,19 +1,10 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-
-import org.apache.commons.lang3.StringUtils;
+import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
+import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
+import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -26,20 +17,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import uk.org.netex.netex.*;
 
-import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
-import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
-import uk.org.netex.netex.AirSubmodeEnumeration;
-import uk.org.netex.netex.CoachSubmodeEnumeration;
-import uk.org.netex.netex.FunicularSubmodeEnumeration;
-import uk.org.netex.netex.LocationStructure;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
-import uk.org.netex.netex.StopPlace;
-import uk.org.netex.netex.StopTypeEnumeration;
-import uk.org.netex.netex.VehicleModeEnumeration;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
@@ -64,25 +50,7 @@ public class StopPlaceResource {
             @QueryParam(value="name") String name) {
 
 
-    	// Example reading details about authenticated user
-    	KeycloakAuthenticationToken auth = (KeycloakAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
-    	
-    	@SuppressWarnings("unchecked")
-		KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>)auth.getPrincipal();
-    	AccessToken token = principal.getKeycloakSecurityContext().getToken();
-    	String email = token.getEmail();
-    	String firstname = token.getGivenName();
-    	String lastname = token.getFamilyName();
-    	String fullname = token.getName();
-    	String preferredUsername = token.getPreferredUsername();
-    	List agencyids = (List) token.getOtherClaims().get("agencyid");
-    
-    	
-    	// all means all agencies, if not a semicolon delimited list of agencies
-    	
-    	logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+ToStringBuilder.reflectionToString(agencyids));;
-    	
-    	// TODO make sure we only return data according to agencyids
+        keyCloak();
     	
         logger.info("Get stop places with names that contains {}", name);
 
@@ -106,6 +74,46 @@ public class StopPlaceResource {
                 .collect(Collectors.toList());
     }
 
+    private KeycloakAuthenticationToken keyCloak() {
+        // Example reading details about authenticated user
+        KeycloakAuthenticationToken auth = (KeycloakAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+
+        @SuppressWarnings("unchecked")
+        KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>)auth.getPrincipal();
+        AccessToken token = principal.getKeycloakSecurityContext().getToken();
+        String email = token.getEmail();
+        String firstname = token.getGivenName();
+        String lastname = token.getFamilyName();
+        String fullname = token.getName();
+        String preferredUsername = token.getPreferredUsername();
+        List agencyids = (List) token.getOtherClaims().get("agencyid");
+
+
+        // all means all agencies, if not a semicolon delimited list of agencies
+
+        logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+ToStringBuilder.reflectionToString(agencyids));;
+
+        // TODO make sure we only return data according to agencyids
+
+        return auth;
+    }
+
+    @POST
+    @Path("search")
+    public List<StopPlaceDTO> getStopPlacesFromBoundingBox(@Context HttpServletResponse response,
+            @DefaultValue(value="0") @QueryParam(value="page") int page,
+            @DefaultValue(value="20") @QueryParam(value="size") int size,
+            BoundingBoxDTO boundingBox) {
+
+        logger.info("Search for stop places within bounding box {}, {} {}, {}", boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax);
+        
+        return stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
+                .collect(Collectors.toList());
+    }
+
     @GET
     @Path("{id}")
     public StopPlaceDTO getStopPlace(@PathParam("id") String id) {
@@ -115,6 +123,8 @@ public class StopPlaceResource {
     @POST
     @Path("{id}")
     public StopPlaceDTO updateStopPlace(StopPlaceDTO simpleStopPlaceDTO) {
+        keyCloak();
+
         logger.info("Save stop place {} with id {}", simpleStopPlaceDTO.name, simpleStopPlaceDTO.id);
 
         StopPlace currentStopPlace = stopPlaceRepository.findOne(simpleStopPlaceDTO.id);
@@ -153,7 +163,7 @@ public class StopPlaceResource {
         locationStructure.setLatitude(new BigDecimal(10));
         locationStructure.setLongitude(new BigDecimal(20));
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(locationStructure);
 
         stopPlace.setCentroid(centroid);
