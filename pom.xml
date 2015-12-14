@@ -61,7 +61,10 @@
             <id>Hibernate Spatial repo</id>
             <url>http://www.hibernatespatial.org/repository</url>
         </repository>
-
+        <repository>
+            <id>geo-solutions.it</id>
+            <url>http://maven.geo-solutions.it</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -122,10 +125,12 @@
             <version>${hibernate-spatial.version}</version>
         </dependency>
 
+
+
         <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.opengeo</groupId>
+            <artifactId>geodb</artifactId>
+            <version>0.7</version>
         </dependency>
 
         <dependency>
