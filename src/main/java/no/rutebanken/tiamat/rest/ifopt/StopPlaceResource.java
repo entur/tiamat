@@ -104,13 +104,16 @@ public class StopPlaceResource {
             @DefaultValue(value="20") @QueryParam(value="size") int size,
             BoundingBoxDTO boundingBox) {
 
-        logger.info("Search for stop places within bounding box {}, {} {}, {}", boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax);
+        logger.info("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
         
-        return stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax)
+        List<StopPlaceDTO> stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax)
                 .stream()
                 .filter(Objects::nonNull)
                 .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
                 .collect(Collectors.toList());
+
+        logger.info("Returning {} nearby stop places", stopPlaces.size());
+        return stopPlaces;
     }
 
     @GET

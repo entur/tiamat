@@ -67,6 +67,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
+        //TODO: Do not return current stop place?
         TypedQuery<StopPlace> query = entityManager
                 .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true", StopPlace.class);
         query.setParameter("filter", geometryFilter);

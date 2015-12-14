@@ -51,4 +51,29 @@ public class StopPlaceRepositoryImplTest {
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getId()).isEqualTo(stopPlace.getId());
     }
+
+    @Test
+    public void testFindStopPlaceWithinNoStopsInBoundingBox() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        SimplePoint centroid = new SimplePoint();
+
+        double southEastLatitude = 59.875649;
+        double southEastLongitude = 10.500340;
+
+        double northWestLatitude = 59.875924;
+        double northWestLongitude = 10.500699;
+
+        // Outside boundingBox
+        double latitude = 60.00;
+        double longitude = 11.00;
+
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        List<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude);
+
+        assertThat(result).isEmpty();
+    }
 }
