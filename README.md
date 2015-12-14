@@ -31,11 +31,16 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 
 ```ONLY_TAGS=rb vagrant provision```
 
-# Run with in memory GeoDB and some bootstrapped data from GTFS stops.txt
+# Run with in-memory GeoDB and some bootstrapped data from GTFS stops.txt
 ```mvn spring-boot:run```
-(default profiles are set in application.properties)
+(default profiles are set in the internal application.properties)
 
-# Run with external config **and** bootstrapped data:
+# Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
+```mvn spring-boot:run spring.profiles.active=geodb```
+(default profiles for dev are set in application.properties)
+
+# Run with external config **and** bootstrap data from GTFS:
+Can be used with an empty PostgreSQL.
 ```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties```
 
 # Docker image
