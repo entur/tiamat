@@ -6,6 +6,11 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Data source factory for initialization of GeoDB.
+ *
+ * http://kofler.nonblocking.at/2014/03/unit-testing-of-spatial-queries/
+ */
 public class GeoDBInMemoryDataSourceFactory extends SingleConnectionDataSource {
 
     public GeoDBInMemoryDataSourceFactory() {
