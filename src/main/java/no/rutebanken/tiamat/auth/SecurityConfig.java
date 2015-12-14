@@ -51,7 +51,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.hasRole("ADMIN")
 			.anyRequest()
 			.permitAll();
-		
+
+		http.csrf().disable();
 	}
 
 	@Override

@@ -62,7 +62,7 @@ public class Zone_VersionStructure
 
     @XmlElement(name = "Centroid")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected SimplePoint_VersionStructure centroid;
+    protected SimplePoint centroid;
 
     @XmlElement(name = "Polygon", namespace = "http://www.opengis.net/gml/3.2")
     @Transient
@@ -104,10 +104,10 @@ public class Zone_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link SimplePoint_VersionStructure }
+     *     {@link SimplePoint }
      *     
      */
-    public SimplePoint_VersionStructure getCentroid() {
+    public SimplePoint getCentroid() {
         return centroid;
     }
 
@@ -116,10 +116,10 @@ public class Zone_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link SimplePoint_VersionStructure }
+     *     {@link SimplePoint }
      *     
      */
-    public void setCentroid(SimplePoint_VersionStructure value) {
+    public void setCentroid(SimplePoint value) {
         this.centroid = value;
     }
 

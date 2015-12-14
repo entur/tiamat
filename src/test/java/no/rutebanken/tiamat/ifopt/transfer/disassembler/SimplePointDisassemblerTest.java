@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.junit.Test;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
+import uk.org.netex.netex.SimplePoint;
 
 import java.math.BigDecimal;
 
@@ -19,7 +19,7 @@ public class SimplePointDisassemblerTest {
         simplePointDTO.location.latitude = "10.123123";
         simplePointDTO.location.longitude = "59.123123";
 
-        SimplePoint_VersionStructure simplePoint = new SimplePointDisassembler().disassemble(new SimplePoint_VersionStructure(), simplePointDTO);
+        SimplePoint simplePoint = new SimplePointDisassembler().disassemble(new SimplePoint(), simplePointDTO);
 
         assertThat(simplePoint).isNotNull();
         assertThat(simplePoint.getLocation()).isNotNull();

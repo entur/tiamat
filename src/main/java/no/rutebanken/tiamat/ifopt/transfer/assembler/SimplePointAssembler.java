@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.ifopt.transfer.assembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.SimplePoint_VersionStructure;
+import uk.org.netex.netex.SimplePoint;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,7 +13,7 @@ public class SimplePointAssembler {
 
     private static final int DECIMAL_PLACES = 8;
 
-    public SimplePointDTO assemble(SimplePoint_VersionStructure simplePoint) {
+    public SimplePointDTO assemble(SimplePoint simplePoint) {
 
         SimplePointDTO simplePointDTO = new SimplePointDTO();
         simplePointDTO.location = new LocationDTO();

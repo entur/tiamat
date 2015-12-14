@@ -100,7 +100,7 @@ public class BootStrap implements InitializingBean {
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(location);
         quay.setCentroid(centroid);
 
@@ -165,7 +165,7 @@ public class BootStrap implements InitializingBean {
         locationStructure.setLatitude(new BigDecimal(10));
         locationStructure.setLongitude(new BigDecimal(20));
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(locationStructure);
 
         stopPlace.setCentroid(centroid);

@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
+@ActiveProfiles("geodb")
 public class StopPlaceTest {
 
     @Autowired
@@ -66,7 +68,7 @@ public class StopPlaceTest {
     public void persistStopPlaceWithCentroid() {
 
         StopPlace stopPlace = new StopPlace();
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 

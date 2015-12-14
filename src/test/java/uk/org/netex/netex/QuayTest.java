@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
+@ActiveProfiles("geodb")
 public class QuayTest {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -117,7 +119,7 @@ public class QuayTest {
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(location);
         quay.setCentroid(centroid);
 
@@ -142,7 +144,7 @@ public class QuayTest {
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
-        SimplePoint_VersionStructure centroid = new SimplePoint_VersionStructure();
+        SimplePoint centroid = new SimplePoint();
         centroid.setLocation(location);
         quay.setCentroid(centroid);
 
