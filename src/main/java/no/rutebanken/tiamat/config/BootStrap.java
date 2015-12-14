@@ -1,5 +1,7 @@
 package no.rutebanken.tiamat.config;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.gtfs.GtfsStopsReader;
 import no.rutebanken.tiamat.nvdb.service.NvdbSync;
 import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
@@ -47,6 +49,9 @@ public class BootStrap implements InitializingBean {
     @Autowired
     private GtfsStopsReader gtfsStopsReader;
 
+    @Autowired
+    private GeometryFactory geometryFactory;
+
     /**
      * Set up test object.
      */
@@ -93,15 +98,12 @@ public class BootStrap implements InitializingBean {
         roadAddress.setBearingCompass("W");
         quay.setRoadAddress(roadAddress);
 
-        Location location = new Location();
         BigDecimal longitude = new BigDecimal("-0.2068758371").setScale(10, BigDecimal.ROUND_CEILING);
         BigDecimal latitude = new BigDecimal("51.4207729447").setScale(10, BigDecimal.ROUND_CEILING);
 
-        location.setLongitude(longitude);
-        location.setLatitude(latitude);
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(location);
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude.doubleValue())));
         quay.setCentroid(centroid);
 
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
@@ -161,12 +163,8 @@ public class BootStrap implements InitializingBean {
 
         stopPlace.getAccessSpaces().add(accessSpace);
 
-        LocationStructure locationStructure = new LocationStructure();
-        locationStructure.setLatitude(new BigDecimal(10));
-        locationStructure.setLongitude(new BigDecimal(20));
-
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(locationStructure);
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10.0, 20.0)));
 
         stopPlace.setCentroid(centroid);
 

@@ -57,12 +57,12 @@ public class SimplePoint
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
 
-    @XmlElement(name = "Location")
+/*    @XmlElement(name = "Location")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected LocationStructure location;
+    protected LocationStructure location;*/
 
     @Type(type="org.hibernate.spatial.GeometryType")
-    private Point point;
+    private Point location;
 
     /**
      * Gets the value of the name property.
@@ -96,7 +96,7 @@ public class SimplePoint
      *     {@link LocationStructure }
      *     
      */
-    public LocationStructure getLocation() {
+    public Point getLocation() {
         return location;
     }
 
@@ -108,15 +108,9 @@ public class SimplePoint
      *     {@link LocationStructure }
      *     
      */
-    public void setLocation(LocationStructure value) {
+    public void setLocation(Point value) {
         this.location = value;
     }
 
-    public Point getPoint() {
-        return point;
-    }
 
-    public void setPoint(Point point) {
-        this.point = point;
-    }
 }

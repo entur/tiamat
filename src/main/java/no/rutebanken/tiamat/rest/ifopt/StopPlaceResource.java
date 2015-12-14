@@ -22,7 +22,6 @@ import uk.org.netex.netex.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -159,12 +158,7 @@ public class StopPlaceResource {
 
         stopPlace.setShortName(shortName);
 
-        LocationStructure locationStructure = new LocationStructure();
-        locationStructure.setLatitude(new BigDecimal(10));
-        locationStructure.setLongitude(new BigDecimal(20));
-
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(locationStructure);
 
         stopPlace.setCentroid(centroid);
 

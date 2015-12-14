@@ -1,5 +1,7 @@
 package uk.org.netex.netex;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
@@ -30,6 +32,10 @@ public class QuayTest {
 
     @Autowired
     private TariffZoneRepository tariffZoneRepository;
+
+    @Autowired
+    private GeometryFactory geometryFactory;
+
 
     /**
      * Using example data from https://github.com/StichtingOpenGeo/NeTEx/blob/master/examples/functions/stopPlace/Netex_10_StopPlace_uk_ComplexStation_Wimbledon_1.xml
@@ -111,16 +117,12 @@ public class QuayTest {
     @Test
     public void persistQuayWithCentroid() {
         Quay quay = new Quay();
-        Location location = new Location();
 
-        BigDecimal longitude = new BigDecimal("39.61441").setScale(10, BigDecimal.ROUND_CEILING);
-        BigDecimal latitude = new BigDecimal("-144.22765").setScale(10, BigDecimal.ROUND_CEILING);
-
-        location.setLongitude(longitude);
-        location.setLatitude(latitude);
+        double longitude = 39.61441;
+        double latitude = -144.22765;
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(location);
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         quay.setCentroid(centroid);
 
         quayRepository.save(quay);
@@ -129,35 +131,9 @@ public class QuayTest {
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getCentroid()).isNotNull();
         assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation().getLatitude()).isEqualTo(latitude);
-        assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
+        assertThat(actualQuay.getCentroid().getLocation().getY()).isEqualTo(latitude);
+        assertThat(actualQuay.getCentroid().getLocation().getX()).isEqualTo(longitude);
     }
-
-    @Test
-    public void persistQuayWithCentroidUsingThreeDigitNegativeLatitude() {
-        Quay quay = new Quay();
-        Location location = new Location();
-
-        BigDecimal longitude = new BigDecimal("33.942886").setScale(10, BigDecimal.ROUND_CEILING);
-        BigDecimal latitude = new BigDecimal("-118.411713").setScale(10, BigDecimal.ROUND_CEILING);
-
-        location.setLongitude(longitude);
-        location.setLatitude(latitude);
-
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(location);
-        quay.setCentroid(centroid);
-
-        quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-
-        assertThat(actualQuay).isNotNull();
-        assertThat(actualQuay.getCentroid()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation().getLatitude()).isEqualTo(latitude);
-        assertThat(actualQuay.getCentroid().getLocation().getLongitude()).isEqualTo(longitude);
-    }
-
 
     @Test
     public void persistQuayWithMobilityImpairedAccessibilityAssessment() {

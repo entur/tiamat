@@ -8,22 +8,19 @@
 
 package uk.org.netex.netex;
 
-import java.math.BigDecimal;
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import net.opengis.gml._3.DirectPositionType;
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.math.BigDecimal;
+
 
 /**
- * Type for geospatial Position of a point. May be expressed in concrete WGS 84 Coordinates or any gml compatible point coordinates format.
+ * Type for geospatial Position of a point.
+ * May be expressed in concrete WGS 84 Coordinates or any gml compatible point coordinates format.
  * 
  * <p>Java class for LocationStructure complex type.
  * 
