@@ -22,6 +22,7 @@
         <keycloak.version>1.6.1.Final</keycloak.version>
         <hibernate-spatial.version>4.3</hibernate-spatial.version>
         <postgresql.version>9.4-1201-jdbc41</postgresql.version>
+        <geodb.version>0.7</geodb.version>
 
         <!-- Docker & Fabric8 Configs -->
         <docker.from>fabric8/java-jboss-openjdk8-jdk:1.0.10</docker.from>
@@ -130,7 +131,7 @@
         <dependency>
             <groupId>org.opengeo</groupId>
             <artifactId>geodb</artifactId>
-            <version>0.7</version>
+            <version>${geodb.version}</version>
         </dependency>
 
         <dependency>
