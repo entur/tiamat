@@ -10,6 +10,7 @@ import uk.org.netex.netex.StopPlace;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,22 +63,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public List<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax) {
-
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-
-        javax.persistence.Query query = entityManager
+        TypedQuery<StopPlace> query = entityManager
                 .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true", StopPlace.class);
         query.setParameter("filter", geometryFilter);
 
-        //4326
-
-
         return query.getResultList();
-
-
-
     }
 }
