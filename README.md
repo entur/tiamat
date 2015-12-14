@@ -8,7 +8,7 @@ Module also known as the backend for "Holdeplassregisteret"
 # Local run
  ```mvn spring-boot:run```
 
-# Run with external properties file
+# Run with external properties file and PostgreSQL
 To run with PostgreSQL you ned an external application.properties.
 Below is an example of application.properties:
 ```
@@ -20,6 +20,7 @@ spring.database.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5435/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
+spring.profiles.active=default
 ```
 
 To start Tiamat with this configuration, specify **spring.config.location**:
@@ -30,10 +31,15 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 
 ```ONLY_TAGS=rb vagrant provision```
 
-# Run with some bootstrapped data from GTFS stops.txt
-```mvn spring-boot:run -Dspring.profiles.active=bootstrap```
+# Run with in-memory GeoDB and some bootstrapped data from GTFS stops.txt
+```mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap```
 
-# Run with external config **and** bootstrapped data:
+# Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
+```mvn spring-boot:run```
+(default profiles are set in internal application.properties)
+
+# Run with external config **and** bootstrap data from GTFS:
+Can be used with an empty PostgreSQL.
 ```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties```
 
 # Docker image
