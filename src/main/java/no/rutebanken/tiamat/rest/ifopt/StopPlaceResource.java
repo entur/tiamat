@@ -50,7 +50,7 @@ public class StopPlaceResource {
 
         keyCloak();
     	
-        logger.info("Get stop places with name '{}'", name);
+        logger.debug("Get stop places with name '{}'", name);
 
         Pageable pageable = new PageRequest(page, size);
 
@@ -96,12 +96,12 @@ public class StopPlaceResource {
             @DefaultValue(value="200") @QueryParam(value="size") int size,
             BoundingBoxDTO boundingBox) {
 
-        logger.info("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
+        logger.debug("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
         Pageable pageable = new PageRequest(page, size);
 
         List<StopPlaceDTO> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
                 .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, pageable));
-        logger.info("Returning {} nearby stop places", stopPlaces.size());
+        logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;
     }
 
