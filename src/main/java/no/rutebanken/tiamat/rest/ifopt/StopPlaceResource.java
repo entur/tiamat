@@ -13,6 +13,7 @@ import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +23,7 @@ import uk.org.netex.netex.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
@@ -52,26 +50,19 @@ public class StopPlaceResource {
 
         keyCloak();
     	
-        logger.info("Get stop places with names that contains {}", name);
+        logger.debug("Get stop places with name '{}'", name);
 
         Pageable pageable = new PageRequest(page, size);
 
-        List<StopPlace> stopPlaces;
+        Page<StopPlace> stopPlaces;
 
         if(name != null && name.length() != 0) {
-            stopPlaces = stopPlaceRepository
-                    .findByNameValueContainingIgnoreCase(name, pageable)
-                    .getContent();
+            stopPlaces = stopPlaceRepository.findByNameValueContainingIgnoreCase(name, pageable);
         } else {
-            stopPlaces = stopPlaceRepository
-                    .findAll(pageable)
-                    .getContent();
+            stopPlaces = stopPlaceRepository.findAll(pageable);
         }
 
-       return stopPlaces
-                .stream()
-                .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
-                .collect(Collectors.toList());
+       return stopPlaceAssembler.assemble(stopPlaces);
     }
 
     private KeycloakAuthenticationToken keyCloak() {
@@ -102,16 +93,16 @@ public class StopPlaceResource {
     @Path("search")
     public List<StopPlaceDTO> getStopPlacesFromBoundingBox(@Context HttpServletResponse response,
             @DefaultValue(value="0") @QueryParam(value="page") int page,
-            @DefaultValue(value="20") @QueryParam(value="size") int size,
+            @DefaultValue(value="200") @QueryParam(value="size") int size,
             BoundingBoxDTO boundingBox) {
 
-        logger.info("Search for stop places within bounding box {}, {} {}, {}", boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax);
-        
-        return stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax)
-                .stream()
-                .filter(Objects::nonNull)
-                .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
-                .collect(Collectors.toList());
+        logger.debug("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
+        Pageable pageable = new PageRequest(page, size);
+
+        List<StopPlaceDTO> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
+                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, pageable));
+        logger.debug("Returning {} nearby stop places", stopPlaces.size());
+        return stopPlaces;
     }
 
     @GET
@@ -159,12 +150,7 @@ public class StopPlaceResource {
 
         stopPlace.setShortName(shortName);
 
-        LocationStructure locationStructure = new LocationStructure();
-        locationStructure.setLatitude(new BigDecimal(10));
-        locationStructure.setLongitude(new BigDecimal(20));
-
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(locationStructure);
 
         stopPlace.setCentroid(centroid);
 

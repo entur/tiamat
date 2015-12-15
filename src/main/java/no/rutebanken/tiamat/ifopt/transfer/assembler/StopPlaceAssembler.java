@@ -3,9 +3,15 @@ package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.StopPlace;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class StopPlaceAssembler {
@@ -26,6 +32,17 @@ public class StopPlaceAssembler {
         simpleStopPlaceDTO.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
 
         return simpleStopPlaceDTO;
+    }
+
+    public List<StopPlaceDTO> assemble(Page<StopPlace> stopPlaces) {
+        if(stopPlaces != null) {
+            return stopPlaces.getContent()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(this::assemble)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     public String multiLingualStringValue(MultilingualString multilingualString) {

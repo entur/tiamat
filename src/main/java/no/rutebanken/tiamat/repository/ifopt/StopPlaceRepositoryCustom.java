@@ -1,9 +1,8 @@
 package no.rutebanken.tiamat.repository.ifopt;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import uk.org.netex.netex.StopPlace;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 
 public interface StopPlaceRepositoryCustom {
@@ -17,5 +16,5 @@ public interface StopPlaceRepositoryCustom {
      */
     StopPlace findStopPlaceDetailed(String id);
 
-    List<StopPlace> findStopPlacesWithin(BigDecimal xMin, BigDecimal yMin, BigDecimal xMax, BigDecimal yMax);
+    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable);
 }

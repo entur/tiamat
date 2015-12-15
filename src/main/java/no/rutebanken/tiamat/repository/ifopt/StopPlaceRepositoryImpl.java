@@ -4,14 +4,16 @@ package no.rutebanken.tiamat.repository.ifopt;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import uk.org.netex.netex.StopPlace;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
-import java.math.BigDecimal;
+import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +24,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Autowired
     private EntityManager entityManager;
 
-    private static final int SRID = 4326;
-
-
-    private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
-
+    @Autowired
+    private GeometryFactory geometryFactory;
 
     @Override
     public StopPlace findStopPlaceDetailed(String stopPlaceId) {
@@ -55,35 +54,22 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     /**
-     *    @Query("select s from StopPlace s " +
-    "left outer join s.centroid sp " +
-    "left outer join sp.location l " +
-    "where l.latitude like ?1 AND l.longitude like ?2")
-     * @param xMin
-     * @param yMin
-     * @param xMax
-     * @param yMax
-     * @return
+     * Find nearby stop places, specifying a bounding box.
      */
-
     @Override
-    public List<StopPlace> findStopPlacesWithin(BigDecimal xMin, BigDecimal yMin, BigDecimal xMax, BigDecimal yMax) {
-
-        Envelope envelope = new Envelope(xMin.doubleValue(), xMax.doubleValue(), yMin.doubleValue(), yMax.doubleValue());
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
+        Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-
-        javax.persistence.Query query = entityManager
-                .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.point, :filter) = true", StopPlace.class);
+        TypedQuery<StopPlace> query = entityManager
+                .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true", StopPlace.class);
         query.setParameter("filter", geometryFilter);
 
-        //4326
+        query.setFirstResult(pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
 
-
-        return query.getResultList();
-
-
-
+        List<StopPlace> stopPlaces = query.getResultList();
+        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
 }

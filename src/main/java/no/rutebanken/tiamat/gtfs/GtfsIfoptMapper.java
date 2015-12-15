@@ -2,17 +2,14 @@ package no.rutebanken.tiamat.gtfs;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import org.onebusaway.gtfs.model.Stop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.Location;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
-
-import java.math.BigDecimal;
 
 @Component
 public class GtfsIfoptMapper {
@@ -21,10 +18,8 @@ public class GtfsIfoptMapper {
 
     private static final int DECIMAL_PLACES = 8;
 
-    private static final int SRID = 4326;
-
-    private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
-
+    @Autowired
+    private GeometryFactory geometryFactory;
 
     public StopPlace map(Stop stop) {
 
@@ -44,24 +39,10 @@ public class GtfsIfoptMapper {
 
         logger.trace("Setting location on stop place {} latitude: {}, longitude: {}", stopPlace.getName(), stop.getLat(), stop.getLon());
 
-
-        centroid.setPoint(geometryFactory.createPoint(new Coordinate(stop.getLat(), stop.getLon())));
-
-        Location location = new Location();
-        location.setLatitude(coordinateFromDouble(stop.getLat()));
-        location.setLongitude(coordinateFromDouble(stop.getLon()));
-
-        centroid.setLocation(location);
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
 
         stopPlace.setCentroid(centroid);
         return stopPlace;
     }
-
-    public BigDecimal coordinateFromDouble(double coordinate) {
-        BigDecimal result = new BigDecimal(String.valueOf(coordinate)).setScale(DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
-        logger.trace("Coordinate value from double value: {} to BigDecimal value: {}", coordinate, result.toPlainString());
-        return result;
-    }
-
 }
 

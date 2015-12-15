@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.gtfs;
 
+import com.vividsolutions.jts.geom.Point;
 import no.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +8,6 @@ import org.onebusaway.gtfs.model.Stop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.LocationStructure;
 import uk.org.netex.netex.StopPlace;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -20,7 +20,7 @@ public class GtfsIfoptMapperTest {
     private GtfsIfoptMapper gtfsIfoptMapper;
 
     @Test
-    public void mapStopLatitudeToCentroidExpectEightDecimalPlaces() throws Exception {
+    public void mapStopLatitudeToCentroid() throws Exception {
 
         double gtfsLatitude = 59.911677022;
 
@@ -29,14 +29,14 @@ public class GtfsIfoptMapperTest {
 
         StopPlace stopPlace = gtfsIfoptMapper.centroid(new StopPlace(), stop);
 
-        LocationStructure locationStructure = stopPlace.getCentroid().getLocation();
+        Point locationStructure = stopPlace.getCentroid().getLocation();
 
-        assertThat(locationStructure.getLatitude().toPlainString()).isEqualTo("59.91167702");
+        assertThat(locationStructure.getY()).isEqualTo(gtfsLatitude);
 
     }
 
     @Test
-    public void mapLongitudeToCentroidExpectEightDecimalPlaces() throws Exception {
+    public void mapLongitudeToCentroid() throws Exception {
 
         double gtfsLongitude = 10.758853;
 
@@ -45,8 +45,8 @@ public class GtfsIfoptMapperTest {
 
         StopPlace stopPlace = gtfsIfoptMapper.centroid(new StopPlace(), stop);
 
-        LocationStructure locationStructure = stopPlace.getCentroid().getLocation();
+        Point locationStructure = stopPlace.getCentroid().getLocation();
 
-        assertThat(locationStructure.getLongitude()).isEqualTo("10.75885300");
+        assertThat(locationStructure.getX()).isEqualTo(gtfsLongitude);
     }
 }

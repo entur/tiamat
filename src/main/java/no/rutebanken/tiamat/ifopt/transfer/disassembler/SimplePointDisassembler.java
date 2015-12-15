@@ -1,16 +1,23 @@
 package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.Location;
-import uk.org.netex.netex.LocationStructure;
 import uk.org.netex.netex.SimplePoint;
-
-import java.math.BigDecimal;
 
 @Component
 public class SimplePointDisassembler {
+
+    private final GeometryFactory geometryFactory;
+
+    @Autowired
+    public SimplePointDisassembler(GeometryFactory geometryFactory) {
+        this.geometryFactory = geometryFactory;
+    }
 
     public SimplePoint disassemble(SimplePoint destination, SimplePointDTO simplePointDTO) {
 
@@ -18,15 +25,8 @@ public class SimplePointDisassembler {
 
         LocationDTO locationDTO = simplePointDTO.location;
 
-        if(destination.getLocation() == null) {
-            destination.setLocation(new Location());
-        }
-
-        LocationStructure location = destination.getLocation();
-
-        location.setLatitude(new BigDecimal(locationDTO.latitude));
-        location.setLongitude(new BigDecimal(locationDTO.longitude));
-
+        Point location = geometryFactory.createPoint(new Coordinate(locationDTO.longitude, locationDTO.latitude));
+        destination.setLocation(location);
         return destination;
     }
 }
