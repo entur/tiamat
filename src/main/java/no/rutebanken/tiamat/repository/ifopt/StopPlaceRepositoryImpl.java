@@ -5,6 +5,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import uk.org.netex.netex.StopPlace;
 
@@ -51,27 +54,22 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     /**
-     *
      * Find nearby stop places, specifying a bounding box.
-     *
-     * @param xMin
-     * @param yMin
-     * @param xMax
-     * @param yMax
-     * @return
      */
-
     @Override
-    public List<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax) {
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        //TODO: Do not return current stop place?
         TypedQuery<StopPlace> query = entityManager
                 .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true", StopPlace.class);
         query.setParameter("filter", geometryFilter);
 
-        return query.getResultList();
+        query.setFirstResult(pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        List<StopPlace> stopPlaces = query.getResultList();
+        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
 }

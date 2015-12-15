@@ -7,12 +7,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.org.netex.netex.EntityStructure;
 import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
-
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -46,10 +48,10 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 
-        List<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude);
+        Pageable pageable = new PageRequest(0, 10);
 
-        assertThat(result).isNotEmpty();
-        assertThat(result.get(0).getId()).isEqualTo(stopPlace.getId());
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
+        assertThat(result.getContent()).extracting(EntityStructure::getId).contains(stopPlace.getId());
     }
 
     @Test
@@ -66,14 +68,19 @@ public class StopPlaceRepositoryImplTest {
         // Outside boundingBox
         double latitude = 60.00;
         double longitude = 11.00;
+        Pageable pageable = new PageRequest(0, 10);
+
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
+        System.out.println(result.getContent().size());
 
         centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
 
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 
-        List<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude);
+        result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
 
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
     }
 }

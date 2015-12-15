@@ -105,8 +105,10 @@ public class StopPlaceResource {
             BoundingBoxDTO boundingBox) {
 
         logger.info("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
-        
-        List<StopPlaceDTO> stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax)
+        Pageable pageable = new PageRequest(page, size);
+
+        List<StopPlaceDTO> stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, pageable)
+                .getContent()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(stopPlace -> stopPlaceAssembler.assemble(stopPlace))
