@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.auth;
 
+import no.rutebanken.tiamat.filter.CorsResponseFilter;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
@@ -45,14 +47,14 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		super.configure(http);
 		
 		// TODO update here with paths that should be secured correctly
-		http.authorizeRequests()
+		http.csrf().disable()
+			.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
+			.authorizeRequests()
 			.antMatchers("/jersey/*").hasRole("holdeplassregister_read")
 			.antMatchers("/admin/*")
 			.hasRole("ADMIN")
 			.anyRequest()
 			.permitAll();
-
-		http.csrf().disable();
 	}
 
 	@Override

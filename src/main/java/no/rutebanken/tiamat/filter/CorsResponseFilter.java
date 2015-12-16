@@ -1,19 +1,28 @@
 package no.rutebanken.tiamat.filter;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class CorsResponseFilter implements ContainerResponseFilter {
-        public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+/**
+ * https://github.com/Smartling/spring-security-keycloak/issues/1
+ */
+public class CorsResponseFilter implements Filter {
 
-            MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {}
 
-            headers.add("Access-Control-Allow-Origin", "*");
-            headers.add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-            headers.add("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Accept");
-        	headers.add("Access-Control-Max-Age", "3600");
-        }
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+
+        httpServletResponse.setHeader("Access-Control-Allow-Origin", "*"); //TODO: not *
+        httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+        httpServletResponse.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Accept");
+        httpServletResponse.setHeader("Access-Control-Max-Age", "3600");
+        filterChain.doFilter(servletRequest,servletResponse);
+    }
+
+    @Override
+    public void destroy() {}
 }

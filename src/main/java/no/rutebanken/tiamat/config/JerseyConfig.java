@@ -1,6 +1,5 @@
 package no.rutebanken.tiamat.config;
 
-import no.rutebanken.tiamat.filter.CorsResponseFilter;
 import no.rutebanken.tiamat.rest.ifopt.QuayResource;
 import no.rutebanken.tiamat.rest.ifopt.StopPlaceResource;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -14,6 +13,5 @@ public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
         register(StopPlaceResource.class);
         register(QuayResource.class);
-        register(CorsResponseFilter.class);
     }
 }
