@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import uk.org.netex.netex.*;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,14 +56,16 @@ public class BootStrap implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        createExampleStopPlace();
-        createExampleQuay();
+        Quay quay = createExampleQuay();
+
+
+        createExampleStopPlace(quay);
 //       nvdbSync.fetchNvdb();
 
         Executors.newSingleThreadExecutor().execute(() -> gtfsStopsReader.read());
     }
 
-    private void createExampleQuay() {
+    private Quay createExampleQuay() {
 
         Quay quay = new Quay();
         quay.setVersion("001");
@@ -98,12 +99,8 @@ public class BootStrap implements InitializingBean {
         roadAddress.setBearingCompass("W");
         quay.setRoadAddress(roadAddress);
 
-        BigDecimal longitude = new BigDecimal("-0.2068758371").setScale(10, BigDecimal.ROUND_CEILING);
-        BigDecimal latitude = new BigDecimal("51.4207729447").setScale(10, BigDecimal.ROUND_CEILING);
-
-
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude.doubleValue())));
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10, 59.4207729447)));
         quay.setCentroid(centroid);
 
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
@@ -138,11 +135,10 @@ public class BootStrap implements InitializingBean {
 
         quay.setSiteRef(siteRefStructure);
 
-        quayRepository.save(quay);
-
+        return quay;
     }
 
-    public void createExampleStopPlace() {
+    public void createExampleStopPlace(Quay quay) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         MultilingualString name = new MultilingualString();
@@ -164,7 +160,7 @@ public class BootStrap implements InitializingBean {
         stopPlace.getAccessSpaces().add(accessSpace);
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10.0, 20.0)));
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10.0, 59.0)));
 
         stopPlace.setCentroid(centroid);
 
@@ -178,8 +174,6 @@ public class BootStrap implements InitializingBean {
         tariffZones.add(tariffZone);
         stopPlace.setTariffZones(tariffZones);
 
-        stopPlaceRepository.save(stopPlace);
-
         MultilingualString description = new MultilingualString();
         description.setValue("description");
         stopPlace.setDescription(description);
@@ -189,6 +183,10 @@ public class BootStrap implements InitializingBean {
         stopPlace.setCoachSubmode(CoachSubmodeEnumeration.REGIONAL_COACH);
         stopPlace.setFunicularSubmode(FunicularSubmodeEnumeration.UNKNOWN);
         stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
+
+        List<Quay> quays = new ArrayList<>();
+        quays.add(quay);
+        stopPlace.setQuays(quays);
 
         stopPlaceRepository.save(stopPlace);
     }

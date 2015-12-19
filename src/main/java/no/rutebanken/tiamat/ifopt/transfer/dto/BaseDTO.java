@@ -6,4 +6,6 @@ public class BaseDTO {
     public String shortName;
     public String description;
     public String id;
+    public SimplePointDTO centroid;
+
 }
