@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import uk.org.netex.netex.StopPlace;
 import uk.org.netex.netex.StopTypeEnumeration;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Disassembles the StopPlaceDTO to update a StopPlace.
@@ -23,6 +26,13 @@ public class StopPlaceDisassembler {
 
     @Autowired
     private SimplePointDisassembler simplePointDisassembler;
+
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
+
+    @Autowired
+    private QuayDisassembler quayDisassembler;
 
     public StopPlace disassemble(StopPlace destination, StopPlaceDTO simpleStopPlaceDTO) {
 
@@ -47,8 +57,15 @@ public class StopPlaceDisassembler {
                 destination.setCentroid(new SimplePoint());
             }
 
-            destination.setCentroid(simplePointDisassembler.disassemble(destination.getCentroid(), simpleStopPlaceDTO.centroid));
+            destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDTO.centroid));
         }
+
+        destination.setQuays(simpleStopPlaceDTO.quays
+                .stream()
+                .filter(Objects::nonNull)
+                .map(quay -> quayDisassembler.disassemble(quay))
+                .collect(Collectors.toList()));
+
        return destination;
 
     }

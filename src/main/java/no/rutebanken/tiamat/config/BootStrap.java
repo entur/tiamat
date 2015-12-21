@@ -58,11 +58,23 @@ public class BootStrap implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         Quay quay = createExampleQuay();
 
+        Quay anotherQuay = createAnotherQuay();
 
-        createExampleStopPlace(quay);
+        createExampleStopPlace(quay, anotherQuay);
 //       nvdbSync.fetchNvdb();
 
         Executors.newSingleThreadExecutor().execute(() -> gtfsStopsReader.read());
+    }
+
+    private Quay createAnotherQuay() {
+        Quay quay = new Quay();
+        quay.setName(new MultilingualString("Wimbledon NE", "en", ""));
+
+        SimplePoint centroid = new SimplePoint();
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(9.986197, 59.009362)));
+        quay.setCentroid(centroid);
+
+        return quay;
     }
 
     private Quay createExampleQuay() {
@@ -100,7 +112,7 @@ public class BootStrap implements InitializingBean {
         quay.setRoadAddress(roadAddress);
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10, 59.4207729447)));
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(9.986701011657715, 59.00934566647322)));
         quay.setCentroid(centroid);
 
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
@@ -138,7 +150,7 @@ public class BootStrap implements InitializingBean {
         return quay;
     }
 
-    public void createExampleStopPlace(Quay quay) {
+    public void createExampleStopPlace(Quay quay, Quay anotherQuay) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         MultilingualString name = new MultilingualString();
@@ -160,7 +172,7 @@ public class BootStrap implements InitializingBean {
         stopPlace.getAccessSpaces().add(accessSpace);
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(10.0, 59.0)));
+        centroid.setLocation(geometryFactory.createPoint(new Coordinate(9.986701011657715, 59.00934566647322)));
 
         stopPlace.setCentroid(centroid);
 
@@ -186,6 +198,7 @@ public class BootStrap implements InitializingBean {
 
         List<Quay> quays = new ArrayList<>();
         quays.add(quay);
+        quays.add(anotherQuay);
         stopPlace.setQuays(quays);
 
         stopPlaceRepository.save(stopPlace);

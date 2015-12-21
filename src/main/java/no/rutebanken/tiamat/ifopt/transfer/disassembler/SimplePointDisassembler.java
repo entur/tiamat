@@ -19,10 +19,11 @@ public class SimplePointDisassembler {
         this.geometryFactory = geometryFactory;
     }
 
-    public SimplePoint disassemble(SimplePoint destination, SimplePointDTO simplePointDTO) {
+    public SimplePoint disassemble(SimplePointDTO simplePointDTO) {
 
-        if(simplePointDTO.location == null) return null;
+        if(simplePointDTO == null || simplePointDTO.location == null) return null;
 
+        SimplePoint destination = new SimplePoint();
         LocationDTO locationDTO = simplePointDTO.location;
 
         Point location = geometryFactory.createPoint(new Coordinate(locationDTO.longitude, locationDTO.latitude));
