@@ -43,26 +43,26 @@ public class StopPlaceResource {
 
     @GET
     public List<StopPlaceDTO> getStopPlaces(
-            @DefaultValue(value="0") @QueryParam(value="page") int page,
-            @DefaultValue(value="20") @QueryParam(value="size") int size,
-            @QueryParam(value="name") String name) {
+            @DefaultValue(value = "0") @QueryParam(value = "page") int page,
+            @DefaultValue(value = "20") @QueryParam(value = "size") int size,
+            @QueryParam(value = "name") String name) {
 
 
         keyCloak();
-    	
+
         logger.debug("Get stop places with name '{}'", name);
 
         Pageable pageable = new PageRequest(page, size);
 
         Page<StopPlace> stopPlaces;
 
-        if(name != null && name.length() != 0) {
+        if (name != null && name.length() != 0) {
             stopPlaces = stopPlaceRepository.findByNameValueContainingIgnoreCase(name, pageable);
         } else {
             stopPlaces = stopPlaceRepository.findAll(pageable);
         }
 
-       return stopPlaceAssembler.assemble(stopPlaces);
+        return stopPlaceAssembler.assemble(stopPlaces);
     }
 
     private KeycloakAuthenticationToken keyCloak() {

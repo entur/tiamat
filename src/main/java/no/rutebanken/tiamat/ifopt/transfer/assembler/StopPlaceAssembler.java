@@ -19,6 +19,8 @@ public class StopPlaceAssembler {
     @Autowired
     private SimplePointAssembler simplePointAssembler;
 
+    @Autowired
+    private QuayAssembler quayAssembler;
 
     public StopPlaceDTO assemble(StopPlace stopPlace) {
         StopPlaceDTO simpleStopPlaceDTO = new StopPlaceDTO();
@@ -30,6 +32,11 @@ public class StopPlaceAssembler {
         if(stopPlace.getStopPlaceType() != null) simpleStopPlaceDTO.stopPlaceType = stopPlace.getStopPlaceType().value();
 
         simpleStopPlaceDTO.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
+
+        simpleStopPlaceDTO.quays = stopPlace.getQuays()
+                .stream()
+                .map(quay -> quayAssembler.assemble(quay))
+                .collect(Collectors.toList());
 
         return simpleStopPlaceDTO;
     }
