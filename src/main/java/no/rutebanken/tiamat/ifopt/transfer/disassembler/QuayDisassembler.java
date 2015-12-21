@@ -14,11 +14,15 @@ public class QuayDisassembler {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayDisassembler.class);
 
-    @Autowired
     private QuayRepository quayRepository;
 
-    @Autowired
     private SimplePointDisassembler simplePointDisassembler;
+
+    @Autowired
+    public QuayDisassembler(QuayRepository quayRepository, SimplePointDisassembler simplePointDisassembler) {
+        this.quayRepository = quayRepository;
+        this.simplePointDisassembler = simplePointDisassembler;
+    }
 
     public Quay disassemble(QuayDTO quayDTO) {
 
@@ -29,7 +33,7 @@ public class QuayDisassembler {
             return null;
         }
 
-        if(quayDTO.id != null || quayDTO.id.isEmpty()) {
+        if(quayDTO.id == null || quayDTO.id.isEmpty()) {
             logger.trace("The quay to disassemble has no Id, which means it's new.");
             quay = new Quay();
         } else {
@@ -41,9 +45,10 @@ public class QuayDisassembler {
         }
 
 
-        quay.setName(new MultilingualString(quayDTO.shortName, "no", ""));
+        quay.setName(new MultilingualString(quayDTO.name, "no", ""));
         quay.setCentroid(simplePointDisassembler.disassemble(quayDTO.centroid));
 
+        logger.debug("Returning quay {}", quay.getName());
         return quay;
     }
 

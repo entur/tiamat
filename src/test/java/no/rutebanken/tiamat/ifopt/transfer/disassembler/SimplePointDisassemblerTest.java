@@ -20,7 +20,7 @@ public class SimplePointDisassemblerTest {
         simplePointDTO.location.latitude = 10.123123;
         simplePointDTO.location.longitude = 59.123123;
 
-        SimplePoint simplePoint = new SimplePointDisassembler(geometryFactory).disassemble(new SimplePoint(), simplePointDTO);
+        SimplePoint simplePoint = new SimplePointDisassembler(geometryFactory).disassemble(simplePointDTO);
 
         assertThat(simplePoint).isNotNull();
         assertThat(simplePoint.getLocation()).isNotNull();
