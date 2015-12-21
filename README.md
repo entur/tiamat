@@ -49,7 +49,7 @@ Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is 
 * Download Keycloak version 1.7.0.CR1 (or newer)
 * Change the port in standalone/configuration/standalone.xml** to 18080 : ```{jboss.http.port:18080}```
 * ```git pull``` devsetup.
-* run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/Users/cris/git/devsetup/keycloak/files/realms/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
+* run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/keycloak/files/realms/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
 
 # Docker image
  ```mvn -Pf8-build```
