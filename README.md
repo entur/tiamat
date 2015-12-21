@@ -42,6 +42,15 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 Can be used with an empty PostgreSQL.
 ```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties```
 
+
+# Run Keycloak
+Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone.
+
+* Download Keycloak version 1.7.0.CR1 (or newer)
+* Change the port in standalone/configuration/standalone.xml** to 18080 : ```{jboss.http.port:18080}```
+* ```git pull``` devsetup.
+* run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/Users/cris/git/devsetup/keycloak/files/realms/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
+
 # Docker image
  ```mvn -Pf8-build```
 
