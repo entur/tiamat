@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.repository.ifopt;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.EntityStructure;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -25,6 +27,9 @@ public class StopPlaceRepositoryImplTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -82,5 +87,21 @@ public class StopPlaceRepositoryImplTest {
         result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
 
         assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
+    }
+
+    @Ignore
+    @Test
+    public void testAttachingQuaysToStopPlace() throws Exception {
+        Quay quay = new Quay();
+        quay.setName(new MultilingualString("q", "en", ""));
+        quayRepository.save(quay);
+
+        StopPlace stopPlace = new StopPlace();
+
+        List<Quay> quays = new ArrayList<>();
+        stopPlace.setQuays(quays);
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
     }
 }
