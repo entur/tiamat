@@ -201,6 +201,8 @@ public class BootStrap implements InitializingBean {
         quays.add(anotherQuay);
         stopPlace.setQuays(quays);
 
+        quayRepository.save(quays);
+
         stopPlaceRepository.save(stopPlace);
     }
 }

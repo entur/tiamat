@@ -171,8 +171,8 @@ public class StopPlace_VersionStructure
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Quay> quays;
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private List<Quay> quays = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
