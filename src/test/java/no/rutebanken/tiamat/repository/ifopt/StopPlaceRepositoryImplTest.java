@@ -3,7 +3,6 @@ package no.rutebanken.tiamat.repository.ifopt;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +88,6 @@ public class StopPlaceRepositoryImplTest {
         assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
     }
 
-    @Ignore
     @Test
     public void testAttachingQuaysToStopPlace() throws Exception {
         Quay quay = new Quay();
