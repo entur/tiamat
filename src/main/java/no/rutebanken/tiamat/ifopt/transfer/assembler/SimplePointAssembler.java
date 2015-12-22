@@ -10,6 +10,10 @@ public class SimplePointAssembler {
 
     public SimplePointDTO assemble(SimplePoint simplePoint) {
 
+        if(simplePoint == null) {
+            return null;
+        }
+
         SimplePointDTO simplePointDTO = new SimplePointDTO();
         simplePointDTO.location = new LocationDTO();
 

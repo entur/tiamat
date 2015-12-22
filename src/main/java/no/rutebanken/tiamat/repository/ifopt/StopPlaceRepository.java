@@ -7,6 +7,8 @@ import uk.org.netex.netex.StopPlace;
 
 public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlace, String>, StopPlaceRepositoryCustom {
 
-    Page<StopPlace> findByNameValueContainingIgnoreCase(String name, Pageable pageable);
+    Page<StopPlace> findAllByOrderByChangedDesc(Pageable pageable);
+
+    Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 }
 

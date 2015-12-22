@@ -36,4 +36,10 @@ public class SimplePointAssemblerTest {
         assertThat(simplePointDTO.location).isNotNull();
         assertThat(simplePointDTO.location.longitude).isEqualTo(longitude);
     }
+
+    @Test
+    public void assembleSimplePointIsNull() {
+        assertThat(simplePointAssembler.assemble(null)).isNull();
+    }
+
 }

@@ -57,9 +57,9 @@ public class StopPlaceResource {
         Page<StopPlace> stopPlaces;
 
         if (name != null && name.length() != 0) {
-            stopPlaces = stopPlaceRepository.findByNameValueContainingIgnoreCase(name, pageable);
+            stopPlaces = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc(name, pageable);
         } else {
-            stopPlaces = stopPlaceRepository.findAll(pageable);
+            stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
         }
 
         return stopPlaceAssembler.assemble(stopPlaces);
