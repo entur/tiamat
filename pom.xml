@@ -53,6 +53,8 @@
 
     </properties>
 
+    <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
+         But you have set up maven to use it as mirror in settings.xml ... -->
     <repositories>
         <repository>
             <id>OSGEO GeoTools repo</id>
@@ -158,26 +160,26 @@
             <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- Spring Security & Keycloak -->
         <dependency>
 	      <groupId>org.keycloak</groupId>
 	      <artifactId>keycloak-tomcat8-adapter</artifactId>
 	      <version>${keycloak.version}</version>
 	    </dependency>
-        
+
         <dependency>
          <groupId>org.keycloak</groupId>
          <artifactId>keycloak-spring-security-adapter</artifactId>
          <version>${keycloak.version}</version>
         </dependency>
-        
+
         <dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
          </dependency>
-	    
+
     </dependencies>
 
 
