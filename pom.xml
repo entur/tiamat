@@ -54,7 +54,7 @@
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
-         But you have set up maven to use it as mirror in settings.xml ... -->
+         But you have set up maven to use it as mirror in settings.xml -->
     <repositories>
         <repository>
             <id>OSGEO GeoTools repo</id>
