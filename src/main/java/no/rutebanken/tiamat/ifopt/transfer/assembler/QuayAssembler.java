@@ -9,8 +9,12 @@ import uk.org.netex.netex.Quay;
 @Component
 public class QuayAssembler {
 
+    private final SimplePointAssembler simplePointAssembler;
+
     @Autowired
-    private SimplePointAssembler simplePointAssembler;
+    public QuayAssembler(SimplePointAssembler simplePointAssembler) {
+        this.simplePointAssembler = simplePointAssembler;
+    }
 
     public QuayDTO assemble(Quay quay) {
         QuayDTO quayDTO = new QuayDTO();
@@ -19,6 +23,11 @@ public class QuayAssembler {
         if(quay.getName() != null) quayDTO.name = quay.getName().getValue();
 
         quayDTO.centroid = simplePointAssembler.assemble(quay.getCentroid());
+
+        if(quay.getQuayType() != null) {
+            quayDTO.quayType = quay.getQuayType().value();
+        }
+
         return quayDTO;
     }
 
