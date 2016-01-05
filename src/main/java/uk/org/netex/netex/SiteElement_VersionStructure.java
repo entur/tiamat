@@ -104,7 +104,6 @@ public abstract class SiteElement_VersionStructure
     protected LightingEnumeration lighting;
 
     @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
-    @Transient
     protected Boolean allAreasWheelchairAccessible;
 
     @XmlElement(name = "PersonCapacity")

@@ -60,6 +60,9 @@ public class StopPlaceDisassembler {
             destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDTO.centroid));
         }
 
+        destination.setAllAreasWheelchairAccessible(simpleStopPlaceDTO.allAreasWheelchairAccessible);
+
+
         destination.setQuays(simpleStopPlaceDTO.quays
                 .stream()
                 .filter(Objects::nonNull)

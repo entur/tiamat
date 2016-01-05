@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.Quay;
+import uk.org.netex.netex.QuayTypeEnumeration;
 
 @Component
 public class QuayDisassembler {
@@ -47,6 +48,14 @@ public class QuayDisassembler {
 
         quay.setName(new MultilingualString(quayDTO.name, "no", ""));
         quay.setCentroid(simplePointDisassembler.disassemble(quayDTO.centroid));
+
+        if(quayDTO.quayType != null && !quayDTO.quayType.isEmpty()) {
+            logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDTO.quayType);
+            quay.setQuayType(QuayTypeEnumeration.fromValue(quayDTO.quayType));
+        }
+
+        logger.trace("Set allAreasWheelchairAccessible {}", quayDTO.allAreasWheelchairAccessible);
+        quay.setAllAreasWheelchairAccessible(quayDTO.allAreasWheelchairAccessible);
 
         logger.debug("Returning quay {}", quay.getName());
         return quay;

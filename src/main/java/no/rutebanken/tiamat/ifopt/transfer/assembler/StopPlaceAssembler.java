@@ -30,8 +30,11 @@ public class StopPlaceAssembler {
         simpleStopPlaceDTO.shortName = multiLingualStringValue(stopPlace.getShortName());
         simpleStopPlaceDTO.description = multiLingualStringValue(stopPlace.getDescription());
         if(stopPlace.getStopPlaceType() != null) simpleStopPlaceDTO.stopPlaceType = stopPlace.getStopPlaceType().value();
-
         simpleStopPlaceDTO.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
+
+        if(stopPlace.isAllAreasWheelchairAccessible() != null) {
+            simpleStopPlaceDTO.allAreasWheelchairAccessible = stopPlace.isAllAreasWheelchairAccessible();
+        }
 
         simpleStopPlaceDTO.quays = stopPlace.getQuays()
                 .stream()
