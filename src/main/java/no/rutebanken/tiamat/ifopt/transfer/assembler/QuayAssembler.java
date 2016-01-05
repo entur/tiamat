@@ -27,7 +27,9 @@ public class QuayAssembler {
         if(quay.getQuayType() != null) {
             quayDTO.quayType = quay.getQuayType().value();
         }
-
+        if(quay.isAllAreasWheelchairAccessible() != null) {
+            quayDTO.allAreasWheelchairAccessible = quay.isAllAreasWheelchairAccessible();
+        }
         return quayDTO;
     }
 

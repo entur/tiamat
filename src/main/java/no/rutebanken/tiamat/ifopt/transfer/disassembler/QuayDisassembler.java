@@ -54,6 +54,9 @@ public class QuayDisassembler {
             quay.setQuayType(QuayTypeEnumeration.fromValue(quayDTO.quayType));
         }
 
+        logger.trace("Set allAreasWheelchairAccessible {}", quayDTO.allAreasWheelchairAccessible);
+        quay.setAllAreasWheelchairAccessible(quayDTO.allAreasWheelchairAccessible);
+
         logger.debug("Returning quay {}", quay.getName());
         return quay;
     }

@@ -7,5 +7,6 @@ public class BaseDTO {
     public String description;
     public String id;
     public SimplePointDTO centroid;
+    public boolean allAreasWheelchairAccessible;
 
 }
