@@ -47,8 +47,9 @@ public class TopographicPlaceTest {
     }
 
     @Test
-    public void stopPlacesShouldBeNestable() {
+    public void topographicPlacesShouldBeNestable() {
 
+        // County
         TopographicPlace buskerud = new TopographicPlace();
         buskerud.setName(new MultilingualString("Buskerud", "no", ""));
 
@@ -57,6 +58,7 @@ public class TopographicPlaceTest {
         TopographicPlaceRefStructure buskerudReference = new TopographicPlaceRefStructure();
         buskerudReference.setRef(buskerud.getId());
 
+        // Municipality
         TopographicPlace nedreEiker = new TopographicPlace();
         nedreEiker.setName(new MultilingualString("Nedre Eiker", "no", ""));
         nedreEiker.setParentTopographicPlaceRef(buskerudReference);
@@ -69,6 +71,23 @@ public class TopographicPlaceTest {
         assertThat(actualNedreEiker.getParentTopographicPlaceRef()).isNotNull();
         assertThat(actualNedreEiker.getParentTopographicPlaceRef().getRef()).isEqualTo(buskerudReference.getRef());
 
+    }
+
+    @Test
+    public void topographicPlacesShouldBePartOfCountry() {
+
+        CountryRef countryRef = new CountryRef();
+        countryRef.setRef(IanaCountryTldEnumeration.NO);
+
+        TopographicPlace akershus = new TopographicPlace();
+        akershus.setName(new MultilingualString("Akershus", "no", ""));
+        akershus.setCountryRef(countryRef);
+
+        topographicPlaceRepository.save(akershus);
+
+        TopographicPlace actual = topographicPlaceRepository.findOne(akershus.getId());
+        assertThat(actual.getCountryRef()).isNotNull();
+        assertThat(actual.getCountryRef().getRef()).isEqualTo(IanaCountryTldEnumeration.NO);
     }
 
 }

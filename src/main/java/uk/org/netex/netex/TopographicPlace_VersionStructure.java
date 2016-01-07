@@ -85,7 +85,7 @@ public class TopographicPlace_VersionStructure
     protected String postCode;
 
     @XmlElement(name = "CountryRef")
-    @Transient
+    @Embedded
     protected CountryRef countryRef;
 
     @Transient
