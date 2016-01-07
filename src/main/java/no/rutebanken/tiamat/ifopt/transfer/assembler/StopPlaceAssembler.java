@@ -2,11 +2,14 @@ package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.TopographicPlace;
+import uk.org.netex.netex.TopographicPlaceRefStructure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,10 @@ public class StopPlaceAssembler {
 
     @Autowired
     private SimplePointAssembler simplePointAssembler;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
+
 
     @Autowired
     private QuayAssembler quayAssembler;
@@ -40,6 +47,13 @@ public class StopPlaceAssembler {
                 .stream()
                 .map(quay -> quayAssembler.assemble(quay))
                 .collect(Collectors.toList());
+
+        TopographicPlaceRefStructure topographicRef = stopPlace.getTopographicPlaceRef();
+        if(topographicRef != null) {
+            TopographicPlace topographicPlace = topographicPlaceRepository.findOne(topographicRef.getRef());
+
+            simpleStopPlaceDTO.topographicPlace = topographicPlace.getName().getValue();
+        }
 
         return simpleStopPlaceDTO;
     }
