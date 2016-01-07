@@ -73,7 +73,7 @@ public abstract class Site_VersionStructure
 {
 
     @XmlElement(name = "TopographicPlaceRef")
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected TopographicPlaceRefStructure topographicPlaceRef;
 
     @XmlElement(name = "TopographicPlaceView")
