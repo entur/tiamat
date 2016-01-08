@@ -80,7 +80,11 @@ public class CountyAndMunicipalityLookupService {
                 logger.info("Found existing county for region {}: {}", region, county.getId());
             }
 
-            List<TopographicPlace> municipalities = topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(locality, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN);
+            List<TopographicPlace> municipalities = topographicPlaceRepository
+                    .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                            locality,
+                            IanaCountryTldEnumeration.NO,
+                            TopographicPlaceTypeEnumeration.TOWN);
 
             TopographicPlace municipality;
 
@@ -92,8 +96,11 @@ public class CountyAndMunicipalityLookupService {
                 municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
                 TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-
                 countyRef.setRef(county.getId());
+
+                CountryRef countryRef = new CountryRef();
+                countryRef.setRef(IanaCountryTldEnumeration.NO);
+                municipality.setCountryRef(countryRef);
 
                 logger.info("Adding reference to county {} from municipality {}", region, locality);
 
