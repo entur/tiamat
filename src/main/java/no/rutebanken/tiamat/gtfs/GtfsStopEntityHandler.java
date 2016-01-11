@@ -38,7 +38,7 @@ public class GtfsStopEntityHandler implements EntityHandler {
             StopPlace stopPlace = gtfsIfoptMapper.map(stop);
 
             try {
-                countyAndMunicipalityLookupService.lookup(stopPlace);
+                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
                 stopPlaceRepository.save(stopPlace);
             } catch (DataIntegrityViolationException | IOException e) {
 
