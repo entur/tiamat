@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.org.netex.netex.StopPlace;
 
 import javax.persistence.EntityGraph;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+@Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
