@@ -1,5 +1,8 @@
 package no.rutebanken.tiamat.service;
 
+import com.vividsolutions.jts.algorithm.CentroidPoint;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -8,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.Quay;
+import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 
 import java.util.ArrayList;
@@ -27,6 +31,9 @@ public class StopPlaceFromQuaysCorrelationService {
 	private StopPlaceRepository stopPlaceRepository;
 
     private final AtomicInteger stopPlaceCounter = new AtomicInteger();
+
+    @Autowired
+    private GeometryFactory geometryFactory;
 
 
 	/**
@@ -64,14 +71,16 @@ public class StopPlaceFromQuaysCorrelationService {
 				}else{
 					stopPlace.getQuays().add(item);
                     quaysAlreadyProcessed.add(item.getId());
-                    quayRepository.save(item);
 				}
 			});
 
+            stopPlace.setCentroid(new SimplePoint());
+            stopPlace.getCentroid().setLocation(calculateCentroidForStopPlace(stopPlace.getQuays()));
+
 			try{	
 				stopPlaceRepository.save(stopPlace);
-                logger.trace("Created stop place number {} with name {} and id {}",
-                        stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getId());
+                logger.debug("Created stop place number {} with name {} and {} quays (id {})",
+                        stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
 			}
 			catch(Exception e){
 				logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
@@ -80,5 +89,14 @@ public class StopPlaceFromQuaysCorrelationService {
 
 		logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
 	}
+
+    public Point calculateCentroidForStopPlace(List<Quay> quays) {
+        CentroidPoint centroidPoint = new CentroidPoint();
+        quays.forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation()));
+
+        logger.debug("Created centroid for stop place based on quays. x: {}, y: {}", centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);
+
+        return geometryFactory.createPoint(centroidPoint.getCentroid());
+    }
 
 }
