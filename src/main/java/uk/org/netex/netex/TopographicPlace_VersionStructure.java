@@ -8,12 +8,8 @@
 
 package uk.org.netex.netex;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import javax.persistence.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -58,6 +54,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlSeeAlso({
     TopographicPlace.class
 })
+@MappedSuperclass
 public class TopographicPlace_VersionStructure
     extends Place_VersionStructure
 {
@@ -66,25 +63,45 @@ public class TopographicPlace_VersionStructure
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String isoCode;
+
     @XmlElement(name = "Descriptor", required = true)
+    @Transient
     protected TopographicPlaceDescriptor_VersionedChildStructure descriptor;
+
+    @Transient
     protected AlternativeDescriptors alternativeDescriptors;
+
     @XmlElement(name = "TopographicPlaceType")
     @XmlSchemaType(name = "NMTOKEN")
+    @Enumerated(EnumType.STRING)
     protected TopographicPlaceTypeEnumeration topographicPlaceType;
+
     @XmlElement(name = "PlaceCentre", defaultValue = "false")
     protected Boolean placeCentre;
+
     @XmlElement(name = "PostCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String postCode;
+
     @XmlElement(name = "CountryRef")
+    @Embedded
     protected CountryRef countryRef;
+
+    @Transient
     protected CountryRefs_RelStructure otherCountries;
+
     @XmlElement(name = "ParentTopographicPlaceRef")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
+
+    @Transient
     protected TopographicPlaceRefs_RelStructure adjacentPlaces;
+
+    @Transient
     protected TopographicPlaceRefs_RelStructure containedIn;
+
+    @Transient
     protected Accesses_RelStructure accesses;
 
     /**

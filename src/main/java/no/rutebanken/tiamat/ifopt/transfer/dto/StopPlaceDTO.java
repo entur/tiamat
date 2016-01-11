@@ -7,4 +7,6 @@ public class StopPlaceDTO extends BaseDTO {
     public String stopPlaceType;
     public List<QuayDTO> quays;
 
+    public String municipality;
+    public String county;
 }

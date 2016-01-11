@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.repository.ifopt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QuayRepositoryImpl implements QuayRepositoryCustom {
-	@Autowired
-	private EntityManager entityManager;
+@Transactional
+public class QuayRepositoryImpl implements QuayRepositoryCustom
+{
+    @Autowired
+    private EntityManager entityManager;
 
 	@Autowired
 	private GeometryFactory geometryFactory;

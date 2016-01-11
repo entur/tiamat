@@ -8,6 +8,9 @@
 
 package uk.org.netex.netex;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -42,11 +45,13 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlSeeAlso({
     CountryRef.class
 })
+@MappedSuperclass
 public class CountryRefStructure {
 
     @XmlValue
     protected String value;
     @XmlAttribute(name = "ref")
+    @Enumerated(EnumType.STRING)
     protected IanaCountryTldEnumeration ref;
 
     /**
