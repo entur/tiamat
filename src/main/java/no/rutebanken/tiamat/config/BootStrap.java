@@ -8,6 +8,8 @@ import no.rutebanken.tiamat.repository.ifopt.AccessSpaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
+import no.rutebanken.tiamat.service.StopPlaceFromQuaysCorrelationService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -19,6 +21,7 @@ import uk.org.netex.netex.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -50,6 +53,9 @@ public class BootStrap implements InitializingBean {
 
     @Autowired
     private GeometryFactory geometryFactory;
+    
+    @Autowired
+    private StopPlaceFromQuaysCorrelationService stopPlaceFromQuaysCorrelationService;
 
     /**
      * Set up test object.
@@ -63,7 +69,9 @@ public class BootStrap implements InitializingBean {
         createExampleStopPlace(quay, anotherQuay);
 //       nvdbSync.fetchNvdb();
 
-        Executors.newSingleThreadExecutor().execute(() -> gtfsStopsReader.read());
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.execute(() -> gtfsStopsReader.read());
+        es.execute(() -> stopPlaceFromQuaysCorrelationService.correlate()); 
     }
 
     private Quay createAnotherQuay() {

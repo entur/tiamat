@@ -27,7 +27,8 @@ public class GtfsIfoptMapperTest {
         Stop stop = new Stop();
         stop.setLat(gtfsLatitude);
 
-        StopPlace stopPlace = gtfsIfoptMapper.centroid(new StopPlace(), stop);
+        StopPlace stopPlace = new StopPlace();
+        gtfsIfoptMapper.centroid(stopPlace, stop);
 
         Point locationStructure = stopPlace.getCentroid().getLocation();
 
@@ -43,7 +44,8 @@ public class GtfsIfoptMapperTest {
         Stop stop = new Stop();
         stop.setLon(gtfsLongitude);
 
-        StopPlace stopPlace = gtfsIfoptMapper.centroid(new StopPlace(), stop);
+        StopPlace stopPlace = new StopPlace();
+        gtfsIfoptMapper.centroid(stopPlace, stop);
 
         Point locationStructure = stopPlace.getCentroid().getLocation();
 

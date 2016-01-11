@@ -22,6 +22,9 @@ public class GtfsStopsReader {
 
     @Autowired
     private GtfsStopEntityHandler gtfsStopEntityHandler;
+    
+    @Autowired
+    private GtfsQuayEntityHandler gtfsQuayEntityHandler;
 
     public void read() {
 
@@ -35,7 +38,7 @@ public class GtfsStopsReader {
 
             reader.setInputLocation(new File(url.getFile()));
 
-            reader.addEntityHandler(gtfsStopEntityHandler);
+            reader.addEntityHandler(gtfsQuayEntityHandler);
             reader.run();
 
 

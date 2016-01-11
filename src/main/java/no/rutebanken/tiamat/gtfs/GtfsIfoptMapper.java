@@ -8,8 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
+import uk.org.netex.netex.Quay;
 import uk.org.netex.netex.SimplePoint;
+import uk.org.netex.netex.Site_VersionStructure;
 import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.Zone_VersionStructure;
 
 @Component
 public class GtfsIfoptMapper {
@@ -29,20 +32,31 @@ public class GtfsIfoptMapper {
         stopPlace.setName(new MultilingualString(stop.getName(), "no", ""));
         stopPlace.setDescription(new MultilingualString(stop.getDesc(), "no", ""));
 
-        stopPlace = centroid(stopPlace, stop);
+        centroid(stopPlace, stop);
 
         return stopPlace;
     }
+    
+    public Quay mapToQuay(Stop stop){
+    	logger.debug("Mapping data from GTFS stop to IFOPT quay {} - {}", stop.getId(), stop.getName());
+    	Quay quay = new Quay();
+    	quay.setName(new MultilingualString(stop.getName(), "no", ""));
+    	quay.setDescription(new MultilingualString(stop.getDesc(), "no", ""));
+    	
+    	centroid(quay, stop);
+    	
+    	return quay;
+    }
 
-    public StopPlace centroid(StopPlace stopPlace, Stop stop) {
+    public void centroid(Zone_VersionStructure site, Stop stop) {
         SimplePoint centroid = new SimplePoint();
 
-        logger.trace("Setting location on stop place {} latitude: {}, longitude: {}", stopPlace.getName(), stop.getLat(), stop.getLon());
+        logger.trace("Setting location for {} latitude: {}, longitude: {}", site.getName(), stop.getLat(), stop.getLon());
 
         centroid.setLocation(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
 
-        stopPlace.setCentroid(centroid);
-        return stopPlace;
+        site.setCentroid(centroid);
+        //return site;
     }
 }
 
