@@ -1,16 +1,21 @@
 package no.rutebanken.tiamat.pelias;
 
 import no.rutebanken.tiamat.pelias.model.ReverseLookupResult;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+/**
+ * Test only intended for manual run with Pelias.
+ */
+@Ignore
 public class PeliasReverseLookupServiceTest {
 
     @Test
     public void testReverseLookup() throws Exception {
 
-        PeliasReverseLookupClient peliasReverseLookupClient = new PeliasReverseLookupClient("http://localhost:3000/v1/reverse");
+        PeliasReverseLookupClient peliasReverseLookupClient = new PeliasReverseLookupClient("http://localhost:3001/v1/reverse");
 
         ReverseLookupResult reverseLookupResult = peliasReverseLookupClient.reverseLookup("60.440860", "5.300058", 1);
 
