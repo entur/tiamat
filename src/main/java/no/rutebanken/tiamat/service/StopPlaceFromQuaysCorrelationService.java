@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.service;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -22,33 +23,36 @@ import java.util.stream.Collectors;
 
 @Service
 public class StopPlaceFromQuaysCorrelationService {
-	private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromQuaysCorrelationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromQuaysCorrelationService.class);
 
-	@Autowired
-	public QuayRepository quayRepository;
+    @Autowired
+    public QuayRepository quayRepository;
 
-	@Autowired
-	private StopPlaceRepository stopPlaceRepository;
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
 
     private final AtomicInteger stopPlaceCounter = new AtomicInteger();
 
     @Autowired
     private GeometryFactory geometryFactory;
 
+    @Autowired
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
-	/**
-	 * Creates stopPlace objects based on quays by combining quays with the same
-	 * name and close location
-	 */
-	public void correlate() {
+
+    /**
+     * Creates stopPlace objects based on quays by combining quays with the same
+     * name and close location
+     */
+    public void correlate() {
 
         logger.trace("Loading quays from repository");
-		List<Quay> quays = quayRepository.findAll();
+        List<Quay> quays = quayRepository.findAll();
 
         logger.trace("Got {} quays", quays.size());
 
-		Map<String, List<Quay>> distinctQuays = quays.stream()
-				.collect(Collectors.groupingBy(quay -> quay.getName().getValue()));
+        Map<String, List<Quay>> distinctQuays = quays.stream()
+                .collect(Collectors.groupingBy(quay -> quay.getName().getValue()));
 
         logger.trace("Got {} distinct quays based on name", distinctQuays.size());
 
@@ -58,37 +62,36 @@ public class StopPlaceFromQuaysCorrelationService {
 
             logger.trace("Processing quay with name {}", quayGroupName);
 
-			StopPlace stopPlace = new StopPlace();
-			stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
+            StopPlace stopPlace = new StopPlace();
+            stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
 
-			stopPlace.setQuays(new ArrayList<>());
+            stopPlace.setQuays(new ArrayList<>());
 
             distinctQuays.get(quayGroupName).forEach(item -> {
 
-				logger.trace("About to add Quay with name {} and id {} to stop place", item.getName(), item.getId());
-				if (quaysAlreadyProcessed.contains(item.getId())){
-					logger.warn("Already created quay with name {} and id {}", item.getName(), item.getId());
-				}else{
-					stopPlace.getQuays().add(item);
+                logger.trace("About to add Quay with name {} and id {} to stop place", item.getName(), item.getId());
+                if (quaysAlreadyProcessed.contains(item.getId())) {
+                    logger.warn("Already created quay with name {} and id {}", item.getName(), item.getId());
+                } else {
+                    stopPlace.getQuays().add(item);
                     quaysAlreadyProcessed.add(item.getId());
-				}
-			});
+                }
+            });
 
             stopPlace.setCentroid(new SimplePoint());
             stopPlace.getCentroid().setLocation(calculateCentroidForStopPlace(stopPlace.getQuays()));
-
-			try{	
-				stopPlaceRepository.save(stopPlace);
+            try {
+                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+                stopPlaceRepository.save(stopPlace);
                 logger.debug("Created stop place number {} with name {} and {} quays (id {})",
                         stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
-			}
-			catch(Exception e){
-				logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
-			}
-		});
+            } catch (Exception e) {
+                logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
+            }
+        });
 
-		logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
-	}
+        logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
+    }
 
     public Point calculateCentroidForStopPlace(List<Quay> quays) {
         CentroidPoint centroidPoint = new CentroidPoint();
