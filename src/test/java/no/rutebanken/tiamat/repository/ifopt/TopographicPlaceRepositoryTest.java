@@ -11,7 +11,7 @@ import uk.org.netex.netex.*;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
@@ -35,11 +35,6 @@ public class TopographicPlaceRepositoryTest {
         topographicPlaceRepository.save(akershus);
 
         List<TopographicPlace> places = topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType("Akershus", IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.COUNTY);
-        assertThat(places.size()).isEqualTo(1);
-
-        assertThat(places.get(0).getId()).isEqualTo(akershus.getId());
+        assertThat(places).extracting("id", String.class).contains(akershus.getId());
     }
-
-
-
 }
