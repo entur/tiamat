@@ -19,12 +19,9 @@ public class GtfsStopsReader {
     private static Logger logger = LoggerFactory.getLogger(GtfsStopsReader.class);
 
     private static final String GTFS_FILE_PATH = "stops";
-
-    @Autowired
-    private GtfsStopEntityHandler gtfsStopEntityHandler;
     
     @Autowired
-    private GtfsQuayEntityHandler gtfsQuayEntityHandler;
+    private GtfsStopEntityHandler gtfsQuayEntityHandler;
 
     public void read() {
 

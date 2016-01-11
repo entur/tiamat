@@ -8,16 +8,16 @@ import org.onebusaway.gtfs.model.Stop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.Quay;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
-public class GtfsStopToQuayMapperTest {
+public class GtfsStopToIfoptQuayMapperTest {
 
     @Autowired
-    private GtfsStopToQuayMapper gtfsStopToQuayMapper;
+    private GtfsStopToIfoptQuayMapper stopToQuayMapper;
 
     @Test
     public void mapStopLatitudeToCentroid() throws Exception {
@@ -27,10 +27,10 @@ public class GtfsStopToQuayMapperTest {
         Stop stop = new Stop();
         stop.setLat(gtfsLatitude);
 
-        StopPlace stopPlace = new StopPlace();
-        gtfsStopToQuayMapper.centroid(stopPlace, stop);
+        Quay quay = new Quay();
+        stopToQuayMapper.centroid(quay, stop);
 
-        Point locationStructure = stopPlace.getCentroid().getLocation();
+        Point locationStructure = quay.getCentroid().getLocation();
 
         assertThat(locationStructure.getY()).isEqualTo(gtfsLatitude);
 
@@ -44,10 +44,10 @@ public class GtfsStopToQuayMapperTest {
         Stop stop = new Stop();
         stop.setLon(gtfsLongitude);
 
-        StopPlace stopPlace = new StopPlace();
-        gtfsStopToQuayMapper.centroid(stopPlace, stop);
+        Quay quay = new Quay();
+        stopToQuayMapper.centroid(quay, stop);
 
-        Point locationStructure = stopPlace.getCentroid().getLocation();
+        Point locationStructure = quay.getCentroid().getLocation();
 
         assertThat(locationStructure.getX()).isEqualTo(gtfsLongitude);
     }
