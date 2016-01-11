@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.repository.ifopt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import uk.org.netex.netex.Quay;
 
 import javax.persistence.EntityGraph;
@@ -8,6 +9,7 @@ import javax.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.Map;
 
+@Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom
 {
     @Autowired
