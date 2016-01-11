@@ -40,8 +40,8 @@ public class PeliasReverseLookupClient {
         logger.info("Request to Pelias on {}", url.toString());
 
         InputStream inputStream = Request.Get(url.toString())
-                .connectTimeout(1000)
-                .socketTimeout(1000)
+                .connectTimeout(3000)
+                .socketTimeout(3000)
                 .execute().returnContent().asStream();
 
 
