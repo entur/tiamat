@@ -14,10 +14,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
-public class GtfsIfoptMapperTest {
+public class GtfsStopToQuayMapperTest {
 
     @Autowired
-    private GtfsIfoptMapper gtfsIfoptMapper;
+    private GtfsStopToQuayMapper gtfsStopToQuayMapper;
 
     @Test
     public void mapStopLatitudeToCentroid() throws Exception {
@@ -28,7 +28,7 @@ public class GtfsIfoptMapperTest {
         stop.setLat(gtfsLatitude);
 
         StopPlace stopPlace = new StopPlace();
-        gtfsIfoptMapper.centroid(stopPlace, stop);
+        gtfsStopToQuayMapper.centroid(stopPlace, stop);
 
         Point locationStructure = stopPlace.getCentroid().getLocation();
 
@@ -45,7 +45,7 @@ public class GtfsIfoptMapperTest {
         stop.setLon(gtfsLongitude);
 
         StopPlace stopPlace = new StopPlace();
-        gtfsIfoptMapper.centroid(stopPlace, stop);
+        gtfsStopToQuayMapper.centroid(stopPlace, stop);
 
         Point locationStructure = stopPlace.getCentroid().getLocation();
 

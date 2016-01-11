@@ -10,33 +10,18 @@ import org.springframework.stereotype.Component;
 import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.Quay;
 import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.Site_VersionStructure;
-import uk.org.netex.netex.StopPlace;
 import uk.org.netex.netex.Zone_VersionStructure;
 
 @Component
-public class GtfsIfoptMapper {
+public class GtfsStopToIfoptQuayMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(GtfsIfoptMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(GtfsStopToIfoptQuayMapper.class);
 
     private static final int DECIMAL_PLACES = 8;
 
     @Autowired
     private GeometryFactory geometryFactory;
 
-    public StopPlace map(Stop stop) {
-
-        logger.debug("Mapping data from GTFS stop to IFOPT stop place {} - {}", stop.getId(), stop.getName());
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(stop.getName(), "no", ""));
-        stopPlace.setDescription(new MultilingualString(stop.getDesc(), "no", ""));
-
-        centroid(stopPlace, stop);
-
-        return stopPlace;
-    }
-    
     public Quay mapToQuay(Stop stop){
     	logger.debug("Mapping data from GTFS stop to IFOPT quay {} - {}", stop.getId(), stop.getName());
     	Quay quay = new Quay();
@@ -56,7 +41,6 @@ public class GtfsIfoptMapper {
         centroid.setLocation(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
 
         site.setCentroid(centroid);
-        //return site;
     }
 }
 
