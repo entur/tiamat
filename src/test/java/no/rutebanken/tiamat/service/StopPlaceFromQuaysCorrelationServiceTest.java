@@ -25,7 +25,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     public void quaysAreNotClose() throws Exception {
         Quay quay = quayWithCentroid(9.489552, 59.866439);
         Quay nearbyQuay = quayWithCentroid(10.488425, 59.865190);
-        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay,nearbyQuay)).isFalse();
+        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay, nearbyQuay)).isFalse();
     }
 
     /**
@@ -40,7 +40,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     public void quaysAreCloseButNotCloseEnough() throws Exception {
         Quay quay = quayWithCentroid(10.488425, 59.865190);
         Quay nearbyQuay = quayWithCentroid(10.493528, 59.858964);
-        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay,nearbyQuay)).isFalse();
+        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay, nearbyQuay)).isFalse();
     }
 
     /**
@@ -52,7 +52,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     public void quaysAreClose() throws Exception {
         Quay quay = quayWithCentroid(10.489552, 59.866439);
         Quay nearbyQuay = quayWithCentroid(10.488425, 59.865190);
-        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay,nearbyQuay)).isTrue();
+        assertThat(stopPlaceFromQuaysCorrelationService.areClose(quay, nearbyQuay)).isTrue();
     }
 
     private Quay quayWithCentroid(double x, double y) {

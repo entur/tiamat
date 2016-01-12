@@ -94,7 +94,7 @@ public class StopPlaceFromQuaysCorrelationService {
                     logger.debug("There are no quays related to stop place {} yet. Will add quay.", stopPlace.getName());
                     addQuay = true;
 
-                } else if (quayIsCloseToExistingQuays(quay, stopPlace.getQuays())){
+                } else if (quayIsCloseToExistingQuays(quay, stopPlace.getQuays())) {
 
                     logger.info("Quay {}, {} is close enough to be added",
                             quay.getName(),
@@ -104,7 +104,7 @@ public class StopPlaceFromQuaysCorrelationService {
                     logger.info("Ignoring quay {} {}", quay.getName(), quay.getCentroid().getLocation().toText());
                 }
 
-                if(addQuay) {
+                if (addQuay) {
                     logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
 
                     stopPlace.getQuays().add(quay);
@@ -114,7 +114,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
             });
 
-            if(stopPlace.getQuays().isEmpty()) {
+            if (stopPlace.getQuays().isEmpty()) {
                 logger.warn("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
             } else {
 
@@ -136,23 +136,23 @@ public class StopPlaceFromQuaysCorrelationService {
     }
 
     public boolean quayIsCloseToExistingQuays(Quay otherQuay, List<Quay> existingQuays) {
-        return existingQuays.stream().allMatch(q ->areClose(otherQuay,q));
+        return existingQuays.stream().allMatch(q -> areClose(otherQuay, q));
     }
 
     /**
      * Check if two quays are close, using the DISTANCE constant.
-     *
+     * <p>
      * http://www.vividsolutions.com/jts/javadoc/com/vividsolutions/jts/geom/Geometry.html#buffer(double)
      */
     public boolean areClose(Quay quay, Quay otherQuay) {
 
-        if(quay == null || otherQuay == null) {
+        if (quay == null || otherQuay == null) {
             return false;
         }
         Geometry buffer = quay.getCentroid().getLocation().buffer(DISTANCE);
         boolean intersects = buffer.intersects(otherQuay.getCentroid().getLocation());
 
-        if(intersects) {
+        if (intersects) {
             logger.debug("Quay {} {} is close to quay {} {}",
                     quay.getName(),
                     quay.getCentroid().getLocation().toText(),

@@ -27,7 +27,6 @@ public class PeliasReverseLookupClient {
         this.peliasReverseLookupEndpoint = peliasReverseLookupEndpoint;
     }
 
-
     public ReverseLookupResult reverseLookup(String latitude, String longitude, int size) throws IOException {
 
         StringBuilder url = new StringBuilder();
