@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
@@ -19,7 +20,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
             new StopPlaceFromQuaysCorrelationService(mock(QuayRepository.class),
                     mock(StopPlaceRepository.class),
                     geometryFactory,
-                    mock(CountyAndMunicipalityLookupService.class));
+                    mock(CountyAndMunicipalityLookupService.class), mock(NvdbSearchService.class));
 
     @Test
     public void quaysAreNotClose() throws Exception {

@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.config;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.gtfs.GtfsStopsReader;
-import no.rutebanken.tiamat.nvdb.service.NvdbSync;
+import no.rutebanken.tiamat.nvdb.service.NvdbStopPlaceRetrievalService;
 import no.rutebanken.tiamat.service.StopPlaceFromQuaysCorrelationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class BootStrap implements InitializingBean {
     private final static Logger logger = LoggerFactory.getLogger(BootStrap.class);
 
     @Autowired
-    private NvdbSync nvdbSync;
+    private NvdbStopPlaceRetrievalService nvdbStopPlaceRetrievalService;
 
     @Autowired
     private GtfsStopsReader gtfsStopsReader;
@@ -40,7 +40,7 @@ public class BootStrap implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-//       nvdbSync.fetchNvdb();
+//       nvdbStopPlaceRetrievalService.fetchNvdb();
 
         ExecutorService es = Executors.newSingleThreadExecutor();
         es.execute(() -> gtfsStopsReader.read());

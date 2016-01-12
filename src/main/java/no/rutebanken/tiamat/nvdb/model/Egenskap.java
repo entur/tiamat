@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "definisjon",
     "enumVerdi"
 })
-public class Egenskaper {
+public class Egenskap {
 
     @JsonProperty("id")
     private Integer id;

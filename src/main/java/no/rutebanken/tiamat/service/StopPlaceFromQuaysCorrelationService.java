@@ -1,9 +1,11 @@
 package no.rutebanken.tiamat.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
@@ -16,6 +18,7 @@ import uk.org.netex.netex.Quay;
 import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,15 +46,19 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
+    private final NvdbSearchService nvdbSearchService;
+
     @Autowired
     public StopPlaceFromQuaysCorrelationService(QuayRepository quayRepository,
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
-                                                CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
+                                                CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
+                                                NvdbSearchService nvdbSearchService) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.geometryFactory = geometryFactory;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
+        this.nvdbSearchService = nvdbSearchService;
     }
 
     /**
@@ -110,6 +117,13 @@ public class StopPlaceFromQuaysCorrelationService {
                     stopPlace.getQuays().add(quay);
 
                     quaysAlreadyProcessed.add(quay.getId());
+
+
+                    try {
+                        nvdbSearchService.search(quay.getName().getValue());
+                    } catch (JsonProcessingException | UnsupportedEncodingException e ) {
+                        logger.warn("Execption caught using the NDVB search service... {}", e.getMessage(), e);
+                    }
                 }
 
             });

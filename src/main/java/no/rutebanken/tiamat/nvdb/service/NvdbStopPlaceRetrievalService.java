@@ -2,7 +2,6 @@ package no.rutebanken.tiamat.nvdb.service;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.rutebanken.tiamat.nvdb.model.Egenskaper;
 import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import no.rutebanken.tiamat.nvdb.model.VegobjekterResultat;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
@@ -24,9 +23,9 @@ import java.util.stream.Collectors;
  * This service is a temporary solution for retrieval of stop place data from NVDB.
  */
 @Service
-public class NvdbSync {
+public class NvdbStopPlaceRetrievalService {
 
-    private static final Logger logger = LoggerFactory.getLogger(NvdbSync.class);
+    private static final Logger logger = LoggerFactory.getLogger(NvdbStopPlaceRetrievalService.class);
     private static final int EGENSKAP_HOLDEPLASS_NAVN = 3957;
 
     @Autowired
@@ -59,17 +58,16 @@ public class NvdbSync {
     }
 
 
-    public StopPlace mapToStopPlace(VegObjekt vegObjekt) {
-        logger.info("Mapping object {}", vegObjekt);
+    public StopPlace mapToStopPlace(VegObjekt roadObject) {
+        logger.info("Mapping object {}", roadObject);
 
         StopPlace stopPlace = new StopPlace();
 
-
-        for(Egenskaper egenskap : vegObjekt.getEgenskaper()) {
-            if (egenskap.getId().equals(EGENSKAP_HOLDEPLASS_NAVN)) {
-                stopPlace.setName(new MultilingualString(egenskap.getVerdi(), "no", ""));
-            }
-        }
+        roadObject.getEgenskaper().stream()
+                .filter(egenskap -> egenskap.getId().equals(EGENSKAP_HOLDEPLASS_NAVN))
+                .forEach(egenskap -> {
+                    stopPlace.setName(new MultilingualString(egenskap.getVerdi(), "no", ""));
+                });
 
         return stopPlace;
     }
