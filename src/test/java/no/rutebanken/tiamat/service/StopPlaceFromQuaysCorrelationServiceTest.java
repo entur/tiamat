@@ -1,7 +1,9 @@
 package no.rutebanken.tiamat.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
@@ -32,7 +34,9 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
             new StopPlaceFromQuaysCorrelationService(quayRepository,
                     stopPlaceRepository,
                     geometryFactory,
-                    mock(CountyAndMunicipalityLookupService.class), mock(NvdbSearchService.class));
+                    mock(CountyAndMunicipalityLookupService.class),
+                    mock(NvdbSearchService.class),
+                    mock(NvdbQuayAugmenter.class));
 
     @Test
     public void quaysAreNotClose() throws Exception {
@@ -111,8 +115,6 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     }
 
-
-
     @Test
     public void threeQuaysWithSameNameButDifferentLocationExpectThreeStopPlaces() {
 
@@ -143,6 +145,13 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
         assertThat(savedStopPlaces.size()).isEqualTo(3);
 
+    }
+
+    @Test
+    public void createEnvelope() {
+        Quay quay = quayWithCentroid(4.0, 5.0);
+        Envelope envelope = stopPlaceFromQuaysCorrelationService.createEnvelopeForQuay(quay);
+        assertThat(envelope).isNotNull();
     }
 
 }

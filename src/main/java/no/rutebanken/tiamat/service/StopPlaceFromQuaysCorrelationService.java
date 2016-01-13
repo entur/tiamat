@@ -2,9 +2,12 @@ package no.rutebanken.tiamat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import no.rutebanken.tiamat.nvdb.model.VegObjekt;
+import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
@@ -18,6 +21,7 @@ import uk.org.netex.netex.Quay;
 import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -50,17 +54,20 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final NvdbSearchService nvdbSearchService;
 
+    private final NvdbQuayAugmenter nvdbQuayAugmenter;
+
     @Autowired
     public StopPlaceFromQuaysCorrelationService(QuayRepository quayRepository,
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
-                                                NvdbSearchService nvdbSearchService) {
+                                                NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.geometryFactory = geometryFactory;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.nvdbSearchService = nvdbSearchService;
+        this.nvdbQuayAugmenter = nvdbQuayAugmenter;
     }
 
     /**
@@ -75,7 +82,6 @@ public class StopPlaceFromQuaysCorrelationService {
         List<Quay> quays = quayRepository.findAll();
 
         logger.trace("Got {} quays", quays.size());
-
 
         ConcurrentMap<String, List<Quay>> distinctQuays = quays.stream()
                 .collect(Collectors.groupingByConcurrent(quay -> quay.getName().getValue()));
@@ -161,15 +167,20 @@ public class StopPlaceFromQuaysCorrelationService {
             if (addQuay) {
                 logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
 
+                try {
+                    VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
+                    if(vegObjekt != null) {
+                        quay = nvdbQuayAugmenter.augmentFromNvdb(quay, vegObjekt);
+                    }
+                } catch (JsonProcessingException | UnsupportedEncodingException e) {
+                    logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
+                }
+
                 stopPlace.getQuays().add(quay);
 
                 quaysAlreadyProcessed.add(quay.getId());
 
-                try {
-                    nvdbSearchService.search(quay.getName().getValue());
-                } catch (JsonProcessingException | UnsupportedEncodingException e) {
-                    logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
-                }
+                quayRepository.save(quay);
             }
 
         });
@@ -183,11 +194,16 @@ public class StopPlaceFromQuaysCorrelationService {
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+            } catch (IOException e) {
+                logger.warn("Error loading data from Pelias: {}", e.getMessage(), e);
+            }
+
+            try {
                 stopPlaceRepository.save(stopPlace);
                 logger.debug("Created stop place number {} with name {} and {} quays (id {})",
                         stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
             } catch (Exception e) {
-                logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
+                logger.warn("Caught exception when creating stop place with name {}", quayGroupName, e);
             }
         }
     }
@@ -224,6 +240,16 @@ public class StopPlaceFromQuaysCorrelationService {
                 otherQuay.getName(),
                 otherQuay.getCentroid().getLocation().toText());
         return false;
+    }
+
+    public Envelope createEnvelopeForQuay(Quay quay) {
+
+        Geometry buffer = quay.getCentroid().getLocation().buffer(0.004);
+
+        Envelope envelope = buffer.getEnvelopeInternal();
+        logger.info("Created envelope {}",envelope.toString());
+
+        return envelope;
     }
 
     public Point calculateCentroidForStopPlace(List<Quay> quays) {
