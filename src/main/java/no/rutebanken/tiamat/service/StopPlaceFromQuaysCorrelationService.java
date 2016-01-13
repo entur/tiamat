@@ -19,12 +19,14 @@ import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * Service for generating test data by correlating quays already stored, and relate them to new stop places.
+ */
 @Service
 public class StopPlaceFromQuaysCorrelationService {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromQuaysCorrelationService.class);
@@ -63,7 +65,9 @@ public class StopPlaceFromQuaysCorrelationService {
 
     /**
      * Creates stopPlace objects based on quays by combining quays with the same
-     * name and close location
+     * name and close location.
+     *
+     * Not the most elegant implementation, but this code is only used to generate test data.
      */
     public void correlate() {
 
@@ -72,81 +76,120 @@ public class StopPlaceFromQuaysCorrelationService {
 
         logger.trace("Got {} quays", quays.size());
 
-        Map<String, List<Quay>> distinctQuays = quays.stream()
-                .collect(Collectors.groupingBy(quay -> quay.getName().getValue()));
+
+        ConcurrentMap<String, List<Quay>> distinctQuays = quays.stream()
+                .collect(Collectors.groupingByConcurrent(quay -> quay.getName().getValue()));
 
         logger.trace("Got {} distinct quays based on name", distinctQuays.size());
 
         List<String> quaysAlreadyProcessed = new ArrayList<>();
 
-        distinctQuays.keySet().forEach(quayGroupName -> {
+        distinctQuays.keySet()
+                .forEach(quayGroupName ->
+                        createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
+                                quayGroupName, quaysAlreadyProcessed));
 
-            logger.trace("Processing quay with name {}", quayGroupName);
+        int maxRemainingRuns = 10;
+        for(int i = 0; i < maxRemainingRuns; i++) {
+            Map<String, List<Quay>> remaining = findRemaining(distinctQuays, quaysAlreadyProcessed);
 
-            StopPlace stopPlace = new StopPlace();
-            stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
+            logger.info("Rerunning through {} groups with remaining quays", remaining.size());
 
-            stopPlace.setQuays(new ArrayList<>());
+            remaining.keySet()
+                    .forEach(quayGroupName ->
+                            createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
+                                    quayGroupName, quaysAlreadyProcessed));
+        }
 
-            distinctQuays.get(quayGroupName).forEach(quay -> {
-
-                boolean addQuay = false;
-
-                if (quaysAlreadyProcessed.contains(quay.getId())) {
-
-                    logger.warn("Already created quay with name {} and id {}", quay.getName(), quay.getId());
-
-                } else if (stopPlace.getQuays().isEmpty()) {
-
-                    logger.debug("There are no quays related to stop place {} yet. Will add quay.", stopPlace.getName());
-                    addQuay = true;
-
-                } else if (quayIsCloseToExistingQuays(quay, stopPlace.getQuays())) {
-
-                    logger.info("Quay {}, {} is close enough to be added",
-                            quay.getName(),
-                            quay.getCentroid().getLocation().toText());
-                    addQuay = true;
-                } else {
-                    logger.info("Ignoring quay {} {}", quay.getName(), quay.getCentroid().getLocation().toText());
-                }
-
-                if (addQuay) {
-                    logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
-
-                    stopPlace.getQuays().add(quay);
-
-                    quaysAlreadyProcessed.add(quay.getId());
-
-
-                    try {
-                        nvdbSearchService.search(quay.getName().getValue());
-                    } catch (JsonProcessingException | UnsupportedEncodingException e ) {
-                        logger.warn("Execption caught using the NDVB search service... {}", e.getMessage(), e);
-                    }
-                }
-
-            });
-
-            if (stopPlace.getQuays().isEmpty()) {
-                logger.warn("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
-            } else {
-
-                stopPlace.setCentroid(new SimplePoint());
-                stopPlace.getCentroid().setLocation(calculateCentroidForStopPlace(stopPlace.getQuays()));
-
-                try {
-                    countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
-                    stopPlaceRepository.save(stopPlace);
-                    logger.debug("Created stop place number {} with name {} and {} quays (id {})",
-                            stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
-                } catch (Exception e) {
-                    logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
-                }
-            }
-        });
 
         logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
+    }
+
+    public Map<String, List<Quay>> findRemaining(ConcurrentMap<String, List<Quay>> distinctQuays,
+                                                 List<String> quaysAlreadyProcessed) {
+
+        Map<String, List<Quay>> remaining = new HashMap<>();
+
+        for(String group : distinctQuays.keySet()) {
+            distinctQuays.get(group).stream()
+                    .filter(quay -> !quaysAlreadyProcessed.contains(quay.getId()))
+                    .forEach(quay -> {
+
+                        List<Quay> list = remaining.get(group);
+
+                        if (list == null) {
+                            remaining.put(group, new ArrayList<>(Arrays.asList(quay)));
+                        } else {
+                            list.add(quay);
+                        }
+                    });
+        }
+        return remaining;
+    }
+
+    public void createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<String> quaysAlreadyProcessed) {
+        logger.trace("Processing quay with name {}", quayGroupName);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
+
+        stopPlace.setQuays(new ArrayList<>());
+
+        quays.forEach(quay -> {
+
+            boolean addQuay = false;
+
+            if (quaysAlreadyProcessed.contains(quay.getId())) {
+
+                logger.warn("Already created quay with name {} and id {}", quay.getName(), quay.getId());
+
+            } else if (stopPlace.getQuays().isEmpty()) {
+
+                logger.debug("There are no quays related to stop place {} yet. Will add quay.", stopPlace.getName());
+                addQuay = true;
+
+            } else if (quayIsCloseToExistingQuays(quay, stopPlace.getQuays())) {
+
+                logger.info("Quay {}, {} is close enough to be added",
+                        quay.getName(),
+                        quay.getCentroid().getLocation().toText());
+                addQuay = true;
+            } else {
+                logger.info("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().toText());
+            }
+
+            if (addQuay) {
+                logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
+
+                stopPlace.getQuays().add(quay);
+
+                quaysAlreadyProcessed.add(quay.getId());
+
+                try {
+                    nvdbSearchService.search(quay.getName().getValue());
+                } catch (JsonProcessingException | UnsupportedEncodingException e) {
+                    logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
+                }
+            }
+
+        });
+
+        if (stopPlace.getQuays().isEmpty()) {
+            logger.warn("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
+        } else {
+
+            stopPlace.setCentroid(new SimplePoint());
+            stopPlace.getCentroid().setLocation(calculateCentroidForStopPlace(stopPlace.getQuays()));
+
+            try {
+                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+                stopPlaceRepository.save(stopPlace);
+                logger.debug("Created stop place number {} with name {} and {} quays (id {})",
+                        stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
+            } catch (Exception e) {
+                logger.warn("Caught exception when saving stop place with name {}", quayGroupName, e);
+            }
+        }
     }
 
     public boolean quayIsCloseToExistingQuays(Quay otherQuay, List<Quay> existingQuays) {
@@ -160,7 +203,7 @@ public class StopPlaceFromQuaysCorrelationService {
      */
     public boolean areClose(Quay quay, Quay otherQuay) {
 
-        if (quay == null || otherQuay == null) {
+        if (quay == null || otherQuay == null && quay.getCentroid() == null || otherQuay.getCentroid() == null) {
             return false;
         }
         Geometry buffer = quay.getCentroid().getLocation().buffer(DISTANCE);
@@ -185,7 +228,9 @@ public class StopPlaceFromQuaysCorrelationService {
 
     public Point calculateCentroidForStopPlace(List<Quay> quays) {
         CentroidPoint centroidPoint = new CentroidPoint();
-        quays.forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation()));
+        quays.stream()
+            .filter(quay -> quay.getCentroid() != null)
+            .forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation()));
 
         logger.debug("Created centroid for stop place based on {} quays. x: {}, y: {}", quays.size(),
                 centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);
