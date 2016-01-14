@@ -15,7 +15,7 @@ public class GeoDBInMemoryDataSourceFactory extends SingleConnectionDataSource {
 
     public GeoDBInMemoryDataSourceFactory() {
         setDriverClassName("org.h2.Driver");
-        setUrl("jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE");
+        setUrl("jdbc:h2:mem:tiamat;DB_CLOSE_ON_EXIT=FALSE");
         setSuppressClose(true);
     }
 
