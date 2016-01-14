@@ -4,10 +4,10 @@ import com.jayway.restassured.RestAssured;
 import no.rutebanken.tiamat.TiamatIntegrationTestApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,7 +25,6 @@ import static org.hamcrest.Matchers.notNullValue;
 @SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
 @WebIntegrationTest
 @ActiveProfiles("geodb")
-@Ignore
 public class StopPlaceResourceTest {
 
     @Autowired
@@ -33,6 +32,9 @@ public class StopPlaceResourceTest {
 
     @Autowired
     private QuayRepository quayRepository;
+
+    @Value("${local.server.port}")
+    private int port;
 
     @Test
     public void testXmlExportOfStopPlace() throws Exception {
@@ -48,7 +50,7 @@ public class StopPlaceResourceTest {
         stopPlaceRepository.save(stopPlace);
 
         RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 1888;
+        RestAssured.port = port;
 
         get("/jersey/stop_place/xml/" + stopPlace.getId())
                 .then()
