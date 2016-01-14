@@ -11,6 +11,7 @@ import javax.ws.rs.ApplicationPath;
 @ApplicationPath("/jersey")
 public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
+        packages("org.glassfish.jersey.jaxb;com.fasterxml.jackson.jaxrs.xml");
         register(StopPlaceResource.class);
         register(QuayResource.class);
     }
