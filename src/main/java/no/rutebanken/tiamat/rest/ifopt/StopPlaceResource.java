@@ -23,6 +23,7 @@ import uk.org.netex.netex.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Component
@@ -127,6 +128,14 @@ public class StopPlaceResource {
         }
 
         throw new WebApplicationException("Cannot find stop place with id "+simpleStopPlaceDTO.id, 400);
+    }
+
+    @GET
+    @Path("xml/{id}")
+    @Produces(MediaType.APPLICATION_XML)
+    public StopPlace getXmlStopPlace(@PathParam("id") String id) {
+        StopPlace stopPlace = stopPlaceRepository.findStopPlaceDetailed(id);
+        return stopPlace;
     }
 
     /**
