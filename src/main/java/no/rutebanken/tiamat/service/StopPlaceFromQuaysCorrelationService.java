@@ -99,6 +99,10 @@ public class StopPlaceFromQuaysCorrelationService {
         for(int i = 0; i < maxRemainingRuns; i++) {
             Map<String, List<Quay>> remaining = findRemaining(distinctQuays, quaysAlreadyProcessed);
 
+            if(remaining.isEmpty()) {
+                break;
+            }
+
             logger.info("Rerunning through {} groups with remaining quays", remaining.size());
 
             remaining.keySet()
