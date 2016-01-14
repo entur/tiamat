@@ -69,23 +69,24 @@ public class StopPlaceResource {
         // Example reading details about authenticated user
         KeycloakAuthenticationToken auth = (KeycloakAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 
-        @SuppressWarnings("unchecked")
-        KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>)auth.getPrincipal();
-        AccessToken token = principal.getKeycloakSecurityContext().getToken();
-        String email = token.getEmail();
-        String firstname = token.getGivenName();
-        String lastname = token.getFamilyName();
-        String fullname = token.getName();
-        String preferredUsername = token.getPreferredUsername();
-        List agencyids = (List) token.getOtherClaims().get("agencyid");
+        if(auth != null) {
+            @SuppressWarnings("unchecked")
+            KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>) auth.getPrincipal();
+            AccessToken token = principal.getKeycloakSecurityContext().getToken();
+            String email = token.getEmail();
+            String firstname = token.getGivenName();
+            String lastname = token.getFamilyName();
+            String fullname = token.getName();
+            String preferredUsername = token.getPreferredUsername();
+            List agencyids = (List) token.getOtherClaims().get("agencyid");
 
 
-        // all means all agencies, if not a semicolon delimited list of agencies
+            // all means all agencies, if not a semicolon delimited list of agencies
 
-        logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+ToStringBuilder.reflectionToString(agencyids));;
+            logger.info("Logged in " + principal + " with preferred username " + preferredUsername + ", name is " + firstname + " " + lastname + " and has email address " + email + " and represents agencie(s) " + ToStringBuilder.reflectionToString(agencyids));
 
-        // TODO make sure we only return data according to agencyids
-
+            // TODO make sure we only return data according to agencyids
+        }
         return auth;
     }
 
