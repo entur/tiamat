@@ -1,10 +1,9 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
+import com.jayway.restassured.RestAssured;
 import no.rutebanken.tiamat.TiamatIntegrationTestApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
-import org.apache.http.StatusLine;
-import org.apache.http.client.fluent.Request;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +16,10 @@ import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.Quay;
 import uk.org.netex.netex.StopPlace;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.jayway.restassured.RestAssured.get;
+import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
@@ -37,8 +34,6 @@ public class StopPlaceResourceTest {
     @Autowired
     private QuayRepository quayRepository;
 
-
-
     @Test
     public void testXmlExportOfStopPlace() throws Exception {
         Quay quay = new Quay();
@@ -52,42 +47,15 @@ public class StopPlaceResourceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        assertThat(stopPlaceRepository.findOne(stopPlace.getId())).isNotNull();
-        String url = "http://localhost:1888/jersey/stop_place/xml/"+stopPlace.getId();
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = 1888;
 
-        RestResponse response =  Request.Get(url)
-                .connectTimeout(10000)
-                .socketTimeout(10000)
-                .execute()
-                .handleResponse(httpResponse -> {
-
-                    RestResponse restResponse = new RestResponse();
-
-                    restResponse.statusLine = httpResponse.getStatusLine();
-
-                    System.out.println(httpResponse.getStatusLine());
-                    if(httpResponse.getEntity() != null) {
-                        BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(httpResponse.getEntity().getContent(),"UTF-8"));
-
-                        restResponse.responseBody = reader.lines().collect(Collectors.joining());
-                    }
-
-                    return restResponse;
-                });
-
-        System.out.println(response.responseBody);
-        assertThat(response).isNotNull();
-
-        assertThat(response.statusLine).isNotNull();
-        assertThat(response.statusLine.getStatusCode()).isEqualTo(200);
-
-        System.out.println(response);
+        get("/jersey/stop_place/xml/" + stopPlace.getId())
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body(notNullValue());
 
     }
 
-    private class RestResponse {
-        public String responseBody;
-        public StatusLine statusLine;
-    }
 }
