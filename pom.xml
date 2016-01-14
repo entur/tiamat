@@ -45,9 +45,7 @@
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <docker.maven.plugin.version>0.13.6</docker.maven.plugin.version>
         <docker.port.container.jolokia>8778</docker.port.container.jolokia>
-        <jackson-jaxrs-json-provider.version>2.3.2</jackson-jaxrs-json-provider.version>
-        <jackson-jaxrs-xml-provider.version>2.3.2</jackson-jaxrs-xml-provider.version>
-        <jackson-module-jaxb-annotations.version>2.3.2</jackson-module-jaxb-annotations.version>
+        <jackson-jaxrs-xml-provider.version>2.6.4</jackson-jaxrs-xml-provider.version>
 
         <httpcomponents-fluent.version>4.5.1</httpcomponents-fluent.version>
         <onebusaway-gtfs.version>1.3.4</onebusaway-gtfs.version>
@@ -95,18 +93,6 @@
 
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>${jackson-jaxrs-json-provider.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <version>${jackson-module-jaxb-annotations.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
