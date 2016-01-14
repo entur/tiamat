@@ -6,6 +6,8 @@ import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticatio
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +25,9 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+
+	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
 	 * manager.
@@ -45,7 +49,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		
+
+		logger.info("Configuring HttpSecurity");
 		// TODO update here with paths that should be secured correctly
 		http.csrf().disable()
 			.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
