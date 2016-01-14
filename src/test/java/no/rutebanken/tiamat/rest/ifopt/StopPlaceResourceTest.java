@@ -4,6 +4,7 @@ import com.jayway.restassured.RestAssured;
 import no.rutebanken.tiamat.TiamatIntegrationTestApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import static org.hamcrest.Matchers.notNullValue;
 @SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
 @WebIntegrationTest
 @ActiveProfiles("geodb")
+@Ignore
 public class StopPlaceResourceTest {
 
     @Autowired
