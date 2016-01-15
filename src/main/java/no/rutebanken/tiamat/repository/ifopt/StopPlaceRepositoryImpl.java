@@ -45,6 +45,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         graph.addAttributeNodes("roadAddress");
         graph.addAttributeNodes("parentSiteRef");
 
+        // Be aware of https://hibernate.atlassian.net/browse/HHH-10261
+
         return entityManager.find(StopPlace.class, stopPlaceId, hints(graph));
     }
 
