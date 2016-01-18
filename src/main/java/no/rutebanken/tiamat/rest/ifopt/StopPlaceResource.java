@@ -1,10 +1,7 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.jaxb.XmlJaxbAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDTO;
@@ -53,6 +50,9 @@ public class StopPlaceResource {
 
     @Autowired
     private QuayRepository quayRepository;
+
+    @Autowired
+    private XmlMapper xmlMapper;
 
     @GET
     public List<StopPlaceDTO> getStopPlaces(
@@ -150,24 +150,12 @@ public class StopPlaceResource {
 
         String xml = null;
         try {
-            xml = createXmlMapper().writeValueAsString(stopPlace);
+            xml = xmlMapper.writeValueAsString(stopPlace);
         } catch (JsonProcessingException e) {
             logger.warn("Error serializing stop place to xml", e);
         }
 
         return Response.ok(xml).build();
-    }
-
-    private XmlMapper createXmlMapper() {
-        XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.setAnnotationIntrospector(new XmlJaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
-        xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        xmlMapper.getSerializationConfig()
-              //  .with(new JacksonAnnotationIntrospector())
-                .with(new JaxbAnnotationIntrospector(xmlMapper.getTypeFactory()))
-                .with(new XmlJaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
-
-        return  xmlMapper;
     }
 
 
@@ -182,7 +170,7 @@ public class StopPlaceResource {
 
         String xml = null;
         try {
-            xml = createXmlMapper().writeValueAsString(stopPlaces);
+            xml = xmlMapper.writeValueAsString(stopPlaces);
         } catch (JsonProcessingException e) {
             logger.warn("Error serializing stop place to xml", e);
         }
