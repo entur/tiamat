@@ -71,7 +71,7 @@ public class StopPlaceResourceTest {
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
 
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 11)))));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
         stopPlaceRepository.save(stopPlace);
 
         RestAssured.baseURI = "http://localhost";

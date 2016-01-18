@@ -155,6 +155,7 @@ public class LocationStructure {
      *     {@link BigDecimal }
      *     
      */
+    @XmlElement(name = "Latitude")
     public BigDecimal getLatitude() {
         if (geometryPoint != null) {
             return new BigDecimal(String.valueOf(geometryPoint.getY()));
