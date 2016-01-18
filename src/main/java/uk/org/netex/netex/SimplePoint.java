@@ -8,17 +8,12 @@
 
 package uk.org.netex.netex;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.vividsolutions.jts.geom.Point;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.persistence.*;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -53,6 +48,13 @@ public class SimplePoint
     extends EntityInVersionStructure
 {
 
+    public SimplePoint(Point location) {
+        this.location = location;
+    }
+
+    public SimplePoint() {
+    }
+
     @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
@@ -61,7 +63,9 @@ public class SimplePoint
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected LocationStructure location;*/
 
+    @JsonBackReference(value = "envelope")
     @Type(type="org.hibernate.spatial.GeometryType")
+    @XmlTransient
     private Point location;
 
     /**

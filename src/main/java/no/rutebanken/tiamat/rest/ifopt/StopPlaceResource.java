@@ -1,9 +1,15 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.jaxb.XmlJaxbAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.keycloak.KeycloakPrincipal;
@@ -18,17 +24,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.org.netex.netex.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Component
 @Produces("application/json")
 @Path("/stop_place")
+@Transactional
 public class StopPlaceResource {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceResource.class);
@@ -41,6 +50,9 @@ public class StopPlaceResource {
 
     @Autowired
     private StopPlaceDisassembler stopPlaceDisassembler;
+
+    @Autowired
+    private QuayRepository quayRepository;
 
     @GET
     public List<StopPlaceDTO> getStopPlaces(
@@ -133,9 +145,71 @@ public class StopPlaceResource {
     @GET
     @Path("xml/{id}")
     @Produces(MediaType.APPLICATION_XML)
-    public StopPlace getXmlStopPlace(@PathParam("id") String id) {
+    public Response getXmlStopPlace(@PathParam("id") String id) {
         StopPlace stopPlace = stopPlaceRepository.findStopPlaceDetailed(id);
-        return stopPlace;
+
+        String xml = null;
+        try {
+            xml = createXmlMapper().writeValueAsString(stopPlace);
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing stop place to xml", e);
+        }
+
+        return Response.ok(xml).build();
+    }
+
+    private XmlMapper createXmlMapper() {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.setAnnotationIntrospector(new XmlJaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
+        xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        xmlMapper.getSerializationConfig()
+              //  .with(new JacksonAnnotationIntrospector())
+                .with(new JaxbAnnotationIntrospector(xmlMapper.getTypeFactory()))
+                .with(new XmlJaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
+
+        return  xmlMapper;
+    }
+
+
+    @GET
+    @Path("xml")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getAllStopPLaces() {
+
+        //Without streaming because of LazyInstantiationException
+        Iterable<StopPlace> stopPlaces = stopPlaceRepository.findAll();
+
+
+        String xml = null;
+        try {
+            xml = createXmlMapper().writeValueAsString(stopPlaces);
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing stop place to xml", e);
+        }
+
+        return Response.ok(xml).build();
+    }
+
+    @POST
+    @Path("xml")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String importStopPlaces(List<StopPlace> stopPlaces) {
+
+        logger.info("Importing {} stop places", stopPlaces.size());
+
+        stopPlaces.stream().filter(stopPlace -> stopPlace.getId() != null)
+                .forEach(stopPlace -> {
+                    logger.info("Delete stop place with ID {}", stopPlace.getId());
+                   // stopPlaceRepository.delete(stopPlace);
+                  //  stopPlace.getCentroid().setId(null);
+                  //  stopPlace.setId(null);
+                    stopPlace.getQuays().stream().peek(quay -> logger.info("Saving quay with id {}", quay.getId())).forEach(quayRepository::save);
+                });
+
+
+        stopPlaceRepository.save(stopPlaces);
+        return stopPlaces.size()+ " saved";
     }
 
     /**

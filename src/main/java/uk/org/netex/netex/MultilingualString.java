@@ -8,15 +8,10 @@
 
 package uk.org.netex.netex;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -51,6 +46,7 @@ public class MultilingualString {
 
     @Id
     @GeneratedValue
+    @XmlTransient
     private long id;
 
     @XmlValue
@@ -84,7 +80,6 @@ public class MultilingualString {
      *     {@link String }
      *     
      */
-    @JsonValue
     public String getValue() {
         return value;
     }
