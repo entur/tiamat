@@ -30,7 +30,7 @@ public class GtfsStopToIfoptQuayMapperTest {
         Quay quay = new Quay();
         stopToQuayMapper.centroid(quay, stop);
 
-        Point locationStructure = quay.getCentroid().getLocation();
+        Point locationStructure = quay.getCentroid().getLocation().getGeometryPoint();
 
         assertThat(locationStructure.getY()).isEqualTo(gtfsLatitude);
 
@@ -47,7 +47,7 @@ public class GtfsStopToIfoptQuayMapperTest {
         Quay quay = new Quay();
         stopToQuayMapper.centroid(quay, stop);
 
-        Point locationStructure = quay.getCentroid().getLocation();
+        Point locationStructure = quay.getCentroid().getLocation().getGeometryPoint();
 
         assertThat(locationStructure.getX()).isEqualTo(gtfsLongitude);
     }

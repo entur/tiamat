@@ -14,10 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -159,10 +156,10 @@ public class StopPlaceFromQuaysCorrelationService {
 
                 logger.info("Quay {}, {} is close enough to be added",
                         quay.getName(),
-                        quay.getCentroid().getLocation().toText());
+                        quay.getCentroid().getLocation().getGeometryPoint().toText());
                 addQuay = true;
             } else {
-                logger.info("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().toText());
+                logger.info("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().getGeometryPoint().toText());
             }
 
             if (addQuay) {
@@ -191,7 +188,8 @@ public class StopPlaceFromQuaysCorrelationService {
         } else {
 
             stopPlace.setCentroid(new SimplePoint());
-            stopPlace.getCentroid().setLocation(calculateCentroidForStopPlace(stopPlace.getQuays()));
+            stopPlace.getCentroid().setLocation(new LocationStructure());
+            stopPlace.getCentroid().getLocation().setGeometryPoint(calculateCentroidForStopPlace(stopPlace.getQuays()));
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
@@ -223,29 +221,29 @@ public class StopPlaceFromQuaysCorrelationService {
         if (quay == null || otherQuay == null && quay.getCentroid() == null || otherQuay.getCentroid() == null) {
             return false;
         }
-        Geometry buffer = quay.getCentroid().getLocation().buffer(DISTANCE);
-        boolean intersects = buffer.intersects(otherQuay.getCentroid().getLocation());
+        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(DISTANCE);
+        boolean intersects = buffer.intersects(otherQuay.getCentroid().getLocation().getGeometryPoint());
 
         if (intersects) {
             logger.debug("Quay {} {} is close to quay {} {}",
                     quay.getName(),
-                    quay.getCentroid().getLocation().toText(),
+                    quay.getCentroid().getLocation().getGeometryPoint().toText(),
                     otherQuay.getName(),
-                    otherQuay.getCentroid().getLocation().toText());
+                    otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
             return true;
         }
 
         logger.debug("Quay {} {} is NOT close to quay {} {}",
                 quay.getName(),
-                quay.getCentroid().getLocation().toText(),
+                quay.getCentroid().getLocation().getGeometryPoint().toText(),
                 otherQuay.getName(),
-                otherQuay.getCentroid().getLocation().toText());
+                otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
         return false;
     }
 
     public Envelope createEnvelopeForQuay(Quay quay) {
 
-        Geometry buffer = quay.getCentroid().getLocation().buffer(0.004);
+        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(0.004);
 
         Envelope envelope = buffer.getEnvelopeInternal();
         logger.info("Created envelope {}",envelope.toString());
@@ -257,7 +255,7 @@ public class StopPlaceFromQuaysCorrelationService {
         CentroidPoint centroidPoint = new CentroidPoint();
         quays.stream()
             .filter(quay -> quay.getCentroid() != null)
-            .forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation()));
+            .forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation().getGeometryPoint()));
 
         logger.debug("Created centroid for stop place based on {} quays. x: {}, y: {}", quays.size(),
                 centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);

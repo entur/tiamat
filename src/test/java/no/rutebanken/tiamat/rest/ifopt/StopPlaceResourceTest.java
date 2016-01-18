@@ -16,10 +16,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.*;
 
 import java.util.ArrayList;
 
@@ -74,7 +71,7 @@ public class StopPlaceResourceTest {
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
 
-        stopPlace.setCentroid(new SimplePoint(geometryFactory.createPoint(new Coordinate(60, 11))));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 11)))));
         stopPlaceRepository.save(stopPlace);
 
         RestAssured.baseURI = "http://localhost";
@@ -108,7 +105,7 @@ public class StopPlaceResourceTest {
         stopPlace.getQuays().add(quay);
 
         // Geometry factory needs JsonBackReference annotation
-        stopPlace.setCentroid(new SimplePoint(geometryFactory.createPoint(new Coordinate(60, 11))));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 11)))));
 
         stopPlaceRepository.save(stopPlace);
 

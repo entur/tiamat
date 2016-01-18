@@ -9,10 +9,7 @@ import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.junit.Test;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
+import uk.org.netex.netex.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +72,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     private Quay quayWithCentroid(double x, double y) {
         Quay quay = new Quay();
         quay.setCentroid(new SimplePoint());
-        quay.getCentroid().setLocation(geometryFactory.createPoint(new Coordinate(x, y, 0)));
+        quay.getCentroid().setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(x, y, 0))));
         return quay;
     }
 

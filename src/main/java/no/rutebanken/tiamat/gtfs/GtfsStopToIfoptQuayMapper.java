@@ -7,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.Zone_VersionStructure;
+import uk.org.netex.netex.*;
 
 @Component
 public class GtfsStopToIfoptQuayMapper {
@@ -38,7 +35,7 @@ public class GtfsStopToIfoptQuayMapper {
 
         logger.trace("Setting location for {} latitude: {}, longitude: {}", site.getName(), stop.getLat(), stop.getLon());
 
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat()))));
 
         site.setCentroid(centroid);
     }

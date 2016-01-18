@@ -35,7 +35,7 @@ public class CountyAndMunicipalityLookupService {
      */
     public void populateCountyAndMunicipality(StopPlace stopPlace) throws IOException {
 
-        Point point = stopPlace.getCentroid().getLocation();
+        Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
 
         ReverseLookupResult reverseLookupResult = peliasReverseLookupClient.reverseLookup(String.valueOf(point.getY()),
                 String.valueOf(point.getX()), 1);

@@ -8,12 +8,14 @@
 
 package uk.org.netex.netex;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.vividsolutions.jts.geom.Point;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -48,7 +50,7 @@ public class SimplePoint
     extends EntityInVersionStructure
 {
 
-    public SimplePoint(Point location) {
+    public SimplePoint(LocationStructure location) {
         this.location = location;
     }
 
@@ -59,14 +61,9 @@ public class SimplePoint
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString name;
 
-/*    @XmlElement(name = "Location")
+    @XmlElement(name = "Location")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected LocationStructure location;*/
-
-    @JsonBackReference(value = "envelope")
-    @Type(type="org.hibernate.spatial.GeometryType")
-    @XmlTransient
-    private Point location;
+    protected LocationStructure location;
 
     /**
      * Gets the value of the name property.
@@ -100,7 +97,7 @@ public class SimplePoint
      *     {@link LocationStructure }
      *     
      */
-    public Point getLocation() {
+    public LocationStructure getLocation() {
         return location;
     }
 
@@ -112,7 +109,7 @@ public class SimplePoint
      *     {@link LocationStructure }
      *     
      */
-    public void setLocation(Point value) {
+    public void setLocation(LocationStructure value) {
         this.location = value;
     }
 

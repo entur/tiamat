@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.org.netex.netex.LocationStructure;
 import uk.org.netex.netex.SimplePoint;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -29,7 +30,7 @@ public class SimplePointAssemblerTest {
 
         SimplePoint simplePoint = new SimplePoint();
 
-        simplePoint.setLocation(geometryFactory.createPoint(new Coordinate(longitude, 0.0)));
+        simplePoint.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, 0.0))));
 
         SimplePointDTO simplePointDTO = simplePointAssembler.assemble(simplePoint);
 
