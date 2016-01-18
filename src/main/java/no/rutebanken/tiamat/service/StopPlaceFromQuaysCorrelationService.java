@@ -1,12 +1,10 @@
 package no.rutebanken.tiamat.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
@@ -22,7 +20,6 @@ import uk.org.netex.netex.SimplePoint;
 import uk.org.netex.netex.StopPlace;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -171,7 +168,7 @@ public class StopPlaceFromQuaysCorrelationService {
             if (addQuay) {
                 logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
 
-                try {
+              /*  try {
                     VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
                     if(vegObjekt != null) {
                         quay = nvdbQuayAugmenter.augmentFromNvdb(quay, vegObjekt);
@@ -179,7 +176,7 @@ public class StopPlaceFromQuaysCorrelationService {
                 } catch (JsonProcessingException | UnsupportedEncodingException e) {
                     logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
                 }
-
+                */
                 stopPlace.getQuays().add(quay);
 
                 quaysAlreadyProcessed.add(quay.getId());
