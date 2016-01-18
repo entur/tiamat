@@ -73,16 +73,12 @@ public class StopPlaceRepositoryImplTest {
         double longitude = 11.00;
         Pageable pageable = new PageRequest(0, 10);
 
-
-        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
-        System.out.println(result.getContent().size());
-
         centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
 
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 
-        result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
 
         assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
     }
