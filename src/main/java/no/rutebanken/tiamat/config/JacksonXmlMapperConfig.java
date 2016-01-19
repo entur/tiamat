@@ -19,6 +19,8 @@ public class JacksonXmlMapperConfig {
                 .with(new JaxbAnnotationIntrospector(xmlMapper.getTypeFactory()))
                 .with(new XmlJaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
 
+        xmlMapper.getDeserializationConfig()
+                .with(new JaxbAnnotationIntrospector(xmlMapper.getTypeFactory()));
         return xmlMapper;
     }
 }
