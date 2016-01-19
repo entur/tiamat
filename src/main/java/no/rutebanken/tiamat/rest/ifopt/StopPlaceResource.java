@@ -173,6 +173,7 @@ public class StopPlaceResource {
 
         String xml = null;
         try {
+            // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
             xml = xmlMapper.writeValueAsString(stopPlaces);
         } catch (JsonProcessingException e) {
             logger.warn("Error serializing stop place to xml", e);
