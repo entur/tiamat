@@ -19,8 +19,8 @@ import uk.org.netex.netex.StopPlace;
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatSecurityConfig.class),
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatApplication.class)
 } )
-public class TiamatIntegrationTestApplication {
+public class TiamatTestApplication {
     public static void main(String[] args) {
-        SpringApplication.run(TiamatIntegrationTestApplication.class, args);
+        SpringApplication.run(TiamatTestApplication.class, args);
     }
 }

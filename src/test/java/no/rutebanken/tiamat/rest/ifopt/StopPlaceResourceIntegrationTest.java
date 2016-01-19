@@ -4,7 +4,7 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import no.rutebanken.tiamat.TiamatIntegrationTestApplication;
+import no.rutebanken.tiamat.TiamatTestApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.junit.Before;
@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.hasXPath;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
+@SpringApplicationConfiguration(classes = TiamatTestApplication.class)
 @WebIntegrationTest
 @ActiveProfiles("geodb")
 public class StopPlaceResourceIntegrationTest {
