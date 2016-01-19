@@ -87,6 +87,7 @@ public class LocationStructure {
    // @GenericGenerator(name = "uuid", strategy = "uuid2")
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @XmlTransient
     protected long id;
 
     @XmlAttribute(name = "srsName")
@@ -312,11 +313,5 @@ public class LocationStructure {
 
     public void setGeometryPoint(Point geometryPoint) {
         this.geometryPoint = geometryPoint;
-    }
-
-    @XmlTransient
-    @Transient
-    public void setGeometryFactory(GeometryFactory geometryFactory) {
-        this.geometryFactory = geometryFactory;
     }
 }

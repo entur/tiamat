@@ -21,7 +21,6 @@ public class LocationStructureTest {
     public void testGeometrySettersAndGetters() {
 
         LocationStructure locationStructure = new LocationStructure();
-        locationStructure.setGeometryFactory(geometryFactory);
 
         BigDecimal longitude = new BigDecimal("5.0");
         BigDecimal latitude = new BigDecimal("60.0");
