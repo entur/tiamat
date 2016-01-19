@@ -112,7 +112,8 @@ public class LocationStructure {
 
     /**
      * Gets the value of the longitude property.
-     * TODO: Find a more elegant solution to geometry point, and allow this class to be closer to a java bean.
+     * TODO: Find a more elegant solution to geometry point
+     * Allow this class to be closer to a java bean with minimal logic.
      * 
      * @return
      *     possible object is
@@ -136,7 +137,7 @@ public class LocationStructure {
      *     {@link BigDecimal }
      *     
      */
-    @XmlElement(name = "Latitude")
+    @XmlElement(name = "Longitude")
     public void setLongitude(BigDecimal longitude) {
         double latitude;
         if(geometryPoint != null) {
@@ -144,7 +145,7 @@ public class LocationStructure {
         } else {
             latitude = 0;
         }
-        this.geometryPoint = geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude));
+        geometryPoint = geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude));
     }
 
     /**
@@ -171,6 +172,7 @@ public class LocationStructure {
      *     {@link BigDecimal }
      *     
      */
+    @XmlElement(name = "Latitude")
     public void setLatitude(BigDecimal latitude) {
         double longitude;
         if(geometryPoint != null) {
@@ -178,7 +180,7 @@ public class LocationStructure {
         } else {
             longitude = 0;
         }
-        this.geometryPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude.doubleValue()));
+        geometryPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude.doubleValue()));
     }
 
     /**
