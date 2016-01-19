@@ -8,12 +8,9 @@
 
 package uk.org.netex.netex;
 
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -37,26 +34,27 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "stopPlace"
+        "stopPlaces"
 })
+@XmlRootElement(name = "stopPlaces")
 public class StopPlaces {
 
     @XmlElement(name = "StopPlace")
-    protected List<StopPlace> stopPlace;
+    protected List<StopPlace> stopPlaces;
 
     /**
-     * Gets the value of the stopPlace property.
+     * Gets the value of the stopPlaces property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the stopPlace property.
+     * This is why there is not a <CODE>set</CODE> method for the stopPlaces property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getStopPlace().add(newItem);
+     *    getStopPlaces().add(newItem);
      * </pre>
      * 
      * 
@@ -66,11 +64,11 @@ public class StopPlaces {
      * 
      * 
      */
-    public List<StopPlace> getStopPlace() {
-        if (stopPlace == null) {
-            stopPlace = new ArrayList<StopPlace>();
+    public List<StopPlace> getStopPlaces() {
+        if (stopPlaces == null) {
+            stopPlaces = new ArrayList<>();
         }
-        return this.stopPlace;
+        return this.stopPlaces;
     }
 
 }

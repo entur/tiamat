@@ -165,8 +165,11 @@ public class StopPlaceResource {
     public Response getAllStopPLaces() {
 
         //Without streaming because of LazyInstantiationException
-        Iterable<StopPlace> stopPlaces = stopPlaceRepository.findAll();
+        Iterable<StopPlace> iterableStopPlaces = stopPlaceRepository.findAll();
 
+        StopPlaces stopPlaces = new StopPlaces();
+        // TODO: Avoid iterating through stop places before serializing.
+        iterableStopPlaces.forEach(stopPlace -> stopPlaces.getStopPlaces().add(stopPlace));
 
         String xml = null;
         try {
@@ -182,22 +185,13 @@ public class StopPlaceResource {
     @Path("xml")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
-    public String importStopPlaces(List<StopPlace> stopPlaces) {
+    public String importStopPlaces(StopPlaces stopPlaces) {
 
-        logger.info("Importing {} stop places", stopPlaces.size());
-
-        stopPlaces.stream().filter(stopPlace -> stopPlace.getId() != null)
-                .forEach(stopPlace -> {
-                    logger.info("Delete stop place with ID {}", stopPlace.getId());
-                   // stopPlaceRepository.delete(stopPlace);
-                  //  stopPlace.getCentroid().setId(null);
-                  //  stopPlace.setId(null);
-                    stopPlace.getQuays().stream().peek(quay -> logger.info("Saving quay with id {}", quay.getId())).forEach(quayRepository::save);
-                });
+        logger.info("Importing {} stop places", stopPlaces.getStopPlaces().size());
 
 
-        stopPlaceRepository.save(stopPlaces);
-        return stopPlaces.size()+ " saved";
+        stopPlaceRepository.save(stopPlaces.getStopPlaces());
+        return stopPlaces.getStopPlaces().size() + " saved";
     }
 
     /**

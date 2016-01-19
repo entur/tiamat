@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatIntegrationTestApplication;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +23,7 @@ import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasXPath;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
@@ -43,6 +42,12 @@ public class StopPlaceResourceTest {
 
     @Value("${local.server.port}")
     private int port;
+
+    @Before
+    public void configureRestAssured() {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = port;
+    }
 
     @Test
     public void testXmlExportOfStopPlaceWithTwoQuays() throws Exception {
@@ -74,9 +79,6 @@ public class StopPlaceResourceTest {
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
         stopPlaceRepository.save(stopPlace);
 
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-
         get("/jersey/stop_place/xml/" + stopPlace.getId())
                 .then()
                 .log().body()
@@ -91,12 +93,34 @@ public class StopPlaceResourceTest {
 
     }
 
+    @Test
+    public void testXmlExportOfMultipleStopPlaces() throws Exception {
+
+        StopPlace firstStopPlace = new StopPlace();
+        String firstStopPlaceName = "first stop place name";
+        firstStopPlace.setName(new MultilingualString(firstStopPlaceName, "en", ""));
+        firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
+        stopPlaceRepository.save(firstStopPlace);
+
+        StopPlace secondStopPlace = new StopPlace();
+        secondStopPlace.setName(new MultilingualString("second stop place name", "en", ""));
+        stopPlaceRepository.save(secondStopPlace);
+
+
+        get("/jersey/stop_place/xml/")
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body(notNullValue())
+                .assertThat()
+                .body(hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
+    }
+
     @Ignore
     @Test
     public void testXmlExportImportOfStopPlaces() throws Exception {
         Quay quay = new Quay();
         quay.setName(new MultilingualString("q", "en", ""));
-//quay.setCentroid(new SimplePoint());
         quayRepository.save(quay);
 
         StopPlace stopPlace = new StopPlace();
@@ -105,12 +129,9 @@ public class StopPlaceResourceTest {
         stopPlace.getQuays().add(quay);
 
         // Geometry factory needs JsonBackReference annotation
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 11)))));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(11, 60)))));
 
         stopPlaceRepository.save(stopPlace);
-
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
 
         String xml =
                 get("/jersey/stop_place/xml")
