@@ -29,7 +29,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
@@ -185,14 +187,24 @@ public class StopPlaceResource {
     @POST
     @Path("xml")
     @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String importStopPlaces(StopPlaces stopPlaces) {
+    @Produces(MediaType.APPLICATION_XML)
+    public List<String> importStopPlaces(String xml) throws IOException {
+
+        // Using xml mapper directly because of issues registering it properly in JerseyConfig
+        logger.trace("Got the following xml\n{}", xml);
+
+        StopPlaces stopPlaces;
+        try {
+            stopPlaces = xmlMapper.readValue(xml, StopPlaces.class);
+        } catch (IOException e) {
+            logger.warn("Error deserializing stop places {}", e.getMessage(), e);
+            throw e;
+        }
 
         logger.info("Importing {} stop places", stopPlaces.getStopPlaces().size());
 
-
         stopPlaceRepository.save(stopPlaces.getStopPlaces());
-        return stopPlaces.getStopPlaces().size() + " saved";
+        return stopPlaces.getStopPlaces().stream().map(EntityStructure::getId).collect(Collectors.toList());
     }
 
     /**

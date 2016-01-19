@@ -31,13 +31,15 @@ import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static com.jayway.restassured.path.xml.XmlPath.from;
+import static org.hamcrest.Matchers.hasXPath;
+import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatIntegrationTestApplication.class)
 @WebIntegrationTest
 @ActiveProfiles("geodb")
-public class StopPlaceResourceTest {
+public class StopPlaceResourceIntegrationTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -114,7 +116,6 @@ public class StopPlaceResourceTest {
         secondStopPlace.setName(new MultilingualString("second stop place name", "en", ""));
         stopPlaceRepository.save(secondStopPlace);
 
-
         get("/jersey/stop_place/xml/")
                 .then()
                 .log().body()
@@ -124,7 +125,6 @@ public class StopPlaceResourceTest {
                 .body(hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
     }
 
-    @Ignore
     @Test
     public void testXmlExportImportOfStopPlaces() throws Exception {
         Quay quay = new Quay();
@@ -140,22 +140,34 @@ public class StopPlaceResourceTest {
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(11, 60)))));
 
         stopPlaceRepository.save(stopPlace);
+        System.out.println(stopPlace.getId());
 
-        String xml =
-                get("/jersey/stop_place/xml")
+        // Export
+        String xml = get("/jersey/stop_place/xml")
                         .then()
                         .log().body()
                         .statusCode(200)
                         .body(notNullValue())
                         .extract().body().asString();
 
-        given()
+        stopPlaceRepository.delete(stopPlace);
+
+        // Post it back
+        String response = given()
                 .contentType(ContentType.XML)
                 .content(xml)
                 .when()
                 .post("jersey/stop_place/xml")
                 .then()
-                .body(containsString("OK"));
+                .extract()
+                .body()
+                .asString();
+
+
+        String createdStopPlaceId = from(response).get("stopPlaces[0]").toString();
+        System.out.println("Got this id back: " + createdStopPlaceId);
+
+        // assertThat(stopPlaceRepository.findOne(createdStopPlaceId)).isNotNull();
 
     }
 
