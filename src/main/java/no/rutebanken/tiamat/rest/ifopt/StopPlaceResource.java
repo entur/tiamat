@@ -203,6 +203,11 @@ public class StopPlaceResource {
 
         logger.info("Importing {} stop places", stopPlaces.getStopPlaces().size());
 
+        stopPlaces.getStopPlaces()
+                .stream()
+                .flatMap(stopPlace -> stopPlace.getQuays().stream())
+                .forEach(quayRepository::save);
+
         stopPlaceRepository.save(stopPlaces.getStopPlaces());
         return stopPlaces.getStopPlaces().stream().map(EntityStructure::getId).collect(Collectors.toList());
     }
