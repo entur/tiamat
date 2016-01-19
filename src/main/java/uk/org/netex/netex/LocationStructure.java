@@ -11,9 +11,9 @@ package uk.org.netex.netex;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import net.opengis.gml._3.DirectPositionType;
 import org.hibernate.annotations.Type;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -66,6 +66,9 @@ import java.math.BigDecimal;
 @Table(name = "location")
 public class LocationStructure {
 
+    private static final int SRID = 4326;
+
+
     @XmlElement(name = "Altitude")
     @Transient
     protected BigDecimal altitude;
@@ -97,10 +100,10 @@ public class LocationStructure {
 
     /**
      * TODO: Do not require geometry factory here.
+     * See also GeometryFactory
      */
     @XmlTransient
-    @Autowired
-    private GeometryFactory geometryFactory;
+    private static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
 
     public LocationStructure(Point geometryPoint) {
         this.geometryPoint = geometryPoint;
