@@ -17,8 +17,16 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.xml.sax.SAXException;
 import uk.org.netex.netex.*;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.get;
@@ -149,8 +157,15 @@ public class StopPlaceResourceTest {
                 .then()
                 .body(containsString("OK"));
 
+    }
 
-
+    @Ignore
+    @Test
+    public void validateStopPlacesXmlAgainstXsd() throws IOException, SAXException {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final Schema schema = schemaFactory.newSchema(new URL("https://raw.githubusercontent.com/StichtingOpenGeo/NeTEx/master/xsd/ifopt.xsd"));
+        final Validator validator = schema.newValidator();
+        validator.validate(new StreamSource("http://localhost:1888/jersey/stop_place/xml"));
     }
 
 }
