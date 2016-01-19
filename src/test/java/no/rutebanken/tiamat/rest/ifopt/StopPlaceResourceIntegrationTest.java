@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.xml.XmlPath.from;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.hasXPath;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -152,6 +153,10 @@ public class StopPlaceResourceIntegrationTest {
 
         stopPlaceRepository.delete(stopPlace);
 
+        // Remove the id to save again like fresh
+        xml = xml.replaceAll("id=\"[a-z0-9-]*\"", "");
+        System.out.println("Removed IDs from xml: " + xml);
+
         // Post it back
         String response = given()
                 .contentType(ContentType.XML)
@@ -163,12 +168,13 @@ public class StopPlaceResourceIntegrationTest {
                 .body()
                 .asString();
 
-
         String createdStopPlaceId = from(response).get("stopPlaces[0]").toString();
         System.out.println("Got this id back: " + createdStopPlaceId);
 
-        // assertThat(stopPlaceRepository.findOne(createdStopPlaceId)).isNotNull();
-
+        StopPlace stopPlaceImportedFromXml = stopPlaceRepository.findOne(createdStopPlaceId);
+        assertThat(stopPlaceImportedFromXml).isNotNull();
+        assertThat(stopPlaceImportedFromXml.getQuays()).hasSize(stopPlace.getQuays().size());
+        System.out.println(stopPlaceImportedFromXml.getQuays().get(0).getId());
     }
 
     @Ignore
