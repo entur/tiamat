@@ -78,7 +78,7 @@ public class StopPlaceAssemblerTest {
     }
 
     @Test
-    public void testAssembleMunicipalityNullPointer() throws Exception {
+    public void testAssembleMunicipalityNullName() throws Exception {
 
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
         StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
@@ -90,6 +90,21 @@ public class StopPlaceAssemblerTest {
         StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
 
         when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(municipality);
+
+        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+    }
+
+    @Test
+    public void testAssembleMunicipalityNull() throws Exception {
+
+        TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+
+        TopographicPlaceRefStructure municipalityReference = topographicRef("123");
+
+        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
+
+        when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(null);
 
         stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
     }
