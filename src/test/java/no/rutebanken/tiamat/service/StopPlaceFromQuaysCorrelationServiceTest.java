@@ -33,7 +33,8 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
                     geometryFactory,
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
-                    mock(NvdbQuayAugmenter.class));
+                    mock(NvdbQuayAugmenter.class),
+                    Integer.MAX_VALUE);
 
     @Test
     public void quaysAreNotClose() throws Exception {

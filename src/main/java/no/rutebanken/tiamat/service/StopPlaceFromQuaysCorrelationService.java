@@ -51,8 +51,6 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final NvdbQuayAugmenter nvdbQuayAugmenter;
 
-    @Autowired
-    @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10}")
     private int maxLimit;
 
     @Autowired
@@ -60,13 +58,15 @@ public class StopPlaceFromQuaysCorrelationService {
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
-                                                NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter) {
+                                                NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
+                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10}") int maxLimit) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.geometryFactory = geometryFactory;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.nvdbSearchService = nvdbSearchService;
         this.nvdbQuayAugmenter = nvdbQuayAugmenter;
+        this.maxLimit = maxLimit;
     }
 
     /**
@@ -89,7 +89,8 @@ public class StopPlaceFromQuaysCorrelationService {
 
         List<String> quaysAlreadyProcessed = new ArrayList<>();
 
-        createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
+        boolean stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
+        if (stop) return;
 
         int maxRemainingRuns = 10;
         for(int i = 0; i < maxRemainingRuns; i++) {
@@ -101,22 +102,28 @@ public class StopPlaceFromQuaysCorrelationService {
             }
 
             logger.info("Rerunning through {} groups with remaining quays", remaining.size());
-            createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
+            stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
+            if (stop) return;
         }
 
 
         logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
     }
 
-    public void createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
+    /**
+     * @return true if max limit has been reached.
+     */
+    public boolean createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
                                          List<String> quaysAlreadyProcessed ) {
         for(String quayGroupName : distinctQuays.keySet()) {
             createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
                     quayGroupName, quaysAlreadyProcessed);
             if(stopPlaceCounter.get() >= maxLimit) {
-                logger.info("stopPlaceCounter: {}, maxLimit: {}.", stopPlaceCounter, maxLimit);
+                logger.info("stopPlaceCounter: {}, maxLimit: {}. Stopping", stopPlaceCounter, maxLimit);
+                return true;
             }
         }
+        return false;
 
     }
 
