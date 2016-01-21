@@ -13,6 +13,7 @@ import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.org.netex.netex.*;
 
@@ -51,6 +52,10 @@ public class StopPlaceFromQuaysCorrelationService {
     private final NvdbQuayAugmenter nvdbQuayAugmenter;
 
     @Autowired
+    @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10}")
+    private int maxLimit;
+
+    @Autowired
     public StopPlaceFromQuaysCorrelationService(QuayRepository quayRepository,
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
@@ -84,29 +89,35 @@ public class StopPlaceFromQuaysCorrelationService {
 
         List<String> quaysAlreadyProcessed = new ArrayList<>();
 
-        distinctQuays.keySet()
-                .forEach(quayGroupName ->
-                        createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
-                                quayGroupName, quaysAlreadyProcessed));
+        createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
 
         int maxRemainingRuns = 10;
         for(int i = 0; i < maxRemainingRuns; i++) {
             Map<String, List<Quay>> remaining = findRemaining(distinctQuays, quaysAlreadyProcessed);
 
             if(remaining.isEmpty()) {
+                logger.info("No remaining groups. Stopping.");
                 break;
             }
 
             logger.info("Rerunning through {} groups with remaining quays", remaining.size());
-
-            remaining.keySet()
-                    .forEach(quayGroupName ->
-                            createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
-                                    quayGroupName, quaysAlreadyProcessed));
+            createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
         }
 
 
         logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
+    }
+
+    public void createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
+                                         List<String> quaysAlreadyProcessed ) {
+        for(String quayGroupName : distinctQuays.keySet()) {
+            createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
+                    quayGroupName, quaysAlreadyProcessed);
+            if(stopPlaceCounter.get() >= maxLimit) {
+                logger.info("stopPlaceCounter: {}, maxLimit: {}.", stopPlaceCounter, maxLimit);
+            }
+        }
+
     }
 
     public Map<String, List<Quay>> findRemaining(ConcurrentMap<String, List<Quay>> distinctQuays,
