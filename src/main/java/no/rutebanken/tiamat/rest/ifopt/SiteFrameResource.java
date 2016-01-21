@@ -97,6 +97,23 @@ public class SiteFrameResource {
                     .stream()
                     .forEach(stopPlace -> {
 
+                        if (stopPlace.getCentroid() == null
+                                || stopPlace.getCentroid().getLocation() == null
+                                || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
+                            logger.warn("Ignoring stop place {} - {} because it lacks geomery", stopPlace.getName(), stopPlace.getId());
+                        }
+
+                        StopPlace existing = stopPlaceRepository
+                                .findByNameValueAndCentroidLocationGeometryPoint(
+                                        stopPlace.getName().getValue(),
+                                        stopPlace.getCentroid().getLocation().getGeometryPoint());
+
+                        if (existing != null) {
+                            logger.warn("Found existing stop place {} with the same name and same location {}. Delete...",
+                                    stopPlace.getName(), stopPlace.getCentroid().getLocation().getGeometryPoint().toText());
+                            stopPlaceRepository.delete(existing.getId());
+                        }
+
                         if (stopPlace.getTopographicPlaceRef() != null) {
                             Optional<TopographicPlace> optional = findOrCreateTopographicalPlace(
                                     siteFrame.getTopographicPlaces().getTopographicPlace(),
@@ -128,7 +145,7 @@ public class SiteFrameResource {
 
 
             return "Saved " + siteFrame.getTopographicPlaces().getTopographicPlace().size()
-                    + " topographical places and " + siteFrame.getStopPlaces().getStopPlace().size() + "stop places";
+                    + " topographical places and " + siteFrame.getStopPlaces().getStopPlace().size() + " stop places";
 
         } catch (IOException e) {
             logger.warn("Problems parsing xml: {}", e.getMessage(), e);
