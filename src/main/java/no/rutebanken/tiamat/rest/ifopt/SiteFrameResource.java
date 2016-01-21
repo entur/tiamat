@@ -2,6 +2,8 @@ package no.rutebanken.tiamat.rest.ifopt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
@@ -27,6 +29,8 @@ import java.util.Optional;
 public class SiteFrameResource {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameResource.class);
+
+    private static final MapperFacade mapperFacade = new DefaultMapperFactory.Builder().build().getMapperFacade();
 
     private StopPlaceRepository stopPlaceRepository;
 
@@ -82,28 +86,46 @@ public class SiteFrameResource {
     @Produces(MediaType.APPLICATION_XML)
     public String importSiteFrame(String xml) throws IOException {
         // Using xml mapper directly because of issues registering it properly in JerseyConfig
-        logger.info("Got the following xml\n{}", xml);
+        logger.info("Incoming xml {} characters long", xml.length());
 
         try {
             SiteFrame siteFrame = xmlMapper.readValue(xml, SiteFrame.class);
             logger.info("Got site frame {}", siteFrame);
+            siteFrame.getTopographicPlaces().getTopographicPlace().forEach(place -> logger.info("{} - {}", place.getName(), place.getId()));
 
             siteFrame.getStopPlaces().getStopPlace()
                     .stream()
                     .forEach(stopPlace -> {
-                        stopPlace.setId("");
 
                         if (stopPlace.getTopographicPlaceRef() != null) {
-                            findOrCreateTopographicalPlace(
+                            Optional<TopographicPlace> optional = findOrCreateTopographicalPlace(
                                     siteFrame.getTopographicPlaces().getTopographicPlace(),
-                                    stopPlace.getTopographicPlaceRef())
-                                    .ifPresent(topographicPlace -> stopPlace.getTopographicPlaceRef().setRef(topographicPlace.getId()));
+                                    stopPlace.getTopographicPlaceRef());
+
+                            if (!optional.isPresent()) {
+                                logger.warn("Got no topographic places back for stop place {} {}", stopPlace.getName(), stopPlace.getId());
+                            }
+
+                            optional.ifPresent(topographicPlace -> {
+                                logger.info("Setting topographical ref {} on stop place {} {}",
+                                        topographicPlace.getId(), stopPlace.getName(), stopPlace.getId());
+                                TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
+                                newRef.setRef(topographicPlace.getId());
+                                stopPlace.setTopographicPlaceRef(newRef);
+                            });
                         }
 
-                        stopPlace.getQuays().forEach(quay -> quay.setId(""));
+                        stopPlace.setId(null);
+
+                        stopPlace.getQuays().forEach(quay -> {
+                            quay.setId(null);
+                            quayRepository.save(quay);
+                        });
+
+                        stopPlaceRepository.save(stopPlace);
+                        logger.info("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());
                     });
 
-            stopPlaceRepository.save(siteFrame.getStopPlaces().getStopPlace());
 
             return "Saved " + siteFrame.getTopographicPlaces().getTopographicPlace().size()
                     + " topographical places and " + siteFrame.getStopPlaces().getStopPlace().size() + "stop places";
@@ -112,50 +134,98 @@ public class SiteFrameResource {
             logger.warn("Problems parsing xml: {}", e.getMessage(), e);
             throw e;
         }
-
     }
 
 
     /**
+     * fixme: Make this more readable and clean
+     *
      * Look for existing topographical places.
      * Use existing IDs to resolve references to parent topographical places,
      * but used the genererated IDs from saving in references.
      */
     public Optional<TopographicPlace> findOrCreateTopographicalPlace(List<TopographicPlace> places, TopographicPlaceRefStructure topographicPlaceRef) {
 
+        Optional<TopographicPlace> optional = findTopographicPlaceFromRefOrRepository(places, topographicPlaceRef);
 
-        Optional<TopographicPlace> placeFromRef = places
-                .stream()
-                .filter(topographicPlace -> topographicPlace.getId() != null)
-                .filter(topographicPlace -> topographicPlace.getId().equals(topographicPlaceRef.getRef()))
-                .peek(topographicPlace -> logger.info("Peeking at topographical place {}", topographicPlace.getId()))
-                .findFirst();
+        if (optional.isPresent()) {
 
-        placeFromRef.ifPresent(topographicPlace -> {
+            TopographicPlace topographicPlaceFromRef = optional.get();
 
             logger.debug("Topographical place found from ref {}", topographicPlaceRef.getRef());
 
-            // Check if it already exists.
-            TopographicPlace topographicPlaceToSave = topographicPlaceRepository
-                    .findByNameValueAndCountryRefRefAndTopographicPlaceType(
-                            topographicPlace.getName().getValue(),
-                            topographicPlace.getCountryRef().getRef(),
-                            topographicPlace.getTopographicPlaceType())
-                    .stream()
-                    .findFirst()
-                    .orElse(topographicPlace);
+            TopographicPlace topographicPlace = findSimilarOrUse(topographicPlaceFromRef);
 
-            if (topographicPlaceToSave.getParentTopographicPlaceRef() != null) {
-                logger.debug("The topographical place {} contains a parent reference {}", topographicPlace.getId(), topographicPlace.getParentTopographicPlaceRef().getRef());
+            if (topographicPlace.getParentTopographicPlaceRef() != null) {
+                logger.debug("The topographical place {} contains a parent reference {}", topographicPlace.getName(),
+                        topographicPlace.getParentTopographicPlaceRef().getRef());
+
                 findOrCreateTopographicalPlace(places, topographicPlace.getParentTopographicPlaceRef())
-                        .ifPresent(parent -> topographicPlaceToSave.getParentTopographicPlaceRef().setRef(parent.getId()));
+                        .ifPresent(parent -> topographicPlace.getParentTopographicPlaceRef().setRef(parent.getId()));
             }
 
+            // if(!topographicPlaceRepository.exists(topographicPlace.getId())) {
             topographicPlaceRepository.save(topographicPlace);
+            logger.info("Saved {} place {} of type {} - got id {}", topographicPlace.getTopographicPlaceType(), topographicPlace.getName(),
+                    topographicPlace.getTopographicPlaceType(), topographicPlace.getId());
+            //}
 
-            logger.info("Saved topographical place {} - got id {}", topographicPlace.getName(), topographicPlace.getId());
-        });
+            return Optional.of(topographicPlace);
+        }
 
-        return placeFromRef;
+        logger.warn("Found no topographical place from ref {} looking in {} topographical places", topographicPlaceRef.getRef(), places.size());
+        places.forEach(place -> logger.info("{} - {}", place.getName(), place.getId()));
+
+        return Optional.empty();
+    }
+
+    /**
+     * Search for similar topographic place in the repository.
+     * If no match, use the topographic place that origins from the incoming xml, but clear the ID.
+     */
+    public TopographicPlace findSimilarOrUse(TopographicPlace topographicPlaceFromRef) {
+
+        // Check if similar place already exists. If not, use the one from the xml, but remember to remove the ID..
+        return topographicPlaceRepository
+                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                        topographicPlaceFromRef.getName().getValue(),
+                        topographicPlaceFromRef.getCountryRef().getRef(),
+                        topographicPlaceFromRef.getTopographicPlaceType())
+                .stream()
+                .peek(topographicPlace1 -> logger.info("Found already persisted {} with name {} and id {}",
+                        topographicPlace1.getTopographicPlaceType(),
+                        topographicPlace1.getName(),
+                        topographicPlace1.getId()))
+                .findFirst()
+                .orElseGet(() -> {
+
+                    logger.debug("Could not find similar {} to {} with country {} in database. Creating new one.",
+                            topographicPlaceFromRef.getTopographicPlaceType(),
+                            topographicPlaceFromRef.getName().getValue(),
+                            topographicPlaceFromRef.getCountryRef().getRef());
+
+                    TopographicPlace newTopographicalPlace = mapperFacade.map(topographicPlaceFromRef, TopographicPlace.class);
+                    newTopographicalPlace.setId(null);
+
+                    return newTopographicalPlace;
+                });
+    }
+
+    public Optional<TopographicPlace> findTopographicPlaceFromRefOrRepository(List<TopographicPlace> places, TopographicPlaceRefStructure topographicPlaceRef) {
+
+        Optional<TopographicPlace> optional = places
+                .stream()
+                .filter(topographicPlace -> topographicPlace.getId() != null)
+                .filter(topographicPlace -> topographicPlace.getId().equals(topographicPlaceRef.getRef()))
+                .peek(topographicPlace -> logger.info("Looking at topographical place with name {} and id {}", topographicPlace.getName(), topographicPlace.getId()))
+                .findFirst();
+
+        //If another stop place or municipality was processed, the topographic place is already persisted.
+        if (!optional.isPresent()) {
+            optional = Optional.of(topographicPlaceRepository.findOne(topographicPlaceRef.getRef()));
+        }
+
+        return optional;
+
     }
 }
