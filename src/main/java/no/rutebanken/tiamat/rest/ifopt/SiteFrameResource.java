@@ -99,6 +99,8 @@ public class SiteFrameResource {
                                     stopPlace.getTopographicPlaceRef())
                                     .ifPresent(topographicPlace -> stopPlace.getTopographicPlaceRef().setRef(topographicPlace.getId()));
                         }
+
+                        stopPlace.getQuays().forEach(quay -> quay.setId(""));
                     });
 
             stopPlaceRepository.save(siteFrame.getStopPlaces().getStopPlace());
