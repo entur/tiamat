@@ -48,7 +48,7 @@ public class NvdbSearchService {
 
         String json = mapper.writeValueAsString(search);
 
-        logger.info("Generated json {}", json);
+        logger.trace("Generated json {}", json);
         String urlEncodedJson = URLEncoder.encode(json, "UTF-8");
 
         logger.trace("Url encoded json {}", urlEncodedJson);
@@ -60,14 +60,14 @@ public class NvdbSearchService {
                     .execute().returnContent().asStream();
 
             SearchResult result = mapper.readValue(inputStream, SearchResult.class);
-            logger.info("Got {} objects", result.getResultater().size());
+            logger.debug("Got {} objects", result.getResultater().size());
 
             VegObjekt roadObject = result.getResultater().stream()
                     .map(Resultater::getVegObjekter)
                     .flatMap(Collection::stream)
                     .findFirst().orElse(null);
 
-            logger.info("got this 'vegobjekt' back: {}", mapper.writeValueAsString(roadObject));
+            logger.trace("got this 'vegobjekt' back: {}", mapper.writeValueAsString(roadObject));
 
             return roadObject;
 
