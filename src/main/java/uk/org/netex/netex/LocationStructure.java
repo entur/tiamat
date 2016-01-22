@@ -8,8 +8,12 @@
 
 package uk.org.netex.netex;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import net.opengis.gml._3.DirectPositionType;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -62,13 +66,8 @@ import java.math.BigDecimal;
 @Table(name = "location")
 public class LocationStructure {
 
-    @XmlElement(name = "Longitude")
-    @Column(precision = 12, scale = 10)
-    protected BigDecimal longitude;
+    private static final int SRID = 4326;
 
-    @XmlElement(name = "Latitude")
-    @Column(precision = 13, scale = 10)
-    protected BigDecimal latitude;
 
     @XmlElement(name = "Altitude")
     @Transient
@@ -82,41 +81,75 @@ public class LocationStructure {
     @Transient
     protected BigDecimal precision;
 
+    @Id
+    @GeneratedValue
+    // TODO: Use String as type for 'id'. Got this using String: org.h2.jdbc.JdbcSQLException: Hexadecimal string contains non-hex character.
+   // @GenericGenerator(name = "uuid", strategy = "uuid2")
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    protected String id;
+    @XmlTransient
+    protected long id;
 
     @XmlAttribute(name = "srsName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Transient
     protected String srsName;
 
+    @XmlTransient
+    @Type(type="org.hibernate.spatial.GeometryType")
+    private Point geometryPoint = null;
+
+    /**
+     * TODO: Do not require geometry factory here.
+     * See also GeometryFactory
+     */
+    @XmlTransient
+    private static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
+
+    public LocationStructure(Point geometryPoint) {
+        this.geometryPoint = geometryPoint;
+    }
+
+    public LocationStructure() {
+    }
+
+
     /**
      * Gets the value of the longitude property.
+     * TODO: Find a more elegant solution to geometry point
+     * Allow this class to be closer to a java bean with minimal logic.
      * 
      * @return
      *     possible object is
      *     {@link BigDecimal }
      *     
      */
+    @XmlElement(name = "Longitude")
     public BigDecimal getLongitude() {
-        return longitude;
+        if(geometryPoint != null) {
+            return new BigDecimal(String.valueOf(geometryPoint.getX()));
+        }
+        return null;
     }
 
     /**
      * Sets the value of the longitude property.
+     * TODO: Not use the geometry factory in this class.
      * 
-     * @param value
+     * @param longitude
      *     allowed object is
      *     {@link BigDecimal }
      *     
      */
-    public void setLongitude(BigDecimal value) {
-        this.longitude = value;
+    @XmlElement(name = "Longitude")
+    public void setLongitude(BigDecimal longitude) {
+        double latitude;
+        if(geometryPoint != null) {
+            latitude = geometryPoint.getY();
+        } else {
+            latitude = 0;
+        }
+        geometryPoint = geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude));
     }
 
     /**
@@ -127,20 +160,31 @@ public class LocationStructure {
      *     {@link BigDecimal }
      *     
      */
+    @XmlElement(name = "Latitude")
     public BigDecimal getLatitude() {
-        return latitude;
+        if (geometryPoint != null) {
+            return new BigDecimal(String.valueOf(geometryPoint.getY()));
+        }
+        return null;
     }
 
     /**
      * Sets the value of the latitude property.
      * 
-     * @param value
+     * @param latitude
      *     allowed object is
      *     {@link BigDecimal }
      *     
      */
-    public void setLatitude(BigDecimal value) {
-        this.latitude = value;
+    @XmlElement(name = "Latitude")
+    public void setLatitude(BigDecimal latitude) {
+        double longitude;
+        if(geometryPoint != null) {
+            longitude = geometryPoint.getX();
+        } else {
+            longitude = 0;
+        }
+        geometryPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude.doubleValue()));
     }
 
     /**
@@ -223,7 +267,7 @@ public class LocationStructure {
      *     {@link String }
      *     
      */
-    public String getId() {
+    public long getId() {
         return id;
     }
 
@@ -235,7 +279,7 @@ public class LocationStructure {
      *     {@link String }
      *     
      */
-    public void setId(String value) {
+    public void setId(long value) {
         this.id = value;
     }
 
@@ -263,4 +307,11 @@ public class LocationStructure {
         this.srsName = value;
     }
 
+    public Point getGeometryPoint() {
+        return geometryPoint;
+    }
+
+    public void setGeometryPoint(Point geometryPoint) {
+        this.geometryPoint = geometryPoint;
+    }
 }

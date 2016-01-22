@@ -1,9 +1,12 @@
 package no.rutebanken.tiamat.rest.ifopt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.keycloak.KeycloakPrincipal;
@@ -18,16 +21,22 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.org.netex.netex.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
 @Path("/stop_place")
+@Transactional
 public class StopPlaceResource {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceResource.class);
@@ -40,6 +49,12 @@ public class StopPlaceResource {
 
     @Autowired
     private StopPlaceDisassembler stopPlaceDisassembler;
+
+    @Autowired
+    private QuayRepository quayRepository;
+
+    @Autowired
+    private XmlMapper xmlMapper;
 
     @GET
     public List<StopPlaceDTO> getStopPlaces(
@@ -69,23 +84,24 @@ public class StopPlaceResource {
         // Example reading details about authenticated user
         KeycloakAuthenticationToken auth = (KeycloakAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 
-        @SuppressWarnings("unchecked")
-        KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>)auth.getPrincipal();
-        AccessToken token = principal.getKeycloakSecurityContext().getToken();
-        String email = token.getEmail();
-        String firstname = token.getGivenName();
-        String lastname = token.getFamilyName();
-        String fullname = token.getName();
-        String preferredUsername = token.getPreferredUsername();
-        List agencyids = (List) token.getOtherClaims().get("agencyid");
+        if(auth != null) {
+            @SuppressWarnings("unchecked")
+            KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>) auth.getPrincipal();
+            AccessToken token = principal.getKeycloakSecurityContext().getToken();
+            String email = token.getEmail();
+            String firstname = token.getGivenName();
+            String lastname = token.getFamilyName();
+            String fullname = token.getName();
+            String preferredUsername = token.getPreferredUsername();
+            List agencyids = (List) token.getOtherClaims().get("agencyid");
 
 
-        // all means all agencies, if not a semicolon delimited list of agencies
+            // all means all agencies, if not a semicolon delimited list of agencies
 
-        logger.info("Logged in "+principal+" with preferred username "+preferredUsername+", name is "+firstname+" "+lastname+" and has email address "+email+" and represents agencie(s) "+ToStringBuilder.reflectionToString(agencyids));;
+            logger.info("Logged in " + principal + " with preferred username " + preferredUsername + ", name is " + firstname + " " + lastname + " and has email address " + email + " and represents agencie(s) " + ToStringBuilder.reflectionToString(agencyids));
 
-        // TODO make sure we only return data according to agencyids
-
+            // TODO make sure we only return data according to agencyids
+        }
         return auth;
     }
 
@@ -126,6 +142,75 @@ public class StopPlaceResource {
         }
 
         throw new WebApplicationException("Cannot find stop place with id "+simpleStopPlaceDTO.id, 400);
+    }
+
+    @GET
+    @Path("xml/{id}")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getXmlStopPlace(@PathParam("id") String id) {
+        StopPlace stopPlace = stopPlaceRepository.findStopPlaceDetailed(id);
+
+        String xml = null;
+        try {
+            xml = xmlMapper.writeValueAsString(stopPlace);
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing stop place to xml", e);
+        }
+
+        return Response.ok(xml).build();
+    }
+
+
+    @GET
+    @Path("xml")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getAllStopPLaces() {
+
+        //Without streaming because of LazyInstantiationException
+        Iterable<StopPlace> iterableStopPlaces = stopPlaceRepository.findAll();
+
+        StopPlaces stopPlaces = new StopPlaces();
+        // TODO: Avoid iterating through stop places before serializing.
+        iterableStopPlaces.forEach(stopPlace -> stopPlaces.getStopPlaces().add(stopPlace));
+
+        String xml = null;
+        try {
+            // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
+            xml = xmlMapper.writeValueAsString(stopPlaces);
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing stop place to xml", e);
+        }
+
+        return Response.ok(xml).build();
+    }
+
+    @POST
+    @Path("xml")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public List<String> importStopPlaces(String xml) throws IOException {
+
+        // Using xml mapper directly because of issues registering it properly in JerseyConfig
+        logger.trace("Got the following xml\n{}", xml);
+
+        StopPlaces stopPlaces;
+        try {
+            stopPlaces = xmlMapper.readValue(xml, StopPlaces.class);
+        } catch (IOException e) {
+            logger.warn("Error deserializing stop places {}", e.getMessage(), e);
+            throw e;
+        }
+
+        logger.info("Importing {} stop places", stopPlaces.getStopPlaces().size());
+
+        stopPlaces.getStopPlaces()
+                .stream()
+                .filter(stopPlace -> stopPlace.getQuays() != null)
+                .flatMap(stopPlace -> stopPlace.getQuays().stream())
+                .forEach(quayRepository::save);
+
+        stopPlaceRepository.save(stopPlaces.getStopPlaces());
+        return stopPlaces.getStopPlaces().stream().map(EntityStructure::getId).collect(Collectors.toList());
     }
 
     /**

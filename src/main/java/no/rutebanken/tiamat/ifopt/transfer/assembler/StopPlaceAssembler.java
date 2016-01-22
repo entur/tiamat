@@ -78,9 +78,16 @@ public class StopPlaceAssembler {
 
             TopographicPlace municipality = topographicPlaceRepository.findOne(topographicRef.getRef());
 
-            stopPlaceDTO.municipality = municipality.getName().getValue();
+            if (municipality == null) {
+                logger.warn("Municipality was null from reference {}", topographicRef.getRef());
+                return stopPlaceDTO;
+            }
 
-            logger.trace("Saved municipality name '{}' on stop place '{}' {}", stopPlaceDTO.municipality, stopPlace.getName(), stopPlace.getId());
+            if (municipality.getName() != null) {
+                stopPlaceDTO.municipality = municipality.getName().getValue();
+            }
+
+            logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDTO.municipality, stopPlace.getName(), stopPlace.getId());
 
             if(municipality.getParentTopographicPlaceRef() != null) {
 

@@ -27,7 +27,6 @@ public class PeliasReverseLookupClient {
         this.peliasReverseLookupEndpoint = peliasReverseLookupEndpoint;
     }
 
-
     public ReverseLookupResult reverseLookup(String latitude, String longitude, int size) throws IOException {
 
         StringBuilder url = new StringBuilder();
@@ -40,8 +39,8 @@ public class PeliasReverseLookupClient {
         logger.info("Request to Pelias on {}", url.toString());
 
         InputStream inputStream = Request.Get(url.toString())
-                .connectTimeout(3000)
-                .socketTimeout(3000)
+                .connectTimeout(20000)
+                .socketTimeout(20000)
                 .execute().returnContent().asStream();
 
 

@@ -122,7 +122,7 @@ public class QuayTest {
         double latitude = -144.22765;
 
         SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
         quay.setCentroid(centroid);
 
         quayRepository.save(quay);
@@ -131,8 +131,8 @@ public class QuayTest {
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getCentroid()).isNotNull();
         assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation().getY()).isEqualTo(latitude);
-        assertThat(actualQuay.getCentroid().getLocation().getX()).isEqualTo(longitude);
+        assertThat(actualQuay.getCentroid().getLocation().getGeometryPoint().getY()).isEqualTo(latitude);
+        assertThat(actualQuay.getCentroid().getLocation().getGeometryPoint().getX()).isEqualTo(longitude);
     }
 
     @Test

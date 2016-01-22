@@ -48,7 +48,7 @@ public class VegObjekt {
     @JsonProperty("sluttDato")
     private String sluttDato;
     @JsonProperty("egenskaper")
-    private List<Egenskaper> egenskaper = new ArrayList<Egenskaper>();
+    private List<Egenskap> egenskaper = new ArrayList<Egenskap>();
     @JsonProperty("assosiasjoner")
     private List<Assosiasjoner> assosiasjoner = new ArrayList<Assosiasjoner>();
     @JsonProperty("modifisert")
@@ -224,7 +224,7 @@ public class VegObjekt {
      *     The egenskaper
      */
     @JsonProperty("egenskaper")
-    public List<Egenskaper> getEgenskaper() {
+    public List<Egenskap> getEgenskaper() {
         return egenskaper;
     }
 
@@ -234,7 +234,7 @@ public class VegObjekt {
      *     The egenskaper
      */
     @JsonProperty("egenskaper")
-    public void setEgenskaper(List<Egenskaper> egenskaper) {
+    public void setEgenskaper(List<Egenskap> egenskaper) {
         this.egenskaper = egenskaper;
     }
 

@@ -7,6 +7,7 @@ import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.org.netex.netex.LocationStructure;
 import uk.org.netex.netex.SimplePoint;
 
 @Component
@@ -26,8 +27,8 @@ public class SimplePointDisassembler {
         SimplePoint destination = new SimplePoint();
         LocationDTO locationDTO = simplePointDTO.location;
 
-        Point location = geometryFactory.createPoint(new Coordinate(locationDTO.longitude, locationDTO.latitude));
-        destination.setLocation(location);
+        Point point = geometryFactory.createPoint(new Coordinate(locationDTO.longitude, locationDTO.latitude));
+        destination.setLocation(new LocationStructure(point));
         return destination;
     }
 }

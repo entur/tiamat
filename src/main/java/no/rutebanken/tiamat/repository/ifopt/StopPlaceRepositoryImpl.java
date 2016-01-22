@@ -45,6 +45,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         graph.addAttributeNodes("roadAddress");
         graph.addAttributeNodes("parentSiteRef");
 
+        // Be aware of https://hibernate.atlassian.net/browse/HHH-10261
+
         return entityManager.find(StopPlace.class, stopPlaceId, hints(graph));
     }
 
@@ -65,7 +67,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         TypedQuery<StopPlace> query = entityManager
-                .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true", StopPlace.class);
+                .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp LEFT OUTER JOIN sp.location l WHERE within(l.geometryPoint, :filter) = true", StopPlace.class);
         query.setParameter("filter", geometryFilter);
 
         query.setFirstResult(pageable.getOffset());

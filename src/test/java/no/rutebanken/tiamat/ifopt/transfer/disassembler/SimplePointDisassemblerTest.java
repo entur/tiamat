@@ -24,7 +24,7 @@ public class SimplePointDisassemblerTest {
 
         assertThat(simplePoint).isNotNull();
         assertThat(simplePoint.getLocation()).isNotNull();
-        assertThat(simplePoint.getLocation().getX()).isEqualTo(simplePointDTO.location.longitude);
-        assertThat(simplePoint.getLocation().getY()).isEqualTo(simplePointDTO.location.latitude);
+        assertThat(simplePoint.getLocation().getGeometryPoint().getX()).isEqualTo(simplePointDTO.location.longitude);
+        assertThat(simplePoint.getLocation().getGeometryPoint().getY()).isEqualTo(simplePointDTO.location.latitude);
     }
 }

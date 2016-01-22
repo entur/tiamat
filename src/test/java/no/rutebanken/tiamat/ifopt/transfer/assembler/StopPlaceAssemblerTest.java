@@ -77,6 +77,39 @@ public class StopPlaceAssemblerTest {
         assertThat(stopPlaceDTO.county).isEqualTo(countyName);
     }
 
+    @Test
+    public void testAssembleMunicipalityNullName() throws Exception {
+
+        TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setId("1");
+        TopographicPlaceRefStructure municipalityReference = topographicRef(municipality.getId());
+
+        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
+
+        when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(municipality);
+
+        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+    }
+
+    @Test
+    public void testAssembleMunicipalityNull() throws Exception {
+
+        TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+
+        TopographicPlaceRefStructure municipalityReference = topographicRef("123");
+
+        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
+
+        when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(null);
+
+        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+    }
+
+
     private StopPlace stopPlaceWithRef(TopographicPlaceRefStructure topographicPlaceRefStructure) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);

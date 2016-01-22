@@ -18,8 +18,8 @@ public class SimplePointAssembler {
         simplePointDTO.location = new LocationDTO();
 
         if (simplePoint.getLocation() != null) {
-            simplePointDTO.location.latitude = simplePoint.getLocation().getY();
-            simplePointDTO.location.longitude = simplePoint.getLocation().getX();
+            simplePointDTO.location.latitude = simplePoint.getLocation().getLatitude().doubleValue();
+            simplePointDTO.location.longitude = simplePoint.getLocation().getLongitude().doubleValue();
         }
         return simplePointDTO;
     }

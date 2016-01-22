@@ -19,9 +19,9 @@ public class GtfsStopsReader {
     private static Logger logger = LoggerFactory.getLogger(GtfsStopsReader.class);
 
     private static final String GTFS_FILE_PATH = "stops";
-
+    
     @Autowired
-    private GtfsStopEntityHandler gtfsStopEntityHandler;
+    private GtfsStopEntityHandler gtfsQuayEntityHandler;
 
     public void read() {
 
@@ -35,7 +35,7 @@ public class GtfsStopsReader {
 
             reader.setInputLocation(new File(url.getFile()));
 
-            reader.addEntityHandler(gtfsStopEntityHandler);
+            reader.addEntityHandler(gtfsQuayEntityHandler);
             reader.run();
 
 

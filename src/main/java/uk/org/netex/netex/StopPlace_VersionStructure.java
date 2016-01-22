@@ -171,6 +171,8 @@ public class StopPlace_VersionStructure
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
+    @XmlElement(name = "Quay", type = Quay.class)
+    @XmlElementWrapper(name="quays")
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private List<Quay> quays = new ArrayList<>();
 

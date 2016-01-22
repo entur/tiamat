@@ -1,6 +1,7 @@
 package uk.org.netex.netex;
 
 import no.rutebanken.tiamat.TiamatApplication;
+import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
 import org.junit.Test;
@@ -26,6 +27,10 @@ public class StopPlaceTest {
 
     @Autowired
     private TariffZoneRepository tariffZoneRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
+
 
 
     @Test
@@ -273,5 +278,18 @@ public class StopPlaceTest {
                 "weighting", "busSubmode", "covered", "gated", "modification",
                 "railSubmode", "metroSubmode", "siteType", "status", "waterSubmode",
                 "tramSubmode", "telecabinSubmode");
+    }
+
+    @Test
+    public void testAttachingQuaysToStopPlace() throws Exception {
+        Quay quay = new Quay();
+        quay.setName(new MultilingualString("q", "en", ""));
+        quayRepository.save(quay);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
     }
 }

@@ -29,9 +29,13 @@ public class CountyAndMunicipalityLookupService {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    /**
+     * Reverse lookup stop place centroid from Pelias.
+     * References to topographical places for municipality and county on the stopPLace.
+     */
     public void populateCountyAndMunicipality(StopPlace stopPlace) throws IOException {
 
-        Point point = stopPlace.getCentroid().getLocation();
+        Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
 
         ReverseLookupResult reverseLookupResult = peliasReverseLookupClient.reverseLookup(String.valueOf(point.getY()),
                 String.valueOf(point.getX()), 1);
