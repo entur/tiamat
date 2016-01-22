@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.StringJoiner;
 
@@ -29,8 +28,6 @@ public class NvdbSearchService {
 
     private JsonFactory factory = new JsonFactory();
     private ObjectMapper mapper = new ObjectMapper(factory);
-
-    private final MessageFormat messageFormat = new MessageFormat("{0},{1},{2},{3}");
 
     public VegObjekt search(String name, Envelope envelope) throws JsonProcessingException, UnsupportedEncodingException {
 
