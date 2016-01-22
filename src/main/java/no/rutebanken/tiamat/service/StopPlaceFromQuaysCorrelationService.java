@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.org.netex.netex.*;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * Service for generating test data by correlating quays already stored, and relate them to new stop places.
  */
 @Service
+@Transactional
 public class StopPlaceFromQuaysCorrelationService {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromQuaysCorrelationService.class);
 
@@ -80,17 +81,17 @@ public class StopPlaceFromQuaysCorrelationService {
      */
     public void correlate() {
 
-        logger.trace("Loading quays from repository");
+        logger.info("Loading quays from repository");
         List<Quay> quays = quayRepository.findAll();
 
         logger.trace("Got {} quays", quays.size());
 
-        ConcurrentMap<String, List<Quay>> distinctQuays = quays.stream()
+        ConcurrentMap<String, List<Quay>> distinctQuays = quays.parallelStream()
                 .collect(Collectors.groupingByConcurrent(quay -> quay.getName().getValue()));
 
-        logger.trace("Got {} distinct quays based on name", distinctQuays.size());
+        logger.info("Got {} distinct quays based on name", distinctQuays.size());
 
-        List<String> quaysAlreadyProcessed = new ArrayList<>();
+        List<String> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
 
         boolean stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
         if (stop) return;
@@ -118,17 +119,15 @@ public class StopPlaceFromQuaysCorrelationService {
      */
     public boolean createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
                                          List<String> quaysAlreadyProcessed ) {
-        for(String quayGroupName : distinctQuays.keySet()) {
-            createStopPlaceFromQuays(distinctQuays.get(quayGroupName),
-                    quayGroupName, quaysAlreadyProcessed);
-            if(stopPlaceCounter.get() >= maxLimit) {
-                logger.info("stopPlaceCounter: {}, maxLimit: {}. Stopping", stopPlaceCounter, maxLimit);
-                return true;
-            }
-        }
-        return false;
+
+        return distinctQuays.keySet()
+                .parallelStream()
+                .map(quayGroupName -> createStopPlaceFromQuays(distinctQuays.get(quayGroupName), quayGroupName, quaysAlreadyProcessed))
+                .anyMatch(stop -> stop);
+
 
     }
+
 
     public Map<String, List<Quay>> findRemaining(ConcurrentMap<String, List<Quay>> distinctQuays,
                                                  List<String> quaysAlreadyProcessed) {
@@ -152,8 +151,13 @@ public class StopPlaceFromQuaysCorrelationService {
         return remaining;
     }
 
-    public void createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<String> quaysAlreadyProcessed) {
+    public boolean createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<String> quaysAlreadyProcessed) {
         logger.trace("Processing quay with name {}", quayGroupName);
+
+        if (stopPlaceCounter.get() >= maxLimit) {
+            logger.info("stopPlaceCounter: {}, maxLimit: {}. Stopping", stopPlaceCounter, maxLimit);
+            return true;
+        }
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
@@ -166,7 +170,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
             if (quaysAlreadyProcessed.contains(quay.getId())) {
 
-                logger.warn("Already created quay with name {} and id {}", quay.getName(), quay.getId());
+                logger.info("Already created quay with name {} and id {}", quay.getName(), quay.getId());
 
             } else if (stopPlace.getQuays().isEmpty()) {
 
@@ -175,12 +179,12 @@ public class StopPlaceFromQuaysCorrelationService {
 
             } else if (quayIsCloseToExistingQuays(quay, stopPlace.getQuays())) {
 
-                logger.info("Quay {}, {} is close enough to be added",
+                logger.debug("Quay {}, {} is close enough to be added",
                         quay.getName(),
                         quay.getCentroid().getLocation().getGeometryPoint().toText());
                 addQuay = true;
             } else {
-                logger.info("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().getGeometryPoint().toText());
+                logger.debug("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().getGeometryPoint().toText());
             }
 
             if (addQuay) {
@@ -219,7 +223,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.warn("Error loading data from Pelias: {}", e.getMessage(), e);
             }
 
@@ -231,6 +235,7 @@ public class StopPlaceFromQuaysCorrelationService {
                 logger.warn("Caught exception when creating stop place with name {}", quayGroupName, e);
             }
         }
+        return false;
     }
 
     public boolean quayIsCloseToExistingQuays(Quay otherQuay, List<Quay> existingQuays) {
@@ -272,7 +277,7 @@ public class StopPlaceFromQuaysCorrelationService {
         Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(0.004);
 
         Envelope envelope = buffer.getEnvelopeInternal();
-        logger.info("Created envelope {}",envelope.toString());
+        logger.trace("Created envelope {}", envelope.toString());
 
         return envelope;
     }

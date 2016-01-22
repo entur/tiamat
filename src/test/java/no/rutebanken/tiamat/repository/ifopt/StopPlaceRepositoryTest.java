@@ -1,7 +1,6 @@
 package no.rutebanken.tiamat.repository.ifopt;
 
 import no.rutebanken.tiamat.TiamatApplication;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,8 @@ import uk.org.netex.netex.MultilingualString;
 import uk.org.netex.netex.StopPlace;
 
 import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TiamatApplication.class)
@@ -38,8 +39,8 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
-        Assertions.assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
-        Assertions.assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
+        assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
+        assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
     }
 
     @Test
@@ -59,7 +60,36 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc("it", pageable);
 
-        Assertions.assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
-        Assertions.assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
+        assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
+        assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
     }
+
+    /*
+    @Test
+    public void reproduceConcurrencyIssue() throws InterruptedException, ExecutionException {
+
+
+        ExecutorService service = Executors.newFixedThreadPool(200);
+        List<Future<String>> futures = new ArrayList<>();
+
+        for(int i = 0; i < 1000; i++) {
+            Future<String> future = service.submit(() -> {
+                StopPlace stopPlace = new StopPlace();
+                stopPlaceRepository.save(stopPlace);
+                //System.out.println("Saved: " + stopPlace.getId());
+                return stopPlace.getId();
+            });
+            futures.add(future);
+        }
+
+        for(Future<String> future : futures) {
+
+            String id = future.get();
+            //System.out.println("Got id "+id);
+            assertThat(id).isNotEmpty();
+        }
+
+
+    }
+    */
 }
