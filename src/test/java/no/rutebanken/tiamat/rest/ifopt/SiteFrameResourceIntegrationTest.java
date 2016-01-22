@@ -48,6 +48,12 @@ public class SiteFrameResourceIntegrationTest {
         RestAssured.port = port;
     }
 
+    @Before
+    public void clearRepositories() {
+        stopPlaceRepository.deleteAll();
+        topographicPlaceRepository.deleteAll();
+    }
+
     @Test
     public void textXmlExportOfSiteFrame() throws Exception {
 

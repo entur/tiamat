@@ -60,6 +60,12 @@ public class StopPlaceResourceIntegrationTest {
         RestAssured.port = port;
     }
 
+    @Before
+    public void clearRepositories() {
+        stopPlaceRepository.deleteAll();
+        quayRepository.deleteAll();
+    }
+
     @Test
     public void testXmlExportOfStopPlaceWithTwoQuays() throws Exception {
 
