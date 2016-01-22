@@ -205,6 +205,7 @@ public class StopPlaceResource {
 
         stopPlaces.getStopPlaces()
                 .stream()
+                .filter(stopPlace -> stopPlace.getQuays() != null)
                 .flatMap(stopPlace -> stopPlace.getQuays().stream())
                 .forEach(quayRepository::save);
 
