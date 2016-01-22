@@ -190,6 +190,11 @@ public class StopPlaceFromQuaysCorrelationService {
                     VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
                     if(vegObjekt != null) {
                         quay = nvdbQuayAugmenter.augmentFromNvdb(quay, vegObjekt);
+                        if (quay.getQuayType() != null && stopPlace.getStopPlaceType() == null) {
+                            if (quay.getQuayType().equals(QuayTypeEnumeration.BUS_BAY) || quay.getQuayType().equals(QuayTypeEnumeration.BUS_STOP)) {
+                                stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+                            }
+                        }
                     }
                 } catch (JsonProcessingException | UnsupportedEncodingException e) {
                     logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
