@@ -58,8 +58,8 @@ public class NvdbSearchService {
 
         try {
             InputStream inputStream = Request.Get("https://www.vegvesen.no/nvdb/api/sok?kriterie="+urlEncodedJson)
-                    .connectTimeout(5000)
-                    .socketTimeout(5000)
+                    .connectTimeout(20000)
+                    .socketTimeout(20000)
                     .execute().returnContent().asStream();
 
             SearchResult result = mapper.readValue(inputStream, SearchResult.class);
