@@ -134,10 +134,12 @@ public class SiteFrameResource {
 
                         stopPlace.setId(null);
 
-                        stopPlace.getQuays().forEach(quay -> {
-                            quay.setId(null);
-                            quayRepository.save(quay);
-                        });
+                        if (stopPlace.getQuays() != null) {
+                            stopPlace.getQuays().forEach(quay -> {
+                                quay.setId(null);
+                                quayRepository.save(quay);
+                            });
+                        }
 
                         stopPlaceRepository.save(stopPlace);
                         logger.info("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());

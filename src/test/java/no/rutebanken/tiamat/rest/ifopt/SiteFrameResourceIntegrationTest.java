@@ -20,6 +20,7 @@ import uk.org.netex.netex.*;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasXPath;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -97,16 +98,14 @@ public class SiteFrameResourceIntegrationTest {
         topographicPlaceRepository.delete(municipality);
         topographicPlaceRepository.delete(county);
 
+        System.out.println("---------------------");
         System.out.println("About to post the xml");
         given().contentType(ContentType.XML)
                 .content(xml)
                 .when()
                 .post("/jersey/site_frame")
                 .then()
-                .log()
-                .body();
-
-
+                .body(containsString("Saved"));
     }
 
 }
