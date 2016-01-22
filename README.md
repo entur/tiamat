@@ -21,6 +21,10 @@ spring.datasource.url=jdbc:postgresql://localhost:5435/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
 spring.profiles.active=default
+
+peliasReverseLookupEndpoint=http://test.rutebanken.org/v1/reverse
+logging.level.no.rutebanken.tiamat.pelias=TRACE
+
 ```
 
 To start Tiamat with this configuration, specify **spring.config.location**:

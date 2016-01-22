@@ -27,7 +27,7 @@
         <!-- Docker & Fabric8 Configs -->
         <docker.from>fabric8/java-jboss-openjdk8-jdk:1.0.10</docker.from>
         <fabric8.dockerUser>rutebanken/</fabric8.dockerUser>
-        <docker.image>${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
+        <docker.image>dr.rutebanken.org/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
 
         <fabric8.service.name>springboot-webmvc</fabric8.service.name>
         <fabric8.service.port>80</fabric8.service.port>
