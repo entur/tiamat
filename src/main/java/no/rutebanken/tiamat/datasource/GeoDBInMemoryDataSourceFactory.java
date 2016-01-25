@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.datasource;
 
+import com.zaxxer.hikari.HikariDataSource;
 import geodb.GeoDB;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,18 +11,18 @@ import java.sql.SQLException;
  *
  * http://kofler.nonblocking.at/2014/03/unit-testing-of-spatial-queries/
  */
-public class GeoDBInMemoryDataSourceFactory extends SingleConnectionDataSource {
+public class GeoDBInMemoryDataSourceFactory extends HikariDataSource {
 
     public GeoDBInMemoryDataSourceFactory() {
         setDriverClassName("org.h2.Driver");
-        setUrl("jdbc:h2:mem:tiamat;DB_CLOSE_ON_EXIT=FALSE");
-        setSuppressClose(true);
+        setJdbcUrl("jdbc:h2:mem:tiamat;DB_CLOSE_ON_EXIT=FALSE");
+        //setSuppressClose(true);
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection conn = super.getConnection();
-        GeoDB.InitGeoDB(conn);
-        return conn;
+        Connection connection = super.getConnection();
+        GeoDB.InitGeoDB(connection);
+        return connection;
     }
 }
