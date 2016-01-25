@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +45,12 @@ public class BootStrap implements InitializingBean {
 
         ExecutorService es = Executors.newSingleThreadExecutor();
         es.execute(() -> gtfsStopsReader.read());
-        es.execute(() -> stopPlaceFromQuaysCorrelationService.correlate()); 
+        es.execute(() -> {
+            try {
+                stopPlaceFromQuaysCorrelationService.correlate();
+            } catch (ExecutionException | InterruptedException e) {
+                logger.warn("{}", e.getMessage(), e);
+            }
+        });
     }
 }

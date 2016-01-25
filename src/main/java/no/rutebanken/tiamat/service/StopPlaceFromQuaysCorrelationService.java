@@ -22,7 +22,7 @@ import uk.org.netex.netex.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -57,13 +57,16 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private int maxLimit;
 
+    private int threads;
+
     @Autowired
     public StopPlaceFromQuaysCorrelationService(QuayRepository quayRepository,
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                                 NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
-                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10}") int maxLimit) {
+                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10000}") int maxLimit,
+                                                @Value("${StopPlaceFromQuaysCorrelationService.threads:2}") int threads) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.geometryFactory = geometryFactory;
@@ -71,6 +74,7 @@ public class StopPlaceFromQuaysCorrelationService {
         this.nvdbSearchService = nvdbSearchService;
         this.nvdbQuayAugmenter = nvdbQuayAugmenter;
         this.maxLimit = maxLimit;
+        this.threads = threads;
     }
 
     /**
@@ -79,7 +83,7 @@ public class StopPlaceFromQuaysCorrelationService {
      *
      * Not the most elegant implementation, but this code is only used to generate test data.
      */
-    public void correlate() {
+    public void correlate() throws InterruptedException, ExecutionException {
 
         logger.info("Loading quays from repository");
         List<Quay> quays = quayRepository.findAll();
@@ -94,7 +98,10 @@ public class StopPlaceFromQuaysCorrelationService {
         List<String> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
 
         boolean stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
-        if (stop) return;
+        if (stop) {
+            logNumberOfStopPlaces();
+            return;
+        }
 
         int maxRemainingRuns = 10;
         for(int i = 0; i < maxRemainingRuns; i++) {
@@ -107,25 +114,61 @@ public class StopPlaceFromQuaysCorrelationService {
 
             logger.info("Rerunning through {} groups with remaining quays", remaining.size());
             stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
-            if (stop) return;
+            if (stop) {
+                logNumberOfStopPlaces();
+                return;
+            }
         }
 
+        logNumberOfStopPlaces();
 
-        logger.debug("Amount of created stop places: {}", stopPlaceCounter.get());
     }
+
+    public void logNumberOfStopPlaces() {
+        logger.info("Created {} stop places.", stopPlaceCounter.get());
+
+    }
+
 
     /**
      * @return true if max limit has been reached.
      */
     public boolean createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
-                                         List<String> quaysAlreadyProcessed ) {
-
+                                            List<String> quaysAlreadyProcessed) throws InterruptedException, ExecutionException {
+/*
         return distinctQuays.keySet()
                 .parallelStream()
                 .map(quayGroupName -> createStopPlaceFromQuays(distinctQuays.get(quayGroupName), quayGroupName, quaysAlreadyProcessed))
                 .anyMatch(stop -> stop);
+*/
 
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CompletionService<Boolean> completionService =
+                new ExecutorCompletionService<>(executor);
 
+        int tasks = 0;
+
+        for (String quayGroupName : distinctQuays.keySet()) {
+            completionService.submit(() -> createStopPlaceFromQuays(distinctQuays.get(quayGroupName), quayGroupName, quaysAlreadyProcessed));
+            tasks++;
+        }
+
+        int received = 0;
+
+        while (received < tasks) {
+            Future<Boolean> futureBoolean = completionService.take();
+            received++;
+            if (futureBoolean.get()) {
+
+                executor.shutdownNow();
+                // True means stop
+                return true;
+            }
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(20, TimeUnit.SECONDS);
+        return false;
     }
 
 
@@ -249,6 +292,7 @@ public class StopPlaceFromQuaysCorrelationService {
      */
     public boolean areClose(Quay quay, Quay otherQuay) {
 
+        //// FIXME
         if (quay == null || otherQuay == null && quay.getCentroid() == null || otherQuay.getCentroid() == null) {
             return false;
         }

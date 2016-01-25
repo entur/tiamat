@@ -14,6 +14,7 @@ import uk.org.netex.netex.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Matchers.any;
@@ -34,7 +35,8 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
                     mock(NvdbQuayAugmenter.class),
-                    Integer.MAX_VALUE);
+                    Integer.MAX_VALUE,
+                    1);
 
     @Test
     public void quaysAreNotClose() throws Exception {
@@ -78,7 +80,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     }
 
     @Test
-    public void correlateFourQuaysAndExpectThreeStopPlacesSaved() {
+    public void correlateFourQuaysAndExpectThreeStopPlacesSaved() throws ExecutionException, InterruptedException {
 
         Quay quayWithSameName1 = quayWithCentroid(10.489552, 59.866439);
         quayWithSameName1.setId("1");
@@ -114,7 +116,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     }
 
     @Test
-    public void threeQuaysWithSameNameButDifferentLocationExpectThreeStopPlaces() {
+    public void threeQuaysWithSameNameButDifferentLocationExpectThreeStopPlaces() throws ExecutionException, InterruptedException {
 
         Quay quay1 = quayWithCentroid(4.0, 59.866439);
         quay1.setId("1");
