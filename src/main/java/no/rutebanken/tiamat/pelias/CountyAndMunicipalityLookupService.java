@@ -127,7 +127,7 @@ public class CountyAndMunicipalityLookupService {
 
         } else {
             municipality = municipalities.get(0);
-            logger.info("Found existing municipality {} with id {}", municipality.getName(), municipality);
+            logger.info("Found existing municipality {} with id {}", municipality.getName(), municipality.getId());
         }
         return municipality;
     }
