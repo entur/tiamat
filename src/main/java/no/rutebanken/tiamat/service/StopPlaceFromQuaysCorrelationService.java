@@ -65,8 +65,8 @@ public class StopPlaceFromQuaysCorrelationService {
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                                 NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
-                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:10000}") int maxLimit,
-                                                @Value("${StopPlaceFromQuaysCorrelationService.threads:2}") int threads) {
+                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:1000000}") int maxLimit,
+                                                @Value("${StopPlaceFromQuaysCorrelationService.threads:20}") int threads) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.geometryFactory = geometryFactory;
@@ -274,6 +274,9 @@ public class StopPlaceFromQuaysCorrelationService {
                 stopPlaceRepository.save(stopPlace);
                 logger.debug("Created stop place number {} with name {} and {} quays (id {})",
                         stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
+                if (stopPlaceCounter.get() % 100 == 0) {
+                    logger.info("Stop place {}", stopPlaceCounter.get());
+                }
             } catch (Exception e) {
                 logger.warn("Caught exception when creating stop place with name {}", quayGroupName, e);
             }
