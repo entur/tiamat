@@ -213,7 +213,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
             if (quaysAlreadyProcessed.contains(quay.getId())) {
 
-                logger.info("Already created quay with name {} and id {}", quay.getName(), quay.getId());
+                logger.debug("Already created quay with name {} and id {}", quay.getName(), quay.getId());
 
             } else if (stopPlace.getQuays().isEmpty()) {
 
@@ -257,7 +257,7 @@ public class StopPlaceFromQuaysCorrelationService {
         });
 
         if (stopPlace.getQuays().isEmpty()) {
-            logger.warn("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
+            logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
         } else {
 
             stopPlace.setCentroid(new SimplePoint());
