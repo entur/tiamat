@@ -41,6 +41,8 @@ public class SiteFrameResource {
 
     private TopographicPlaceRepository topographicPlaceRepository;
 
+    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
+
     private XmlMapper xmlMapper;
 
     @Autowired
@@ -174,7 +176,6 @@ public class SiteFrameResource {
         }
     }
 
-    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
 
     /**
