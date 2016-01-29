@@ -16,8 +16,8 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.2.84</fabric8.version>
         <docker.maven.plugin.version>0.13.8</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.3.1.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.3.1.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>1.3.2.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>1.3.2.RELEASE</spring-boot.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
         <hibernate-spatial.version>4.3</hibernate-spatial.version>
@@ -119,7 +119,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <dependency>
