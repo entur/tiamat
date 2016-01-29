@@ -29,9 +29,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
@@ -184,6 +182,11 @@ public class StopPlaceResource {
         return Response.ok(xml).build();
     }
 
+    /*
+
+    Commented out. Because xml serializer is not registered with jersey, after issues with running Tiamat as a fat jar:
+    https://github.com/spring-projects/spring-boot/issues/1345
+
     @POST
     @Path("xml")
     @Consumes(MediaType.APPLICATION_XML)
@@ -212,6 +215,7 @@ public class StopPlaceResource {
         stopPlaceRepository.save(stopPlaces.getStopPlaces());
         return stopPlaces.getStopPlaces().stream().map(EntityStructure::getId).collect(Collectors.toList());
     }
+    */
 
     /**
      * For testing creation and serialization of a stop place.

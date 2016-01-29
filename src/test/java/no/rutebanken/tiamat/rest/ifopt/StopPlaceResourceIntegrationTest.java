@@ -132,6 +132,7 @@ public class StopPlaceResourceIntegrationTest {
                 .body(hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
     }
 
+    @Ignore
     @Test
     public void testXmlExportImportOfStopPlaces() throws Exception {
         Quay quay = new Quay();
