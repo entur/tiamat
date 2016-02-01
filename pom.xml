@@ -226,7 +226,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-plugin.version}</version>
                 <configuration>
-                    <mainClass>no.rutebanken.tiamat.TiamatApplication</mainClass>
+                    <mainClass>no.rutebanken.tiamat.TiamatTestApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
