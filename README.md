@@ -67,9 +67,9 @@ choose **one** of:
 For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
-# Export data from Tiamat
+# Export *ALL* data from Tiamat
 ```
-curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://localhost:1871/jersey/site_frame > netex_site_frame_stop_places.xml
+curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
 
 ```
 
@@ -78,7 +78,7 @@ curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://
 curl --max-time 6000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
 ```
 
-Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times.
+*Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times. It also might happen that you loose the connection, but the import continues to run in Tiamat. Please monitor the logs of Tiamat while using the import.*
 
 
 
