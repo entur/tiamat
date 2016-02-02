@@ -67,5 +67,20 @@ choose **one** of:
 For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
+# Export data from Tiamat
+```
+curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://localhost:1871/jersey/site_frame > netex_site_frame_stop_places.xml
+
+```
+
+# Import data into Tiamat
+```
+curl --max-time 6000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
+```
+
+Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times.
+
+
+
 # See also
 https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
