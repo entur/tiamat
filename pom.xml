@@ -21,7 +21,7 @@
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
         <hibernate-spatial.version>4.3</hibernate-spatial.version>
-        <postgresql.version>9.4-1201-jdbc41</postgresql.version>
+        <postgresql.version>9.4.1207.jre7</postgresql.version>
         <geodb.version>0.7</geodb.version>
 
         <!-- Docker & Fabric8 Configs -->
@@ -169,6 +169,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
             <version>${hibernate-spatial.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
