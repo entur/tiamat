@@ -32,6 +32,12 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 
 ```mvn spring-boot:run -Dspring.config.location=/path/to/application.properties```
 
+
+## HikariCP
+Tiamat is using HikariCP. Most properties can be configured in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
+
+
+# Postgres
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
 ```ONLY_TAGS=rb vagrant provision```
