@@ -34,8 +34,8 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 
 
 ## HikariCP
-Tiamat is using HikariCP. Most properties can be configured in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
-
+Tiamat is using HikariCP. Most properties shoulbe be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
+See also http://stackoverflow.com/a/26514779
 
 # Postgres
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
