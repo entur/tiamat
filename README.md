@@ -20,6 +20,7 @@ spring.database.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5435/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
+spring.datasource.initializationFailFast=false
 spring.profiles.active=default
 
 peliasReverseLookupEndpoint=http://test.rutebanken.org/v1/reverse
