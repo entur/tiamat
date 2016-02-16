@@ -40,7 +40,8 @@ See also http://stackoverflow.com/a/26514779
 # Postgres
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
-```ONLY_TAGS=rb vagrant provision```
+```ONLY_TAGS=rb PLAY=build vagrant provision```
+```ONLY_TAGS=rb PLAY=run vagrant provision```
 
 # Run with in-memory GeoDB and some bootstrapped data from GTFS stops.txt
 ```mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap```
