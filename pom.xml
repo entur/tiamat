@@ -16,6 +16,11 @@
     <name>Tiamat</name>
     <description>Stop place register / holdeplassregister</description>
 
+    <scm>
+      <connection>scm:git:ssh://git@bitbucket.org/rutebanken/tiamat.git</connection>
+      <developerConnection>scm:git:ssh://git@bitbucket.org/rutebanken/tiamat.git</developerConnection>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
