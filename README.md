@@ -34,7 +34,7 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 
 
 ## HikariCP
-Tiamat is using HikariCP. Most properties shoulbe be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
+Tiamat is using HikariCP. Most properties shoul be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
 See also http://stackoverflow.com/a/26514779
 
 # Postgres
