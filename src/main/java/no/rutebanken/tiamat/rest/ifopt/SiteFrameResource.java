@@ -102,7 +102,7 @@ public class SiteFrameResource {
                     siteFrame.getStopPlaces().getStopPlace().size());
 
             siteFrame.getStopPlaces().getStopPlace()
-                    .parallelStream()
+                    .stream()
                     .forEach(stopPlace -> {
                         try {
                             importStopPlace(stopPlace, siteFrame, counter);
@@ -111,8 +111,12 @@ public class SiteFrameResource {
                         }
                     });
 
-            return "Saved " + siteFrame.getTopographicPlaces().getTopographicPlace().size()
+            String returnString = "Saved " + siteFrame.getTopographicPlaces().getTopographicPlace().size()
                     + " topographical places and " + siteFrame.getStopPlaces().getStopPlace().size() + " stop places";
+
+            logger.info(returnString);
+
+            return returnString;
 
         } catch (IOException e) {
             logger.warn("Problems parsing xml: {}", e.getMessage(), e);
@@ -149,7 +153,7 @@ public class SiteFrameResource {
             }
 
             optional.ifPresent(topographicPlace -> {
-                logger.debug("Setting topographical ref {} on stop place {} {}",
+                logger.trace("Setting topographical ref {} on stop place {} {}",
                         topographicPlace.getId(), stopPlace.getName(), stopPlace.getId());
                 TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
                 newRef.setRef(topographicPlace.getId());
