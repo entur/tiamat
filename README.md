@@ -76,9 +76,10 @@ For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.ht
 
 
 # Export *ALL* data from Tiamat
+*Not that you need to run this with enough memory available, or else you might run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly how much memory should be tested.*
+
 ```
 curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
-
 ```
 
 # Import data into Tiamat
