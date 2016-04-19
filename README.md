@@ -43,11 +43,11 @@ There is a PostgreSQL docker container in vagrant. It can be provisioned by usin
 ```ONLY_TAGS=rb PLAY=build vagrant provision```
 ```ONLY_TAGS=rb PLAY=run vagrant provision```
 
-# Run with in-memory GeoDB and some bootstrapped data from GTFS stops.txt
-```mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap```
+# Run with in-memory GeoDB and bootstrap generation of data from GTFS stops.txt
+```mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties```
 
 # Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
-```mvn spring-boot:run```
+```mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties```
 (default profiles are set in internal application.properties)
 
 # Run with external config **and** bootstrap data from GTFS:
@@ -56,7 +56,7 @@ Can be used with an empty PostgreSQL.
 
 
 # Run Keycloak
-Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone.
+Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone. *Currently disabled, see NRP-16*
 
 * Download Keycloak version 1.7.0.CR1 (or newer)
 * Change the port in standalone/configuration/standalone.xml** to 18080 : ```{jboss.http.port:18080}```
