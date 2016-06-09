@@ -35,7 +35,7 @@
         <geodb.version>0.7</geodb.version>
 
         <!-- Docker & Fabric8 Configs -->
-        <docker.from>fabric8/java-jboss-openjdk8-jdk:1.0.10</docker.from>
+        <docker.from>dr.rutebanken.org/rutebanken/java-base-image</docker.from>
         <fabric8.dockerUser>rutebanken/</fabric8.dockerUser>
         <docker.image>dr.rutebanken.org/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
 
