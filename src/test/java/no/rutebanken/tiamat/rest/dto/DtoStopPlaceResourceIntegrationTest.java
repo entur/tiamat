@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex;
+package no.rutebanken.tiamat.rest.dto;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
@@ -100,13 +100,13 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .then()
                 .log().body()
                 .statusCode(200)
-                .body(notNullValue())
+                .body(Matchers.notNullValue())
                 .assertThat()
-                .body(hasXPath("/StopPlace/Name[text()='"+stopPlaceName+"']"))
-                .body(hasXPath("/StopPlace/Name[@lang='"+lang+"']"))
-                .body(hasXPath("/StopPlace/quays"))
-                .body(hasXPath("/StopPlace/quays/Quay"))
-                .body(hasXPath("/StopPlace/quays/Quay/Name[text()='"+firstQuayName+"']"));
+                .body(Matchers.hasXPath("/StopPlace/Name[text()='"+stopPlaceName+"']"))
+                .body(Matchers.hasXPath("/StopPlace/Name[@lang='"+lang+"']"))
+                .body(Matchers.hasXPath("/StopPlace/quays"))
+                .body(Matchers.hasXPath("/StopPlace/quays/Quay"))
+                .body(Matchers.hasXPath("/StopPlace/quays/Quay/Name[text()='"+firstQuayName+"']"));
 
     }
 
@@ -127,9 +127,9 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .then()
                 .log().body()
                 .statusCode(200)
-                .body(notNullValue())
+                .body(Matchers.notNullValue())
                 .assertThat()
-                .body(hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
+                .body(Matchers.hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
     }
 
     @Ignore
@@ -155,7 +155,7 @@ public class DtoStopPlaceResourceIntegrationTest {
                         .then()
                         .log().body()
                         .statusCode(200)
-                        .body(notNullValue())
+                        .body(Matchers.notNullValue())
                         .extract().body().asString();
 
         stopPlaceRepository.delete(stopPlace);
@@ -175,12 +175,12 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .body()
                 .asString();
 
-        String createdStopPlaceId = from(response).get("stopPlaces[0]").toString();
+        String createdStopPlaceId = XmlPath.from(response).get("stopPlaces[0]").toString();
         System.out.println("Got this id back: " + createdStopPlaceId);
 
         StopPlace stopPlaceImportedFromXml = stopPlaceRepository.findOne(createdStopPlaceId);
-        assertThat(stopPlaceImportedFromXml).isNotNull();
-        assertThat(stopPlaceImportedFromXml.getQuays()).hasSize(stopPlace.getQuays().size());
+        AssertionsForClassTypes.assertThat(stopPlaceImportedFromXml).isNotNull();
+        AssertionsForInterfaceTypes.assertThat(stopPlaceImportedFromXml.getQuays()).hasSize(stopPlace.getQuays().size());
         System.out.println(stopPlaceImportedFromXml.getQuays().get(0).getId());
     }
 
