@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.ifopt;
+package no.rutebanken.tiamat.rest.abzu;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;

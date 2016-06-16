@@ -1,8 +1,8 @@
 package no.rutebanken.tiamat.config;
 
-import no.rutebanken.tiamat.rest.ifopt.QuayResource;
+import no.rutebanken.tiamat.rest.abzu.QuayResource;
 import no.rutebanken.tiamat.rest.ifopt.SiteFrameResource;
-import no.rutebanken.tiamat.rest.ifopt.StopPlaceResource;
+import no.rutebanken.tiamat.rest.abzu.StopPlaceResource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.ifopt;
+package no.rutebanken.tiamat.rest.abzu;
 
 import no.rutebanken.tiamat.ifopt.transfer.assembler.QuayAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
