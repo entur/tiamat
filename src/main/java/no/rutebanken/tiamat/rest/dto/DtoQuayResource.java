@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.dto;
 
-import no.rutebanken.tiamat.ifopt.transfer.assembler.QuayAssembler;
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
+import no.rutebanken.tiamat.dtoassembling.assembler.QuayAssembler;
+import no.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

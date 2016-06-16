@@ -1,7 +1,7 @@
-package no.rutebanken.tiamat.ifopt.transfer.assembler;
+package no.rutebanken.tiamat.dtoassembling.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
+import no.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.Quay;
 import no.rutebanken.tiamat.model.QuayTypeEnumeration;

@@ -1,6 +1,6 @@
-package no.rutebanken.tiamat.ifopt.transfer.disassembler;
+package no.rutebanken.tiamat.dtoassembling.disassembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
+import no.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.Quay;

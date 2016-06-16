@@ -1,7 +1,7 @@
-package no.rutebanken.tiamat.ifopt.transfer.assembler;
+package no.rutebanken.tiamat.dtoassembling.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
+import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

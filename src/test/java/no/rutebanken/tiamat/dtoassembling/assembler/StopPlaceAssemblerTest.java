@@ -1,6 +1,6 @@
-package no.rutebanken.tiamat.ifopt.transfer.assembler;
+package no.rutebanken.tiamat.dtoassembling.assembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
+import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.junit.Test;

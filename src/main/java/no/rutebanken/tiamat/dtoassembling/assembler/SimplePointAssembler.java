@@ -1,7 +1,7 @@
-package no.rutebanken.tiamat.ifopt.transfer.assembler;
+package no.rutebanken.tiamat.dtoassembling.assembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDto;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
+import no.rutebanken.tiamat.dtoassembling.dto.LocationDto;
+import no.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
 import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.SimplePoint;
 

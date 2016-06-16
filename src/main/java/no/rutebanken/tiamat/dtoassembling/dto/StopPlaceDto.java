@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.ifopt.transfer.dto;
+package no.rutebanken.tiamat.dtoassembling.dto;
 
 import java.util.List;
 

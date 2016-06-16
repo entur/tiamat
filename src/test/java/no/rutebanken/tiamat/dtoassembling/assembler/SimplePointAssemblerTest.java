@@ -1,9 +1,10 @@
-package no.rutebanken.tiamat.ifopt.transfer.assembler;
+package no.rutebanken.tiamat.dtoassembling.assembler;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
+import no.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class SimplePointAssemblerTest {
 
     @Test
     public void assembleSimplePointIsNull() {
-        assertThat(simplePointAssembler.assemble(null)).isNull();
+        AssertionsForClassTypes.assertThat(simplePointAssembler.assemble(null)).isNull();
     }
 
 }

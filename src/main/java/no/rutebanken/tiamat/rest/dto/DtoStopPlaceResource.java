@@ -2,10 +2,10 @@ package no.rutebanken.tiamat.rest.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
-import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
-import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDto;
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
+import no.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
+import no.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
+import no.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
+import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;

@@ -1,10 +1,10 @@
-package no.rutebanken.tiamat.ifopt.transfer.disassembler;
+package no.rutebanken.tiamat.dtoassembling.disassembler;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDto;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
+import no.rutebanken.tiamat.dtoassembling.dto.LocationDto;
+import no.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.LocationStructure;

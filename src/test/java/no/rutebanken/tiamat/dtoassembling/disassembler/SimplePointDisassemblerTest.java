@@ -1,9 +1,9 @@
-package no.rutebanken.tiamat.ifopt.transfer.disassembler;
+package no.rutebanken.tiamat.dtoassembling.disassembler;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.config.GeometryFactoryConfig;
-import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDto;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
+import no.rutebanken.tiamat.dtoassembling.dto.LocationDto;
+import no.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.SimplePoint;
 
