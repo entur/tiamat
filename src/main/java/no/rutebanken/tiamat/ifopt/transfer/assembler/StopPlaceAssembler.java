@@ -1,8 +1,8 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
-import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
+import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
+import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,31 +36,31 @@ public class StopPlaceAssembler {
         this.quayAssembler = quayAssembler;
     }
 
-    public StopPlaceDTO assemble(StopPlace stopPlace) {
-        StopPlaceDTO stopPlaceDTO = new StopPlaceDTO();
-        stopPlaceDTO.id = stopPlace.getId();
+    public StopPlaceDto assemble(StopPlace stopPlace) {
+        StopPlaceDto stopPlaceDto = new StopPlaceDto();
+        stopPlaceDto.id = stopPlace.getId();
 
-        stopPlaceDTO.name = multiLingualStringValue(stopPlace.getName());
-        stopPlaceDTO.shortName = multiLingualStringValue(stopPlace.getShortName());
-        stopPlaceDTO.description = multiLingualStringValue(stopPlace.getDescription());
-        if(stopPlace.getStopPlaceType() != null) stopPlaceDTO.stopPlaceType = stopPlace.getStopPlaceType().value();
-        stopPlaceDTO.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
+        stopPlaceDto.name = multiLingualStringValue(stopPlace.getName());
+        stopPlaceDto.shortName = multiLingualStringValue(stopPlace.getShortName());
+        stopPlaceDto.description = multiLingualStringValue(stopPlace.getDescription());
+        if(stopPlace.getStopPlaceType() != null) stopPlaceDto.stopPlaceType = stopPlace.getStopPlaceType().value();
+        stopPlaceDto.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
 
         if(stopPlace.isAllAreasWheelchairAccessible() != null) {
-            stopPlaceDTO.allAreasWheelchairAccessible = stopPlace.isAllAreasWheelchairAccessible();
+            stopPlaceDto.allAreasWheelchairAccessible = stopPlace.isAllAreasWheelchairAccessible();
         }
 
-        stopPlaceDTO.quays = stopPlace.getQuays()
+        stopPlaceDto.quays = stopPlace.getQuays()
                 .stream()
                 .map(quay -> quayAssembler.assemble(quay))
                 .collect(Collectors.toList());
 
-        stopPlaceDTO = assembleMunicipalityAndCounty(stopPlaceDTO, stopPlace);
+        stopPlaceDto = assembleMunicipalityAndCounty(stopPlaceDto, stopPlace);
 
-        return stopPlaceDTO;
+        return stopPlaceDto;
     }
 
-    public List<StopPlaceDTO> assemble(Page<StopPlace> stopPlaces) {
+    public List<StopPlaceDto> assemble(Page<StopPlace> stopPlaces) {
         if(stopPlaces != null) {
             return stopPlaces.getContent()
                     .stream()
@@ -71,7 +71,7 @@ public class StopPlaceAssembler {
         return new ArrayList<>();
     }
 
-    public StopPlaceDTO assembleMunicipalityAndCounty(StopPlaceDTO stopPlaceDTO, StopPlace stopPlace) {
+    public StopPlaceDto assembleMunicipalityAndCounty(StopPlaceDto stopPlaceDto, StopPlace stopPlace) {
         TopographicPlaceRefStructure topographicRef = stopPlace.getTopographicPlaceRef();
         if(topographicRef != null) {
             logger.trace("Found reference from stop place '{}' {} to a topographic place {}", stopPlace.getName(), stopPlace.getId(), topographicRef.getRef());
@@ -80,14 +80,14 @@ public class StopPlaceAssembler {
 
             if (municipality == null) {
                 logger.warn("Municipality was null from reference {}", topographicRef.getRef());
-                return stopPlaceDTO;
+                return stopPlaceDto;
             }
 
             if (municipality.getName() != null) {
-                stopPlaceDTO.municipality = municipality.getName().getValue();
+                stopPlaceDto.municipality = municipality.getName().getValue();
             }
 
-            logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDTO.municipality, stopPlace.getName(), stopPlace.getId());
+            logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDto.municipality, stopPlace.getName(), stopPlace.getId());
 
             if(municipality.getParentTopographicPlaceRef() != null) {
 
@@ -95,7 +95,7 @@ public class StopPlaceAssembler {
 
                 if(county != null && county.getName() != null) {
                     logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getId(), municipality.getName(), municipality.getId());
-                    stopPlaceDTO.county = county.getName().getValue();
+                    stopPlaceDto.county = county.getName().getValue();
                 }
             } else {
                 logger.warn("Found no county reference (parent topographic place ref) from municipality '{}' {}", municipality.getName(), municipality.getId());
@@ -103,7 +103,7 @@ public class StopPlaceAssembler {
 
         }
 
-        return stopPlaceDTO;
+        return stopPlaceDto;
     }
 
     public String multiLingualStringValue(MultilingualString multilingualString) {

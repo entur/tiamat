@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.Quay;
@@ -16,21 +16,21 @@ public class QuayAssembler {
         this.simplePointAssembler = simplePointAssembler;
     }
 
-    public QuayDTO assemble(Quay quay) {
-        QuayDTO quayDTO = new QuayDTO();
+    public QuayDto assemble(Quay quay) {
+        QuayDto quayDto = new QuayDto();
 
-        quayDTO.id = quay.getId();
-        if(quay.getName() != null) quayDTO.name = quay.getName().getValue();
+        quayDto.id = quay.getId();
+        if(quay.getName() != null) quayDto.name = quay.getName().getValue();
 
-        quayDTO.centroid = simplePointAssembler.assemble(quay.getCentroid());
+        quayDto.centroid = simplePointAssembler.assemble(quay.getCentroid());
 
         if(quay.getQuayType() != null) {
-            quayDTO.quayType = quay.getQuayType().value();
+            quayDto.quayType = quay.getQuayType().value();
         }
         if(quay.isAllAreasWheelchairAccessible() != null) {
-            quayDTO.allAreasWheelchairAccessible = quay.isAllAreasWheelchairAccessible();
+            quayDto.allAreasWheelchairAccessible = quay.isAllAreasWheelchairAccessible();
         }
-        return quayDTO;
+        return quayDto;
     }
 
 }

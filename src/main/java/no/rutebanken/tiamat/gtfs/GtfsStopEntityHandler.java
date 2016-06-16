@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.gtfs;
 
 
-import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
+import no.rutebanken.tiamat.repository.QuayRepository;
 import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.gtfs.model.Stop;
 import org.slf4j.Logger;

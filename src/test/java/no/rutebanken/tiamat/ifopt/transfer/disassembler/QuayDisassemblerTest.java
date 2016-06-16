@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
-import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
+import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
+import no.rutebanken.tiamat.repository.QuayRepository;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.Quay;
 import no.rutebanken.tiamat.model.QuayTypeEnumeration;
@@ -20,9 +20,9 @@ public class QuayDisassemblerTest {
     public void disassembledQuayNotNull() {
         QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
 
-        QuayDTO quayDTO = new QuayDTO();
+        QuayDto quayDto = new QuayDto();
 
-        Quay quay = quayDisassembler.disassemble(quayDTO);
+        Quay quay = quayDisassembler.disassemble(quayDto);
 
         assertThat(quay).isNotNull();
     }
@@ -31,11 +31,11 @@ public class QuayDisassemblerTest {
     public void disassembledQuayNName() {
         QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
 
-        QuayDTO quayDTO = new QuayDTO();
-        quayDTO.name = "name";
-        Quay quay = quayDisassembler.disassemble(quayDTO);
+        QuayDto quayDto = new QuayDto();
+        quayDto.name = "name";
+        Quay quay = quayDisassembler.disassemble(quayDto);
 
-        assertThat(quay.getName().getValue()).isEqualTo(quayDTO.name);
+        assertThat(quay.getName().getValue()).isEqualTo(quayDto.name);
     }
 
 
@@ -43,27 +43,27 @@ public class QuayDisassemblerTest {
     public void disassembledExistingQuay() {
         QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
 
-        QuayDTO quayDTO = new QuayDTO();
-        quayDTO.id = "xyz";
+        QuayDto quayDto = new QuayDto();
+        quayDto.id = "xyz";
 
         Quay quay = new Quay();
-        quay.setId(quayDTO.id);
+        quay.setId(quayDto.id);
 
-        when(quayRepository.findOne(quayDTO.id)).thenReturn(quay);
+        when(quayRepository.findOne(quayDto.id)).thenReturn(quay);
 
-        Quay actualQuay = quayDisassembler.disassemble(quayDTO);
+        Quay actualQuay = quayDisassembler.disassemble(quayDto);
 
-        assertThat(actualQuay.getId()).isEqualTo(quayDTO.id);
+        assertThat(actualQuay.getId()).isEqualTo(quayDto.id);
     }
 
     @Test
     public void dissasembleQuayWithQuayType() {
         QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
 
-        QuayDTO quayDTO = new QuayDTO();
-        quayDTO.quayType = "vehicleLoadingPlace";
+        QuayDto quayDto = new QuayDto();
+        quayDto.quayType = "vehicleLoadingPlace";
 
-        Quay actualQuay = quayDisassembler.disassemble(quayDTO);
+        Quay actualQuay = quayDisassembler.disassemble(quayDto);
 
         assertThat(actualQuay.getQuayType()).isEqualTo(QuayTypeEnumeration.VEHICLE_LOADING_PLACE);
     }

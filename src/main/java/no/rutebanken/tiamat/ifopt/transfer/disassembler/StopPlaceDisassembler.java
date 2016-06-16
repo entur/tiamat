@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
+import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Disassembles the StopPlaceDTO to update a StopPlace.
+ * Disassembles the StopPlaceDto to update a StopPlace.
  */
 @Component
 public class StopPlaceDisassembler {
@@ -34,36 +34,36 @@ public class StopPlaceDisassembler {
     @Autowired
     private QuayDisassembler quayDisassembler;
 
-    public StopPlace disassemble(StopPlace destination, StopPlaceDTO simpleStopPlaceDTO) {
+    public StopPlace disassemble(StopPlace destination, StopPlaceDto simpleStopPlaceDto) {
 
         if(destination == null) {
             return null;
         }
 
-        logger.debug("Disassemble simpleStopPlaceDTO with id {}", simpleStopPlaceDTO.id);
+        logger.debug("Disassemble simpleStopPlaceDto with id {}", simpleStopPlaceDto.id);
 
-        destination.setName(new MultilingualString(simpleStopPlaceDTO.name, "no", ""));
+        destination.setName(new MultilingualString(simpleStopPlaceDto.name, "no", ""));
         destination.setChanged(new Date());
-        destination.setShortName(new MultilingualString(simpleStopPlaceDTO.shortName, "no", ""));
-        destination.setDescription(new MultilingualString(simpleStopPlaceDTO.description, "no", ""));
+        destination.setShortName(new MultilingualString(simpleStopPlaceDto.shortName, "no", ""));
+        destination.setDescription(new MultilingualString(simpleStopPlaceDto.description, "no", ""));
 
-        destination.setStopPlaceType(Optional.ofNullable(simpleStopPlaceDTO.stopPlaceType)
+        destination.setStopPlaceType(Optional.ofNullable(simpleStopPlaceDto.stopPlaceType)
                 .filter(type -> !type.isEmpty())
                 .map(StopTypeEnumeration::fromValue)
                 .orElse(null));
 
-        if(simpleStopPlaceDTO.centroid != null) {
+        if(simpleStopPlaceDto.centroid != null) {
             if (destination.getCentroid() == null) {
                 destination.setCentroid(new SimplePoint());
             }
 
-            destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDTO.centroid));
+            destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDto.centroid));
         }
 
-        destination.setAllAreasWheelchairAccessible(simpleStopPlaceDTO.allAreasWheelchairAccessible);
+        destination.setAllAreasWheelchairAccessible(simpleStopPlaceDto.allAreasWheelchairAccessible);
 
 
-        destination.setQuays(simpleStopPlaceDTO.quays
+        destination.setQuays(simpleStopPlaceDto.quays
                 .stream()
                 .filter(Objects::nonNull)
                 .map(quay -> quayDisassembler.disassemble(quay))

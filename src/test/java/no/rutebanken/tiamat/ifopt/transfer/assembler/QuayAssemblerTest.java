@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.Quay;
 import no.rutebanken.tiamat.model.QuayTypeEnumeration;
@@ -20,10 +20,10 @@ public class QuayAssemblerTest {
         Quay quay = new Quay();
         quay.setQuayType(QuayTypeEnumeration.BUS_BAY);
 
-        QuayDTO quayDTO = quayAssembler.assemble(quay);
+        QuayDto quayDto = quayAssembler.assemble(quay);
 
 
-        assertThat(quayDTO.quayType).isEqualTo("busBay");
+        assertThat(quayDto.quayType).isEqualTo("busBay");
     }
 
 }

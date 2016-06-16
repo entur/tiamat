@@ -1,27 +1,27 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDto;
+import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
 import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.SimplePoint;
 
 @Component
 public class SimplePointAssembler {
 
-    public SimplePointDTO assemble(SimplePoint simplePoint) {
+    public SimplePointDto assemble(SimplePoint simplePoint) {
 
         if(simplePoint == null) {
             return null;
         }
 
-        SimplePointDTO simplePointDTO = new SimplePointDTO();
-        simplePointDTO.location = new LocationDTO();
+        SimplePointDto simplePointDto = new SimplePointDto();
+        simplePointDto.location = new LocationDto();
 
         if (simplePoint.getLocation() != null) {
-            simplePointDTO.location.latitude = simplePoint.getLocation().getLatitude().doubleValue();
-            simplePointDTO.location.longitude = simplePoint.getLocation().getLongitude().doubleValue();
+            simplePointDto.location.latitude = simplePoint.getLocation().getLatitude().doubleValue();
+            simplePointDto.location.longitude = simplePoint.getLocation().getLongitude().doubleValue();
         }
-        return simplePointDTO;
+        return simplePointDto;
     }
 
 }

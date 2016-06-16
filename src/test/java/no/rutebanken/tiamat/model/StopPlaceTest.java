@@ -1,9 +1,9 @@
 package no.rutebanken.tiamat.model;
 
 import no.rutebanken.tiamat.TiamatApplication;
-import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
-import no.rutebanken.tiamat.repository.ifopt.TariffZoneRepository;
+import no.rutebanken.tiamat.repository.QuayRepository;
+import no.rutebanken.tiamat.repository.StopPlaceRepository;
+import no.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

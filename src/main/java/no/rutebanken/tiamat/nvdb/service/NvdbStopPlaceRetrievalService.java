@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import no.rutebanken.tiamat.nvdb.model.VegobjekterResultat;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.apache.http.client.fluent.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

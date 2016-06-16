@@ -2,8 +2,8 @@ package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.config.GeometryFactoryConfig;
-import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
-import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDto;
+import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDto;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.SimplePoint;
 
@@ -15,16 +15,16 @@ public class SimplePointDisassemblerTest {
 
     @Test
     public void dissasembleLongitudeAndLatitude() throws Exception {
-        SimplePointDTO simplePointDTO = new SimplePointDTO();
-        simplePointDTO.location = new LocationDTO();
-        simplePointDTO.location.latitude = 10.123123;
-        simplePointDTO.location.longitude = 59.123123;
+        SimplePointDto simplePointDto = new SimplePointDto();
+        simplePointDto.location = new LocationDto();
+        simplePointDto.location.latitude = 10.123123;
+        simplePointDto.location.longitude = 59.123123;
 
-        SimplePoint simplePoint = new SimplePointDisassembler(geometryFactory).disassemble(simplePointDTO);
+        SimplePoint simplePoint = new SimplePointDisassembler(geometryFactory).disassemble(simplePointDto);
 
         assertThat(simplePoint).isNotNull();
         assertThat(simplePoint.getLocation()).isNotNull();
-        assertThat(simplePoint.getLocation().getGeometryPoint().getX()).isEqualTo(simplePointDTO.location.longitude);
-        assertThat(simplePoint.getLocation().getGeometryPoint().getY()).isEqualTo(simplePointDTO.location.latitude);
+        assertThat(simplePoint.getLocation().getGeometryPoint().getX()).isEqualTo(simplePointDto.location.longitude);
+        assertThat(simplePoint.getLocation().getGeometryPoint().getY()).isEqualTo(simplePointDto.location.latitude);
     }
 }

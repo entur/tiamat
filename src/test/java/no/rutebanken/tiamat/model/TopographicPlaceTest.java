@@ -1,8 +1,8 @@
 package no.rutebanken.tiamat.model;
 
 import no.rutebanken.tiamat.TiamatApplication;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
-import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
+import no.rutebanken.tiamat.repository.StopPlaceRepository;
+import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

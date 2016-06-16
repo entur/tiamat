@@ -7,8 +7,8 @@ import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
-import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
-import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
+import no.rutebanken.tiamat.repository.QuayRepository;
+import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 
 import java.util.ArrayList;

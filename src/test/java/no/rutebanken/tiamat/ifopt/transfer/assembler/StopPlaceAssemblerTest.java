@@ -1,8 +1,8 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDto;
 import no.rutebanken.tiamat.model.*;
-import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
+import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -35,9 +35,9 @@ public class StopPlaceAssemblerTest {
         List<TopographicPlace> topographicPlaces = new ArrayList<>(Arrays.asList(municipality));
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(municipalityName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN)).thenReturn(topographicPlaces);
 
-        StopPlaceDTO stopPlaceDTO = stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+        StopPlaceDto stopPlaceDto = stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
 
-        assertThat(stopPlaceDTO.municipality).isEqualTo(municipalityName);
+        assertThat(stopPlaceDto.municipality).isEqualTo(municipalityName);
     }
 
     @Test
@@ -72,9 +72,9 @@ public class StopPlaceAssemblerTest {
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(countyName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.COUNTY)).thenReturn(counties);
 
 
-        StopPlaceDTO stopPlaceDTO = stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+        StopPlaceDto stopPlaceDto = stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
 
-        assertThat(stopPlaceDTO.county).isEqualTo(countyName);
+        assertThat(stopPlaceDto.county).isEqualTo(countyName);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class StopPlaceAssemblerTest {
 
         when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(municipality);
 
-        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class StopPlaceAssemblerTest {
 
         when(topographicPlaceRepository.findOne(municipalityReference.getRef())).thenReturn(null);
 
-        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDTO(), stopPlace);
+        stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }
 
 

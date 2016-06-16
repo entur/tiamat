@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 
-import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
-import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
+import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDto;
+import no.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,37 +25,37 @@ public class QuayDisassembler {
         this.simplePointDisassembler = simplePointDisassembler;
     }
 
-    public Quay disassemble(QuayDTO quayDTO) {
+    public Quay disassemble(QuayDto quayDto) {
 
         Quay quay;
 
-        if(quayDTO == null) {
+        if(quayDto == null) {
             logger.warn("The incoming quay is null. Returning null");
             return null;
         }
 
-        if(quayDTO.id == null || quayDTO.id.isEmpty()) {
+        if(quayDto.id == null || quayDto.id.isEmpty()) {
             logger.trace("The quay to disassemble has no Id, which means it's new.");
             quay = new Quay();
         } else {
-             quay = quayRepository.findOne(quayDTO.id);
+             quay = quayRepository.findOne(quayDto.id);
             if (quay == null) {
-                logger.warn("There is no existing quay with id {}, returning null", quayDTO.id);
+                logger.warn("There is no existing quay with id {}, returning null", quayDto.id);
                 return null;
             }
         }
 
 
-        quay.setName(new MultilingualString(quayDTO.name, "no", ""));
-        quay.setCentroid(simplePointDisassembler.disassemble(quayDTO.centroid));
+        quay.setName(new MultilingualString(quayDto.name, "no", ""));
+        quay.setCentroid(simplePointDisassembler.disassemble(quayDto.centroid));
 
-        if(quayDTO.quayType != null && !quayDTO.quayType.isEmpty()) {
-            logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDTO.quayType);
-            quay.setQuayType(QuayTypeEnumeration.fromValue(quayDTO.quayType));
+        if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {
+            logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDto.quayType);
+            quay.setQuayType(QuayTypeEnumeration.fromValue(quayDto.quayType));
         }
 
-        logger.trace("Set allAreasWheelchairAccessible {}", quayDTO.allAreasWheelchairAccessible);
-        quay.setAllAreasWheelchairAccessible(quayDTO.allAreasWheelchairAccessible);
+        logger.trace("Set allAreasWheelchairAccessible {}", quayDto.allAreasWheelchairAccessible);
+        quay.setAllAreasWheelchairAccessible(quayDto.allAreasWheelchairAccessible);
 
         logger.debug("Returning quay {}", quay.getName());
         return quay;
