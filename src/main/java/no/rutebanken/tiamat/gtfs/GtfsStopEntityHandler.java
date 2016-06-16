@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.Quay;
+import no.rutebanken.tiamat.model.Quay;
 
 @Component
 public class GtfsStopEntityHandler implements EntityHandler {

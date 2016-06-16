@@ -9,8 +9,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.LocationStructure;
-import uk.org.netex.netex.SimplePoint;
+import no.rutebanken.tiamat.model.LocationStructure;
+import no.rutebanken.tiamat.model.SimplePoint;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

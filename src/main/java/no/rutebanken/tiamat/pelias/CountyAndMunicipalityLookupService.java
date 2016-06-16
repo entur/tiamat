@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.pelias;
 
 import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Point;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.pelias.model.Feature;
 import no.rutebanken.tiamat.pelias.model.ReverseLookupResult;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.org.netex.netex.*;
 
 import java.io.IOException;
 import java.util.List;

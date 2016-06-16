@@ -12,10 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.EntityStructure;
-import uk.org.netex.netex.LocationStructure;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.EntityStructure;
+import no.rutebanken.tiamat.model.LocationStructure;
+import no.rutebanken.tiamat.model.SimplePoint;
+import no.rutebanken.tiamat.model.StopPlace;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

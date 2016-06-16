@@ -3,8 +3,8 @@ package no.rutebanken.tiamat.ifopt.transfer.disassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import org.junit.Test;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.QuayTypeEnumeration;
+import no.rutebanken.tiamat.model.Quay;
+import no.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;

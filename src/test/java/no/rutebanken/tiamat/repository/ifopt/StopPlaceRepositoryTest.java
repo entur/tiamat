@@ -10,8 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.MultilingualString;
+import no.rutebanken.tiamat.model.StopPlace;
 
 import java.util.Date;
 

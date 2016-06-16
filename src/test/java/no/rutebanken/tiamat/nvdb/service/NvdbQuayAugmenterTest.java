@@ -6,8 +6,8 @@ import no.rutebanken.tiamat.nvdb.model.Egenskap;
 import no.rutebanken.tiamat.nvdb.model.EnumVerdi;
 import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.junit.Test;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.QuayTypeEnumeration;
+import no.rutebanken.tiamat.model.Quay;
+import no.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

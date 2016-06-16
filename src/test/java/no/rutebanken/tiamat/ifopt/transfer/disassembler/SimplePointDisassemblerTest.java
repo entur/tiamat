@@ -5,7 +5,7 @@ import no.rutebanken.tiamat.config.GeometryFactoryConfig;
 import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.junit.Test;
-import uk.org.netex.netex.SimplePoint;
+import no.rutebanken.tiamat.model.SimplePoint;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

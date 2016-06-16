@@ -1,9 +1,8 @@
 package no.rutebanken.tiamat.rest.ifopt.siteframe;
 
-import no.rutebanken.tiamat.rest.ifopt.siteframe.TopographicPlaceFromRefFinder;
 import org.junit.Test;
-import uk.org.netex.netex.TopographicPlace;
-import uk.org.netex.netex.TopographicPlaceRefStructure;
+import no.rutebanken.tiamat.model.TopographicPlace;
+import no.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.ArrayList;
 import java.util.List;

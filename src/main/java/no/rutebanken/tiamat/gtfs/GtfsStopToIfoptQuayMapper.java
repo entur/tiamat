@@ -2,12 +2,12 @@ package no.rutebanken.tiamat.gtfs;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import no.rutebanken.tiamat.model.*;
 import org.onebusaway.gtfs.model.Stop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.*;
 
 @Component
 public class GtfsStopToIfoptQuayMapper {

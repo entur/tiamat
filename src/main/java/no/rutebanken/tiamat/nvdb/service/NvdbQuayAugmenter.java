@@ -6,8 +6,8 @@ import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.QuayTypeEnumeration;
+import no.rutebanken.tiamat.model.Quay;
+import no.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 /**
  * Read data from NVDB and map fields to Quay.

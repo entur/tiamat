@@ -5,6 +5,7 @@ import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatTestApplication;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.junit.Before;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.xml.sax.SAXException;
-import uk.org.netex.netex.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;

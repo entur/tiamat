@@ -6,6 +6,7 @@ import no.rutebanken.tiamat.ifopt.transfer.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.ifopt.transfer.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.BoundingBoxDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import uk.org.netex.netex.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;

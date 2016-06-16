@@ -1,9 +1,9 @@
 package no.rutebanken.tiamat.ifopt.transfer.assembler;
 
 import no.rutebanken.tiamat.ifopt.transfer.dto.StopPlaceDTO;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
 import org.junit.Test;
-import uk.org.netex.netex.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

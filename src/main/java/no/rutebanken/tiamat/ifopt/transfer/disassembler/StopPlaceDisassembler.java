@@ -6,10 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.SimplePoint;
-import uk.org.netex.netex.StopPlace;
-import uk.org.netex.netex.StopTypeEnumeration;
+import no.rutebanken.tiamat.model.MultilingualString;
+import no.rutebanken.tiamat.model.SimplePoint;
+import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import java.util.Date;
 import java.util.Objects;

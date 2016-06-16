@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-import uk.org.netex.netex.Quay;
+import no.rutebanken.tiamat.model.Quay;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;

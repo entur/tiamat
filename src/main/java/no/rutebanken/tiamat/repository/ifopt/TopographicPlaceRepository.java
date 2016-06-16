@@ -1,10 +1,9 @@
 package no.rutebanken.tiamat.repository.ifopt;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import uk.org.netex.netex.IanaCountryTldEnumeration;
-import uk.org.netex.netex.TopographicPlace;
-import uk.org.netex.netex.TopographicPlaceTypeEnumeration;
+import no.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import no.rutebanken.tiamat.model.TopographicPlace;
+import no.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.List;
 

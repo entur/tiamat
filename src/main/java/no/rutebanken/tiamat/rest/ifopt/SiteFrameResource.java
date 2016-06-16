@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.rest.ifopt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
 import no.rutebanken.tiamat.rest.ifopt.siteframe.SiteFrameImporter;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import uk.org.netex.netex.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

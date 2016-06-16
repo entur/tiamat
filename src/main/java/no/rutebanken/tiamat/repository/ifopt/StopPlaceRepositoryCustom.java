@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.repository.ifopt;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.StopPlace;
 
 
 public interface StopPlaceRepositoryCustom {

@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.ifopt.transfer.assembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.LocationDTO;
 import no.rutebanken.tiamat.ifopt.transfer.dto.SimplePointDTO;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.SimplePoint;
+import no.rutebanken.tiamat.model.SimplePoint;
 
 @Component
 public class SimplePointAssembler {

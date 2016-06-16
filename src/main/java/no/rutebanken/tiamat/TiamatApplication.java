@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.StopPlace;
 
 @Configuration
 @EnableAutoConfiguration

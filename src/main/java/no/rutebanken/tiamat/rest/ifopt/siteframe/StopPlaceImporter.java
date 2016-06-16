@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.SiteFrame;
-import uk.org.netex.netex.StopPlace;
-import uk.org.netex.netex.TopographicPlace;
-import uk.org.netex.netex.TopographicPlaceRefStructure;
+import no.rutebanken.tiamat.model.SiteFrame;
+import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.TopographicPlace;
+import no.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

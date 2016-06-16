@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.MultilingualString;
-import uk.org.netex.netex.Quay;
-import uk.org.netex.netex.QuayTypeEnumeration;
+import no.rutebanken.tiamat.model.MultilingualString;
+import no.rutebanken.tiamat.model.Quay;
+import no.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 @Component
 public class QuayDisassembler {

@@ -4,7 +4,7 @@ package no.rutebanken.tiamat.ifopt.transfer.assembler;
 import no.rutebanken.tiamat.ifopt.transfer.dto.QuayDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.Quay;
+import no.rutebanken.tiamat.model.Quay;
 
 @Component
 public class QuayAssembler {

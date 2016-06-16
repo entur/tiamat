@@ -4,11 +4,10 @@ import no.rutebanken.tiamat.auth.TiamatSecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.orm.jpa.EntityScan;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.StopPlace;
 
 /**
  * Run integration tests for the rest interface without security

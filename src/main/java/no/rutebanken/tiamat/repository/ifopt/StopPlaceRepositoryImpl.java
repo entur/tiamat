@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.StopPlace;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;

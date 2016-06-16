@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.nvdb.model.VegObjekt;
 import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.org.netex.netex.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;

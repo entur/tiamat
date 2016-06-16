@@ -1,11 +1,9 @@
 package no.rutebanken.tiamat.rest.ifopt.siteframe;
 
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.ifopt.TopographicPlaceRepository;
-import no.rutebanken.tiamat.rest.ifopt.siteframe.TopographicPlaceCreator;
-import no.rutebanken.tiamat.rest.ifopt.siteframe.TopographicPlaceFromRefFinder;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.org.netex.netex.*;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

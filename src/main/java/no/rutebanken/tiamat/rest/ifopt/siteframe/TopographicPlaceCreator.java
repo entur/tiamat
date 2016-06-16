@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.org.netex.netex.TopographicPlace;
-import uk.org.netex.netex.TopographicPlaceRefStructure;
+import no.rutebanken.tiamat.model.TopographicPlace;
+import no.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.List;
 import java.util.Optional;

@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import uk.org.netex.netex.StopPlace;
+import no.rutebanken.tiamat.model.StopPlace;
 
 public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlace, String>, StopPlaceRepositoryCustom {
 

@@ -3,13 +3,13 @@ package no.rutebanken.tiamat.service;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
 import no.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.ifopt.QuayRepository;
 import no.rutebanken.tiamat.repository.ifopt.StopPlaceRepository;
 import org.junit.Test;
-import uk.org.netex.netex.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
