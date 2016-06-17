@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.rest.netex;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.netexmapping.NetexMapper;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import no.rutebanken.tiamat.rest.netex.siteframe.SiteFrameImporter;
@@ -26,7 +27,6 @@ public class SiteFrameResource {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameResource.class);
 
-
     private StopPlaceRepository stopPlaceRepository;
 
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -35,14 +35,17 @@ public class SiteFrameResource {
 
     private SiteFrameImporter siteFrameImporter;
 
+    private NetexMapper netexMapper;
+
     @Autowired
     public SiteFrameResource(StopPlaceRepository stopPlaceRepository,
                              TopographicPlaceRepository topographicPlaceRepository,
-                             XmlMapper xmlMapper, SiteFrameImporter siteFrameImporter) {
+                             XmlMapper xmlMapper, SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.xmlMapper = xmlMapper;
         this.siteFrameImporter = siteFrameImporter;
+        this.netexMapper = netexMapper;
     }
 
     @GET
@@ -67,9 +70,11 @@ public class SiteFrameResource {
 
         siteFrame.setTopographicPlaces(topographicPlaces);
 
+        no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.map(siteFrame);
+
         try {
             // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
-            String xml = xmlMapper.writeValueAsString(siteFrame);
+            String xml = xmlMapper.writeValueAsString(convertedSiteFrame);
             return Response.ok(xml).build();
         } catch (JsonProcessingException e) {
             logger.warn("Error serializing stop place to xml", e);
