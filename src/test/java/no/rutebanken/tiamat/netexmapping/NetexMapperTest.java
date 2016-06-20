@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class NetexMapperTest {
 
     @Test
-    public void map() throws Exception {
+    public void mapToNetex() throws Exception {
         no.rutebanken.tiamat.model.SiteFrame sourceSiteFrame = new no.rutebanken.tiamat.model.SiteFrame();
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
@@ -28,5 +28,30 @@ public class NetexMapperTest {
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+    }
+
+
+    @Test
+    public void mapToInternalModel() throws Exception {
+        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame();
+
+        no.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new no.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
+
+        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
+        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
+        name.setValue("stop place");
+        name.setLang("no");
+        name.setTextIdType("");
+        stopPlace.setName(name);
+        stopPlace.setId("1337");
+
+        stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
+        netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
+
+        no.rutebanken.tiamat.model.SiteFrame actualSiteFrame = new NetexMapper().map(netexSiteFrame);
+
+        assertThat(actualSiteFrame).isNotNull();
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId()).isEqualTo(stopPlace.getId());
     }
 }

@@ -33,6 +33,11 @@ public class NetexMapper {
         return siteFrame;
     }
 
+    public no.rutebanken.tiamat.model.SiteFrame map(SiteFrame netexSiteFrame) {
+        no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = mapperFactory.getMapperFacade().map(netexSiteFrame, no.rutebanken.tiamat.model.SiteFrame.class);
+        return tiamatSiteFrame;
+    }
+
     public SiteFrame manualMap(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
 
         SiteFrame siteframe = new SiteFrame();
