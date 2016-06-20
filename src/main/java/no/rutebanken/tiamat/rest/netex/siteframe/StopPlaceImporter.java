@@ -47,6 +47,9 @@ public class StopPlaceImporter {
             return;
         }
 
+        // TODO: Hack to avoid 'detached entity passed to persist'.
+        stopPlace.getCentroid().getLocation().setId(0);
+
         if (stopPlace.getTopographicPlaceRef() != null) {
             Optional<TopographicPlace> optionalTopographicPlace = topographicPlaceCreator.findOrCreateTopographicPlace(
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
