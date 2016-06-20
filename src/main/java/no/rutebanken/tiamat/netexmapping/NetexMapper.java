@@ -13,35 +13,25 @@ public class NetexMapper {
     private static final MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
     private static final Logger logger = LoggerFactory.getLogger(NetexMapper.class);
 
-    public NetexMapper() {
+    static {
         logger.info("Creating netex mapper");
-        mapperFactory.getConverterFactory().registerConverter(new ValidityConditionsConverter());
         mapperFactory.getConverterFactory().registerConverter(new AccessSpacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new LevelsConverter());
         mapperFactory.getConverterFactory().registerConverter(new QuaysConverter());
         mapperFactory.getConverterFactory().registerConverter(new AlternativeNamesConverter());
         mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new TariffZonesConverter());
+        mapperFactory.getConverterFactory().registerConverter(new ValidityConditionsConverter());
 
-
-        //mapperFactory.classMap()
     }
 
-
-    public SiteFrame map(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
+    public SiteFrame mapToNetexModel(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
         SiteFrame siteFrame = mapperFactory.getMapperFacade().map(tiamatSiteFrame, SiteFrame.class);
         return siteFrame;
     }
 
-    public no.rutebanken.tiamat.model.SiteFrame map(SiteFrame netexSiteFrame) {
+    public no.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {
         no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = mapperFactory.getMapperFacade().map(netexSiteFrame, no.rutebanken.tiamat.model.SiteFrame.class);
         return tiamatSiteFrame;
-    }
-
-    public SiteFrame manualMap(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
-
-        SiteFrame siteframe = new SiteFrame();
-        //tiamatSiteFrame.getStopPlaces().getStopPlace().stream().
-        return null;
     }
 }

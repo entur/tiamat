@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class NetexMapperTest {
 
     @Test
-    public void mapToNetex() throws Exception {
+    public void mapToNetexModel() throws Exception {
         no.rutebanken.tiamat.model.SiteFrame sourceSiteFrame = new no.rutebanken.tiamat.model.SiteFrame();
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
@@ -24,7 +24,7 @@ public class NetexMapperTest {
 
         sourceSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new NetexMapper().map(sourceSiteFrame);
+        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new NetexMapper().mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -48,7 +48,7 @@ public class NetexMapperTest {
         stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
         netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        no.rutebanken.tiamat.model.SiteFrame actualSiteFrame = new NetexMapper().map(netexSiteFrame);
+        no.rutebanken.tiamat.model.SiteFrame actualSiteFrame = new NetexMapper().mapToTiamatModel(netexSiteFrame);
 
         assertThat(actualSiteFrame).isNotNull();
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());

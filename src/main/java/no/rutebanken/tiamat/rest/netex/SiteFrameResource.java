@@ -70,7 +70,7 @@ public class SiteFrameResource {
 
         siteFrame.setTopographicPlaces(topographicPlaces);
 
-        no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.map(siteFrame);
+        no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         try {
             // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
@@ -97,10 +97,11 @@ public class SiteFrameResource {
             logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
                     recievedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
                     recievedNetexSiteFrame.getStopPlaces().getStopPlace().size());
-            // TODO: map back to internal model
-            // siteFrame = xmlMapper.readValue(xml, SiteFrame.class);
-            //return siteFrameImporter.importSiteFrame(siteFrame);
-            return "Not implemented";
+
+            SiteFrame siteFrame = netexMapper.mapToTiamatModel(recievedNetexSiteFrame);
+
+            return siteFrameImporter.importSiteFrame(siteFrame);
+
         } catch (IOException e) {
             logger.warn("Problems parsing xml: {}", e.getMessage(), e);
             throw e;
