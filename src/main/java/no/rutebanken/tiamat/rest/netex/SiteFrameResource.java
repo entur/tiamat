@@ -2,7 +2,15 @@ package no.rutebanken.tiamat.rest.netex;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import no.rutebanken.netex.model.*;
+import no.rutebanken.netex.model.Common_VersionFrameStructure;
+import no.rutebanken.netex.model.VersionFrame_VersionStructure;
 import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.model.SiteFrame;
+import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import no.rutebanken.tiamat.model.TopographicPlace;
+import no.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -16,6 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import java.io.*;
 import java.util.Iterator;
 
@@ -49,7 +62,7 @@ public class SiteFrameResource {
     }
 
     @GET
-    public Response getSiteFrame() throws JsonProcessingException {
+    public Response getSiteFrame() throws JsonProcessingException, JAXBException {
 
         SiteFrame siteFrame = new SiteFrame();
 
@@ -72,6 +85,24 @@ public class SiteFrameResource {
 
         no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
+/*
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure();
+        PublicationDeliveryStructure.DataObjects dataObjects = objectFactory.createPublicationDeliveryStructureDataObjects();
+
+        //objectFactory.createPublicationDelivery(publicationDeliveryStructure);
+        JAXBElement<Common_VersionFrameStructure> commonFrame = objectFactory.createCommonFrame(convertedSiteFrame);
+        dataObjects.getCompositeFrameOrCommonFrame().add(commonFrame);
+
+        publicationDeliveryStructure.setDataObjects(dataObjects);
+        JAXBElement<PublicationDeliveryStructure> publicationDelivery = objectFactory.createPublicationDelivery(publicationDeliveryStructure);
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(PublicationDeliveryStructure.class);
+        StringWriter writer = new StringWriter();
+        jaxbContext.createMarshaller().marshal(publicationDelivery, writer);
+        return Response.ok(writer.toString()).build();
+*/
         try {
             // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
             String xml = xmlMapper.writeValueAsString(convertedSiteFrame);
@@ -80,19 +111,21 @@ public class SiteFrameResource {
             logger.warn("Error serializing stop place to xml", e);
             throw e;
         }
-
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String importSiteFrame(String xml) throws IOException {
+    public String importSiteFrame(String xml) throws IOException, JAXBException {
         // Using xml mapper directly because of issues registering it properly in JerseyConfig
         logger.info("Incoming xml is {} characters long", xml.length());
 
-        try {
 
-            no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = xmlMapper.readValue(xml, no.rutebanken.netex.model.SiteFrame.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = (no.rutebanken.netex.model.SiteFrame) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+
+            //no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = xmlMapper.readValue(xml, no.rutebanken.netex.model.SiteFrame.class);
 
             logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
                     recievedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
@@ -102,10 +135,7 @@ public class SiteFrameResource {
 
             return siteFrameImporter.importSiteFrame(siteFrame);
 
-        } catch (IOException e) {
-            logger.warn("Problems parsing xml: {}", e.getMessage(), e);
-            throw e;
-        }
+
     }
 
 
