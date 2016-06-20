@@ -7,15 +7,15 @@ import no.rutebanken.tiamat.model.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class LevelsConverter extends CustomConverter<ArrayList<Level>, Levels_RelStructure> {
+public class LevelsConverter extends CustomConverter<List<Level>, Levels_RelStructure> {
     private static final Logger logger = LoggerFactory.getLogger(LevelsConverter.class);
     @Override
-    public no.rutebanken.netex.model.Levels_RelStructure convert(ArrayList<Level> levels, Type<? extends Levels_RelStructure> type) {
+    public Levels_RelStructure convert(List<Level> levels, Type<? extends Levels_RelStructure> type) {
         logger.debug("Mapping {} levels into levels_RelStructure", levels.size());
 
-        no.rutebanken.netex.model.Levels_RelStructure levels_relStructure = new no.rutebanken.netex.model.Levels_RelStructure();
+        Levels_RelStructure levels_relStructure = new Levels_RelStructure();
 
         levels.forEach(level -> {
                     levels_relStructure.getLevelRefOrLevel().add(

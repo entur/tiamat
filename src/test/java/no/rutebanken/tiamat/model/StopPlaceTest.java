@@ -31,8 +31,6 @@ public class StopPlaceTest {
     @Autowired
     private QuayRepository quayRepository;
 
-
-
     @Test
     public void persistStopPlaceWithAccessSpace() {
         StopPlace stopPlace = new StopPlace();

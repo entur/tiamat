@@ -91,8 +91,16 @@ public class SiteFrameResource {
         logger.info("Incoming xml is {} characters long", xml.length());
 
         try {
-            SiteFrame siteFrame = xmlMapper.readValue(xml, SiteFrame.class);
-            return siteFrameImporter.importSiteFrame(siteFrame);
+
+            no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = xmlMapper.readValue(xml, no.rutebanken.netex.model.SiteFrame.class);
+
+            logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
+                    recievedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
+                    recievedNetexSiteFrame.getStopPlaces().getStopPlace().size());
+            // TODO: map back to internal model
+            // siteFrame = xmlMapper.readValue(xml, SiteFrame.class);
+            //return siteFrameImporter.importSiteFrame(siteFrame);
+            return "Not implemented";
         } catch (IOException e) {
             logger.warn("Problems parsing xml: {}", e.getMessage(), e);
             throw e;

@@ -19,11 +19,24 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new AccessSpacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new LevelsConverter());
         mapperFactory.getConverterFactory().registerConverter(new QuaysConverter());
+        mapperFactory.getConverterFactory().registerConverter(new AlternativeNamesConverter());
+        mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
+        mapperFactory.getConverterFactory().registerConverter(new TariffZonesConverter());
+
+
+        //mapperFactory.classMap()
     }
 
 
     public SiteFrame map(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
         SiteFrame siteFrame = mapperFactory.getMapperFacade().map(tiamatSiteFrame, SiteFrame.class);
         return siteFrame;
+    }
+
+    public SiteFrame manualMap(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
+
+        SiteFrame siteframe = new SiteFrame();
+        //tiamatSiteFrame.getStopPlaces().getStopPlace().stream().
+        return null;
     }
 }

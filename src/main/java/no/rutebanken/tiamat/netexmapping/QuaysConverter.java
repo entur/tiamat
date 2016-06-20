@@ -6,10 +6,11 @@ import no.rutebanken.netex.model.Quays_RelStructure;
 import no.rutebanken.tiamat.model.Quay;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class QuaysConverter extends CustomConverter<ArrayList<Quay>, Quays_RelStructure> {
+public class QuaysConverter extends CustomConverter<List<Quay>, Quays_RelStructure> {
     @Override
-    public Quays_RelStructure convert(ArrayList<Quay> quays, Type<? extends Quays_RelStructure> type) {
+    public Quays_RelStructure convert(List<Quay> quays, Type<? extends Quays_RelStructure> type) {
         Quays_RelStructure quays_relStructure = new Quays_RelStructure();
 
         quays.forEach(quay -> {
