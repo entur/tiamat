@@ -15,6 +15,8 @@ public class ValidityConditionsConverter extends BidirectionalConverter<List<Val
 
     @Override
     public ValidityConditions_RelStructure convertTo(List<ValidityCondition> validityConditions, Type<ValidityConditions_RelStructure> type) {
+
+        if(validityConditions.isEmpty()) return null;
         ValidityConditions_RelStructure validityConditions_relStructure = new no.rutebanken.netex.model.ValidityConditions_RelStructure();
 
         validityConditions.forEach(validityCondition ->

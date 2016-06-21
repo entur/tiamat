@@ -58,8 +58,12 @@ public class SiteFrameResourceIntegrationTest {
         topographicPlaceRepository.deleteAll();
     }
 
+
+    /**
+     * Verify that the REST service can export and import a SiteFrame with stop place, quay and topographic place.
+     */
     @Test
-    public void textXmlExportOfSiteFrame() throws Exception {
+    public void netexExportImportSiteFrameWithStopPlaceAndTopographicalPlace() throws Exception {
 
         CountryRef countryRef = new CountryRef();
         countryRef.setRef(IanaCountryTldEnumeration.NO);
