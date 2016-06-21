@@ -1,16 +1,22 @@
 package no.rutebanken.tiamat.netexmapping;
 
 import ma.glasnost.orika.CustomConverter;
+import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.tiamat.model.EquipmentPlace;
 import no.rutebanken.netex.model.EquipmentPlaces_RelStructure;
 
 import java.util.List;
 
-public class EquipmentPlacesConverter extends CustomConverter<List<EquipmentPlace>, EquipmentPlaces_RelStructure> {
+public class EquipmentPlacesConverter extends BidirectionalConverter<List<EquipmentPlace>, EquipmentPlaces_RelStructure> {
+
     @Override
-    public EquipmentPlaces_RelStructure convert(List<EquipmentPlace> equipmentPlaces, Type<? extends EquipmentPlaces_RelStructure> type) {
+    public EquipmentPlaces_RelStructure convertTo(List<EquipmentPlace> equipmentPlaces, Type<EquipmentPlaces_RelStructure> type) {
         return null;
     }
 
+    @Override
+    public List<EquipmentPlace> convertFrom(EquipmentPlaces_RelStructure equipmentPlaces_relStructure, Type<List<EquipmentPlace>> type) {
+        return null;
+    }
 }

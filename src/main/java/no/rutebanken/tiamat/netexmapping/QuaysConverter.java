@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.netexmapping;
 
 import ma.glasnost.orika.CustomConverter;
+import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.netex.model.Quays_RelStructure;
 import no.rutebanken.tiamat.model.Quay;
@@ -8,9 +9,10 @@ import no.rutebanken.tiamat.model.Quay;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuaysConverter extends CustomConverter<List<Quay>, Quays_RelStructure> {
+public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_RelStructure> {
+
     @Override
-    public Quays_RelStructure convert(List<Quay> quays, Type<? extends Quays_RelStructure> type) {
+    public Quays_RelStructure convertTo(List<Quay> quays, Type<Quays_RelStructure> type) {
         Quays_RelStructure quays_relStructure = new Quays_RelStructure();
 
         quays.forEach(quay -> {
@@ -19,5 +21,10 @@ public class QuaysConverter extends CustomConverter<List<Quay>, Quays_RelStructu
             );
         });
         return quays_relStructure;
-    };
+    }
+
+    @Override
+    public List<Quay> convertFrom(Quays_RelStructure quays_relStructure, Type<List<Quay>> type) {
+        return null;
+    }
 }
