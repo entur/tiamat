@@ -1,6 +1,5 @@
-package no.rutebanken.tiamat.netexmapping;
+package no.rutebanken.tiamat.netexmapping.converters;
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.netex.model.ValidityConditions_RelStructure;
@@ -8,7 +7,6 @@ import no.rutebanken.tiamat.model.ValidityCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ValidityConditionsConverter extends BidirectionalConverter<List<ValidityCondition>, ValidityConditions_RelStructure> {

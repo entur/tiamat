@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatTestApplication;
 import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.junit.Before;
@@ -38,6 +39,9 @@ public class SiteFrameResourceIntegrationTest {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
 
     @Value("${local.server.port}")
     private int port;
@@ -86,6 +90,13 @@ public class SiteFrameResourceIntegrationTest {
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
         stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
 
+
+        Quay quay = new Quay();
+        quay.setName(new MultilingualString("quay", "en", ""));
+        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(6, 70)))));
+
+        quayRepository.save(quay);
+        stopPlace.getQuays().add(quay);
         stopPlaceRepository.save(stopPlace);
 
         String xml = get("/jersey/site_frame")

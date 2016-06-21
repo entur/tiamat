@@ -1,6 +1,5 @@
-package no.rutebanken.tiamat.netexmapping;
+package no.rutebanken.tiamat.netexmapping.converters;
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.netex.model.Levels_RelStructure;

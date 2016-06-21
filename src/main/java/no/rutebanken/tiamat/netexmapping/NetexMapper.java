@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.netexmapping;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import no.rutebanken.netex.model.SiteFrame;
+import no.rutebanken.tiamat.netexmapping.converters.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,9 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new TariffZonesConverter());
         mapperFactory.getConverterFactory().registerConverter(new ValidityConditionsConverter());
+        mapperFactory.getConverterFactory().registerConverter(new BoardinPositionsConverter());
+        mapperFactory.getConverterFactory().registerConverter(new CheckConstraintsConverter());
+        mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
 
     }
 
