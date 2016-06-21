@@ -56,6 +56,10 @@ public class Properties {
     private String county;
     @JsonProperty("locality")
     private String locality;
+
+    @JsonProperty("localadmin")
+    private String localadmin;
+
     @JsonProperty("neighbourhood")
     private String neighbourhood;
     @JsonProperty("confidence")
@@ -66,9 +70,8 @@ public class Properties {
     private String label;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
-
     /**
-     * 
+     *
      * @return
      *     The id
      */
@@ -78,7 +81,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param id
      *     The id
      */
@@ -88,7 +91,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The gid
      */
@@ -98,7 +101,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param gid
      *     The gid
      */
@@ -108,7 +111,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The layer
      */
@@ -118,7 +121,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param layer
      *     The layer
      */
@@ -128,7 +131,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The source
      */
@@ -138,7 +141,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param source
      *     The source
      */
@@ -148,7 +151,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The name
      */
@@ -158,7 +161,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param name
      *     The name
      */
@@ -168,7 +171,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The housenumber
      */
@@ -178,7 +181,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param housenumber
      *     The housenumber
      */
@@ -188,7 +191,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The street
      */
@@ -198,7 +201,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param street
      *     The street
      */
@@ -208,7 +211,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The postalcode
      */
@@ -218,7 +221,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param postalcode
      *     The postalcode
      */
@@ -228,7 +231,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The countryA
      */
@@ -238,7 +241,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param countryA
      *     The country_a
      */
@@ -248,7 +251,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The country
      */
@@ -258,7 +261,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param country
      *     The country
      */
@@ -268,7 +271,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The region
      */
@@ -278,7 +281,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param region
      *     The region
      */
@@ -288,7 +291,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The county
      */
@@ -298,7 +301,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param county
      *     The county
      */
@@ -308,7 +311,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The locality
      */
@@ -318,7 +321,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param locality
      *     The locality
      */
@@ -328,7 +331,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The neighbourhood
      */
@@ -338,7 +341,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param neighbourhood
      *     The neighbourhood
      */
@@ -348,7 +351,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The confidence
      */
@@ -358,7 +361,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param confidence
      *     The confidence
      */
@@ -368,7 +371,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The distance
      */
@@ -378,7 +381,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @param distance
      *     The distance
      */
@@ -388,7 +391,7 @@ public class Properties {
     }
 
     /**
-     * 
+     *
      * @return
      *     The label
      */
@@ -397,8 +400,17 @@ public class Properties {
         return label;
     }
 
+    @JsonProperty("localadmin")
+    public String getLocaladmin() {
+        return localadmin;
+    }
+
+    public void setLocaladmin(String localadmin) {
+        this.localadmin = localadmin;
+    }
+
     /**
-     * 
+     *
      * @param label
      *     The label
      */

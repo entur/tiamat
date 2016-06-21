@@ -53,8 +53,8 @@ public class CountyAndMunicipalityLookupService {
 
         Feature feature = reverseLookupResult.getFeatures().get(0);
 
-        String region = feature.getProperties().getRegion();
-        String locality = feature.getProperties().getLocality();
+        String region = feature.getProperties().getCounty();
+        String locality = feature.getProperties().getLocaladmin();
 
         logger.trace("Got region {} and locality {}", region, locality);
 
