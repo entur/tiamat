@@ -85,32 +85,33 @@ public class SiteFrameResource {
 
         no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-/*
+
         ObjectFactory objectFactory = new ObjectFactory();
 
-        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure();
-        PublicationDeliveryStructure.DataObjects dataObjects = objectFactory.createPublicationDeliveryStructureDataObjects();
+//        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure();
+//        PublicationDeliveryStructure.DataObjects dataObjects = objectFactory.createPublicationDeliveryStructureDataObjects();
 
         //objectFactory.createPublicationDelivery(publicationDeliveryStructure);
-        JAXBElement<Common_VersionFrameStructure> commonFrame = objectFactory.createCommonFrame(convertedSiteFrame);
-        dataObjects.getCompositeFrameOrCommonFrame().add(commonFrame);
+        //JAXBElement<Common_VersionFrameStructure> commonFrame = objectFactory.createCommonFrame(convertedSiteFrame);
+        //dataObjects.getCompositeFrameOrCommonFrame().add(commonFrame);
 
-        publicationDeliveryStructure.setDataObjects(dataObjects);
-        JAXBElement<PublicationDeliveryStructure> publicationDelivery = objectFactory.createPublicationDelivery(publicationDeliveryStructure);
+//        publicationDeliveryStructure.setDataObjects(dataObjects);
+//        JAXBElement<PublicationDeliveryStructure> publicationDelivery = objectFactory.createPublicationDelivery(publicationDeliveryStructure);
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(PublicationDeliveryStructure.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
         StringWriter writer = new StringWriter();
-        jaxbContext.createMarshaller().marshal(publicationDelivery, writer);
+        JAXBElement<no.rutebanken.netex.model.SiteFrame> objectFactorySiteFrame = objectFactory.createSiteFrame(convertedSiteFrame);
+        jaxbContext.createMarshaller().marshal(objectFactorySiteFrame, writer);
         return Response.ok(writer.toString()).build();
-*/
-        try {
-            // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
-            String xml = xmlMapper.writeValueAsString(convertedSiteFrame);
-            return Response.ok(xml).build();
-        } catch (JsonProcessingException e) {
-            logger.warn("Error serializing stop place to xml", e);
-            throw e;
-        }
+
+//        try {
+//            // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
+//            String xml = xmlMapper.writeValueAsString(convertedSiteFrame);
+//            return Response.ok(xml).build();
+//        } catch (JsonProcessingException e) {
+//            logger.warn("Error serializing stop place to xml", e);
+//            throw e;
+//        }
     }
 
     @POST
@@ -123,15 +124,21 @@ public class SiteFrameResource {
 
             JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = (no.rutebanken.netex.model.SiteFrame) jaxbUnmarshaller.unmarshal(new StringReader(xml));
 
-            //no.rutebanken.netex.model.SiteFrame recievedNetexSiteFrame = xmlMapper.readValue(xml, no.rutebanken.netex.model.SiteFrame.class);
+            JAXBElement<no.rutebanken.netex.model.SiteFrame> jaxbElement =
+                    (JAXBElement<no.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+            no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
+
+
+//            no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = (no.rutebanken.netex.model.SiteFrame) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+
+            //no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = xmlMapper.readValue(xml, no.rutebanken.netex.model.SiteFrame.class);
 
             logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
-                    recievedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
-                    recievedNetexSiteFrame.getStopPlaces().getStopPlace().size());
+                    receivedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
+                    receivedNetexSiteFrame.getStopPlaces().getStopPlace().size());
 
-            SiteFrame siteFrame = netexMapper.mapToTiamatModel(recievedNetexSiteFrame);
+            SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
             return siteFrameImporter.importSiteFrame(siteFrame);
 
