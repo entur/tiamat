@@ -96,7 +96,6 @@ public class LocationStructure {
     protected String srsName;
 
     @XmlTransient
-    @Type(type="org.hibernate.spatial.GeometryType")
     private Point geometryPoint = null;
 
     /**
