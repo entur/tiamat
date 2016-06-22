@@ -4,19 +4,19 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
+import no.rutebanken.tiamat.model.LocationStructure;
+import no.rutebanken.tiamat.model.SimplePoint;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import no.rutebanken.tiamat.model.LocationStructure;
-import no.rutebanken.tiamat.model.SimplePoint;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TiamatApplication.class)
+@SpringBootTest(classes = TiamatApplication.class)
 public class SimplePointAssemblerTest {
 
     @Autowired

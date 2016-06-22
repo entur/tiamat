@@ -6,7 +6,7 @@ import no.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ import no.rutebanken.tiamat.model.StopPlace;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TiamatApplication.class)
+@SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
 public class StopPlaceRepositoryImplTest {
 
