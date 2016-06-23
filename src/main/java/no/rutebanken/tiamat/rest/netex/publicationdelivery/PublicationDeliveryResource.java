@@ -74,10 +74,7 @@ public class PublicationDeliveryResource {
         String importResponse = publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> {
-                    SiteFrame siteFrame = (SiteFrame) element.getValue();
-                    return netexMapper.mapToTiamatModel(siteFrame);
-                })
+                .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
                 .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame))
                 .findFirst().orElse("Could not find SiteFrame in PublicationDeliveryStructure");
 

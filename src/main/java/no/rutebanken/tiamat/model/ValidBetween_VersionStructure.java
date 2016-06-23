@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 
@@ -55,27 +56,27 @@ public class ValidBetween_VersionStructure
     /**
      * Start date of AVAILABILITY CONDITION.
      */
-    private Date fromDate;
+    private ZonedDateTime fromDate;
 
     /**
      * End of AVAILABILITY CONDITION. Date is INCLUSIVE.
      */
-    private Date toDate;
+    private ZonedDateTime toDate;
 
 
-    public Date getFromDate() {
+    public ZonedDateTime getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(Date fromDate) {
+    public void setFromDate(ZonedDateTime fromDate) {
         this.fromDate = fromDate;
     }
 
-    public Date getToDate() {
+    public ZonedDateTime getToDate() {
         return toDate;
     }
 
-    public void setToDate(Date toDate) {
+    public void setToDate(ZonedDateTime toDate) {
         this.toDate = toDate;
     }
 }
