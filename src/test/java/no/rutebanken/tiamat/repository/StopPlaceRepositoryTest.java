@@ -1,6 +1,8 @@
 package no.rutebanken.tiamat.repository;
 
 import no.rutebanken.tiamat.TiamatApplication;
+import no.rutebanken.tiamat.model.MultilingualString;
+import no.rutebanken.tiamat.model.StopPlace;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import no.rutebanken.tiamat.model.MultilingualString;
-import no.rutebanken.tiamat.model.StopPlace;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

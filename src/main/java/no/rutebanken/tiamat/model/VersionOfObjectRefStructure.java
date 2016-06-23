@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -133,11 +133,11 @@ public class VersionOfObjectRefStructure implements Serializable {
 
     @XmlAttribute(name = "created")
     @XmlSchemaType(name = "dateTime")
-    protected Date created;
+    protected ZonedDateTime created;
 
     @XmlAttribute(name = "changed")
     @XmlSchemaType(name = "dateTime")
-    protected Date changed;
+    protected ZonedDateTime changed;
 
     @XmlAttribute(name = "version")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
@@ -223,7 +223,7 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public Date getCreated() {
+    public ZonedDateTime getCreated() {
         return created;
     }
 
@@ -235,7 +235,7 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setCreated(Date value) {
+    public void setCreated(ZonedDateTime value) {
         this.created = value;
     }
 
@@ -247,7 +247,7 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public Date getChanged() {
+    public ZonedDateTime getChanged() {
         return changed;
     }
 
@@ -259,7 +259,7 @@ public class VersionOfObjectRefStructure implements Serializable {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setChanged(Date value) {
+    public void setChanged(ZonedDateTime value) {
         this.changed = value;
     }
 

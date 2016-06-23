@@ -1,18 +1,17 @@
 package no.rutebanken.tiamat.dtoassembling.disassembler;
 
 import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
+import no.rutebanken.tiamat.model.MultilingualString;
+import no.rutebanken.tiamat.model.SimplePoint;
+import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.StopTypeEnumeration;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import no.rutebanken.tiamat.model.MultilingualString;
-import no.rutebanken.tiamat.model.SimplePoint;
-import no.rutebanken.tiamat.model.StopPlace;
-import no.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
