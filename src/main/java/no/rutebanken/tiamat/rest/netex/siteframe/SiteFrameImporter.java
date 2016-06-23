@@ -30,7 +30,7 @@ public class SiteFrameImporter {
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
 
         logger.info("Received site frame for import. It contains {} topographical places and {} stop places. Starting import,",
-                siteFrame.getTopographicPlaces().getTopographicPlace().size(),
+                siteFrame.getTopographicPlaces() != null ? siteFrame.getTopographicPlaces().getTopographicPlace().size() : 0,
                 siteFrame.getStopPlaces().getStopPlace().size());
 
         siteFrame.getStopPlaces().getStopPlace()
