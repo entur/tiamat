@@ -191,7 +191,7 @@ public class StopPlaceTest {
     @Test
     public void persistStopPlaceWithCreatedDate() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
+        stopPlace.setCreated(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
         assertThat(actualStopPlace.getCreated()).isEqualTo(stopPlace.getCreated());
