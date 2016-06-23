@@ -11,6 +11,7 @@ import no.rutebanken.tiamat.model.SimplePoint;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopTypeEnumeration;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class StopPlaceDisassembler {
         logger.debug("Disassemble simpleStopPlaceDto with id {}", simpleStopPlaceDto.id);
 
         destination.setName(new MultilingualString(simpleStopPlaceDto.name, "no", ""));
-        destination.setChanged(new Date());
+        destination.setChanged(ZonedDateTime.now());
         destination.setShortName(new MultilingualString(simpleStopPlaceDto.shortName, "no", ""));
         destination.setDescription(new MultilingualString(simpleStopPlaceDto.description, "no", ""));
 

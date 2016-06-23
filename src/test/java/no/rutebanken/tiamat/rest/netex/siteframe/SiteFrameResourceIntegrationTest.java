@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex;
+package no.rutebanken.tiamat.rest.netex.siteframe;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;

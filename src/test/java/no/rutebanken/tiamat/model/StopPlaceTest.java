@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -188,19 +191,19 @@ public class StopPlaceTest {
     @Test
     public void persistStopPlaceWithCreatedDate() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setCreated(new Date(10000));
+        stopPlace.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
-        assertThat(actualStopPlace.getCreated().getTime()).isEqualTo(stopPlace.getCreated().getTime());
+        assertThat(actualStopPlace.getCreated()).isEqualTo(stopPlace.getCreated());
     }
 
     @Test
     public void persistStopPlaceWithChangedDate() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setChanged(new Date(10000));
+        stopPlace.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
-        assertThat(actualStopPlace.getChanged().getTime()).isEqualTo(stopPlace.getChanged().getTime());
+        assertThat(actualStopPlace.getChanged()).isEqualTo(stopPlace.getChanged());
     }
 
     @Test

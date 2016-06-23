@@ -13,6 +13,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import no.rutebanken.tiamat.model.MultilingualString;
 import no.rutebanken.tiamat.model.StopPlace;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,8 +33,8 @@ public class StopPlaceRepositoryTest {
         StopPlace stopPlaceOlder = new StopPlace();
         StopPlace stopPlaceNewer = new StopPlace();
 
-        stopPlaceOlder.setChanged(new Date(50));
-        stopPlaceNewer.setChanged(new Date(100));
+        stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
+        stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
 
         stopPlaceRepository.save(stopPlaceNewer);
         stopPlaceRepository.save(stopPlaceOlder);
@@ -39,8 +42,8 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
-        assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
-        assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
+        assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+        assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
     }
 
     @Test
@@ -48,10 +51,10 @@ public class StopPlaceRepositoryTest {
         StopPlace stopPlaceOlder = new StopPlace();
         StopPlace stopPlaceNewer = new StopPlace();
 
-        stopPlaceOlder.setChanged(new Date(50));
+        stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
         stopPlaceOlder.setName(new MultilingualString("it's older", "en", ""));
 
-        stopPlaceNewer.setChanged(new Date(100));
+        stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
         stopPlaceNewer.setName(new MultilingualString("it's newer", "en", ""));
 
         stopPlaceRepository.save(stopPlaceNewer);
@@ -60,8 +63,8 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc("it", pageable);
 
-        assertThat(page.getContent().get(0).getChanged().getTime()).isEqualTo(stopPlaceNewer.getChanged().getTime());
-        assertThat(page.getContent().get(1).getChanged().getTime()).isEqualTo(stopPlaceOlder.getChanged().getTime());
+        assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+        assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged() );
     }
 
     /*

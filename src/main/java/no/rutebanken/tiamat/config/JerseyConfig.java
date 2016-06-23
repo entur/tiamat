@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.config;
 
 import no.rutebanken.tiamat.rest.dto.DtoQuayResource;
-import no.rutebanken.tiamat.rest.netex.SiteFrameResource;
+import no.rutebanken.tiamat.rest.netex.siteframe.SiteFrameResource;
 import no.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;

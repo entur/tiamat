@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class QuayTest {
     public void persistQuayWithCommonValues() throws ParseException {
         Quay quay = new Quay();
         quay.setVersion("001");
-        quay.setCreated(dateFormat.parse("2010-04-17T09:30:47Z"));
+        quay.setCreated(ZonedDateTime.parse("2010-04-17T09:30:47Z"));
         quay.setDataSourceRef("nptg:DataSource:NaPTAN");
         quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
 
@@ -73,7 +74,7 @@ public class QuayTest {
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
         String[] verifyColumns = new String[]{"id", "name.value", "version",
-                "created.time", "shortName.value", "covered", "description.value", "publicCode",
+                "created", "shortName.value", "covered", "description.value", "publicCode",
                 "label.value", "boardingUse", "compassOctant", "quayType", "alightingUse"};
         assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
