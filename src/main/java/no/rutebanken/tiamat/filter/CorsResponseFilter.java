@@ -1,5 +1,7 @@
 package no.rutebanken.tiamat.filter;
 
+import org.springframework.stereotype.Component;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 /**
  * https://github.com/Smartling/spring-security-keycloak/issues/1
  */
+@Component
 public class CorsResponseFilter implements Filter {
 
     @Override
