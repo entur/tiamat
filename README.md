@@ -22,8 +22,9 @@ spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
 spring.datasource.initializationFailFast=false
 spring.profiles.active=default
+spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
 
-peliasReverseLookupEndpoint=http://test.rutebanken.org/v1/reverse
+peliasReverseLookupEndpoint=https://beta.rutebanken.org/apiman-gateway/rutebanken/geocoder/1.0/reverse
 logging.level.no.rutebanken.tiamat.pelias=TRACE
 
 ```
