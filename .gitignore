@@ -38,4 +38,5 @@ gradlew.bat
 
 script/gtfs*
 script/*txt
-src/main/resources/stops/*txt
+src/main/resources/stops/stops.txt
+src/main/resources/stops/agency.txt
