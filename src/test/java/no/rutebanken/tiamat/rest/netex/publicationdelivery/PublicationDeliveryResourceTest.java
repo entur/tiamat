@@ -8,6 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
@@ -50,7 +54,10 @@ public class PublicationDeliveryResourceTest {
                 "</PublicationDelivery>";
 
 
-        String response = publicationDeliveryResource.receivePublicationDelivery(xml);
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        String response = publicationDeliveryResource.receivePublicationDelivery(stream);
 
 
     }

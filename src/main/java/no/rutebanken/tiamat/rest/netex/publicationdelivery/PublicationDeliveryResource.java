@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 
@@ -51,16 +52,16 @@ public class PublicationDeliveryResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String receivePublicationDelivery(String xml) throws IOException, JAXBException {
+    public String receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
 
         String responseMessage;
-        logger.info("Incoming xml is {} characters long", xml.length());
+//        logger.info("Incoming xml is {} characters long", xml.length());
 
         JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.PublicationDeliveryStructure.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+                (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
         PublicationDeliveryStructure publicationDelivery = jaxbElement.getValue();
 
         if(publicationDelivery.getDataObjects() == null) {
