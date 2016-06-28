@@ -110,7 +110,9 @@ public class SiteFrameResource {
 
             SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-            return siteFrameImporter.importSiteFrame(siteFrame);
+            SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame);
+
+            return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }
 }
 

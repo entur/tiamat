@@ -19,14 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.bind.*;
+import java.io.*;
 import java.util.Iterator;
 
 @Component
@@ -41,6 +36,8 @@ public class PublicationDeliveryResource {
 
     private NetexMapper netexMapper;
 
+    private final ObjectFactory objectFactory = new ObjectFactory();
+
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
 
@@ -52,35 +49,51 @@ public class PublicationDeliveryResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
 
         String responseMessage;
-//        logger.info("Incoming xml is {} characters long", xml.length());
 
         JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.PublicationDeliveryStructure.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
                 (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure publicationDelivery = jaxbElement.getValue();
+        PublicationDeliveryStructure incomingPublicationDelivery = jaxbElement.getValue();
 
-        if(publicationDelivery.getDataObjects() == null) {
+        if(incomingPublicationDelivery.getDataObjects() == null) {
             responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
-            return responseMessage;
+            throw new RuntimeException(responseMessage);
         }
-        logger.info("Got publication delivery: {}", publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
 
-        String importResponse = publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+        no.rutebanken.tiamat.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
                 .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame))
-                .findFirst().orElse("Could not find SiteFrame in PublicationDeliveryStructure");
+                .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
 
-        logger.info(importResponse);
-        return importResponse;
+
+        SiteFrame mappedSiteFrame = netexMapper.mapToNetexModel(siteFrameWithProcessedStopPlaces);
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                                        .withCompositeFrameOrCommonFrame(objectFactory.createSiteFrame(mappedSiteFrame)));
+
+
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        StreamingOutput stream = outputStream -> {
+            try {
+                marshaller.marshal(objectFactory.createPublicationDelivery(publicationDelivery), outputStream);
+            } catch (JAXBException e) {
+                throw new RuntimeException("Could not marshal site frame", e);
+            }
+        };
+
+        return Response.ok(stream).build();
+
     }
 }
 

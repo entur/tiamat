@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import no.rutebanken.tiamat.TiamatApplication;
+import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
@@ -57,8 +63,9 @@ public class PublicationDeliveryResourceTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        String response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
 
+        assertThat(response.getStatus()).isEqualTo(200);
 
     }
 

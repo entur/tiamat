@@ -39,12 +39,12 @@ public class StopPlaceImporter {
     }
 
 
-    public void importStopPlace(StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
         if (stopPlace.getCentroid() == null
                 || stopPlace.getCentroid().getLocation() == null
                 || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
-            return;
+            return null;
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.
@@ -80,6 +80,6 @@ public class StopPlaceImporter {
 
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());
-
+        return stopPlace;
     }
 }
