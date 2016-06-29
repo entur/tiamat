@@ -124,7 +124,7 @@ public class SiteFrameResourceIntegrationTest {
                 .when()
                 .post("/jersey/site_frame")
                 .then()
-                .body(containsString("Saved"));
+                .body(containsString("Imported"));
     }
 
 }
