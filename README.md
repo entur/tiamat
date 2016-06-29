@@ -22,10 +22,11 @@ spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
 spring.datasource.initializationFailFast=false
 spring.profiles.active=default
+spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
+security.basic.enabled=false
 
-peliasReverseLookupEndpoint=http://test.rutebanken.org/v1/reverse
+peliasReverseLookupEndpoint=https://beta.rutebanken.org/apiman-gateway/rutebanken/geocoder/1.0/reverse
 logging.level.no.rutebanken.tiamat.pelias=TRACE
-
 ```
 
 To start Tiamat with this configuration, specify **spring.config.location**:
