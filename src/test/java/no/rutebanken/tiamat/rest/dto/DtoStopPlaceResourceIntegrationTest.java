@@ -34,6 +34,8 @@ import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TiamatTestApplication.class)
@@ -65,7 +67,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     @Test
-    public void testXmlExportOfStopPlaceWithTwoQuays() throws Exception {
+    public void retrieveStopPlaceWithTwoQuays() throws Exception {
 
         // Create a stop place with two quays
 
@@ -78,7 +80,8 @@ public class DtoStopPlaceResourceIntegrationTest {
         quayRepository.save(quay);
 
         Quay secondQuay = new Quay();
-        secondQuay.setName(new MultilingualString("second quay", lang, ""));
+        String secondQuayName = "second quay";
+        secondQuay.setName(new MultilingualString(secondQuayName, lang, ""));
 
         quayRepository.save(secondQuay);
 
@@ -94,101 +97,17 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
         stopPlaceRepository.save(stopPlace);
 
-        get("/jersey/stop_place/xml/" + stopPlace.getId())
+        get("/jersey/stop_place/" + stopPlace.getId())
                 .then()
                 .log().body()
                 .statusCode(200)
                 .body(Matchers.notNullValue())
                 .assertThat()
-                .body(Matchers.hasXPath("/StopPlace/Name[text()='"+stopPlaceName+"']"))
-                .body(Matchers.hasXPath("/StopPlace/Name[@lang='"+lang+"']"))
-                .body(Matchers.hasXPath("/StopPlace/quays"))
-                .body(Matchers.hasXPath("/StopPlace/quays/Quay"))
-                .body(Matchers.hasXPath("/StopPlace/quays/Quay/Name[text()='"+firstQuayName+"']"));
+                .body("name", equalTo(stopPlaceName))
+                .body("quays.name", hasItems(firstQuayName, secondQuayName))
+                .body("quays.id", hasItems(quay.getId(), secondQuay.getId()));
 
     }
 
-    @Test
-    public void testXmlExportOfMultipleStopPlaces() throws Exception {
-
-        StopPlace firstStopPlace = new StopPlace();
-        String firstStopPlaceName = "first stop place name";
-        firstStopPlace.setName(new MultilingualString(firstStopPlaceName, "en", ""));
-        firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
-        stopPlaceRepository.save(firstStopPlace);
-
-        StopPlace secondStopPlace = new StopPlace();
-        secondStopPlace.setName(new MultilingualString("second stop place name", "en", ""));
-        stopPlaceRepository.save(secondStopPlace);
-
-        get("/jersey/stop_place/xml/")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .body(Matchers.notNullValue())
-                .assertThat()
-                .body(Matchers.hasXPath("/stopPlaces/StopPlace/Name[text()='" + firstStopPlaceName + "']"));
-    }
-
-    @Ignore
-    @Test
-    public void testXmlExportImportOfStopPlaces() throws Exception {
-        Quay quay = new Quay();
-        quay.setName(new MultilingualString("q", "en", ""));
-        quayRepository.save(quay);
-
-        StopPlace stopPlace = new StopPlace();
-
-        stopPlace.setQuays(new ArrayList<>());
-        stopPlace.getQuays().add(quay);
-
-        // Geometry factory needs JsonBackReference annotation
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(11, 60)))));
-
-        stopPlaceRepository.save(stopPlace);
-        System.out.println(stopPlace.getId());
-
-        // Export
-        String xml = get("/jersey/stop_place/xml")
-                        .then()
-                        .log().body()
-                        .statusCode(200)
-                        .body(Matchers.notNullValue())
-                        .extract().body().asString();
-
-        stopPlaceRepository.delete(stopPlace);
-
-        // Remove the id to save again like fresh
-        xml = xml.replaceAll("id=\"[a-z0-9-]*\"", "");
-        System.out.println("Removed IDs from xml: " + xml);
-
-        // Post it back
-        String response = given()
-                .contentType(ContentType.XML)
-                .content(xml)
-                .when()
-                .post("jersey/stop_place/xml")
-                .then()
-                .extract()
-                .body()
-                .asString();
-
-        String createdStopPlaceId = XmlPath.from(response).get("stopPlaces[0]").toString();
-        System.out.println("Got this id back: " + createdStopPlaceId);
-
-        StopPlace stopPlaceImportedFromXml = stopPlaceRepository.findOne(createdStopPlaceId);
-        AssertionsForClassTypes.assertThat(stopPlaceImportedFromXml).isNotNull();
-        AssertionsForInterfaceTypes.assertThat(stopPlaceImportedFromXml.getQuays()).hasSize(stopPlace.getQuays().size());
-        System.out.println(stopPlaceImportedFromXml.getQuays().get(0).getId());
-    }
-
-    @Ignore
-    @Test
-    public void validateStopPlacesXmlAgainstXsd() throws IOException, SAXException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        final Schema schema = schemaFactory.newSchema(new URL("https://raw.githubusercontent.com/StichtingOpenGeo/NeTEx/master/xsd/ifopt.xsd"));
-        final Validator validator = schema.newValidator();
-        validator.validate(new StreamSource("http://localhost:1888/jersey/stop_place/xml"));
-    }
 
 }
