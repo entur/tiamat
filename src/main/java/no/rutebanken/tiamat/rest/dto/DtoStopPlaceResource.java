@@ -1,12 +1,10 @@
 package no.rutebanken.tiamat.rest.dto;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
-import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -27,8 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Component
@@ -50,9 +46,6 @@ public class DtoStopPlaceResource {
 
     @Autowired
     private QuayRepository quayRepository;
-
-    @Autowired
-    private XmlMapper xmlMapper;
 
     @GET
     public List<StopPlaceDto> getStopPlaces(
@@ -141,122 +134,4 @@ public class DtoStopPlaceResource {
 
         throw new WebApplicationException("Cannot find stop place with id "+ simpleStopPlaceDto.id, 400);
     }
-
-    @GET
-    @Path("xml/{id}")
-    @Produces(MediaType.APPLICATION_XML)
-    public Response getXmlStopPlace(@PathParam("id") String id) {
-        StopPlace stopPlace = stopPlaceRepository.findStopPlaceDetailed(id);
-
-        String xml = null;
-        try {
-            xml = xmlMapper.writeValueAsString(stopPlace);
-        } catch (JsonProcessingException e) {
-            logger.warn("Error serializing stop place to xml", e);
-        }
-
-        return Response.ok(xml).build();
-    }
-
-
-    @GET
-    @Path("xml")
-    @Produces(MediaType.APPLICATION_XML)
-    public Response getAllStopPLaces() {
-
-        //Without streaming because of LazyInstantiationException
-        Iterable<StopPlace> iterableStopPlaces = stopPlaceRepository.findAll();
-
-        StopPlaces stopPlaces = new StopPlaces();
-        // TODO: Avoid iterating through stop places before serializing.
-        iterableStopPlaces.forEach(stopPlace -> stopPlaces.getStopPlaces().add(stopPlace));
-
-        String xml = null;
-        try {
-            // Using xml mapper directly to avoid lazy instantiation exception. This method is transactional.
-            xml = xmlMapper.writeValueAsString(stopPlaces);
-        } catch (JsonProcessingException e) {
-            logger.warn("Error serializing stop place to xml", e);
-        }
-
-        return Response.ok(xml).build();
-    }
-
-    /*
-
-    Commented out. Because xml serializer is not registered with jersey, after issues with running Tiamat as a fat jar:
-    https://github.com/spring-projects/spring-boot/issues/1345
-
-    @POST
-    @Path("xml")
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
-    public List<String> importStopPlaces(String xml) throws IOException {
-
-        // Using xml mapper directly because of issues registering it properly in JerseyConfig
-        logger.trace("Got the following xml\n{}", xml);
-
-        StopPlaces stopPlaces;
-        try {
-            stopPlaces = xmlMapper.readValue(xml, StopPlaces.class);
-        } catch (IOException e) {
-            logger.warn("Error deserializing stop places {}", e.getMessage(), e);
-            throw e;
-        }
-
-        logger.info("Importing {} stop places", stopPlaces.getStopPlaces().size());
-
-        stopPlaces.getStopPlaces()
-                .stream()
-                .filter(stopPlace -> stopPlace.getQuays() != null)
-                .flatMap(stopPlace -> stopPlace.getQuays().stream())
-                .forEach(quayRepository::save);
-
-        stopPlaceRepository.save(stopPlaces.getStopPlaces());
-        return stopPlaces.getStopPlaces().stream().map(EntityStructure::getId).collect(Collectors.toList());
-    }
-    */
-
-    /**
-     * For testing creation and serialization of a stop place.
-     */
-    @GET
-    @Path("create")
-    public StopPlaceDto createStopPlace() {
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        stopPlace.setId("xxx-yyyy-zazzz");
-        MultilingualString name = new MultilingualString();
-        name.setTextIdType("textIdType");
-        name.setValue("Bahnhof Ried");
-
-        stopPlace.setName(name);
-
-        MultilingualString shortName = new MultilingualString();
-        shortName.setValue("Bahnhof");
-        shortName.setTextIdType("textId");
-
-        stopPlace.setShortName(shortName);
-
-        SimplePoint centroid = new SimplePoint();
-
-        stopPlace.setCentroid(centroid);
-
-        MultilingualString description = new MultilingualString();
-        description.setValue("description");
-        stopPlace.setDescription(description);
-
-        stopPlace.setTransportMode(VehicleModeEnumeration.RAIL);
-        stopPlace.setAirSubmode(AirSubmodeEnumeration.UNDEFINED);
-        stopPlace.setCoachSubmode(CoachSubmodeEnumeration.REGIONAL_COACH);
-        stopPlace.setFunicularSubmode(FunicularSubmodeEnumeration.UNKNOWN);
-        stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
-
-        stopPlaceRepository.save(stopPlace);
-
-        return stopPlaceAssembler.assemble(stopPlace);
-    }
-
-
 }

@@ -1,14 +1,9 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.rutebanken.netex.model.ObjectFactory;
-
 import no.rutebanken.netex.model.PublicationDeliveryStructure;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
-import no.rutebanken.tiamat.repository.StopPlaceRepository;
-import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import no.rutebanken.tiamat.rest.netex.siteframe.SiteFrameImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.*;
-import java.io.*;
-import java.util.Iterator;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Component
 @Produces("application/xml")

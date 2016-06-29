@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.netex.siteframe;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import no.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
@@ -39,8 +39,6 @@ public class SiteFrameResource {
 
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    private XmlMapper xmlMapper;
-
     private SiteFrameImporter siteFrameImporter;
 
     private NetexMapper netexMapper;
@@ -48,10 +46,9 @@ public class SiteFrameResource {
     @Autowired
     public SiteFrameResource(StopPlaceRepository stopPlaceRepository,
                              TopographicPlaceRepository topographicPlaceRepository,
-                             XmlMapper xmlMapper, SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
+                             SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
-        this.xmlMapper = xmlMapper;
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
     }
@@ -61,7 +58,6 @@ public class SiteFrameResource {
 
         SiteFrame siteFrame = new SiteFrame();
 
-        //Without streaming because of LazyInstantiationException
         Iterable<StopPlace> iterableStopPlaces = stopPlaceRepository.findAll();
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
@@ -86,6 +82,7 @@ public class SiteFrameResource {
         StringWriter writer = new StringWriter();
         JAXBElement<no.rutebanken.netex.model.SiteFrame> objectFactorySiteFrame = objectFactory.createSiteFrame(convertedSiteFrame);
         jaxbContext.createMarshaller().marshal(objectFactorySiteFrame, writer);
+        // TODO: stream
         return Response.ok(writer.toString()).build();
     }
 
@@ -93,26 +90,24 @@ public class SiteFrameResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String importSiteFrame(String xml) throws IOException, JAXBException {
-        // Using xml mapper directly because of issues registering it properly in JerseyConfig
         logger.info("Incoming xml is {} characters long", xml.length());
 
+        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        JAXBElement<no.rutebanken.netex.model.SiteFrame> jaxbElement =
+                (JAXBElement<no.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+        no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
 
-            JAXBElement<no.rutebanken.netex.model.SiteFrame> jaxbElement =
-                    (JAXBElement<no.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
-            no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
+        logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
+                receivedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
+                receivedNetexSiteFrame.getStopPlaces().getStopPlace().size());
 
-            logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
-                    receivedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
-                    receivedNetexSiteFrame.getStopPlaces().getStopPlace().size());
+        SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-            SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
+        SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame);
 
-            SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame);
-
-            return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
+        return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }
 }
 
