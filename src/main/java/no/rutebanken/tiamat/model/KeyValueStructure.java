@@ -45,11 +45,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "KeyValueStructure", propOrder = {
-    "key",
-    "value"
-})
 @Entity
 @Table(name = "key_value")
 public class KeyValueStructure {
@@ -59,20 +54,21 @@ public class KeyValueStructure {
     @GeneratedValue
     private long id;
 
-    @XmlElement(name = "Key", required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
     protected String key;
 
-    @XmlElement(name = "Value", required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
     protected String value;
 
-    @XmlAttribute(name = "typeOfKey")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
+
     protected String typeOfKey;
+
+    public KeyValueStructure(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public KeyValueStructure() {
+
+    }
 
     /**
      * Gets the value of the key property.

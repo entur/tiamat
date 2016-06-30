@@ -3,6 +3,8 @@ package no.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
+import no.rutebanken.tiamat.model.*;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import no.rutebanken.tiamat.model.EntityStructure;
-import no.rutebanken.tiamat.model.LocationStructure;
-import no.rutebanken.tiamat.model.SimplePoint;
-import no.rutebanken.tiamat.model.StopPlace;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -32,6 +30,23 @@ public class StopPlaceRepositoryImplTest {
 
     @Autowired
     private GeometryFactory geometryFactory;
+
+    @Test
+    public void findStopPlaceFromKeyList() {
+        StopPlace stopPlace = new StopPlace();
+
+        KeyListStructure keyListStructure = new KeyListStructure();
+        keyListStructure.getKeyValue().add(new KeyValueStructure("key", "value"));
+        stopPlace.setKeyList(keyListStructure);
+
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace actual = stopPlaceRepository.findByKeyValue("key", "value");
+        Assertions.assertThat(actual).isNotNull();
+        Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getKey()).isEqualTo("key");
+        Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("value");
+
+    }
 
     @Test
     public void testFindStopPlacesWithin() throws Exception {

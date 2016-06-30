@@ -20,7 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceImporter.class);
+
     public static final String ORIGINAL_ID_KEY = "imported-id";
+
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
@@ -36,6 +38,31 @@ public class StopPlaceImporter {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
+    public StopPlace findExistingStopPlaceFromOriginalId(StopPlace stopPlace) {
+
+        if(stopPlace.getId() != null) {
+
+            StopPlace existingStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+            if(existingStopPlace != null) {
+                return existingStopPlace;
+            }
+        }
+
+        if(stopPlace.getKeyList() != null) {
+            return stopPlace.getKeyList().getKeyValue()
+                    .stream()
+                    .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
+                    .map(KeyValueStructure::getValue)
+                    .map(value -> stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, value))
+                    .filter(existingStopPlace ->  existingStopPlace != null)
+                    .findFirst()
+                    .orElseGet(null);
+        }
+
+        return null;
+
+    }
+
 
     public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
         if (stopPlace.getCentroid() == null
@@ -43,6 +70,11 @@ public class StopPlaceImporter {
                 || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
             return null;
+        }
+
+        StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
+        if(existingStopPlace != null) {
+            logger.info("Found existing stop place with ID {}", existingStopPlace.getId());
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.

@@ -17,4 +17,7 @@ public interface StopPlaceRepositoryCustom {
     StopPlace findStopPlaceDetailed(String id);
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable);
+
+    StopPlace findByKeyValue(String key, String value);
+
 }
