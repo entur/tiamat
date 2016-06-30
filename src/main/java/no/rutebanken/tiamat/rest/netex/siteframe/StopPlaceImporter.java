@@ -4,16 +4,13 @@ package no.rutebanken.tiamat.rest.netex.siteframe;
 
 
 
+import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import no.rutebanken.tiamat.model.SiteFrame;
-import no.rutebanken.tiamat.model.StopPlace;
-import no.rutebanken.tiamat.model.TopographicPlace;
-import no.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceImporter.class);
+    public static final String ORIGINAL_ID_KEY = "imported-id";
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
@@ -69,7 +67,16 @@ public class StopPlaceImporter {
             });
         }
 
-        stopPlace.setId(null);
+        if(stopPlace.getId() != null) {
+            KeyValueStructure importedId = new KeyValueStructure();
+            importedId.setKey(ORIGINAL_ID_KEY);
+            importedId.setValue(stopPlace.getId());
+            if(stopPlace.getKeyList() == null) {
+                stopPlace.setKeyList(new KeyListStructure());
+            }
+            stopPlace.getKeyList().getKeyValue().add(importedId);
+            stopPlace.setId(null);
+        }
 
         if (stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> {
