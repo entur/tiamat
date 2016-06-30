@@ -29,38 +29,25 @@ public class StopPlaceImporterTest {
 
     private StopPlaceImporter stopPlaceImporter = new StopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
 
+
     @Test
-    public void importStopPlaceWithQuay() throws Exception {
+    public void keepOriginalIdsInKeyList() throws Exception {
 
         final String stopPlaceOriginalId = "stop-place-id-to-replace";
         final String quayOriginalId = "quay-id-to-replace";
 
         final String persistedStopPlaceId = "persisted-stop-place-id";
-        when(stopPlaceRepository.save(any(StopPlace.class))).then((Answer<StopPlace>) invocationOnMock -> {
-            StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlace.setId(persistedStopPlaceId);
-            return stopPlace;
-        });
+        mockStopPlaceRepository(persistedStopPlaceId);
 
         final String persistedQuayId = "persisted-quay-id";
-        when(quayRepository.save(any(Quay.class))).then((Answer<Quay>) invocationOnMock -> {
-            Quay quay = (Quay) invocationOnMock.getArguments()[0];
-            quay.setId(persistedQuayId);
-            return quay;
-        });
-
+        mockQuayRepository(persistedQuayId);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setId(stopPlaceOriginalId);
-        stopPlace.setName(new MultilingualString("Nesbru", "no", ""));
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
-
-        // stopPlace.setDataSourceRef("chouette");
 
         Quay quay = new Quay();
         quay.setId(quayOriginalId);
-        quay.setName(new MultilingualString("Nesbru", "no", ""));
-        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
         stopPlace.getQuays().add(quay);
 
@@ -87,6 +74,30 @@ public class StopPlaceImporterTest {
         assertThat(stopPlaceKeyVal.getValue())
                 .as("the original ID should not be the same as the new persisted ID")
                 .isNotEqualTo(importedStopPlace.getId());
+
+        Quay importedQuay = importedStopPlace.getQuays().get(0);
+
+        KeyValueStructure quayKeyKeyValue = importedQuay.getKeyList().getKeyValue().get(0);
+        assertThat(quayKeyKeyValue.getValue())
+                .as("the original ID should be stored as value")
+                .isEqualTo(quayOriginalId);
+
     }
+
+    private void mockStopPlaceRepository(String persistedStopPlaceId) {
+        when(stopPlaceRepository.save(any(StopPlace.class))).then((Answer<StopPlace>) invocationOnMock -> {
+            StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
+            stopPlace.setId(persistedStopPlaceId);
+            return stopPlace;
+        });
+    }
+    private void mockQuayRepository(String persistedQuayId) {
+        when(quayRepository.save(any(Quay.class))).then((Answer<Quay>) invocationOnMock -> {
+            Quay quay = (Quay) invocationOnMock.getArguments()[0];
+            quay.setId(persistedQuayId);
+            return quay;
+        });
+    }
+
 
 }

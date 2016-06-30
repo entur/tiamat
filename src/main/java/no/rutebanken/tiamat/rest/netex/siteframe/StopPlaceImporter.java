@@ -67,20 +67,11 @@ public class StopPlaceImporter {
             });
         }
 
-        if(stopPlace.getId() != null) {
-            KeyValueStructure importedId = new KeyValueStructure();
-            importedId.setKey(ORIGINAL_ID_KEY);
-            importedId.setValue(stopPlace.getId());
-            if(stopPlace.getKeyList() == null) {
-                stopPlace.setKeyList(new KeyListStructure());
-            }
-            stopPlace.getKeyList().getKeyValue().add(importedId);
-            stopPlace.setId(null);
-        }
+        resetAndKeepOriginalId(stopPlace);
 
         if (stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> {
-                quay.setId(null);
+                resetAndKeepOriginalId(quay);
                 quayRepository.save(quay);
             });
         }
@@ -88,5 +79,18 @@ public class StopPlaceImporter {
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());
         return stopPlace;
+    }
+
+    public void resetAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
+        if(dataManagedObjectStructure.getId() != null) {
+            KeyValueStructure importedId = new KeyValueStructure();
+            importedId.setKey(ORIGINAL_ID_KEY);
+            importedId.setValue(dataManagedObjectStructure.getId());
+            if(dataManagedObjectStructure.getKeyList() == null) {
+                dataManagedObjectStructure.setKeyList(new KeyListStructure());
+            }
+            dataManagedObjectStructure.getKeyList().getKeyValue().add(importedId);
+            dataManagedObjectStructure.setId(null);
+        }
     }
 }
