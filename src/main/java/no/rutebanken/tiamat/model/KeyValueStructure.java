@@ -8,6 +8,10 @@
 
 package no.rutebanken.tiamat.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,16 +50,25 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "key",
     "value"
 })
+@Entity
+@Table(name = "key_value")
 public class KeyValueStructure {
+
+
+    @Id
+    @GeneratedValue
+    private long id;
 
     @XmlElement(name = "Key", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String key;
+
     @XmlElement(name = "Value", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String value;
+
     @XmlAttribute(name = "typeOfKey")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -133,4 +146,11 @@ public class KeyValueStructure {
         this.typeOfKey = value;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

@@ -8,6 +8,9 @@
 
 package no.rutebanken.tiamat.model;
 
+import javax.persistence.CascadeType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -95,10 +98,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     TypeOfValue_VersionStructure.class,
     ValidityCondition_VersionStructure.class
 })
+@MappedSuperclass
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-    @Transient
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     protected KeyListStructure keyList;
 
     @XmlElement(name = "Extensions")
