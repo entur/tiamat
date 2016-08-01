@@ -40,10 +40,20 @@ public class StopPlaceImporter {
 
     public StopPlace findExistingStopPlaceFromOriginalId(StopPlace stopPlace) {
 
+        StopPlace existingStopPlace = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
+
+
+        if(existingStopPlace != null) {
+            logger.info("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
+            return existingStopPlace;
+        }
+
+        /*
         if(stopPlace.getId() != null) {
 
             StopPlace existingStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
             if(existingStopPlace != null) {
+                logger.info("Found existing stop place from ID: {}", stopPlace.getId());
                 return existingStopPlace;
             }
         }
@@ -55,9 +65,10 @@ public class StopPlaceImporter {
                     .map(KeyValueStructure::getValue)
                     .map(value -> stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, value))
                     .filter(existingStopPlace ->  existingStopPlace != null)
+                    .peek(existingStopPlace -> logger.info("Found stop place from original ID. Local ID is: {}", existingStopPlace.getId()))
                     .findFirst()
                     .orElseGet(null);
-        }
+        }*/
 
         return null;
 
@@ -74,7 +85,8 @@ public class StopPlaceImporter {
 
         StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
         if(existingStopPlace != null) {
-            logger.info("Found existing stop place with ID {}", existingStopPlace.getId());
+            logger.info("Returning existing stop place with ID {}", existingStopPlace.getId());
+            return existingStopPlace;
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.
