@@ -85,8 +85,11 @@ public class StopPlaceImporter {
 
         StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
         if(existingStopPlace != null) {
+
             logger.info("Returning existing stop place with ID {}", existingStopPlace.getId());
-            return existingStopPlace;
+
+            // TODO: findByKeyValue leads to Lazy Initialization Exception even though transactional. findOne does not.
+            return stopPlaceRepository.findOne(existingStopPlace.getId());
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.
