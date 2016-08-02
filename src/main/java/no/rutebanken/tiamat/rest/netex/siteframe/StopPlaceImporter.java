@@ -111,11 +111,11 @@ public class StopPlaceImporter {
             });
         }
 
-        resetAndKeepOriginalId(stopPlace);
+        resetIdAndKeepOriginalId(stopPlace);
 
         if (stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> {
-                resetAndKeepOriginalId(quay);
+                resetIdAndKeepOriginalId(quay);
                 quayRepository.save(quay);
             });
         }
@@ -125,7 +125,7 @@ public class StopPlaceImporter {
         return stopPlace;
     }
 
-    public void resetAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
+    public void resetIdAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
         if(dataManagedObjectStructure.getId() != null) {
             KeyValueStructure importedId = new KeyValueStructure();
             importedId.setKey(ORIGINAL_ID_KEY);
