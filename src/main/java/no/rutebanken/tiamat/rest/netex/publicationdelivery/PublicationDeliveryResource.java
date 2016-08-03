@@ -17,7 +17,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,13 +33,19 @@ public class PublicationDeliveryResource {
 
     private NetexMapper netexMapper;
 
-    private final ObjectFactory objectFactory = new ObjectFactory();
+    private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
+
+    private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
     @Autowired
-    public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
+    public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
+                                       PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
+                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
+        this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
+        this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
     }
 
 
@@ -48,49 +53,32 @@ public class PublicationDeliveryResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
+        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
+        PublicationDeliveryStructure responsePublicationDelivery = receivePublicationDelivery(incomingPublicationDelivery);
+        return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+    }
 
-        String responseMessage;
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.PublicationDeliveryStructure.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-        JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure incomingPublicationDelivery = jaxbElement.getValue();
-
+    public PublicationDeliveryStructure receivePublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
         if(incomingPublicationDelivery.getDataObjects() == null) {
-            responseMessage = "Received publication delivery but it does not contain any data objects.";
+            String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
             throw new RuntimeException(responseMessage);
         }
         logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-
         no.rutebanken.tiamat.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
-                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame))
+                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, true))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
 
 
         SiteFrame mappedSiteFrame = netexMapper.mapToNetexModel(siteFrameWithProcessedStopPlaces);
 
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+        return new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                                        .withCompositeFrameOrCommonFrame(objectFactory.createSiteFrame(mappedSiteFrame)));
-
-
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        StreamingOutput stream = outputStream -> {
-            try {
-                marshaller.marshal(objectFactory.createPublicationDelivery(publicationDelivery), outputStream);
-            } catch (JAXBException e) {
-                throw new RuntimeException("Could not marshal site frame", e);
-            }
-        };
-
-        return Response.ok(stream).build();
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
 
     }
 }

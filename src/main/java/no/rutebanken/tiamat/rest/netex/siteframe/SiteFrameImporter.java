@@ -27,8 +27,7 @@ public class SiteFrameImporter {
         this.topographicPlaceCreator = topographicPlaceCreator;
     }
 
-
-    public SiteFrame importSiteFrame(SiteFrame siteFrame) {
+    public SiteFrame importSiteFrame(SiteFrame siteFrame, boolean checkIfExistsById) {
         long startTime = System.currentTimeMillis();
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
@@ -39,10 +38,10 @@ public class SiteFrameImporter {
 
         List<StopPlace> createdStopPlaces = new CopyOnWriteArrayList<>();
         siteFrame.getStopPlaces().getStopPlace()
-                .parallelStream()
+//                .parallelStream()
                 .forEach(stopPlace -> {
                     try {
-                        StopPlace created = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+                        StopPlace created = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated, checkIfExistsById);
                         createdStopPlaces.add(created);
                         stopPlacesCreated.incrementAndGet();
                         logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated);

@@ -14,6 +14,7 @@ import no.rutebanken.tiamat.model.StopPlace;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
@@ -75,5 +76,26 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+    }
+
+    @Override
+    public StopPlace findByKeyValue(String key, String value) {
+
+        TypedQuery<StopPlace> query = entityManager
+                .createQuery("SELECT s " +
+                        "FROM StopPlace s " +
+                            "LEFT OUTER JOIN s.keyList kl " +
+                            "LEFT OUTER JOIN kl.keyValue kv " +
+                                "WHERE kv.key = :key " +
+                                    "AND kv.value = :value",
+                        StopPlace.class);
+        query.setParameter("key", key);
+        query.setParameter("value", value);
+
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException noResultException) {
+            return null;
+        }
     }
 }

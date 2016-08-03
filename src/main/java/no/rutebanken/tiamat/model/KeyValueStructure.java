@@ -8,6 +8,10 @@
 
 package no.rutebanken.tiamat.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -41,25 +45,30 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "KeyValueStructure", propOrder = {
-    "key",
-    "value"
-})
+@Entity
+@Table(name = "key_value")
 public class KeyValueStructure {
 
-    @XmlElement(name = "Key", required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
+
+    @Id
+    @GeneratedValue
+    private long id;
+
     protected String key;
-    @XmlElement(name = "Value", required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
+
     protected String value;
-    @XmlAttribute(name = "typeOfKey")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
+
+
     protected String typeOfKey;
+
+    public KeyValueStructure(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public KeyValueStructure() {
+
+    }
 
     /**
      * Gets the value of the key property.
@@ -133,4 +142,11 @@ public class KeyValueStructure {
         this.typeOfKey = value;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

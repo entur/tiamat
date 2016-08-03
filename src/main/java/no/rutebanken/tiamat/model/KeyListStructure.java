@@ -10,6 +10,7 @@ package no.rutebanken.tiamat.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -41,9 +42,16 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "KeyListStructure", propOrder = {
     "keyValue"
 })
+@Entity
+@Table(name = "key_list")
 public class KeyListStructure {
 
+    @Id
+    @GeneratedValue
+    public long id;
+
     @XmlElement(name = "KeyValue", required = true)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     protected List<KeyValueStructure> keyValue;
 
     /**
