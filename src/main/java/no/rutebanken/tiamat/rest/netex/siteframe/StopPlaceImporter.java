@@ -75,7 +75,9 @@ public class StopPlaceImporter {
     }
 
 
-    public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
+                                     AtomicInteger topographicPlacesCreatedCounter,
+                                     boolean checkIfExistsById) throws InterruptedException, ExecutionException {
         if (stopPlace.getCentroid() == null
                 || stopPlace.getCentroid().getLocation() == null
                 || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
@@ -83,9 +85,11 @@ public class StopPlaceImporter {
             return null;
         }
 
-        StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
-        if(existingStopPlace != null) {
-            return existingStopPlace;
+        if(checkIfExistsById) {
+            StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
+            if (existingStopPlace != null) {
+                return existingStopPlace;
+            }
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.

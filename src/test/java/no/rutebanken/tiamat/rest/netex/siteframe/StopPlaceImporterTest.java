@@ -55,7 +55,7 @@ public class StopPlaceImporterTest {
             return stopPlace;
         });
 
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger(), true);
 
 
         when(stopPlaceRepository.findByKeyValue(anyString(), anyString()))
@@ -66,7 +66,7 @@ public class StopPlaceImporterTest {
 
         when(stopPlaceRepository.findOne(anyString())).then(invocationOnMock -> importedStopPlace1);
 
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger(), true);
 
 
         assertThat(importedStopPlace2.getId()).isEqualTo(importedStopPlace1.getId())
@@ -94,7 +94,7 @@ public class StopPlaceImporterTest {
 
         stopPlace.getQuays().add(quay);
 
-        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger(), true);
 
         assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
         assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);

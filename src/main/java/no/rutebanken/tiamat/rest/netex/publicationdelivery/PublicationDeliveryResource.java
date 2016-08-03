@@ -70,7 +70,7 @@ public class PublicationDeliveryResource {
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
-                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame))
+                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, true))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
 
 

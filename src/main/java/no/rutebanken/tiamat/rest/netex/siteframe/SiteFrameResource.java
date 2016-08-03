@@ -105,7 +105,7 @@ public class SiteFrameResource {
 
         SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-        SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame);
+        SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, false);
 
         return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }
