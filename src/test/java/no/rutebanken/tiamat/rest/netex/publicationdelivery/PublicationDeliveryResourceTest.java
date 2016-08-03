@@ -28,6 +28,7 @@ public class PublicationDeliveryResourceTest {
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
+     * When importing multiple stop places and those exists, make sure no Lazy Initialization Exception is thrown.
      */
     @Test
     public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
@@ -39,9 +40,17 @@ public class PublicationDeliveryResourceTest {
                             .withLatitude(new BigDecimal("9"))
                             .withLongitude(new BigDecimal("71"))));
 
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("2222")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
+                .withStopPlace(stopPlace, stopPlace2));
 
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
