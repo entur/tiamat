@@ -53,18 +53,18 @@ public class PublicationDeliveryResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
-
-        String responseMessage;
-
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
+        PublicationDeliveryStructure responsePublicationDelivery = receivePublicationDelivery(incomingPublicationDelivery);
+        return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+    }
 
+    public PublicationDeliveryStructure receivePublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
         if(incomingPublicationDelivery.getDataObjects() == null) {
-            responseMessage = "Received publication delivery but it does not contain any data objects.";
+            String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
             throw new RuntimeException(responseMessage);
         }
         logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
-
 
         no.rutebanken.tiamat.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
@@ -76,12 +76,9 @@ public class PublicationDeliveryResource {
 
         SiteFrame mappedSiteFrame = netexMapper.mapToNetexModel(siteFrameWithProcessedStopPlaces);
 
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+        return new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
-
-
-        return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDelivery)).build();
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
 
     }
 }
