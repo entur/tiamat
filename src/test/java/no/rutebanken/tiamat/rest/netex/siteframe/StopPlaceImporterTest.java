@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.rutebanken.tiamat.rest.netex.siteframe.StopPlaceImporter.ORIGINAL_ID_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -63,6 +64,7 @@ public class StopPlaceImporterTest {
                     return importedStopPlace1;
                 });
 
+        when(stopPlaceRepository.findOne(anyString())).then(invocationOnMock -> importedStopPlace1);
 
         StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
 
