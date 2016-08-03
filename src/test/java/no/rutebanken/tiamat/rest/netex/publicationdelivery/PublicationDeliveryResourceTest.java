@@ -60,8 +60,8 @@ public class PublicationDeliveryResourceTest {
         PublicationDeliveryStructure firstResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
         PublicationDeliveryStructure secondResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
 
-        StopPlace firstStopPlace =findFirstStopPlace(firstResponse);
-        StopPlace secondStopPlace =findFirstStopPlace(secondResponse);
+        StopPlace firstStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace secondStopPlace = findFirstStopPlace(secondResponse);
 
         assertThat(secondStopPlace.getId()).isEqualTo(firstStopPlace.getId());
     }
@@ -87,6 +87,12 @@ public class PublicationDeliveryResourceTest {
                 "  <SiteFrame version=\"01\" id=\"nhr:sf:1\">" +
                 "   <stopPlaces>" +
                 "    <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">" +
+                "     <Centroid>" +
+                "      <Location srsName=\"WGS84\">" +
+                "       <Longitude>10.8577903</Longitude>" +
+                "       <Latitude>59.910579</Latitude>" +
+                "      </Location>" +
+                "     </Centroid>" +
                 "     <Name lang=\"no-NO\">Krokstien</Name>    " +
                 "     <TransportMode>bus</TransportMode>" +
                 "     <StopPlaceType>onstreetBus</StopPlaceType>" +
@@ -116,7 +122,6 @@ public class PublicationDeliveryResourceTest {
         Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
 
         assertThat(response.getStatus()).isEqualTo(200);
-
     }
 
 }
