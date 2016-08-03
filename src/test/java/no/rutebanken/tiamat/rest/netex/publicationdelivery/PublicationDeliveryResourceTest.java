@@ -2,8 +2,6 @@ package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import no.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.TiamatApplication;
-
-import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
@@ -31,10 +25,6 @@ public class PublicationDeliveryResourceTest {
 
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;
-
-    @Autowired
-    private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
-
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
