@@ -17,7 +17,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,13 +33,19 @@ public class PublicationDeliveryResource {
 
     private NetexMapper netexMapper;
 
-    private final ObjectFactory objectFactory = new ObjectFactory();
+    private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
+
+    private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
     @Autowired
-    public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
+    public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
+                                       PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
+                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
+        this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
+        this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
     }
 
 
@@ -51,12 +56,7 @@ public class PublicationDeliveryResource {
 
         String responseMessage;
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.PublicationDeliveryStructure.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-        JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure incomingPublicationDelivery = jaxbElement.getValue();
+        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
 
         if(incomingPublicationDelivery.getDataObjects() == null) {
             responseMessage = "Received publication delivery but it does not contain any data objects.";
@@ -78,19 +78,10 @@ public class PublicationDeliveryResource {
 
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                                        .withCompositeFrameOrCommonFrame(objectFactory.createSiteFrame(mappedSiteFrame)));
+                                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
 
 
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        StreamingOutput stream = outputStream -> {
-            try {
-                marshaller.marshal(objectFactory.createPublicationDelivery(publicationDelivery), outputStream);
-            } catch (JAXBException e) {
-                throw new RuntimeException("Could not marshal site frame", e);
-            }
-        };
-
-        return Response.ok(stream).build();
+        return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDelivery)).build();
 
     }
 }
