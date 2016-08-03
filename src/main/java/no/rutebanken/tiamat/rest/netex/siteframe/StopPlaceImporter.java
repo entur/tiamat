@@ -85,7 +85,6 @@ public class StopPlaceImporter {
 
         StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
         if(existingStopPlace != null) {
-            logger.info("Returning existing stop place with ID {}", existingStopPlace.getId());
             return existingStopPlace;
         }
 
