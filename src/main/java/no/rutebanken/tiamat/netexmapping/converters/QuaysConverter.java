@@ -25,6 +25,15 @@ public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_Rel
 
     @Override
     public List<Quay> convertFrom(Quays_RelStructure quays_relStructure, Type<List<Quay>> type) {
-        return null;
+        List<Quay> quays = new ArrayList<>();
+        if(quays_relStructure.getQuayRefOrQuay() != null) {
+            quays_relStructure.getQuayRefOrQuay().stream()
+                    .filter(object -> object instanceof no.rutebanken.netex.model.Quay)
+                    .map(object -> ((no.rutebanken.netex.model.Quay) object))
+                    .map(netexQuay -> mapperFacade.map(netexQuay, Quay.class))
+                    .forEach(quay -> quays.add(quay));
+        }
+
+        return quays;
     }
 }
