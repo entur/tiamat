@@ -96,6 +96,8 @@ TRUNCATE topographic_place CASCADE;
 curl --max-time 6000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
 ```
 
+Example site frame data can be found on the jump server (/var/www/...). There are several example files. Recent versions of Tiamat requires XML namespaces.
+
 
 *Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times. It also might happen that you loose the connection, but the import continues to run in Tiamat. Please monitor the logs of Tiamat while using the import.*
 
