@@ -50,24 +50,9 @@ public class CleanStopPlaceImporter implements StopPlaceImporter {
             return null;
         }
 
-        if (stopPlace.getTopographicPlaceRef() != null) {
-            Optional<TopographicPlace> optionalTopographicPlace = topographicPlaceCreator.findOrCreateTopographicPlace(
-                    siteFrame.getTopographicPlaces().getTopographicPlace(),
-                    stopPlace.getTopographicPlaceRef(),
-                    topographicPlacesCreatedCounter);
-
-            if (!optionalTopographicPlace.isPresent()) {
-                logger.warn("Got no topographic places back for stop place {} {}", stopPlace.getName(), stopPlace.getId());
-            }
-
-            optionalTopographicPlace.ifPresent(topographicPlace -> {
-                logger.trace("Setting topographical ref {} on stop place {} {}",
-                        topographicPlace.getId(), stopPlace.getName(), stopPlace.getId());
-                TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
-                newRef.setRef(topographicPlace.getId());
-                stopPlace.setTopographicPlaceRef(newRef);
-            });
-        }
+        topographicPlaceCreator.setTopographicReference(stopPlace,
+                siteFrame.getTopographicPlaces().getTopographicPlace(),
+                topographicPlacesCreatedCounter);
 
         logger.trace("Resetting IDs for stop place");
         resetId(stopPlace);

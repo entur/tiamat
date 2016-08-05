@@ -6,6 +6,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.Striped;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import no.rutebanken.tiamat.model.Site_VersionStructure;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,31 @@ public class TopographicPlaceCreator {
 
     public void invalidateCache() {
         topographicPlaces.invalidateAll();
+    }
+
+    /**
+     * Find or create topographic place and, if found, set correct reference on provided site.
+     */
+    public void setTopographicReference(Site_VersionStructure site,
+                                        List<TopographicPlace> incomingTopographicPlaces,
+                                        AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+
+        Optional<TopographicPlace> optionalTopographicPlace = findOrCreateTopographicPlace(
+                incomingTopographicPlaces,
+                site.getTopographicPlaceRef(),
+                topographicPlacesCreatedCounter);
+
+        if (!optionalTopographicPlace.isPresent()) {
+            logger.warn("Got no topographic places back for site {} {}", site.getName(), site.getId());
+        }
+
+        optionalTopographicPlace.ifPresent(topographicPlace -> {
+            logger.trace("Setting topographical ref {} on site {} {}",
+                    topographicPlace.getId(), site.getName(), site.getId());
+            TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
+            newRef.setRef(topographicPlace.getId());
+            site.setTopographicPlaceRef(newRef);
+        });
     }
 
     /**
