@@ -3,8 +3,6 @@ package no.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.config.GeometryFactoryConfig;
-import no.rutebanken.tiamat.importers.StopPlaceImporter;
-import no.rutebanken.tiamat.importers.TopographicPlaceCreator;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -14,14 +12,14 @@ import org.mockito.stubbing.Answer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static no.rutebanken.tiamat.importers.StopPlaceImporter.ORIGINAL_ID_KEY;
+import static no.rutebanken.tiamat.importers.DefaultStopPlaceImporter.ORIGINAL_ID_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class StopPlaceImporterTest {
+public class DefaultStopPlaceImporterTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
@@ -31,7 +29,7 @@ public class StopPlaceImporterTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private StopPlaceImporter stopPlaceImporter = new StopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
+    private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
 
 
     @Test
@@ -55,7 +53,7 @@ public class StopPlaceImporterTest {
             return stopPlace;
         });
 
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger(), true);
+        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
 
 
         when(stopPlaceRepository.findByKeyValue(anyString(), anyString()))
@@ -66,7 +64,7 @@ public class StopPlaceImporterTest {
 
         when(stopPlaceRepository.findOne(anyString())).then(invocationOnMock -> importedStopPlace1);
 
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger(), true);
+        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
 
 
         assertThat(importedStopPlace2.getId()).isEqualTo(importedStopPlace1.getId())
@@ -94,7 +92,7 @@ public class StopPlaceImporterTest {
 
         stopPlace.getQuays().add(quay);
 
-        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger(), true);
+        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
 
         assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
         assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
@@ -120,7 +118,10 @@ public class StopPlaceImporterTest {
 
         Quay importedQuay = importedStopPlace.getQuays().get(0);
 
-        KeyValueStructure quayKeyValue = importedQuay.getKeyList().getKeyValue().get(0);
+        KeyValueStructure quayKeyValue = importedQuay
+                .getKeyList()
+                .getKeyValue()
+                .get(0);
         assertThat(quayKeyValue.getValue())
                 .as("the original ID should be stored as value")
                 .isEqualTo(quayOriginalId);

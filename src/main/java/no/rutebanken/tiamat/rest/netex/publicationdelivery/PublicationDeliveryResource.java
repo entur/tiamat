@@ -3,11 +3,13 @@ package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 import no.rutebanken.netex.model.ObjectFactory;
 import no.rutebanken.netex.model.PublicationDeliveryStructure;
 import no.rutebanken.netex.model.SiteFrame;
+import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
 import no.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +39,19 @@ public class PublicationDeliveryResource {
 
     private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
+    private StopPlaceImporter stopPlaceImporter;
+
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
-                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput) {
+                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
+                                       @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
+        this.stopPlaceImporter = stopPlaceImporter;
     }
 
 
@@ -70,7 +76,7 @@ public class PublicationDeliveryResource {
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
-                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, true))
+                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
 
 

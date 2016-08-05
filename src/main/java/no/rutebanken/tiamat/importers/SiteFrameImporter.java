@@ -17,16 +17,14 @@ public class SiteFrameImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameImporter.class);
 
-    private StopPlaceImporter stopPlaceImporter;
     private TopographicPlaceCreator topographicPlaceCreator;
 
     @Autowired
-    public SiteFrameImporter(StopPlaceImporter stopPlaceImporter, TopographicPlaceCreator topographicPlaceCreator) {
-        this.stopPlaceImporter = stopPlaceImporter;
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator) {
         this.topographicPlaceCreator = topographicPlaceCreator;
     }
 
-    public SiteFrame importSiteFrame(SiteFrame siteFrame, boolean checkIfExistsById) {
+    public SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
         long startTime = System.currentTimeMillis();
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
@@ -40,7 +38,7 @@ public class SiteFrameImporter {
 //                .parallelStream()
                 .forEach(stopPlace -> {
                     try {
-                        StopPlace created = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated, checkIfExistsById);
+                        StopPlace created = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
                         createdStopPlaces.add(created);
                         stopPlacesCreated.incrementAndGet();
                         logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated);
