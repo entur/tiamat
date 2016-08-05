@@ -144,13 +144,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
                             }
                         }
                     }
-                    logger.info("Saving {} quays", quaysToAdd.size());
-                    quaysToAdd.forEach(quay -> {
-                        resetIdAndKeepOriginalId(quay);
-                        nearbyStopPlace .getQuays().add(quay);
-                        quayRepository.save(quay);
-                    });
                 }
+                logger.info("Saving {} quays", quaysToAdd.size());
+                quaysToAdd.forEach(quay -> {
+                    resetIdAndKeepOriginalId(quay);
+                    nearbyStopPlace .getQuays().add(quay);
+                    quayRepository.save(quay);
+                });
                 // Assume topographic place already set ?
                 stopPlaceRepository.save(nearbyStopPlace );
                 return nearbyStopPlace ;
