@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,16 +54,14 @@ public class CleanStopPlaceImporter implements StopPlaceImporter {
                 topographicPlacesCreatedCounter);
 
         logger.trace("Resetting IDs for stop place");
-        resetId(stopPlace);
-        resetCentroidIds(stopPlace);
+        resetIds(stopPlace);
 
         if (stopPlace.getQuays() != null) {
             logger.debug("Stop place has {} quays", stopPlace.getQuays().size());
             stopPlace.getQuays().forEach(quay -> {
 
                 logger.trace("Resetting IDs for quay");
-                resetId(quay);
-                resetCentroidIds(quay);
+                resetIds(quay);
                 logger.debug("Saving quay ");
                 quayRepository.save(quay);
             });
@@ -75,13 +72,12 @@ public class CleanStopPlaceImporter implements StopPlaceImporter {
         return stopPlace;
     }
 
-    public void resetId(DataManagedObjectStructure dataManagedObjectStructure) {
-        if(dataManagedObjectStructure.getId() != null) {
-            dataManagedObjectStructure.setId(null);
-        }
-    }
-
-    public void resetCentroidIds(Zone_VersionStructure zone) {
+    /**
+     * Incoming data might contain IDs which may not correspond with our IDs. Reset.
+     * @param zone
+     */
+    public void resetIds(Zone_VersionStructure zone) {
+        zone.setId(null);
         if(zone.getCentroid() != null) {
             zone.getCentroid().setId(null);
             if(zone.getCentroid().getLocation() != null) {
