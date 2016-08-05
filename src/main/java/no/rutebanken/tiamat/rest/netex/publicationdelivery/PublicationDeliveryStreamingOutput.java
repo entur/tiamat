@@ -27,6 +27,7 @@ public class PublicationDeliveryStreamingOutput {
 
     public StreamingOutput stream(PublicationDeliveryStructure publicationDelivery) throws JAXBException {
         Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return outputStream -> {
             try {
                 marshaller.marshal(objectFactory.createPublicationDelivery(publicationDelivery), outputStream);

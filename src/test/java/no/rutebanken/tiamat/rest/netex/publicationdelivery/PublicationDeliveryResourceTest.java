@@ -65,6 +65,51 @@ public class PublicationDeliveryResourceTest {
         assertThat(secondStopPlace.getId()).isEqualTo(firstStopPlace.getId());
     }
 
+    @Test
+    public void publicationDeliveryWithStopPlaceAndQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("123123")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                    .withQuayRefOrQuay(new Quay()
+                    .withName(new MultilingualString().withValue("quay"))))
+                    .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9.1"))
+                                .withLongitude(new BigDecimal("71.2"))));
+
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+
+        Quay quay = actualStopPlace.getQuays()
+                .getQuayRefOrQuay().stream()
+                    .filter(object -> object instanceof Quay)
+                    .map(object -> ((Quay) object))
+                    .findFirst()
+                    .get();
+
+
+        assertThat(quay.getName().getValue()).isEqualTo("quay");
+        assertThat(quay.getId()).isNotNull();
+
+    }
+
+
     private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
         return publicationDeliveryStructure.getDataObjects()
                 .getCompositeFrameOrCommonFrame()

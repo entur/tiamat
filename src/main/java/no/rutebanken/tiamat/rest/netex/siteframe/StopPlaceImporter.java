@@ -117,8 +117,10 @@ public class StopPlaceImporter {
         resetIdAndKeepOriginalId(stopPlace);
 
         if (stopPlace.getQuays() != null) {
+            logger.debug("Stop place has {} quays", stopPlace.getQuays().size());
             stopPlace.getQuays().forEach(quay -> {
                 resetIdAndKeepOriginalId(quay);
+                logger.debug("Saving quay ");
                 quayRepository.save(quay);
             });
         }
@@ -138,6 +140,7 @@ public class StopPlaceImporter {
             }
             dataManagedObjectStructure.getKeyList().getKeyValue().add(importedId);
             dataManagedObjectStructure.setId(null);
+            logger.debug("Moved ID {} to key {}", importedId.getValue(), ORIGINAL_ID_KEY);
         }
     }
 }
