@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.config.GeometryFactoryConfig;
 import no.rutebanken.tiamat.model.*;
@@ -31,6 +32,42 @@ public class DefaultStopPlaceImporterTest {
 
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
 
+    private static SiteFrame siteFrame = new SiteFrame();
+    static {
+        siteFrame.setTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
+    }
+
+    @Test
+    public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
+
+        StopPlace firstStopPlace = new StopPlace();
+        firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
+        firstStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
+
+        Quay terminal1 = new Quay();
+        terminal1.setName(new MultilingualString("terminal 1", "", ""));
+        terminal1.setId("chouette-id-1");
+        terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.000, 10.78)))));
+
+        firstStopPlace.getQuays().add(terminal1);
+
+        StopPlace secondStopPlace = new StopPlace();
+        secondStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.000, 10.78)))));
+        secondStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
+
+        Quay terminal2 = new Quay();
+        terminal2.setName(new MultilingualString("terminal 2", "", ""));
+        terminal2.setId("chouette-id-2");
+        terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.01, 10.78)))));
+        secondStopPlace.getQuays().add(terminal2);
+
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), anyString())).then(invocationOnMock -> firstStopPlace);
+
+        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
+
+        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getQuays()).hasSize(2);
+    }
 
     @Test
     public void handleDuplicateStopPlacesBasedOnId() throws ExecutionException, InterruptedException {
@@ -53,7 +90,7 @@ public class DefaultStopPlaceImporterTest {
             return stopPlace;
         });
 
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger());
 
 
         when(stopPlaceRepository.findByKeyValue(anyString(), anyString()))
@@ -64,7 +101,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.findOne(anyString())).then(invocationOnMock -> importedStopPlace1);
 
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
 
         assertThat(importedStopPlace2.getId()).isEqualTo(importedStopPlace1.getId())
@@ -92,7 +129,7 @@ public class DefaultStopPlaceImporterTest {
 
         stopPlace.getQuays().add(quay);
 
-        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
         assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
@@ -125,6 +162,29 @@ public class DefaultStopPlaceImporterTest {
         assertThat(quayKeyValue.getValue())
                 .as("the original ID should be stored as value")
                 .isEqualTo(quayOriginalId);
+
+    }
+
+    @Test
+    public void haveSameCoordinates() {
+        Quay quay1 = new Quay();
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
+
+        stopPlaceImporter.hasSameCoordinates(quay1, quay2);
+    }
+
+    @Test
+    public void doesNotHaveSameCoordinates() {
+        Quay quay1 = new Quay();
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 10.775973)))));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
+
+        stopPlaceImporter.hasSameCoordinates(quay1, quay2);
 
     }
 

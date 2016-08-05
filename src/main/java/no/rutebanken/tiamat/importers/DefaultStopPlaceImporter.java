@@ -1,5 +1,7 @@
 package no.rutebanken.tiamat.importers;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -9,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,6 +76,25 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
 
     }
 
+    public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
+        if(zone1.getCentroid() == null || zone2.getCentroid() == null ) {
+            return false;
+        }
+        return (zone1.getCentroid().getLocation().getGeometryPoint()
+                .distance(zone2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
+    }
+
+
+    public Envelope createBoundingBox(SimplePoint simplePoint) {
+
+        Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(0.004);
+
+        Envelope envelope = buffer.getEnvelopeInternal();
+        logger.trace("Created envelope {}", envelope.toString());
+
+        return envelope;
+    }
+
 
     @Override
     public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
@@ -85,6 +109,39 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
         StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(stopPlace);
         if (existingStopPlace != null) {
             return existingStopPlace;
+        }
+
+
+        if(stopPlace.getName() != null) {
+            Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
+            existingStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
+
+            if (existingStopPlace != null) {
+                logger.info("Found nearby stop place with the same name: {}", existingStopPlace.getId());
+
+                logger.info("Reuse stop place and compare quays");
+
+                Set<Quay> quaysToAdd = new HashSet<>();
+
+                for (Quay existingQuay : existingStopPlace.getQuays()) {
+
+                    for (Quay newQuay : stopPlace.getQuays()) {
+
+                        if (hasSameCoordinates(existingQuay, newQuay)) {
+                            logger.trace("Quays does have the same coordinates and are probably the same");
+                        } else {
+                            logger.trace("Found quay with other coordinates. Will add quay to stop place {}");
+                            resetIdAndKeepOriginalId(newQuay);
+                            quaysToAdd.add(newQuay);
+                        }
+                    }
+                }
+                quaysToAdd.forEach(quay -> quayRepository.save(quay));
+                existingStopPlace.getQuays().addAll(quaysToAdd);
+                // Assume topographic place already set ?
+                stopPlaceRepository.save(existingStopPlace);
+                return existingStopPlace;
+            }
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.

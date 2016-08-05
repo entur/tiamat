@@ -79,6 +79,26 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
+    public StopPlace findNearbyStopPlace(Envelope envelope, String name) {
+        Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+        TypedQuery<StopPlace> query = entityManager
+                .createQuery("SELECT s FROM StopPlace s " +
+                                "LEFT OUTER JOIN s.centroid sp " +
+                                "LEFT OUTER JOIN sp.location l " +
+                                "INNER JOIN s.name n " +
+                             "WHERE within(l.geometryPoint, :filter) = true " +
+                            "AND n.value = :name", StopPlace.class);
+        query.setParameter("filter", geometryFilter);
+        query.setParameter("name", name);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
     public StopPlace findByKeyValue(String key, String value) {
 
         TypedQuery<StopPlace> query = entityManager
