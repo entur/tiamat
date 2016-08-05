@@ -32,10 +32,7 @@ public class DefaultStopPlaceImporterTest {
 
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
 
-    private static SiteFrame siteFrame = new SiteFrame();
-    static {
-        siteFrame.setTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
-    }
+    private SiteFrame siteFrame = new SiteFrame();
 
     @Test
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {

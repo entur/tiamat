@@ -54,6 +54,8 @@ public class TopographicPlaceCreator {
     public void setTopographicReference(Site_VersionStructure site,
                                         List<TopographicPlace> incomingTopographicPlaces,
                                         AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+        if(site.getTopographicPlaceRef() == null) return;
+
 
         Optional<TopographicPlace> optionalTopographicPlace = findOrCreateTopographicPlace(
                 incomingTopographicPlaces,

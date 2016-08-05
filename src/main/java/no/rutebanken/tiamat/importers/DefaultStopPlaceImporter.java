@@ -114,42 +114,57 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
 
         if(stopPlace.getName() != null) {
             Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
-            existingStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
+            final StopPlace nearbyStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
 
-            if (existingStopPlace != null) {
-                logger.info("Found nearby stop place with the same name: {}", existingStopPlace.getId());
+            if (nearbyStopPlace != null) {
+                logger.info("Found nearby stop place with the same name: {}", nearbyStopPlace .getId());
 
-                logger.info("Reuse stop place and compare quays");
+                logger.info("Reuse stop place and compare quays for {}", nearbyStopPlace .getId());
+
+                if(nearbyStopPlace .getQuays() == null) {
+                    nearbyStopPlace .setQuays(new ArrayList<>());
+                }
 
                 Set<Quay> quaysToAdd = new HashSet<>();
+                if(nearbyStopPlace.getQuays().isEmpty() && stopPlace.getQuays() != null) {
+                    stopPlace.getQuays().forEach(quaysToAdd::add);
 
-                for (Quay existingQuay : existingStopPlace.getQuays()) {
+                } else if(stopPlace.getQuays() != null ) {
 
-                    for (Quay newQuay : stopPlace.getQuays()) {
+                    for (Quay existingQuay : nearbyStopPlace .getQuays()) {
 
-                        if (hasSameCoordinates(existingQuay, newQuay)) {
-                            logger.trace("Quays does have the same coordinates and are probably the same");
-                        } else {
-                            logger.trace("Found quay with other coordinates. Will add quay to stop place {}");
-                            resetIdAndKeepOriginalId(newQuay);
-                            quaysToAdd.add(newQuay);
+                        for (Quay newQuay : stopPlace.getQuays()) {
+
+                            if (hasSameCoordinates(existingQuay, newQuay)) {
+                                logger.info("Quays does have the same coordinates and are probably the same");
+                            } else {
+                                logger.info("Found quay with other coordinates. Will add quay to stop place {}");
+
+                                quaysToAdd.add(newQuay);
+                            }
                         }
                     }
+                    logger.info("Saving {} quays", quaysToAdd.size());
+                    quaysToAdd.forEach(quay -> {
+                        resetIdAndKeepOriginalId(quay);
+                        nearbyStopPlace .getQuays().add(quay);
+                        quayRepository.save(quay);
+                    });
                 }
-                quaysToAdd.forEach(quay -> quayRepository.save(quay));
-                existingStopPlace.getQuays().addAll(quaysToAdd);
                 // Assume topographic place already set ?
-                stopPlaceRepository.save(existingStopPlace);
-                return existingStopPlace;
+                stopPlaceRepository.save(nearbyStopPlace );
+                return nearbyStopPlace ;
             }
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.
         stopPlace.getCentroid().getLocation().setId(0);
 
-        topographicPlaceCreator.setTopographicReference(stopPlace,
-                siteFrame.getTopographicPlaces().getTopographicPlace(),
-                topographicPlacesCreatedCounter);
+        if(siteFrame.getTopographicPlaces() != null) {
+            topographicPlaceCreator.setTopographicReference(stopPlace,
+                    siteFrame.getTopographicPlaces().getTopographicPlace(),
+                    topographicPlacesCreatedCounter);
+        }
         resetIdAndKeepOriginalId(stopPlace);
 
         if (stopPlace.getQuays() != null) {
