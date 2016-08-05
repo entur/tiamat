@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex.siteframe;
+package no.rutebanken.tiamat.importers;
 
 
 

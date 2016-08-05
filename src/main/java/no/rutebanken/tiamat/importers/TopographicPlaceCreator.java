@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex.siteframe;
+package no.rutebanken.tiamat.importers;
 
 
 import com.google.common.cache.Cache;
@@ -62,7 +62,7 @@ public class TopographicPlaceCreator {
     /**
      * Look for existing topographical places.
      * Use existing IDs to resolve references to parent topographical places,
-     * but used the genererated IDs from saving in references.
+     * but use generated IDs in references.
      */
     private Optional<TopographicPlace> findOrCreate(List<TopographicPlace> incomingTopographicPlaces,
                                                     TopographicPlaceRefStructure topographicPlaceRef,

@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex.siteframe;
+package no.rutebanken.tiamat.importers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

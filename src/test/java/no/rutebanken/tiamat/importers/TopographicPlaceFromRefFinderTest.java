@@ -1,5 +1,6 @@
-package no.rutebanken.tiamat.rest.netex.siteframe;
+package no.rutebanken.tiamat.importers;
 
+import no.rutebanken.tiamat.importers.TopographicPlaceFromRefFinder;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.TopographicPlace;
 import no.rutebanken.tiamat.model.TopographicPlaceRefStructure;

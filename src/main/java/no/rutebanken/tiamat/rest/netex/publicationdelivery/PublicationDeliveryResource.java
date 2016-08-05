@@ -4,7 +4,7 @@ import no.rutebanken.netex.model.ObjectFactory;
 import no.rutebanken.netex.model.PublicationDeliveryStructure;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
-import no.rutebanken.tiamat.rest.netex.siteframe.SiteFrameImporter;
+import no.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
