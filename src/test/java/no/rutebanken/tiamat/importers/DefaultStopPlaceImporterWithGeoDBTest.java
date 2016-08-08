@@ -80,7 +80,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     /**
      * Two stop places with the same name and coordinates should become one stop place.
-     * Because the those stop places each have one quay with the same coordinates, the should become one as well.
+     * Because the those stop places each have one quay with the same coordinates, they should treated as one quay.
      */
     @Test
     public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes() throws ExecutionException, InterruptedException {
