@@ -85,7 +85,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return null;
         }
 
-        logger.info("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
+        logger.debug("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
                 newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
                 newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
 
@@ -99,12 +99,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             final StopPlace nearbyStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, newStopPlace.getName().getValue());
 
             if (nearbyStopPlace != null) {
-                logger.info("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
 
                 Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
-                logger.info("Saving {} quays", quaysToAdd.size());
                 quaysToAdd.forEach(quay -> {
-                    logger.info("Saving quay {}, {}", quay.getId(), quay.getName());
+                    logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
                     resetIdAndKeepOriginalId(quay);
                     nearbyStopPlace.getQuays().add(quay);
                     quayRepository.save(quay);
@@ -130,17 +129,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             newStopPlace.getQuays().forEach(quay -> {
                 resetIdAndKeepOriginalId(quay);
                 logger.debug("Saving quay ");
-
-
-//                quay.getCentroid().setId(null);
-//                quay.getCentroid().getLocation().setId(0);
-
                 quayRepository.save(quay);
             });
         }
 
         stopPlaceRepository.save(newStopPlace);
-        logger.debug("Saving stop place {} {}", newStopPlace.getName(), newStopPlace.getId());
+        logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
         return newStopPlace;
     }
 
@@ -167,24 +161,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
                 .anyMatch(existingQuay -> hasSameCoordinates(existingQuay, newQuay));
     }
-
-/*    public boolean shouldAddQuay(Quay newQuay, Collection<Quay> existingQuays) {
-        for(Quay existingQuay : existingQuays) {
-            if (hasSameCoordinates(existingQuay, newQuay)) {
-                logger.info("New quay has matching coordinates as existing quay. new quay: {},{}. existing quay: {},{}",
-                        newQuay.getCentroid().getLocation().getLongitude(), newQuay.getCentroid().getLocation().getLatitude(),
-                        existingQuay.getCentroid().getLocation().getLongitude(), existingQuay.getCentroid().getLocation().getLatitude());
-                return false;
-            } else {
-                logger.info("Found quay {} with other coordinates. Will add quay to nearby stop place. New quay: {},{}. existing quay: {},{}",
-                        newQuay.getId(),
-                        newQuay.getCentroid().getLocation().getLongitude(), newQuay.getCentroid().getLocation().getLatitude(),
-                        existingQuay.getCentroid().getLocation().getLongitude(), existingQuay.getCentroid().getLocation().getLatitude());
-                return true;
-            }
-        }
-        return true;
-    }*/
 
     public void resetIdAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
         if (dataManagedObjectStructure.getId() != null) {
