@@ -125,7 +125,6 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setName(new MultilingualString("stop place", "", ""));
         SimplePoint centroid = new SimplePoint();
 
-        // Set location off
         centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
 
         stopPlace.setCentroid(centroid);
@@ -134,6 +133,25 @@ public class StopPlaceRepositoryImplTest {
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
         StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("This name is different", "", ""));
+        SimplePoint centroid = new SimplePoint();
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        // Stop place coordinates within envelope
+        Envelope envelope = new Envelope(14, 16, 50, 70);
+
+        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
+
+
         assertThat(result).isNull();
     }
 }
