@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.importers.SiteFrameImporter;
 import no.rutebanken.tiamat.importers.StopPlaceImporter;
-import no.rutebanken.tiamat.importers.clean.CleanStopPlaceImporter;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;

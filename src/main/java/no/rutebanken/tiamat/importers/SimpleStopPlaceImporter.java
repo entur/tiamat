@@ -1,8 +1,6 @@
-package no.rutebanken.tiamat.importers.clean;
+package no.rutebanken.tiamat.importers;
 
 
-import no.rutebanken.tiamat.importers.StopPlaceImporter;
-import no.rutebanken.tiamat.importers.TopographicPlaceCreator;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -17,13 +15,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Import stop place without taking existing data into account.
- * Suitable for clean databases. Topographical places can already exist.
+ * Suitable for clean databases. Topographical places may already exist,
+ * or will be created by the TopoGraphicPlaceCreator.
  */
 @Component
 @Qualifier("cleanStopPlaceImporter")
-public class CleanStopPlaceImporter implements StopPlaceImporter {
+public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CleanStopPlaceImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleStopPlaceImporter.class);
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
@@ -33,7 +32,7 @@ public class CleanStopPlaceImporter implements StopPlaceImporter {
 
 
     @Autowired
-    public CleanStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
+    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
