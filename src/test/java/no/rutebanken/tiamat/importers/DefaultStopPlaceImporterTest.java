@@ -20,6 +20,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Test stop place importer with mocked dependencies.
+ * See also {@link DefaultStopPlaceImporterWithGeoDBTest}
+ */
 public class DefaultStopPlaceImporterTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
@@ -60,6 +64,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), anyString())).then(invocationOnMock -> firstStopPlace);
 
+        // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());

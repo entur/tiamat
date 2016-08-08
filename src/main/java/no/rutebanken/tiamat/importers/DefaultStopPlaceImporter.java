@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Qualifier("defaultStopPlaceImporter")
-public class DefaultStopPlaceImporter implements StopPlaceImporter{
+public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
 
@@ -45,7 +45,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
         StopPlace existingStopPlace = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
 
 
-        if(existingStopPlace != null) {
+        if (existingStopPlace != null) {
             logger.info("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
             return existingStopPlace;
         }
@@ -77,7 +77,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
     }
 
     public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
-        if(zone1.getCentroid() == null || zone2.getCentroid() == null ) {
+        if (zone1.getCentroid() == null || zone2.getCentroid() == null) {
             return false;
         }
         return (zone1.getCentroid().getLocation().getGeometryPoint()
@@ -112,34 +112,29 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
         }
 
 
-        if(stopPlace.getName() != null) {
+        if (stopPlace.getName() != null) {
             Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
             final StopPlace nearbyStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
 
             if (nearbyStopPlace != null) {
-                logger.info("Found nearby stop place with the same name: {}", nearbyStopPlace .getId());
+                logger.info("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
 
-                logger.info("Reuse stop place and compare quays for {}", nearbyStopPlace .getId());
+                logger.info("About to compare quays for {}", nearbyStopPlace.getId());
 
-                if(nearbyStopPlace .getQuays() == null) {
-                    nearbyStopPlace .setQuays(new ArrayList<>());
+                if (nearbyStopPlace.getQuays() == null) {
+                    nearbyStopPlace.setQuays(new ArrayList<>());
                 }
 
                 Set<Quay> quaysToAdd = new HashSet<>();
-                if(nearbyStopPlace.getQuays().isEmpty() && stopPlace.getQuays() != null) {
+                if (nearbyStopPlace.getQuays().isEmpty() && stopPlace.getQuays() != null) {
                     stopPlace.getQuays().forEach(quaysToAdd::add);
-
-                } else if(stopPlace.getQuays() != null ) {
-
-                    for (Quay existingQuay : nearbyStopPlace .getQuays()) {
-
+                } else if (stopPlace.getQuays() != null) {
+                    for (Quay existingQuay : nearbyStopPlace.getQuays()) {
                         for (Quay newQuay : stopPlace.getQuays()) {
-
                             if (hasSameCoordinates(existingQuay, newQuay)) {
                                 logger.info("Quays does have the same coordinates and are probably the same");
                             } else {
-                                logger.info("Found quay with other coordinates. Will add quay to stop place {}");
-
+                                logger.info("Found quay with other coordinates. Will add quay to nearby stop place {}", nearbyStopPlace.getId());
                                 quaysToAdd.add(newQuay);
                             }
                         }
@@ -147,20 +142,21 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
                 }
                 logger.info("Saving {} quays", quaysToAdd.size());
                 quaysToAdd.forEach(quay -> {
+                    logger.info("Saving quay {}, {}", quay.getId(), quay.getName());
                     resetIdAndKeepOriginalId(quay);
-                    nearbyStopPlace .getQuays().add(quay);
+                    nearbyStopPlace.getQuays().add(quay);
                     quayRepository.save(quay);
                 });
                 // Assume topographic place already set ?
-                stopPlaceRepository.save(nearbyStopPlace );
-                return nearbyStopPlace ;
+                stopPlaceRepository.save(nearbyStopPlace);
+                return nearbyStopPlace;
             }
         }
 
         // TODO: Hack to avoid 'detached entity passed to persist'.
         stopPlace.getCentroid().getLocation().setId(0);
 
-        if(siteFrame.getTopographicPlaces() != null) {
+        if (siteFrame.getTopographicPlaces() != null) {
             topographicPlaceCreator.setTopographicReference(stopPlace,
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
                     topographicPlacesCreatedCounter);
@@ -187,11 +183,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter{
     }
 
     public void resetIdAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
-        if(dataManagedObjectStructure.getId() != null) {
+        if (dataManagedObjectStructure.getId() != null) {
             KeyValueStructure importedId = new KeyValueStructure();
             importedId.setKey(ORIGINAL_ID_KEY);
             importedId.setValue(dataManagedObjectStructure.getId());
-            if(dataManagedObjectStructure.getKeyList() == null) {
+            if (dataManagedObjectStructure.getKeyList() == null) {
                 dataManagedObjectStructure.setKeyList(new KeyListStructure());
             }
             dataManagedObjectStructure.getKeyList().getKeyValue().add(importedId);
