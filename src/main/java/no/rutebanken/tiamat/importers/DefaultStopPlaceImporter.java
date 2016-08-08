@@ -11,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Component
 @Qualifier("defaultStopPlaceImporter")
@@ -75,25 +74,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     }
 
-    public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
-        if (zone1.getCentroid() == null || zone2.getCentroid() == null) {
-            return false;
-        }
-        return (zone1.getCentroid().getLocation().getGeometryPoint()
-                .distance(zone2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
-    }
-
-
-    public Envelope createBoundingBox(SimplePoint simplePoint) {
-
-        Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(0.004);
-
-        Envelope envelope = buffer.getEnvelopeInternal();
-        logger.trace("Created envelope {}", envelope.toString());
-
-        return envelope;
-    }
-
 
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
@@ -105,11 +85,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return null;
         }
 
+        logger.info("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
+                newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
+                newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+
         StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(newStopPlace);
         if (existingStopPlace != null) {
             return existingStopPlace;
         }
-
 
         if (newStopPlace.getName() != null) {
             Envelope boundingBox = createBoundingBox(newStopPlace.getCentroid());
@@ -171,25 +154,37 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         Set<Quay> quaysToAdd = new HashSet<>();
         if (nearbyStopPlace.getQuays().isEmpty() && newStopPlace.getQuays() != null) {
-            newStopPlace.getQuays().forEach(quaysToAdd::add);
+            quaysToAdd.addAll(newStopPlace.getQuays());
         } else if (newStopPlace.getQuays() != null) {
-
-            for(Quay newQuay : newStopPlace.getQuays()) {
-                for(Quay existingQuay : nearbyStopPlace.getQuays()) {
-
-                    if (hasSameCoordinates(existingQuay, newQuay)) {
-                        logger.info("Quays does have the same coordinates and are probably the same");
-                    } else {
-                        logger.info("Found quay with other coordinates. Will add quay to nearby stop place {}", nearbyStopPlace.getId());
-                        quaysToAdd.add(newQuay);
-                        break;
-                    }
-                }
-            }
+            newStopPlace.getQuays().stream()
+                    .filter(newQuay -> !containsQuayWithCoordinates(newQuay, nearbyStopPlace.getQuays(), quaysToAdd))
+                    .forEach(quaysToAdd::add);
         }
         return quaysToAdd;
-
     }
+
+    public boolean containsQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
+        return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
+                .anyMatch(existingQuay -> hasSameCoordinates(existingQuay, newQuay));
+    }
+
+/*    public boolean shouldAddQuay(Quay newQuay, Collection<Quay> existingQuays) {
+        for(Quay existingQuay : existingQuays) {
+            if (hasSameCoordinates(existingQuay, newQuay)) {
+                logger.info("New quay has matching coordinates as existing quay. new quay: {},{}. existing quay: {},{}",
+                        newQuay.getCentroid().getLocation().getLongitude(), newQuay.getCentroid().getLocation().getLatitude(),
+                        existingQuay.getCentroid().getLocation().getLongitude(), existingQuay.getCentroid().getLocation().getLatitude());
+                return false;
+            } else {
+                logger.info("Found quay {} with other coordinates. Will add quay to nearby stop place. New quay: {},{}. existing quay: {},{}",
+                        newQuay.getId(),
+                        newQuay.getCentroid().getLocation().getLongitude(), newQuay.getCentroid().getLocation().getLatitude(),
+                        existingQuay.getCentroid().getLocation().getLongitude(), existingQuay.getCentroid().getLocation().getLatitude());
+                return true;
+            }
+        }
+        return true;
+    }*/
 
     public void resetIdAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
         if (dataManagedObjectStructure.getId() != null) {
@@ -203,5 +198,24 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             dataManagedObjectStructure.setId(null);
             logger.debug("Moved ID {} to key {}", importedId.getValue(), ORIGINAL_ID_KEY);
         }
+    }
+
+    public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
+        if (zone1.getCentroid() == null || zone2.getCentroid() == null) {
+            return false;
+        }
+        return (zone1.getCentroid().getLocation().getGeometryPoint()
+                .distance(zone2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
+    }
+
+
+    public Envelope createBoundingBox(SimplePoint simplePoint) {
+
+        Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(0.004);
+
+        Envelope envelope = buffer.getEnvelopeInternal();
+        logger.trace("Created envelope {}", envelope.toString());
+
+        return envelope;
     }
 }

@@ -95,7 +95,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace firstStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, "k7:StopArea:987987");
         firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, "k7:StopArea:987987"));
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude+0.01, quayLatitude+0.01, "k7:StopArea:987987"));
+        firstStopPlace.getQuays().add(createQuay(name, quayLongitude + 0.01, quayLatitude + 0.01, "k7:StopArea:987987"));
 
         AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
@@ -117,6 +117,34 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     }
 
+
+    @Test
+    public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes2() throws ExecutionException, InterruptedException {
+        String name = "Mjåsund";
+
+        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
+                5.447336160641715, 59.32245646609804, "k16:StopArea:11463484", "k16:StopArea:11463484");
+
+        AtomicInteger topographicPlacesCounter = new AtomicInteger();
+        SiteFrame siteFrame = new SiteFrame();
+
+        // Import first stop place.
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+
+        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
+                5.447071920203443, 59.32262902417035, "k16:StopArea:11463483", "k16:StopArea:11463483");
+
+        // Import second stop place
+        defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
+
+        StopPlace thirdStopPlace = createStopPlaceWithQuay(name,
+                5.447071920203443, 59.32262902417035, "k16:StopArea:11463483", "k16:StopArea:11463483");
+
+        // Import third stop place with a quay with the same coordinates
+        StopPlace actualStopPlace = defaultStopPlaceImporter.importStopPlace(thirdStopPlace, siteFrame, topographicPlacesCounter);
+
+        assertThat(actualStopPlace.getQuays()).hasSize(2);
+    }
 
     private SimplePoint point(double longitude, double latitude) {
         return new SimplePoint(new LocationStructure(
