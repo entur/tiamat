@@ -1,4 +1,4 @@
-package no.rutebanken.tiamat.rest.netex.siteframe;
+package no.rutebanken.tiamat.importers;
 
 
 import com.google.common.cache.Cache;
@@ -6,6 +6,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.Striped;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import no.rutebanken.tiamat.model.Site_VersionStructure;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,33 @@ public class TopographicPlaceCreator {
     }
 
     /**
+     * Find or create topographic place and, if found, set correct reference on provided site.
+     */
+    public void setTopographicReference(Site_VersionStructure site,
+                                        List<TopographicPlace> incomingTopographicPlaces,
+                                        AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+        if(site.getTopographicPlaceRef() == null) return;
+
+
+        Optional<TopographicPlace> optionalTopographicPlace = findOrCreateTopographicPlace(
+                incomingTopographicPlaces,
+                site.getTopographicPlaceRef(),
+                topographicPlacesCreatedCounter);
+
+        if (!optionalTopographicPlace.isPresent()) {
+            logger.warn("Got no topographic places back for site {} {}", site.getName(), site.getId());
+        }
+
+        optionalTopographicPlace.ifPresent(topographicPlace -> {
+            logger.trace("Setting topographical ref {} on site {} {}",
+                    topographicPlace.getId(), site.getName(), site.getId());
+            TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
+            newRef.setRef(topographicPlace.getId());
+            site.setTopographicPlaceRef(newRef);
+        });
+    }
+
+    /**
      * Using cache
      */
     public Optional<TopographicPlace> findOrCreateTopographicPlace(List<TopographicPlace> incomingTopographicPlaces,
@@ -62,7 +90,7 @@ public class TopographicPlaceCreator {
     /**
      * Look for existing topographical places.
      * Use existing IDs to resolve references to parent topographical places,
-     * but used the genererated IDs from saving in references.
+     * but use generated IDs in references.
      */
     private Optional<TopographicPlace> findOrCreate(List<TopographicPlace> incomingTopographicPlaces,
                                                     TopographicPlaceRefStructure topographicPlaceRef,

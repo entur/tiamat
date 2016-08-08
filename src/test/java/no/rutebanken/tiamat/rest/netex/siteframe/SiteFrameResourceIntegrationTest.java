@@ -113,6 +113,7 @@ public class SiteFrameResourceIntegrationTest {
                 .body()
                 .asString();
 
+        System.out.println(xml);
         stopPlaceRepository.delete(stopPlace);
         topographicPlaceRepository.delete(municipality);
         topographicPlaceRepository.delete(county);

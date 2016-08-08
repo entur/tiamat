@@ -3,6 +3,8 @@ package no.rutebanken.tiamat.rest.netex.siteframe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import no.rutebanken.netex.model.*;
+import no.rutebanken.tiamat.importers.SiteFrameImporter;
+import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -14,6 +16,7 @@ import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,10 @@ import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.util.Iterator;
 
+/**
+ * Import/export Site Frame.
+ * TODO: External data should be sent or received wrapped in Publication Delivery.
+ */
 @Component
 @Produces("application/xml")
 @Path("/site_frame")
@@ -41,15 +48,20 @@ public class SiteFrameResource {
 
     private SiteFrameImporter siteFrameImporter;
 
+    private StopPlaceImporter stopPlaceImporter;
+
     private NetexMapper netexMapper;
 
     @Autowired
     public SiteFrameResource(StopPlaceRepository stopPlaceRepository,
                              TopographicPlaceRepository topographicPlaceRepository,
-                             SiteFrameImporter siteFrameImporter, NetexMapper netexMapper) {
+                             SiteFrameImporter siteFrameImporter,
+                             @Qualifier("cleanStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
+                             NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.siteFrameImporter = siteFrameImporter;
+        this.stopPlaceImporter = stopPlaceImporter;
         this.netexMapper = netexMapper;
     }
 
@@ -105,7 +117,7 @@ public class SiteFrameResource {
 
         SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-        SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, false);
+        SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
 
         return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }

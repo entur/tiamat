@@ -1,6 +1,7 @@
 package no.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.model.*;
@@ -97,5 +98,60 @@ public class StopPlaceRepositoryImplTest {
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
 
         assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
+    }
+
+
+    @Test
+    public void findNearbyStopPlace() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("name", "", ""));
+        SimplePoint centroid = new SimplePoint();
+
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679))));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
+
+        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        assertThat(result).isNotNull();
+        assertThat(result.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+    }
+
+    @Test
+    public void noNearbyStopPlace() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("stop place", "", ""));
+        SimplePoint centroid = new SimplePoint();
+
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
+
+        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("This name is different", "", ""));
+        SimplePoint centroid = new SimplePoint();
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        // Stop place coordinates within envelope
+        Envelope envelope = new Envelope(14, 16, 50, 70);
+
+        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
+
+
+        assertThat(result).isNull();
     }
 }
