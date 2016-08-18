@@ -67,6 +67,8 @@
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
 
+        <netex-java-model.version>0.0.6</netex-java-model.version>
+
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -118,7 +120,7 @@
         <dependency>
             <groupId>no.rutebanken</groupId>
             <artifactId>netex-java-model</artifactId>
-            <version>0.0.5</version>
+            <version>${netex-java-model.version}</version>
         </dependency>
 
         <dependency>
