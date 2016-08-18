@@ -27,6 +27,7 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new CheckConstraintsConverter());
         mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
+        mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
 
     }
 
