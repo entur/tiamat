@@ -2,11 +2,14 @@
 
 Module also known as the backend for "Holdeplassregisteret"
 
-# Build
- ```mvn clean install```
+## Build
 
-# Local run
- ```mvn spring-boot:run```
+`mvn clean install`
+
+## Local run
+
+`mvn spring-boot:run`
+
 
 # Run with external properties file and PostgreSQL
 To run with PostgreSQL you ned an external application.properties.
@@ -31,7 +34,7 @@ logging.level.no.rutebanken.tiamat.pelias=TRACE
 
 To start Tiamat with this configuration, specify **spring.config.location**:
 
-```mvn spring-boot:run -Dspring.config.location=/path/to/application.properties```
+`mvn spring-boot:run -Dspring.config.location=/path/to/application.properties`
 
 
 ## HikariCP
@@ -41,11 +44,14 @@ See also http://stackoverflow.com/a/26514779
 # Postgres
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
-```ONLY_TAGS=rb PLAY=build vagrant provision```
-```ONLY_TAGS=rb PLAY=run vagrant provision```
+```
+ONLY_TAGS=rb PLAY=build vagrant provision
+ONLY_TAGS=rb PLAY=run vagrant provision
+```
 
 # Run with in-memory GeoDB and bootstrap generation of data from GTFS stops.txt
-```mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties```
+
+`mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties`
 
 # Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
 ```mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties```
@@ -77,13 +83,18 @@ For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.ht
 
 
 # Export *ALL* data from Tiamat
-*Not that you need to run this with enough memory available, or else you might run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly how much memory should be tested.*
+
+Note that you need to run this with enough memory available, or else you might run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly how much memory should be tested.
 
 ```
 curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
 ```
 
 # Import data into Tiamat
+
+If you are running this from `spring:run`, then you need to make sure that you
+have enough memory available for the java process:
+`export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'``
 
 Clean existing data in postgresql (streamline if frequently used):
 ```
