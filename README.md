@@ -54,15 +54,22 @@ ONLY_TAGS=rb PLAY=run vagrant provision
 `mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties`
 
 # Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
-```mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties```
+
+```
+mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
+```
 (default profiles are set in internal application.properties)
 
 # Run with external config **and** bootstrap data from GTFS:
+
 Can be used with an empty PostgreSQL.
-```mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties```
+```
+mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties
+```
 
 
-# Run Keycloak
+## Run Keycloak
+
 Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone. *Currently disabled, see NRP-16*
 
 * Download Keycloak version 1.7.0.CR1 (or newer)
@@ -70,25 +77,53 @@ Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is 
 * ```git pull``` devsetup.
 * run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/vagrant/provisioning/roles/keycloak/files/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
 
-# Docker image
- ```mvn -Pf8-build```
+## Docker image
 
-# Run the docker image in, eh, docker
+```
+mvn -Pf8-build
+```
+
+## Run the docker image in, eh, docker
+
 choose **one** of:
 
-* ```mvn docker:start```
-* ```docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT```
+* `mvn docker:start`
+* `docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT`
 
 For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
 # Export *ALL* data from Tiamat
 
-Note that you need to run this with enough memory available, or else you might run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly how much memory should be tested.
+Note that you need to run this with enough memory available, or else you might
+run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly
+how much memory should be tested. **Note** at the time of writing
+(24.08.2016), this does not work due to GW timeout,
 
 ```
-curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
+curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET https://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
 ```
+
+Alternative:
+
+```
+kubectl exec -i tiamat-HASH -- curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://localhost:8777/jersey/site_frame > netex_site_frame_stop_places.xml
+```
+
+## Database creation
+
+Before starting tiamat, you need to run the following commands:
+
+```
+kubectl exec -it tiamatdb-HASH psql -- --username=postgres tiamat
+CREATE DATABASE template_postgis;
+UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template_postgis';
+CREATE DATABASE tiamat WITH encoding 'UTF8' template=template0;
+\c tiamat
+CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;
+```
+
 
 # Import data into Tiamat
 
@@ -104,8 +139,16 @@ TRUNCATE topographic_place CASCADE;
 ```
 
 ```
-curl --max-time 6000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
+curl --max-time 60000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
 ```
+
+Alternative:
+
+```
+kc exec -i tiamat-HASH -- bash -c 'cat > /tmp/netex.xml' < netex_site_frame_stop_places.xml
+kc exec -i tiamat-HASH -- curl --max-time 60000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@/tmp/netex.xml http://localhost:8777/jersey/site_frame
+```
+
 
 Example site frame data can be found on the jump server (/var/www/...). There are several example files. Recent versions of Tiamat requires XML namespaces.
 
