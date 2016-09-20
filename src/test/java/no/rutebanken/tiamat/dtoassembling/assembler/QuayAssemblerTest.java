@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.dtoassembling.assembler;
 
 
 import no.rutebanken.tiamat.dtoassembling.dto.QuayDto;
+import no.rutebanken.tiamat.model.MultilingualString;
 import org.junit.Test;
 import no.rutebanken.tiamat.model.Quay;
 import no.rutebanken.tiamat.model.QuayTypeEnumeration;
@@ -22,8 +23,19 @@ public class QuayAssemblerTest {
 
         QuayDto quayDto = quayAssembler.assemble(quay);
 
-
         assertThat(quayDto.quayType).isEqualTo("busBay");
     }
+
+    @Test
+    public void assembleQuayWithQuayDescription() {
+
+        Quay quay = new Quay();
+        quay.setDescription(new MultilingualString("description","no",""));
+
+        QuayDto quayDto = quayAssembler.assemble(quay);
+
+        assertThat(quayDto.description).isEqualTo("description");
+    }
+
 
 }

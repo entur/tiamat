@@ -30,7 +30,13 @@ public class QuayAssembler {
         if(quay.isAllAreasWheelchairAccessible() != null) {
             quayDto.allAreasWheelchairAccessible = quay.isAllAreasWheelchairAccessible();
         }
+
+        if (quay.getDescription() != null) {
+            quayDto.description = quay.getDescription().getValue();
+        }
+
         return quayDto;
     }
 
 }
+

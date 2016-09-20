@@ -38,6 +38,17 @@ public class QuayDisassemblerTest {
         assertThat(quay.getName().getValue()).isEqualTo(quayDto.name);
     }
 
+    @Test
+    public void disassembledQuayDescription() {
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+
+        QuayDto quayDto = new QuayDto();
+        quayDto.description = "description";
+        Quay quay = quayDisassembler.disassemble(quayDto);
+
+        assertThat(quay.getDescription().getValue()).isEqualTo(quayDto.description);
+    }
+
 
     @Test
     public void disassembledExistingQuay() {
