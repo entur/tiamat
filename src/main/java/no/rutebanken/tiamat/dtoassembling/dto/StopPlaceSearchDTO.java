@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.dtoassembling.dto;
 
 public class StopPlaceSearchDTO {
-    public BoundingBoxDto boundingBoxDto;
+    public BoundingBoxDto boundingBox;
     public String ignoreStopPlaceId;
 }

@@ -103,7 +103,7 @@ public class DtoStopPlaceResource {
                                                            @DefaultValue(value="0") @QueryParam(value="page") int page,
                                                            @DefaultValue(value="200") @QueryParam(value="size") int size,
                                                            StopPlaceSearchDTO stopPlaceSearchDTO) {
-        BoundingBoxDto boundingBox = stopPlaceSearchDTO.boundingBoxDto;
+        BoundingBoxDto boundingBox = stopPlaceSearchDTO.boundingBox;
 
         logger.debug("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
         Pageable pageable = new PageRequest(page, size);
