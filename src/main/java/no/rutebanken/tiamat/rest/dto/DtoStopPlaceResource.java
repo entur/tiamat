@@ -4,6 +4,7 @@ import no.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import no.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import no.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
+import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDTO;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -101,13 +102,14 @@ public class DtoStopPlaceResource {
     public List<StopPlaceDto> getStopPlacesFromBoundingBox(@Context HttpServletResponse response,
                                                            @DefaultValue(value="0") @QueryParam(value="page") int page,
                                                            @DefaultValue(value="200") @QueryParam(value="size") int size,
-                                                           BoundingBoxDto boundingBox) {
+                                                           StopPlaceSearchDTO stopPlaceSearchDTO) {
+        BoundingBoxDto boundingBox = stopPlaceSearchDTO.boundingBox;
 
         logger.debug("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
         Pageable pageable = new PageRequest(page, size);
 
         List<StopPlaceDto> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
-                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, pageable));
+                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, stopPlaceSearchDTO.ignoreStopPlaceId, pageable));
         logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;
     }
