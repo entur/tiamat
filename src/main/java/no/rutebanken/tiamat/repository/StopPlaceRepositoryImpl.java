@@ -60,16 +60,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     /**
      * Find nearby stop places, specifying a bounding box.
+     * Optionally, a stop place ID to ignore can be defined.
      */
     @Override
-    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable) {
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<StopPlace> query = entityManager
-                .createQuery("SELECT s FROM StopPlace s LEFT OUTER JOIN s.centroid sp LEFT OUTER JOIN sp.location l WHERE within(l.geometryPoint, :filter) = true", StopPlace.class);
+        String queryString = "SELECT s FROM StopPlace s " +
+                "LEFT OUTER JOIN s.centroid sp " +
+                "LEFT OUTER JOIN sp.location l "+
+                "WHERE within(l.geometryPoint, :filter) = true " +
+                "AND (:ignoreStopPlaceId IS NULL OR s.id != :ignoreStopPlaceId)";
+
+        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
+        query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
 
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());

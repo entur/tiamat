@@ -70,7 +70,7 @@ public class StopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
         assertThat(result.getContent()).extracting(EntityStructure::getId).contains(stopPlace.getId());
     }
 
@@ -95,9 +95,37 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setCentroid(centroid);
         stopPlaceRepository.save(stopPlace);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
 
         assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
+    }
+
+    @Test
+    public void testFindStopPlaceWithinIgnoringStopPlace() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        SimplePoint centroid = new SimplePoint();
+
+        double southEastLatitude = 59;
+        double southEastLongitude = 10;
+
+        double northWestLatitude = 60;
+        double northWestLongitude = 11;
+
+        double latitude = 59.5;
+        double longitude = 10.5;
+        Pageable pageable = new PageRequest(0, 10);
+
+        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
+
+        stopPlace.setCentroid(centroid);
+        stopPlaceRepository.save(stopPlace);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, stopPlace.getId(), pageable);
+
+        assertThat(result.getContent())
+                .extracting(EntityStructure::getId)
+                .as("Ignored stop place shall not be part of the result")
+                .doesNotContain(stopPlace.getId());
     }
 
 

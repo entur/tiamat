@@ -6,5 +6,4 @@ public class BoundingBoxDto {
     public double yMin;
     public double xMax;
     public double yMax;
-
 }
