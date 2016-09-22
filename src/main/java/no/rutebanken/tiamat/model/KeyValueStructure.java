@@ -8,10 +8,7 @@
 
 package no.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,7 +43,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @Entity
-@Table(name = "key_value")
+@Table(name = "key_value", indexes = {
+    @Index(name = "keyvalue", columnList = "key, value")
+})
 public class KeyValueStructure {
 
 
