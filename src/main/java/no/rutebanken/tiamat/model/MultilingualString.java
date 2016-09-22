@@ -8,9 +8,7 @@
 
 package no.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
@@ -42,6 +40,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "value"
 })
 @Entity
+@Table(name = "multilingual_string", indexes = {@Index(name = "multilingual_value", columnList = "value")})
 public class MultilingualString {
 
     @Id
