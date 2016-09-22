@@ -15,7 +15,7 @@ public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlac
 
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
-    @CachePut(value = "findNearbyStopPlace", key = "#p0.getName().getValue()")
+//    @CachePut(value = "findNearbyStopPlace", key = "#p0.getName().getValue()")
     StopPlace save(StopPlace stopPlace);
 }
 

@@ -86,7 +86,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
 
-    @Cacheable(value = "findNearbyStopPlace", key = "#p0")
+//    @Cacheable(value = "findNearbyStopPlace", key = "#p0")
     @Override
     public StopPlace findNearbyStopPlace(Envelope envelope, String name) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
