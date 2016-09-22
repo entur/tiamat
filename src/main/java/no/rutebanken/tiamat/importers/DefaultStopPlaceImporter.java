@@ -128,7 +128,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
             newStopPlace.getQuays().forEach(quay -> {
                 resetIdAndKeepOriginalId(quay);
-                logger.debug("Saving quay ");
+                quay.getCentroid().setId("");
+                quay.getCentroid().getLocation().setId(0);
                 quayRepository.save(quay);
             });
         }
