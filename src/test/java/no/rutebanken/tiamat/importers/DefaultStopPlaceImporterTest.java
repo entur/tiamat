@@ -10,6 +10,7 @@ import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
+import java.math.BigDecimal;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -128,6 +129,7 @@ public class DefaultStopPlaceImporterTest {
 
         Quay quay = new Quay();
         quay.setId(quayOriginalId);
+        createCentroid(quay);
 
         stopPlace.getQuays().add(quay);
 
@@ -205,5 +207,11 @@ public class DefaultStopPlaceImporterTest {
         });
     }
 
+    private void createCentroid(Quay quay) {
+        quay.setCentroid(new SimplePoint());
+        quay.getCentroid().setLocation(new LocationStructure());
+        quay.getCentroid().getLocation().setLatitude(BigDecimal.valueOf(71));
+        quay.getCentroid().getLocation().setLongitude(BigDecimal.valueOf(6));
+    }
 
 }

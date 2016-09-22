@@ -76,11 +76,11 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
                     .withQuayRefOrQuay(new Quay()
-                    .withName(new MultilingualString().withValue("quay"))))
-                    .withCentroid(new SimplePoint_VersionStructure()
-                        .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("9.1"))
-                                .withLongitude(new BigDecimal("71.2"))));
+                        .withName(new MultilingualString().withValue("quay"))
+                        .withCentroid(new SimplePoint_VersionStructure()
+                            .withLocation(new LocationStructure()
+                                    .withLatitude(new BigDecimal("9.1"))
+                                    .withLongitude(new BigDecimal("71.2"))))));
 
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
