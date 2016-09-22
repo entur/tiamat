@@ -4,6 +4,7 @@ import no.rutebanken.tiamat.auth.TiamatSecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.orm.jpa.EntityScan;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -14,6 +15,7 @@ import no.rutebanken.tiamat.model.StopPlace;
  */
 @Configuration
 @EnableAutoConfiguration
+@EnableCaching
 @EntityScan(basePackageClasses={StopPlace.class})
 @ComponentScan(excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatSecurityConfig.class),
