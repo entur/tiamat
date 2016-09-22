@@ -1,7 +1,6 @@
 package no.rutebanken.tiamat.exporters;
 
 import no.rutebanken.netex.model.*;
-import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -10,20 +9,26 @@ import no.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import java.io.StringWriter;
 import java.util.Iterator;
 
+@Component
+@Transactional
 public class PublicationDeliveryExporter {
-
-
     private StopPlaceRepository stopPlaceRepository;
     private TopographicPlaceRepository topographicPlaceRepository;
     private NetexMapper netexMapper;
+
+    @Autowired
+    public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository, TopographicPlaceRepository topographicPlaceRepository, NetexMapper netexMapper) {
+        this.stopPlaceRepository = stopPlaceRepository;
+        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.netexMapper = netexMapper;
+    }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
 

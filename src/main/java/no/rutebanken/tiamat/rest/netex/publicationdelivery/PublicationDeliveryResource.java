@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 import no.rutebanken.netex.model.ObjectFactory;
 import no.rutebanken.netex.model.PublicationDeliveryStructure;
 import no.rutebanken.netex.model.SiteFrame;
+import no.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
 import no.rutebanken.tiamat.importers.SiteFrameImporter;
@@ -13,10 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.*;
@@ -41,17 +39,21 @@ public class PublicationDeliveryResource {
 
     private StopPlaceImporter stopPlaceImporter;
 
+    private PublicationDeliveryExporter publicationDeliveryExporter;
+
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                                       @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter) {
+                                       @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
+                                       PublicationDeliveryExporter publicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceImporter = stopPlaceImporter;
+        this.publicationDeliveryExporter = publicationDeliveryExporter;
     }
 
 
@@ -86,6 +88,13 @@ public class PublicationDeliveryResource {
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
 
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    public Response exportAllStopPlaces() throws JAXBException {
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
+        return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 }
 
