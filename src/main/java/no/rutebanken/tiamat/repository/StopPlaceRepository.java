@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Point;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -15,7 +16,13 @@ public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlac
 
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
-//    @CachePut(value = "findNearbyStopPlace", key = "#p0.getName().getValue()")
+    @Override
+    @CachePut(value = "stopPlace", key = "#p0.getId()")
     StopPlace save(StopPlace stopPlace);
+
+    @Override
+    @Cacheable(value = "stopPlace", key = "#p0")
+    StopPlace findOne(String stopPlaceId);
+
 }
 
