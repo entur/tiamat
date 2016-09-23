@@ -53,7 +53,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         StopPlace existingStopPlace = findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
 
         if (existingStopPlace != null) {
-            logger.info("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
+            logger.debug("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
             return existingStopPlace;
         }
         return null;
