@@ -116,7 +116,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
 
-    private Cache<String, StopPlace> keyValueCache = CacheBuilder.newBuilder()
+    private Cache<String, String> keyValueCache = CacheBuilder.newBuilder()
             .maximumSize(50000)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
@@ -125,7 +125,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public StopPlace findByKeyValue(String key, String value) {
         String cacheKey = key + "-" + value;
         try {
-            return keyValueCache.get(cacheKey, () -> findByKeyValueInternal(key, value));
+            String stopPlaceId = keyValueCache.get(cacheKey, () -> findIdByKeyValueInternal(key, value));
+            return entityManager.find(StopPlace.class, stopPlaceId);
         }
         catch (UncheckedExecutionException e) {
             return null;
@@ -136,16 +137,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
-    private StopPlace findByKeyValueInternal(String key, String value) {
-
-        TypedQuery<StopPlace> query = entityManager
-                .createQuery("SELECT s " +
+    private String findIdByKeyValueInternal(String key, String value) {
+        TypedQuery<String> query = entityManager
+                .createQuery("SELECT s.id " +
                         "FROM StopPlace s " +
                             "LEFT OUTER JOIN s.keyList kl " +
                             "LEFT OUTER JOIN kl.keyValue kv " +
                                 "WHERE kv.key = :key " +
                                     "AND kv.value = :value",
-                        StopPlace.class);
+                        String.class);
         query.setParameter("key", key);
         query.setParameter("value", value);
 
