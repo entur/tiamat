@@ -39,6 +39,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Autowired
     private GeometryFactory geometryFactory;
 
+    private Cache<String, String> keyValueCache = CacheBuilder.newBuilder()
+            .maximumSize(50000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
     @Override
     public StopPlace findStopPlaceDetailed(String stopPlaceId) {
 
@@ -114,12 +119,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             return null;
         }
     }
-
-
-    private Cache<String, String> keyValueCache = CacheBuilder.newBuilder()
-            .maximumSize(50000)
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build();
 
     @Override
     public StopPlace findByKeyValue(String key, String value) {
