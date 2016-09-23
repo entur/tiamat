@@ -42,36 +42,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         StopPlace existingStopPlace = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
 
-
         if (existingStopPlace != null) {
             logger.info("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
             return existingStopPlace;
         }
-
-        /*
-        if(stopPlace.getId() != null) {
-
-            StopPlace existingStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
-            if(existingStopPlace != null) {
-                logger.info("Found existing stop place from ID: {}", stopPlace.getId());
-                return existingStopPlace;
-            }
-        }
-
-        if(stopPlace.getKeyList() != null) {
-            return stopPlace.getKeyList().getKeyValue()
-                    .stream()
-                    .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
-                    .map(KeyValueStructure::getValue)
-                    .map(value -> stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, value))
-                    .filter(existingStopPlace ->  existingStopPlace != null)
-                    .peek(existingStopPlace -> logger.info("Found stop place from original ID. Local ID is: {}", existingStopPlace.getId()))
-                    .findFirst()
-                    .orElseGet(null);
-        }*/
-
         return null;
-
     }
 
 
