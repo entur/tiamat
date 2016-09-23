@@ -39,11 +39,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Autowired
     private GeometryFactory geometryFactory;
 
-    private Cache<String, String> keyValueCache = CacheBuilder.newBuilder()
-            .maximumSize(50000)
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build();
-
     @Override
     public StopPlace findStopPlaceDetailed(String stopPlaceId) {
 
@@ -120,22 +115,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public StopPlace findByKeyValue(String key, String value) {
-        String cacheKey = key + "-" + value;
-        try {
-            String stopPlaceId = keyValueCache.get(cacheKey, () -> findIdByKeyValueInternal(key, value));
-            return entityManager.find(StopPlace.class, stopPlaceId);
-        }
-        catch (UncheckedExecutionException e) {
-            return null;
-        }
-        catch (ExecutionException e) {
-            logger.warn("Caught exception while finding stop place by key and value.", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String findIdByKeyValueInternal(String key, String value) {
+    public String findByKeyValue(String key, String value) {
         TypedQuery<String> query = entityManager
                 .createQuery("SELECT s.id " +
                         "FROM StopPlace s " +
@@ -147,7 +127,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setParameter("key", key);
         query.setParameter("value", value);
 
-        // Throws unchecked exception
-        return query.getSingleResult();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException noResultException) {
+            return null;
+        }
     }
 }

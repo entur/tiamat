@@ -42,7 +42,8 @@ public class StopPlaceRepositoryImplTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actual = stopPlaceRepository.findByKeyValue("key", "value");
+        String id = stopPlaceRepository.findByKeyValue("key", "value");
+        StopPlace actual = stopPlaceRepository.findOne(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getKey()).isEqualTo("key");
         Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("value");

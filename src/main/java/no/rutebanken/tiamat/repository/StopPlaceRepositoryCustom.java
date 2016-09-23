@@ -21,6 +21,6 @@ public interface StopPlaceRepositoryCustom {
 
     StopPlace findNearbyStopPlace(Envelope envelope, String name);
 
-    StopPlace findByKeyValue(String key, String value);
+    String findByKeyValue(String key, String value);
 
 }

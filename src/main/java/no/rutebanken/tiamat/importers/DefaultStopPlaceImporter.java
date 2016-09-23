@@ -1,5 +1,8 @@
 package no.rutebanken.tiamat.importers;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import no.rutebanken.tiamat.model.*;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -30,6 +34,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private StopPlaceRepository stopPlaceRepository;
 
+    private Cache<String, Optional<String>> keyValueCache = CacheBuilder.newBuilder()
+            .maximumSize(50000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
+
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
@@ -40,7 +50,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     public StopPlace findExistingStopPlaceFromOriginalId(StopPlace stopPlace) {
 
-        StopPlace existingStopPlace = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
+        StopPlace existingStopPlace = findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
 
         if (existingStopPlace != null) {
             logger.info("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
@@ -49,6 +59,24 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return null;
     }
 
+    private String keyValKey(String key, String value) {
+        return key + "-" + value;
+    }
+
+    private StopPlace findByKeyValue(String key, String value) {
+        String cacheKey = keyValKey(key, value);
+        try {
+            Optional<String> stopPlaceId = keyValueCache.get(cacheKey, () -> Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, value)));
+            if(stopPlaceId.isPresent()) {
+                return stopPlaceRepository.findOne(stopPlaceId.get());
+            }
+            return null;
+        }
+        catch (ExecutionException e) {
+            logger.warn("Caught exception while finding stop place by key and value.", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
@@ -97,6 +125,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
                     topographicPlacesCreatedCounter);
         }
+        String originalId = newStopPlace.getId();
         resetIdAndKeepOriginalId(newStopPlace);
 
         if (newStopPlace.getQuays() != null) {
@@ -115,7 +144,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             });
         }
 
+
         stopPlaceRepository.save(newStopPlace);
+        keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(newStopPlace.getId()));
         logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
         return newStopPlace;
     }
