@@ -8,8 +8,11 @@ import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.SiteFrame;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -33,33 +36,41 @@ public class SiteFrameImporter {
                 siteFrame.getTopographicPlaces() != null ? siteFrame.getTopographicPlaces().getTopographicPlace().size() : 0,
                 siteFrame.getStopPlaces().getStopPlace().size());
 
+        Timer timer = new Timer(this.getClass().getName()+"-logger");
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated);
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 2000, 2000);
         List<StopPlace> createdStopPlaces = new CopyOnWriteArrayList<>();
         siteFrame.getStopPlaces().getStopPlace()
-//                .parallelStream()
+                .parallelStream()
                 .forEach(stopPlace -> {
                     try {
                         StopPlace created = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
                         createdStopPlaces.add(created);
                         stopPlacesCreated.incrementAndGet();
-                        logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated);
                     } catch (InterruptedException | ExecutionException e) {
                         throw new RuntimeException(e);
                     }
                 });
-
+        timerTask.cancel();
         siteFrame.getStopPlaces().getStopPlace().clear();
         siteFrame.getStopPlaces().getStopPlace().addAll(createdStopPlaces);
 
         logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
 
-        topographicPlaceCreator.invalidateCache();
+        topographicPlaceCreator.invalidateCache(); // TODO: time eviction
         return siteFrame;
     }
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated) {
-        if (stopPlacesCreated.get() % 100 == 0) {
+        long duration = System.currentTimeMillis() - startTime;
+        if (stopPlacesCreated.get() % 100 == 0 || duration % 1000 == 0) {
             String stopPlacesPerSecond = "NA";
-            long duration = System.currentTimeMillis() - startTime;
+
             if(duration >= 1000) {
 
                 stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000f));
