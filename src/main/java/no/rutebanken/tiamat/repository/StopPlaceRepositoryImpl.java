@@ -1,11 +1,14 @@
 package no.rutebanken.tiamat.repository;
 
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +23,15 @@ import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
     @Autowired
     private EntityManager entityManager;
@@ -107,8 +115,28 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
+
+    private Cache<String, StopPlace> keyValueCache = CacheBuilder.newBuilder()
+            .maximumSize(50000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
     @Override
     public StopPlace findByKeyValue(String key, String value) {
+        String cacheKey = key + "-" + value;
+        try {
+            return keyValueCache.get(cacheKey, () -> findByKeyValueInternal(key, value));
+        }
+        catch (UncheckedExecutionException e) {
+            return null;
+        }
+        catch (ExecutionException e) {
+            logger.warn("Caught exception while finding stop place by key and value.", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private StopPlace findByKeyValueInternal(String key, String value) {
 
         TypedQuery<StopPlace> query = entityManager
                 .createQuery("SELECT s " +
@@ -121,10 +149,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setParameter("key", key);
         query.setParameter("value", value);
 
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException noResultException) {
-            return null;
-        }
+        // Throws unchecked exception
+        return query.getSingleResult();
     }
 }
