@@ -62,7 +62,7 @@ public class SiteFrameImporter {
             long duration = System.currentTimeMillis() - startTime;
             if(duration >= 1000) {
 
-                stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000));
+                stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000f));
             }
             int total = siteFrame.getStopPlaces().getStopPlace().size();
             logger.info("Stop place {}/{} - {}% - {} spl/sec - {} topographic places", stopPlacesCreated.get(),
