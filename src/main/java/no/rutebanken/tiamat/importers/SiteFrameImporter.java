@@ -68,19 +68,19 @@ public class SiteFrameImporter {
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated) {
         long duration = System.currentTimeMillis() - startTime;
-        if (stopPlacesCreated.get() % 100 == 0 || duration % 1000 == 0) {
-            String stopPlacesPerSecond = "NA";
 
-            if(duration >= 1000) {
+        String stopPlacesPerSecond = "NA";
 
-                stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000f));
-            }
-            int total = siteFrame.getStopPlaces().getStopPlace().size();
-            logger.info("Stop place {}/{} - {}% - {} spl/sec - {} topographic places", stopPlacesCreated.get(),
-                    siteFrame.getStopPlaces().getStopPlace().size(),
-                    (stopPlacesCreated.get() * 100f) / total,
-                    stopPlacesPerSecond,
-                    topographicPlacesCreated);
+        if(duration >= 1000) {
+
+            stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000f));
         }
+        int total = siteFrame.getStopPlaces().getStopPlace().size();
+        logger.info("Stop place {}/{} - {}% - {} spl/sec - {} topographic places", stopPlacesCreated.get(),
+                siteFrame.getStopPlaces().getStopPlace().size(),
+                (stopPlacesCreated.get() * 100f) / total,
+                stopPlacesPerSecond,
+                topographicPlacesCreated);
+
     }
 }
