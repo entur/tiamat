@@ -147,7 +147,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         stopPlaceRepository.save(newStopPlace);
         keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(newStopPlace.getId()));
-        logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+        logger.debug("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
         return newStopPlace;
     }
 
