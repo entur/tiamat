@@ -148,9 +148,10 @@ public class StopPlaceRepositoryImplTest {
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
         assertThat(result).isNotNull();
-        assertThat(result.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        StopPlace actual = stopPlaceRepository.findOne(result);
+        assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
     @Test
@@ -166,7 +167,7 @@ public class StopPlaceRepositoryImplTest {
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
         assertThat(result).isNull();
     }
 
@@ -183,9 +184,7 @@ public class StopPlaceRepositoryImplTest {
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        StopPlace result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
-
-
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
         assertThat(result).isNull();
     }
 

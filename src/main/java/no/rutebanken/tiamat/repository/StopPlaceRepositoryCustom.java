@@ -19,7 +19,7 @@ public interface StopPlaceRepositoryCustom {
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable);
 
-    StopPlace findNearbyStopPlace(Envelope envelope, String name);
+    String findNearbyStopPlace(Envelope envelope, String name);
 
     String findByKeyValue(String key, String value);
 

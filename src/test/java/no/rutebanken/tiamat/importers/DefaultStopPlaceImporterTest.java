@@ -39,8 +39,10 @@ public class DefaultStopPlaceImporterTest {
 
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 100, 10, HOURS);
 
+    private NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 20000, 30, TimeUnit.MINUTES);
+
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
-            quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder);
+            quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder);
 
     private SiteFrame siteFrame = new SiteFrame();
 

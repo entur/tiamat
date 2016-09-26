@@ -1,9 +1,6 @@
 package no.rutebanken.tiamat.repository;
 
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -23,9 +20,6 @@ import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Repository
 @Transactional
@@ -94,17 +88,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
 
-//    @Cacheable(value = "findNearbyStopPlace", key = "#p0")
     @Override
-    public StopPlace findNearbyStopPlace(Envelope envelope, String name) {
+    public String findNearbyStopPlace(Envelope envelope, String name) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<StopPlace> query = entityManager
-                .createQuery("SELECT s FROM StopPlace s " +
+        TypedQuery<String> query = entityManager
+                .createQuery("SELECT s.id FROM StopPlace s " +
                                 "LEFT OUTER JOIN s.centroid sp " +
                                 "LEFT OUTER JOIN sp.location l " +
                              "WHERE within(l.geometryPoint, :filter) = true " +
-                            "AND s.name.value = :name", StopPlace.class);
+                            "AND s.name.value = :name", String.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
         try {

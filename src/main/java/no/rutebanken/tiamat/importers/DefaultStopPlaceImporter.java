@@ -32,15 +32,18 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
+    private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
-                                    StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder) {
+                                    StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
+                                    NearbyStopPlaceFinder nearbyStopPlaceFinder) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
+        this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
     }
 
     @Override
@@ -63,8 +66,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         if (newStopPlace.getName() != null) {
-            Envelope boundingBox = createBoundingBox(newStopPlace.getCentroid());
-            final StopPlace nearbyStopPlace = stopPlaceRepository.findNearbyStopPlace(boundingBox, newStopPlace.getName().getValue());
+
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
 
             if (nearbyStopPlace != null) {
                 logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
@@ -111,6 +114,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         stopPlaceRepository.save(newStopPlace);
         stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
+        nearbyStopPlaceFinder.update(newStopPlace);
         logger.debug("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
         return newStopPlace;
     }
@@ -162,13 +166,5 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
 
-    public Envelope createBoundingBox(SimplePoint simplePoint) {
 
-        Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(0.004);
-
-        Envelope envelope = buffer.getEnvelopeInternal();
-        logger.trace("Created envelope {}", envelope.toString());
-
-        return envelope;
-    }
 }
