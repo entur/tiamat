@@ -1,8 +1,5 @@
 package no.rutebanken.tiamat.importers;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import no.rutebanken.tiamat.model.*;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -24,9 +20,9 @@ import java.util.stream.Stream;
 @Qualifier("defaultStopPlaceImporter")
 public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
-
     public static final String ORIGINAL_ID_KEY = "imported-id";
+
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
@@ -34,48 +30,17 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private StopPlaceRepository stopPlaceRepository;
 
-    private Cache<String, Optional<String>> keyValueCache = CacheBuilder.newBuilder()
-            .maximumSize(50000)
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build();
-
+    private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
 
     @Autowired
-    public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
+    public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
+                                    QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
+                                    StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
-    }
-
-    public StopPlace findExistingStopPlaceFromOriginalId(StopPlace stopPlace) {
-
-        StopPlace existingStopPlace = findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
-
-        if (existingStopPlace != null) {
-            logger.debug("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
-            return existingStopPlace;
-        }
-        return null;
-    }
-
-    private String keyValKey(String key, String value) {
-        return key + "-" + value;
-    }
-
-    private StopPlace findByKeyValue(String key, String value) {
-        String cacheKey = keyValKey(key, value);
-        try {
-            Optional<String> stopPlaceId = keyValueCache.get(cacheKey, () -> Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, value)));
-            if(stopPlaceId.isPresent()) {
-                return stopPlaceRepository.findOne(stopPlaceId.get());
-            }
-            return null;
-        }
-        catch (ExecutionException e) {
-            logger.warn("Caught exception while finding stop place by key and value.", e);
-            throw new RuntimeException(e);
-        }
+        this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
     }
 
     @Override
@@ -92,7 +57,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
                 newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
 
-        StopPlace existingStopPlace = findExistingStopPlaceFromOriginalId(newStopPlace);
+        StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
         if (existingStopPlace != null) {
             return existingStopPlace;
         }
@@ -144,9 +109,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             });
         }
 
-
         stopPlaceRepository.save(newStopPlace);
-        keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(newStopPlace.getId()));
+        stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
         logger.debug("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
         return newStopPlace;
     }

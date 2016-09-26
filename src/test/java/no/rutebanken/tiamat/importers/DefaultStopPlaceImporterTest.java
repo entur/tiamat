@@ -35,7 +35,8 @@ public class DefaultStopPlaceImporterTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator, quayRepository, stopPlaceRepository);
+    private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
+            quayRepository, stopPlaceRepository, new StopPlaceFromOriginalIdFinder(stopPlaceRepository));
 
     private SiteFrame siteFrame = new SiteFrame();
 
@@ -107,7 +108,8 @@ public class DefaultStopPlaceImporterTest {
         StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
 
-        assertThat(importedStopPlace2.getId()).isEqualTo(importedStopPlace1.getId())
+        assertThat(importedStopPlace2.getId())
+                .isEqualTo(importedStopPlace1.getId())
                 .as("The same stop place should be returned as they have the same chouette id");
     }
 
