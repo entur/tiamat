@@ -53,6 +53,7 @@ public class DefaultStopPlaceImporterTest {
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
         firstStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
 
+
         Quay terminal1 = new Quay();
         terminal1.setName(new MultilingualString("terminal 1", "", ""));
         terminal1.setId("chouette-id-1");
@@ -70,7 +71,9 @@ public class DefaultStopPlaceImporterTest {
         terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.01, 10.78)))));
         secondStopPlace.getQuays().add(terminal2);
 
-        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), anyString())).then(invocationOnMock -> firstStopPlace);
+        mockStopPlaceSave("firstId", firstStopPlace);
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class))).thenReturn("firstId");
+        when(stopPlaceRepository.findOne("firstId")).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
@@ -126,7 +129,7 @@ public class DefaultStopPlaceImporterTest {
         final String quayOriginalId = "quay-id-to-replace";
 
         final String persistedStopPlaceId = "persisted-stop-place-id";
-        mockStopPlaceRepository(persistedStopPlaceId);
+        mockStopPlaceSave(persistedStopPlaceId);
 
         final String persistedQuayId = "persisted-quay-id";
         mockQuayRepository(persistedQuayId);
@@ -200,7 +203,15 @@ public class DefaultStopPlaceImporterTest {
 
     }
 
-    private void mockStopPlaceRepository(String persistedStopPlaceId) {
+    private void mockStopPlaceSave(String persistedStopPlaceId, StopPlace stopPlace) {
+        when(stopPlaceRepository.save(stopPlace)).then(invocationOnMock -> {
+            StopPlace stopPlaceToSave = (StopPlace) invocationOnMock.getArguments()[0];
+            stopPlaceToSave.setId(persistedStopPlaceId);
+            return stopPlaceToSave;
+        });
+    }
+
+    private void mockStopPlaceSave(String persistedStopPlaceId) {
         when(stopPlaceRepository.save(any(StopPlace.class))).then((Answer<StopPlace>) invocationOnMock -> {
             StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
             stopPlace.setId(persistedStopPlaceId);
