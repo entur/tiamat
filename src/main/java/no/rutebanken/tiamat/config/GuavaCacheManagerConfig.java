@@ -18,9 +18,9 @@ public class GuavaCacheManagerConfig {
 
     @Bean(name = "guavaCacheManager")
     public CacheManager guavaCacheManager(
-            @Value("${no.rutebanken.tiamat.cache.maxSize:20000}") int maxSize,
-            @Value("${no.rutebanken.tiamat.cache.expiresAfter:30}") int expiresAfter,
-            @Value("${no.rutebanken.tiamat.cache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
+            @Value("${guavaCacheManager.maxSize:20000}") int maxSize,
+            @Value("${guavaCacheManager.expiresAfter:30}") int expiresAfter,
+            @Value("${guavaCacheManager.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
 
 
         logger.info("Setting up guava cache manager with max cache size {} and expiration time {} {}",

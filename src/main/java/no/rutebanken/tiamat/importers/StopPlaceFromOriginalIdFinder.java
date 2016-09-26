@@ -6,6 +6,7 @@ import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -27,12 +28,14 @@ public class StopPlaceFromOriginalIdFinder {
 
     private Cache<String, Optional<String>> keyValueCache;
 
-
-    public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository) {
+    public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:20000}") int maximumSize,
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfter:30}") int expiresAfter,
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
-         keyValueCache = CacheBuilder.newBuilder()
-                .maximumSize(50000)
-                .expireAfterWrite(5, TimeUnit.MINUTES)
+        keyValueCache = CacheBuilder.newBuilder()
+                .maximumSize(maximumSize)
+                .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
                 .build();
     }
 

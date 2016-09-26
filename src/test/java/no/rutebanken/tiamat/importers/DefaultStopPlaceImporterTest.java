@@ -12,8 +12,10 @@ import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.concurrent.TimeUnit.HOURS;
 import static no.rutebanken.tiamat.importers.DefaultStopPlaceImporter.ORIGINAL_ID_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -35,8 +37,10 @@ public class DefaultStopPlaceImporterTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
+    private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 100, 10, HOURS);
+
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
-            quayRepository, stopPlaceRepository, new StopPlaceFromOriginalIdFinder(stopPlaceRepository));
+            quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder);
 
     private SiteFrame siteFrame = new SiteFrame();
 
