@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.importers;
 
+import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import no.rutebanken.tiamat.model.*;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -33,6 +35,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
+
+    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
@@ -56,67 +60,92 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return null;
         }
 
-        logger.debug("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
-                newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
-                newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
-
-        StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
-        if (existingStopPlace != null) {
-            return existingStopPlace;
+        final String semaphoreKey;
+        if (newStopPlace.getId() != null) {
+            semaphoreKey = "new-stop-place-"+newStopPlace.getId();
+        } else if (newStopPlace.getCentroid() != null && newStopPlace.getCentroid().getLocation() != null){
+            LocationStructure location = newStopPlace.getCentroid().getLocation();
+            semaphoreKey = "location-"+location.getLongitude()+"-"+location.getLatitude();
+        } else if (newStopPlace.getName() != null
+                && newStopPlace.getName().getValue() != null
+                && !newStopPlace.getName().getValue().isEmpty()){
+            semaphoreKey = "name-"+newStopPlace.getName().getValue();
+        } else {
+            //TODO: proper and sensible striped locking.
+            semaphoreKey = "";
         }
 
-        if (newStopPlace.getName() != null) {
+        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
+        semaphore.acquire();
 
-            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+        try {
 
-            if (nearbyStopPlace != null) {
-                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
 
-                Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
-                quaysToAdd.forEach(quay -> {
-                    logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
-                    resetIdAndKeepOriginalId(quay);
-                    nearbyStopPlace.getQuays().add(quay);
-                    quayRepository.save(quay);
-                });
-                // Assume topographic place already set ?
-                stopPlaceRepository.save(nearbyStopPlace);
-                return nearbyStopPlace;
+            logger.debug("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
+                    newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
+                    newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+
+            StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+            if (existingStopPlace != null) {
+                return existingStopPlace;
             }
-        }
 
-        // TODO: Hack to avoid 'detached entity passed to persist'.
-        newStopPlace.getCentroid().getLocation().setId(0);
+            if (newStopPlace.getName() != null) {
 
-        if (siteFrame.getTopographicPlaces() != null) {
-            topographicPlaceCreator.setTopographicReference(newStopPlace,
-                    siteFrame.getTopographicPlaces().getTopographicPlace(),
-                    topographicPlacesCreatedCounter);
-        }
-        String originalId = newStopPlace.getId();
-        resetIdAndKeepOriginalId(newStopPlace);
+                final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
 
-        if (newStopPlace.getQuays() != null) {
-            logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
-            newStopPlace.getQuays().forEach(quay -> {
-                if(quay.getCentroid() == null) {
-                    logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
-                } else if (quay.getCentroid().getLocation() == null) {
-                    logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
-                } else {
-                    resetIdAndKeepOriginalId(quay);
-                    quay.getCentroid().setId("");
-                    quay.getCentroid().getLocation().setId(0);
-                    quayRepository.save(quay);
+                if (nearbyStopPlace != null) {
+                    logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+
+                    Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
+                    quaysToAdd.forEach(quay -> {
+                        logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
+                        resetIdAndKeepOriginalId(quay);
+                        nearbyStopPlace.getQuays().add(quay);
+                        quayRepository.save(quay);
+                    });
+                    // Assume topographic place already set ?
+                    stopPlaceRepository.save(nearbyStopPlace);
+                    return nearbyStopPlace;
                 }
-            });
-        }
+            }
 
-        stopPlaceRepository.save(newStopPlace);
-        stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
-        nearbyStopPlaceFinder.update(newStopPlace);
-        logger.debug("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
-        return newStopPlace;
+            // TODO: Hack to avoid 'detached entity passed to persist'.
+            newStopPlace.getCentroid().getLocation().setId(0);
+
+            if (siteFrame.getTopographicPlaces() != null) {
+                topographicPlaceCreator.setTopographicReference(newStopPlace,
+                        siteFrame.getTopographicPlaces().getTopographicPlace(),
+                        topographicPlacesCreatedCounter);
+            }
+            String originalId = newStopPlace.getId();
+            resetIdAndKeepOriginalId(newStopPlace);
+
+            if (newStopPlace.getQuays() != null) {
+                logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
+                newStopPlace.getQuays().forEach(quay -> {
+                    if (quay.getCentroid() == null) {
+                        logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
+                    } else if (quay.getCentroid().getLocation() == null) {
+                        logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
+                    } else {
+                        resetIdAndKeepOriginalId(quay);
+                        quay.getCentroid().setId("");
+                        quay.getCentroid().getLocation().setId(0);
+                        quayRepository.save(quay);
+                    }
+                });
+            }
+
+            stopPlaceRepository.save(newStopPlace);
+            stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
+            nearbyStopPlaceFinder.update(newStopPlace);
+            logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+            return newStopPlace;
+        }
+        finally {
+            semaphore.release();
+        }
     }
 
     public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace nearbyStopPlace) {

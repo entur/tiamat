@@ -64,7 +64,7 @@ public class PublicationDeliveryResourceTest {
         List<StopPlace> result = extractStopPlace(response);
 
         assertThat(result).hasSize(2);
-        assertThat(result).extracting("id").contains("123123", "123123");
+        assertThat(result.get(0).getId()).isEqualTo(result.get(1).getId());
     }
 
     @Test
