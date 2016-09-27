@@ -136,4 +136,23 @@ public class DtoStopPlaceResource {
 
         throw new WebApplicationException("Cannot find stop place with id "+ simpleStopPlaceDto.id, 400);
     }
+
+    @POST
+    public StopPlaceDto createStopPlace(StopPlaceDto simpleStopPlaceDto) {
+        keyCloak();
+
+        logger.info("Creating stop place with name {}, {} quays and centroid: {}",
+                simpleStopPlaceDto.name,
+                simpleStopPlaceDto.quays != null ? simpleStopPlaceDto.quays.size() : 0,
+                simpleStopPlaceDto.centroid);
+
+        StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
+        if(stopPlace != null) {
+            stopPlaceRepository.save(stopPlace);
+            logger.info("Returning created stop place with id {}", stopPlace.getId());
+            return stopPlaceAssembler.assemble(stopPlace);
+        }
+
+        throw new WebApplicationException("Cannot save stop place with name "+ simpleStopPlaceDto.name, 400);
+    }
 }

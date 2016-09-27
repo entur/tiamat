@@ -2,18 +2,14 @@ package no.rutebanken.tiamat.rest.dto;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.path.xml.XmlPath;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.TiamatTestApplication;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TiamatTestApplication.class)
@@ -64,6 +51,37 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void clearRepositories() {
         stopPlaceRepository.deleteAll();
         quayRepository.deleteAll();
+    }
+
+    @Test
+    public void createStopPlace() throws Exception {
+
+
+        given()
+                .contentType(ContentType.JSON)
+                .content("{\n" +
+                        "\"name\": \"Bogen skole\",\n" +
+                        "\"shortName\": null,\n" +
+                        "\"description\": null,\n" +
+                        "\"centroid\": {\n" +
+                        "\"location\": {\n" +
+                        "\"longitude\": 17.003237,\n" +
+                        "\"latitude\": 68.51526\n" +
+                        "}\n" +
+                        "},\n" +
+                        "\"allAreasWheelchairAccessible\": false,\n" +
+                        "\"stopPlaceType\": null,\n" +
+                        "\"quays\": [],\n" +
+                        "\"municipality\": \"Evenes\",\n" +
+                        "\"county\": \"Nordland\"\n" +
+                        "}")
+            .when()
+                .post("/jersey/stop_place")
+            .then()
+                .body("name", is("Bogen skole"))
+                .body("id", notNullValue());
+
+
     }
 
     @Test
