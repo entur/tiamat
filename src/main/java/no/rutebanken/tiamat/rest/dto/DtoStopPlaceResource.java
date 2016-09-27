@@ -149,6 +149,7 @@ public class DtoStopPlaceResource {
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
         if(stopPlace != null) {
             stopPlaceRepository.save(stopPlace);
+            quayRepository.save(stopPlace.getQuays());
             logger.info("Returning created stop place with id {}", stopPlace.getId());
             return stopPlaceAssembler.assemble(stopPlace);
         }

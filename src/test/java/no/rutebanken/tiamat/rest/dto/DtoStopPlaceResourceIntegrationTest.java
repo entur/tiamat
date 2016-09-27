@@ -71,15 +71,32 @@ public class DtoStopPlaceResourceIntegrationTest {
                         "},\n" +
                         "\"allAreasWheelchairAccessible\": false,\n" +
                         "\"stopPlaceType\": null,\n" +
-                        "\"quays\": [],\n" +
-                        "\"municipality\": \"Evenes\",\n" +
-                        "\"county\": \"Nordland\"\n" +
+                        "\"quays\": [\n" +
+                        "{\n" +
+                        "\"name\": \"quay 1\",\n" +
+                        "\"shortName\": null,\n" +
+                        "\"description\": \"\",\n" +
+                        "\"centroid\": {\n" +
+                        "\"location\": {\n" +
+                        "\"longitude\": 17.003836999999997,\n" +
+                        "\"latitude\": 68.51606\n" +
+                        "}\n" +
+                        "},\n" +
+                        "\"allAreasWheelchairAccessible\": true,\n" +
+                        "\"quayType\": \"other\"\n" +
+                        "}\n" +
+                        "]\n" +
                         "}")
             .when()
                 .post("/jersey/stop_place")
             .then()
                 .body("name", is("Bogen skole"))
-                .body("id", notNullValue());
+                .body("id", notNullValue())
+                .body("centroid.location.longitude", equalTo(17.003237f))
+                .body("centroid.location.latitude", equalTo(68.51526f))
+                .body("quays", is(not(empty())))
+                .body("quays[0].name", equalTo("quay 1"));
+        ;
 
 
     }
