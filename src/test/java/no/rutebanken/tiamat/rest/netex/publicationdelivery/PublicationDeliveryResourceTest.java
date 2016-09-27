@@ -15,7 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -41,7 +43,7 @@ public class PublicationDeliveryResourceTest {
                             .withLongitude(new BigDecimal("71"))));
 
         StopPlace stopPlace2 = new StopPlace()
-                .withId("2222")
+                .withId("123123")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -52,17 +54,17 @@ public class PublicationDeliveryResourceTest {
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace, stopPlace2));
 
+        @SuppressWarnings(value = "unchecked")
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
-        PublicationDeliveryStructure secondResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
 
-        StopPlace firstStopPlace = findFirstStopPlace(firstResponse);
-        StopPlace secondStopPlace = findFirstStopPlace(secondResponse);
+        List<StopPlace> result = extractStopPlace(response);
 
-        assertThat(secondStopPlace.getId()).isEqualTo(firstStopPlace.getId());
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting("id").contains("123123", "123123");
     }
 
     @Test
@@ -109,6 +111,15 @@ public class PublicationDeliveryResourceTest {
 
     }
 
+    private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
+        return  publicationDeliveryStructure.getDataObjects()
+                .getCompositeFrameOrCommonFrame()
+                .stream()
+                .map(JAXBElement::getValue)
+                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
+                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .collect(toList());
+    }
 
     private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
         return publicationDeliveryStructure.getDataObjects()
