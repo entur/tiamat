@@ -11,6 +11,7 @@ package no.rutebanken.tiamat.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -82,8 +83,8 @@ public abstract class DerivedViewStructure {
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue()
+    @GenericGenerator(name = "increment", strategy = "increment")
     protected String id;
 
     /**

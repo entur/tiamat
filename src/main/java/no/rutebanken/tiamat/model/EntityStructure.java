@@ -54,8 +54,8 @@ public abstract class EntityStructure implements Serializable{
     public String nameOfClass;
 */
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue
+    @GenericGenerator(name = "increment", strategy = "increment")
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String id;
