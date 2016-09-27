@@ -17,8 +17,8 @@
     <description>Stop place register / holdeplassregister</description>
 
     <scm>
-      <connection>scm:git:ssh://git@bitbucket.org/rutebanken/tiamat.git</connection>
-      <developerConnection>scm:git:ssh://git@bitbucket.org/rutebanken/tiamat.git</developerConnection>
+      <connection>scm:git:ssh://git@github.com:rutebanken/tiamat.git</connection>
+      <developerConnection>scm:git:ssh://git@github.com:rutebanken/tiamat.git</developerConnection>
     </scm>
 
     <properties>
