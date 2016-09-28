@@ -11,9 +11,7 @@ package no.rutebanken.tiamat.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -54,8 +52,8 @@ public abstract class EntityStructure implements Serializable{
     public String nameOfClass;
 */
     @Id
-    @GeneratedValue
-    @GenericGenerator(name = "increment", strategy = "increment")
+    @GenericGenerator(name="seq_generator", strategy="no.rutebanken.tiamat.repository.EntityIdGenerator")
+    @GeneratedValue(strategy= GenerationType.IDENTITY, generator="seq_generator")
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String id;
