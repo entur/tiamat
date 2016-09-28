@@ -83,8 +83,8 @@ public abstract class DerivedViewStructure {
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Id
-    @GeneratedValue
-    @GenericGenerator(name = "increment", strategy = "increment")
+    @GenericGenerator(name="seq_generator", strategy="no.rutebanken.tiamat.repository.EntityIdGenerator")
+    @GeneratedValue(strategy= GenerationType.IDENTITY, generator="seq_generator")
     protected String id;
 
     /**
