@@ -84,7 +84,6 @@ public class LocationStructure {
     @Id
     @GeneratedValue
     // TODO: Use String as type for 'id'. Got this using String: org.h2.jdbc.JdbcSQLException: Hexadecimal string contains non-hex character.
-   // @GenericGenerator(name = "uuid", strategy = "uuid2")
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlTransient
