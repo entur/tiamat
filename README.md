@@ -93,6 +93,11 @@ choose **one** of:
 For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
+# Run postgres/gis for tiamat in docker
+```
+docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
+```
+
 # Export *ALL* data from Tiamat
 
 Note that you need to run this with enough memory available, or else you might
