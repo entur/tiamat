@@ -34,7 +34,7 @@ public class EntityIdGenerator implements IdentifierGenerator {
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 int nextval = rs.getInt("nextval");
-                String id = prefix + "-" + nextval;
+                String id = prefix + ":" + nextval;
                 logger.trace("Generated id: {}", id);
                 return id;
             }
@@ -58,6 +58,6 @@ public class EntityIdGenerator implements IdentifierGenerator {
         } else if (object instanceof Quay) {
             return "q";
         }
-        return "";
+        return "u";
     }
 }
