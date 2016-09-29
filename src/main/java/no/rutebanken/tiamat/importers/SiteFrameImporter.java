@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.importers;
 import no.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class SiteFrameImporter {
             StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();
             // Map inside same thread to keep transaction and to avoid lazy initialization exception
+            Hibernate.initialize(importedStopPlace);
             return netexMapper.mapToNetexModel(importedStopPlace);
 
         } catch (InterruptedException | ExecutionException e) {
