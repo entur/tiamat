@@ -82,6 +82,8 @@ public class PublicationDeliveryResource {
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
 
 
+
+
         SiteFrame mappedSiteFrame = netexMapper.mapToNetexModel(siteFrameWithProcessedStopPlaces);
 
         return new PublicationDeliveryStructure()

@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.netexmapping;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import no.rutebanken.netex.model.SiteFrame;
+import no.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.converters.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,17 @@ public class NetexMapper {
         return siteFrame;
     }
 
+    public StopPlace mapToNetexModel(no.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
+        return mapperFactory.getMapperFacade().map(tiamatStopPlace, StopPlace.class);
+    }
+
     public no.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {
         no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = mapperFactory.getMapperFacade().map(netexSiteFrame, no.rutebanken.tiamat.model.SiteFrame.class);
         return tiamatSiteFrame;
+    }
+
+    public no.rutebanken.tiamat.model.StopPlace mapToTiamatModel(StopPlace netexStopPlace) {
+        no.rutebanken.tiamat.model.StopPlace stopPlace = mapperFactory.getMapperFacade().map(netexStopPlace, no.rutebanken.tiamat.model.StopPlace.class);
+        return stopPlace;
     }
 }

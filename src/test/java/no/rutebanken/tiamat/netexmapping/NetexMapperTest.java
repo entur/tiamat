@@ -54,4 +54,34 @@ public class NetexMapperTest {
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId()).isEqualTo(stopPlace.getId());
     }
+
+
+    @Test
+    public void mapToNetexStopPlace() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("name", "en", ""));
+
+        no.rutebanken.netex.model.StopPlace netexStopPlace = new NetexMapper().mapToNetexModel(stopPlace);
+
+        assertThat(netexStopPlace).isNotNull();
+        assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+    }
+
+    @Test
+    public void mapToInternalStopPlace() throws Exception {
+        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
+        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
+        name.setValue("stop placec ");
+        name.setLang("no");
+        name.setTextIdType("");
+        stopPlace.setName(name);
+        stopPlace.setId("1337");
+
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new NetexMapper().mapToTiamatModel(stopPlace);
+
+        assertThat(tiamatStopPlace).isNotNull();
+        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(tiamatStopPlace.getId()).isEqualTo(stopPlace.getId());
+    }
 }
