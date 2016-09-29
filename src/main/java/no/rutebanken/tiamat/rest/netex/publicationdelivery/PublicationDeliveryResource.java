@@ -3,6 +3,7 @@ package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 import no.rutebanken.netex.model.ObjectFactory;
 import no.rutebanken.netex.model.PublicationDeliveryStructure;
 import no.rutebanken.netex.model.SiteFrame;
+import no.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
@@ -20,6 +21,10 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 @Produces("application/xml")
@@ -62,11 +67,12 @@ public class PublicationDeliveryResource {
     @Produces(MediaType.APPLICATION_XML)
     public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure responsePublicationDelivery = receivePublicationDelivery(incomingPublicationDelivery);
+        PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
         return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
     }
 
-    public PublicationDeliveryStructure receivePublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
         if(incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
@@ -74,23 +80,61 @@ public class PublicationDeliveryResource {
         }
         logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        no.rutebanken.tiamat.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+        no.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
                 .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-
-
-
-
-        SiteFrame mappedSiteFrame = netexMapper.mapToNetexModel(siteFrameWithProcessedStopPlaces);
-
+        
         return new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(mappedSiteFrame)));
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
 
     }
+
+    // Import publication delivery without using SiteFrameImporter
+//    public PublicationDeliveryStructure importPublicationDelivery2(PublicationDeliveryStructure incomingPublicationDelivery) {
+//        if(incomingPublicationDelivery.getDataObjects() == null) {
+//            String responseMessage = "Received publication delivery but it does not contain any data objects.";
+//            logger.warn(responseMessage);
+//            throw new RuntimeException(responseMessage);
+//        }
+//        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+//
+//        SiteFrame netexSiteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+//                .stream()
+//                .filter(element -> element.getValue() instanceof SiteFrame)
+//                .map(element -> (SiteFrame) element.getValue())
+//                .findFirst().get();
+//
+//        no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
+//
+//        AtomicInteger topographicPlacesCreated = new AtomicInteger();
+//
+//        List<StopPlace> importedStopPlaces = tiamatSiteFrame.getStopPlaces().getStopPlace()
+//                .parallelStream()
+//                .map(stopPlace -> {
+//                    try {
+//                        return stopPlaceImporter.importStopPlace(stopPlace, tiamatSiteFrame, topographicPlacesCreated);
+//                    } catch (InterruptedException|ExecutionException e) {
+//                        e.printStackTrace();
+//                        return null;
+//                    }
+//                })
+//                .map(importedStopPlace -> netexMapper.mapToNetexModel(importedStopPlace))
+//                .collect(Collectors.toList());
+//
+//
+//
+//        netexSiteFrame.getStopPlaces().getStopPlace().clear();
+//        netexSiteFrame.getStopPlaces().getStopPlace().addAll(importedStopPlaces);
+//
+//
+//        return new PublicationDeliveryStructure()                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+//                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(netexSiteFrame)));
+//
+//    }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)

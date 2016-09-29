@@ -59,7 +59,7 @@ public class PublicationDeliveryResourceTest {
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
-        PublicationDeliveryStructure response = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
         List<StopPlace> result = extractStopPlace(response);
 
@@ -92,7 +92,7 @@ public class PublicationDeliveryResourceTest {
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.receivePublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
