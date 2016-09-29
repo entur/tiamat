@@ -56,14 +56,15 @@ public class SiteFrameImporter {
                 .parallelStream()
                 .map(stopPlace -> {
                     try {
-                        return stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+                        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+                        stopPlacesCreated.incrementAndGet();
+                        // Map inside same thread to keep transaction and to avoid lazy initialization exception
+                        return netexMapper.mapToNetexModel(importedStopPlace);
+
                     } catch (InterruptedException | ExecutionException e) {
                         throw new RuntimeException(e);
                     }
                 })
-                .peek(stopPlace -> stopPlacesCreated.incrementAndGet())
-                // Map inside same thread to keep transaction and to avoid lazy initialization exception
-                .map(importedStopPlace -> netexMapper.mapToNetexModel(importedStopPlace))
                 .collect(Collectors.toList());
 
         timerTask.cancel();
