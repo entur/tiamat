@@ -6,9 +6,11 @@ import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import no.rutebanken.tiamat.model.StopPlace;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableAutoConfiguration
+@EnableTransactionManagement
 @EntityScan(basePackageClasses={StopPlace.class})
 @ComponentScan
 public class TiamatApplication {

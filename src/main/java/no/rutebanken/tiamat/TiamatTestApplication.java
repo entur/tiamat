@@ -9,12 +9,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import no.rutebanken.tiamat.model.StopPlace;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Run integration tests for the rest interface without security
  */
 @Configuration
 @EnableAutoConfiguration
+@EnableTransactionManagement
 @EnableCaching
 @EntityScan(basePackageClasses={StopPlace.class})
 @ComponentScan(excludeFilters = {
