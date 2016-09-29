@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import no.rutebanken.tiamat.model.SiteFrame;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -52,35 +53,40 @@ public class SiteFrameImporter {
         };
         timer.scheduleAtFixedRate(timerTask, 2000, 2000);
 
-        List<no.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                .parallelStream()
-                .map(stopPlace -> {
-                    try {
-                        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
-                        stopPlacesCreated.incrementAndGet();
-                        // Map inside same thread to keep transaction and to avoid lazy initialization exception
-                        return netexMapper.mapToNetexModel(importedStopPlace);
+        try {
+            List<no.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
+                    .parallelStream()
+                    .map(stopPlace ->
+                            importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
+                    )
+                    .collect(Collectors.toList());
+            
+                logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
 
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+                topographicPlaceCreator.invalidateCache();
 
-        timerTask.cancel();
-
-        logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
-
-        topographicPlaceCreator.invalidateCache();
-
-        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame()
+                no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame()
                 .withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
                             .withStopPlace(createdStopPlaces)
                 );
+            return netexSiteFrame;
+        } finally {
+            timerTask.cancel();
+        }
+    }
 
+    @Transactional
+    private no.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
+        try {
+            StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+            stopPlacesCreated.incrementAndGet();
+            // Map inside same thread to keep transaction and to avoid lazy initialization exception
+            return netexMapper.mapToNetexModel(importedStopPlace);
 
-        return netexSiteFrame;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated) {
