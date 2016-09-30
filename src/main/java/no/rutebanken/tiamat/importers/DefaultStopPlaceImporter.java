@@ -152,8 +152,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private void initializeLazyReferences(StopPlace stopPlace) {
-        Hibernate.initialize(stopPlace.getLevels());
-        Hibernate.initialize(stopPlace.getOtherTransportModes());
+        if(stopPlace != null) {
+            Hibernate.initialize(stopPlace.getLevels());
+            Hibernate.initialize(stopPlace.getOtherTransportModes());
+        }
     }
 
     public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace nearbyStopPlace) {
