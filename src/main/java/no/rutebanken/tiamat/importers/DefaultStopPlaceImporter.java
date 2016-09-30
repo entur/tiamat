@@ -1,16 +1,17 @@
 package no.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -50,6 +51,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
     }
 
+    @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
@@ -59,7 +61,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", newStopPlace.getName(), newStopPlace.getId());
             return null;
         }
-
         final String semaphoreKey;
         if (newStopPlace.getId() != null) {
             semaphoreKey = "new-stop-place-"+newStopPlace.getId();
@@ -87,6 +88,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
             StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
             if (existingStopPlace != null) {
+                initializeLazyReferences(existingStopPlace);
                 return existingStopPlace;
             }
 
@@ -96,6 +98,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
                 if (nearbyStopPlace != null) {
                     logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                    initializeLazyReferences(existingStopPlace);
 
                     Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
                     quaysToAdd.forEach(quay -> {
@@ -146,6 +149,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         finally {
             semaphore.release();
         }
+    }
+
+    private void initializeLazyReferences(StopPlace stopPlace) {
+        Hibernate.initialize(stopPlace.getLevels());
+        Hibernate.initialize(stopPlace.getOtherTransportModes());
     }
 
     public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace nearbyStopPlace) {

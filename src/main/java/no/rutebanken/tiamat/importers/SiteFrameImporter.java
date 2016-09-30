@@ -1,21 +1,19 @@
 package no.rutebanken.tiamat.importers;
 
 import no.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import no.rutebanken.tiamat.model.SiteFrame;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -28,7 +26,6 @@ public class SiteFrameImporter {
     private TopographicPlaceCreator topographicPlaceCreator;
 
     private NetexMapper netexMapper;
-
 
     @Autowired
     public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper) {
@@ -82,8 +79,6 @@ public class SiteFrameImporter {
         try {
             StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();
-            // Map inside same thread to keep transaction and to avoid lazy initialization exception
-            Hibernate.initialize(importedStopPlace);
             return netexMapper.mapToNetexModel(importedStopPlace);
 
         } catch (InterruptedException | ExecutionException e) {
