@@ -167,7 +167,7 @@ public class DefaultStopPlaceImporterTest {
      * When importing a stop place which already exists, matching quays should not be duplicated.
      */
     @Test
-    public void detectTwoMatchingQuayInTwoSeparateStopPlaces() throws ExecutionException, InterruptedException {
+    public void detectTwoMatchingQuaysInTwoSeparateStopPlaces() throws ExecutionException, InterruptedException {
         final String savedStopPlaceId = "saved-stop-place-id";
         final String chouetteId = "chouette-stop-id";
 
@@ -198,9 +198,9 @@ public class DefaultStopPlaceImporterTest {
         StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
-        assertThat(importResult.getQuays()).hasSize(2);
+        // Expect only one quay when two quays have the same coordinates
+        assertThat(importResult.getQuays()).hasSize(1);
         assertThat(importResult.getQuays()).contains(terminal1);
-        assertThat(importResult.getQuays()).contains(terminal2);
     }
 
     @Test
