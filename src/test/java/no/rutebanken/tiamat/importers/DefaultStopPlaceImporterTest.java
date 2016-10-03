@@ -82,6 +82,7 @@ public class DefaultStopPlaceImporterTest {
         assertThat(importResult.getQuays()).hasSize(2);
     }
 
+
     @Test
     public void handleDuplicateStopPlacesBasedOnId() throws ExecutionException, InterruptedException {
 
@@ -120,6 +121,46 @@ public class DefaultStopPlaceImporterTest {
         assertThat(importedStopPlace2.getId())
                 .isEqualTo(importedStopPlace1.getId())
                 .as("The same stop place should be returned as they have the same chouette id");
+    }
+
+    /**
+     * When importing a stop place with matching chouette ID, the quay should be added to existing stop place.
+     */
+    @Test
+    public void detectAndMergeQuaysForExistingStopPlace() throws ExecutionException, InterruptedException {
+        final String savedStopPlaceId = "saved-stop-place-id";
+        final String chouetteId = "chouette-stop-id";
+
+        StopPlace firstStopPlace = new StopPlace();
+        firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
+        firstStopPlace.setId(chouetteId);
+
+        Quay terminal1 = new Quay();
+        terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
+        firstStopPlace.getQuays().add(terminal1);
+
+        StopPlace secondStopPlace = new StopPlace();
+        // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
+        secondStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(80.000, 20.78)))));
+
+        // Set same ID as first stop place
+        secondStopPlace.setId(chouetteId);
+
+        Quay terminal2 = new Quay();
+        terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.01, 10.78)))));
+        secondStopPlace.getQuays().add(terminal2);
+
+        mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, chouetteId)).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
+
+        // Import only the second stop place as the first one is already "saved" (mocked)
+        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
+
+        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getQuays()).hasSize(2);
+        assertThat(importResult.getQuays()).contains(terminal1);
+        assertThat(importResult.getQuays()).contains(terminal2);
     }
 
     @Test

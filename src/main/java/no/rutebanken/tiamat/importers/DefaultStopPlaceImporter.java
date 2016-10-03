@@ -51,6 +51,22 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
     }
 
+    private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
+        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+        if (existingStopPlace != null) {
+            return existingStopPlace;
+        }
+
+        if (newStopPlace.getName() != null) {
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+            if (nearbyStopPlace != null) {
+                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                return nearbyStopPlace;
+            }
+        }
+        return null;
+    }
+
     @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
@@ -86,31 +102,20 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
                     newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
 
-            StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
-            if (existingStopPlace != null) {
-                initializeLazyReferences(existingStopPlace);
-                return existingStopPlace;
-            }
+            final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
-            if (newStopPlace.getName() != null) {
-
-                final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
-
-                if (nearbyStopPlace != null) {
-                    logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
-
-                    Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
-                    quaysToAdd.forEach(quay -> {
-                        logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
-                        resetIdAndKeepOriginalId(quay);
-                        nearbyStopPlace.getQuays().add(quay);
-                        quayRepository.save(quay);
-                    });
-                    // Assume topographic place already set ?
-                    stopPlaceRepository.save(nearbyStopPlace);
-                    initializeLazyReferences(nearbyStopPlace);
-                    return nearbyStopPlace;
-                }
+            if(foundStopPlace != null) {
+                Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, foundStopPlace);
+                quaysToAdd.forEach(quay -> {
+                    logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
+                    resetIdAndKeepOriginalId(quay);
+                    foundStopPlace.getQuays().add(quay);
+                    quayRepository.save(quay);
+                });
+                // Assume topographic place already set ?
+                stopPlaceRepository.save(foundStopPlace);
+                initializeLazyReferences(foundStopPlace);
+                return foundStopPlace;
             }
 
             // TODO: Hack to avoid 'detached entity passed to persist'.
