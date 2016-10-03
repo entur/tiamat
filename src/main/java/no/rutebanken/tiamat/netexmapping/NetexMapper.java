@@ -1,9 +1,12 @@
 package no.rutebanken.tiamat.netexmapping;
 
+import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.netex.model.StopPlace;
+import no.rutebanken.tiamat.model.EntityStructure;
 import no.rutebanken.tiamat.netexmapping.converters.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +32,20 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
-        mapperFactory.getConverterFactory().registerConverter(new EntityStructureConverter());
+        mapperFactory.classMap(EntityStructure.class, no.rutebanken.netex.model.EntityStructure.class)
+                .byDefault()
+                .customize(new CustomMapper<EntityStructure, no.rutebanken.netex.model.EntityStructure>() {
+                    @Override
+                    public void mapAtoB(EntityStructure model, no.rutebanken.netex.model.EntityStructure netex, MappingContext context) {
+                        netex.setId(model.toString());
+                    }
+
+                    @Override
+                    public void mapBtoA(no.rutebanken.netex.model.EntityStructure netex, EntityStructure model, MappingContext context) {
+                        // TODO: handle netex-ids with prefixes.
+                        model.setId(Long.parseLong(netex.getId()));
+                    }
+                });
 
     }
 
