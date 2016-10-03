@@ -17,11 +17,11 @@ public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlac
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
     @Override
-    @CachePut(value = "stopPlace", key = "#p0.getId()", cacheManager = "guavaCacheManager")
+//    @CachePut(value = "stopPlace", key = "#p0.getId()", cacheManager = "guavaCacheManager")
     StopPlace save(StopPlace stopPlace);
 
     @Override
-    @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
+//    @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
     StopPlace findOne(String stopPlaceId);
 
 }
