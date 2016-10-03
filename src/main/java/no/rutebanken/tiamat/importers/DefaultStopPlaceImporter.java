@@ -98,7 +98,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
                 if (nearbyStopPlace != null) {
                     logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
-                    initializeLazyReferences(existingStopPlace);
 
                     Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, nearbyStopPlace);
                     quaysToAdd.forEach(quay -> {
@@ -109,6 +108,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     });
                     // Assume topographic place already set ?
                     stopPlaceRepository.save(nearbyStopPlace);
+                    initializeLazyReferences(nearbyStopPlace);
                     return nearbyStopPlace;
                 }
             }
@@ -144,6 +144,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
             nearbyStopPlaceFinder.update(newStopPlace);
             logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+            initializeLazyReferences(newStopPlace);
             return newStopPlace;
         }
         finally {
