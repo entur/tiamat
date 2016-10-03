@@ -95,7 +95,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", newStopPlace.getName(), newStopPlace.getId());
             return null;
         }
-        
+
         Semaphore semaphore = getStripedSemaphore(newStopPlace);
         semaphore.acquire();
 
@@ -168,22 +168,29 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
     }
 
-    public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace nearbyStopPlace) {
+    public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace foundStopPlaces) {
 
-        logger.info("About to compare quays for {}", nearbyStopPlace.getId());
+        logger.info("About to compare quays for {}", foundStopPlaces.getId());
 
-        if (nearbyStopPlace.getQuays() == null) {
-            nearbyStopPlace.setQuays(new ArrayList<>());
+        if (foundStopPlaces.getQuays() == null) {
+            foundStopPlaces.setQuays(new ArrayList<>());
         }
 
         Set<Quay> quaysToAdd = new HashSet<>();
-        if (nearbyStopPlace.getQuays().isEmpty() && newStopPlace.getQuays() != null) {
+        if (foundStopPlaces.getQuays().isEmpty() && newStopPlace.getQuays() != null) {
+            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}",
+                    foundStopPlaces.getId(), newStopPlace.getId(), newStopPlace.getName());
             quaysToAdd.addAll(newStopPlace.getQuays());
-        } else if (newStopPlace.getQuays() != null) {
+        } else if (newStopPlace.getQuays() != null && !newStopPlace.getQuays().isEmpty()) {
+            logger.debug("Existing stop {} has {} quays. Incoming stop {} has {} quays. Removing quays that has matching coordinates",
+                    foundStopPlaces.getId(), foundStopPlaces.getQuays().size(),
+                    newStopPlace.getId(), newStopPlace.getQuays().size());
             newStopPlace.getQuays().stream()
-                    .filter(newQuay -> !containsQuayWithCoordinates(newQuay, nearbyStopPlace.getQuays(), quaysToAdd))
+                    .filter(newQuay -> !containsQuayWithCoordinates(newQuay, foundStopPlaces.getQuays(), quaysToAdd))
+                    .peek(newQuay -> logger.debug("Adding quay {}, {}", newQuay.getId(), newQuay.getName()))
                     .forEach(quaysToAdd::add);
         }
+        logger.debug("Found {} quays to save for incoming stop place {}, {}",  quaysToAdd.size(), newStopPlace.getId(), newStopPlace.getName());
         return quaysToAdd;
     }
 
