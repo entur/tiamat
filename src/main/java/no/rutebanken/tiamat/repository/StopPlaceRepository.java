@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import no.rutebanken.tiamat.model.StopPlace;
 
-public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlace, String>, StopPlaceRepositoryCustom {
+public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlace, Long>, StopPlaceRepositoryCustom {
 
     Page<StopPlace> findAllByOrderByChangedDesc(Pageable pageable);
 
@@ -22,7 +22,7 @@ public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlac
 
     @Override
     @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
-    StopPlace findOne(String stopPlaceId);
+    StopPlace findOne(Long stopPlaceId);
 
 }
 

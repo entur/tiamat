@@ -131,7 +131,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
                         topographicPlacesCreatedCounter);
             }
-            String originalId = newStopPlace.getId();
+            Long originalId = newStopPlace.getId();
             resetIdAndKeepOriginalId(newStopPlace);
 
             if (newStopPlace.getQuays() != null) {
@@ -143,7 +143,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                         logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
                     } else {
                         resetIdAndKeepOriginalId(quay);
-                        quay.getCentroid().setId("");
+                        quay.getCentroid().setId(null);
                         quay.getCentroid().getLocation().setId(0);
                         quayRepository.save(quay);
                     }
@@ -207,7 +207,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         if (dataManagedObjectStructure.getId() != null) {
             KeyValueStructure importedId = new KeyValueStructure();
             importedId.setKey(ORIGINAL_ID_KEY);
-            importedId.setValue(dataManagedObjectStructure.getId());
+            importedId.setValue(String.valueOf(dataManagedObjectStructure.getId()));
             if (dataManagedObjectStructure.getKeyList() == null) {
                 dataManagedObjectStructure.setKeyList(new KeyListStructure());
             }

@@ -20,10 +20,10 @@ public class TopographicPlaceFromRefFinderTest {
     public void findTopographicPlaceFromListWhenPresent() throws Exception {
         List<TopographicPlace> topographicPlacelist = new ArrayList<>();
 
-        String id = "1";
+        Long id = 22L;
 
         TopographicPlaceRefStructure topographicPlaceRef = new TopographicPlaceRefStructure();
-        topographicPlaceRef.setRef(id);
+        topographicPlaceRef.setRef(String.valueOf(id));
 
         TopographicPlace topographicPlace = new TopographicPlace();
         topographicPlace.setId(id);

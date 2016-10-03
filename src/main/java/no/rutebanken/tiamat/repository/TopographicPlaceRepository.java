@@ -7,7 +7,7 @@ import no.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.List;
 
-public interface TopographicPlaceRepository extends PagingAndSortingRepository<TopographicPlace, String> {
+public interface TopographicPlaceRepository extends PagingAndSortingRepository<TopographicPlace, Long> {
 
 
     /**

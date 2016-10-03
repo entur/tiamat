@@ -34,7 +34,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private GeometryFactory geometryFactory;
 
     @Override
-    public StopPlace findStopPlaceDetailed(String stopPlaceId) {
+    public StopPlace findStopPlaceDetailed(Long stopPlaceId) {
 
         EntityGraph<StopPlace> graph = entityManager.createEntityGraph(StopPlace.class);
 
@@ -66,7 +66,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      * Optionally, a stop place ID to ignore can be defined.
      */
     @Override
-    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable) {
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable) {
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
@@ -89,15 +89,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public String findNearbyStopPlace(Envelope envelope, String name) {
+    public Long findNearbyStopPlace(Envelope envelope, String name) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<String> query = entityManager
+        TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                                 "LEFT OUTER JOIN s.centroid sp " +
                                 "LEFT OUTER JOIN sp.location l " +
                              "WHERE within(l.geometryPoint, :filter) = true " +
-                            "AND s.name.value = :name", String.class);
+                            "AND s.name.value = :name", Long.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
         try {
@@ -108,15 +108,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public String findByKeyValue(String key, String value) {
-        TypedQuery<String> query = entityManager
+    public Long findByKeyValue(String key, String value) {
+        TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id " +
                         "FROM StopPlace s " +
                             "LEFT OUTER JOIN s.keyList kl " +
                             "LEFT OUTER JOIN kl.keyValue kv " +
                                 "WHERE kv.key = :key " +
                                     "AND kv.value = :value",
-                        String.class);
+                        Long.class);
         query.setParameter("key", key);
         query.setParameter("value", value);
 

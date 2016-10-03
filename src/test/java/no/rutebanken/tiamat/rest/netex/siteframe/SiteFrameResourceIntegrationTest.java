@@ -73,7 +73,7 @@ public class SiteFrameResourceIntegrationTest {
         topographicPlaceRepository.save(county);
 
         TopographicPlaceRefStructure countyReference = new TopographicPlaceRefStructure();
-        countyReference.setRef(county.getId());
+        countyReference.setRef(String.valueOf(county.getId()));
 
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new MultilingualString("Nedre Eiker", "no", ""));
@@ -84,7 +84,7 @@ public class SiteFrameResourceIntegrationTest {
         topographicPlaceRepository.save(municipality);
 
         TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
-        topographicPlaceRefStructure.setRef(municipality.getId());
+        topographicPlaceRefStructure.setRef(String.valueOf(municipality.getId()));
 
         StopPlace stopPlace = new StopPlace();
         String firstStopPlaceName = "first stop place name";

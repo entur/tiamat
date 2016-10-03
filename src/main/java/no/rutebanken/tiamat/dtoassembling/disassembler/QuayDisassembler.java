@@ -38,7 +38,7 @@ public class QuayDisassembler {
             logger.trace("The quay to disassemble has no Id, which means it's new.");
             quay = new Quay();
         } else {
-             quay = quayRepository.findOne(quayDto.id);
+             quay = quayRepository.findOne(Long.valueOf(quayDto.id));
             if (quay == null) {
                 logger.warn("There is no existing quay with id {}, returning null", quayDto.id);
                 return null;

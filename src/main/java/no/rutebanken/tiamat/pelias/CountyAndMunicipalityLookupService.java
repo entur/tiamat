@@ -93,7 +93,7 @@ public class CountyAndMunicipalityLookupService {
             stripedSemaphore.release();
         }
         TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-        municipalityRef.setRef(municipality.getId());
+        municipalityRef.setRef(String.valueOf(municipality.getId()));
 
         logger.trace("Setting reference to municipality {} : {} on stop place {}",
                 municipality.getName(), municipalityRef.getRef(), stopPlace.getName());
@@ -114,7 +114,7 @@ public class CountyAndMunicipalityLookupService {
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-            countyRef.setRef(county.getId());
+            countyRef.setRef(String.valueOf(county.getId()));
 
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);

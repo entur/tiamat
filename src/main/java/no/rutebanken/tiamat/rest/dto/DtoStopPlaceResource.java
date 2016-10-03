@@ -109,7 +109,7 @@ public class DtoStopPlaceResource {
         Pageable pageable = new PageRequest(page, size);
 
         List<StopPlaceDto> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
-                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, stopPlaceSearchDTO.ignoreStopPlaceId, pageable));
+                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, Long.valueOf(stopPlaceSearchDTO.ignoreStopPlaceId), pageable));
         logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;
     }
@@ -117,7 +117,7 @@ public class DtoStopPlaceResource {
     @GET
     @Path("{id}")
     public StopPlaceDto getStopPlace(@PathParam("id") String id) {
-       return stopPlaceAssembler.assemble(stopPlaceRepository.findOne(id));
+       return stopPlaceAssembler.assemble(stopPlaceRepository.findOne(Long.valueOf(id)));
     }
 
     @POST
@@ -127,7 +127,7 @@ public class DtoStopPlaceResource {
 
         logger.info("Save stop place {} with id {}", simpleStopPlaceDto.name, simpleStopPlaceDto.id);
 
-        StopPlace currentStopPlace = stopPlaceRepository.findOne(simpleStopPlaceDto.id);
+        StopPlace currentStopPlace = stopPlaceRepository.findOne(Long.valueOf(simpleStopPlaceDto.id));
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDto);
         if(stopPlace != null) {
             stopPlaceRepository.save(stopPlace);

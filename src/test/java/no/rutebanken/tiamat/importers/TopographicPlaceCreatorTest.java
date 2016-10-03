@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,13 +41,15 @@ public class TopographicPlaceCreatorTest {
         String municipalityName = "Asker";
 
         // Already saved municipality.
-        TopographicPlace existingMunicipalityId = createTopographicPlace("existingMunicipalityId", countryRef, null, municipalityName);
-        mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingMunicipalityId);
+        Long existingMunicipalityId = 1L;
+        TopographicPlace existingMunicipality = createTopographicPlace(existingMunicipalityId, countryRef, null, municipalityName);
+        mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingMunicipality);
 
         // Incoming municipality
-        TopographicPlace incomingMunicipality = createTopographicPlace("incomingMunicipalityId", countryRef, null, municipalityName);
+        Long incomingMunicipalityId = 2L;
+        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, countryRef, null, municipalityName);
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
-        mockSaveAnyTopographicPlace(topographicPlaceRepository, new AtomicInteger());
+        mockSaveAnyTopographicPlace(topographicPlaceRepository, new AtomicLong());
 
         List<TopographicPlace> places = singletonList(incomingMunicipality);
 
@@ -65,7 +68,7 @@ public class TopographicPlaceCreatorTest {
         assertThat(actualMunicipality.getId()).isNotEqualTo(incomingMunicipality.getId());
 
         // Assert that the topographic place that was returned has the ID of the already saved municipality
-        assertThat(actualMunicipality.getId()).isEqualTo(existingMunicipalityId.getId());
+        assertThat(actualMunicipality.getId()).isEqualTo(existingMunicipality.getId());
     }
 
     /**
@@ -76,10 +79,11 @@ public class TopographicPlaceCreatorTest {
         // Arrange
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
         TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
-        TopographicPlace incomingMunicipality = createTopographicPlace("incomingMunicipality", createCountryRef(), null, "Incoming municipality");
+        Long incomingMunicipalityId = 1L;
+        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), null, "Incoming municipality");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
-        mockSaveAnyTopographicPlace(topographicPlaceRepository, new AtomicInteger(10));
+        mockSaveAnyTopographicPlace(topographicPlaceRepository, new AtomicLong(10));
         List<TopographicPlace> places = singletonList(incomingMunicipality);
 
         // Act
@@ -90,7 +94,8 @@ public class TopographicPlaceCreatorTest {
 
         // Id should have been saved, hence not same as incoming.
         assertThat(actualMunicipality.getId()).isNotEqualTo(incomingMunicipality.getId());
-        assertThat(actualMunicipality.getId().length()).isGreaterThan(0);
+        assertThat(actualMunicipality.getId()).isNotNull();
+        assertThat(actualMunicipality.getId()).isNotEqualTo(0L);
     }
 
 
@@ -102,14 +107,16 @@ public class TopographicPlaceCreatorTest {
         // Arrange
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
         TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
-        AtomicInteger idCounter = new AtomicInteger();
+        AtomicLong idCounter = new AtomicLong();
 
         // County
-        TopographicPlace incomingCounty = createTopographicPlace("incoming county", createCountryRef(), null, "Incoming, unsaved county");
+        Long incomingCountyId = 10L;
+        TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Incoming, unsaved county");
         TopographicPlaceRefStructure incomingCountyRef = createTopographicPlaceRef(incomingCounty);
 
         // Municipality
-        TopographicPlace incomingMunicipality = createTopographicPlace("incomingMunicipalityWithCounty", createCountryRef(), incomingCountyRef, "Incoming municipality with reference to County");
+        Long incomingMunicipalityId = 11L;
+        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCountyRef, "Incoming municipality with reference to County");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
 
@@ -119,7 +126,7 @@ public class TopographicPlaceCreatorTest {
 
                     TopographicPlace topographicPlace = (TopographicPlace) invocationOnMock.getArguments()[0];
                     System.out.println("Saving topographical place '" + topographicPlace.getName()+"'");
-                    topographicPlace.setId(String.valueOf(idCounter.incrementAndGet()));
+                    topographicPlace.setId(idCounter.incrementAndGet());
                     savedPlaces.add(topographicPlace);
                     return topographicPlace;
                 });
@@ -140,7 +147,7 @@ public class TopographicPlaceCreatorTest {
 
         assertThat(idCounter.get()).isEqualTo(2);
         assertThat(savedPlaces).hasSize(2);
-        assertThat(savedPlaces).extracting(EntityStructure::getId).contains(actualCountyRef.getRef());
+        assertThat(savedPlaces).extracting(EntityStructure::getId).contains(Long.valueOf(actualCountyRef.getRef()));
         assertThat(savedPlaces).extracting(topographicPlace -> topographicPlace.getName().getValue()).contains(incomingCounty.getName().getValue());
     }
 
@@ -151,15 +158,18 @@ public class TopographicPlaceCreatorTest {
         TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
 
         // Existing county
-        TopographicPlace existingCounty = createTopographicPlace("existingCounty", createCountryRef(), null, "Akershus");
+        Long existingCountyId = 11L;
+        TopographicPlace existingCounty = createTopographicPlace(existingCountyId, createCountryRef(), null, "Akershus");
         mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingCounty);
 
         // Incoming county
-        TopographicPlace incomingCounty = createTopographicPlace("incoming county", createCountryRef(), null, "Akershus");
+        Long incomingCountyId = 13L;
+        TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Akershus");
         TopographicPlaceRefStructure incomingCountyRef = createTopographicPlaceRef(incomingCounty);
 
         // Incoming municipality
-        TopographicPlace incomingMunicipality  = createTopographicPlace("municipality", createCountryRef(), incomingCountyRef, "Asker");
+        Long incomingMunicipalityId = 14L;
+        TopographicPlace incomingMunicipality  = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCountyRef, "Asker");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
         List<TopographicPlace> places = Arrays.asList(incomingMunicipality, incomingCounty);
@@ -168,7 +178,7 @@ public class TopographicPlaceCreatorTest {
         TopographicPlace actualMunicipality = topographicPlaceCreator.findOrCreateTopographicPlace(places, incomingMunicipalityRef, new AtomicInteger()).get();
 
         // Assert
-        assertThat(actualMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(existingCounty.getId());
+        assertThat(actualMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(existingCounty.getId().toString());
     }
 
 
@@ -184,10 +194,12 @@ public class TopographicPlaceCreatorTest {
         String municipalityName = "Asker";
 
         // Already saved municipality.
-        TopographicPlace existingMunicipality = createTopographicPlace("existingMunicipalityId", countryRef, null, municipalityName);
+        Long existingCountyId = 11L;
+        TopographicPlace existingMunicipality = createTopographicPlace(existingCountyId, countryRef, null, municipalityName);
         mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingMunicipality);
 
-        TopographicPlace incomingMunicipality = createTopographicPlace("incomingMunicipalityId", countryRef, null, municipalityName);
+        Long incomingMunicipalityId = 14L;
+        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, countryRef, null, municipalityName);
 
         List<TopographicPlace> places = singletonList(incomingMunicipality);
         AtomicInteger topographicPlacesCreatedCounter = new AtomicInteger();
@@ -225,13 +237,13 @@ public class TopographicPlaceCreatorTest {
     }
 
 
-    private void mockSaveAnyTopographicPlace(TopographicPlaceRepository repository, AtomicInteger idCounter) {
+    private void mockSaveAnyTopographicPlace(TopographicPlaceRepository repository, AtomicLong idCounter) {
         when(repository.save(any(TopographicPlace.class)))
                 .then(invocationOnMock -> {
 
                     TopographicPlace topographicPlace = (TopographicPlace) invocationOnMock.getArguments()[0];
                     System.out.println("Saving topographical place '" + topographicPlace.getName()+"'");
-                    topographicPlace.setId(String.valueOf(idCounter.incrementAndGet()));
+                    topographicPlace.setId(idCounter.incrementAndGet());
                     return topographicPlace;
                 });
     }
@@ -244,7 +256,7 @@ public class TopographicPlaceCreatorTest {
                 .thenReturn(singletonList(topographicPlace));
     }
 
-    private TopographicPlace createTopographicPlace(String id, CountryRef countryRef,
+    private TopographicPlace createTopographicPlace(Long id, CountryRef countryRef,
                                                     TopographicPlaceRefStructure parentTopographicPlaceRef,
                                                     String name) {
         TopographicPlace topographicPlace = new TopographicPlace();
@@ -257,7 +269,7 @@ public class TopographicPlaceCreatorTest {
 
     private TopographicPlaceRefStructure createTopographicPlaceRef(TopographicPlace county) {
         TopographicPlaceRefStructure topographicPlaceRef = new TopographicPlaceRefStructure();
-        topographicPlaceRef.setRef(county.getId());
+        topographicPlaceRef.setRef(String.valueOf(county.getId()));
         return topographicPlaceRef;
     }
 

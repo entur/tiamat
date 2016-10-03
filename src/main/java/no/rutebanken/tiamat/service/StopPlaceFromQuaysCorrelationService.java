@@ -95,7 +95,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
         logger.info("Got {} distinct quays based on name", distinctQuays.size());
 
-        List<String> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
+        List<Long> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
 
         boolean stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
         if (stop) {
@@ -134,7 +134,7 @@ public class StopPlaceFromQuaysCorrelationService {
      * @return true if max limit has been reached.
      */
     public boolean createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
-                                            List<String> quaysAlreadyProcessed) throws InterruptedException, ExecutionException {
+                                            List<Long> quaysAlreadyProcessed) throws InterruptedException, ExecutionException {
 /*
         return distinctQuays.keySet()
                 .parallelStream()
@@ -173,7 +173,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
 
     public Map<String, List<Quay>> findRemaining(ConcurrentMap<String, List<Quay>> distinctQuays,
-                                                 List<String> quaysAlreadyProcessed) {
+                                                 List<Long> quaysAlreadyProcessed) {
 
         Map<String, List<Quay>> remaining = new HashMap<>();
 
@@ -194,7 +194,7 @@ public class StopPlaceFromQuaysCorrelationService {
         return remaining;
     }
 
-    public boolean createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<String> quaysAlreadyProcessed) {
+    public boolean createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<Long> quaysAlreadyProcessed) {
         logger.trace("Processing quay with name {}", quayGroupName);
 
         if (stopPlaceCounter.get() >= maxLimit) {

@@ -30,7 +30,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	private GeometryFactory geometryFactory;
 
 	@Override
-	public Quay findQuayDetailed(String quayId) {
+	public Quay findQuayDetailed(Long quayId) {
 		EntityGraph<Quay> graph = entityManager.createEntityGraph(Quay.class);
 		graph.addAttributeNodes("alternativeNames");
 		graph.addAttributeNodes("accessibilityAssessment");

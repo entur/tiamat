@@ -24,9 +24,9 @@ public class StopPlaceFromOriginalIdFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromOriginalIdFinder.class);
 
-        private StopPlaceRepository stopPlaceRepository;
+    private StopPlaceRepository stopPlaceRepository;
 
-    private Cache<String, Optional<String>> keyValueCache;
+    private Cache<String, Optional<Long>> keyValueCache;
 
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:20000}") int maximumSize,
@@ -50,14 +50,16 @@ public class StopPlaceFromOriginalIdFinder {
         return null;
     }
 
-    public void update(String originalId, String newId) {
+    public void update(Long originalId, Long newId) {
         keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(newId));
     }
 
-    private StopPlace findByKeyValue(String key, String value) {
-        String cacheKey = keyValKey(key, value);
+    private StopPlace findByKeyValue(String key, Long id) {
+        String cacheKey = keyValKey(key, id);
         try {
-            Optional<String> stopPlaceId = keyValueCache.get(cacheKey, () -> Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, value)));
+            String stringId = String.valueOf(id);
+            Optional<Long> stopPlaceId = keyValueCache.get(cacheKey, () ->
+                    Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, stringId)));
             if(stopPlaceId.isPresent()) {
                 return stopPlaceRepository.findOne(stopPlaceId.get());
             }
@@ -69,7 +71,7 @@ public class StopPlaceFromOriginalIdFinder {
         }
     }
 
-    private String keyValKey(String key, String value) {
+    private String keyValKey(String key, Long value) {
         return key + "-" + value;
     }
 }

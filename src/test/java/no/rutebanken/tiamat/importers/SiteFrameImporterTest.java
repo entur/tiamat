@@ -53,7 +53,7 @@ public class SiteFrameImporterTest {
             for (int stopPlaceIndex = 0; stopPlaceIndex < stopPlaces; stopPlaceIndex++) {
 
                 StopPlace stopPlace = new StopPlace();
-                stopPlace.setId(String.valueOf(stopPlaceIndex * Math.abs(random.nextInt())));
+                stopPlace.setId(stopPlaceIndex * Math.abs(random.nextLong()));
 
                 double longitude = 39.61441 * Math.abs(random.nextDouble());
                 double latitude = -144.22765 * Math.abs(random.nextDouble());

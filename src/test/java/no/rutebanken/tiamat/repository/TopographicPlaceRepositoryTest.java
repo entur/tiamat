@@ -35,6 +35,6 @@ public class TopographicPlaceRepositoryTest {
         topographicPlaceRepository.save(akershus);
 
         List<TopographicPlace> places = topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType("Akershus", IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.COUNTY);
-        assertThat(places).extracting("id", String.class).contains(akershus.getId());
+        assertThat(places).extracting("id", Long.class).contains(akershus.getId());
     }
 }

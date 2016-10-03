@@ -35,8 +35,8 @@ public class PublicationDeliveryExporterTest {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
 
-        StopPlace actual = findStopPlace(publicationDeliveryStructure, stopPlace.getId());
-        assertThat(actual.getId()).isEqualTo(stopPlace.getId());
+        StopPlace actual = findStopPlace(publicationDeliveryStructure, String.valueOf(stopPlace.getId()));
+        assertThat(actual.getId()).isEqualTo(stopPlace.getId().toString());
     }
 
     private StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {

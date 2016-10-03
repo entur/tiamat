@@ -38,7 +38,7 @@ public class StopPlaceAssembler {
 
     public StopPlaceDto assemble(StopPlace stopPlace) {
         StopPlaceDto stopPlaceDto = new StopPlaceDto();
-        stopPlaceDto.id = stopPlace.getId();
+        stopPlaceDto.id = String.valueOf(stopPlace.getId());
 
         stopPlaceDto.name = multiLingualStringValue(stopPlace.getName());
         stopPlaceDto.shortName = multiLingualStringValue(stopPlace.getShortName());
@@ -76,7 +76,7 @@ public class StopPlaceAssembler {
         if(topographicRef != null) {
             logger.trace("Found reference from stop place '{}' {} to a topographic place {}", stopPlace.getName(), stopPlace.getId(), topographicRef.getRef());
 
-            TopographicPlace municipality = topographicPlaceRepository.findOne(topographicRef.getRef());
+            TopographicPlace municipality = topographicPlaceRepository.findOne(Long.valueOf(topographicRef.getRef()));
 
             if (municipality == null) {
                 logger.warn("Municipality was null from reference {}", topographicRef.getRef());
@@ -91,7 +91,7 @@ public class StopPlaceAssembler {
 
             if(municipality.getParentTopographicPlaceRef() != null) {
 
-                TopographicPlace county = topographicPlaceRepository.findOne(municipality.getParentTopographicPlaceRef().getRef());
+                TopographicPlace county = topographicPlaceRepository.findOne(Long.valueOf(municipality.getParentTopographicPlaceRef().getRef()));
 
                 if(county != null && county.getName() != null) {
                     logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getId(), municipality.getName(), municipality.getId());

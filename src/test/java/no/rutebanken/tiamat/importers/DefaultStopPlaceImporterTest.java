@@ -19,6 +19,7 @@ import static java.util.concurrent.TimeUnit.HOURS;
 import static no.rutebanken.tiamat.importers.DefaultStopPlaceImporter.ORIGINAL_ID_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,14 +50,15 @@ public class DefaultStopPlaceImporterTest {
     @Test
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
 
+        Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
         firstStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
-
+        firstStopPlace.setId(firstStopId);
 
         Quay terminal1 = new Quay();
         terminal1.setName(new MultilingualString("terminal 1", "", ""));
-        terminal1.setId("chouette-id-1");
+        terminal1.setId(2L);
         terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.000, 10.78)))));
 
         firstStopPlace.getQuays().add(terminal1);
@@ -67,13 +69,13 @@ public class DefaultStopPlaceImporterTest {
 
         Quay terminal2 = new Quay();
         terminal2.setName(new MultilingualString("terminal 2", "", ""));
-        terminal2.setId("chouette-id-2");
+        terminal2.setId(3L);
         terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.01, 10.78)))));
         secondStopPlace.getQuays().add(terminal2);
 
-        mockStopPlaceSave("firstId", firstStopPlace);
-        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class))).thenReturn("firstId");
-        when(stopPlaceRepository.findOne("firstId")).thenReturn(firstStopPlace);
+        mockStopPlaceSave(firstStopId, firstStopPlace);
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class))).thenReturn(firstStopId);
+        when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
@@ -88,7 +90,7 @@ public class DefaultStopPlaceImporterTest {
 
 
         StopPlace firstStopPlace = new StopPlace();
-        firstStopPlace.setId("chouette-id-1");
+        firstStopPlace.setId(1L);
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
         firstStopPlace.setName(new MultilingualString("skjeberg", "no", ""));
 
@@ -100,7 +102,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.save(firstStopPlace)).then(invocationOnMock -> {
             StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlace.setId("generated-id-first-stop-place");
+            stopPlace.setId(2L);
             return stopPlace;
         });
 
@@ -113,7 +115,7 @@ public class DefaultStopPlaceImporterTest {
                     return importedStopPlace1;
                 });
 
-        when(stopPlaceRepository.findOne(anyString())).then(invocationOnMock -> importedStopPlace1);
+        when(stopPlaceRepository.findOne(anyLong())).then(invocationOnMock -> importedStopPlace1);
 
         StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
@@ -128,9 +130,9 @@ public class DefaultStopPlaceImporterTest {
      */
     @Test
     public void detectAndMergeQuaysForExistingStopPlace() throws ExecutionException, InterruptedException {
-        final String savedStopPlaceId = "saved-stop-place-id";
-        final String chouetteId = "chouette-stop-id";
-        final String chouetteQuayId = "chouette-quay-id";
+        final Long savedStopPlaceId = 1L;
+        final Long chouetteId = 2L;
+        final Long chouetteQuayId = 3L;
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
@@ -153,7 +155,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, chouetteId)).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
@@ -168,8 +170,8 @@ public class DefaultStopPlaceImporterTest {
      */
     @Test
     public void detectTwoMatchingQuaysInTwoSeparateStopPlaces() throws ExecutionException, InterruptedException {
-        final String savedStopPlaceId = "saved-stop-place-id";
-        final String chouetteId = "chouette-stop-id";
+        final Long savedStopPlaceId = 1L;
+        final Long chouetteId = 2L;
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
@@ -191,7 +193,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, chouetteId)).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
@@ -206,13 +208,13 @@ public class DefaultStopPlaceImporterTest {
     @Test
     public void keepOriginalIdsInKeyList() throws Exception {
 
-        final String stopPlaceOriginalId = "stop-place-id-to-replace";
-        final String quayOriginalId = "quay-id-to-replace";
+        final Long stopPlaceOriginalId = 1L;
+        final Long quayOriginalId = 2L;
 
-        final String persistedStopPlaceId = "persisted-stop-place-id";
+        final Long persistedStopPlaceId = 10L;
         mockStopPlaceSave(persistedStopPlaceId);
 
-        final String persistedQuayId = "persisted-quay-id";
+        final Long persistedQuayId = 11L;
         mockQuayRepository(persistedQuayId);
 
         StopPlace stopPlace = new StopPlace();
@@ -227,7 +229,7 @@ public class DefaultStopPlaceImporterTest {
 
         StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, new AtomicInteger());
 
-        assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
+        assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId.toString());
         assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
 
         assertThat(importedStopPlace.getKeyList()).isNotNull();
@@ -284,7 +286,7 @@ public class DefaultStopPlaceImporterTest {
 
     }
 
-    private void mockStopPlaceSave(String persistedStopPlaceId, StopPlace stopPlace) {
+    private void mockStopPlaceSave(Long persistedStopPlaceId, StopPlace stopPlace) {
         when(stopPlaceRepository.save(stopPlace)).then(invocationOnMock -> {
             StopPlace stopPlaceToSave = (StopPlace) invocationOnMock.getArguments()[0];
             stopPlaceToSave.setId(persistedStopPlaceId);
@@ -292,14 +294,14 @@ public class DefaultStopPlaceImporterTest {
         });
     }
 
-    private void mockStopPlaceSave(String persistedStopPlaceId) {
+    private void mockStopPlaceSave(Long persistedStopPlaceId) {
         when(stopPlaceRepository.save(any(StopPlace.class))).then((Answer<StopPlace>) invocationOnMock -> {
             StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
             stopPlace.setId(persistedStopPlaceId);
             return stopPlace;
         });
     }
-    private void mockQuayRepository(String persistedQuayId) {
+    private void mockQuayRepository(Long persistedQuayId) {
         when(quayRepository.save(any(Quay.class))).then((Answer<Quay>) invocationOnMock -> {
             Quay quay = (Quay) invocationOnMock.getArguments()[0];
             quay.setId(persistedQuayId);

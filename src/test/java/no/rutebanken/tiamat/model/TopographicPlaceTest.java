@@ -33,7 +33,7 @@ public class TopographicPlaceTest {
         topographicPlaceRepository.save(nedreEiker);
 
         TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
-        topographicPlaceRefStructure.setRef(nedreEiker.getId());
+        topographicPlaceRefStructure.setRef(String.valueOf(nedreEiker.getId()));
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("Steinberg", "no", ""));
@@ -56,7 +56,7 @@ public class TopographicPlaceTest {
         topographicPlaceRepository.save(buskerud);
 
         TopographicPlaceRefStructure buskerudReference = new TopographicPlaceRefStructure();
-        buskerudReference.setRef(buskerud.getId());
+        buskerudReference.setRef(String.valueOf(buskerud.getId()));
 
         // Municipality
         TopographicPlace nedreEiker = new TopographicPlace();

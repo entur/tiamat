@@ -7,7 +7,7 @@ import no.rutebanken.tiamat.model.Quay;
 
 public interface QuayRepositoryCustom {
 
-    Quay findQuayDetailed(String quayId);
+    Quay findQuayDetailed(Long quayId);
     
     Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable);
 }

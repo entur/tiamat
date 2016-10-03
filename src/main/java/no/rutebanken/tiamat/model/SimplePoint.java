@@ -59,10 +59,6 @@ public class SimplePoint
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected LocationStructure location;
 
-    @XmlTransient
-    @Transient
-    protected String id;
-
     /**
      * Gets the value of the name property.
      * 

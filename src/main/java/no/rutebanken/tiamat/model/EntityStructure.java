@@ -51,12 +51,12 @@ public abstract class EntityStructure implements Serializable{
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     public String nameOfClass;
 */
-    @Id
-    @GenericGenerator(name="seq_generator", strategy="no.rutebanken.tiamat.repository.EntityIdGenerator")
-    @GeneratedValue(strategy= GenerationType.IDENTITY, generator="seq_generator")
+
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    protected String id;
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    protected Long id;
 
     /**
      * Gets the value of the nameOfClass property.
@@ -90,7 +90,7 @@ public abstract class EntityStructure implements Serializable{
      *     {@link String }
      *     
      */
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -103,7 +103,7 @@ public abstract class EntityStructure implements Serializable{
      *     
      */
     @JsonIgnore
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

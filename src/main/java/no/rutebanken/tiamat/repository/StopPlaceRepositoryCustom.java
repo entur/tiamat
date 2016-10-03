@@ -15,12 +15,12 @@ public interface StopPlaceRepositoryCustom {
      * @param id the stop place id
      * @return the stop place with relations fetched.
      */
-    StopPlace findStopPlaceDetailed(String id);
+    StopPlace findStopPlaceDetailed(Long id);
 
-    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable);
+    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable);
 
-    String findNearbyStopPlace(Envelope envelope, String name);
+    Long findNearbyStopPlace(Envelope envelope, String name);
 
-    String findByKeyValue(String key, String value);
+    Long findByKeyValue(String key, String value);
 
 }

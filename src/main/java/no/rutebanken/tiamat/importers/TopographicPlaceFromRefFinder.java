@@ -18,7 +18,10 @@ public class TopographicPlaceFromRefFinder {
         return incomingTopographicPlaces
                 .stream()
                 .filter(topographicPlace -> topographicPlace.getId() != null)
-                .filter(topographicPlace -> topographicPlace.getId().equals(topographicPlaceRef.getRef()))
+                .filter(topographicPlace -> {
+                    Long reference = Long.valueOf(topographicPlaceRef.getRef());
+                    return topographicPlace.getId().equals(reference);
+                })
                 .peek(topographicPlace -> logger.trace("Looking at topographical place with name {} and id {}", topographicPlace.getName(), topographicPlace.getId()))
                 .findFirst();
     }

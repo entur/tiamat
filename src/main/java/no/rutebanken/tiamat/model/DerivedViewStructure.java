@@ -83,9 +83,8 @@ public abstract class DerivedViewStructure {
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Id
-    @GenericGenerator(name="seq_generator", strategy="no.rutebanken.tiamat.repository.EntityIdGenerator")
-    @GeneratedValue(strategy= GenerationType.IDENTITY, generator="seq_generator")
-    protected String id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    protected Long id;
 
     /**
      * Gets the value of the brandingRef property.
@@ -111,27 +110,11 @@ public abstract class DerivedViewStructure {
         this.brandingRef = value;
     }
 
-    /**
-     * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    /**
-     * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setId(String value) {
+    public void setId(Long value) {
         this.id = value;
     }
 

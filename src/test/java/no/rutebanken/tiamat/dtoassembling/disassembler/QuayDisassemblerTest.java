@@ -55,16 +55,16 @@ public class QuayDisassemblerTest {
         QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
 
         QuayDto quayDto = new QuayDto();
-        quayDto.id = "xyz";
+        quayDto.id = "12333";
 
         Quay quay = new Quay();
-        quay.setId(quayDto.id);
+        quay.setId(Long.valueOf(quayDto.id));
 
-        when(quayRepository.findOne(quayDto.id)).thenReturn(quay);
+        when(quayRepository.findOne(Long.valueOf(quayDto.id))).thenReturn(quay);
 
         Quay actualQuay = quayDisassembler.disassemble(quayDto);
 
-        assertThat(actualQuay.getId()).isEqualTo(quayDto.id);
+        assertThat(actualQuay.getId().toString()).isEqualTo(quayDto.id);
     }
 
     @Test

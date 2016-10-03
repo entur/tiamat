@@ -26,7 +26,7 @@ public class NearbyStopPlaceFinder {
 
     private StopPlaceRepository stopPlaceRepository;
 
-    private final Cache<String, Optional<String>> nearbyStopCache;
+    private final Cache<String, Optional<Long>> nearbyStopCache;
 
     @Autowired
     public NearbyStopPlaceFinder(StopPlaceRepository stopPlaceRepository,
@@ -34,17 +34,17 @@ public class NearbyStopPlaceFinder {
                                          @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
                                          @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
-        Cache<String, Optional<String>> x= CacheBuilder.newBuilder()
+        this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
                 .build();
-        nearbyStopCache = x;
+
     }
 
     public StopPlace find(StopPlace stopPlace) {
 
         try {
-            Optional<String> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
+            Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
                 return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue()));
             });

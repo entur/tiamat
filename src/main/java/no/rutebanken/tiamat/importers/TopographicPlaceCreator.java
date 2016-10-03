@@ -70,7 +70,7 @@ public class TopographicPlaceCreator {
             logger.trace("Setting topographical ref {} on site {} {}",
                     topographicPlace.getId(), site.getName(), site.getId());
             TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
-            newRef.setRef(topographicPlace.getId());
+            newRef.setRef(String.valueOf(topographicPlace.getId()));
             site.setTopographicPlaceRef(newRef);
         });
     }
@@ -146,7 +146,7 @@ public class TopographicPlaceCreator {
                 logger.debug("Found parent place '{}' for '{}'", parent.getName().getValue(), newTopographicPlace.getName().getValue());
 
                 TopographicPlaceRefStructure parentRef = new TopographicPlaceRefStructure();
-                parentRef.setRef(parent.getId());
+                parentRef.setRef(String.valueOf(parent.getId()));
                 newTopographicPlace.setParentTopographicPlaceRef(parentRef);
             });
         }
