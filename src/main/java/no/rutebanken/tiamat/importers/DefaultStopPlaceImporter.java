@@ -67,6 +67,24 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return null;
     }
 
+    private Semaphore getStripedSemaphore(StopPlace stopPlace) {
+        final String semaphoreKey;
+        if (stopPlace.getId() != null) {
+            semaphoreKey = "new-stop-place-"+stopPlace.getId();
+        } else if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null){
+            LocationStructure location = stopPlace.getCentroid().getLocation();
+            semaphoreKey = "location-"+location.getLongitude()+"-"+location.getLatitude();
+        } else if (stopPlace.getName() != null
+                && stopPlace.getName().getValue() != null
+                && !stopPlace.getName().getValue().isEmpty()){
+            semaphoreKey = "name-"+stopPlace.getName().getValue();
+        } else {
+            //TODO: proper and sensible striped locking.
+            semaphoreKey = "";
+        }
+        return stripedSemaphores.get(semaphoreKey);
+    }
+
     @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
@@ -77,22 +95,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", newStopPlace.getName(), newStopPlace.getId());
             return null;
         }
-        final String semaphoreKey;
-        if (newStopPlace.getId() != null) {
-            semaphoreKey = "new-stop-place-"+newStopPlace.getId();
-        } else if (newStopPlace.getCentroid() != null && newStopPlace.getCentroid().getLocation() != null){
-            LocationStructure location = newStopPlace.getCentroid().getLocation();
-            semaphoreKey = "location-"+location.getLongitude()+"-"+location.getLatitude();
-        } else if (newStopPlace.getName() != null
-                && newStopPlace.getName().getValue() != null
-                && !newStopPlace.getName().getValue().isEmpty()){
-            semaphoreKey = "name-"+newStopPlace.getName().getValue();
-        } else {
-            //TODO: proper and sensible striped locking.
-            semaphoreKey = "";
-        }
-
-        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
+        
+        Semaphore semaphore = getStripedSemaphore(newStopPlace);
         semaphore.acquire();
 
         try {
