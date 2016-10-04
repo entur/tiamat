@@ -1,5 +1,6 @@
 package no.rutebanken.tiamat.netexmapping;
 
+import no.rutebanken.netex.model.Quay;
 import no.rutebanken.tiamat.model.MultilingualString;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -13,7 +14,7 @@ public class NetexMapperTest {
     private NetexMapper netexMapper = new NetexMapper();
 
     @Test
-    public void mapToNetexModel() throws Exception {
+    public void mapSiteFrameToNetexModel() throws Exception {
         no.rutebanken.tiamat.model.SiteFrame sourceSiteFrame = new no.rutebanken.tiamat.model.SiteFrame();
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
@@ -33,7 +34,7 @@ public class NetexMapperTest {
 
 
     @Test
-    public void mapToInternalModel() throws Exception {
+    public void mapSiteFrameToInternalModel() throws Exception {
         no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame();
 
         no.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new no.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
@@ -58,7 +59,7 @@ public class NetexMapperTest {
 
 
     @Test
-    public void mapToNetexStopPlace() throws Exception {
+    public void mapStopPlaceToNetex() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("name", "en", ""));
 
@@ -69,9 +70,8 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapToInternalStopPlaceId() throws Exception {
+    public void mapStopPlaceToInternalWithId() throws Exception {
         no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
-        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
         netexStopPlace.setId("1337");
 
         no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
@@ -81,7 +81,7 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapToInternalStopPlaceName() throws Exception {
+    public void mapStopPlaceToInternalWithName() throws Exception {
         no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
         no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
         name.setValue("stop placec ");
@@ -98,31 +98,36 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapStopPlaceNetexStringIdToInternalLong() {
-        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
-        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString()
-                .withValue("stop place")
-                .withLang("no");
-        netexStopPlace.setName(name);
-
-        String netexId = "NSR:StopPlace:12345";
-        netexStopPlace.setId(netexId);
-
-        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
-
-        assertThat(tiamatStopPlace.getName()).isNotNull();
-        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(netexStopPlace.getName().getValue());
-        assertThat(tiamatStopPlace.getId()).isEqualTo(12345L);
-    }
-
-    @Test
     public void mapStopPlaceInternalIdToNetexId() {
-
         StopPlace tiamatStopPlace = new StopPlace();
         tiamatStopPlace.setId(123456L);
 
         no.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
 
         assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
+    }
+
+    @Test
+    public void mapNetexQuayIdToInternal() {
+        Quay netexQuay = new Quay();
+
+        String netexId = "NSR:Quay:12345";
+        netexQuay.setId(netexId);
+
+        no.rutebanken.tiamat.model.Quay tiamatQuay = netexMapper.mapToTiamatModel(netexQuay);
+
+        assertThat(tiamatQuay.getId()).isEqualTo(12345L);
+    }
+
+    @Test
+    public void mapInternatQuayIdToNetex() {
+
+        no.rutebanken.tiamat.model.Quay tiamatQuay = new no.rutebanken.tiamat.model.Quay();
+        tiamatQuay.setId(1234567L);
+
+        Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
+        assertThat(netexQuay.getId()).isNotNull();
+        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+
     }
 }
