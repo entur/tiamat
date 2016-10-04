@@ -1,13 +1,12 @@
 package no.rutebanken.tiamat.netexmapping;
 
-import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import no.rutebanken.netex.model.Quay;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.converters.*;
+import no.rutebanken.tiamat.netexmapping.mapper.SiteFrameIdMapper;
 import no.rutebanken.tiamat.netexmapping.mapper.QuayIdMapper;
 import no.rutebanken.tiamat.netexmapping.mapper.StopPlaceIdMapper;
 import org.slf4j.Logger;
@@ -35,6 +34,12 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
 
+        mapperFactory.classMap(SiteFrame.class, no.rutebanken.tiamat.model.SiteFrame.class)
+                .customize(new SiteFrameIdMapper())
+                .exclude("id")
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(StopPlace.class, no.rutebanken.tiamat.model.StopPlace.class)
                 .customize(new StopPlaceIdMapper())
                 .exclude("id")
@@ -46,6 +51,10 @@ public class NetexMapper {
                 .exclude("id")
                 .byDefault()
                 .register();
+
+
+
+
     }
 
     public SiteFrame mapToNetexModel(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
