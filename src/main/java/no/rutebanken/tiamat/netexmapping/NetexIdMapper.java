@@ -27,6 +27,8 @@ public class NetexIdMapper {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setId(null);
+        } else if (!netexEntity.getId().contains(":")) {
+            throw new NumberFormatException("Id '" + netexEntity.getId()+"' not supported. Expected (At least) colon followed by Long value");
         } else {
             String netexId = netexEntity.getId();
             Long tiamatId = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
