@@ -45,7 +45,8 @@ public class NetexMapperTest {
         name.setLang("no");
         name.setTextIdType("");
         stopPlace.setName(name);
-        stopPlace.setId("1337");
+        String stopPlaceId = "1337";
+        stopPlace.setId("NSR:StopPlace:" + stopPlaceId);
 
         stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
         netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
@@ -54,7 +55,7 @@ public class NetexMapperTest {
 
         assertThat(actualSiteFrame).isNotNull();
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
-        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId().toString()).isEqualTo(stopPlace.getId());
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId().toString()).isEqualTo(stopPlaceId);
     }
 
 
@@ -72,19 +73,20 @@ public class NetexMapperTest {
     @Test
     public void mapStopPlaceToInternalWithId() throws Exception {
         no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
-        netexStopPlace.setId("1337");
+        String stopPlaceId = "1339";
+        netexStopPlace.setId("NSR:StopPlace:" + stopPlaceId);
 
         no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getId().toString()).isEqualTo(netexStopPlace.getId());
+        assertThat(tiamatStopPlace.getId().toString()).isEqualTo(stopPlaceId);
     }
 
     @Test
     public void mapStopPlaceToInternalWithName() throws Exception {
         no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
         no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
-        name.setValue("stop placec ");
+        name.setValue("stop place ");
         name.setLang("no");
         name.setTextIdType("");
         netexStopPlace.setName(name);
