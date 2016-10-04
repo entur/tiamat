@@ -35,8 +35,9 @@ public class PublicationDeliveryExporterTest {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
 
-        StopPlace actual = findStopPlace(publicationDeliveryStructure, String.valueOf(stopPlace.getId()));
-        assertThat(actual.getId()).isEqualTo(stopPlace.getId().toString());
+        String expectedId = "NSR:StopPlace:"+stopPlace.getId();
+        StopPlace actual = findStopPlace(publicationDeliveryStructure, expectedId);
+        assertThat(actual).isNotNull();
     }
 
     private StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {
@@ -46,6 +47,7 @@ public class PublicationDeliveryExporterTest {
                 .map(JAXBElement::getValue)
                 .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
                 .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .peek(System.out::println)
                 .filter(stopPlace -> stopPlace.getId().equals(stopPlaceId))
                 .findFirst().get();
     }
