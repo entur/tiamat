@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class NetexMapperTest {
 
     private NetexMapper netexMapper = new NetexMapper();
