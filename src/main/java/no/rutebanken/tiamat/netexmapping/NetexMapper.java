@@ -1,9 +1,12 @@
 package no.rutebanken.tiamat.netexmapping;
 
+import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
+import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.model.EntityStructure;
@@ -32,21 +35,24 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
-        mapperFactory.classMap(EntityStructure.class, no.rutebanken.netex.model.EntityStructure.class)
+
+        mapperFactory.classMap(StopPlace.class, no.rutebanken.tiamat.model.StopPlace.class)
+                .customize(new CustomMapper<StopPlace, no.rutebanken.tiamat.model.StopPlace>() {
+                    @Override
+                    public void mapAtoB(StopPlace netexStopPlace, no.rutebanken.tiamat.model.StopPlace tiamatStopPlace, MappingContext context) {
+                        String netexId = netexStopPlace.getId();
+                        Long tiamatId = Long.valueOf(netexId.substring(netexId.lastIndexOf(':')+1));
+                        tiamatStopPlace.setId(tiamatId);
+                    }
+
+                    @Override
+                    public void mapBtoA(no.rutebanken.tiamat.model.StopPlace tiamatStopPlace, StopPlace netexStopPlace, MappingContext context) {
+                        netexStopPlace.setId(tiamatStopPlace.getId().toString());
+                    }
+                })
+                .exclude("id")
                 .byDefault()
-                .customize(new CustomMapper<EntityStructure, no.rutebanken.netex.model.EntityStructure>() {
-                    @Override
-                    public void mapAtoB(EntityStructure model, no.rutebanken.netex.model.EntityStructure netex, MappingContext context) {
-                        netex.setId(model.toString());
-                    }
-
-                    @Override
-                    public void mapBtoA(no.rutebanken.netex.model.EntityStructure netex, EntityStructure model, MappingContext context) {
-                        // TODO: handle netex-ids with prefixes.
-                        model.setId(Long.parseLong(netex.getId()));
-                    }
-                });
-
+                .register();
     }
 
     public SiteFrame mapToNetexModel(no.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {

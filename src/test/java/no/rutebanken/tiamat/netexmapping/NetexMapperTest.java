@@ -11,6 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Ignore
 public class NetexMapperTest {
 
+    private NetexMapper netexMapper = new NetexMapper();
+
     @Test
     public void mapToNetexModel() throws Exception {
         no.rutebanken.tiamat.model.SiteFrame sourceSiteFrame = new no.rutebanken.tiamat.model.SiteFrame();
@@ -24,7 +26,7 @@ public class NetexMapperTest {
 
         sourceSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new NetexMapper().mapToNetexModel(sourceSiteFrame);
+        no.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -48,7 +50,7 @@ public class NetexMapperTest {
         stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
         netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        no.rutebanken.tiamat.model.SiteFrame actualSiteFrame = new NetexMapper().mapToTiamatModel(netexSiteFrame);
+        no.rutebanken.tiamat.model.SiteFrame actualSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
 
         assertThat(actualSiteFrame).isNotNull();
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -62,7 +64,7 @@ public class NetexMapperTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("name", "en", ""));
 
-        no.rutebanken.netex.model.StopPlace netexStopPlace = new NetexMapper().mapToNetexModel(stopPlace);
+        no.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -78,10 +80,28 @@ public class NetexMapperTest {
         stopPlace.setName(name);
         stopPlace.setId("1337");
 
-        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new NetexMapper().mapToTiamatModel(stopPlace);
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(stopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
         assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
         assertThat(tiamatStopPlace.getId()).isEqualTo(stopPlace.getId());
+    }
+
+    @Test
+    public void mapNetexStringIdToInternalLong() {
+        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
+        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString()
+                .withValue("stop place")
+                .withLang("no");
+        stopPlace.setName(name);
+
+        String netexId = "NSR:StopPlace:12345";
+        stopPlace.setId(netexId);
+
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(stopPlace);
+
+        assertThat(tiamatStopPlace.getName()).isNotNull();
+        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(tiamatStopPlace.getId()).isEqualTo(12345L);
     }
 }
