@@ -54,13 +54,12 @@ public class NetexMapperTest {
 
         assertThat(actualSiteFrame).isNotNull();
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
-        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId()).isEqualTo(stopPlace.getId());
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getId().toString()).isEqualTo(stopPlace.getId());
     }
 
 
     @Test
     public void mapToNetexStopPlace() throws Exception {
-
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("name", "en", ""));
 
@@ -71,37 +70,60 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapToInternalStopPlace() throws Exception {
-        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
+    public void mapToInternalStopPlaceId() throws Exception {
+        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
+        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
+        netexStopPlace.setId("1337");
+
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
+
+        assertThat(tiamatStopPlace).isNotNull();
+        assertThat(tiamatStopPlace.getId().toString()).isEqualTo(netexStopPlace.getId());
+    }
+
+    @Test
+    public void mapToInternalStopPlaceName() throws Exception {
+        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
         no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
         name.setValue("stop placec ");
         name.setLang("no");
         name.setTextIdType("");
-        stopPlace.setName(name);
-        stopPlace.setId("1337");
+        netexStopPlace.setName(name);
 
-        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(stopPlace);
+
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
-        assertThat(tiamatStopPlace.getId()).isEqualTo(stopPlace.getId());
+        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(netexStopPlace.getName().getValue());
+
     }
 
     @Test
-    public void mapNetexStringIdToInternalLong() {
-        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
+    public void mapStopPlaceNetexStringIdToInternalLong() {
+        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
         no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString()
                 .withValue("stop place")
                 .withLang("no");
-        stopPlace.setName(name);
+        netexStopPlace.setName(name);
 
         String netexId = "NSR:StopPlace:12345";
-        stopPlace.setId(netexId);
+        netexStopPlace.setId(netexId);
 
-        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(stopPlace);
+        no.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace.getName()).isNotNull();
-        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(netexStopPlace.getName().getValue());
         assertThat(tiamatStopPlace.getId()).isEqualTo(12345L);
+    }
+
+    @Test
+    public void mapStopPlaceInternalIdToNetexId() {
+
+        StopPlace tiamatStopPlace = new StopPlace();
+        tiamatStopPlace.setId(123456L);
+
+        no.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
+
+        assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
     }
 }

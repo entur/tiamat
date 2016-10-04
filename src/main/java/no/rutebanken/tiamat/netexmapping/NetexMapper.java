@@ -1,16 +1,11 @@
 package no.rutebanken.tiamat.netexmapping;
 
-import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.netex.model.StopPlace;
-import no.rutebanken.tiamat.model.EntityStructure;
 import no.rutebanken.tiamat.netexmapping.converters.*;
+import no.rutebanken.tiamat.netexmapping.mapper.StopPlaceIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,19 +32,7 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
 
         mapperFactory.classMap(StopPlace.class, no.rutebanken.tiamat.model.StopPlace.class)
-                .customize(new CustomMapper<StopPlace, no.rutebanken.tiamat.model.StopPlace>() {
-                    @Override
-                    public void mapAtoB(StopPlace netexStopPlace, no.rutebanken.tiamat.model.StopPlace tiamatStopPlace, MappingContext context) {
-                        String netexId = netexStopPlace.getId();
-                        Long tiamatId = Long.valueOf(netexId.substring(netexId.lastIndexOf(':')+1));
-                        tiamatStopPlace.setId(tiamatId);
-                    }
-
-                    @Override
-                    public void mapBtoA(no.rutebanken.tiamat.model.StopPlace tiamatStopPlace, StopPlace netexStopPlace, MappingContext context) {
-                        netexStopPlace.setId(tiamatStopPlace.getId().toString());
-                    }
-                })
+                .customize(new StopPlaceIdMapper())
                 .exclude("id")
                 .byDefault()
                 .register();
