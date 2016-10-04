@@ -229,7 +229,7 @@ public class DefaultStopPlaceImporterTest {
 
         StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, new AtomicInteger());
 
-        assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId.toString());
+        assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
         assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
 
         assertThat(importedStopPlace.getKeyList()).isNotNull();
@@ -245,7 +245,7 @@ public class DefaultStopPlaceImporterTest {
 
         assertThat(stopPlaceKeyVal.getValue())
                 .as("the original ID should be stored as value")
-                .isEqualTo(stopPlaceOriginalId);
+                .isEqualTo(stopPlaceOriginalId.toString());
 
         assertThat(stopPlaceKeyVal.getValue())
                 .as("the original ID should not be the same as the new persisted ID")
@@ -259,7 +259,7 @@ public class DefaultStopPlaceImporterTest {
                 .get(0);
         assertThat(quayKeyValue.getValue())
                 .as("the original ID should be stored as value")
-                .isEqualTo(quayOriginalId);
+                .isEqualTo(quayOriginalId.toString());
 
     }
 

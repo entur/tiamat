@@ -140,7 +140,7 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .assertThat()
                 .body("name", equalTo(stopPlaceName))
                 .body("quays.name", hasItems(firstQuayName, secondQuayName))
-                .body("quays.id", hasItems(quay.getId(), secondQuay.getId()));
+                .body("quays.id", hasItems(quay.getId().toString(), secondQuay.getId().toString()));
 
     }
 
