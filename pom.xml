@@ -25,9 +25,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.2.84</fabric8.version>
-        <docker.maven.plugin.version>0.13.8</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.4.0.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+        <docker.maven.plugin.version>0.13.9</docker.maven.plugin.version>
+        <spring-boot-plugin.version>1.4.1.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>1.4.1.RELEASE</spring-boot.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
         <!-- Version must correspond with hibernate core version from spring -->
@@ -36,9 +36,9 @@
         <geodb.version>0.7</geodb.version>
 
         <!-- Docker & Fabric8 Configs -->
-        <docker.from>dr.rutebanken.org/rutebanken/java-base-image</docker.from>
-        <fabric8.dockerUser>rutebanken/</fabric8.dockerUser>
-        <docker.image>dr.rutebanken.org/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
+        <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
+        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
+        <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
 
         <fabric8.service.name>springboot-webmvc</fabric8.service.name>
         <fabric8.service.port>80</fabric8.service.port>
@@ -326,7 +326,7 @@
                             <build>
                                 <from>${docker.from}</from>
                                 <assembly>
-                                    <basedir>/app</basedir>
+                                    <basedir>/deployments</basedir>
                                     <descriptorRef>artifact</descriptorRef>
                                 </assembly>
                                 <env>
