@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -40,6 +41,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "value"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_multilingualstring")
 @Table(name = "multilingual_string", indexes = {@Index(name = "multilingual_value", columnList = "value")})
 public class MultilingualString {
 

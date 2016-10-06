@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.ManyToAny;
@@ -53,6 +54,7 @@ import javax.xml.bind.annotation.XmlType;
     "navigationPathRefOrNavigationPath"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_navigationpaths_relstructure")
 public class NavigationPaths_RelStructure
     extends ContainmentAggregationStructure
 {
