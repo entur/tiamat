@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -64,7 +63,6 @@ import java.math.BigDecimal;
     "precision"
 })
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_locationstructure")
 @Table(name = "location")
 public class LocationStructure {
 

@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
     "keyValue"
 })
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_keyliststructure")
 @Table(name = "key_list")
 public class KeyListStructure {
 

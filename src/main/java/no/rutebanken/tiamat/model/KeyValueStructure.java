@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -44,7 +43,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_keyvaluestructure")
 @Table(name = "key_value", indexes = {
     @Index(name = "keyvalue", columnList = "key, value")
 })

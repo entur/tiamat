@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,6 @@ import javax.xml.bind.annotation.XmlType;
     "accessRefOrAccess"
 })
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_accesses_relstructure")
 public class Accesses_RelStructure
     extends ContainmentAggregationStructure
 {

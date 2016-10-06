@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -46,7 +45,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "")
 @XmlRootElement(name = "AccessibilityLimitation")
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_accessibilitylimitation")
 public class AccessibilityLimitation
     extends AccessibilityLimitation_VersionedChildStructure
 {

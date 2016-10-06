@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ import javax.xml.bind.annotation.XmlType;
     "pathLinkRefOrSitePathLink"
 })
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_sitepathlinks_relstructure")
 public class SitePathLinks_RelStructure
     extends ContainmentAggregationStructure
 {

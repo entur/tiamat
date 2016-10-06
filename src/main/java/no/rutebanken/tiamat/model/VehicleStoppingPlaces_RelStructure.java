@@ -7,7 +7,6 @@
 
 
 package no.rutebanken.tiamat.model;
-import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ import javax.xml.bind.annotation.XmlType;
     "vehicleStoppingPlaceRefOrVehicleStoppingPlace"
 })
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_vehiclestoppingplaces_relstructure")
 public class VehicleStoppingPlaces_RelStructure
     extends ContainmentAggregationStructure
 {
