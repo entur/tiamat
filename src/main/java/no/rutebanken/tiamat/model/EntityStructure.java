@@ -55,7 +55,13 @@ public abstract class EntityStructure implements Serializable{
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="idgen")
+    @Column(name = "id", updatable=false)
+    @GenericGenerator(name = "pooled", strategy = "org.hibernate.id.enhanced.TableGenerator", parameters = {
+            @org.hibernate.annotations.Parameter(name = "value_column_name", value = "sequence_next_hi_value"),
+            @org.hibernate.annotations.Parameter(name = "prefer_entity_table_as_segment_value", value = "true"),
+            @org.hibernate.annotations.Parameter(name = "optimizer", value = "pooled-lo"),
+            @org.hibernate.annotations.Parameter(name = "increment_size", value = "100")})
     protected Long id;
 
     /**

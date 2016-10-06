@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.ManyToAny;
@@ -53,6 +54,7 @@ import java.util.List;
     "installedEquipmentRefOrInstalledEquipmentOrLocalServiceRef"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_explicitequipments_relstructure")
 public class ExplicitEquipments_RelStructure
     extends ContainmentAggregationStructure
 {

@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -109,6 +110,7 @@ import java.time.ZonedDateTime;
     TypeOfValueRefStructure.class
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_versionofobjectrefstructure")
 public class VersionOfObjectRefStructure implements Serializable {
 
     @Id

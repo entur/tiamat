@@ -7,6 +7,9 @@
 
 
 package no.rutebanken.tiamat.model;
+import org.hibernate.annotations.Parameter;
+
+import javax.persistence.SequenceGenerator;
 
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -63,6 +66,8 @@ import java.io.Serializable;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
 @Entity
+
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_stopplace" )
 public class StopPlace
     extends StopPlace_VersionStructure implements Serializable
 {

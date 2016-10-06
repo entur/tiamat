@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ import javax.xml.bind.annotation.XmlType;
     "quayRefOrQuay"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_quays_relstructure")
 public class Quays_RelStructure
     extends ContainmentAggregationStructure
 {

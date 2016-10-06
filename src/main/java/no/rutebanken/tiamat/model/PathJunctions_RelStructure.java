@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ import javax.xml.bind.annotation.XmlType;
     "pathJunctionRefOrPathJunction"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_pathjunctions_relstructure")
 public class PathJunctions_RelStructure
     extends ContainmentAggregationStructure
 {

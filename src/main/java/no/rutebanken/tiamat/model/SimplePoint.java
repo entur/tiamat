@@ -7,6 +7,7 @@
 
 
 package no.rutebanken.tiamat.model;
+import javax.persistence.SequenceGenerator;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -40,6 +41,7 @@ import javax.xml.bind.annotation.*;
     "location"
 })
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_simplepoint")
 public class SimplePoint
     extends EntityInVersionStructure
 {
