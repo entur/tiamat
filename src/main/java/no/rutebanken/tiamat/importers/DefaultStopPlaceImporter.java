@@ -117,12 +117,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     foundStopPlace.getQuays().add(quay);
                     quayRepository.save(quay);
                 });
-                // Assume topographic place already set ?
-                stopPlaceRepository.save(foundStopPlace);
-                initializeLazyReferences(foundStopPlace);
-                return foundStopPlace;
-            }
 
+                if (!quaysToAdd.isEmpty()) {
+                    logger.info("Found existing stop place {}. Adding {} quays to it", foundStopPlace.getId(), quaysToAdd.size());
+                    stopPlaceRepository.save(foundStopPlace);
+                }
+                return initializeLazyReferences(foundStopPlace);
+            }
             // TODO: Hack to avoid 'detached entity passed to persist'.
             newStopPlace.getCentroid().getLocation().setId(0);
 
@@ -153,20 +154,21 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             stopPlaceRepository.save(newStopPlace);
             stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
             nearbyStopPlaceFinder.update(newStopPlace);
-            logger.info("Saving stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
-            initializeLazyReferences(newStopPlace);
-            return newStopPlace;
+            logger.info("Saved stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+
+            return initializeLazyReferences(newStopPlace);
         }
         finally {
             semaphore.release();
         }
     }
 
-    private void initializeLazyReferences(StopPlace stopPlace) {
+    private StopPlace initializeLazyReferences(StopPlace stopPlace) {
         if(stopPlace != null) {
             Hibernate.initialize(stopPlace.getLevels());
             Hibernate.initialize(stopPlace.getOtherTransportModes());
         }
+        return stopPlace;
     }
 
     /**
