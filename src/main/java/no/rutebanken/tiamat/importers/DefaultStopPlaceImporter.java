@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
 import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.hibernate.Hibernate;
@@ -11,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
@@ -29,6 +30,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
     private QuayRepository quayRepository;
 
     private StopPlaceRepository stopPlaceRepository;
@@ -41,10 +44,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
+                                    CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopPlaceFinder nearbyStopPlaceFinder) {
         this.topographicPlaceCreator = topographicPlaceCreator;
+        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
@@ -131,6 +136,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 topographicPlaceCreator.setTopographicReference(newStopPlace,
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
                         topographicPlacesCreatedCounter);
+            } else {
+                lookupCountyAndMunicipality(newStopPlace);
             }
             Long originalId = newStopPlace.getId();
             resetIdAndKeepOriginalId(newStopPlace);
@@ -160,6 +167,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
         finally {
             semaphore.release();
+        }
+    }
+
+    private void lookupCountyAndMunicipality(StopPlace stopPlace) {
+        try {
+            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+        } catch (IOException|InterruptedException e) {
+            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
         }
     }
 

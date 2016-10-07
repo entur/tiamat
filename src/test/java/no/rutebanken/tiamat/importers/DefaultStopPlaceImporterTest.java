@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.config.GeometryFactoryConfig;
 import no.rutebanken.tiamat.model.*;
+import no.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
@@ -42,8 +43,10 @@ public class DefaultStopPlaceImporterTest {
 
     private NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 20000, 30, TimeUnit.MINUTES);
 
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService = mock(CountyAndMunicipalityLookupService.class);
+
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
-            quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder);
+            countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder);
 
     private SiteFrame siteFrame = new SiteFrame();
 
