@@ -27,6 +27,9 @@ public class StopPlaceRepositoryImplTest {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
+
+    @Autowired
     private QuayRepository quayRepository;
 
     @Autowired
@@ -186,6 +189,35 @@ public class StopPlaceRepositoryImplTest {
 
         Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
         assertThat(result).isNull();
+    }
+
+
+    @Test
+    public void findStopPlace() throws Exception {
+        String stopPlaceName = "Nesbru";
+        String municipalityName = "Asker";
+        StopPlace stopPlace = createStopPlace(stopPlaceName, municipalityName);
+        stopPlaceRepository.save(stopPlace);
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Long.valueOf(stopPlace.getTopographicPlaceRef().getRef()), null, pageable);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+    private StopPlace createStopPlace(String name, String municipalityName) {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString(name, "", ""));
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setName(new MultilingualString(municipalityName, "", ""));
+
+        topographicPlaceRepository.save(municipality);
+
+        TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
+        topographicPlaceRefStructure.setRef(municipality.getId().toString());
+        stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
+        return stopPlace;
     }
 
     private StopPlace createStopPlace(double latitude, double longitude) {

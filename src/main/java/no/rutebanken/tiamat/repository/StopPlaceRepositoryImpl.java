@@ -4,6 +4,7 @@ package no.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import no.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,12 +12,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import no.rutebanken.tiamat.model.StopPlace;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,4 +127,43 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             return null;
         }
     }
+
+    @Override
+    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, Pageable pageable) {
+        StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
+
+        queryString.append("WHERE");
+
+        List<String> wheres = new ArrayList<>();
+        Map<String, String> parameters = new HashMap<>();
+
+        if(municipalityId != null){
+            wheres.add("stopPlace.topographicPlaceRef.ref = :municipalityId");
+            parameters.put("municipalityId", String.valueOf(municipalityId));
+        }
+
+        if(name != null) {
+            wheres.add("stopPlace.name.value = :name");
+            parameters.put("name", name);
+        }
+
+        for(int i = 0; i < wheres.size(); i++) {
+            if(i > 0) {
+                queryString.append(" AND ");
+            }
+            queryString.append(' ').append(wheres.get(i)).append(' ');
+        }
+
+        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
+
+        parameters.forEach(query::setParameter);
+
+        query.setFirstResult(pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        List<StopPlace> stopPlaces = query.getResultList();
+        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+
+    }
+
 }

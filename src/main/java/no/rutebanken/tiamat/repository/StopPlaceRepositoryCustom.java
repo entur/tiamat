@@ -23,4 +23,5 @@ public interface StopPlaceRepositoryCustom {
 
     Long findByKeyValue(String key, String value);
 
+    Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, Pageable pageable);
 }
