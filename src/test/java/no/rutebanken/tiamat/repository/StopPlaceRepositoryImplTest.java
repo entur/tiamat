@@ -240,6 +240,21 @@ public class StopPlaceRepositoryImplTest {
         System.out.println(result.getContent().get(0));
     }
 
+    @Test
+    public void findStopPlaceByCountyAndNameAndExpectEmptyResult() throws Exception {
+        String municipalityName = "Asker";
+        String countyName = "Akershus";
+
+        TopographicPlace county = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, county);
+        createStopPlaceWithMunicipality("Somewhere", municipality);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, county.getId(), pageable);
+        assertThat(result).isEmpty();
+    }
+
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new MultilingualString(municipalityName, "", ""));
