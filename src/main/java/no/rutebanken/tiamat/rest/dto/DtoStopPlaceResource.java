@@ -53,7 +53,10 @@ public class DtoStopPlaceResource {
     public List<StopPlaceDto> getStopPlaces(
             @DefaultValue(value = "0") @QueryParam(value = "page") int page,
             @DefaultValue(value = "20") @QueryParam(value = "size") int size,
-            @QueryParam(value = "name") String name) {
+            @QueryParam(value = "name") String name,
+            @QueryParam(value = "municipalityReference") Long municipalityReference,
+            @QueryParam(value = "countyReference") Long countyReference
+    ) {
 
 
         keyCloak();
