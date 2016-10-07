@@ -193,10 +193,11 @@ public class StopPlaceRepositoryImplTest {
 
 
     @Test
-    public void findStopPlace() throws Exception {
+    public void findStopPlaceByMunicipalityAndName() throws Exception {
         String stopPlaceName = "Nesbru";
         String municipalityName = "Asker";
-        StopPlace stopPlace = createStopPlace(stopPlaceName, municipalityName);
+        TopographicPlace municipality = createMunicipality(municipalityName, null);
+        StopPlace stopPlace = createStopPlaceWithMunicipality(stopPlaceName, municipality);
         stopPlaceRepository.save(stopPlace);
         Pageable pageable = new PageRequest(0, 10);
 
@@ -205,18 +206,73 @@ public class StopPlaceRepositoryImplTest {
         System.out.println(result.getContent().get(0));
     }
 
-    private StopPlace createStopPlace(String name, String municipalityName) {
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(name, "", ""));
+    @Test
+    public void findStopPlaceByMunicipalityCountyAndName() throws Exception {
+        String stopPlaceName = "Bergerveien";
+        String municipalityName = "Asker";
+        String countyName = "Akershus";
 
+        TopographicPlace county = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, county);
+        createStopPlaceWithMunicipality(stopPlaceName, municipality);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipality.getId(), county.getId(), pageable);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+    @Test
+    public void findStopPlaceByCountyAndName() throws Exception {
+        String stopPlaceName = "IKEA Slependen";
+        String municipalityName = "Asker";
+        String countyName = "Akershus";
+
+        TopographicPlace county = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, county);
+        createStopPlaceWithMunicipality(stopPlaceName, municipality);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, county.getId(), pageable);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+    private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new MultilingualString(municipalityName, "", ""));
 
-        topographicPlaceRepository.save(municipality);
+        if(parentCounty != null) {
+            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
+            countyRef.setRef(parentCounty.getId().toString());
+            municipality.setParentTopographicPlaceRef(countyRef);
+        }
 
-        TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
-        topographicPlaceRefStructure.setRef(municipality.getId().toString());
-        stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
+        topographicPlaceRepository.save(municipality);
+        return municipality;
+    }
+
+    private TopographicPlace createCounty(String countyName) {
+
+        TopographicPlace county = new TopographicPlace();
+        county.setName(new MultilingualString(countyName, "", ""));
+        topographicPlaceRepository.save(county);
+
+        return county;
+    }
+
+    private StopPlace createStopPlaceWithMunicipality(String name, TopographicPlace municipality) {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString(name, "", ""));
+
+        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
+        municipalityRef.setRef(municipality.getId().toString());
+        stopPlace.setTopographicPlaceRef(municipalityRef);
+
+        stopPlaceRepository.save(stopPlace);
+
         return stopPlace;
     }
 

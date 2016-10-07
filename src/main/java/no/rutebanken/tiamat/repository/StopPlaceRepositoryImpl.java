@@ -139,7 +139,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         if(municipalityId != null){
             wheres.add("stopPlace.topographicPlaceRef.ref = :municipalityId");
-            parameters.put("municipalityId", String.valueOf(municipalityId));
+            parameters.put("municipalityId", municipalityId.toString());
+        }
+
+        if(countyId != null) {
+            wheres.add("stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref = :countyId)");
+            parameters.put("countyId", countyId.toString());
         }
 
         if(name != null) {
@@ -154,7 +159,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             queryString.append(' ').append(wheres.get(i)).append(' ');
         }
 
-        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
+
+        logger.debug("{}", queryString);
+         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
 
         parameters.forEach(query::setParameter);
 
