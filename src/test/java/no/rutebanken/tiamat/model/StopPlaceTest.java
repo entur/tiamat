@@ -292,4 +292,13 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
     }
+
+    @Test
+    public void testToString() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("stoppested", "", ""));
+        stopPlace.setId(123123123L);
+
+        System.out.println(stopPlace.toString());
+    }
 }

@@ -8,6 +8,8 @@
 
 package no.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -67,5 +69,13 @@ public class StopPlace
     extends StopPlace_VersionStructure implements Serializable
 {
 
-
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("name", name)
+                .add("quays", getQuays() != null ? getQuays().size() : 0)
+                .toString();
+    }
 }
