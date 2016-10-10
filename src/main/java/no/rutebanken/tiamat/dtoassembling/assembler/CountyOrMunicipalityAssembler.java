@@ -20,12 +20,14 @@ public class CountyOrMunicipalityAssembler {
     public List<CountyOrMunicipalityDto> assemble(Iterable<TopographicPlace> places) {
         Map<Long, TopographicPlace> counties = new HashMap<>();
         List<TopographicPlace> municipalities = new ArrayList<>();
-        List<CountyOrMunicipalityDto> returnList = new ArrayList<>();
+        List<CountyOrMunicipalityDto> countyOrMunicipalityDtos = new ArrayList<>();
 
         places.forEach(place -> {
-            if (place.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY)) {
+            if(place.getTopographicPlaceType() == null) {
+                logger.warn("TopographicPlace has type null", place.getId());
+            } else if (place.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY)) {
                 counties.put(place.getId(), place);
-                returnList.add(map(place));
+                countyOrMunicipalityDtos.add(map(place));
             } else if (place.getTopographicPlaceType().equals(MUNICIPALITY_TYPE)) {
                 municipalities.add(place);
             } else {
@@ -38,17 +40,17 @@ public class CountyOrMunicipalityAssembler {
                 long countyId = Long.parseLong(municipality.getParentTopographicPlaceRef().getRef());
                 TopographicPlace county = counties.get(countyId);
                 CountyOrMunicipalityDto admin = map(municipality);
-                if (county != null) {
+                if (county != null) {
                     admin.county = county.getName().getValue();
-                    returnList.add(admin);
+                    countyOrMunicipalityDtos.add(admin);
                 } else {
                     logger.warn("No county with ID {}", countyId);
                 }
             } else {
-                logger.warn("Found topographic place of type {} without parent place ref.", MUNICIPALITY_TYPE);
+                logger.warn("Found topographic place {} of type {} without parent place ref.", municipality.getId(), MUNICIPALITY_TYPE);
             }
         });
-
+        return countyOrMunicipalityDtos;
     }
 
 
