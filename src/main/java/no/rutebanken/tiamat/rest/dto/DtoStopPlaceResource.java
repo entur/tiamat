@@ -57,7 +57,7 @@ public class DtoStopPlaceResource {
             @QueryParam(value = "name") String name,
             @QueryParam(value = "municipalityReference") Long municipalityReference,
             @QueryParam(value = "countyReference") Long countyReference,
-            @QueryParam(value = "stopPlaceType") StopTypeEnumeration stopPlaceType) {
+            @QueryParam(value = "stopPlaceTypes") List<StopTypeEnumeration> stopPlaceTypes) {
 
 
         keyCloak();
@@ -68,8 +68,8 @@ public class DtoStopPlaceResource {
 
         Page<StopPlace> stopPlaces;
 
-        if ((name != null && !name.isEmpty()) || countyReference != null || municipalityReference != null || stopPlaceType != null) {
-            stopPlaces = stopPlaceRepository.findStopPlace(name, countyReference, municipalityReference, stopPlaceType, pageable);
+        if ((name != null && !name.isEmpty()) || countyReference != null || municipalityReference != null || stopPlaceTypes != null) {
+            stopPlaces = stopPlaceRepository.findStopPlace(name, countyReference, municipalityReference, stopPlaceTypes, pageable);
         } else {
             stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
         }

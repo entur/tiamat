@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -274,8 +277,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
 
         stopPlaceRepository.save(stopPlace);
-
-        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(null, null, null, StopTypeEnumeration.AIRPORT, new PageRequest(0,1));
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(null, null, null, Arrays.asList(StopTypeEnumeration.AIRPORT), new PageRequest(0,1));
         Assertions.assertThat(actual).isNotEmpty();
 
     }

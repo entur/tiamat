@@ -130,7 +130,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, StopTypeEnumeration stopPlaceType, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
 
         queryString.append("WHERE");
@@ -153,10 +153,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             parameters.put("name", name);
         }
 
-
-        if(stopPlaceType != null) {
-            wheres.add("stopPlace.stopPlaceType = :stopPlaceType");
-            parameters.put("stopPlaceType", stopPlaceType);
+        if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
+            wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
+            parameters.put("stopPlaceTypes", stopPlaceTypes);
         }
 
         for(int i = 0; i < wheres.size(); i++) {
