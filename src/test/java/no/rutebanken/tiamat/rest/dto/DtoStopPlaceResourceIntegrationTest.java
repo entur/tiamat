@@ -144,5 +144,25 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     }
 
+    @Test
+    public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
+        String lang = "en";
 
+        StopPlace stopPlace = new StopPlace();
+        String stopPlaceName = "Grytnes";
+        stopPlace.setName(new MultilingualString(stopPlaceName, lang, ""));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))));
+        stopPlaceRepository.save(stopPlace);
+
+        given()
+                .queryParam("name", "ytNES")
+        .when()
+                .get("/jersey/stop_place/")
+        .then()
+                .log().body()
+                .statusCode(200)
+                .body(Matchers.notNullValue())
+                .assertThat()
+                    .body("[0].name", equalTo(stopPlaceName));
+    }
 }

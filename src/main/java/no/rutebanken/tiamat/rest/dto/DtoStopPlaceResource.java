@@ -67,8 +67,8 @@ public class DtoStopPlaceResource {
 
         Page<StopPlace> stopPlaces;
 
-        if (name != null && name.length() != 0) {
-            stopPlaces = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc(name, pageable);
+        if ((name != null && !name.isEmpty()) || countyReference != null || municipalityReference != null) {
+            stopPlaces = stopPlaceRepository.findStopPlace(name, countyReference, municipalityReference, pageable);
         } else {
             stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
         }

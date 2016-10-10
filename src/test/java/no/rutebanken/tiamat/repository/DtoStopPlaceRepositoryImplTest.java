@@ -21,7 +21,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
-public class StopPlaceRepositoryImplTest {
+public class DtoStopPlaceRepositoryImplTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
