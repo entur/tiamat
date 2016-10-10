@@ -133,8 +133,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
 
-        queryString.append("WHERE");
-
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
 
@@ -161,6 +159,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
                 queryString.append(" AND ");
+            } else {
+                queryString.append("WHERE");
             }
             queryString.append(' ').append(wheres.get(i)).append(' ');
         }

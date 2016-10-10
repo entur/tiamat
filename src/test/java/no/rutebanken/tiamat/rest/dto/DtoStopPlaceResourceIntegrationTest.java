@@ -151,6 +151,24 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     @Test
+    public void searchForStopPlaceNoParams() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        String stopPlaceName = "Eselstua";
+        stopPlace.setName(new MultilingualString(stopPlaceName));
+        stopPlaceRepository.save(stopPlace);
+
+        given()
+                .when()
+                .get("/jersey/stop_place/")
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body(Matchers.notNullValue())
+                .assertThat()
+                .body("[0].name", equalTo(stopPlaceName));
+    }
+
+    @Test
     public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
         String lang = "en";
 
