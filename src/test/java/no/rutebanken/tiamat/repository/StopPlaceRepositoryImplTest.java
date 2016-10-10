@@ -21,7 +21,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
-public class DtoStopPlaceRepositoryImplTest {
+public class StopPlaceRepositoryImplTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -201,7 +201,7 @@ public class DtoStopPlaceRepositoryImplTest {
         stopPlaceRepository.save(stopPlace);
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Long.valueOf(stopPlace.getTopographicPlaceRef().getRef()), null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Long.valueOf(stopPlace.getTopographicPlaceRef().getRef()), null, null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -218,7 +218,7 @@ public class DtoStopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipality.getId(), county.getId(), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipality.getId(), county.getId(), null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -235,7 +235,7 @@ public class DtoStopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, county.getId(), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, county.getId(), null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -247,7 +247,7 @@ public class DtoStopPlaceRepositoryImplTest {
         Pageable pageable = new PageRequest(0, 10);
 
         createStopPlaceWithMunicipality(stopPlaceName, null);
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("lEpEnden", null, null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("lEpEnden", null, null, null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -263,8 +263,21 @@ public class DtoStopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, county.getId(), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, county.getId(), null, pageable);
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void findStopPlaceByTypeAirport() {
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
+
+        stopPlaceRepository.save(stopPlace);
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(null, null, null, StopTypeEnumeration.AIRPORT, new PageRequest(0,1));
+        Assertions.assertThat(actual).isNotEmpty();
+
     }
 
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {

@@ -6,6 +6,7 @@ import no.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import no.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDTO;
 import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.StopTypeEnumeration;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -55,8 +56,8 @@ public class DtoStopPlaceResource {
             @DefaultValue(value = "20") @QueryParam(value = "size") int size,
             @QueryParam(value = "name") String name,
             @QueryParam(value = "municipalityReference") Long municipalityReference,
-            @QueryParam(value = "countyReference") Long countyReference
-    ) {
+            @QueryParam(value = "countyReference") Long countyReference,
+            @QueryParam(value = "stopPlaceType") StopTypeEnumeration stopPlaceType) {
 
 
         keyCloak();
@@ -67,8 +68,8 @@ public class DtoStopPlaceResource {
 
         Page<StopPlace> stopPlaces;
 
-        if ((name != null && !name.isEmpty()) || countyReference != null || municipalityReference != null) {
-            stopPlaces = stopPlaceRepository.findStopPlace(name, countyReference, municipalityReference, pageable);
+        if ((name != null && !name.isEmpty()) || countyReference != null || municipalityReference != null || stopPlaceType != null) {
+            stopPlaces = stopPlaceRepository.findStopPlace(name, countyReference, municipalityReference, stopPlaceType, pageable);
         } else {
             stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
         }

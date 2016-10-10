@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import no.rutebanken.tiamat.model.StopPlace;
+import no.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -129,13 +130,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, StopTypeEnumeration stopPlaceType, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
 
         queryString.append("WHERE");
 
         List<String> wheres = new ArrayList<>();
-        Map<String, String> parameters = new HashMap<>();
+        Map<String, Object> parameters = new HashMap<>();
 
         if(municipalityId != null){
             wheres.add("stopPlace.topographicPlaceRef.ref = :municipalityId");
@@ -150,6 +151,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         if(name != null) {
             wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
             parameters.put("name", name);
+        }
+
+
+        if(stopPlaceType != null) {
+            wheres.add("stopPlace.stopPlaceType = :stopPlaceType");
+            parameters.put("stopPlaceType", stopPlaceType);
         }
 
         for(int i = 0; i < wheres.size(); i++) {
