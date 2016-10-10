@@ -75,6 +75,12 @@ public class Zone_VersionStructure
     @Transient
     protected ZoneRefStructure parentZoneRef;
 
+    public Zone_VersionStructure() {}
+
+    public Zone_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
     /**
      * Gets the value of the types property.
      * 

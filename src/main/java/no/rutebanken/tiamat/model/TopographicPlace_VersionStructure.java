@@ -104,6 +104,13 @@ public class TopographicPlace_VersionStructure
     @Transient
     protected Accesses_RelStructure accesses;
 
+    public TopographicPlace_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public TopographicPlace_VersionStructure() {
+    }
+
     /**
      * Gets the value of the isoCode property.
      * 

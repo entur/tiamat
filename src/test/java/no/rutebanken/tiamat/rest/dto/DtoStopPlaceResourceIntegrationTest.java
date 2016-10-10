@@ -8,6 +8,7 @@ import no.rutebanken.tiamat.TiamatTestApplication;
 import no.rutebanken.tiamat.model.*;
 import no.rutebanken.tiamat.repository.QuayRepository;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
+import no.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,10 @@ public class DtoStopPlaceResourceIntegrationTest {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
+
+
+    @Autowired
     private QuayRepository quayRepository;
 
     @Autowired
@@ -51,6 +56,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void clearRepositories() {
         stopPlaceRepository.deleteAll();
         quayRepository.deleteAll();
+        topographicPlaceRepository.deleteAll();
     }
 
     @Test
@@ -87,9 +93,9 @@ public class DtoStopPlaceResourceIntegrationTest {
                         "}\n" +
                         "]\n" +
                         "}")
-            .when()
+                .when()
                 .post("/jersey/stop_place")
-            .then()
+                .then()
                 .body("name", is("Bogen skole"))
                 .body("id", notNullValue())
                 .body("centroid.location.longitude", equalTo(17.003237f))
@@ -156,13 +162,57 @@ public class DtoStopPlaceResourceIntegrationTest {
 
         given()
                 .queryParam("name", "ytNES")
-        .when()
+                .when()
                 .get("/jersey/stop_place/")
-        .then()
+                .then()
                 .log().body()
                 .statusCode(200)
                 .body(Matchers.notNullValue())
                 .assertThat()
-                    .body("[0].name", equalTo(stopPlaceName));
+                .body("[0].name", equalTo(stopPlaceName));
     }
+
+    @Test
+    public void searchForStopsWithTypeTramWithMunicipalityAndCountySpecified() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new MultilingualString("Anda"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
+
+        TopographicPlace hordaland = new TopographicPlace(new MultilingualString("Hordaland"));
+        topographicPlaceRepository.save(hordaland);
+
+        TopographicPlace kvinnherad = new TopographicPlace(new MultilingualString("Kvinnherad"));
+
+
+        TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
+        countyRef.setRef(hordaland.getId().toString());
+
+        kvinnherad.setParentTopographicPlaceRef(countyRef);
+
+        topographicPlaceRepository.save(kvinnherad);
+
+
+        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
+        municipalityRef.setRef(kvinnherad.getId().toString());
+
+        stopPlaceRepository.save(stopPlace);
+
+        given()
+            .param("name", "A")
+            .param("stopPlaceType", "onstreetTram")
+            .param("municipality", kvinnherad.getId().toString())
+            .param("county", hordaland.getId().toString())
+            .get("/jersey/stop_place/")
+        .then()
+            .log().body()
+            .statusCode(200)
+            .body(Matchers.notNullValue())
+            .assertThat()
+            .body("[0].name", equalTo(stopPlace.getName().getValue()));
+
+
+    }
+
+
 }

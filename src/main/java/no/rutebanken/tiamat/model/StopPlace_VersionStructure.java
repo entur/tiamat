@@ -199,6 +199,13 @@ public class StopPlace_VersionStructure
     @Transient
     protected VehicleStoppingPlaces_RelStructure vehicleStoppingPlaces;
 
+    public StopPlace_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public StopPlace_VersionStructure() {
+    }
+
 
     /**
      * Gets the value of the publicCode property.

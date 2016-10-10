@@ -86,6 +86,14 @@ public abstract class GroupOfEntities_VersionStructure
     @Transient
     protected PrivateCodeStructure privateCode;
 
+
+    public GroupOfEntities_VersionStructure() {
+    }
+
+    public GroupOfEntities_VersionStructure(MultilingualString name) {
+        this.name = name;
+    }
+
     /**
      * Gets the value of the name property.
      * 

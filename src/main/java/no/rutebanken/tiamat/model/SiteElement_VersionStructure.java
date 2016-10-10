@@ -114,6 +114,12 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected SiteFacilitySets_RelStructure facilities;
 
+    public SiteElement_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public SiteElement_VersionStructure() {}
+
     /**
      * Gets the value of the accessibilityAssessment property.
      * 

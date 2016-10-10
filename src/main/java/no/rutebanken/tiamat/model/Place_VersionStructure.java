@@ -52,6 +52,12 @@ public abstract class Place_VersionStructure
 
     protected TypeOfPlaceRefs_RelStructure placeTypes;
 
+    public Place_VersionStructure(){}
+
+    public Place_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
     /**
      * Gets the value of the placeTypes property.
      * 

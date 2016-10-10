@@ -68,6 +68,11 @@ import java.io.Serializable;
 public class StopPlace
     extends StopPlace_VersionStructure implements Serializable
 {
+    public StopPlace(MultilingualString name) {
+        super(name);
+    }
+
+    public StopPlace() {}
 
     @Override
     public String toString() {

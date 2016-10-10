@@ -74,7 +74,7 @@ public class FlexibleQuay_VersionStructure
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-
+    
     /**
      * Gets the value of the nameSuffix property.
      * 

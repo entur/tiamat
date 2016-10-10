@@ -69,6 +69,12 @@ public class AddressablePlace_VersionStructure
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected RoadAddress roadAddress;
 
+    public AddressablePlace_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public AddressablePlace_VersionStructure() {}
+
     /**
      * Gets the value of the url property.
      * 

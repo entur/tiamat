@@ -71,6 +71,10 @@ public class MultilingualString {
         this.textIdType = textIdType;
     }
 
+    public MultilingualString(String value) {
+        this.value = value;
+    }
+
     /**
      * Gets the value of the value property.
      * 

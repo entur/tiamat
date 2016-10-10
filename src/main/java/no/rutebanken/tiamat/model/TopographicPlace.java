@@ -60,5 +60,9 @@ public class TopographicPlace
     extends TopographicPlace_VersionStructure
 {
 
+    public TopographicPlace(MultilingualString name) {
+        super(name);
+    }
 
+    public TopographicPlace() {}
 }

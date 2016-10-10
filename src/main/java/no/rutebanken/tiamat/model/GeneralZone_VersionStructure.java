@@ -38,4 +38,7 @@ public class GeneralZone_VersionStructure
 {
 
 
+    public GeneralZone_VersionStructure(MultilingualString name) {
+        super(name);
+    }
 }

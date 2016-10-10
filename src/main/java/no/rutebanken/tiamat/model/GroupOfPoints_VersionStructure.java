@@ -51,6 +51,12 @@ public class GroupOfPoints_VersionStructure
 
     protected PointRefs_RelStructure members;
 
+    public GroupOfPoints_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public GroupOfPoints_VersionStructure() {}
+
     /**
      * Gets the value of the members property.
      * 
