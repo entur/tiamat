@@ -21,8 +21,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 
-import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,76 +61,64 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     @Test
     public void createStopPlace() throws Exception {
-
-
         given()
-                .contentType(ContentType.JSON)
-                .content("{\n" +
-                        "\"name\": \"Bogen skole\",\n" +
-                        "\"shortName\": null,\n" +
-                        "\"description\": null,\n" +
-                        "\"centroid\": {\n" +
-                        "\"location\": {\n" +
-                        "\"longitude\": 17.003237,\n" +
-                        "\"latitude\": 68.51526\n" +
-                        "}\n" +
-                        "},\n" +
-                        "\"allAreasWheelchairAccessible\": false,\n" +
-                        "\"stopPlaceType\": null,\n" +
-                        "\"quays\": [\n" +
-                        "{\n" +
-                        "\"name\": \"quay 1\",\n" +
-                        "\"shortName\": null,\n" +
-                        "\"description\": \"\",\n" +
-                        "\"centroid\": {\n" +
-                        "\"location\": {\n" +
-                        "\"longitude\": 17.003836999999997,\n" +
-                        "\"latitude\": 68.51606\n" +
-                        "}\n" +
-                        "},\n" +
-                        "\"allAreasWheelchairAccessible\": true,\n" +
-                        "\"quayType\": \"other\"\n" +
-                        "}\n" +
-                        "]\n" +
-                        "}")
-                .when()
-                .post("/jersey/stop_place")
-                .then()
-                .body("name", is("Bogen skole"))
-                .body("id", notNullValue())
-                .body("centroid.location.longitude", equalTo(17.003237f))
-                .body("centroid.location.latitude", equalTo(68.51526f))
-                .body("quays", is(not(empty())))
-                .body("quays[0].name", equalTo("quay 1"));
-        ;
-
-
+            .contentType(ContentType.JSON)
+            .content("{\n" +
+                    "\"name\": \"Bogen skole\",\n" +
+                    "\"shortName\": null,\n" +
+                    "\"description\": null,\n" +
+                    "\"centroid\": {\n" +
+                    "\"location\": {\n" +
+                    "\"longitude\": 17.003237,\n" +
+                    "\"latitude\": 68.51526\n" +
+                    "}\n" +
+                    "},\n" +
+                    "\"allAreasWheelchairAccessible\": false,\n" +
+                    "\"stopPlaceType\": null,\n" +
+                    "\"quays\": [\n" +
+                    "{\n" +
+                    "\"name\": \"quay 1\",\n" +
+                    "\"shortName\": null,\n" +
+                    "\"description\": \"\",\n" +
+                    "\"centroid\": {\n" +
+                    "\"location\": {\n" +
+                    "\"longitude\": 17.003836999999997,\n" +
+                    "\"latitude\": 68.51606\n" +
+                    "}\n" +
+                    "},\n" +
+                    "\"allAreasWheelchairAccessible\": true,\n" +
+                    "\"quayType\": \"other\"\n" +
+                    "}\n" +
+                    "]\n" +
+                    "}")
+        .when()
+             .post("/jersey/stop_place")
+        .then()
+            .body("name", is("Bogen skole"))
+            .body("id", notNullValue())
+            .body("centroid.location.longitude", equalTo(17.003237f))
+            .body("centroid.location.latitude", equalTo(68.51526f))
+            .body("quays", is(not(empty())))
+            .body("quays[0].name", equalTo("quay 1"));
     }
 
     @Test
     public void retrieveStopPlaceWithTwoQuays() throws Exception {
-
-        // Create a stop place with two quays
-
-        String lang = "en";
-
         Quay quay = new Quay();
         String firstQuayName = "first quay name";
-        quay.setName(new MultilingualString(firstQuayName, lang, ""));
+        quay.setName(new MultilingualString(firstQuayName));
 
         quayRepository.save(quay);
 
         Quay secondQuay = new Quay();
         String secondQuayName = "second quay";
-        secondQuay.setName(new MultilingualString(secondQuayName, lang, ""));
+        secondQuay.setName(new MultilingualString(secondQuayName));
 
         quayRepository.save(secondQuay);
 
-        StopPlace stopPlace = new StopPlace();
-
         String stopPlaceName = "StopPlace";
+        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
 
-        stopPlace.setName(new MultilingualString(stopPlaceName, lang, ""));
         stopPlace.setQuays(new ArrayList<>());
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
@@ -138,63 +126,57 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
         stopPlaceRepository.save(stopPlace);
 
-        get("/jersey/stop_place/" + stopPlace.getId())
-                .then()
-                .log().body()
-                .statusCode(200)
-                .body(Matchers.notNullValue())
-                .assertThat()
-                .body("name", equalTo(stopPlaceName))
-                .body("quays.name", hasItems(firstQuayName, secondQuayName))
-                .body("quays.id", hasItems(quay.getId().toString(), secondQuay.getId().toString()));
 
+        when()
+            .get("/jersey/stop_place/" + stopPlace.getId())
+        .then()
+            .log().body()
+            .statusCode(200)
+            .body(Matchers.notNullValue())
+            .assertThat()
+            .body("name", equalTo(stopPlaceName))
+            .body("quays.name", hasItems(firstQuayName, secondQuayName))
+            .body("quays.id", hasItems(quay.getId().toString(), secondQuay.getId().toString()));
     }
 
     @Test
     public void searchForStopPlaceNoParams() throws Exception {
-        StopPlace stopPlace = new StopPlace();
         String stopPlaceName = "Eselstua";
-        stopPlace.setName(new MultilingualString(stopPlaceName));
+        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
         stopPlaceRepository.save(stopPlace);
 
-        given()
-                .when()
-                .get("/jersey/stop_place/")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .body(Matchers.notNullValue())
-                .assertThat()
-                .body("[0].name", equalTo(stopPlaceName));
+        when()
+            .get("/jersey/stop_place/")
+        .then()
+            .log().body()
+            .statusCode(200)
+            .body(Matchers.notNullValue())
+            .assertThat()
+            .body("[0].name", equalTo(stopPlaceName));
     }
 
     @Test
     public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
-        String lang = "en";
-
-        StopPlace stopPlace = new StopPlace();
         String stopPlaceName = "Grytnes";
-        stopPlace.setName(new MultilingualString(stopPlaceName, lang, ""));
+        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))));
         stopPlaceRepository.save(stopPlace);
 
         given()
                 .queryParam("name", "ytNES")
-                .when()
+        .when()
                 .get("/jersey/stop_place/")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .body(Matchers.notNullValue())
-                .assertThat()
-                .body("[0].name", equalTo(stopPlaceName));
+        .then()
+            .log().body()
+            .statusCode(200)
+            .body(Matchers.notNullValue())
+            .assertThat()
+            .body("[0].name", equalTo(stopPlaceName));
     }
 
     @Test
     public void searchForStopsWithTypeTramWithMunicipalityAndCountySpecified() {
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("Anda"));
+        StopPlace stopPlace = new StopPlace(new MultilingualString("Anda"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
 
         TopographicPlace hordaland = new TopographicPlace(new MultilingualString("Hordaland"));
@@ -202,14 +184,12 @@ public class DtoStopPlaceResourceIntegrationTest {
 
         TopographicPlace kvinnherad = new TopographicPlace(new MultilingualString("Kvinnherad"));
 
-
         TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
         countyRef.setRef(hordaland.getId().toString());
 
         kvinnherad.setParentTopographicPlaceRef(countyRef);
 
         topographicPlaceRepository.save(kvinnherad);
-
 
         TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
         municipalityRef.setRef(kvinnherad.getId().toString());
@@ -221,6 +201,7 @@ public class DtoStopPlaceResourceIntegrationTest {
             .param("stopPlaceType", "onstreetTram")
             .param("municipality", kvinnherad.getId().toString())
             .param("county", hordaland.getId().toString())
+        .when()
             .get("/jersey/stop_place/")
         .then()
             .log().body()
@@ -228,8 +209,6 @@ public class DtoStopPlaceResourceIntegrationTest {
             .body(Matchers.notNullValue())
             .assertThat()
             .body("[0].name", equalTo(stopPlace.getName().getValue()));
-
-
     }
 
 
