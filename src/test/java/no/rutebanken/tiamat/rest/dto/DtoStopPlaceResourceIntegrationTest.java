@@ -30,6 +30,8 @@ import static org.hamcrest.Matchers.*;
 @ActiveProfiles("geodb")
 public class DtoStopPlaceResourceIntegrationTest {
 
+    private static final String BASE_URI_STOP_PLACE = "/jersey/stop_place/";
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
@@ -128,7 +130,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
 
         when()
-            .get("/jersey/stop_place/" + stopPlace.getId())
+            .get(BASE_URI_STOP_PLACE + stopPlace.getId())
         .then()
             .log().body()
             .statusCode(200)
@@ -146,7 +148,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         when()
-            .get("/jersey/stop_place/")
+            .get(BASE_URI_STOP_PLACE)
         .then()
             .log().body()
             .statusCode(200)
@@ -163,9 +165,9 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         given()
-                .queryParam("name", "ytNES")
+            .queryParam("name", "ytNES")
         .when()
-                .get("/jersey/stop_place/")
+            .get(BASE_URI_STOP_PLACE)
         .then()
             .log().body()
             .statusCode(200)
@@ -173,6 +175,25 @@ public class DtoStopPlaceResourceIntegrationTest {
             .assertThat()
             .body("[0].name", equalTo(stopPlaceName));
     }
+
+    @Test
+    public void searchForStopsWithOtherStopPlaceTypeShouldHaveNoResult() {
+
+        StopPlace stopPlace = new StopPlace(new MultilingualString("Fyrstekakeveien"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
+        stopPlaceRepository.save(stopPlace);
+
+        given()
+            .param("stopPlaceType", StopTypeEnumeration.FERRY_STOP.value())
+        .when()
+            .get(BASE_URI_STOP_PLACE)
+        .then()
+            .log().body()
+            .statusCode(200)
+            .assertThat()
+                .body("$", Matchers.hasSize(0));
+    }
+
 
     @Test
     public void searchForStopsWithTypeTramWithMunicipalityAndCountySpecified() {
@@ -202,7 +223,7 @@ public class DtoStopPlaceResourceIntegrationTest {
             .param("municipality", kvinnherad.getId().toString())
             .param("county", hordaland.getId().toString())
         .when()
-            .get("/jersey/stop_place/")
+            .get(BASE_URI_STOP_PLACE)
         .then()
             .log().body()
             .statusCode(200)
