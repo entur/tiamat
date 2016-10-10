@@ -2,6 +2,7 @@ package no.rutebanken.tiamat.config;
 
 import no.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import no.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
+import no.rutebanken.tiamat.rest.dto.DtoTopographicPlaceResource;
 import no.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import no.rutebanken.tiamat.rest.netex.siteframe.SiteFrameResource;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -16,6 +17,7 @@ public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
         register(DtoStopPlaceResource.class);
         register(DtoQuayResource.class);
+        register(DtoTopographicPlaceResource.class);
         register(SiteFrameResource.class);
         register(PublicationDeliveryResource.class);
     }

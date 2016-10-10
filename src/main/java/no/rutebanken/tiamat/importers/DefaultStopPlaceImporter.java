@@ -132,7 +132,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             // TODO: Hack to avoid 'detached entity passed to persist'.
             newStopPlace.getCentroid().getLocation().setId(0);
 
-            if (siteFrame.getTopographicPlaces() != null) {
+            if (siteFrame.getTopographicPlaces() != null
+                    && siteFrame.getTopographicPlaces().getTopographicPlace() != null
+                    && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty()) {
                 topographicPlaceCreator.setTopographicReference(newStopPlace,
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
                         topographicPlacesCreatedCounter);
