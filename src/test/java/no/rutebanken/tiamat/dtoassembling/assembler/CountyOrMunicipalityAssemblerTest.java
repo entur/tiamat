@@ -38,6 +38,7 @@ public class CountyOrMunicipalityAssemblerTest {
         assertThat(assembledPlaces).isNotEmpty();
         assertThat(assembledPlaces).hasSize(2);
         assertThat(assembledPlaces).extracting("name").contains("Akershus", "Asker");
+        assertThat(assembledPlaces).extracting("county").contains("Akershus");
 
     }
 
