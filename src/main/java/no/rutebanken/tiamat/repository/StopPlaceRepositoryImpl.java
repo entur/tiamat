@@ -148,7 +148,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         if(name != null) {
-            wheres.add("stopPlace.name.value = :name");
+            wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
             parameters.put("name", name);
         }
 

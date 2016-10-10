@@ -241,6 +241,18 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
+    public void findStopPlacNameContainsIgnoreCase() throws Exception {
+        String stopPlaceName = "IKEA Slependen";
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        createStopPlaceWithMunicipality(stopPlaceName, null);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("lEpEnden", null, null, pageable);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+    @Test
     public void findStopPlaceByCountyAndNameAndExpectEmptyResult() throws Exception {
         String municipalityName = "Asker";
         String countyName = "Akershus";
@@ -282,14 +294,18 @@ public class StopPlaceRepositoryImplTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString(name, "", ""));
 
-        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-        municipalityRef.setRef(municipality.getId().toString());
-        stopPlace.setTopographicPlaceRef(municipalityRef);
+        if(municipality != null) {
+            TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
+            municipalityRef.setRef(municipality.getId().toString());
+            stopPlace.setTopographicPlaceRef(municipalityRef);
+        }
 
         stopPlaceRepository.save(stopPlace);
 
         return stopPlace;
     }
+
+
 
     private StopPlace createStopPlace(double latitude, double longitude) {
         StopPlace stopPlace = new StopPlace();
