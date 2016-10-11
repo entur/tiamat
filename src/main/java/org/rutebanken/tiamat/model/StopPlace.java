@@ -114,247 +114,94 @@ public class StopPlace
     public StopPlace() {
     }
 
-
-    /**
-     * Gets the value of the publicCode property.
-     *
-     * @return possible object is
-     * {@link String }
-     */
     public String getPublicCode() {
         return publicCode;
     }
 
-    /**
-     * Sets the value of the publicCode property.
-     *
-     * @param value allowed object is
-     *              {@link String }
-     */
     public void setPublicCode(String value) {
         this.publicCode = value;
     }
 
-    /**
-     * Gets the value of the transportMode property.
-     *
-     * @return possible object is
-     * {@link VehicleModeEnumeration }
-     */
     public VehicleModeEnumeration getTransportMode() {
         return transportMode;
     }
 
-    /**
-     * Sets the value of the transportMode property.
-     *
-     * @param value allowed object is
-     *              {@link VehicleModeEnumeration }
-     */
     public void setTransportMode(VehicleModeEnumeration value) {
         this.transportMode = value;
     }
 
-    /**
-     * Gets the value of the airSubmode property.
-     *
-     * @return possible object is
-     * {@link AirSubmodeEnumeration }
-     */
     public AirSubmodeEnumeration getAirSubmode() {
         return airSubmode;
     }
 
-    /**
-     * Sets the value of the airSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link AirSubmodeEnumeration }
-     */
     public void setAirSubmode(AirSubmodeEnumeration value) {
         this.airSubmode = value;
     }
 
-    /**
-     * Gets the value of the busSubmode property.
-     *
-     * @return possible object is
-     * {@link BusSubmodeEnumeration }
-     */
     public BusSubmodeEnumeration getBusSubmode() {
         return busSubmode;
     }
 
-    /**
-     * Sets the value of the busSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link BusSubmodeEnumeration }
-     */
     public void setBusSubmode(BusSubmodeEnumeration value) {
         this.busSubmode = value;
     }
 
-    /**
-     * Gets the value of the coachSubmode property.
-     *
-     * @return possible object is
-     * {@link CoachSubmodeEnumeration }
-     */
     public CoachSubmodeEnumeration getCoachSubmode() {
         return coachSubmode;
     }
 
-    /**
-     * Sets the value of the coachSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link CoachSubmodeEnumeration }
-     */
     public void setCoachSubmode(CoachSubmodeEnumeration value) {
         this.coachSubmode = value;
     }
 
-    /**
-     * Gets the value of the funicularSubmode property.
-     *
-     * @return possible object is
-     * {@link FunicularSubmodeEnumeration }
-     */
     public FunicularSubmodeEnumeration getFunicularSubmode() {
         return funicularSubmode;
     }
 
-    /**
-     * Sets the value of the funicularSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link FunicularSubmodeEnumeration }
-     */
     public void setFunicularSubmode(FunicularSubmodeEnumeration value) {
         this.funicularSubmode = value;
     }
 
-    /**
-     * Gets the value of the metroSubmode property.
-     *
-     * @return possible object is
-     * {@link MetroSubmodeEnumeration }
-     */
     public MetroSubmodeEnumeration getMetroSubmode() {
         return metroSubmode;
     }
 
-    /**
-     * Sets the value of the metroSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link MetroSubmodeEnumeration }
-     */
     public void setMetroSubmode(MetroSubmodeEnumeration value) {
         this.metroSubmode = value;
     }
 
-    /**
-     * Gets the value of the tramSubmode property.
-     *
-     * @return possible object is
-     * {@link TramSubmodeEnumeration }
-     */
     public TramSubmodeEnumeration getTramSubmode() {
         return tramSubmode;
     }
 
-    /**
-     * Sets the value of the tramSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link TramSubmodeEnumeration }
-     */
     public void setTramSubmode(TramSubmodeEnumeration value) {
         this.tramSubmode = value;
     }
 
-    /**
-     * Gets the value of the telecabinSubmode property.
-     *
-     * @return possible object is
-     * {@link TelecabinSubmodeEnumeration }
-     */
     public TelecabinSubmodeEnumeration getTelecabinSubmode() {
         return telecabinSubmode;
     }
 
-    /**
-     * Sets the value of the telecabinSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link TelecabinSubmodeEnumeration }
-     */
     public void setTelecabinSubmode(TelecabinSubmodeEnumeration value) {
         this.telecabinSubmode = value;
     }
 
-    /**
-     * Gets the value of the railSubmode property.
-     *
-     * @return possible object is
-     * {@link RailSubmodeEnumeration }
-     */
     public RailSubmodeEnumeration getRailSubmode() {
         return railSubmode;
     }
 
-    /**
-     * Sets the value of the railSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link RailSubmodeEnumeration }
-     */
     public void setRailSubmode(RailSubmodeEnumeration value) {
         this.railSubmode = value;
     }
 
-    /**
-     * Gets the value of the waterSubmode property.
-     *
-     * @return possible object is
-     * {@link WaterSubmodeEnumeration }
-     */
     public WaterSubmodeEnumeration getWaterSubmode() {
         return waterSubmode;
     }
 
-    /**
-     * Sets the value of the waterSubmode property.
-     *
-     * @param value allowed object is
-     *              {@link WaterSubmodeEnumeration }
-     */
     public void setWaterSubmode(WaterSubmodeEnumeration value) {
         this.waterSubmode = value;
     }
 
-    /**
-     * Gets the value of the otherTransportModes property.
-     * <p>
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the otherTransportModes property.
-     * <p>
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getOtherTransportModes().add(newItem);
-     * </pre>
-     * <p>
-     * <p>
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link VehicleModeEnumeration }
-     */
     @JsonIgnore
     public List<VehicleModeEnumeration> getOtherTransportModes() {
         if (otherTransportModes == null) {
@@ -363,295 +210,115 @@ public class StopPlace
         return this.otherTransportModes;
     }
 
-    /**
-     * Gets the value of the tariffZones property.
-     *
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *
-     */
    /* public TariffZoneRefs_RelStructure getTariffZones() {
         return tariffZones;
     }*/
 
-    /**
-     * Sets the value of the tariffZones property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *
-     */
+    
   /*  public void setTariffZones(TariffZoneRefs_RelStructure value) {
         this.tariffZones = value;
     }*/
 
-    /**
-     * Gets the value of the stopPlaceType property.
-     *
-     * @return possible object is
-     * {@link StopTypeEnumeration }
-     */
     public StopTypeEnumeration getStopPlaceType() {
         return stopPlaceType;
     }
 
-    /**
-     * Sets the value of the stopPlaceType property.
-     *
-     * @param value allowed object is
-     *              {@link StopTypeEnumeration }
-     */
     public void setStopPlaceType(StopTypeEnumeration value) {
         this.stopPlaceType = value;
     }
 
-    /**
-     * Gets the value of the borderCrossing property.
-     *
-     * @return possible object is
-     * {@link Boolean }
-     */
     public Boolean isBorderCrossing() {
         return borderCrossing;
     }
 
-    /**
-     * Sets the value of the borderCrossing property.
-     *
-     * @param value allowed object is
-     *              {@link Boolean }
-     */
     public void setBorderCrossing(Boolean value) {
         this.borderCrossing = value;
     }
 
-    /**
-     * Gets the value of the unlocalisedEquipments property.
-     *
-     * @return
-     *     possible object is
-     *     {@link ExplicitEquipments_RelStructure }
-     *
-     */
 /*    public ExplicitEquipments_RelStructure getUnlocalisedEquipments() {
         return unlocalisedEquipments;
     }
 */
-    /**
-     * Sets the value of the unlocalisedEquipments property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link ExplicitEquipments_RelStructure }
-     *
-     */
+    
  /*   public void setUnlocalisedEquipments(ExplicitEquipments_RelStructure value) {
         this.unlocalisedEquipments = value;
     }
 */
 
-    /**
-     * Gets the value of the servedPlaces property.
-     *
-     * @return possible object is
-     * {@link TopographicPlaceRefs_RelStructure }
-     */
     public TopographicPlaceRefs_RelStructure getServedPlaces() {
         return servedPlaces;
     }
 
-    /**
-     * Sets the value of the servedPlaces property.
-     *
-     * @param value allowed object is
-     *              {@link TopographicPlaceRefs_RelStructure }
-     */
     public void setServedPlaces(TopographicPlaceRefs_RelStructure value) {
         this.servedPlaces = value;
     }
 
-    /**
-     * Gets the value of the mainTerminusForPlaces property.
-     *
-     * @return possible object is
-     * {@link TopographicPlaceRefs_RelStructure }
-     */
     public TopographicPlaceRefs_RelStructure getMainTerminusForPlaces() {
         return mainTerminusForPlaces;
     }
 
-    /**
-     * Sets the value of the mainTerminusForPlaces property.
-     *
-     * @param value allowed object is
-     *              {@link TopographicPlaceRefs_RelStructure }
-     */
     public void setMainTerminusForPlaces(TopographicPlaceRefs_RelStructure value) {
         this.mainTerminusForPlaces = value;
     }
 
-    /**
-     * Gets the value of the limitedUse property.
-     *
-     * @return possible object is
-     * {@link LimitedUseTypeEnumeration }
-     */
     public LimitedUseTypeEnumeration getLimitedUse() {
         return limitedUse;
     }
 
-    /**
-     * Sets the value of the limitedUse property.
-     *
-     * @param value allowed object is
-     *              {@link LimitedUseTypeEnumeration }
-     */
+
     public void setLimitedUse(LimitedUseTypeEnumeration value) {
         this.limitedUse = value;
     }
 
-    /**
-     * Gets the value of the weighting property.
-     *
-     * @return possible object is
-     * {@link InterchangeWeightingEnumeration }
-     */
     public InterchangeWeightingEnumeration getWeighting() {
         return weighting;
     }
 
-    /**
-     * Sets the value of the weighting property.
-     *
-     * @param value allowed object is
-     *              {@link InterchangeWeightingEnumeration }
-     */
     public void setWeighting(InterchangeWeightingEnumeration value) {
         this.weighting = value;
     }
 
-
-    /**
-     * Gets the value of the accessSpaces property.
-     *
-     * @return
-     *     possible object is
-     *     {@link AccessSpaces_RelStructure }
-     *
-    //    public AccessSpaces_RelStructure getAccessSpaces() {
-    //        return accessSpaces;
-    //    }
-
-    /**
-     * Sets the value of the accessSpaces property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link AccessSpaces_RelStructure }
-     *
-     */
     //   public void setAccessSpaces(AccessSpaces_RelStructure value) {
     //       this.accessSpaces = value;
     //   }
 
-    /**
-     * Gets the value of the pathLinks property.
-     *
-     * @return possible object is
-     * {@link SitePathLinks_RelStructure }
-     */
+
     public SitePathLinks_RelStructure getPathLinks() {
         return pathLinks;
     }
 
-    /**
-     * Sets the value of the pathLinks property.
-     *
-     * @param value allowed object is
-     *              {@link SitePathLinks_RelStructure }
-     */
     public void setPathLinks(SitePathLinks_RelStructure value) {
         this.pathLinks = value;
     }
 
-    /**
-     * Gets the value of the pathJunctions property.
-     *
-     * @return possible object is
-     * {@link PathJunctions_RelStructure }
-     */
     public PathJunctions_RelStructure getPathJunctions() {
         return pathJunctions;
     }
 
-    /**
-     * Sets the value of the pathJunctions property.
-     *
-     * @param value allowed object is
-     *              {@link PathJunctions_RelStructure }
-     */
     public void setPathJunctions(PathJunctions_RelStructure value) {
         this.pathJunctions = value;
     }
 
-    /**
-     * Gets the value of the accesses property.
-     *
-     * @return possible object is
-     * {@link Accesses_RelStructure }
-     */
     public Accesses_RelStructure getAccesses() {
         return accesses;
     }
 
-    /**
-     * Sets the value of the accesses property.
-     *
-     * @param value allowed object is
-     *              {@link Accesses_RelStructure }
-     */
     public void setAccesses(Accesses_RelStructure value) {
         this.accesses = value;
     }
 
-    /**
-     * Gets the value of the navigationPaths property.
-     *
-     * @return possible object is
-     * {@link NavigationPaths_RelStructure }
-     */
     public NavigationPaths_RelStructure getNavigationPaths() {
         return navigationPaths;
     }
 
-    /**
-     * Sets the value of the navigationPaths property.
-     *
-     * @param value allowed object is
-     *              {@link NavigationPaths_RelStructure }
-     */
     public void setNavigationPaths(NavigationPaths_RelStructure value) {
         this.navigationPaths = value;
     }
 
-    /**
-     * Gets the value of the vehicleStoppingPlaces property.
-     *
-     * @return possible object is
-     * {@link VehicleStoppingPlaces_RelStructure }
-     */
     public VehicleStoppingPlaces_RelStructure getVehicleStoppingPlaces() {
         return vehicleStoppingPlaces;
     }
 
-    /**
-     * Sets the value of the vehicleStoppingPlaces property.
-     *
-     * @param value allowed object is
-     *              {@link VehicleStoppingPlaces_RelStructure }
-     */
     public void setVehicleStoppingPlaces(VehicleStoppingPlaces_RelStructure value) {
         this.vehicleStoppingPlaces = value;
     }
