@@ -43,7 +43,7 @@ public class NetexIdMapper {
         } else if (entityStructure instanceof Quay){
             return "Quay";
         } else {
-            return "-";
+            return "Unknown";
         }
 
     }
