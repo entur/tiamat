@@ -12,127 +12,46 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * Type for a Version of a STOP PLACE.
- * 
- * <p>Java class for StopPlace complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="StopPlace">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.netex.org.uk/netex}Site_VersionStructure">
- *       &lt;sequence>
- *         &lt;group ref="{http://www.netex.org.uk/netex}StopPlaceGroup"/>
- *       &lt;/sequence>
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- * 
- * 
- */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StopPlace", propOrder = {
-    "publicCode",
-    "transportMode",
-    "airSubmode",
-    "busSubmode",
-    "coachSubmode",
-    "funicularSubmode",
-    "metroSubmode",
-    "tramSubmode",
-    "telecabinSubmode",
-    "railSubmode",
-    "waterSubmode",
-    "otherTransportModes",
-    "tariffZones",
-    "stopPlaceType",
-    "borderCrossing",
-    "unlocalisedEquipments",
-    "servedPlaces",
-    "mainTerminusForPlaces",
-    "limitedUse",
-    "weighting",
-    "quays",
-    "accessSpaces",
-    "pathLinks",
-    "pathJunctions",
-    "accesses",
-    "navigationPaths",
-    "vehicleStoppingPlaces"
-})
 @Entity
 public class StopPlace
-    extends Site_VersionStructure implements Serializable {
+        extends Site_VersionStructure implements Serializable {
 
-    @XmlElement(name = "PublicCode")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
 
-    @XmlElement(name = "TransportMode")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
 
-    @XmlElement(name = "AirSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
 
-    @XmlElement(name = "BusSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
 
-    @XmlElement(name = "CoachSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected CoachSubmodeEnumeration coachSubmode;
 
-    @XmlElement(name = "FunicularSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected FunicularSubmodeEnumeration funicularSubmode;
 
-    @XmlElement(name = "MetroSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected MetroSubmodeEnumeration metroSubmode;
 
-    @XmlElement(name = "TramSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected TramSubmodeEnumeration tramSubmode;
 
-    @XmlElement(name = "TelecabinSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected TelecabinSubmodeEnumeration telecabinSubmode;
 
-    @XmlElement(name = "RailSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected RailSubmodeEnumeration railSubmode;
 
-    @XmlElement(name = "WaterSubmode", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
 
-    @XmlList
-    @XmlElement(name = "OtherTransportModes")
-    @XmlSchemaType(name = "anySimpleType")
     @ElementCollection(targetClass = VehicleModeEnumeration.class)
     @Enumerated(EnumType.STRING)
     protected List<VehicleModeEnumeration> otherTransportModes;
@@ -140,12 +59,9 @@ public class StopPlace
     @OneToMany
     private List<TariffZone> tariffZones;
 
-    @XmlElement(name = "StopPlaceType")
-    @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
 
-    @XmlElement(name = "BorderCrossing", defaultValue = "false")
     protected Boolean borderCrossing;
 
 //    @Embedded
@@ -159,18 +75,12 @@ public class StopPlace
     @Transient
     protected TopographicPlaceRefs_RelStructure mainTerminusForPlaces;
 
-    @XmlElement(name = "LimitedUse")
-    @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitedUseTypeEnumeration limitedUse;
 
-    @XmlElement(name = "Weighting")
-    @XmlSchemaType(name = "string")
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-    @XmlElement(name = "Quay", type = Quay.class)
-    @XmlElementWrapper(name="quays")
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private List<Quay> quays = new ArrayList<>();
 
@@ -207,11 +117,9 @@ public class StopPlace
 
     /**
      * Gets the value of the publicCode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getPublicCode() {
         return publicCode;
@@ -219,11 +127,9 @@ public class StopPlace
 
     /**
      * Sets the value of the publicCode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPublicCode(String value) {
         this.publicCode = value;
@@ -231,11 +137,9 @@ public class StopPlace
 
     /**
      * Gets the value of the transportMode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link VehicleModeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link VehicleModeEnumeration }
      */
     public VehicleModeEnumeration getTransportMode() {
         return transportMode;
@@ -243,11 +147,9 @@ public class StopPlace
 
     /**
      * Sets the value of the transportMode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link VehicleModeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link VehicleModeEnumeration }
      */
     public void setTransportMode(VehicleModeEnumeration value) {
         this.transportMode = value;
@@ -255,11 +157,9 @@ public class StopPlace
 
     /**
      * Gets the value of the airSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AirSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link AirSubmodeEnumeration }
      */
     public AirSubmodeEnumeration getAirSubmode() {
         return airSubmode;
@@ -267,11 +167,9 @@ public class StopPlace
 
     /**
      * Sets the value of the airSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AirSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AirSubmodeEnumeration }
      */
     public void setAirSubmode(AirSubmodeEnumeration value) {
         this.airSubmode = value;
@@ -279,11 +177,9 @@ public class StopPlace
 
     /**
      * Gets the value of the busSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BusSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link BusSubmodeEnumeration }
      */
     public BusSubmodeEnumeration getBusSubmode() {
         return busSubmode;
@@ -291,11 +187,9 @@ public class StopPlace
 
     /**
      * Sets the value of the busSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BusSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BusSubmodeEnumeration }
      */
     public void setBusSubmode(BusSubmodeEnumeration value) {
         this.busSubmode = value;
@@ -303,11 +197,9 @@ public class StopPlace
 
     /**
      * Gets the value of the coachSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CoachSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link CoachSubmodeEnumeration }
      */
     public CoachSubmodeEnumeration getCoachSubmode() {
         return coachSubmode;
@@ -315,11 +207,9 @@ public class StopPlace
 
     /**
      * Sets the value of the coachSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CoachSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CoachSubmodeEnumeration }
      */
     public void setCoachSubmode(CoachSubmodeEnumeration value) {
         this.coachSubmode = value;
@@ -327,11 +217,9 @@ public class StopPlace
 
     /**
      * Gets the value of the funicularSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FunicularSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link FunicularSubmodeEnumeration }
      */
     public FunicularSubmodeEnumeration getFunicularSubmode() {
         return funicularSubmode;
@@ -339,11 +227,9 @@ public class StopPlace
 
     /**
      * Sets the value of the funicularSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FunicularSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link FunicularSubmodeEnumeration }
      */
     public void setFunicularSubmode(FunicularSubmodeEnumeration value) {
         this.funicularSubmode = value;
@@ -351,11 +237,9 @@ public class StopPlace
 
     /**
      * Gets the value of the metroSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MetroSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link MetroSubmodeEnumeration }
      */
     public MetroSubmodeEnumeration getMetroSubmode() {
         return metroSubmode;
@@ -363,11 +247,9 @@ public class StopPlace
 
     /**
      * Sets the value of the metroSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MetroSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MetroSubmodeEnumeration }
      */
     public void setMetroSubmode(MetroSubmodeEnumeration value) {
         this.metroSubmode = value;
@@ -375,11 +257,9 @@ public class StopPlace
 
     /**
      * Gets the value of the tramSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TramSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link TramSubmodeEnumeration }
      */
     public TramSubmodeEnumeration getTramSubmode() {
         return tramSubmode;
@@ -387,11 +267,9 @@ public class StopPlace
 
     /**
      * Sets the value of the tramSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TramSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link TramSubmodeEnumeration }
      */
     public void setTramSubmode(TramSubmodeEnumeration value) {
         this.tramSubmode = value;
@@ -399,11 +277,9 @@ public class StopPlace
 
     /**
      * Gets the value of the telecabinSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TelecabinSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link TelecabinSubmodeEnumeration }
      */
     public TelecabinSubmodeEnumeration getTelecabinSubmode() {
         return telecabinSubmode;
@@ -411,11 +287,9 @@ public class StopPlace
 
     /**
      * Sets the value of the telecabinSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TelecabinSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link TelecabinSubmodeEnumeration }
      */
     public void setTelecabinSubmode(TelecabinSubmodeEnumeration value) {
         this.telecabinSubmode = value;
@@ -423,11 +297,9 @@ public class StopPlace
 
     /**
      * Gets the value of the railSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link RailSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link RailSubmodeEnumeration }
      */
     public RailSubmodeEnumeration getRailSubmode() {
         return railSubmode;
@@ -435,11 +307,9 @@ public class StopPlace
 
     /**
      * Sets the value of the railSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link RailSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link RailSubmodeEnumeration }
      */
     public void setRailSubmode(RailSubmodeEnumeration value) {
         this.railSubmode = value;
@@ -447,11 +317,9 @@ public class StopPlace
 
     /**
      * Gets the value of the waterSubmode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link WaterSubmodeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link WaterSubmodeEnumeration }
      */
     public WaterSubmodeEnumeration getWaterSubmode() {
         return waterSubmode;
@@ -459,11 +327,9 @@ public class StopPlace
 
     /**
      * Sets the value of the waterSubmode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link WaterSubmodeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link WaterSubmodeEnumeration }
      */
     public void setWaterSubmode(WaterSubmodeEnumeration value) {
         this.waterSubmode = value;
@@ -471,25 +337,23 @@ public class StopPlace
 
     /**
      * Gets the value of the otherTransportModes property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the otherTransportModes property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getOtherTransportModes().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link VehicleModeEnumeration }
-     * 
-     * 
      */
     @JsonIgnore
     public List<VehicleModeEnumeration> getOtherTransportModes() {
@@ -501,11 +365,11 @@ public class StopPlace
 
     /**
      * Gets the value of the tariffZones property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link TariffZoneRefs_RelStructure }
-     *     
+     *
      */
    /* public TariffZoneRefs_RelStructure getTariffZones() {
         return tariffZones;
@@ -513,11 +377,11 @@ public class StopPlace
 
     /**
      * Sets the value of the tariffZones property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link TariffZoneRefs_RelStructure }
-     *     
+     *
      */
   /*  public void setTariffZones(TariffZoneRefs_RelStructure value) {
         this.tariffZones = value;
@@ -525,11 +389,9 @@ public class StopPlace
 
     /**
      * Gets the value of the stopPlaceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link StopTypeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link StopTypeEnumeration }
      */
     public StopTypeEnumeration getStopPlaceType() {
         return stopPlaceType;
@@ -537,11 +399,9 @@ public class StopPlace
 
     /**
      * Sets the value of the stopPlaceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link StopTypeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link StopTypeEnumeration }
      */
     public void setStopPlaceType(StopTypeEnumeration value) {
         this.stopPlaceType = value;
@@ -549,11 +409,9 @@ public class StopPlace
 
     /**
      * Gets the value of the borderCrossing property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     * {@link Boolean }
      */
     public Boolean isBorderCrossing() {
         return borderCrossing;
@@ -561,11 +419,9 @@ public class StopPlace
 
     /**
      * Sets the value of the borderCrossing property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setBorderCrossing(Boolean value) {
         this.borderCrossing = value;
@@ -573,11 +429,11 @@ public class StopPlace
 
     /**
      * Gets the value of the unlocalisedEquipments property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ExplicitEquipments_RelStructure }
-     *     
+     *
      */
 /*    public ExplicitEquipments_RelStructure getUnlocalisedEquipments() {
         return unlocalisedEquipments;
@@ -585,23 +441,22 @@ public class StopPlace
 */
     /**
      * Sets the value of the unlocalisedEquipments property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ExplicitEquipments_RelStructure }
-     *     
+     *
      */
  /*   public void setUnlocalisedEquipments(ExplicitEquipments_RelStructure value) {
         this.unlocalisedEquipments = value;
     }
 */
+
     /**
      * Gets the value of the servedPlaces property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TopographicPlaceRefs_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link TopographicPlaceRefs_RelStructure }
      */
     public TopographicPlaceRefs_RelStructure getServedPlaces() {
         return servedPlaces;
@@ -609,11 +464,9 @@ public class StopPlace
 
     /**
      * Sets the value of the servedPlaces property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TopographicPlaceRefs_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link TopographicPlaceRefs_RelStructure }
      */
     public void setServedPlaces(TopographicPlaceRefs_RelStructure value) {
         this.servedPlaces = value;
@@ -621,11 +474,9 @@ public class StopPlace
 
     /**
      * Gets the value of the mainTerminusForPlaces property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TopographicPlaceRefs_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link TopographicPlaceRefs_RelStructure }
      */
     public TopographicPlaceRefs_RelStructure getMainTerminusForPlaces() {
         return mainTerminusForPlaces;
@@ -633,11 +484,9 @@ public class StopPlace
 
     /**
      * Sets the value of the mainTerminusForPlaces property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TopographicPlaceRefs_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link TopographicPlaceRefs_RelStructure }
      */
     public void setMainTerminusForPlaces(TopographicPlaceRefs_RelStructure value) {
         this.mainTerminusForPlaces = value;
@@ -645,11 +494,9 @@ public class StopPlace
 
     /**
      * Gets the value of the limitedUse property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LimitedUseTypeEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link LimitedUseTypeEnumeration }
      */
     public LimitedUseTypeEnumeration getLimitedUse() {
         return limitedUse;
@@ -657,11 +504,9 @@ public class StopPlace
 
     /**
      * Sets the value of the limitedUse property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LimitedUseTypeEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link LimitedUseTypeEnumeration }
      */
     public void setLimitedUse(LimitedUseTypeEnumeration value) {
         this.limitedUse = value;
@@ -669,11 +514,9 @@ public class StopPlace
 
     /**
      * Gets the value of the weighting property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link InterchangeWeightingEnumeration }
-     *     
+     *
+     * @return possible object is
+     * {@link InterchangeWeightingEnumeration }
      */
     public InterchangeWeightingEnumeration getWeighting() {
         return weighting;
@@ -681,11 +524,9 @@ public class StopPlace
 
     /**
      * Sets the value of the weighting property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link InterchangeWeightingEnumeration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link InterchangeWeightingEnumeration }
      */
     public void setWeighting(InterchangeWeightingEnumeration value) {
         this.weighting = value;
@@ -694,34 +535,32 @@ public class StopPlace
 
     /**
      * Gets the value of the accessSpaces property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link AccessSpaces_RelStructure }
-     *     
-//    public AccessSpaces_RelStructure getAccessSpaces() {
-//        return accessSpaces;
-//    }
+     *
+    //    public AccessSpaces_RelStructure getAccessSpaces() {
+    //        return accessSpaces;
+    //    }
 
     /**
      * Sets the value of the accessSpaces property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link AccessSpaces_RelStructure }
-     *     
+     *
      */
- //   public void setAccessSpaces(AccessSpaces_RelStructure value) {
- //       this.accessSpaces = value;
- //   }
+    //   public void setAccessSpaces(AccessSpaces_RelStructure value) {
+    //       this.accessSpaces = value;
+    //   }
 
     /**
      * Gets the value of the pathLinks property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SitePathLinks_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link SitePathLinks_RelStructure }
      */
     public SitePathLinks_RelStructure getPathLinks() {
         return pathLinks;
@@ -729,11 +568,9 @@ public class StopPlace
 
     /**
      * Sets the value of the pathLinks property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link SitePathLinks_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link SitePathLinks_RelStructure }
      */
     public void setPathLinks(SitePathLinks_RelStructure value) {
         this.pathLinks = value;
@@ -741,11 +578,9 @@ public class StopPlace
 
     /**
      * Gets the value of the pathJunctions property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PathJunctions_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link PathJunctions_RelStructure }
      */
     public PathJunctions_RelStructure getPathJunctions() {
         return pathJunctions;
@@ -753,11 +588,9 @@ public class StopPlace
 
     /**
      * Sets the value of the pathJunctions property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PathJunctions_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PathJunctions_RelStructure }
      */
     public void setPathJunctions(PathJunctions_RelStructure value) {
         this.pathJunctions = value;
@@ -765,11 +598,9 @@ public class StopPlace
 
     /**
      * Gets the value of the accesses property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Accesses_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link Accesses_RelStructure }
      */
     public Accesses_RelStructure getAccesses() {
         return accesses;
@@ -777,11 +608,9 @@ public class StopPlace
 
     /**
      * Sets the value of the accesses property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Accesses_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Accesses_RelStructure }
      */
     public void setAccesses(Accesses_RelStructure value) {
         this.accesses = value;
@@ -789,11 +618,9 @@ public class StopPlace
 
     /**
      * Gets the value of the navigationPaths property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NavigationPaths_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link NavigationPaths_RelStructure }
      */
     public NavigationPaths_RelStructure getNavigationPaths() {
         return navigationPaths;
@@ -801,11 +628,9 @@ public class StopPlace
 
     /**
      * Sets the value of the navigationPaths property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NavigationPaths_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NavigationPaths_RelStructure }
      */
     public void setNavigationPaths(NavigationPaths_RelStructure value) {
         this.navigationPaths = value;
@@ -813,11 +638,9 @@ public class StopPlace
 
     /**
      * Gets the value of the vehicleStoppingPlaces property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link VehicleStoppingPlaces_RelStructure }
-     *     
+     *
+     * @return possible object is
+     * {@link VehicleStoppingPlaces_RelStructure }
      */
     public VehicleStoppingPlaces_RelStructure getVehicleStoppingPlaces() {
         return vehicleStoppingPlaces;
@@ -825,11 +648,9 @@ public class StopPlace
 
     /**
      * Sets the value of the vehicleStoppingPlaces property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link VehicleStoppingPlaces_RelStructure }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link VehicleStoppingPlaces_RelStructure }
      */
     public void setVehicleStoppingPlaces(VehicleStoppingPlaces_RelStructure value) {
         this.vehicleStoppingPlaces = value;
