@@ -63,7 +63,7 @@ import java.util.List;
 })
 @XmlSeeAlso({
     Parking_VersionStructure.class,
-    StopPlace_VersionStructure.class,
+    StopPlace.class,
     ServiceSite_VersionStructure.class,
     PointOfInterest_VersionStructure.class
 })
