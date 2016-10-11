@@ -8,7 +8,7 @@
         <version>0.0.2</version>
     </parent>
 
-    <groupId>no.rutebanken</groupId>
+    <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
     <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -282,7 +282,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-plugin.version}</version>
                 <configuration>
-                    <mainClass>no.rutebanken.tiamat.TiamatTestApplication</mainClass>
+                    <mainClass>org.rutebanken.tiamat.TiamatTestApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
