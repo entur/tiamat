@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
  **/
 public class NetexIdMapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetexIdMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
     public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
         if(internalEntity.getId() == null) {
-            LOGGER.warn("Id for internal model is null. Mapping to null value.");
+            logger.warn("Id for internal model is null. Mapping to null value.");
             netexEntity.setId(null);
         } else {
             netexEntity.setId("NSR:" +  determineIdType(internalEntity)+":" + internalEntity.getId().toString());
