@@ -14,7 +14,7 @@ public class NetexIdMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetexIdMapper.class);
 
-    public void toNetexModel(EntityStructure internalEntity, no.rutebanken.netex.model.EntityStructure netexEntity) {
+    public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
         if(internalEntity.getId() == null) {
             LOGGER.warn("Id for internal model is null. Mapping to null value.");
             netexEntity.setId(null);
@@ -23,7 +23,7 @@ public class NetexIdMapper {
         }
     }
 
-    public void toTiamatModel(no.rutebanken.netex.model.EntityStructure netexEntity, EntityStructure tiamatEntity) {
+    public void toTiamatModel(org.rutebanken.netex.model.EntityStructure netexEntity, EntityStructure tiamatEntity) {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setId(null);

@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.netexmapping.converters;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.Levels_RelStructure;
+import org.rutebanken.netex.model.Levels_RelStructure;
 import no.rutebanken.tiamat.model.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class LevelsConverter extends BidirectionalConverter<List<Level>, Levels_
 
         levels.forEach(level -> {
                     levels_relStructure.getLevelRefOrLevel().add(
-                            mapperFacade.map(level, no.rutebanken.netex.model.Level.class)
+                            mapperFacade.map(level, org.rutebanken.netex.model.Level.class)
                     );
                 }
         );

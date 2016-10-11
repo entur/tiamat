@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.netexmapping.converters;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.rutebanken.netex.model.AlternativeNames_RelStructure;
 import no.rutebanken.tiamat.model.AlternativeName;
 
 import java.util.List;

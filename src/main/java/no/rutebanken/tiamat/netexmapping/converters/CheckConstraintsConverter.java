@@ -2,8 +2,8 @@ package no.rutebanken.tiamat.netexmapping.converters;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.BoardingPositions_RelStructure;
-import no.rutebanken.netex.model.CheckConstraints_RelStructure;
+import org.rutebanken.netex.model.BoardingPositions_RelStructure;
+import org.rutebanken.netex.model.CheckConstraints_RelStructure;
 import no.rutebanken.tiamat.model.BoardingPosition;
 import no.rutebanken.tiamat.model.CheckConstraint;
 

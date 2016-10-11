@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.importers;
 
-import no.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
@@ -33,7 +33,7 @@ public class SiteFrameImporter {
         this.netexMapper = netexMapper;
     }
 
-    public no.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
+    public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
         long startTime = System.currentTimeMillis();
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
@@ -52,7 +52,7 @@ public class SiteFrameImporter {
         timer.scheduleAtFixedRate(timerTask, 2000, 2000);
 
         try {
-            List<no.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
+            List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                     .parallelStream()
                     .map(stopPlace ->
                             importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
@@ -63,7 +63,7 @@ public class SiteFrameImporter {
 
                 topographicPlaceCreator.invalidateCache();
 
-                no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame()
+                org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame()
                 .withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
                             .withStopPlace(createdStopPlaces)
@@ -75,7 +75,7 @@ public class SiteFrameImporter {
     }
 
     @Transactional
-    private no.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
+    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
         try {
             StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();

@@ -1,7 +1,7 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import no.rutebanken.netex.model.ObjectFactory;
-import no.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.StreamingOutput;

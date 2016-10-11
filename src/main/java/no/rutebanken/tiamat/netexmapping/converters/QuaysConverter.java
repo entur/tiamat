@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.netexmapping.converters;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.Quays_RelStructure;
 import no.rutebanken.tiamat.model.Quay;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_Rel
 
         quays.forEach(quay -> {
             quays_relStructure.getQuayRefOrQuay().add(
-                    mapperFacade.map(quay, no.rutebanken.netex.model.Quay.class)
+                    mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class)
             );
         });
         return quays_relStructure;
@@ -28,8 +28,8 @@ public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_Rel
         List<Quay> quays = new ArrayList<>();
         if(quays_relStructure.getQuayRefOrQuay() != null) {
             quays_relStructure.getQuayRefOrQuay().stream()
-                    .filter(object -> object instanceof no.rutebanken.netex.model.Quay)
-                    .map(object -> ((no.rutebanken.netex.model.Quay) object))
+                    .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
+                    .map(object -> ((org.rutebanken.netex.model.Quay) object))
                     .map(netexQuay -> mapperFacade.map(netexQuay, Quay.class))
                     .forEach(quay -> quays.add(quay));
         }

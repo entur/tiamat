@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import no.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
@@ -28,7 +28,7 @@ public class PublicationDeliveryUnmarshaller {
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<no.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
+                (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
         return publicationDeliveryStructure;
     }

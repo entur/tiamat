@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import no.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;

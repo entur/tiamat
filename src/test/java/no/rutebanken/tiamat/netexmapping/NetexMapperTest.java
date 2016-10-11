@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.netexmapping;
 
-import no.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.Quay;
 import no.rutebanken.tiamat.model.MultilingualString;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -26,7 +26,7 @@ public class NetexMapperTest {
 
         sourceSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        no.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -35,12 +35,12 @@ public class NetexMapperTest {
 
     @Test
     public void mapSiteFrameToInternalModel() throws Exception {
-        no.rutebanken.netex.model.SiteFrame netexSiteFrame = new no.rutebanken.netex.model.SiteFrame();
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
 
-        no.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new no.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
+        org.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new org.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
 
-        no.rutebanken.netex.model.StopPlace stopPlace = new no.rutebanken.netex.model.StopPlace();
-        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
+        org.rutebanken.netex.model.StopPlace stopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.rutebanken.netex.model.MultilingualString name = new org.rutebanken.netex.model.MultilingualString();
         name.setValue("stop place");
         name.setLang("no");
         name.setTextIdType("");
@@ -64,7 +64,7 @@ public class NetexMapperTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("name", "en", ""));
 
-        no.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -72,7 +72,7 @@ public class NetexMapperTest {
 
     @Test
     public void mapStopPlaceToInternalWithId() throws Exception {
-        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
         String stopPlaceId = "1339";
         netexStopPlace.setId("NSR:StopPlace:" + stopPlaceId);
 
@@ -84,8 +84,8 @@ public class NetexMapperTest {
 
     @Test
     public void mapStopPlaceToInternalWithName() throws Exception {
-        no.rutebanken.netex.model.StopPlace netexStopPlace = new no.rutebanken.netex.model.StopPlace();
-        no.rutebanken.netex.model.MultilingualString name = new no.rutebanken.netex.model.MultilingualString();
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.rutebanken.netex.model.MultilingualString name = new org.rutebanken.netex.model.MultilingualString();
         name.setValue("stop place ");
         name.setLang("no");
         name.setTextIdType("");
@@ -104,7 +104,7 @@ public class NetexMapperTest {
         StopPlace tiamatStopPlace = new StopPlace();
         tiamatStopPlace.setId(123456L);
 
-        no.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
+        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
 
         assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
     }

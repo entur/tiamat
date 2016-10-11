@@ -4,7 +4,7 @@ import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import no.rutebanken.tiamat.model.EquipmentPlace;
-import no.rutebanken.netex.model.EquipmentPlaces_RelStructure;
+import org.rutebanken.netex.model.EquipmentPlaces_RelStructure;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package no.rutebanken.tiamat.exporters;
 
-import no.rutebanken.netex.model.PublicationDeliveryStructure;
-import no.rutebanken.netex.model.SiteFrame;
-import no.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.TiamatApplication;
 import no.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;

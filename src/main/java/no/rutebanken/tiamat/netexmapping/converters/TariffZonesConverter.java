@@ -3,7 +3,7 @@ package no.rutebanken.tiamat.netexmapping.converters;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.TariffZoneRefs_RelStructure;
+import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import no.rutebanken.tiamat.model.TariffZone;
 
 import java.util.List;

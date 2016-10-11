@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.netexmapping.converters;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import no.rutebanken.netex.model.ValidityConditions_RelStructure;
+import org.rutebanken.netex.model.ValidityConditions_RelStructure;
 import no.rutebanken.tiamat.model.ValidityCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +18,11 @@ public class ValidityConditionsConverter extends BidirectionalConverter<List<Val
 
         return null;
 //        if(validityConditions.isEmpty()) return null;
-//        ValidityConditions_RelStructure validityConditions_relStructure = new no.rutebanken.netex.model.ValidityConditions_RelStructure();
+//        ValidityConditions_RelStructure validityConditions_relStructure = new org.rutebanken.netex.model.ValidityConditions_RelStructure();
 //
 //        validityConditions.forEach(validityCondition ->
 //                validityConditions_relStructure.getValidityConditionRefOrValidBetweenOrValidityCondition_().add(
-//                        mapperFacade.map(validityCondition, no.rutebanken.netex.model.ValidityCondition.class)
+//                        mapperFacade.map(validityCondition, org.rutebanken.netex.model.ValidityCondition.class)
 //                ));
 //
 //        return validityConditions_relStructure;

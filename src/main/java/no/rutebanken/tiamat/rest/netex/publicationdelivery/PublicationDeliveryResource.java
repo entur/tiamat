@@ -1,9 +1,9 @@
 package no.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import no.rutebanken.netex.model.ObjectFactory;
-import no.rutebanken.netex.model.PublicationDeliveryStructure;
-import no.rutebanken.netex.model.SiteFrame;
-import no.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.netexmapping.NetexMapper;
@@ -80,7 +80,7 @@ public class PublicationDeliveryResource {
         }
         logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        no.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))

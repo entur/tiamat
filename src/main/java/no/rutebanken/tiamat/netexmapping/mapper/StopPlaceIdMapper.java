@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.netexmapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import no.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
 public class StopPlaceIdMapper extends CustomMapper<StopPlace, no.rutebanken.tiamat.model.StopPlace> {

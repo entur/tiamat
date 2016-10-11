@@ -1,6 +1,6 @@
 package no.rutebanken.tiamat.exporters;
 
-import no.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.model.SiteFrame;
 import no.rutebanken.tiamat.model.StopPlace;
 import no.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -55,7 +55,7 @@ public class PublicationDeliveryExporter {
         siteFrame.setTopographicPlaces(topographicPlaces);
 
         logger.info("Mapping site frame to netex model");
-        no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+        org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         logger.info("Returning publication delivery");
         return new PublicationDeliveryStructure()

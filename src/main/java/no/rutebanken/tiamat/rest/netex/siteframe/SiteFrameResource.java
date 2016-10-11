@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.rest.netex.siteframe;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.*;
 import no.rutebanken.tiamat.importers.SiteFrameImporter;
 import no.rutebanken.tiamat.importers.StopPlaceImporter;
 import no.rutebanken.tiamat.model.SiteFrame;
@@ -86,13 +86,13 @@ public class SiteFrameResource {
 
         siteFrame.setTopographicPlaces(topographicPlaces);
 
-        no.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+        org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         ObjectFactory objectFactory = new ObjectFactory();
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(org.rutebanken.netex.model.SiteFrame.class);
         StringWriter writer = new StringWriter();
-        JAXBElement<no.rutebanken.netex.model.SiteFrame> objectFactorySiteFrame = objectFactory.createSiteFrame(convertedSiteFrame);
+        JAXBElement<org.rutebanken.netex.model.SiteFrame> objectFactorySiteFrame = objectFactory.createSiteFrame(convertedSiteFrame);
         jaxbContext.createMarshaller().marshal(objectFactorySiteFrame, writer);
         // TODO: stream
         return Response.ok(writer.toString()).build();
@@ -104,12 +104,12 @@ public class SiteFrameResource {
     public String importSiteFrame(String xml) throws IOException, JAXBException {
         logger.info("Incoming xml is {} characters long", xml.length());
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(no.rutebanken.netex.model.SiteFrame.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(org.rutebanken.netex.model.SiteFrame.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-        JAXBElement<no.rutebanken.netex.model.SiteFrame> jaxbElement =
-                (JAXBElement<no.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
-        no.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
+        JAXBElement<org.rutebanken.netex.model.SiteFrame> jaxbElement =
+                (JAXBElement<org.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+        org.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
 
         logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
                 receivedNetexSiteFrame.getTopographicPlaces().getTopographicPlace().size(),
@@ -117,7 +117,7 @@ public class SiteFrameResource {
 
         SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-        no.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
+        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
 
         return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }

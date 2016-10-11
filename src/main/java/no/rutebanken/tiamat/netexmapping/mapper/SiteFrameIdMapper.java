@@ -2,7 +2,7 @@ package no.rutebanken.tiamat.netexmapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import no.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.SiteFrame;
 import no.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
 public class SiteFrameIdMapper extends CustomMapper<SiteFrame, no.rutebanken.tiamat.model.SiteFrame> {

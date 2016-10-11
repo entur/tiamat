@@ -2,9 +2,9 @@ package no.rutebanken.tiamat.netexmapping;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import no.rutebanken.netex.model.Quay;
-import no.rutebanken.netex.model.SiteFrame;
-import no.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
 import no.rutebanken.tiamat.netexmapping.converters.*;
 import no.rutebanken.tiamat.netexmapping.mapper.SiteFrameIdMapper;
 import no.rutebanken.tiamat.netexmapping.mapper.QuayIdMapper;
