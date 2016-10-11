@@ -46,7 +46,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 @XmlSeeAlso({
     VehicleStoppingPlace_VersionStructure.class,
-    Quay_VersionStructure.class,
+    Quay.class,
     BoardingPosition_VersionStructure.class,
     AccessSpace_VersionStructure.class
 })
