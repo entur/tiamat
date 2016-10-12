@@ -262,7 +262,7 @@ public class StopPlaceRepositoryImplTest {
 
         TopographicPlace county = createCounty(countyName);
         TopographicPlace municipality = createMunicipality(municipalityName, county);
-        createStopPlaceWithMunicipality("Somewhere", municipality);
+        createStopPlaceWithMunicipality("No matching stop name", municipality);
 
         Pageable pageable = new PageRequest(0, 10);
 
