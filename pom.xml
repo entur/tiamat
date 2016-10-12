@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.rutebanken.superpom</groupId>
         <artifactId>superpom</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.5</version>
     </parent>
 
     <groupId>org.rutebanken</groupId>
