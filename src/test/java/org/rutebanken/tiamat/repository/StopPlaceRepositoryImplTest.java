@@ -271,6 +271,17 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
+    public void findStopPlaceByMunicipalityAndNameAndExpectEmptyResult() throws Exception {
+        TopographicPlace municipality = createMunicipality("Asker", createCounty("Akershus"));
+        createStopPlaceWithMunicipality("No matching stop name", municipality);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", Arrays.asList(municipality.getId().toString()), null, null, pageable);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     public void findStopPlaceByTypeAirport() {
         StopPlace stopPlace = new StopPlace();
 
@@ -279,7 +290,6 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceRepository.save(stopPlace);
         Page<StopPlace> actual = stopPlaceRepository.findStopPlace(null, null, null, Arrays.asList(StopTypeEnumeration.AIRPORT), new PageRequest(0,1));
         Assertions.assertThat(actual).isNotEmpty();
-
     }
 
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {

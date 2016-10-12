@@ -135,30 +135,35 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
+        List<String> operators = new ArrayList<>(2);
+
+        if(name != null) {
+            wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
+            parameters.put("name", name);
+            operators.add("AND");
+        }
 
         if(municipalityIds != null && !municipalityIds.isEmpty()){
             wheres.add("stopPlace.topographicPlaceRef.ref in :municipalityId");
             parameters.put("municipalityId", municipalityIds);
+            operators.add("OR");
         }
 
         if(countyIds != null && !countyIds.isEmpty()) {
             wheres.add("stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref in :countyId)");
             parameters.put("countyId", countyIds);
-        }
-
-        if(name != null) {
-            wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
-            parameters.put("name", name);
+            operators.add("OR");
         }
 
         if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
             wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
             parameters.put("stopPlaceTypes", stopPlaceTypes);
+            operators.add("OR");
         }
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
-                queryString.append("OR");
+                queryString.append(operators.get(i-1));
             } else {
                 queryString.append("WHERE");
             }
@@ -167,7 +172,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
         logger.debug("{}", queryString);
-         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
+        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
 
         parameters.forEach(query::setParameter);
 

@@ -180,7 +180,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     @Test
-    public void searchForStopsWithOtherStopPlaceTypeShouldHaveNoResult() {
+    public void searchForStopsWithDifferentStopPlaceTypeShouldHaveNoResult() {
 
         StopPlace stopPlace = new StopPlace(new MultilingualString("Fyrstekakeveien"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
@@ -199,7 +199,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
 
     @Test
-    public void searchForStopsWithTypeTramWithMunicipalityAndCountySpecified() {
+    public void searchForTramStopWithMunicipalityAndCounty() {
 
         TopographicPlace hordaland = new TopographicPlace(new MultilingualString("Hordaland"));
         topographicPlaceRepository.save(hordaland);
@@ -226,7 +226,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     @Test
-    public void searchForStopsInMunicipalityAndExpectNoResult() {
+    public void searchForStopsInMunicipalityThenExpectNoResult() {
         // Stop Place not related to municipality
         StopPlace stopPlace = new StopPlace(new MultilingualString("Nesbru"));
         stopPlaceRepository.save(stopPlace);
@@ -262,6 +262,45 @@ public class DtoStopPlaceResourceIntegrationTest {
         assertThat(result).extracting("name").contains("Nesbru", "Oksenøyveien");
     }
 
+    @Test
+    public void searchForStopsInTwoCountiesAndTwoMunicipalities() {
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
+        TopographicPlace buskerud = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Buskerud")));
+
+        TopographicPlace lier = createMunicipalityWithCountyRef("Lier", buskerud);
+        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
+
+        createStopPlaceWithMunicipalityRef("Nesbru", asker);
+        createStopPlaceWithMunicipalityRef("Hennumkrysset", asker);
+
+        StopPlaceDto[] result = given()
+                .param("countyReference", buskerud.getId().toString())
+                .param("countyReference", akershus.getId().toString())
+                .param("municipalityReference", lier.getId().toString())
+                .param("municipalityReference", asker.getId().toString())
+                .get(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto[].class);
+
+        assertThat(result).extracting("name").contains("Nesbru", "Hennumkrysset");
+    }
+
+    @Test
+    public void searchForStopsInDifferentMunicipalitiesButSameCounty() {
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
+        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
+        TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", akershus);
+
+        createStopPlaceWithMunicipalityRef("Måsan", asker);
+        createStopPlaceWithMunicipalityRef("Haslum", baerum);
+
+        StopPlaceDto[] result = given()
+                .param("countyReference", akershus.getId().toString())
+                .get(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto[].class);
+
+        assertThat(result).extracting("name").contains("Måsan", "Haslum");
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new MultilingualString(name));
         stopPlace.setStopPlaceType(type);
@@ -275,7 +314,6 @@ public class DtoStopPlaceResourceIntegrationTest {
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality) {
         return createStopPlaceWithMunicipalityRef(name, municipality, null);
     }
-
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new MultilingualString(name));
