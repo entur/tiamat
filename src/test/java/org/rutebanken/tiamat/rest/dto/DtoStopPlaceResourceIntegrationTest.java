@@ -220,8 +220,8 @@ public class DtoStopPlaceResourceIntegrationTest {
         given()
             .param("name", "A")
             .param("stopPlaceType", "onstreetTram")
-            .param("municipality", kvinnherad.getId().toString())
-            .param("county", hordaland.getId().toString())
+            .param("municipalityReference", kvinnherad.getId().toString())
+            .param("countyReference", hordaland.getId().toString())
         .when()
             .get(BASE_URI_STOP_PLACE)
         .then()
@@ -232,5 +232,23 @@ public class DtoStopPlaceResourceIntegrationTest {
             .body("[0].name", equalTo(stopPlace.getName().getValue()));
     }
 
+    @Test
+    public void searchForStopsInMunicipalityAndExpectNoResult() {
+        StopPlace stopPlace = new StopPlace(new MultilingualString("Nesbru"));
+        stopPlaceRepository.save(stopPlace);
+
+        TopographicPlace asker = new TopographicPlace(new MultilingualString("Asker"));
+        topographicPlaceRepository.save(asker);
+
+        given()
+                .param("municipalityReference", asker.getId().toString())
+        .when()
+                .get(BASE_URI_STOP_PLACE)
+        .then()
+                .log().body()
+                .statusCode(200)
+                .assertThat()
+                .body("$", Matchers.hasSize(0));
+    }
 
 }
