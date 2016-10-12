@@ -235,27 +235,20 @@ public class DtoStopPlaceResourceIntegrationTest {
         topographicPlaceRepository.save(asker);
 
         given()
-                .param("municipalityReference", asker.getId().toString())
+            .param("municipalityReference", asker.getId().toString())
         .when()
-                .get(BASE_URI_STOP_PLACE)
+            .get(BASE_URI_STOP_PLACE)
         .then()
-                .log().body()
-                .statusCode(200)
-                .assertThat()
-                .body("$", hasSize(0));
+            .log().body()
+            .statusCode(200)
+            .assertThat()
+            .body("$", hasSize(0));
     }
 
-    /**
-     * SELECT stopPlace FROM StopPlace stopPlace
-     * WHERE stopPlace.topographicPlaceRef.ref = :municipalityId
-     *  OR stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref = :countyId)
-     */
     @Test
-    public void searchForStopsInTwoMunicipalitiesBelongingToTheSameCounty() {
-        TopographicPlace akershus = new TopographicPlace(new MultilingualString("Akershus"));
-        topographicPlaceRepository.save(akershus);
-        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
-        TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", akershus);
+    public void searchForStopsInTwoMunicipalities() {
+        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", null);
+        TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", null);
 
         createStopPlaceWithMunicipalityRef("Nesbru", asker);
         createStopPlaceWithMunicipalityRef("Oksenøyveien", baerum);
@@ -263,7 +256,6 @@ public class DtoStopPlaceResourceIntegrationTest {
         StopPlaceDto[] result = given()
             .param("municipalityReference", baerum.getId().toString())
             .param("municipalityReference", asker.getId().toString())
-            .param("countyReference", akershus.getId().toString())
             .get(BASE_URI_STOP_PLACE)
                 .as(StopPlaceDto[].class);
 
@@ -287,9 +279,11 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new MultilingualString(name));
-        TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-        countyRef.setRef(county.getId().toString());
-        municipality.setParentTopographicPlaceRef(countyRef);
+        if(county != null) {
+            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
+            countyRef.setRef(county.getId().toString());
+            municipality.setParentTopographicPlaceRef(countyRef);
+        }
         topographicPlaceRepository.save(municipality);
         return municipality;
     }

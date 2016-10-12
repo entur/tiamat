@@ -130,20 +130,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(String name, Long municipalityId, Long countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(String name, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
 
-        if(municipalityId != null){
-            wheres.add("stopPlace.topographicPlaceRef.ref = :municipalityId");
-            parameters.put("municipalityId", municipalityId.toString());
+        if(municipalityIds != null && !municipalityIds.isEmpty()){
+            wheres.add("stopPlace.topographicPlaceRef.ref in :municipalityId");
+            parameters.put("municipalityId", municipalityIds);
         }
 
-        if(countyId != null) {
-            wheres.add("stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref = :countyId)");
-            parameters.put("countyId", countyId.toString());
+        if(countyIds != null && !countyIds.isEmpty()) {
+            wheres.add("stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref in :countyId)");
+            parameters.put("countyId", countyIds);
         }
 
         if(name != null) {
@@ -158,7 +158,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
-                queryString.append(" AND ");
+                queryString.append("OR");
             } else {
                 queryString.append("WHERE");
             }

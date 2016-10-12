@@ -204,7 +204,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceRepository.save(stopPlace);
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Long.valueOf(stopPlace.getTopographicPlaceRef().getRef()), null, null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()), null, null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -221,7 +221,7 @@ public class StopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipality.getId(), county.getId(), null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(municipality.getId().toString()), Arrays.asList(county.getId().toString()), null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -238,7 +238,7 @@ public class StopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, county.getId(), null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, Arrays.asList(county.getId().toString()), null, pageable);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -266,7 +266,7 @@ public class StopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, county.getId(), null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, Arrays.asList(county.getId().toString()), null, pageable);
         assertThat(result).isEmpty();
     }
 
