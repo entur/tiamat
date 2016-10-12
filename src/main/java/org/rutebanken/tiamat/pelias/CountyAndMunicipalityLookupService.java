@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class CountyAndMunicipalityLookupService {
@@ -27,10 +29,7 @@ public class CountyAndMunicipalityLookupService {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
+    
     private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
 
 
@@ -38,7 +37,7 @@ public class CountyAndMunicipalityLookupService {
      * Reverse lookup stop place centroid from Pelias.
      * References to topographical places for municipality and county on the stopPLace.
      */
-    public void populateCountyAndMunicipality(StopPlace stopPlace) throws IOException, InterruptedException {
+    public void populateCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) throws IOException, InterruptedException {
 
         Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
 
@@ -78,9 +77,9 @@ public class CountyAndMunicipalityLookupService {
                             region,
                             IanaCountryTldEnumeration.NO,
                             TopographicPlaceTypeEnumeration.COUNTY);
+            logger.info("Got {} counties for region {} from repository", counties.size(), region);
 
-            TopographicPlace county = createOrUseExistingCounty(counties, region);
-
+            TopographicPlace county = createOrUseExistingCounty(counties, region, topographicPlacesCreatedCounter);
 
             List<TopographicPlace> municipalities = topographicPlaceRepository
                     .findByNameValueAndCountryRefRefAndTopographicPlaceType(
@@ -88,26 +87,29 @@ public class CountyAndMunicipalityLookupService {
                             IanaCountryTldEnumeration.NO,
                             TopographicPlaceTypeEnumeration.TOWN);
 
-            municipality = createOrUseExistingMunicipality(municipalities, county, locality, region);
+            logger.info("Got {} municipalities for locality {} from repository", counties.size(), locality);
+
+            municipality = createOrUseExistingMunicipality(municipalities, county, locality, region, topographicPlacesCreatedCounter);
         } finally {
+            logger.debug("Releasing semaphore for region {}", region);
             stripedSemaphore.release();
         }
         TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
         municipalityRef.setRef(String.valueOf(municipality.getId()));
 
-        logger.trace("Setting reference to municipality {} : {} on stop place {}",
+        logger.trace("Setting reference to municipality {} : {} to stop place {}",
                 municipality.getName(), municipalityRef.getRef(), stopPlace.getName());
 
         stopPlace.setTopographicPlaceRef(municipalityRef);
     }
 
     private TopographicPlace createOrUseExistingMunicipality(List<TopographicPlace> municipalities,
-                                                             TopographicPlace county, String locality, String region) {
+                                                             TopographicPlace county, String locality, String region, AtomicInteger topographicPlacesCreatedCounter) {
 
         TopographicPlace municipality;
 
         if (municipalities.isEmpty()) {
-            logger.info("Creating new municipality for locality {}", locality);
+            logger.debug("Creating new municipality for locality {}", locality);
 
             municipality = new TopographicPlace();
             municipality.setName(new MultilingualString(locality, "no", ""));
@@ -120,10 +122,12 @@ public class CountyAndMunicipalityLookupService {
             countryRef.setRef(IanaCountryTldEnumeration.NO);
             municipality.setCountryRef(countryRef);
 
-            logger.info("Adding reference to county {} from municipality {}", region, locality);
+            logger.debug("Adding reference to county {} from municipality {}", region, locality);
 
             municipality.setParentTopographicPlaceRef(countyRef);
             topographicPlaceRepository.save(municipality);
+            topographicPlacesCreatedCounter.incrementAndGet();
+            logger.info("Created municipality {} with id: {}, referencing county {}", locality, municipality.getId(), county.getId());
 
         } else {
             municipality = municipalities.get(0);
@@ -132,7 +136,7 @@ public class CountyAndMunicipalityLookupService {
         return municipality;
     }
 
-    private TopographicPlace createOrUseExistingCounty(List<TopographicPlace> counties, String region) {
+    private TopographicPlace createOrUseExistingCounty(List<TopographicPlace> counties, String region, AtomicInteger topographicPlacesCreatedCounter) {
 
         TopographicPlace county;
 
@@ -148,6 +152,8 @@ public class CountyAndMunicipalityLookupService {
             county.setCountryRef(countryRef);
 
             topographicPlaceRepository.save(county);
+            topographicPlacesCreatedCounter.incrementAndGet();
+            logger.info("Created county {} with id: {}", region, county.getId());
         } else {
             county = counties.get(0);
             logger.info("Found existing county for region {}: {}", region, county.getId());
