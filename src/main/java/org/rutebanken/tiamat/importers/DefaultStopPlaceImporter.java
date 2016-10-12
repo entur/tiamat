@@ -139,7 +139,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
                         topographicPlacesCreatedCounter);
             } else {
-                lookupCountyAndMunicipality(newStopPlace);
+                lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
             }
             Long originalId = newStopPlace.getId();
             resetIdAndKeepOriginalId(newStopPlace);
@@ -172,9 +172,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
     }
 
-    private void lookupCountyAndMunicipality(StopPlace stopPlace) {
+    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
         try {
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
         } catch (IOException|InterruptedException e) {
             logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
         }
