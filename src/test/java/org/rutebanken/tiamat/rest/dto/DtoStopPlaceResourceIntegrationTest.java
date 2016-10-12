@@ -4,7 +4,9 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.json.JSONArray;
 import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -197,24 +200,13 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     @Test
     public void searchForStopsWithTypeTramWithMunicipalityAndCountySpecified() {
-        StopPlace stopPlace = new StopPlace(new MultilingualString("Anda"));
-        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
 
         TopographicPlace hordaland = new TopographicPlace(new MultilingualString("Hordaland"));
         topographicPlaceRepository.save(hordaland);
 
-        TopographicPlace kvinnherad = new TopographicPlace(new MultilingualString("Kvinnherad"));
+        TopographicPlace kvinnherad = createMunicipalityWithCountyRef("Kvinnherad", hordaland);
 
-        TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-        countyRef.setRef(hordaland.getId().toString());
-
-        kvinnherad.setParentTopographicPlaceRef(countyRef);
-
-        topographicPlaceRepository.save(kvinnherad);
-
-        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-        municipalityRef.setRef(kvinnherad.getId().toString());
-
+        StopPlace stopPlace = createStopPlaceWithMunicipalityRef("Anda", kvinnherad, StopTypeEnumeration.TRAM_STATION);
         stopPlaceRepository.save(stopPlace);
 
         given()
@@ -229,11 +221,13 @@ public class DtoStopPlaceResourceIntegrationTest {
             .statusCode(200)
             .body(Matchers.notNullValue())
             .assertThat()
+            .body("$", hasSize(1))
             .body("[0].name", equalTo(stopPlace.getName().getValue()));
     }
 
     @Test
     public void searchForStopsInMunicipalityAndExpectNoResult() {
+        // Stop Place not related to municipality
         StopPlace stopPlace = new StopPlace(new MultilingualString("Nesbru"));
         stopPlaceRepository.save(stopPlace);
 
@@ -248,7 +242,56 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .log().body()
                 .statusCode(200)
                 .assertThat()
-                .body("$", Matchers.hasSize(0));
+                .body("$", hasSize(0));
+    }
+
+    /**
+     * SELECT stopPlace FROM StopPlace stopPlace
+     * WHERE stopPlace.topographicPlaceRef.ref = :municipalityId
+     *  OR stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref = :countyId)
+     */
+    @Test
+    public void searchForStopsInTwoMunicipalitiesBelongingToTheSameCounty() {
+        TopographicPlace akershus = new TopographicPlace(new MultilingualString("Akershus"));
+        topographicPlaceRepository.save(akershus);
+        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
+        TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", akershus);
+
+        createStopPlaceWithMunicipalityRef("Nesbru", asker);
+        createStopPlaceWithMunicipalityRef("Oksenøyveien", baerum);
+
+        StopPlaceDto[] result = given()
+            .param("municipalityReference", baerum.getId().toString())
+            .param("municipalityReference", asker.getId().toString())
+            .param("countyReference", akershus.getId().toString())
+            .get(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto[].class);
+
+        assertThat(result).extracting("name").contains("Nesbru", "Oksenøyveien");
+    }
+
+    private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
+        StopPlace stopPlace = new StopPlace(new MultilingualString(name));
+        stopPlace.setStopPlaceType(type);
+        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
+        municipalityRef.setRef(municipality.getId().toString());
+        stopPlace.setTopographicPlaceRef(municipalityRef);
+        stopPlaceRepository.save(stopPlace);
+        return stopPlace;
+    }
+
+    private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality) {
+        return createStopPlaceWithMunicipalityRef(name, municipality, null);
+    }
+
+
+    private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
+        TopographicPlace municipality = new TopographicPlace(new MultilingualString(name));
+        TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
+        countyRef.setRef(county.getId().toString());
+        municipality.setParentTopographicPlaceRef(countyRef);
+        topographicPlaceRepository.save(municipality);
+        return municipality;
     }
 
 }
