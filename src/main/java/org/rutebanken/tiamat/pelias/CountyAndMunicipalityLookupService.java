@@ -5,13 +5,14 @@ import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.model.Feature;
+import org.rutebanken.tiamat.pelias.model.Properties;
 import org.rutebanken.tiamat.pelias.model.ReverseLookupResult;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -41,59 +42,50 @@ public class CountyAndMunicipalityLookupService {
 
         Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
 
+        Properties peliasProperties = reverseLookup(point, stopPlace);
+        if(peliasProperties == null) {
+            return;
+        }
+
+        String peliasCounty = peliasProperties.getCounty();
+        Semaphore stripedSemaphore = stripedSemaphores.get(peliasCounty);
+        stripedSemaphore.acquire();
+        try {
+            TopographicPlace municipality = populateCountyAndMunicipality(peliasProperties.getCounty(), peliasProperties.getLocaladmin(), topographicPlacesCreatedCounter);
+            createAndSetRef(stopPlace, municipality);
+        } finally {
+            logger.debug("Releasing semaphore for region {}", peliasCounty);
+            stripedSemaphore.release();
+        }
+    }
+
+    private Properties reverseLookup(Point point, StopPlace stopPlace) throws IOException {
         ReverseLookupResult reverseLookupResult = peliasReverseLookupClient.reverseLookup(String.valueOf(point.getY()),
                 String.valueOf(point.getX()), 1);
 
         if (reverseLookupResult.getFeatures().isEmpty()) {
             logger.warn("Got empty features list from Pelias reverse. {},{}", String.valueOf(point.getY()),
                     String.valueOf(point.getX()));
-            return;
+            return null;
         }
 
-        Feature feature = reverseLookupResult.getFeatures().get(0);
+        Properties properties = reverseLookupResult.getFeatures().get(0).getProperties();
 
-        String region = feature.getProperties().getCounty();
-        String locality = feature.getProperties().getLocaladmin();
+        logger.trace("Got county {} and locality {}", properties.getCounty(), properties.getLocaladmin());
 
-        logger.trace("Got region {} and locality {}", region, locality);
-
-        if (region == null) {
-            logger.warn("'region' was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
-            return;
+        if (properties.getCounty() == null) {
+            logger.warn("County was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
+            return null;
         }
 
-        if (locality == null) {
-            logger.warn("'locality' was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
-            return;
+        if (properties.getLocaladmin() == null) {
+            logger.warn("Localadmin was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
+            return null;
         }
+        return properties;
+    }
 
-        TopographicPlace municipality;
-
-        Semaphore stripedSemaphore = stripedSemaphores.get(region);
-        stripedSemaphore.acquire();
-        try {
-            List<TopographicPlace> counties = topographicPlaceRepository
-                    .findByNameValueAndCountryRefRefAndTopographicPlaceType(
-                            region,
-                            IanaCountryTldEnumeration.NO,
-                            TopographicPlaceTypeEnumeration.COUNTY);
-            logger.info("Got {} counties for region {} from repository", counties.size(), region);
-
-            TopographicPlace county = createOrUseExistingCounty(counties, region, topographicPlacesCreatedCounter);
-
-            List<TopographicPlace> municipalities = topographicPlaceRepository
-                    .findByNameValueAndCountryRefRefAndTopographicPlaceType(
-                            locality,
-                            IanaCountryTldEnumeration.NO,
-                            TopographicPlaceTypeEnumeration.TOWN);
-
-            logger.info("Got {} municipalities for locality {} from repository", counties.size(), locality);
-
-            municipality = createOrUseExistingMunicipality(municipalities, county, locality, region, topographicPlacesCreatedCounter);
-        } finally {
-            logger.debug("Releasing semaphore for region {}", region);
-            stripedSemaphore.release();
-        }
+    private void createAndSetRef(StopPlace stopPlace, TopographicPlace municipality) {
         TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
         municipalityRef.setRef(String.valueOf(municipality.getId()));
 
@@ -101,6 +93,28 @@ public class CountyAndMunicipalityLookupService {
                 municipality.getName(), municipalityRef.getRef(), stopPlace.getName());
 
         stopPlace.setTopographicPlaceRef(municipalityRef);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private TopographicPlace populateCountyAndMunicipality(String peliasCounty, String peliasLocalAdmin, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException {
+        List<TopographicPlace> counties = topographicPlaceRepository
+                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                        peliasCounty,
+                        IanaCountryTldEnumeration.NO,
+                        TopographicPlaceTypeEnumeration.COUNTY);
+        logger.info("Got {} counties for region {} from repository", counties.size(), peliasCounty);
+
+        TopographicPlace county = createOrUseExistingCounty(counties, peliasCounty, topographicPlacesCreatedCounter);
+
+        List<TopographicPlace> municipalities = topographicPlaceRepository
+                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                        peliasLocalAdmin,
+                        IanaCountryTldEnumeration.NO,
+                        TopographicPlaceTypeEnumeration.TOWN);
+
+        logger.info("Got {} municipalities for locality {} from repository", counties.size(), peliasLocalAdmin);
+
+        return createOrUseExistingMunicipality(municipalities, county, peliasLocalAdmin, peliasCounty, topographicPlacesCreatedCounter);
     }
 
     private TopographicPlace createOrUseExistingMunicipality(List<TopographicPlace> municipalities,
@@ -125,7 +139,8 @@ public class CountyAndMunicipalityLookupService {
             logger.debug("Adding reference to county {} from municipality {}", region, locality);
 
             municipality.setParentTopographicPlaceRef(countyRef);
-            topographicPlaceRepository.save(municipality);
+            topographicPlaceRepository.saveAndFlush(municipality);
+
             topographicPlacesCreatedCounter.incrementAndGet();
             logger.info("Created municipality {} with id: {}, referencing county {}", locality, municipality.getId(), county.getId());
 
@@ -151,7 +166,8 @@ public class CountyAndMunicipalityLookupService {
             countryRef.setRef(IanaCountryTldEnumeration.NO);
             county.setCountryRef(countryRef);
 
-            topographicPlaceRepository.save(county);
+            topographicPlaceRepository.saveAndFlush(county);
+
             topographicPlacesCreatedCounter.incrementAndGet();
             logger.info("Created county {} with id: {}", region, county.getId());
         } else {
