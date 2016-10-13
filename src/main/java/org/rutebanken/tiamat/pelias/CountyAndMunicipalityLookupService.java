@@ -102,7 +102,7 @@ public class CountyAndMunicipalityLookupService {
                         peliasCounty,
                         IanaCountryTldEnumeration.NO,
                         TopographicPlaceTypeEnumeration.COUNTY);
-        logger.info("Got {} counties for region {} from repository", counties.size(), peliasCounty);
+        logger.debug("Got {} counties for region {} from repository", counties.size(), peliasCounty);
 
         TopographicPlace county = createOrUseExistingCounty(counties, peliasCounty, topographicPlacesCreatedCounter);
 
@@ -112,7 +112,7 @@ public class CountyAndMunicipalityLookupService {
                         IanaCountryTldEnumeration.NO,
                         TopographicPlaceTypeEnumeration.TOWN);
 
-        logger.info("Got {} municipalities for locality {} from repository", counties.size(), peliasLocalAdmin);
+        logger.debug("Got {} municipalities for locality {} from repository", counties.size(), peliasLocalAdmin);
 
         return createOrUseExistingMunicipality(municipalities, county, peliasLocalAdmin, peliasCounty, topographicPlacesCreatedCounter);
     }
@@ -146,20 +146,20 @@ public class CountyAndMunicipalityLookupService {
 
         } else {
             municipality = municipalities.get(0);
-            logger.info("Found existing municipality {} with id {}", municipality.getName(), municipality.getId());
+            logger.debug("Found existing municipality {} with id {}", municipality.getName(), municipality.getId());
         }
         return municipality;
     }
 
-    private TopographicPlace createOrUseExistingCounty(List<TopographicPlace> counties, String region, AtomicInteger topographicPlacesCreatedCounter) {
+    private TopographicPlace createOrUseExistingCounty(List<TopographicPlace> counties, String peliasCounty, AtomicInteger topographicPlacesCreatedCounter) {
 
         TopographicPlace county;
 
         if (counties.isEmpty()) {
 
-            logger.info("Creating new county for region {}", region);
+            logger.debug("Creating new county from pelias county: {}", peliasCounty);
             county = new TopographicPlace();
-            county.setName(new MultilingualString(region, "no", ""));
+            county.setName(new MultilingualString(peliasCounty, "no", ""));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
             CountryRef countryRef = new CountryRef();
@@ -169,10 +169,10 @@ public class CountyAndMunicipalityLookupService {
             topographicPlaceRepository.saveAndFlush(county);
 
             topographicPlacesCreatedCounter.incrementAndGet();
-            logger.info("Created county {} with id: {}", region, county.getId());
+            logger.info("Created county {} with id: {}", peliasCounty, county.getId());
         } else {
             county = counties.get(0);
-            logger.info("Found existing county for region {}: {}", region, county.getId());
+            logger.debug("Found existing county for region {}: {}", peliasCounty, county.getId());
         }
         return county;
     }
