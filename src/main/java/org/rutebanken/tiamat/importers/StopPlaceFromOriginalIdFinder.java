@@ -55,6 +55,9 @@ public class StopPlaceFromOriginalIdFinder {
     }
 
     private StopPlace findByKeyValue(String key, Long id) {
+        if(id == null) {
+            return null;
+        }
         String cacheKey = keyValKey(key, id);
         try {
             String stringId = String.valueOf(id);

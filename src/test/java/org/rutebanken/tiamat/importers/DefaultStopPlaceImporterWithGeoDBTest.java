@@ -2,18 +2,24 @@ package org.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,6 +46,9 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     @Autowired
     private DefaultStopPlaceImporter defaultStopPlaceImporter;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
     /**
      * Import two stop places, each with one quay.
@@ -147,6 +156,56 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         assertThat(actualStopPlace.getQuays()).hasSize(2);
     }
+
+    @Test
+    public void reproduceIssueWithDuplicateCountiesAndMunicipalities() {
+
+        List<StopPlace> stopPlaces = new ArrayList<>();
+
+        for(int i = 0; i < 10; i++) {
+            StopPlace stopPlace = new StopPlace(new MultilingualString("Stop place " + i));
+            stopPlace.setId(Long.valueOf(i));
+            stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)))));
+            stopPlaces.add(stopPlace);
+        }
+
+        AtomicInteger topographicPlacesConter = new AtomicInteger();
+
+        stopPlaces.parallelStream()
+                .forEach(stopPlace -> {
+                    try {
+
+                        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), topographicPlacesConter);
+                    } catch (ExecutionException|InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        Iterable<TopographicPlace> topographicPlaces = topographicPlaceRepository.findAll();
+
+        final int[] size = new int[1];
+        topographicPlaces.forEach(tp -> size[0]++);
+        assertThat(size[0]).isEqualTo(2);
+
+        List<TopographicPlace> counties = topographicPlaceRepository
+                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                        "Buskerud",
+                        IanaCountryTldEnumeration.NO,
+                        TopographicPlaceTypeEnumeration.COUNTY);
+
+        assertThat(counties).hasSize(1);
+
+        List<TopographicPlace> municipalities = topographicPlaceRepository
+                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
+                        "Nedre Eiker",
+                        IanaCountryTldEnumeration.NO,
+                        TopographicPlaceTypeEnumeration.TOWN);
+
+        assertThat(municipalities).hasSize(1);
+
+        assertThat(topographicPlacesConter.get()).isEqualTo(2);
+    }
+
 
     private SimplePoint point(double longitude, double latitude) {
         return new SimplePoint(new LocationStructure(

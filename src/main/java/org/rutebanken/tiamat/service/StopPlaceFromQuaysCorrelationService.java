@@ -265,7 +265,7 @@ public class StopPlaceFromQuaysCorrelationService {
             stopPlace.getCentroid().getLocation().setGeometryPoint(calculateCentroidForStopPlace(stopPlace.getQuays()));
 
             try {
-                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, new AtomicInteger());
             } catch (Exception e) {
                 logger.warn("Error loading data from Pelias: {}", e.getMessage(), e);
             }

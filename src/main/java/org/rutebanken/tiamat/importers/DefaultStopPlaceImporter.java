@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
@@ -40,7 +41,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
+    private static DecimalFormat format = new DecimalFormat("#.#");
+
     private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
+
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
@@ -74,20 +78,24 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private Semaphore getStripedSemaphore(StopPlace stopPlace) {
         final String semaphoreKey;
+        if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null) {
+            LocationStructure location = stopPlace.getCentroid().getLocation();
+            semaphoreKey = locationSemaphore(location);
+        } else
         if (stopPlace.getId() != null) {
             semaphoreKey = "new-stop-place-"+stopPlace.getId();
-        } else if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null){
-            LocationStructure location = stopPlace.getCentroid().getLocation();
-            semaphoreKey = "location-"+location.getLongitude()+"-"+location.getLatitude();
         } else if (stopPlace.getName() != null
                 && stopPlace.getName().getValue() != null
                 && !stopPlace.getName().getValue().isEmpty()){
             semaphoreKey = "name-"+stopPlace.getName().getValue();
         } else {
-            //TODO: proper and sensible striped locking.
-            semaphoreKey = "";
+            semaphoreKey = "all";
         }
         return stripedSemaphores.get(semaphoreKey);
+    }
+
+    private String locationSemaphore(LocationStructure location) {
+        return "location-"+ format.format(location.getLongitude())+"-"+ format.format(location.getLatitude());
     }
 
     @Transactional
@@ -139,7 +147,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
                         topographicPlacesCreatedCounter);
             } else {
-                lookupCountyAndMunicipality(newStopPlace);
+                lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
             }
             Long originalId = newStopPlace.getId();
             resetIdAndKeepOriginalId(newStopPlace);
@@ -172,9 +180,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
     }
 
-    private void lookupCountyAndMunicipality(StopPlace stopPlace) {
+    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
         try {
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
         } catch (IOException|InterruptedException e) {
             logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
         }
