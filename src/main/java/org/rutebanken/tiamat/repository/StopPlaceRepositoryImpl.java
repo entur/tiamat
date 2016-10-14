@@ -130,16 +130,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(String name, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>(2);
 
-        if(name != null) {
+        if(query != null) {
             wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
-            parameters.put("name", name);
+            parameters.put("name", query);
             operators.add("AND");
         }
 
