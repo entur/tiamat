@@ -134,15 +134,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
-        StringBuilder queryString = new StringBuilder("SELECT stopPlace FROM StopPlace stopPlace ");
+        StringBuilder queryString = new StringBuilder("select stopPlace from StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>(2);
 
         if(query != null) {
-            parameters.put("query", query);
-            operators.add("AND");
+            parameters.put("q", query);
+            operators.add("and");
             if(Longs.tryParse(query) != null) {
                 wheres.add("id like concat('%', :query, '%')");
             } else {
@@ -153,26 +153,26 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         if(municipalityIds != null && !municipalityIds.isEmpty()){
             wheres.add("stopPlace.topographicPlaceRef.ref in :municipalityId");
             parameters.put("municipalityId", municipalityIds);
-            operators.add("OR");
+            operators.add("or");
         }
 
         if(countyIds != null && !countyIds.isEmpty()) {
-            wheres.add("stopPlace.topographicPlaceRef.ref IN (SELECT municipality.id FROM TopographicPlace municipality WHERE municipality.parentTopographicPlaceRef.ref in :countyId)");
+            wheres.add("stopPlace.topographicPlaceRef.ref in (select municipality.id from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)");
             parameters.put("countyId", countyIds);
-            operators.add("OR");
+            operators.add("or");
         }
 
         if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
             wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
             parameters.put("stopPlaceTypes", stopPlaceTypes);
-            operators.add("OR");
+            operators.add("or");
         }
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
                 queryString.append(operators.get(i-1));
             } else {
-                queryString.append("WHERE");
+                queryString.append("where");
             }
             queryString.append(' ').append(wheres.get(i)).append(' ');
         }
