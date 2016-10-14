@@ -73,7 +73,7 @@ public class DtoStopPlaceResource {
                 .add("municipalityReferences", municipalityReferences)
                 .add("countyReference", countyReferences)
                 .add("stopPlaceType", stopPlaceTypes)
-                .add("query", query)
+                .add("q", query)
                 .add("page", page)
                 .add("size", size));
 
