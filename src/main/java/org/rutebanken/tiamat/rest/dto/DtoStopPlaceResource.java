@@ -56,7 +56,7 @@ public class DtoStopPlaceResource {
     public List<StopPlaceDto> getStopPlaces(
             @DefaultValue(value = "0") @QueryParam(value = "page") int page,
             @DefaultValue(value = "20") @QueryParam(value = "size") int size,
-            @QueryParam(value = "query") String query,
+            @QueryParam(value = "q") String query,
             @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
             @QueryParam(value = "countyReference") List<String> countyReferences,
             @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) {
