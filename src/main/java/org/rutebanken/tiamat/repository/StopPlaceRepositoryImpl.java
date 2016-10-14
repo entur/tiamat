@@ -144,7 +144,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             parameters.put("query", query);
             operators.add("and");
             if(Longs.tryParse(query) != null) {
-                wheres.add("id like concat('%', :query, '%')");
+                wheres.add("concat(id) like concat('%', :query, '%')");
             } else {
                 wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
             }
