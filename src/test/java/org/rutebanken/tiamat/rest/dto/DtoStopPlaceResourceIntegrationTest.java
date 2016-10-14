@@ -168,7 +168,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         given()
-            .queryParam("name", "ytNES")
+            .param("query", "ytNES")
         .when()
             .get(BASE_URI_STOP_PLACE)
         .then()
@@ -210,7 +210,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         given()
-            .param("name", "A")
+            .param("query", "A")
             .param("stopPlaceType", "onstreetTram")
             .param("municipalityReference", kvinnherad.getId().toString())
             .param("countyReference", hordaland.getId().toString())

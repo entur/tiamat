@@ -172,14 +172,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
         logger.debug("{}", queryString);
-        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString.toString(), StopPlace.class);
+        final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString.toString(), StopPlace.class);
 
-        parameters.forEach(query::setParameter);
+        parameters.forEach(typedQuery::setParameter);
 
-        query.setFirstResult(pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
+        typedQuery.setFirstResult(pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
 
-        List<StopPlace> stopPlaces = query.getResultList();
+        List<StopPlace> stopPlaces = typedQuery.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
 
     }
