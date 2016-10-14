@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.rest.dto;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
@@ -67,7 +69,13 @@ public class DtoStopPlaceResource {
 
         keyCloak();
 
-        logger.debug("Get stop places with name '{}'", name);
+        logger.info("Get stop places '{}'", MoreObjects.toStringHelper("Query")
+                .add("municipalityReferences", municipalityReferences)
+                .add("countyReference", countyReferences)
+                .add("stopPlaceType", stopPlaceTypes)
+                .add("name", name)
+                .add("page", page)
+                .add("size", size));
 
         Pageable pageable = new PageRequest(page, size);
 
