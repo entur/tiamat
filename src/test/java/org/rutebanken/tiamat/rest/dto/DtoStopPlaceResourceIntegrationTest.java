@@ -315,12 +315,30 @@ public class DtoStopPlaceResourceIntegrationTest {
         assertThat(result).extracting("name").contains("Måsan", "Haslum");
     }
 
+    @Test
+    public void searchForStopById() throws Exception {
+
+        StopPlace stopPlace = createStopPlaceWithMunicipalityRef("Espa", null);
+        stopPlaceRepository.save(stopPlace);
+
+
+        StopPlaceDto[] result = given()
+                .param("query", stopPlace.getId().toString())
+                .get(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto[].class);
+
+        assertThat(result).extracting("name").contains("Espa");
+    }
+
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new MultilingualString(name));
         stopPlace.setStopPlaceType(type);
-        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-        municipalityRef.setRef(municipality.getId().toString());
-        stopPlace.setTopographicPlaceRef(municipalityRef);
+        if(municipality != null) {
+            TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
+            municipalityRef.setRef(municipality.getId().toString());
+            stopPlace.setTopographicPlaceRef(municipalityRef);
+        }
         stopPlaceRepository.save(stopPlace);
         return stopPlace;
     }

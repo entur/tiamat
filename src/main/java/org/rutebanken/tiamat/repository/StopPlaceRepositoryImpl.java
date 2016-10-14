@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 
+import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.NumberUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -138,9 +141,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<String> operators = new ArrayList<>(2);
 
         if(query != null) {
-            wheres.add("lower(stopPlace.name.value) like concat('%', lower(:name), '%')");
-            parameters.put("name", query);
+            parameters.put("query", query);
             operators.add("AND");
+            if(Longs.tryParse(query) != null) {
+                wheres.add("id like concat('%', :query, '%')");
+            } else {
+                wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+            }
         }
 
         if(municipalityIds != null && !municipalityIds.isEmpty()){
