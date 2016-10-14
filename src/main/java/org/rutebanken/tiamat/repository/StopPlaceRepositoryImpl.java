@@ -141,7 +141,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<String> operators = new ArrayList<>(2);
 
         if(query != null) {
-            parameters.put("q", query);
+            parameters.put("query", query);
             operators.add("and");
             if(Longs.tryParse(query) != null) {
                 wheres.add("id like concat('%', :query, '%')");
