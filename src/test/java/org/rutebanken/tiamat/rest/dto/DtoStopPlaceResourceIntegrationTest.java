@@ -246,6 +246,20 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     @Test
+    public void searchForStopInMunicipalityOnly() {
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
+        TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
+        createStopPlaceWithMunicipalityRef("Nesbru", asker);
+
+        StopPlaceDto[] result = given()
+                .param("municipalityReference", asker.getId().toString())
+                .get(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto[].class);
+
+        assertThat(result).extracting("name").contains("Nesbru");
+    }
+
+    @Test
     public void searchForStopsInTwoMunicipalities() {
         TopographicPlace asker = createMunicipalityWithCountyRef("Asker", null);
         TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", null);
