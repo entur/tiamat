@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.Before;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -49,6 +50,14 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
+
+
+    @Before
+    public void cleanRepositories() {
+        stopPlaceRepository.deleteAll();
+        topographicPlaceRepository.deleteAll();
+        quayRepository.deleteAll();
+    }
 
     /**
      * Import two stop places, each with one quay.
@@ -184,8 +193,12 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         Iterable<TopographicPlace> topographicPlaces = topographicPlaceRepository.findAll();
 
         final int[] size = new int[1];
-        topographicPlaces.forEach(tp -> size[0]++);
-        assertThat(size[0]).isEqualTo(2);
+        topographicPlaces.forEach(tp -> {
+            size[0]++;
+            System.out.println("Topographic place repo contains " + tp.getName());
+        });
+
+        assertThat(size[0]).isEqualTo(2).withFailMessage("Number of topographic places in the repository is not as expected");
 
         List<TopographicPlace> counties = topographicPlaceRepository
                 .findByNameValueAndCountryRefRefAndTopographicPlaceType(
