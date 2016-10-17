@@ -323,7 +323,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
 
         StopPlaceDto[] result = given()
-                .param("q", stopPlace.getId().toString())
+                .param("q", stopPlace.getId())
                 .get(BASE_URI_STOP_PLACE)
                 .as(StopPlaceDto[].class);
 
