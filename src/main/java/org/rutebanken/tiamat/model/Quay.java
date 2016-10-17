@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -118,5 +120,14 @@ public class Quay extends StopPlaceSpace_VersionStructure {
        /* public void setBoardingPositions(BoardingPositions_RelStructure value) {
         this.boardingPositions = value;
     }*/
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("name", name)
+                .toString();
+    }
 
 }
