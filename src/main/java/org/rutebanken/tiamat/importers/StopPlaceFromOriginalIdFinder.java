@@ -13,7 +13,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.rutebanken.tiamat.importers.DefaultStopPlaceImporter.ORIGINAL_ID_KEY;
+
+import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
 
 /**
  * Helper class to find stop places based on saved original ID key.

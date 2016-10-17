@@ -4,6 +4,7 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.importers.DefaultStopPlaceImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,9 +17,11 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
@@ -109,6 +112,65 @@ public class PublicationDeliveryResourceTest {
         assertThat(quay.getName().getValue()).isEqualTo("quay");
         assertThat(quay.getId()).isNotNull();
 
+    }
+
+    @Test
+    public void importPublicationDeliveryAndExpectMappedIdInReturn() throws Exception {
+
+        String originalQuayId = "XYZ:Quay:321321";
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:123123")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withId(originalQuayId)
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("quay"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
+
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        hasOriginalId(stopPlace.getId(), actualStopPlace);
+
+        Quay quay = actualStopPlace.getQuays()
+                .getQuayRefOrQuay()
+                .stream()
+                .peek(object -> System.out.println(object))
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .peek(q-> System.out.println(q))
+                .findFirst().get();
+
+        hasOriginalId(originalQuayId, quay);
+    }
+
+    private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
+        assertThat(object).isNotNull();
+        assertThat(object.getKeyList()).isNotNull();
+        Optional<String> originalIdString = object.getKeyList().getKeyValue()
+                .stream()
+                .peek(keyValueStructure -> System.out.println(keyValueStructure))
+                .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
+                .map(keyValueStructure -> keyValueStructure.getValue())
+                .findFirst();
+        assertThat(originalIdString).isPresent();
+        assertThat(originalIdString.get()).isEqualTo(expectedId);
     }
 
     private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {

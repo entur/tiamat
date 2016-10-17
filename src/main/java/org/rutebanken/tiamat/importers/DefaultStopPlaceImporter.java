@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 @Qualifier("defaultStopPlaceImporter")
 public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
-    public static final String ORIGINAL_ID_KEY = "imported-id";
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
 
@@ -113,8 +112,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         semaphore.acquire();
 
         try {
-
-
             logger.debug("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
                     newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
                     newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
@@ -126,7 +123,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
                 quaysToAdd.forEach(quay -> {
                     logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
-                    resetIdAndKeepOriginalId(quay);
                     foundStopPlace.getQuays().add(quay);
                     quayRepository.save(quay);
                 });
@@ -150,7 +146,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
             }
             Long originalId = newStopPlace.getId();
-            resetIdAndKeepOriginalId(newStopPlace);
 
             if (newStopPlace.getQuays() != null) {
                 logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
@@ -160,10 +155,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     } else if (quay.getCentroid().getLocation() == null) {
                         logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
                     } else {
-                        resetIdAndKeepOriginalId(quay);
                         quay.getCentroid().setId(null);
                         quay.getCentroid().getLocation().setId(0);
                         quayRepository.save(quay);
+                        logger.debug("Saved quay. Got id {} back", quay.getId());
                     }
                 });
             }
@@ -181,11 +176,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
-        try {
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
-        } catch (IOException|InterruptedException e) {
-            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
-        }
+//        try {
+//            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
+//        } catch (IOException|InterruptedException e) {
+//            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
+//        }
     }
 
     private StopPlace initializeLazyReferences(StopPlace stopPlace) {
@@ -228,20 +223,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     public boolean containsQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
         return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
                 .anyMatch(existingQuay -> hasSameCoordinates(existingQuay, newQuay));
-    }
-
-    public void resetIdAndKeepOriginalId(DataManagedObjectStructure dataManagedObjectStructure) {
-        if (dataManagedObjectStructure.getId() != null) {
-            KeyValueStructure importedId = new KeyValueStructure();
-            importedId.setKey(ORIGINAL_ID_KEY);
-            importedId.setValue(String.valueOf(dataManagedObjectStructure.getId()));
-            if (dataManagedObjectStructure.getKeyList() == null) {
-                dataManagedObjectStructure.setKeyList(new KeyListStructure());
-            }
-            dataManagedObjectStructure.getKeyList().getKeyValue().add(importedId);
-            dataManagedObjectStructure.setId(null);
-            logger.debug("Moved ID {} to key {}", importedId.getValue(), ORIGINAL_ID_KEY);
-        }
     }
 
     public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
