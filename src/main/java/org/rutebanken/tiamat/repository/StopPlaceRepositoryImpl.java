@@ -150,31 +150,35 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             operators.add("and");
         }
 
-        if(municipalityIds != null && !municipalityIds.isEmpty()){
-            wheres.add("stopPlace.topographicPlaceRef.ref in :municipalityId");
-            parameters.put("municipalityId", municipalityIds);
-            operators.add("and");
-        }
-
-        if(countyIds != null && !countyIds.isEmpty()) {
-            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)");
-            parameters.put("countyId", countyIds);
-            if(municipalityIds != null && !municipalityIds.isEmpty()) {
-                operators.add("or");
-            } else {
-                operators.add("and");
-            }
-        }
-
         if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
             wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
             parameters.put("stopPlaceTypes", stopPlaceTypes);
             operators.add("and");
         }
 
+        boolean hasMunicipalityFilter = municipalityIds != null && !municipalityIds.isEmpty();
+        boolean hasCountyFilter = countyIds != null && !countyIds.isEmpty();
+
+        if(hasMunicipalityFilter){
+            String prefix;
+            if(hasCountyFilter) {
+                operators.add("or");
+                prefix = "(";
+            } else prefix = "";
+
+            wheres.add(prefix+"stopPlace.topographicPlaceRef.ref in :municipalityId");
+            parameters.put("municipalityId", municipalityIds);
+        }
+
+        if(hasCountyFilter) {
+            String posix = hasMunicipalityFilter ? ")" : "";
+            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+posix);
+            parameters.put("countyId", countyIds);
+        }
+
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
-                queryString.append(operators.get(i));
+                queryString.append(operators.get(i-1));
             } else {
                 queryString.append("where");
             }

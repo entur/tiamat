@@ -294,6 +294,51 @@ public class StopPlaceRepositoryImplTest {
         System.out.println(result.getContent().get(0));
     }
 
+    /**
+     * Expect no result beacuse stop type is not matching.
+     * https://test.rutebanken.org/apiman-gateway/rutebanken/tiamat/1.0/stop_place/?stopPlaceType=onstreetBus&countyReference=33&municipalityReference=2&
+     */
+    @Test
+    public void findStopPlaceByCountyAndMunicipalityAndStopPlaceType() throws Exception {
+        String municipalityName = "Asker";
+        String countyName = "Akershus";
+
+        TopographicPlace county = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, county);
+        createStopPlaceWithMunicipality("Does not matter", municipality);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(null,
+                Arrays.asList(municipality.getId().toString()),
+                Arrays.asList(county.getId().toString()),
+                Arrays.asList(StopTypeEnumeration.COACH_STATION),
+                new PageRequest(0, 1));
+
+        assertThat(result).isEmpty();
+    }
+
+    /**
+     * Expect no result because name should be anded with other parts of query
+     * https://test.rutebanken.org/apiman-gateway/rutebanken/tiamat/1.0/stop_place/?q=lomsdalen&municipalityReference=2&countyReference=33
+     */
+    @Test
+    public void findStopPlaceByCountyAndMunicipalityAndNameExpectNoResult() throws Exception {
+        String municipalityName = "Asker";
+        String countyName = "Akershus";
+
+        TopographicPlace county = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, county);
+        createStopPlaceWithMunicipality("XYZ", municipality);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Name",
+                Arrays.asList(municipality.getId().toString()),
+                Arrays.asList(county.getId().toString()),
+                null,
+                new PageRequest(0, 1));
+
+        System.out.println(result);
+        assertThat(result).isEmpty();
+    }
+
     @Test
     public void findStopPlaceByCountyAndNameThenExpectEmptyResult() throws Exception {
         String municipalityName = "Asker";
