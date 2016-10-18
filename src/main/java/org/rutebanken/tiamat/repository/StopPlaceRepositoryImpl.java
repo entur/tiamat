@@ -157,7 +157,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         if(countyIds != null && !countyIds.isEmpty()) {
-            wheres.add("stopPlace.topographicPlaceRef.ref in (select municipality.id from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)");
+            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)");
             parameters.put("countyId", countyIds);
             operators.add("or");
         }
