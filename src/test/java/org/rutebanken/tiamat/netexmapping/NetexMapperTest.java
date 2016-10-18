@@ -1,11 +1,15 @@
 package org.rutebanken.tiamat.netexmapping;
 
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.*;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.rutebanken.tiamat.model.KeyListStructure;
+import org.rutebanken.tiamat.model.KeyValueStructure;
+import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,6 +87,25 @@ public class NetexMapperTest {
     }
 
     @Test
+    public void mapStopPlaceWithKeyValuesToNetex() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setKeyList(new KeyListStructure());
+
+        String originalId = "OPP:StopArea:123";
+        KeyValueStructure keyValueStructure = new KeyValueStructure(NetexIdMapper.ORIGINAL_ID_KEY, originalId);
+
+        stopPlace.getKeyList().getKeyValue().add(keyValueStructure);
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        assertThat(netexStopPlace.getKeyList()).isNotNull();
+        assertThat(netexStopPlace.getKeyList().getKeyValue()).isNotNull();
+        assertThat(netexStopPlace.getKeyList().getKeyValue()).isNotEmpty();
+        assertThat(netexStopPlace.getKeyList().getKeyValue()).extracting("key").contains(NetexIdMapper.ORIGINAL_ID_KEY);
+        assertThat(netexStopPlace.getKeyList().getKeyValue()).extracting("value").contains(originalId);
+    }
+    
+    @Test
     public void mapStopPlaceToInternalWithName() throws Exception {
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
         org.rutebanken.netex.model.MultilingualString name = new org.rutebanken.netex.model.MultilingualString();
@@ -111,7 +134,7 @@ public class NetexMapperTest {
 
     @Test
     public void mapNetexQuayIdToInternal() {
-        Quay netexQuay = new Quay();
+        org.rutebanken.netex.model.Quay netexQuay = new org.rutebanken.netex.model.Quay();
 
         String netexId = "NSR:Quay:12345";
         netexQuay.setId(netexId);
@@ -127,7 +150,7 @@ public class NetexMapperTest {
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
         tiamatQuay.setId(1234567L);
 
-        Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
+        org.rutebanken.netex.model.Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
         assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
 
