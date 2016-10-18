@@ -23,7 +23,7 @@ public class NetexMapper {
         logger.info("Creating netex mapper");
         mapperFactory.getConverterFactory().registerConverter(new AccessSpacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new LevelsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new QuaysConverter());
+        mapperFactory.getConverterFactory().registerConverter(new QuayListConverter());
         mapperFactory.getConverterFactory().registerConverter(new AlternativeNamesConverter());
         mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
         mapperFactory.getConverterFactory().registerConverter(new TariffZonesConverter());

@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.netexmapping.converters;
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.Quays_RelStructure;
@@ -12,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_RelStructure> {
+public class QuayListConverter extends BidirectionalConverter<List<Quay>, Quays_RelStructure> {
 
-    private static final Logger logger = LoggerFactory.getLogger(QuaysConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(QuayListConverter.class);
 
     private final NetexIdMapper netexIdMapper = new NetexIdMapper();
 
@@ -26,7 +25,7 @@ public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_Rel
 
         quays.forEach(quay -> {
             org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
-            netexIdMapper.toNetexModel(quay, netexQuay);
+//            netexIdMapper.toNetexModel(quay, netexQuay);
             quays_relStructure.getQuayRefOrQuay().add(netexQuay);
         });
         return quays_relStructure;
@@ -42,7 +41,7 @@ public class QuaysConverter extends BidirectionalConverter<List<Quay>, Quays_Rel
                     .map(object -> ((org.rutebanken.netex.model.Quay) object))
                     .map(netexQuay -> {
                         Quay tiamatQuay = mapperFacade.map(netexQuay, Quay.class);
-                        netexIdMapper.toTiamatModel(netexQuay, tiamatQuay );
+//                        netexIdMapper.toTiamatModel(netexQuay, tiamatQuay );
                         return tiamatQuay;
                     })
                     .forEach(quay -> quays.add(quay));
