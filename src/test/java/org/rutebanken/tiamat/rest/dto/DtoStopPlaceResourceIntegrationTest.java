@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.json.JSONArray;
 import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -318,7 +319,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForStopById() throws Exception {
 
-        StopPlace stopPlace = createStopPlaceWithMunicipalityRef("Espa", null);
+        StopPlace stopPlace = createStopPlace("Espa");
         stopPlaceRepository.save(stopPlace);
 
 
@@ -328,6 +329,27 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .as(StopPlaceDto[].class);
 
         assertThat(result).extracting("name").contains("Espa");
+    }
+
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-677
+     */
+    @Test
+    public void createStopPlaceShouldExposeQuayIds() {
+        StopPlaceDto stopPlaceDto = new StopPlaceDto();
+        stopPlaceDto.quays = new ArrayList<>(1);
+        stopPlaceDto.quays.add(new QuayDto());
+
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(stopPlaceDto)
+        .when()
+                .post(BASE_URI_STOP_PLACE)
+        .then()
+                .log().body()
+                .assertThat()
+                .body("quays[0].id", notNullValue());
     }
 
 
@@ -341,6 +363,10 @@ public class DtoStopPlaceResourceIntegrationTest {
         }
         stopPlaceRepository.save(stopPlace);
         return stopPlace;
+    }
+
+    private StopPlace createStopPlace(String name) {
+        return createStopPlaceWithMunicipalityRef(name, null);
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality) {

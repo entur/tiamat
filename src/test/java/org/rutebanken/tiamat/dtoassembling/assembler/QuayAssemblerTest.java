@@ -37,5 +37,17 @@ public class QuayAssemblerTest {
         assertThat(quayDto.description).isEqualTo("description");
     }
 
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-677
+     */
+    @Test
+    public void assembleQuayAndVerifyIdInReturn() {
+        Quay quay = new Quay();
+        quay.setId(123L);
+
+        QuayDto quayDto = quayAssembler.assemble(quay);
+
+        assertThat(quayDto.id).isNotEmpty();
+    }
 
 }
