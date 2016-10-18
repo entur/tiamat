@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -163,14 +164,16 @@ public class PublicationDeliveryResourceTest {
     private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
         assertThat(object).isNotNull();
         assertThat(object.getKeyList()).isNotNull();
-        Optional<String> originalIdString = object.getKeyList().getKeyValue()
+        List<String> list = object.getKeyList().getKeyValue()
                 .stream()
                 .peek(keyValueStructure -> System.out.println(keyValueStructure))
                 .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
                 .map(keyValueStructure -> keyValueStructure.getValue())
-                .findFirst();
-        assertThat(originalIdString).isPresent();
-        assertThat(originalIdString.get()).isEqualTo(expectedId);
+                .collect(Collectors.toList());
+        assertThat(list).hasSize(1);
+        String originalIdString = list.get(0);
+        assertThat(originalIdString).isNotEmpty();
+        assertThat(originalIdString).isEqualTo(expectedId);
     }
 
     private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
