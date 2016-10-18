@@ -19,7 +19,7 @@ public class NetexIdMapper {
 
     public void toNetexModel(DataManagedObjectStructure internalEntity, org.rutebanken.netex.model.DataManagedObjectStructure netexEntity) {
         if(internalEntity.getId() == null) {
-            logger.warn("Id for internal model is null. Mapping to null value.");
+            logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
             netexEntity.setId("NSR:" +  determineIdType(internalEntity)+":" + internalEntity.getId().toString());
