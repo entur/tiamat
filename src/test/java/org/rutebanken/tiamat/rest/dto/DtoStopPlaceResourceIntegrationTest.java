@@ -212,7 +212,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
         given()
             .param("q", "A")
-            .param("stopPlaceType", "onstreetTram")
+            .param("stopPlaceType", StopTypeEnumeration.TRAM_STATION.value())
             .param("municipalityReference", kvinnherad.getId().toString())
             .param("countyReference", hordaland.getId().toString())
         .when()

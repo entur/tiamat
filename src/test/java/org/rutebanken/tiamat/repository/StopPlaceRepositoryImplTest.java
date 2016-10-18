@@ -194,6 +194,21 @@ public class StopPlaceRepositoryImplTest {
         assertThat(result).isNull();
     }
 
+    @Test
+    public void findStopPlaceByMunicipalityAndTypeBusThenExpectNoResult() {
+        String stopPlaceName = "Falsens plass";
+        String municipalityName = "Gjøvik";
+        TopographicPlace municipality = createMunicipality(municipalityName, null);
+        StopPlace stopPlace = createStopPlaceWithMunicipality(stopPlaceName, municipality);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
+        stopPlaceRepository.save(stopPlace);
+        Pageable pageable = new PageRequest(0, 10);
+
+        List<StopTypeEnumeration> stopTypeEnumerations = Arrays.asList(StopTypeEnumeration.BUS_STATION);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()), null, stopTypeEnumerations, pageable);
+        assertThat(result).isEmpty();
+    }
 
     @Test
     public void findStopPlaceByMunicipalityAndName() throws Exception {
@@ -256,7 +271,7 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
-    public void findStopPlaceByCountyAndNameAndExpectEmptyResult() throws Exception {
+    public void findStopPlaceByCountyAndNameThenExpectEmptyResult() throws Exception {
         String municipalityName = "Asker";
         String countyName = "Akershus";
 
