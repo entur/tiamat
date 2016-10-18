@@ -138,6 +138,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
+        List<String> operators = new ArrayList<>();
 
         if(query != null) {
             parameters.put("query", query);
@@ -146,26 +147,34 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             } else {
                 wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
             }
+            operators.add("and");
         }
 
         if(municipalityIds != null && !municipalityIds.isEmpty()){
             wheres.add("stopPlace.topographicPlaceRef.ref in :municipalityId");
             parameters.put("municipalityId", municipalityIds);
+            operators.add("and");
         }
 
         if(countyIds != null && !countyIds.isEmpty()) {
             wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)");
             parameters.put("countyId", countyIds);
+            if(municipalityIds != null && !municipalityIds.isEmpty()) {
+                operators.add("or");
+            } else {
+                operators.add("and");
+            }
         }
 
         if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
             wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
             parameters.put("stopPlaceTypes", stopPlaceTypes);
+            operators.add("and");
         }
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
-                queryString.append("and");
+                queryString.append(operators.get(i));
             } else {
                 queryString.append("where");
             }

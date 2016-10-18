@@ -259,6 +259,30 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
+    public void findStopPlaceByCounties() throws Exception {
+        String stopPlaceName = "Slependen";
+        String municipalityName = "Bærum";
+        String countyName = "Akershus";
+
+        TopographicPlace akershus = createCounty(countyName);
+        TopographicPlace municipality = createMunicipality(municipalityName, akershus);
+        StopPlace stopPlace = createStopPlaceWithMunicipality(stopPlaceName, municipality);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlaceRepository.save(stopPlace);
+
+        TopographicPlace buskerud = createCounty("Buskerud");
+
+        List<String> countyRefs = Arrays.asList(buskerud.getId().toString());
+        List<String> municipalityRefs = Arrays.asList(municipality.getId().toString());
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipalityRefs, countyRefs, Arrays.asList(StopTypeEnumeration.BUS_STATION), pageable);
+        assertThat(result).isNotEmpty();
+        assertThat(result).extracting(actual -> actual.getId()).contains(stopPlace.getId());
+    }
+
+    @Test
     public void findStopPlacNameContainsIgnoreCase() throws Exception {
         String stopPlaceName = "IKEA Slependen";
 
