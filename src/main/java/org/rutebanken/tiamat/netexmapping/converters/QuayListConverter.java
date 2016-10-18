@@ -15,8 +15,6 @@ public class QuayListConverter extends BidirectionalConverter<List<Quay>, Quays_
 
     private static final Logger logger = LoggerFactory.getLogger(QuayListConverter.class);
 
-    private final NetexIdMapper netexIdMapper = new NetexIdMapper();
-
     @Override
     public Quays_RelStructure convertTo(List<Quay> quays, Type<Quays_RelStructure> type) {
         Quays_RelStructure quays_relStructure = new Quays_RelStructure();
@@ -25,7 +23,6 @@ public class QuayListConverter extends BidirectionalConverter<List<Quay>, Quays_
 
         quays.forEach(quay -> {
             org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
-//            netexIdMapper.toNetexModel(quay, netexQuay);
             quays_relStructure.getQuayRefOrQuay().add(netexQuay);
         });
         return quays_relStructure;
@@ -41,7 +38,6 @@ public class QuayListConverter extends BidirectionalConverter<List<Quay>, Quays_
                     .map(object -> ((org.rutebanken.netex.model.Quay) object))
                     .map(netexQuay -> {
                         Quay tiamatQuay = mapperFacade.map(netexQuay, Quay.class);
-//                        netexIdMapper.toTiamatModel(netexQuay, tiamatQuay );
                         return tiamatQuay;
                     })
                     .forEach(quay -> quays.add(quay));
