@@ -67,7 +67,9 @@
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
 
-        <netex-java-model.version>0.0.8</netex-java-model.version>
+        <!-- NB: Concious choice of using snapshot version. This is to keep in
+            sync, and fail fast if incompatibilities -->
+        <netex-java-model.version>0.0.9-SNAPSHOT</netex-java-model.version>
 
     </properties>
 
