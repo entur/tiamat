@@ -140,7 +140,7 @@ public class DtoStopPlaceResource {
 
     @POST
     @Path("{id}")
-    public StopPlaceDto updateStopPlace(StopPlaceDto simpleStopPlaceDto) {
+    public StopPlaceDto updateStopPlace(StopPlaceDto simpleStopPlaceDto, @PathParam("id") String id) {
         keyCloak();
 
         logger.info("Save stop place {} with id {}", simpleStopPlaceDto.name, simpleStopPlaceDto.id);
@@ -149,6 +149,7 @@ public class DtoStopPlaceResource {
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDto);
         if(stopPlace != null) {
             stopPlaceRepository.save(stopPlace);
+            quayRepository.save(stopPlace.getQuays());
             return stopPlaceAssembler.assemble(stopPlace);
         }
 
@@ -163,6 +164,10 @@ public class DtoStopPlaceResource {
                 simpleStopPlaceDto.name,
                 simpleStopPlaceDto.quays != null ? simpleStopPlaceDto.quays.size() : 0,
                 simpleStopPlaceDto.centroid);
+
+        if(simpleStopPlaceDto.id != null) {
+            throw new IllegalArgumentException("Cannot accept stop place ID when creating new stop place");
+        }
 
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
         if(stopPlace != null) {

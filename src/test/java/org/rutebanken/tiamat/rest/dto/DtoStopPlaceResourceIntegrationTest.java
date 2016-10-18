@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -352,6 +352,41 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .body("quays[0].id", notNullValue());
     }
 
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-677
+     */
+    @Test
+    public void createStopPlaceWithNewQuayShouldExposeQuayIds() {
+        StopPlaceDto stopPlaceDto = new StopPlaceDto();
+        stopPlaceDto.quays = new ArrayList<>(1);
+        stopPlaceDto.quays.add(new QuayDto());
+
+
+        // Create
+        stopPlaceDto = given()
+                .contentType(ContentType.JSON)
+                .body(stopPlaceDto)
+                .post(BASE_URI_STOP_PLACE)
+                .as(StopPlaceDto.class);
+
+        // Add new quay
+        stopPlaceDto.quays.add(new QuayDto());
+
+        // Update
+        stopPlaceDto = given()
+                .contentType(ContentType.JSON)
+                .body(stopPlaceDto)
+                .post(BASE_URI_STOP_PLACE + stopPlaceDto.id)
+                .as(StopPlaceDto.class);
+
+        assertThat(stopPlaceDto.quays)
+                .hasSize(2)
+                .extracting(quayDto -> quayDto.id)
+                    .doesNotContain("null")
+                    .isNotNull()
+                    .isNotEmpty();
+
+    }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new MultilingualString(name));

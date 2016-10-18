@@ -48,6 +48,7 @@ public class QuayAssemblerTest {
         QuayDto quayDto = quayAssembler.assemble(quay);
 
         assertThat(quayDto.id).isNotEmpty();
+        assertThat(quayDto.id).contains(quay.getId().toString());
     }
 
 }
