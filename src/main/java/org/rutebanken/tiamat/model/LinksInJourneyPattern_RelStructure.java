@@ -47,10 +47,7 @@ public class LinksInJourneyPattern_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ServiceLinkInJourneyPattern", type = ServiceLinkInJourneyPattern_VersionedChildStructure.class),
-        @XmlElement(name = "TimingLinkInJourneyPattern", type = TimingLinkInJourneyPattern.class)
-    })
+
     protected List<LinkInLinkSequence_VersionedChildStructure> serviceLinkInJourneyPatternOrTimingLinkInJourneyPattern;
 
     /**

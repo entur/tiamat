@@ -72,8 +72,8 @@ public class AssistanceBookingService_VersionStructure
     protected AllModesEnumeration vehicleMode;
     @XmlElementRef(name = "TransportOrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
-    protected JAXBElement<? extends LineRefStructure> lineRef;
+//    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
+//    protected JAXBElement<? extends LineRefStructure> lineRef;
     @XmlElement(name = "BookedObjectRef")
     protected VersionOfObjectRefStructure bookedObjectRef;
     protected NoticeAssignments_RelStructure noticeAssignmenrts;
@@ -226,31 +226,6 @@ public class AssistanceBookingService_VersionStructure
         this.transportOrganisationRef = value;
     }
 
-    /**
-     * Gets the value of the lineRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link JAXBElement }{@code <}{@link FlexibleLineRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link LineRefStructure }{@code >}
-     *     
-     */
-    public JAXBElement<? extends LineRefStructure> getLineRef() {
-        return lineRef;
-    }
-
-    /**
-     * Sets the value of the lineRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link FlexibleLineRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link LineRefStructure }{@code >}
-     *     
-     */
-    public void setLineRef(JAXBElement<? extends LineRefStructure> value) {
-        this.lineRef = value;
-    }
 
     /**
      * Gets the value of the bookedObjectRef property.

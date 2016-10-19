@@ -37,7 +37,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "ConnectionRefStructure")
 @XmlSeeAlso({
     SiteConnectionRefStructure.class,
-    DefaultConnectionRefStructure.class
 })
 public class ConnectionRefStructure
     extends TransferRefStructure

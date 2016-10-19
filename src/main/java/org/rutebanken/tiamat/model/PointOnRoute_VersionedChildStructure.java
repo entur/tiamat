@@ -53,8 +53,7 @@ public class PointOnRoute_VersionedChildStructure
 
     @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElement(name = "OnwardRouteLinkRef")
-    protected RouteLinkRefStructure onwardRouteLinkRef;
+
 
     /**
      * Gets the value of the pointRef property.
@@ -110,30 +109,6 @@ public class PointOnRoute_VersionedChildStructure
      */
     public void setPointRef(JAXBElement<? extends PointRefStructure> value) {
         this.pointRef = value;
-    }
-
-    /**
-     * Gets the value of the onwardRouteLinkRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link RouteLinkRefStructure }
-     *     
-     */
-    public RouteLinkRefStructure getOnwardRouteLinkRef() {
-        return onwardRouteLinkRef;
-    }
-
-    /**
-     * Sets the value of the onwardRouteLinkRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link RouteLinkRefStructure }
-     *     
-     */
-    public void setOnwardRouteLinkRef(RouteLinkRefStructure value) {
-        this.onwardRouteLinkRef = value;
     }
 
 }

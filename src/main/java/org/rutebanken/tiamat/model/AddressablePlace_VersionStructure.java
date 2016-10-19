@@ -47,7 +47,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 @XmlSeeAlso({
     AddressablePlace.class,
-    Garage_VersionStructure.class,
     SiteElement_VersionStructure.class
 })
 @MappedSuperclass

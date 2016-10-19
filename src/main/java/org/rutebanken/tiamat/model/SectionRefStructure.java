@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "SectionRefStructure")
 @XmlSeeAlso({
     CommonSectionRefStructure.class,
-    LineSectionRefStructure.class
+
 })
 public class SectionRefStructure
     extends GroupOfEntitiesRefStructure

@@ -46,10 +46,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 @XmlSeeAlso({
     NavigationPath_VersionStructure.class,
-    TimingPattern_VersionStructure.class,
-    ServicePattern_VersionStructure.class,
-    Route_VersionStructure.class,
-    JourneyPattern_VersionStructure.class
+
 })
 public abstract class LinkSequence_VersionStructure
     extends DataManagedObjectStructure

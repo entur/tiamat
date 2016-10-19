@@ -52,27 +52,19 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 @XmlSeeAlso({
     PointOfInterestClassification_DerivedViewStructure.class,
-    StopPointInJourneyPattern_DerivedViewStructure.class,
     PointOfInterest_DerivedViewStructure.class,
     Zone_DerivedViewStructure.class,
-    ScheduledStopPoint_DerivedViewStructure.class,
-    JourneyPattern_DerivedViewStructure.class,
     PathLink_DerivedViewStructure.class,
     NoticeAssignment_DerivedViewStructure.class,
     PassengerStopAssignment_DerivedViewStructure.class,
     TopographicPlace_DerivedViewStructure.class,
-    Route_DerivedViewStructure.class,
     StopPlace_DerivedViewStructure.class,
     Operator_DerivedViewStructure.class,
-    OnwardTimingLink_DerivedViewStructure.class,
     DestinationDisplay_DerivedViewStructure.class,
-    OnwardServiceLink_DerivedViewStructure.class,
     TrainComponent_DerivedViewStructure.class,
     Direction_DerivedViewStructure.class,
     Organisation_DerivedViewStructure.class,
     PassengerCarryingPassengerCarrying_ViewStructure.class,
-    Line_DerivedViewStructure.class,
-    Network_DerivedViewStructure.class
 })
 @MappedSuperclass
 public abstract class DerivedViewStructure {

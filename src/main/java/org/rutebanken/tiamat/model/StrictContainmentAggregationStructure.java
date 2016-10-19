@@ -37,17 +37,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     AlternativeNames_RelStructure.class,
     TypesOfValueStructure.class,
-    TimingLinks_RelStructure.class,
+
     TrainsInCompoundTrain_RelStructure.class,
     ResponsibilityRoleAssignments_RelStructure.class,
     GroupOfLinks_RelStructure.class,
-    JourneyPatternRunTimes_RelStructure.class,
+
     CheckConstraintThroughputs_RelStructure.class,
     PropertiesOfDay_RelStructure.class,
     StairFlights_RelStructure.class,
     Vias_RelStructure.class,
     PointOfInterestClassificationHierarchyMembers_RelStructure.class,
-    JourneyPatternWaitTimes_RelStructure.class,
+
     PointsOnRoute_RelStructure.class,
     LinksInJourneyPattern_RelStructure.class,
     AccessibilityAssessments_RelStructure.class,
@@ -57,32 +57,26 @@ import javax.xml.bind.annotation.XmlType;
     PointsInJourneyPattern_RelStructure.class,
     ClassificationDescriptors_RelStructure.class,
     PathLinksInSequence_RelStructure.class,
-    JourneyWaitTimes_RelStructure.class,
-    JourneyLayovers_RelStructure.class,
-    TurnaroundTimeLimitTimes_RelStructure.class,
-    StopPointsInJourneyPattern_RelStructure.class,
-    GaragePoints_RelStructure.class,
+
     CommonSectionSequenceMembers_RelStructure.class,
     AccessSummaries_RelStructure.class,
-    JourneyRunTimes_RelStructure.class,
-    TimingPointsInJourneyPattern_RelStructure.class,
+
     PlacesInSequence_RelStructure.class,
     PointsOnLink_RelStructure.class,
     CommonSectionPointMembers_RelStructure.class,
     CheckConstraintDelays_RelStructure.class,
     TopographicPlaceDescriptors_RelStructure.class,
-    JourneyPatternLayovers_RelStructure.class,
-    ServiceLinksInJourneyPattern_RelStructure.class,
+
     CodespaceAssignments_RelStructure.class,
-    VehicleTypePreferences_RelStructure.class,
+
     ParkingProperties_RelStructure.class,
     DeliveryVariants_RelStructure.class,
     DestinationDisplayVariants_RelStructure.class,
     DayTypeAssignments_RelStructure.class,
     Suitabilities_RelStructure.class,
-    JourneyPatternHeadways_RelStructure.class,
+
     GroupOfLinkSequences_RelStructure.class,
-    JourneyHeadways_RelStructure.class
+
 })
 public class StrictContainmentAggregationStructure
     extends RelationshipStructure

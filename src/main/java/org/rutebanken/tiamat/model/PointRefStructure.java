@@ -37,11 +37,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PointRefStructure")
 @XmlSeeAlso({
-    TimingPointRefStructure.class,
+
     InfrastructurePointRefStructure.class,
     TrafficControlPointRefStructure.class,
     ActivationPointRefStructure.class,
-    RoutePointRefStructure.class,
+
     PointOnLinkRefStructure_.class
 })
 @Entity

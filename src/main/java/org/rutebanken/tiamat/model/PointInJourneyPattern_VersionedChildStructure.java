@@ -50,8 +50,7 @@ import javax.xml.bind.annotation.XmlType;
     "noticeAssignments"
 })
 @XmlSeeAlso({
-    PointInJourneyPattern.class,
-    FarePointInPattern_VersionedChildStructure.class
+    PointInJourneyPattern.class
 })
 public class PointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure

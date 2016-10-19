@@ -60,9 +60,6 @@ public class TransferRestriction_VersionStructure
     @XmlSchemaType(name = "string")
     protected TransferConstraintTypeEnumeration restrictionType;
     @XmlElement(name = "FromPointRef")
-    protected ScheduledStopPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef")
-    protected ScheduledStopPointRefStructure toPointRef;
 
     /**
      * Gets the value of the typeOfTransferRef property.
@@ -134,54 +131,6 @@ public class TransferRestriction_VersionStructure
      */
     public void setRestrictionType(TransferConstraintTypeEnumeration value) {
         this.restrictionType = value;
-    }
-
-    /**
-     * Gets the value of the fromPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public ScheduledStopPointRefStructure getFromPointRef() {
-        return fromPointRef;
-    }
-
-    /**
-     * Sets the value of the fromPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public void setFromPointRef(ScheduledStopPointRefStructure value) {
-        this.fromPointRef = value;
-    }
-
-    /**
-     * Gets the value of the toPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public ScheduledStopPointRefStructure getToPointRef() {
-        return toPointRef;
-    }
-
-    /**
-     * Sets the value of the toPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public void setToPointRef(ScheduledStopPointRefStructure value) {
-        this.toPointRef = value;
     }
 
 }

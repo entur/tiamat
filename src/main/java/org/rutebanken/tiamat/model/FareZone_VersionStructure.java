@@ -54,7 +54,7 @@ public class FareZone_VersionStructure
     @XmlElement(name = "ZoneTopology")
     @XmlSchemaType(name = "normalizedString")
     protected ZoneTopologyEnumeration zoneTopology;
-    protected FareSections_RelStructure fareSections;
+//    protected FareSections_RelStructure fareSections;
     protected FareZoneRefs_RelStructure neighbours;
 
     /**
@@ -105,29 +105,29 @@ public class FareZone_VersionStructure
         this.zoneTopology = value;
     }
 
-    /**
-     * Gets the value of the fareSections property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FareSections_RelStructure }
-     *     
-     */
-    public FareSections_RelStructure getFareSections() {
-        return fareSections;
-    }
-
-    /**
-     * Sets the value of the fareSections property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FareSections_RelStructure }
-     *     
-     */
-    public void setFareSections(FareSections_RelStructure value) {
-        this.fareSections = value;
-    }
+//    /**
+//     * Gets the value of the fareSections property.
+//     *
+//     * @return
+//     *     possible object is
+//     *     {@link FareSections_RelStructure }
+//     *
+//     */
+//    public FareSections_RelStructure getFareSections() {
+//        return fareSections;
+//    }
+//
+//    /**
+//     * Sets the value of the fareSections property.
+//     *
+//     * @param value
+//     *     allowed object is
+//     *     {@link FareSections_RelStructure }
+//     *
+//     */
+//    public void setFareSections(FareSections_RelStructure value) {
+//        this.fareSections = value;
+//    }
 
     /**
      * Gets the value of the neighbours property.

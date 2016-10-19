@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     StopAreaRefStructure.class,
     AccessZoneRefStructure.class,
-    RoutingConstraintZoneRefStructure.class,
+
     TariffZoneRefStructure.class,
     AdministrativeZoneRefStructure.class
 })

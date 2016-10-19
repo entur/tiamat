@@ -48,9 +48,6 @@ import javax.xml.bind.annotation.XmlType;
     "linkRef",
     "reverse"
 })
-@XmlSeeAlso({
-    LineSectionPointMember_VersionStructure.class
-})
 public class CommonSectionPointMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {

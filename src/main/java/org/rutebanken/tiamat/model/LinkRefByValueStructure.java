@@ -50,13 +50,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
     ActivationLinkRefByValueStructure.class,
     WireLinkRefByValueStructure.class,
     ModalLinkRefByValueStructure.class,
-    RouteLinkRefByValueStructure.class,
     PathLinkRefByValueStructure.class,
     RailwayLinkRefByValueStructure.class,
     RoadLinkRefByValueStructure.class,
-    LineLinkRefByValueStructure.class,
-    TimingLinkRefByValueStructure.class,
-    ServiceLinkRefByValueStructure.class
 })
 public class LinkRefByValueStructure {
 

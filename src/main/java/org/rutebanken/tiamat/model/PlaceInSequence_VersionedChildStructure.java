@@ -61,7 +61,7 @@ public class PlaceInSequence_VersionedChildStructure
     protected String branchLevel;
     @XmlElement(name = "Description")
     protected MultilingualString description;
-    protected OnwardLinks onwardLinks;
+//    protected OnwardLinks onwardLinks;
 
     /**
      * Gets the value of the placeRef property.
@@ -133,30 +133,6 @@ public class PlaceInSequence_VersionedChildStructure
      */
     public void setDescription(MultilingualString value) {
         this.description = value;
-    }
-
-    /**
-     * Gets the value of the onwardLinks property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link OnwardLinks }
-     *     
-     */
-    public OnwardLinks getOnwardLinks() {
-        return onwardLinks;
-    }
-
-    /**
-     * Sets the value of the onwardLinks property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link OnwardLinks }
-     *     
-     */
-    public void setOnwardLinks(OnwardLinks value) {
-        this.onwardLinks = value;
     }
 
 }

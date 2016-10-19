@@ -42,9 +42,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "pathLinksInSequence_RelStructure", propOrder = {
     "pathLinkInSequence"
 })
-@XmlSeeAlso({
-    OnwardLinks.class
-})
 public class PathLinksInSequence_RelStructure
     extends StrictContainmentAggregationStructure
 {

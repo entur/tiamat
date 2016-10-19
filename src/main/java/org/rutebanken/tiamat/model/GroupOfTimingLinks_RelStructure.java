@@ -46,30 +46,5 @@ public class GroupOfTimingLinks_RelStructure
     extends GroupOfEntities_VersionStructure
 {
 
-    protected TimingLinkRefs_RelStructure members;
-
-    /**
-     * Gets the value of the members property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TimingLinkRefs_RelStructure }
-     *     
-     */
-    public TimingLinkRefs_RelStructure getMembers() {
-        return members;
-    }
-
-    /**
-     * Sets the value of the members property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TimingLinkRefs_RelStructure }
-     *     
-     */
-    public void setMembers(TimingLinkRefs_RelStructure value) {
-        this.members = value;
-    }
 
 }

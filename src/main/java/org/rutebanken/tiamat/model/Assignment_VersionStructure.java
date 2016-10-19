@@ -50,7 +50,6 @@ import javax.xml.bind.annotation.XmlType;
     Assignment.class,
     DayTypeAssignment_VersionStructure.class,
     CheckConstraintThroughput_VersionStructure.class,
-    DisplayAssignment_VersionStructure.class,
     CheckConstraint_VersionStructure.class,
     TransferRestriction_VersionStructure.class,
     ServiceExclusion_VersionStructure.class,
@@ -58,7 +57,6 @@ import javax.xml.bind.annotation.XmlType;
     ActivationAssignment_VersionStructure.class,
     NoticeAssignment_VersionStructure.class,
     StopAssignment_VersionStructure.class,
-    TimeDemandTypeAssignment_VersionStructure.class,
     NetworkRestriction_VersionStructure.class
 })
 public abstract class Assignment_VersionStructure

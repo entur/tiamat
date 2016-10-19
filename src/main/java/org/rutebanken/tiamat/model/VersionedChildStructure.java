@@ -63,7 +63,6 @@ import javax.xml.bind.annotation.XmlType;
     ParkingCapacity_VersionedChildStructure.class,
     SchematicMapMember_VersionedChildStructure.class,
     ParkingProperties_VersionedChildStructure.class,
-    JourneyTiming_VersionedChildStructure.class,
     FlexibleLinkProperties_VersionedChildStructure.class,
     PointInLinkSequence_VersionedChildStructure.class,
     AccessSummary_VersionedChildStructure.class,

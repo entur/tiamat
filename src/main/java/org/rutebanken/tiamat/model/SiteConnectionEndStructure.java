@@ -75,8 +75,7 @@ public class SiteConnectionEndStructure {
     protected AllVehicleModesOfTransportEnumeration transportMode;
     @XmlElement(name = "StopAreaRef")
     protected StopAreaRefStructure stopAreaRef;
-    @XmlElement(name = "ScheduledStopPointRef")
-    protected ScheduledStopPointRefStructure scheduledStopPointRef;
+
     @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
     @XmlElement(name = "AccessSpaceRef")
@@ -154,31 +153,7 @@ public class SiteConnectionEndStructure {
         this.stopAreaRef = value;
     }
 
-    /**
-     * Gets the value of the scheduledStopPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public ScheduledStopPointRefStructure getScheduledStopPointRef() {
-        return scheduledStopPointRef;
-    }
-
-    /**
-     * Sets the value of the scheduledStopPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public void setScheduledStopPointRef(ScheduledStopPointRefStructure value) {
-        this.scheduledStopPointRef = value;
-    }
-
-    /**
+     /**
      * Gets the value of the stopPlaceRef property.
      * 
      * @return

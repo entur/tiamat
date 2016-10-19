@@ -50,7 +50,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     Connection_VersionStructure.class,
     Access_VersionStructure.class,
-    DefaultConnection_VersionStructure.class,
     SiteConnection_VersionStructure.class
 })
 public abstract class Transfer_VersionStructure

@@ -37,11 +37,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "LinkRefStructure")
 @XmlSeeAlso({
     ActivationLinkRefStructure.class,
-    ServiceLinkRefStructure.class,
     InfrastructureLinkRefStructure.class,
-    LineLinkRefStructure.class,
-    TimingLinkRefStructure.class,
-    RouteLinkRefStructure.class,
     PathLinkRefStructure.class
 })
 public class LinkRefStructure

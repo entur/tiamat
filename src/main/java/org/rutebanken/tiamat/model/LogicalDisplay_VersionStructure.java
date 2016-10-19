@@ -53,7 +53,6 @@ public class LogicalDisplay_VersionStructure
     protected MultilingualString name;
     @XmlElement(name = "Description")
     protected MultilingualString description;
-    protected DisplayAssignments_RelStructure displayAssignments;
 
     /**
      * Gets the value of the name property.
@@ -101,30 +100,6 @@ public class LogicalDisplay_VersionStructure
      */
     public void setDescription(MultilingualString value) {
         this.description = value;
-    }
-
-    /**
-     * Gets the value of the displayAssignments property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DisplayAssignments_RelStructure }
-     *     
-     */
-    public DisplayAssignments_RelStructure getDisplayAssignments() {
-        return displayAssignments;
-    }
-
-    /**
-     * Sets the value of the displayAssignments property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DisplayAssignments_RelStructure }
-     *     
-     */
-    public void setDisplayAssignments(DisplayAssignments_RelStructure value) {
-        this.displayAssignments = value;
     }
 
 }

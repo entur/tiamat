@@ -37,7 +37,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AddressablePlaceRefStructure")
 @XmlSeeAlso({
-    GarageRefStructure.class,
     SiteElementRefStructure.class
 })
 @MappedSuperclass

@@ -41,9 +41,7 @@ import javax.xml.bind.annotation.XmlType;
     "members"
 })
 @XmlSeeAlso({
-    CommonSection.class,
-    LineSection_VersionStructure.class,
-    FareSection_VersionStructure.class
+    CommonSection.class
 })
 public class CommonSection_VersionStructure
     extends GroupOfEntities_VersionStructure

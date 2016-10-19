@@ -35,10 +35,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "frameContainmentStructure")
 @XmlSeeAlso({
-    BorderPointsInFrame_RelStructure.class,
-    FareSectionsInFrame_RelStructure.class,
     FareZonesInFrame_RelStructure.class,
-    FareScheduledStopPointsInFrame_RelStructure.class
+
 })
 public class FrameContainmentStructure
     extends RelationshipStructure

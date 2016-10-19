@@ -51,8 +51,8 @@ public class Connections {
     protected List<Access> access;
     @XmlElement(name = "Connection")
     protected List<Connection> connection;
-    @XmlElement(name = "DefaultConnection")
-    protected List<DefaultConnection> defaultConnection;
+//    @XmlElement(name = "DefaultConnection")
+//    protected List<DefaultConnection> defaultConnection;
     @XmlElement(name = "SiteConnection")
     protected List<SiteConnection> siteConnection;
 
@@ -136,12 +136,12 @@ public class Connections {
      * 
      * 
      */
-    public List<DefaultConnection> getDefaultConnection() {
-        if (defaultConnection == null) {
-            defaultConnection = new ArrayList<DefaultConnection>();
-        }
-        return this.defaultConnection;
-    }
+//    public List<DefaultConnection> getDefaultConnection() {
+//        if (defaultConnection == null) {
+//            defaultConnection = new ArrayList<DefaultConnection>();
+//        }
+//        return this.defaultConnection;
+//    }
 
     /**
      * Gets the value of the siteConnection property.

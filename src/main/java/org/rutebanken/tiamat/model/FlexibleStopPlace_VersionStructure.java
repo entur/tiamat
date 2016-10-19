@@ -68,7 +68,7 @@ public class FlexibleStopPlace_VersionStructure
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
     protected Areas areas;
-    protected LineRefs_RelStructure lines;
+//    protected LineRefs_RelStructure lines;
 
     /**
      * Gets the value of the nameSuffix property.
@@ -190,28 +190,28 @@ public class FlexibleStopPlace_VersionStructure
         this.areas = value;
     }
 
-    /**
-     * Gets the value of the lines property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LineRefs_RelStructure }
-     *     
-     */
-    public LineRefs_RelStructure getLines() {
-        return lines;
-    }
-
-    /**
-     * Sets the value of the lines property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LineRefs_RelStructure }
-     *     
-     */
-    public void setLines(LineRefs_RelStructure value) {
-        this.lines = value;
-    }
+//    /**
+//     * Gets the value of the lines property.
+//     *
+//     * @return
+//     *     possible object is
+//     *     {@link LineRefs_RelStructure }
+//     *
+//     */
+//    public LineRefs_RelStructure getLines() {
+//        return lines;
+//    }
+//
+//    /**
+//     * Sets the value of the lines property.
+//     *
+//     * @param value
+//     *     allowed object is
+//     *     {@link LineRefs_RelStructure }
+//     *
+//     */
+//    public void setLines(LineRefs_RelStructure value) {
+//        this.lines = value;
+//    }
 
 }

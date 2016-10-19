@@ -39,7 +39,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     GroupOfTimingLinksRefStructure.class,
     GroupOfOperatorsRefStructure.class,
-    GroupOfLinesRefStructure.class,
     GeneralGroupOfEntitiesRefStructure.class,
     GroupOfTimebandsRefStructure.class,
     CrewBaseRefStructure.class,

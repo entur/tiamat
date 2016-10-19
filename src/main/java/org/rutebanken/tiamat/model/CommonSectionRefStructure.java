@@ -35,9 +35,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CommonSectionRefStructure")
-@XmlSeeAlso({
-    FareSectionRefStructure.class
-})
+
 public class CommonSectionRefStructure
     extends SectionRefStructure
 {

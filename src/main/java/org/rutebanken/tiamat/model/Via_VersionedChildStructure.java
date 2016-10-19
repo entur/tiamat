@@ -52,8 +52,7 @@ public class Via_VersionedChildStructure
     protected DestinationDisplayView destinationDisplayView;
     @XmlElement(name = "Name")
     protected MultilingualString name;
-    @XmlElement(name = "RoutePointRef")
-    protected RoutePointRefStructure routePointRef;
+
     @XmlElement(name = "ViaType")
     @XmlSchemaType(name = "string")
     protected ViaTypeEnumeration viaType;
@@ -128,30 +127,6 @@ public class Via_VersionedChildStructure
      */
     public void setName(MultilingualString value) {
         this.name = value;
-    }
-
-    /**
-     * Gets the value of the routePointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link RoutePointRefStructure }
-     *     
-     */
-    public RoutePointRefStructure getRoutePointRef() {
-        return routePointRef;
-    }
-
-    /**
-     * Sets the value of the routePointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link RoutePointRefStructure }
-     *     
-     */
-    public void setRoutePointRef(RoutePointRefStructure value) {
-        this.routePointRef = value;
     }
 
     /**

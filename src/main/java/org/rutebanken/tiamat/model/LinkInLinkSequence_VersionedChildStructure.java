@@ -47,9 +47,9 @@ import javax.xml.bind.annotation.XmlType;
     "projections"
 })
 @XmlSeeAlso({
-    ServiceLinkInJourneyPattern_VersionedChildStructure.class,
-    TimingLinkInJourneyPattern_VersionedChildStructure.class,
-    LinkInJourneyPattern_VersionedChildStructure.class,
+//    ServiceLinkInJourneyPattern_VersionedChildStructure.class,
+//    TimingLinkInJourneyPattern_VersionedChildStructure.class,
+//    LinkInJourneyPattern_VersionedChildStructure.class,
     PathLinkInSequence_VersionedChildStructure.class
 })
 public abstract class LinkInLinkSequence_VersionedChildStructure

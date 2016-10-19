@@ -48,10 +48,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 @XmlSeeAlso({
     PointOnRoute_VersionedChildStructure.class,
-    StopPointInJourneyPattern_VersionedChildStructure.class,
     PlaceInSequence_VersionedChildStructure.class,
     PointInJourneyPattern_VersionedChildStructure.class,
-    TimingPointInJourneyPattern_VersionedChildStructure.class
 })
 public abstract class PointInLinkSequence_VersionedChildStructure
     extends VersionedChildStructure

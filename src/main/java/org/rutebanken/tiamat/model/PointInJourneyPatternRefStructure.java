@@ -35,11 +35,6 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PointInJourneyPatternRefStructure")
-@XmlSeeAlso({
-    FarePointInPatternRefStructure.class,
-    TimingPointInJourneyPatternRefStructure.class,
-    StopPointInJourneyPatternRefStructure.class
-})
 public class PointInJourneyPatternRefStructure
     extends PointInSequenceRefStructure
 {

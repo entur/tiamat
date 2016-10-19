@@ -58,8 +58,7 @@ public class StopAssignment_VersionStructure
     protected Boolean alightingUse;
     @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ScheduledStopPointRef")
-    protected ScheduledStopPointRefStructure scheduledStopPointRef;
+
 
     /**
      * Gets the value of the boardingUse property.
@@ -131,30 +130,6 @@ public class StopAssignment_VersionStructure
      */
     public void setPrivateCode(PrivateCodeStructure value) {
         this.privateCode = value;
-    }
-
-    /**
-     * Gets the value of the scheduledStopPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public ScheduledStopPointRefStructure getScheduledStopPointRef() {
-        return scheduledStopPointRef;
-    }
-
-    /**
-     * Sets the value of the scheduledStopPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public void setScheduledStopPointRef(ScheduledStopPointRefStructure value) {
-        this.scheduledStopPointRef = value;
     }
 
 }

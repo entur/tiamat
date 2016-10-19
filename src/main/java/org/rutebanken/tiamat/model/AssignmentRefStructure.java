@@ -38,8 +38,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     CheckConstraintRefStructure.class,
     ServiceExclusionRefStructure.class,
-    DisplayAssignmentRefStructure.class,
-    TimeDemandTypeAssigmentRefStructure.class,
     CheckConstraintThroughputRefStructure.class,
     NetworkRestrictionRefStructure.class,
     StopAssignmentRefStructure.class,

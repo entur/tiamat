@@ -51,7 +51,6 @@ import javax.xml.bind.annotation.XmlType;
     GeneralGroupOfEntities_VersionStructure.class,
     GroupOfOperatorsStructure.class,
     GroupOfTimebands_VersionedChildStructure.class,
-    GroupOfLines_VersionStructure.class,
     CrewBase_VersionStructure.class,
     GroupOfLinks_VersionStructure.class,
     GroupOfPlaces_VersionStructure.class,

@@ -48,10 +48,10 @@ import net.opengis.gml._3.LineStringType;
     "passingThrough"
 })
 @XmlSeeAlso({
-    RouteLink_VersionStructure.class,
-    ServiceLink_VersionStructure.class,
+//    RouteLink_VersionStructure.class,
+//    ServiceLink_VersionStructure.class,
     PathLink_VersionStructure.class,
-    TimingLink_VersionStructure.class,
+//    TimingLink_VersionStructure.class,
     InfrastructureLink_VersionStructure.class,
     ActivationLink_VersionStructure.class
 })

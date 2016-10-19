@@ -44,58 +44,5 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class ConnectionEndStructure {
 
-    @XmlElement(name = "TransportMode", defaultValue = "all")
-    @XmlSchemaType(name = "NMTOKEN")
-    protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "ScheduledStopPointRef")
-    protected ScheduledStopPointRefStructure scheduledStopPointRef;
-
-    /**
-     * Gets the value of the transportMode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AllVehicleModesOfTransportEnumeration }
-     *     
-     */
-    public AllVehicleModesOfTransportEnumeration getTransportMode() {
-        return transportMode;
-    }
-
-    /**
-     * Sets the value of the transportMode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AllVehicleModesOfTransportEnumeration }
-     *     
-     */
-    public void setTransportMode(AllVehicleModesOfTransportEnumeration value) {
-        this.transportMode = value;
-    }
-
-    /**
-     * Gets the value of the scheduledStopPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public ScheduledStopPointRefStructure getScheduledStopPointRef() {
-        return scheduledStopPointRef;
-    }
-
-    /**
-     * Sets the value of the scheduledStopPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ScheduledStopPointRefStructure }
-     *     
-     */
-    public void setScheduledStopPointRef(ScheduledStopPointRefStructure value) {
-        this.scheduledStopPointRef = value;
-    }
 
 }

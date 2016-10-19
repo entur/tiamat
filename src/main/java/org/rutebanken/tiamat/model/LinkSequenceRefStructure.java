@@ -36,10 +36,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LinkSequenceRefStructure")
 @XmlSeeAlso({
-    TimingPatternRefStructure.class,
     NavigationPathRefStructure.class,
-    JourneyPatternRefStructure.class,
-    RouteRefStructure.class
 })
 public class LinkSequenceRefStructure
     extends VersionOfObjectRefStructure

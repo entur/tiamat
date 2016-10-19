@@ -49,12 +49,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "groupMemberships"
 })
 @XmlSeeAlso({
-    RoutePoint_VersionStructure.class,
+
     PathJunction_VersionStructure.class,
     ActivationPoint_VersionStructure.class,
     InfrastructurePoint_VersionStructure.class,
     TrafficControlPoint_VersionStructure.class,
-    TimingPoint_VersionStructure.class
+
 })
 public class Point_VersionStructure
     extends DataManagedObjectStructure

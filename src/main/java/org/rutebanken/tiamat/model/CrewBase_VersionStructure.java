@@ -47,60 +47,6 @@ public class CrewBase_VersionStructure
     extends GroupOfEntities_VersionStructure
 {
 
-    @XmlElementRef(name = "ReliefPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
-    protected JAXBElement<? extends ReliefPointRefStructure> reliefPointRef;
-    protected GarageRefs_RelStructure garages;
 
-    /**
-     * Gets the value of the reliefPointRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link JAXBElement }{@code <}{@link ParkingPointRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link GaragePointRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link ReliefPointRefStructure }{@code >}
-     *     
-     */
-    public JAXBElement<? extends ReliefPointRefStructure> getReliefPointRef() {
-        return reliefPointRef;
-    }
-
-    /**
-     * Sets the value of the reliefPointRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link ParkingPointRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link GaragePointRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link ReliefPointRefStructure }{@code >}
-     *     
-     */
-    public void setReliefPointRef(JAXBElement<? extends ReliefPointRefStructure> value) {
-        this.reliefPointRef = value;
-    }
-
-    /**
-     * Gets the value of the garages property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link GarageRefs_RelStructure }
-     *     
-     */
-    public GarageRefs_RelStructure getGarages() {
-        return garages;
-    }
-
-    /**
-     * Sets the value of the garages property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link GarageRefs_RelStructure }
-     *     
-     */
-    public void setGarages(GarageRefs_RelStructure value) {
-        this.garages = value;
-    }
 
 }
