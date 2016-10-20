@@ -225,6 +225,37 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
+    public void searchingForThreeLettersMustOnlyReturnNamesStartingWithLetters() throws Exception {
+        StopPlace nesbru = createStopPlaceWithMunicipality("Nesbru", null);
+        StopPlace bru = createStopPlaceWithMunicipality("Bru", null);
+
+        stopPlaceRepository.save(nesbru);
+        stopPlaceRepository.save(bru);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("bru", null, null, null, new PageRequest(0, 10));
+        assertThat(result).isNotEmpty();
+        assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
+                .contains(bru.getName().getValue())
+                .doesNotContain(nesbru.getName().getValue());
+    }
+
+    @Test
+    public void searchingForMoreThanThreeLettersMustReturnNamesContainingLetters() throws Exception {
+
+        StopPlace nesset = createStopPlaceWithMunicipality("Nesset", null);
+        StopPlace brunesset = createStopPlaceWithMunicipality("Brunesset", null);
+
+        stopPlaceRepository.save(nesset);
+        stopPlaceRepository.save(brunesset);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace("nesset", null, null, null, new PageRequest(0, 10));
+        assertThat(result).isNotEmpty();
+        assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
+                .contains(brunesset.getName().getValue())
+                .contains(nesset.getName().getValue());
+    }
+
+    @Test
     public void findStopPlaceByMunicipalityCountyAndName() throws Exception {
         String stopPlaceName = "Bergerveien";
         String municipalityName = "Asker";
