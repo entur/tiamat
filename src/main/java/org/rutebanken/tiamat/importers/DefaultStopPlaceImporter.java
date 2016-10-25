@@ -41,6 +41,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
+    private KeyValueAppender keyValueAppender;
+
     private static DecimalFormat format = new DecimalFormat("#.#");
 
     private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
@@ -51,13 +53,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                                     CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
-                                    NearbyStopPlaceFinder nearbyStopPlaceFinder) {
+                                    NearbyStopPlaceFinder nearbyStopPlaceFinder, KeyValueAppender keyValueAppender) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
+        this.keyValueAppender = keyValueAppender;
     }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
@@ -128,10 +131,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     quayRepository.save(quay);
                 });
 
-                if (!quaysToAdd.isEmpty()) {
-                    logger.info("Found existing stop place {}. Adding {} quays to it", foundStopPlace.getId(), quaysToAdd.size());
-                    stopPlaceRepository.save(foundStopPlace);
-                }
+                logger.info("Found existing stop place {}. Adding {} quays to it", foundStopPlace.getId(), quaysToAdd.size());
+
+                keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+                stopPlaceRepository.save(foundStopPlace);
                 return initializeLazyReferences(foundStopPlace);
             }
             // TODO: Hack to avoid 'detached entity passed to persist'.
@@ -213,6 +216,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             logger.debug("Existing stop {} has {} quays. Incoming stop {} has {} quays. Removing quays that has matching coordinates",
                     foundStopPlace.getId(), foundStopPlace.getQuays().size(),
                     newStopPlace.getId(), newStopPlace.getQuays().size());
+
+            for(Quay newQuay : newStopPlace.getQuays()) {
+                if(containsQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd) {
+
+                } else {
+
+                }
+            }
+
             newStopPlace.getQuays().stream()
                     .filter(newQuay -> !containsQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd))
                     .peek(newQuay -> logger.debug("Adding quay {}, {}", newQuay.getId(), newQuay.getName()))
@@ -222,9 +234,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return quaysToAdd;
     }
 
-    public boolean containsQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
-        return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
-                .anyMatch(existingQuay -> hasSameCoordinates(existingQuay, newQuay));
+    public Quay findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
+        Quay quay =  Stream.concat(existingQuays.stream(), quaysToAdd.stream())
+                .findFirst(existingQuay -> hasSameCoordinates(existingQuay, newQuay)).get();
     }
 
     public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {

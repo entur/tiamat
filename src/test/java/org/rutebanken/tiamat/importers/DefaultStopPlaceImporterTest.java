@@ -47,7 +47,7 @@ public class DefaultStopPlaceImporterTest {
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService = mock(CountyAndMunicipalityLookupService.class);
 
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
-            countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder);
+            countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder, new KeyValueAppender());
 
     private SiteFrame siteFrame = new SiteFrame();
 

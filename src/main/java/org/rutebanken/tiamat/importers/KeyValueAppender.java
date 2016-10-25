@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.KeyListStructure;
 import org.rutebanken.tiamat.model.KeyValueStructure;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * Append Ids in KeyValue to a comma separated string for a data mangaged object.
  */
+@Component
 public class KeyValueAppender {
     public void appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
 
