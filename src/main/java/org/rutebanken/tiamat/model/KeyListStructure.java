@@ -66,7 +66,7 @@ public class KeyListStructure {
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getKeyValue().add(newItem);
+     *    getOrCreateKeyValue().add(newItem);
      * </pre>
      * 
      * 

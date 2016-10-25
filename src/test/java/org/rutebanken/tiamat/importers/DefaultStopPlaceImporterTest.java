@@ -237,11 +237,11 @@ public class DefaultStopPlaceImporterTest {
 //        assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
 //
 //        assertThat(importedStopPlace.getKeyList()).isNotNull();
-//        assertThat(importedStopPlace.getKeyList().getKeyValue()).isNotEmpty();
+//        assertThat(importedStopPlace.getKeyList().getOrCreateKeyValue()).isNotEmpty();
 //
 //        KeyValueStructure stopPlaceKeyVal = importedStopPlace
 //                .getKeyList()
-//                .getKeyValue()
+//                .getOrCreateKeyValue()
 //                .get(0);
 //
 //        assertThat(stopPlaceKeyVal.getKey()).as("key should be set")
@@ -259,7 +259,7 @@ public class DefaultStopPlaceImporterTest {
 //
 //        KeyValueStructure quayKeyValue = importedQuay
 //                .getKeyList()
-//                .getKeyValue()
+//                .getOrCreateKeyValue()
 //                .get(0);
 //        assertThat(quayKeyValue.getValue())
 //                .as("the original ID should be stored as value")

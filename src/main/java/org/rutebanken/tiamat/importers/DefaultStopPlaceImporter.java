@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -174,6 +175,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             semaphore.release();
         }
     }
+
 
     private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
         try {
