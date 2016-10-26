@@ -28,7 +28,7 @@ public class NetexIdMapperTest {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         new NetexIdMapper().toNetexModel(accessibilityAssessment, netexSiteFrame);
 
-        assertThat(netexSiteFrame.getId()).isNotEmpty();
+        assertThat(netexSiteFrame.getId()).isNotEmpty();    
         assertThat(netexSiteFrame.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssessment:123124");
     }
 

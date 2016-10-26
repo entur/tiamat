@@ -52,7 +52,7 @@ public class NetexIdMapper {
         } else if (entityStructure instanceof SiteFrame){
             return "SiteFrame";
         } else {
-            return "Unknown";
+            return entityStructure.getClass().getSimpleName();
         }
     }
 
