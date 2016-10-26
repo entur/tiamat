@@ -137,13 +137,21 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     }
 
-
+    /**
+     * Import two stop places with the same coordinates.
+     * Verify that quays are not added multiple times.
+     */
     @Test
     public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes2() throws ExecutionException, InterruptedException {
         String name = "Mjåsund";
 
+        double latitude = 59.32262902417035;
+        double longitude = 5.447071920203443;
+        long stopPlaceId = 11463484L;
+        long quayId = 11463483L;
+
         StopPlace firstStopPlace = createStopPlaceWithQuay(name,
-                5.447336160641715, 59.32245646609804, 11463484L, 11463484L);
+                longitude, latitude, stopPlaceId, quayId);
 
         AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
@@ -152,18 +160,12 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
 
         StopPlace secondStopPlace = createStopPlaceWithQuay(name,
-                5.447071920203443, 59.32262902417035, 11463483L, 11463483L);
+                longitude, latitude, stopPlaceId, quayId);
 
-        // Import second stop place
-        defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
+        // Import second stop place with a quay with the same coordinates as second stop place
+        StopPlace actualStopPlace = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
 
-        StopPlace thirdStopPlace = createStopPlaceWithQuay(name,
-                5.447071920203443, 59.32262902417035, 11463483L, 11463483L);
-
-        // Import third stop place with a quay with the same coordinates
-        StopPlace actualStopPlace = defaultStopPlaceImporter.importStopPlace(thirdStopPlace, siteFrame, topographicPlacesCounter);
-
-        assertThat(actualStopPlace.getQuays()).hasSize(2);
+        assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
 
     @Test
