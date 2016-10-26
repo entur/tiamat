@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -65,6 +66,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
      * <p>
      * Test data from chouette reggtopp import (kolumbus).
      */
+    @Ignore
     @Test
     public void addQuaysToNearbyStopPlaceWithDataFromChouette() throws ExecutionException, InterruptedException {
 
