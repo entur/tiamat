@@ -107,9 +107,11 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.setName(new MultilingualString("skjeberg", "no", ""));
 
 
+        Long savedId = 2L;
+
         when(stopPlaceRepository.save(firstStopPlace)).then(invocationOnMock -> {
             StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlace.setId(2L);
+            stopPlace.setId(savedId);
             return stopPlace;
         });
 
@@ -129,6 +131,7 @@ public class DefaultStopPlaceImporterTest {
 
         assertThat(importedStopPlace2.getId())
                 .isEqualTo(importedStopPlace1.getId())
+                .isEqualTo(savedId)
                 .as("The same stop place should be returned as they have the same chouette id");
     }
 

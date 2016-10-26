@@ -124,58 +124,74 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
             final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
+            final StopPlace stopPlace;
             if(foundStopPlace != null) {
-                logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
-
-                boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
-                boolean originalIdChanged = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
-
-                if(originalIdChanged) {
-                    logger.debug("Saving existing stop place {}", foundStopPlace);
-                    stopPlaceRepository.save(foundStopPlace);
-                }
-                return initializeLazyReferences(foundStopPlace);
-            }
-            // TODO: Hack to avoid 'detached entity passed to persist'.
-            newStopPlace.getCentroid().getLocation().setId(0);
-
-            if (siteFrame.getTopographicPlaces() != null
-                    && siteFrame.getTopographicPlaces().getTopographicPlace() != null
-                    && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty()) {
-                topographicPlaceCreator.setTopographicReference(newStopPlace,
-                        siteFrame.getTopographicPlaces().getTopographicPlace(),
-                        topographicPlacesCreatedCounter);
+                stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
             } else {
-                lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+                stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
             }
-            Long originalId = newStopPlace.getId();
-
-            if (newStopPlace.getQuays() != null) {
-                logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
-                newStopPlace.getQuays().forEach(quay -> {
-                    if (quay.getCentroid() == null) {
-                        logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
-                    } else if (quay.getCentroid().getLocation() == null) {
-                        logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
-                    } else {
-                        quay.getCentroid().setId(null);
-                        quay.getCentroid().getLocation().setId(0);
-                        quayRepository.save(quay);
-                        logger.debug("Saved quay. Got id {} back", quay.getId());
-                    }
-                });
-            }
-
-            stopPlaceRepository.save(newStopPlace);
-            stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
-            nearbyStopPlaceFinder.update(newStopPlace);
-            logger.info("Saved stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
-
-            return initializeLazyReferences(newStopPlace);
+            return initializeLazyReferences(stopPlace);
         }
         finally {
             semaphore.release();
         }
+    }
+
+
+    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+        // TODO: Hack to avoid 'detached entity passed to persist'.
+        newStopPlace.getCentroid().getLocation().setId(0);
+
+        if (hasTopographicPlaces(siteFrame)) {
+            topographicPlaceCreator.setTopographicReference(newStopPlace,
+                    siteFrame.getTopographicPlaces().getTopographicPlace(),
+                    topographicPlacesCreatedCounter);
+        } else {
+            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+        }
+        Long originalId = newStopPlace.getId();
+
+        if (newStopPlace.getQuays() != null) {
+            logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
+            newStopPlace.getQuays().forEach(quay -> {
+                if (quay.getCentroid() == null) {
+                    logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
+                } else if (quay.getCentroid().getLocation() == null) {
+                    logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
+                } else {
+                    quay.getCentroid().setId(null);
+                    quay.getCentroid().getLocation().setId(0);
+                    quayRepository.save(quay);
+                    logger.debug("Saved quay. Got id {} back", quay.getId());
+                }
+            });
+        }
+
+        stopPlaceRepository.save(newStopPlace);
+        stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
+        nearbyStopPlaceFinder.update(newStopPlace);
+        logger.info("Saved stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+
+        return newStopPlace;
+    }
+
+    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
+        return siteFrame.getTopographicPlaces() != null
+                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
+                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
+    }
+
+    public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
+        logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
+
+        boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
+        boolean originalIdChanged = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+
+        if(originalIdChanged) {
+            logger.debug("Saving existing stop place {}", foundStopPlace);
+            stopPlaceRepository.save(foundStopPlace);
+        }
+        return foundStopPlace;
     }
 
     private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
