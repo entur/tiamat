@@ -182,7 +182,7 @@ public class DefaultStopPlaceImporterTest {
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
-        firstStopPlace.setId(chouetteId);
+        firstStopPlace.setId(savedStopPlaceId);
 
         Quay terminal1 = new Quay();
         terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
@@ -206,7 +206,7 @@ public class DefaultStopPlaceImporterTest {
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getId()).isEqualTo(savedStopPlaceId);
         // Expect only one quay when two quays have the same coordinates
         assertThat(importResult.getQuays()).hasSize(1);
         assertThat(importResult.getQuays()).contains(terminal1);
