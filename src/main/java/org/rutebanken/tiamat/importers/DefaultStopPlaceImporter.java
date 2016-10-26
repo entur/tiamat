@@ -1,7 +1,12 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.LocationStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -179,7 +184,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
     }
 
-
     private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
         try {
             countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
@@ -213,38 +217,42 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     foundStopPlace.getId(), newStopPlace.getId(), newStopPlace.getName());
             quaysToAdd.addAll(newStopPlace.getQuays());
         } else if (newStopPlace.getQuays() != null && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Existing stop {} has {} quays. Incoming stop {} has {} quays. Removing quays that has matching coordinates",
+            logger.debug("Existing stop {} has {} quays. Incoming stop {} has {} quays. Removing/ignoring quays that has matching coordinates",
                     foundStopPlace.getId(), foundStopPlace.getQuays().size(),
                     newStopPlace.getId(), newStopPlace.getQuays().size());
 
             for(Quay newQuay : newStopPlace.getQuays()) {
-                if(containsQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd) {
 
+                Optional<Quay> existingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
+
+                if(existingQuay.isPresent()) {
+                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay.get(), newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
+                    keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay.get());
                 } else {
-
+                    logger.debug("Incoming quay {} does not match any existing quays for stop place {}. Adding it.", newQuay, foundStopPlace);
+                    quaysToAdd.add(newQuay);
                 }
             }
-
-            newStopPlace.getQuays().stream()
-                    .filter(newQuay -> !containsQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd))
-                    .peek(newQuay -> logger.debug("Adding quay {}, {}", newQuay.getId(), newQuay.getName()))
-                    .forEach(quaysToAdd::add);
         }
         logger.debug("Found {} quays to add to existing stop place {}, {}",  quaysToAdd.size(), foundStopPlace.getId(), foundStopPlace.getName());
         return quaysToAdd;
     }
 
-    public Quay findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
-        Quay quay =  Stream.concat(existingQuays.stream(), quaysToAdd.stream())
-                .findFirst(existingQuay -> hasSameCoordinates(existingQuay, newQuay)).get();
+    /**
+     * Find first matching quay that has the same coordinates as the new Quay.
+     */
+    public Optional<Quay> findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
+        return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
+                .filter(alreadyAddedOrExistingQuay-> hasSameCoordinates(alreadyAddedOrExistingQuay, newQuay))
+                .findFirst();
     }
 
-    public boolean hasSameCoordinates(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {
-        if (zone1.getCentroid() == null || zone2.getCentroid() == null) {
+    public boolean hasSameCoordinates(Quay quay1, Quay quay2) {
+        if (quay1.getCentroid() == null || quay2.getCentroid() == null) {
             return false;
         }
-        return (zone1.getCentroid().getLocation().getGeometryPoint()
-                .distance(zone2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
+        return (quay1.getCentroid().getLocation().getGeometryPoint()
+                .distance(quay2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
     }
 
 
