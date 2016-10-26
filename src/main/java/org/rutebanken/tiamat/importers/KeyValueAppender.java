@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Component
 public class KeyValueAppender {
-    public void appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
+    public boolean appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
 
         KeyValueStructure existingKeyValue = getOrCreateKeyValue(key, existingObject);
         KeyValueStructure newKeyValue = getOrCreateKeyValue(key, newObject);
@@ -23,7 +23,12 @@ public class KeyValueAppender {
         List<String> newIds = split(newKeyValue);
 
         addNew(newIds, existingIds);
-        existingKeyValue.setValue(String.join(",", existingIds));
+        String newValue = String.join(",", existingIds);
+
+        boolean changed = !newValue.equals(existingKeyValue.getValue());
+
+        existingKeyValue.setValue(newValue);
+        return changed;
     }
 
     public void addNew(List<String> newIds, List<String> existingIds) {
