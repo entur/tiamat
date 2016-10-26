@@ -4,7 +4,8 @@ import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**Note: Implemented because of an issue with using
+/**
+ * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
  * and missing default mapping for subtypes
  **/
@@ -17,7 +18,7 @@ public class NetexIdMapper {
     // TODO: make it configurable
     public static final String NSR = "NSR";
 
-    public void toNetexModel(DataManagedObjectStructure internalEntity, org.rutebanken.netex.model.DataManagedObjectStructure netexEntity) {
+    public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
         if(internalEntity.getId() == null) {
             logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
@@ -48,6 +49,8 @@ public class NetexIdMapper {
             return "StopPlace";
         } else if (entityStructure instanceof Quay){
             return "Quay";
+        } else if (entityStructure instanceof SiteFrame){
+            return "SiteFrame";
         } else {
             return "Unknown";
         }
