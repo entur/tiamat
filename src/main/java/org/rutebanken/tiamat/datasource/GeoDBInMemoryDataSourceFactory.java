@@ -15,7 +15,7 @@ public class GeoDBInMemoryDataSourceFactory extends HikariDataSource {
 
     public GeoDBInMemoryDataSourceFactory() {
         setDriverClassName("org.h2.Driver");
-        setJdbcUrl("jdbc:h2:mem:tiamat;DB_CLOSE_ON_EXIT=FALSE");
+        setJdbcUrl("jdbc:h2:mem:tiamat;DB_CLOSE_ON_EXIT=FALSE"); //;TRACE_LEVEL_FILE=4
         //setSuppressClose(true);
     }
 
