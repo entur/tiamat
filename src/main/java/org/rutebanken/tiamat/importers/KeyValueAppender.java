@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.importers;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.KeyListStructure;
 import org.rutebanken.tiamat.model.KeyValueStructure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import java.util.List;
  */
 @Component
 public class KeyValueAppender {
+    private static final Logger logger = LoggerFactory.getLogger(KeyValueAppender.class);
+
     public boolean appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
 
         KeyValueStructure existingKeyValue = getOrCreateKeyValue(key, existingObject);
@@ -34,6 +38,7 @@ public class KeyValueAppender {
     public void addNew(List<String> newIds, List<String> existingIds) {
         for (String newId : newIds) {
             if (!existingIds.contains(newId)) {
+                logger.debug("Adding new ID {} to list of existing IDs {}", newId, existingIds);
                 existingIds.add(newId);
             }
         }
