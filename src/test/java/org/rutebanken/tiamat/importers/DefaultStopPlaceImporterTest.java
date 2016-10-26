@@ -209,64 +209,6 @@ public class DefaultStopPlaceImporterTest {
         assertThat(importResult.getQuays()).contains(terminal1);
     }
 
-//    @Test
-//    public void keepOriginalIdsInKeyList() throws Exception {
-//
-//        final Long stopPlaceOriginalId = 1L;
-//        final Long quayOriginalId = 2L;
-//
-//        final Long persistedStopPlaceId = 10L;
-//        mockStopPlaceSave(persistedStopPlaceId);
-//
-//        final Long persistedQuayId = 11L;
-//        mockQuayRepository(persistedQuayId);
-//
-//        StopPlace stopPlace = new StopPlace();
-//        stopPlace.setId(stopPlaceOriginalId);
-//        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
-//
-//        Quay quay = new Quay();
-//        quay.setId(quayOriginalId);
-//        createCentroid(quay);
-//
-//        stopPlace.getQuays().add(quay);
-//
-//        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, new AtomicInteger());
-//
-//        assertThat(importedStopPlace.getId()).isEqualTo(persistedStopPlaceId);
-//        assertThat(importedStopPlace.getQuays().get(0).getId()).isEqualTo(persistedQuayId);
-//
-//        assertThat(importedStopPlace.getKeyList()).isNotNull();
-//        assertThat(importedStopPlace.getKeyList().getOrCreateKeyValue()).isNotEmpty();
-//
-//        KeyValueStructure stopPlaceKeyVal = importedStopPlace
-//                .getKeyList()
-//                .getOrCreateKeyValue()
-//                .get(0);
-//
-//        assertThat(stopPlaceKeyVal.getKey()).as("key should be set")
-//                .isEqualTo(ORIGINAL_ID_KEY);
-//
-//        assertThat(stopPlaceKeyVal.getValue())
-//                .as("the original ID should be stored as value")
-//                .isEqualTo(stopPlaceOriginalId.toString());
-//
-//        assertThat(stopPlaceKeyVal.getValue())
-//                .as("the original ID should not be the same as the new persisted ID")
-//                .isNotEqualTo(importedStopPlace.getId());
-//
-//        Quay importedQuay = importedStopPlace.getQuays().get(0);
-//
-//        KeyValueStructure quayKeyValue = importedQuay
-//                .getKeyList()
-//                .getOrCreateKeyValue()
-//                .get(0);
-//        assertThat(quayKeyValue.getValue())
-//                .as("the original ID should be stored as value")
-//                .isEqualTo(quayOriginalId.toString());
-//
-//    }
-
     @Test
     public void haveSameCoordinates() {
         Quay quay1 = new Quay();
@@ -297,27 +239,4 @@ public class DefaultStopPlaceImporterTest {
             return stopPlaceToSave;
         });
     }
-
-    private void mockStopPlaceSave(Long persistedStopPlaceId) {
-        when(stopPlaceRepository.save(any(StopPlace.class))).then((Answer<StopPlace>) invocationOnMock -> {
-            StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlace.setId(persistedStopPlaceId);
-            return stopPlace;
-        });
-    }
-    private void mockQuayRepository(Long persistedQuayId) {
-        when(quayRepository.save(any(Quay.class))).then((Answer<Quay>) invocationOnMock -> {
-            Quay quay = (Quay) invocationOnMock.getArguments()[0];
-            quay.setId(persistedQuayId);
-            return quay;
-        });
-    }
-
-    private void createCentroid(Quay quay) {
-        quay.setCentroid(new SimplePoint());
-        quay.getCentroid().setLocation(new LocationStructure());
-        quay.getCentroid().getLocation().setLatitude(BigDecimal.valueOf(71));
-        quay.getCentroid().getLocation().setLongitude(BigDecimal.valueOf(6));
-    }
-
 }
