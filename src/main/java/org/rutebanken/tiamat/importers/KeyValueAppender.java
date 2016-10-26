@@ -32,6 +32,7 @@ public class KeyValueAppender {
         boolean changed = !newValue.equals(existingKeyValue.getValue());
 
         existingKeyValue.setValue(newValue);
+        logger.debug("Setting key value. id: '{}' key: '{}' value: '{}'", existingKeyValue.getId(), existingKeyValue.getKey(), existingKeyValue.getValue());
         return changed;
     }
 

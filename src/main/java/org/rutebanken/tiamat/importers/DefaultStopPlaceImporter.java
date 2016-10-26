@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.LocationStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
@@ -25,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 @Component
 @Qualifier("defaultStopPlaceImporter")
@@ -128,18 +125,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
             if(foundStopPlace != null) {
-                Set<Quay> quaysToAdd = determineQuaysToAdd(newStopPlace, foundStopPlace);
+                logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
-                quaysToAdd.forEach(quay -> {
-                    logger.debug("Saving quay {}, {}", quay.getId(), quay.getName());
-                    foundStopPlace.getQuays().add(quay);
-                    quayRepository.save(quay);
-                });
+                boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
+                boolean originalIdChanged = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
-                logger.info("Found existing stop place {}. Adding {} quays to it", foundStopPlace.getId(), quaysToAdd.size());
-
-                keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
-                stopPlaceRepository.save(foundStopPlace);
+                if(originalIdChanged) {
+                    logger.debug("Saving existing stop place {}", foundStopPlace);
+                    stopPlaceRepository.save(foundStopPlace);
+                }
                 return initializeLazyReferences(foundStopPlace);
             }
             // TODO: Hack to avoid 'detached entity passed to persist'.
@@ -201,9 +195,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     /**
-     * Inspect quays from incoming stop place. If they do not exist from before, add them.
+     * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
-    public Set<Quay> determineQuaysToAdd(StopPlace newStopPlace, StopPlace foundStopPlace) {
+    public boolean addAndSaveNewQuays(StopPlace newStopPlace, StopPlace foundStopPlace) {
+
+        AtomicInteger updatedQuays = new AtomicInteger();
+        AtomicInteger createdQuays = new AtomicInteger();
+
 
         logger.debug("About to compare quays for {}", foundStopPlace.getId());
 
@@ -214,37 +212,58 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         Set<Quay> quaysToAdd = new HashSet<>();
         if (foundStopPlace.getQuays().isEmpty() && newStopPlace.getQuays() != null) {
             logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}",
-                    foundStopPlace.getId(), newStopPlace.getId(), newStopPlace.getName());
+                    foundStopPlace, newStopPlace, newStopPlace.getName());
             quaysToAdd.addAll(newStopPlace.getQuays());
         } else if (newStopPlace.getQuays() != null && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Existing stop {} has {} quays. Incoming stop {} has {} quays. Removing/ignoring quays that has matching coordinates",
-                    foundStopPlace.getId(), foundStopPlace.getQuays().size(),
-                    newStopPlace.getId(), newStopPlace.getQuays().size());
+
+            logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID)",
+                    foundStopPlace, newStopPlace);
 
             for(Quay newQuay : newStopPlace.getQuays()) {
+               Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
 
-                Optional<Quay> existingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
+                if(optionalExistingQuay.isPresent()) {
+                    Quay existingQuay = optionalExistingQuay.get();
+                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
+                    boolean changed = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
-                if(existingQuay.isPresent()) {
-                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay.get(), newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
-                    keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay.get());
+                    if(changed) {
+                        // Save quay to keep update original id key
+                        logger.debug("Saving quay {}, {}", existingQuay.getId(), existingQuay);
+                        quayRepository.save(existingQuay);
+                        updatedQuays.incrementAndGet();
+                    }
                 } else {
-                    logger.debug("Incoming quay {} does not match any existing quays for stop place {}. Adding it.", newQuay, foundStopPlace);
-                    quaysToAdd.add(newQuay);
+                    logger.debug("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
+                    newQuay.setId(null);
+                    foundStopPlace.getQuays().add(newQuay);
+                    quayRepository.save(newQuay);
+                    createdQuays.incrementAndGet();
                 }
             }
         }
-        logger.debug("Found {} quays to add to existing stop place {}, {}",  quaysToAdd.size(), foundStopPlace.getId(), foundStopPlace.getName());
-        return quaysToAdd;
+
+
+        logger.debug("Created {} quays and updated {} quays for stop place {}", createdQuays.get(), updatedQuays.get(), foundStopPlace);
+        return updatedQuays.get() > 0 || createdQuays.get() > 0 ;
     }
 
     /**
      * Find first matching quay that has the same coordinates as the new Quay.
      */
     public Optional<Quay> findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
-        return Stream.concat(existingQuays.stream(), quaysToAdd.stream())
-                .filter(alreadyAddedOrExistingQuay-> hasSameCoordinates(alreadyAddedOrExistingQuay, newQuay))
-                .findFirst();
+        List<Quay> concatenatedQuays = new ArrayList<>();
+        concatenatedQuays.addAll(existingQuays);
+        concatenatedQuays.addAll(quaysToAdd);
+
+        for(Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
+            boolean hasSameCoordinates = hasSameCoordinates(alreadyAddedOrExistingQuay, newQuay);
+            logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, hasSameCoordinates);
+            if(hasSameCoordinates) {
+                return Optional.of(alreadyAddedOrExistingQuay);
+            }
+        }
+        return Optional.empty();
     }
 
     public boolean hasSameCoordinates(Quay quay1, Quay quay2) {

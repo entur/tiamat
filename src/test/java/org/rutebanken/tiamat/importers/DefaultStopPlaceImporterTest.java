@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
@@ -12,6 +13,8 @@ import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -217,7 +220,7 @@ public class DefaultStopPlaceImporterTest {
         Quay quay2 = new Quay();
         quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
-        stopPlaceImporter.hasSameCoordinates(quay1, quay2);
+        assertThat(stopPlaceImporter.hasSameCoordinates(quay1, quay2)).isTrue();
     }
 
     @Test
@@ -228,9 +231,57 @@ public class DefaultStopPlaceImporterTest {
         Quay quay2 = new Quay();
         quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
-        stopPlaceImporter.hasSameCoordinates(quay1, quay2);
-
+        assertThat(stopPlaceImporter.hasSameCoordinates(quay1, quay2)).isFalse();
     }
+
+    @Test
+    public void findQuayIfAlreadyExisting() {
+
+        Point existingQuayPoint = geometryFactory.createPoint(new Coordinate(60, 11));
+
+        Quay existingQuay = new Quay();
+        existingQuay.setName(new MultilingualString("existing quay"));
+        existingQuay.setCentroid(new SimplePoint(new LocationStructure(existingQuayPoint)));
+
+        Quay alreadyAdded = new Quay();
+        alreadyAdded.setName(new MultilingualString("already added quay"));
+        alreadyAdded.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59, 10)))));
+
+        Quay newQuayToInspect = new Quay();
+        newQuayToInspect.setName(new MultilingualString("New quay which matches existing quay on the coordinates"));
+        newQuayToInspect.setCentroid(new SimplePoint(new LocationStructure(existingQuayPoint)));
+
+        List<Quay> existingQuays = Arrays.asList(existingQuay);
+        List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAdded);
+
+        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
+        assertThat(actual).as("The same quay object as existingQuay should be returned").isSameAs(existingQuay);
+    }
+
+    @Test
+    public void findQuayIfAlreadyAdded() {
+
+        Point alreadyAddedQuayPoint = geometryFactory.createPoint(new Coordinate(61, 12));
+
+        Quay existingQuay = new Quay();
+        existingQuay.setName(new MultilingualString("Existing quay"));
+        existingQuay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(71, 9)))));
+
+        Quay alreadyAddedQuay = new Quay();
+        alreadyAddedQuay.setName(new MultilingualString("Quay to be added"));
+        alreadyAddedQuay.setCentroid(new SimplePoint(new LocationStructure(alreadyAddedQuayPoint)));
+
+        Quay newQuayToInspect = new Quay();
+        newQuayToInspect.setName(new MultilingualString("New quay to check for match"));
+        newQuayToInspect.setCentroid(new SimplePoint(new LocationStructure(alreadyAddedQuayPoint)));
+
+        List<Quay> existingQuays = Arrays.asList(existingQuay);
+        List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAddedQuay);
+
+        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
+        assertThat(actual).as("The same quay object as addedQuay should be returned").isSameAs(alreadyAddedQuay);
+    }
+
 
     private void mockStopPlaceSave(Long persistedStopPlaceId, StopPlace stopPlace) {
         when(stopPlaceRepository.save(stopPlace)).then(invocationOnMock -> {
