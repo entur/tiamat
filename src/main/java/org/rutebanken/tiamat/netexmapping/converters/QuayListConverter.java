@@ -42,8 +42,7 @@ public class QuayListConverter extends BidirectionalConverter<List<Quay>, Quays_
                     })
                     .forEach(quay -> quays.add(quay));
         }
-
-        quays.forEach(q -> logger.info(q.toString()));
+        
         return quays;
     }
 }
