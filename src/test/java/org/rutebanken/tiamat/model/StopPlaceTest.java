@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -291,6 +292,37 @@ public class StopPlaceTest {
         stopPlace.getQuays().add(quay);
 
         stopPlaceRepository.save(stopPlace);
+    }
+
+    @Test
+    public void testKeyValueStructure() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        List<String> ids = Arrays.asList("OPP:StopArea:123123", "TEL:StopArea:3251321");
+        ValueList values = new ValueList(ids);
+        stopPlace.getKeyValues().put("ORIGINAL_ID", values);
+
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace actual = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actual.getKeyValues().get("ORIGINAL_ID").getValues().containsAll(ids));
+    }
+
+    @Test
+    public void testAddKeyValueAndRemove() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        // Add two
+        List<String> ids = Arrays.asList("OPP:StopArea:1337", "TEL:StopArea:666");
+        ValueList values = new ValueList(ids);
+        stopPlace.getKeyValues().put("ORIGINAL_ID", values);
+
+        stopPlaceRepository.save(stopPlace);
+
+        stopPlace.getKeyValues().get("ORIGINAL_ID").getValues().remove(1);
+
+        StopPlace actual = stopPlaceRepository.findOne(stopPlace.getId());
+
+        assertThat(actual.getKeyValues().get("ORIGINAL_ID").getValues()).hasSize(1);
     }
 
     @Test
