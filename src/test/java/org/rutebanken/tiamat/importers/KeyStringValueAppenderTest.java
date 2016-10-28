@@ -9,9 +9,9 @@ import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class KeyValueAppenderTest {
+public class KeyStringValueAppenderTest {
 
-    private KeyValueAppender keyValueAppender = new KeyValueAppender();
+    private KeyStringValueAppender keyStringValueAppender = new KeyStringValueAppender();
 
     @Test
     public void appendNewToExisting() {
@@ -20,7 +20,7 @@ public class KeyValueAppenderTest {
         StopPlace newStopPlace = new StopPlace();
         addId("HED:StopArea:4321", newStopPlace);
 
-        keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
+        keyStringValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
 
         assertThat(existingStopPlace.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("OPP:StopArea:12345,HED:StopArea:4321");
     }
@@ -31,7 +31,7 @@ public class KeyValueAppenderTest {
         StopPlace newStopPlace = new StopPlace();
         addId("HED:StopArea:4321", newStopPlace);
 
-        keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
+        keyStringValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
 
         assertThat(existingStopPlace.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("HED:StopArea:4321");
     }
@@ -41,7 +41,7 @@ public class KeyValueAppenderTest {
         StopPlace existingStopPlace = new StopPlace();
         StopPlace newStopPlace = new StopPlace();
 
-        keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
+        keyStringValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, existingStopPlace);
 
         assertThat(existingStopPlace.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("");
     }

@@ -1,7 +1,11 @@
 package org.rutebanken.tiamat.model;
 
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @MappedSuperclass
@@ -59,5 +63,12 @@ public abstract class DataManagedObjectStructure
 
     public Map<String, Value> getKeyValues() {
         return keyValues;
+    }
+
+    public List<String> getValues(String key) {
+        if (getKeyValues().get(key) != null) {
+            return getKeyValues().get(key).getItems();
+        }
+        return new ArrayList<>(0);
     }
 }

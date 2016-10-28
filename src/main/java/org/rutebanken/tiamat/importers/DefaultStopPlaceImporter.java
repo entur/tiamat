@@ -43,7 +43,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
-    private KeyValueAppender keyValueAppender;
+//    private KeyStringValueAppender keyStringValueAppender;
+
+    private KeyValueListAppender keyValueListAppender;
 
     private static DecimalFormat format = new DecimalFormat("#.#");
 
@@ -55,14 +57,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                                     CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
-                                    NearbyStopPlaceFinder nearbyStopPlaceFinder, KeyValueAppender keyValueAppender) {
+                                    NearbyStopPlaceFinder nearbyStopPlaceFinder, KeyValueListAppender keyValueListAppender) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
-        this.keyValueAppender = keyValueAppender;
+        this.keyValueListAppender = keyValueListAppender;
     }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
@@ -185,7 +187,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
         boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
-        boolean originalIdChanged = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+        boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
         if(originalIdChanged) {
             logger.debug("Saving existing stop place {}", foundStopPlace);
@@ -241,7 +243,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 if(optionalExistingQuay.isPresent()) {
                     Quay existingQuay = optionalExistingQuay.get();
                     logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
-                    boolean changed = keyValueAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
+                    boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
                     if(changed) {
                         // Save quay to keep update original id key

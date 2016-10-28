@@ -15,8 +15,8 @@ import java.util.List;
  * Append Ids in KeyValue to a comma separated string for a data mangaged object.
  */
 @Component
-public class KeyValueAppender {
-    private static final Logger logger = LoggerFactory.getLogger(KeyValueAppender.class);
+public class KeyStringValueAppender {
+    private static final Logger logger = LoggerFactory.getLogger(KeyStringValueAppender.class);
 
     public boolean appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
 
