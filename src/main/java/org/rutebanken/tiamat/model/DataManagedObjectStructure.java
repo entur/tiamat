@@ -8,11 +8,13 @@ import java.util.Map;
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
+    @Transient
+//    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     protected KeyListStructure keyList;
 
+    @MapKeyColumn(name = "key")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<String,ValueList> keyValues = new HashMap<>();
+    private Map<String,Value> keyValues = new HashMap<>();
 
     @Transient
     protected ExtensionsStructure extensions;
@@ -55,7 +57,7 @@ public abstract class DataManagedObjectStructure
         this.responsibilitySetRef = value;
     }
 
-    public Map<String, ValueList> getKeyValues() {
+    public Map<String, Value> getKeyValues() {
         return keyValues;
     }
 }

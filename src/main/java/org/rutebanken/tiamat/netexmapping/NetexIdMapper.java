@@ -39,6 +39,7 @@ public class NetexIdMapper {
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             moveOriginalIdToKeyValue(tiamatEntity, netexEntity.getId());
+            moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setId(null);
         }
     }
@@ -54,6 +55,10 @@ public class NetexIdMapper {
         } else {
             return entityStructure.getClass().getSimpleName();
         }
+    }
+
+    public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
+        dataManagedObjectStructure.getKeyValues().put(ORIGINAL_ID_KEY, new Value(netexId));
     }
 
     public void moveOriginalIdToKeyValue(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
