@@ -351,6 +351,7 @@ public class StopPlace
                 .add("id", id)
                 .add("name", name)
                 .add("quays", getQuays() != null ? getQuays().size() : 0)
+                .add("keyValues", getKeyValues())
                 .toString();
     }
 }
