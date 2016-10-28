@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,5 +29,14 @@ public class Value {
 
     public List<String> getItems() {
         return items;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("items", items)
+                .toString();
     }
 }
