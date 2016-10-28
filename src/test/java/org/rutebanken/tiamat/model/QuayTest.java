@@ -39,33 +39,6 @@ public class QuayTest {
     @Autowired
     private GeometryFactory geometryFactory;
 
-
-
-
-    @Test
-    public void persistQuayWithKeyList() {
-        Quay quay = new Quay();
-
-        KeyValueStructure keyValueStructure = new KeyValueStructure();
-        keyValueStructure.setKey("key");
-        keyValueStructure.setValue("value");
-
-        KeyListStructure keyListStructure = new KeyListStructure();
-        keyListStructure.getKeyValue().add(keyValueStructure);
-        quay.setKeyList(keyListStructure);
-
-        quayRepository.save(quay);
-
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-
-        assertThat(actualQuay).isNotEqualTo(quay);
-        assertThat(actualQuay.getKeyList()).isNotNull();
-        assertThat(actualQuay.getKeyList().getKeyValue()).isNotEmpty();
-        assertThat(actualQuay.getKeyList().getKeyValue().get(0).getKey()).isEqualTo("key");
-        assertThat(actualQuay.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("value");
-    }
-
-
     /**
      * Using example data from https://github.com/StichtingOpenGeo/NeTEx/blob/master/examples/functions/stopPlace/Netex_10_StopPlace_uk_ComplexStation_Wimbledon_1.xml
      *
