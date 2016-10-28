@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netexmapping;
 
+import org.rutebanken.tiamat.importers.KeyValueListAppender;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ public class NetexIdMapper {
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
     public static final String ORIGINAL_ID_KEY = "imported-id";
+
+    private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
 
     // TODO: make it configurable
     public static final String NSR = "NSR";
@@ -38,7 +41,6 @@ public class NetexIdMapper {
             tiamatEntity.setId(tiamatId);
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
-            moveOriginalIdToKeyValue(tiamatEntity, netexEntity.getId());
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setId(null);
         }
@@ -61,15 +63,4 @@ public class NetexIdMapper {
         dataManagedObjectStructure.getKeyValues().put(ORIGINAL_ID_KEY, new Value(netexId));
     }
 
-    public void moveOriginalIdToKeyValue(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        KeyValueStructure originalId = new KeyValueStructure();
-        originalId.setKey(ORIGINAL_ID_KEY);
-        originalId.setValue(netexId);
-        if (dataManagedObjectStructure.getKeyList() == null) {
-            dataManagedObjectStructure.setKeyList(new KeyListStructure());
-        }
-        dataManagedObjectStructure.getKeyList().getKeyValue().add(originalId);
-
-        logger.debug("Moved ID {} to key {} when mapping to internal model", originalId.getValue(), ORIGINAL_ID_KEY);
-    }
 }
