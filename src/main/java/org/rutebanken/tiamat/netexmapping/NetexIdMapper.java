@@ -5,6 +5,8 @@ import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
@@ -60,6 +62,9 @@ public class NetexIdMapper {
     }
 
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
+        if(dataManagedObjectStructure.getKeyValues() == null) {
+            dataManagedObjectStructure.setKeyValues(new HashMap<>());
+        }
         dataManagedObjectStructure.getKeyValues().put(ORIGINAL_ID_KEY, new Value(netexId));
     }
 

@@ -7,6 +7,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.netexmapping.converters.*;
+import org.rutebanken.tiamat.netexmapping.mapper.KeyListMapper;
 import org.rutebanken.tiamat.netexmapping.mapper.SiteFrameIdMapper;
 import org.rutebanken.tiamat.netexmapping.mapper.QuayIdMapper;
 import org.rutebanken.tiamat.netexmapping.mapper.StopPlaceIdMapper;
@@ -34,7 +35,8 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
-        mapperFactory.getConverterFactory().registerConverter("keyValConverter", new KeyValueConverter());
+
+        mapperFactory.registerMapper(new KeyListMapper());
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .customize(new SiteFrameIdMapper())
