@@ -31,6 +31,10 @@ public class Value {
         return items;
     }
 
+    public void setItems(List<String> items) {
+        this.items = items;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
