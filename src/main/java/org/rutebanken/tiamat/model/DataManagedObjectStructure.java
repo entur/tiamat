@@ -12,11 +12,6 @@ import java.util.Map;
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-    @Transient
-//    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
-    protected KeyListStructure keyList;
-
-    @MapKeyColumn(name = "key")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<String,Value> keyValues = new HashMap<>();
 
@@ -28,14 +23,6 @@ public abstract class DataManagedObjectStructure
 
     @Transient
     protected String responsibilitySetRef;
-
-    public KeyListStructure getKeyList() {
-        return keyList;
-    }
-
-    public void setKeyList(KeyListStructure value) {
-        this.keyList = value;
-    }
 
     public ExtensionsStructure getExtensions() {
         return extensions;
@@ -65,10 +52,11 @@ public abstract class DataManagedObjectStructure
         return keyValues;
     }
 
-    public List<String> getValues(String key) {
-        if (getKeyValues().get(key) != null) {
-            return getKeyValues().get(key).getItems();
+    public List<String> getOrCreateValues(String key) {
+        if (getKeyValues().get(key) == null) {
+            keyValues.put(key, new Value());
         }
-        return new ArrayList<>(0);
+
+        return keyValues.get(key).getItems();
     }
 }
