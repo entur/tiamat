@@ -134,7 +134,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         stopPlaceRepository.save(newStopPlace);
         stopPlaceFromOriginalIdFinder.update(originalId, newStopPlace.getId());
         nearbyStopPlaceFinder.update(newStopPlace);
-        logger.info("Saved stop place {} {} with {} quays", newStopPlace.getName(), newStopPlace.getId(), newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+        logger.info("Saved stop place {}", newStopPlace);
 
         return newStopPlace;
     }
