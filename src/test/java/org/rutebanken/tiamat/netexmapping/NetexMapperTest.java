@@ -90,12 +90,11 @@ public class NetexMapperTest {
     public void mapStopPlaceWithKeyValuesToNetex() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setKeyList(new KeyListStructure());
 
         String originalId = "OPP:StopArea:123";
-        KeyValueStructure keyValueStructure = new KeyValueStructure(NetexIdMapper.ORIGINAL_ID_KEY, originalId);
 
-        stopPlace.getKeyList().getKeyValue().add(keyValueStructure);
+
+        stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, new Value(originalId));
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
         assertThat(netexStopPlace.getKeyList()).isNotNull();
@@ -118,11 +117,9 @@ public class NetexMapperTest {
         netexStopPlace.getKeyList().getKeyValue().add(keyValueStructure);
 
         StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
-        assertThat(tiamatStopPlace.getKeyList()).isNotNull();
-        assertThat(tiamatStopPlace.getKeyList().getKeyValue()).isNotNull();
-        assertThat(tiamatStopPlace.getKeyList().getKeyValue()).isNotEmpty();
-        assertThat(tiamatStopPlace.getKeyList().getKeyValue()).extracting("key").contains(NetexIdMapper.ORIGINAL_ID_KEY);
-        assertThat(tiamatStopPlace.getKeyList().getKeyValue()).extracting("value").contains(originalId);
+        assertThat(tiamatStopPlace.getKeyValues()).isNotNull();
+        assertThat(tiamatStopPlace.getKeyValues()).containsKey(NetexIdMapper.ORIGINAL_ID_KEY);
+        assertThat(tiamatStopPlace.getKeyValues().get(NetexIdMapper.ORIGINAL_ID_KEY).getItems().contains(originalId));
     }
 
     @Test
@@ -133,7 +130,6 @@ public class NetexMapperTest {
         name.setLang("no");
         name.setTextIdType("");
         netexStopPlace.setName(name);
-
 
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 

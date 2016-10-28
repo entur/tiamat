@@ -42,17 +42,15 @@ public class StopPlaceRepositoryImplTest {
     public void findStopPlaceFromKeyList() {
         StopPlace stopPlace = new StopPlace();
 
-        KeyListStructure keyListStructure = new KeyListStructure();
-        keyListStructure.getKeyValue().add(new KeyValueStructure("key", "value"));
-        stopPlace.setKeyList(keyListStructure);
-
+        stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
         Long id = stopPlaceRepository.findByKeyValue("key", "value");
         StopPlace actual = stopPlaceRepository.findOne(id);
         Assertions.assertThat(actual).isNotNull();
-        Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getKey()).isEqualTo("key");
-        Assertions.assertThat(actual.getKeyList().getKeyValue().get(0).getValue()).isEqualTo("value");
+        Assertions.assertThat(actual.getKeyValues()).containsKey("key");
+
+        Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
 
     }
 
