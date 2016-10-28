@@ -59,4 +59,8 @@ public abstract class DataManagedObjectStructure
 
         return keyValues.get(key).getItems();
     }
+
+    public void setKeyValues(Map<String, Value> keyValues) {
+        this.keyValues = keyValues;
+    }
 }
