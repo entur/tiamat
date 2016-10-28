@@ -67,44 +67,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
     }
 
-    private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
-        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
-        if (existingStopPlace != null) {
-            return existingStopPlace;
-        }
-
-        if (newStopPlace.getName() != null) {
-            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
-            if (nearbyStopPlace != null) {
-                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
-                return nearbyStopPlace;
-            }
-        }
-        return null;
-    }
-
-    private Semaphore getStripedSemaphore(StopPlace stopPlace) {
-        final String semaphoreKey;
-        if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null) {
-            LocationStructure location = stopPlace.getCentroid().getLocation();
-            semaphoreKey = locationSemaphore(location);
-        } else
-        if (stopPlace.getId() != null) {
-            semaphoreKey = "new-stop-place-"+stopPlace.getId();
-        } else if (stopPlace.getName() != null
-                && stopPlace.getName().getValue() != null
-                && !stopPlace.getName().getValue().isEmpty()){
-            semaphoreKey = "name-"+stopPlace.getName().getValue();
-        } else {
-            semaphoreKey = "all";
-        }
-        return stripedSemaphores.get(semaphoreKey);
-    }
-
-    private String locationSemaphore(LocationStructure location) {
-        return "location-"+ format.format(location.getLongitude())+"-"+ format.format(location.getLatitude());
-    }
-
     @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
@@ -292,6 +254,43 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 .distance(quay2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
     }
 
+    private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
+        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+        if (existingStopPlace != null) {
+            return existingStopPlace;
+        }
+
+        if (newStopPlace.getName() != null) {
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+            if (nearbyStopPlace != null) {
+                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                return nearbyStopPlace;
+            }
+        }
+        return null;
+    }
+
+    private Semaphore getStripedSemaphore(StopPlace stopPlace) {
+        final String semaphoreKey;
+        if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null) {
+            LocationStructure location = stopPlace.getCentroid().getLocation();
+            semaphoreKey = locationSemaphore(location);
+        } else
+        if (stopPlace.getId() != null) {
+            semaphoreKey = "new-stop-place-"+stopPlace.getId();
+        } else if (stopPlace.getName() != null
+                && stopPlace.getName().getValue() != null
+                && !stopPlace.getName().getValue().isEmpty()){
+            semaphoreKey = "name-"+stopPlace.getName().getValue();
+        } else {
+            semaphoreKey = "all";
+        }
+        return stripedSemaphores.get(semaphoreKey);
+    }
+
+    private String locationSemaphore(LocationStructure location) {
+        return "location-"+ format.format(location.getLongitude())+"-"+ format.format(location.getLatitude());
+    }
 
 
 }
