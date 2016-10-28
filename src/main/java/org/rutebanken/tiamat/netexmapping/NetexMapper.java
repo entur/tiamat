@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.netexmapping;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
@@ -33,6 +34,7 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
+        mapperFactory.getConverterFactory().registerConverter("keyValConverter", new KeyValueConverter());
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .customize(new SiteFrameIdMapper())
@@ -52,7 +54,8 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-
+        mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
+                .fieldMap("keyList", "keyValues").converter("keyValConverter").add();
 
 
     }
