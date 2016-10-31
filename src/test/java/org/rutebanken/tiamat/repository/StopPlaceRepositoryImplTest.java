@@ -65,13 +65,13 @@ public class StopPlaceRepositoryImplTest {
 
     @Test
     public void findCorrectStopPlaceFromKeyValue() {
-        StopPlace matchingStopPlace = new StopPlace();
-        matchingStopPlace.getKeyValues().put("key", new Value("value"));
-        stopPlaceRepository.save(matchingStopPlace);
-
         StopPlace anotherStopPlaceWithAnotherValue = new StopPlace();
         anotherStopPlaceWithAnotherValue.getKeyValues().put("key", new Value("anotherValue"));
         stopPlaceRepository.save(anotherStopPlaceWithAnotherValue);
+
+        StopPlace matchingStopPlace = new StopPlace();
+        matchingStopPlace.getKeyValues().put("key", new Value("value"));
+        stopPlaceRepository.save(matchingStopPlace);
 
         Long id = stopPlaceRepository.findByKeyValue("key", "value");
 
