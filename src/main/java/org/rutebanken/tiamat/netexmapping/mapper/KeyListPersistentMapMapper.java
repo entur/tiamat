@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Implemented because of difficulties making orika use the KeyListMapper.
  */
-public class KeyListPersistentBagMapper extends CustomMapper<KeyListStructure, PersistentMap> {
+public class KeyListPersistentMapMapper extends CustomMapper<KeyListStructure, PersistentMap> {
     @Override
     public void mapAtoB(KeyListStructure keyListStructure, PersistentMap stringValueMap, MappingContext context) {
         if(keyListStructure != null && keyListStructure.getKeyValue() != null && !keyListStructure.getKeyValue().isEmpty()) {

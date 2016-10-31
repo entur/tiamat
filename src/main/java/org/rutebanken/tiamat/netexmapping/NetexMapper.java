@@ -7,10 +7,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.netexmapping.converters.*;
-import org.rutebanken.tiamat.netexmapping.mapper.KeyListMapper;
-import org.rutebanken.tiamat.netexmapping.mapper.SiteFrameIdMapper;
-import org.rutebanken.tiamat.netexmapping.mapper.QuayIdMapper;
-import org.rutebanken.tiamat.netexmapping.mapper.StopPlaceIdMapper;
+import org.rutebanken.tiamat.netexmapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,29 +33,30 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
 
+        mapperFactory.registerMapper(new KeyListPersistentMapMapper());
         mapperFactory.registerMapper(new KeyListMapper());
 
+//        mapperFactory.classMap(KeyListStructure.class, PersistentMap.class)
+//                .use(KeyListStructure.class, Map<String, Value>.class);
+
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
-                .customize(new SiteFrameIdMapper())
-                .exclude("id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
-                .customize(new StopPlaceIdMapper())
-                .exclude("id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
-                .customize(new QuayIdMapper())
-                .exclude("id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .field("keyList", "keyValues")
+                .customize(new DataManagedObjectStructureIdMapper())
                 .exclude("id")
+                .exclude("keyList")
+                .exclude("keyValues")
                 .byDefault()
                 .register();
 

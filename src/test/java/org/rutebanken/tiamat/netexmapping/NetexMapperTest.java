@@ -71,6 +71,7 @@ public class NetexMapperTest {
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
+        assertThat(netexStopPlace.getName()).isNotNull();
         assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
