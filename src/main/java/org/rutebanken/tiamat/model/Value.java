@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Value class for use with Map<String, Value> in {@link DataManagedObjectStructure}.
+ */
 @Entity
 public class Value {
 
