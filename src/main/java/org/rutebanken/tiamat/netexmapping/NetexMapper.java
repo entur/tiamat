@@ -36,9 +36,6 @@ public class NetexMapper {
         mapperFactory.registerMapper(new KeyListPersistentMapMapper());
         mapperFactory.registerMapper(new KeyListMapper());
 
-//        mapperFactory.classMap(KeyListStructure.class, PersistentMap.class)
-//                .use(KeyListStructure.class, Map<String, Value>.class);
-
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .byDefault()
                 .register();
