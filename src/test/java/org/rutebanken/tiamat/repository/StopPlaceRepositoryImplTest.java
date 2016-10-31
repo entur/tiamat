@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.junit.Before;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.assertj.core.api.Assertions;
@@ -37,6 +38,12 @@ public class StopPlaceRepositoryImplTest {
 
     @Autowired
     private GeometryFactory geometryFactory;
+
+    @Before
+    public void before() {
+        stopPlaceRepository.deleteAll();
+        topographicPlaceRepository.deleteAll();
+    }
 
     @Test
     public void findStopPlaceFromKeyValue() {
