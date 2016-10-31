@@ -198,7 +198,7 @@ public class NetexMapperTest {
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
         org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
-        assertThat(netexTopographicPlace.getCountryRef()).isNotNull();
+        assertThat(netexTopographicPlace.getCountryRef()).isNotNull().as("Reference to country shall not be null");
         assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
 
 

@@ -2,10 +2,7 @@ package org.rutebanken.tiamat.netexmapping;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.netexmapping.converters.*;
 import org.rutebanken.tiamat.netexmapping.mapper.*;
 import org.slf4j.Logger;
@@ -37,6 +34,10 @@ public class NetexMapper {
         mapperFactory.registerMapper(new KeyListMapper());
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
                 .byDefault()
                 .register();
 
