@@ -12,7 +12,7 @@ import java.util.Map;
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Map<String,Value> keyValues = new HashMap<>();
 
     @Transient
