@@ -160,7 +160,7 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapInternatQuayIdToNetex() {
+    public void mapInternalQuayIdToNetex() {
 
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
         tiamatQuay.setId(1234567L);
