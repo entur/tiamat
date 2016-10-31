@@ -1,13 +1,18 @@
 package org.rutebanken.tiamat.netexmapping;
 
+import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.rutebanken.tiamat.model.CountryRef;
+import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlace;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -170,4 +175,34 @@ public class NetexMapperTest {
         assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
 
     }
+
+    @Test
+    public void countryRefMappedToNetex() {
+        SiteFrame tiamatSiteFrame = new SiteFrame();
+        TopographicPlace topographicPlace = new TopographicPlace();
+
+        topographicPlace.setId(1L);
+        CountryRef countryRef = new CountryRef();
+        countryRef.setRef(IanaCountryTldEnumeration.ZM);
+        topographicPlace.setCountryRef(countryRef);
+
+        tiamatSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(topographicPlace);
+
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
+
+
+        assertThat(netexSiteFrame).isNotNull();
+        assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
+
+        org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(netexTopographicPlace.getCountryRef()).isNotNull();
+        assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
+
+
+
+    }
+
 }

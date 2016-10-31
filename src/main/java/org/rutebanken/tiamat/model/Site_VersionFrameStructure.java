@@ -59,7 +59,7 @@ import javax.xml.bind.annotation.XmlType;
 public class Site_VersionFrameStructure
         extends Common_VersionFrameStructure {
 
-    protected TopographicPlacesInFrame_RelStructure topographicPlaces;
+    protected TopographicPlacesInFrame_RelStructure topographicPlaces = new TopographicPlacesInFrame_RelStructure();
     protected AddressesInFrame_RelStructure addresses;
     protected AccessesInFrame_RelStructure accesses;
     protected StopPlacesInFrame_RelStructure stopPlaces;
