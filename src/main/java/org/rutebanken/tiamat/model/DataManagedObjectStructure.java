@@ -13,7 +13,7 @@ public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Map<String,Value> keyValues = new HashMap<>();
+    private final Map<String,Value> keyValues = new HashMap<>();
 
     @Transient
     protected ExtensionsStructure extensions;
@@ -53,14 +53,10 @@ public abstract class DataManagedObjectStructure
     }
 
     public List<String> getOrCreateValues(String key) {
-        if (getKeyValues().get(key) == null) {
+        if (keyValues.get(key) == null) {
             keyValues.put(key, new Value());
         }
 
         return keyValues.get(key).getItems();
-    }
-
-    public void setKeyValues(Map<String, Value> keyValues) {
-        this.keyValues = keyValues;
     }
 }

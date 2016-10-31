@@ -62,9 +62,6 @@ public class NetexIdMapper {
     }
 
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        if(dataManagedObjectStructure.getKeyValues() == null) {
-            dataManagedObjectStructure.setKeyValues(new HashMap<>());
-        }
         dataManagedObjectStructure.getKeyValues().put(ORIGINAL_ID_KEY, new Value(netexId));
     }
 
