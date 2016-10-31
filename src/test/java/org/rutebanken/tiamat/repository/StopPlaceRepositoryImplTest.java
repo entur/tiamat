@@ -39,7 +39,7 @@ public class StopPlaceRepositoryImplTest {
     private GeometryFactory geometryFactory;
 
     @Test
-    public void findStopPlaceFromKeyList() {
+    public void findStopPlaceFromKeyValue() {
         StopPlace stopPlace = new StopPlace();
 
         stopPlace.getKeyValues().put("key", new Value("value"));
@@ -51,8 +51,38 @@ public class StopPlaceRepositoryImplTest {
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
 
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
-
     }
+
+    @Test
+    public void noStopPlaceFromKeyValue() {
+        StopPlace firstStopPlace = new StopPlace();
+        firstStopPlace.getKeyValues().put("key", new Value("value"));
+        stopPlaceRepository.save(firstStopPlace);
+
+        Long id = stopPlaceRepository.findByKeyValue("key", "anotherValue");
+        assertThat(id).isNull();
+    }
+
+    @Test
+    public void findCorrectStopPlaceFromKeyValue() {
+        StopPlace matchingStopPlace = new StopPlace();
+        matchingStopPlace.getKeyValues().put("key", new Value("value"));
+        stopPlaceRepository.save(matchingStopPlace);
+
+        StopPlace anotherStopPlaceWithAnotherValue = new StopPlace();
+        anotherStopPlaceWithAnotherValue.getKeyValues().put("key", new Value("anotherValue"));
+        stopPlaceRepository.save(anotherStopPlaceWithAnotherValue);
+
+        Long id = stopPlaceRepository.findByKeyValue("key", "value");
+
+        assertThat(id).isEqualTo(matchingStopPlace.getId());
+
+        StopPlace actual = stopPlaceRepository.findOne(id);
+        Assertions.assertThat(actual).isNotNull();
+        Assertions.assertThat(actual.getKeyValues()).containsKey("key");
+        Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
+    }
+
 
     @Test
     public void findStopPlacesWithin() throws Exception {
