@@ -3,8 +3,6 @@ package org.rutebanken.tiamat.netexmapping;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.KeyListStructure;
-import org.rutebanken.tiamat.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;

@@ -64,8 +64,8 @@ public class DestinationDisplay_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @Transient
-    protected KeyListStructure keyList;
+//    @Transient
+//    protected KeyListStructure keyList;
 
     @XmlElement(name = "DestinationDisplayRef")
     @Transient
@@ -105,31 +105,7 @@ public class DestinationDisplay_DerivedViewStructure
     @Transient
     protected PrivateCodeStructure privateCode;
 
-    /**
-     * A list of alternative Key values for an element.
-     * 
-     * @return
-     *     possible object is
-     *     {@link KeyListStructure }
-     *     
-     */
-    public KeyListStructure getKeyList() {
-        return keyList;
-    }
-
-    /**
-     * Sets the value of the keyList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link KeyListStructure }
-     *     
-     */
-    public void setKeyList(KeyListStructure value) {
-        this.keyList = value;
-    }
-
-    /**
+  /**
      * Gets the value of the destinationDisplayRef property.
      * 
      * @return
