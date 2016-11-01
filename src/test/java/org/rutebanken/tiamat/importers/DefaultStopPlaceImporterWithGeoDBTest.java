@@ -66,7 +66,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
      * <p>
      * Test data from chouette reggtopp import (kolumbus).
      */
-    @Ignore
     @Test
     public void addQuaysToNearbyStopPlaceWithDataFromChouette() throws ExecutionException, InterruptedException {
 
