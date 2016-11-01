@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <if condition='property("env").contains("dev")'>
+        <then>
+            <include resource="org/springframework/boot/logging/logback/base.xml" />
+        </then>
+        <else>
+            <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                    <providers>
+                        <!-- provides the timestamp <timestamp/> -->
+                        <!-- provides the version <version/> -->
+                        <!-- provides the fields in the configured pattern -->
+                        <pattern>
+                            <!-- the pattern that defines what to include -->
+                            <pattern>
+                                {
+                                "serviceContext": {
+                                    "service": "tiamat"
+                                },
+                                "message": "%message\n%ex{full}",
+                                "severity": "%level",
+                                "reportLocation": {
+                                    "filePath": "%logger",
+                                    "lineNumber": "%line",
+                                    "functionName": "%method"
+                                }
+                                }
+                            </pattern>
+                        </pattern>
+                    </providers>
+                </encoder>
+            </appender>
+
+
+            <logger name="com" level="INFO"/>
+            <logger name="no" level="INFO"/>
+            <logger name="org" level="INFO"/>
+            <logger name="org.apache" level="INFO"/>
+            <root level="INFO">
+                <appender-ref ref="console"/>
+            </root>
+        </else>
+    </if>
+</configuration>
