@@ -17,7 +17,7 @@ public class Value {
     @Id
     private long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> items = new ArrayList<>(0);
 
     public Value() {}
