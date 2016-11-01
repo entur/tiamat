@@ -33,6 +33,14 @@ public class SiteFrameImporterTest {
     @Autowired
     private DefaultStopPlaceImporter stopPlaceImporter;
 
+
+
+    @Test
+    public void noStopPlacesInSiteFrameShouldNotCauseNullpointer() {
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
+    }
+
     /**
      * This test is implemented to reproduce an issue we had with lazy initialization exception
      * when returning a stop place that is already persisted, found by looking at imported key.
