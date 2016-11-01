@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -366,4 +368,15 @@ public class SiteFrame
         this.siteFacilitySets = value;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("name", name)
+                .add("topoGraphicPlaces", getTopographicPlaces() != null && getTopographicPlaces().getTopographicPlace() != null ? getTopographicPlaces().getTopographicPlace().size() : 0)
+                .add("stops", getStopPlaces() != null && getStopPlaces().getStopPlace() != null ? getStopPlaces().getStopPlace().size() : 0)
+                .add("keyValues", getKeyValues())
+                .toString();
+    }
 }

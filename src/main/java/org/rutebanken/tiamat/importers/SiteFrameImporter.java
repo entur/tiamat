@@ -38,9 +38,7 @@ public class SiteFrameImporter {
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
 
-        logger.info("Received site frame for import. It contains {} topographical places and {} stop places. Starting import,",
-                siteFrame.getTopographicPlaces() != null ? siteFrame.getTopographicPlaces().getTopographicPlace().size() : 0,
-                siteFrame.getStopPlaces().getStopPlace().size());
+        logger.info("Received site frame for import: {}", siteFrame);
 
         Timer timer = new Timer(this.getClass().getName()+"-logger");
         TimerTask timerTask = new TimerTask() {
@@ -52,22 +50,25 @@ public class SiteFrameImporter {
         timer.scheduleAtFixedRate(timerTask, 2000, 2000);
 
         try {
-            List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                    .parallelStream()
-                    .map(stopPlace ->
-                            importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
-                    )
-                    .collect(Collectors.toList());
-            
+            org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+            if(siteFrame.getStopPlaces() != null) {
+                List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
+                        .parallelStream()
+                        .map(stopPlace ->
+                                importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
+                        )
+                        .collect(Collectors.toList());
+
                 logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
 
                 topographicPlaceCreator.invalidateCache();
-
-                org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame()
-                .withStopPlaces(
+                netexSiteFrame.withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
-                            .withStopPlace(createdStopPlaces)
+                                .withStopPlace(createdStopPlaces)
                 );
+            } else {
+                logger.info("Site frame does not contain any stop places: ", siteFrame);
+            }
             return netexSiteFrame;
         } finally {
             timerTask.cancel();
