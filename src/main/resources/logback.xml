@@ -18,6 +18,7 @@
                                 "serviceContext": {
                                     "service": "tiamat"
                                 },
+                                "timestamp": "%date",
                                 "message": "%message\n%ex{full}",
                                 "severity": "%level",
                                 "reportLocation": {
