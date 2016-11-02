@@ -39,6 +39,7 @@
             <logger name="no" level="INFO"/>
             <logger name="org" level="INFO"/>
             <logger name="org.apache" level="INFO"/>
+            <logger name="org.hibernate.id" level="DEBUG" />
             <root level="INFO">
                 <appender-ref ref="console"/>
             </root>
