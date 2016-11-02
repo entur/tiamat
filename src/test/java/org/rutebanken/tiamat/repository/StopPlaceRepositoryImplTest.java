@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.swing.plaf.multi.MultiButtonUI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -227,6 +228,24 @@ public class StopPlaceRepositoryImplTest {
 
         Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
         assertThat(result).isNull();
+    }
+
+    @Test
+    public void multipleNearbyStopPlaces() throws Exception {
+        StopPlace stopPlace = new StopPlace(new MultilingualString("name"));
+        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60)))));
+
+        StopPlace stopPlace2 = new StopPlace(new MultilingualString("name"));
+        stopPlace2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)))));
+
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.save(stopPlace2);
+
+        // Stop place coordinates within envelope
+        Envelope envelope = new Envelope(14, 16, 50, 70);
+
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name");
+        assertThat(result).isNotNull();
     }
 
     @Test

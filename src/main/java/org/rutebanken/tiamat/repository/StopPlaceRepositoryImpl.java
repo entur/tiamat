@@ -106,7 +106,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
         try {
-            return query.getSingleResult();
+            List<Long> resultList = query.getResultList();
+            return  resultList.isEmpty() ? null : resultList.get(0);
         } catch (NoResultException e) {
             return null;
         }
