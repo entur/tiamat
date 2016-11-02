@@ -116,7 +116,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         Long originalId = newStopPlace.getId();
 
         if (newStopPlace.getQuays() != null) {
-            logger.debug("Stop place has {} quays", newStopPlace.getQuays().size());
+            logger.info("Importing quays for new stop place {}", newStopPlace);
             newStopPlace.getQuays().forEach(quay -> {
                 if (quay.getCentroid() == null) {
                     logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
@@ -125,6 +125,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 } else {
                     quay.getCentroid().setId(null);
                     quay.getCentroid().getLocation().setId(0);
+                    logger.info("Saving quay {}", quay);
                     quayRepository.save(quay);
                     logger.debug("Saved quay. Got id {} back", quay.getId());
                 }
