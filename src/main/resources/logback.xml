@@ -19,6 +19,7 @@
                                     "service": "tiamat"
                                 },
                                 "timestamp": "%date",
+                                "thread": "%thread",
                                 "message": "%message\n%ex{full}",
                                 "severity": "%level",
                                 "reportLocation": {
