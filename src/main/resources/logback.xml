@@ -18,6 +18,7 @@
                                 "serviceContext": {
                                     "service": "tiamat"
                                 },
+                                "logger": "%logger{15}",
                                 "timestamp": "%date",
                                 "thread": "%thread",
                                 "message": "%message\n%ex{full}",
