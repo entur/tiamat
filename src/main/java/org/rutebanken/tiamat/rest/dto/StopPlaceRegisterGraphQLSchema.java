@@ -11,8 +11,10 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
+import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
@@ -29,8 +31,13 @@ public class StopPlaceRegisterGraphQLSchema {
 	        @Override
 			public
 	        Object get(DataFetchingEnvironment environment) {
-	             Iterable<StopPlace> findAll = stopPlaceRepository.findAll();
-	             return findAll;
+	            Long id = environment.getArgument("id"); 
+	        	if(id != null) {
+	        		return new Object[] {stopPlaceRepository.findOne(id)};
+	        	} else {
+	        		Iterable<StopPlace> findAll = stopPlaceRepository.findAll();
+	        		return findAll;
+	        	}
 	        }};
 
         
@@ -112,11 +119,19 @@ public class StopPlaceRegisterGraphQLSchema {
 	        
 	        
 	    GraphQLObjectType queryType = newObject()
-	            .name("findAllStopPlaces")
+	            .name("findStopPlaces")
 	            .field(newFieldDefinition()
 	                    .type(new GraphQLList(stopPlaceType))
-	                    .name("stopPlaces")
-	                    .dataFetcher(stopPlaceFetcher))
+	                    .name("stopPlace")
+	                    .argument(GraphQLArgument.newArgument()
+	                            .name("id")
+	                            .type(Scalars.GraphQLLong))
+//	                    .argument(GraphQLArgument.newArgument()
+//	                    		.name("stopPlaceType")
+//	                    		.type(stopPlaceTypeEnum))
+	                    .dataFetcher(stopPlaceFetcher)
+	                    )
+	            
 	            .build();
 	    
 	    stopPlaceRegisterSchema = GraphQLSchema.newSchema()
