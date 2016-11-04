@@ -114,7 +114,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
                     topographicPlacesCreatedCounter);
         } else {
-//            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
         }
         Long originalId = newStopPlace.getId();
 
