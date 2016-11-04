@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test implemented to try to reproduce an issue with hibernate/spring boot/postgres where duplicate keys are tried inserted to the database.
+ * This test requires tiamat to be running in another jvm
  */
 public class ReproduceDuplicateKeys {
 
@@ -29,25 +30,25 @@ public class ReproduceDuplicateKeys {
         final int publicationDeliveries = 1000;
         final int eachPublicationDeliverySentTimes = 5;
 
-        final int stopPlacesPerPublicationDelivery = 20 ;
+        final int stopPlacesPerPublicationDelivery = 20;
         final PublicationDeliveryClient client = new PublicationDeliveryClient("http://localhost:1997/jersey/publication_delivery");
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
         final AtomicInteger publicationDeliveriesSent = new AtomicInteger();
         final AtomicInteger exceptionsReceived = new AtomicInteger();
 
-        for(int i = 0; i < publicationDeliveries; i++) {
+        for (int i = 0; i < publicationDeliveries; i++) {
 
             SiteFrame siteFrame = new SiteFrame();
             siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                    .withStopPlace(createStopPlacesWithQuays(i%2==0?i:0, stopPlacesPerPublicationDelivery)));
+                    .withStopPlace(createStopPlacesWithQuays(i % 2 == 0 ? i : 0, stopPlacesPerPublicationDelivery)));
 
             PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
                     .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                             .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
 
-            for(int j = 0; j < eachPublicationDeliverySentTimes; j++) {
+            for (int j = 0; j < eachPublicationDeliverySentTimes; j++) {
                 executorService.submit(() -> {
                     try {
                         client.sendPublicationDelivery(publicationDelivery);
@@ -62,7 +63,7 @@ public class ReproduceDuplicateKeys {
 
         executorService.shutdown();
         executorService.awaitTermination(100, TimeUnit.MINUTES);
-        assertThat(publicationDeliveriesSent.get()).isEqualTo(publicationDeliveries*eachPublicationDeliverySentTimes).describedAs("excpected number of publication deliveries sent successfully");
+        assertThat(publicationDeliveriesSent.get()).isEqualTo(publicationDeliveries * eachPublicationDeliverySentTimes).describedAs("excpected number of publication deliveries sent successfully");
         assertThat(exceptionsReceived.get()).isZero().as("no exceptions expected");
         System.out.println("done");
 
@@ -75,19 +76,19 @@ public class ReproduceDuplicateKeys {
 
             LocationStructure location = randomCoordinates();
             StopPlace stopPlace = new StopPlace()
-                    .withId("XYZ:StopPlace"+salt+":"+i)
-                    .withName(new MultilingualString().withValue("Stop place "+i+ " pd" + salt))
+                    .withId("XYZ:StopPlace" + salt + ":" + i)
+                    .withName(new MultilingualString().withValue("Stop place " + i + " pd" + salt))
                     .withCentroid(new SimplePoint_VersionStructure()
                             .withLocation(location))
                     .withQuays(new Quays_RelStructure()
                             .withQuayRefOrQuay(new Quay()
-                                    .withName(new MultilingualString().withValue("Quay "+i + " pd" + salt))
-                                    .withId("XYZ:Quay"+salt+":"+i)
-                                    .withCentroid(new SimplePoint_VersionStructure()
-                                            .withLocation(location)),
+                                            .withName(new MultilingualString().withValue("Quay " + i + " pd" + salt))
+                                            .withId("XYZ:Quay" + salt + ":" + i)
+                                            .withCentroid(new SimplePoint_VersionStructure()
+                                                    .withLocation(location)),
                                     new Quay()
-                                            .withName(new MultilingualString().withValue("someother Quay "+i + " pd" + salt))
-                                            .withId("XYZ:Quay"+salt+"two:"+i)
+                                            .withName(new MultilingualString().withValue("someother Quay " + i + " pd" + salt))
+                                            .withId("XYZ:Quay" + salt + "two:" + i)
                                             .withCentroid(new SimplePoint_VersionStructure()
                                                     .withLocation(location))));
 
@@ -102,9 +103,10 @@ public class ReproduceDuplicateKeys {
 
     private final double longitudeMin = 50.0;
     private final double longitudeMax = 60.0;
+
     public LocationStructure randomCoordinates() {
-        double latitude = latitudeMin+ (latitudeMax - latitudeMin) * random.nextDouble();
-        double longitude = longitudeMin+ (longitudeMax - longitudeMin) * random.nextDouble();
+        double latitude = latitudeMin + (latitudeMax - latitudeMin) * random.nextDouble();
+        double longitude = longitudeMin + (longitudeMax - longitudeMin) * random.nextDouble();
 
         return new LocationStructure()
                 .withLatitude(new BigDecimal(String.valueOf(latitude)))
