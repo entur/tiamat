@@ -320,6 +320,8 @@ public class StopPlaceTest {
 
         stopPlace.getKeyValues().get("ORIGINAL_ID").getItems().remove(1);
 
+        stopPlaceRepository.save(stopPlace);
+
         StopPlace actual = stopPlaceRepository.findOne(stopPlace.getId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems()).hasSize(1);
