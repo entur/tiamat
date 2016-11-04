@@ -15,8 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.transaction.TransactionManager;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -111,7 +114,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
                     topographicPlacesCreatedCounter);
         } else {
-            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+//            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
         }
         Long originalId = newStopPlace.getId();
 
@@ -153,8 +156,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
         if(originalIdChanged) {
-            logger.debug("Saving existing stop place {}", foundStopPlace);
-            stopPlaceRepository.save(foundStopPlace);
+            logger.debug("Updated existing stop place {}", foundStopPlace);
+//            stopPlaceRepository.save(foundStopPlace);
         }
         return foundStopPlace;
     }
@@ -207,13 +210,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     Quay existingQuay = optionalExistingQuay.get();
                     logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
-
-                    if(changed) {
-                        // Save quay to keep update original id key
-                        logger.debug("Saving quay {}, {}", existingQuay.getId(), existingQuay);
+//
+//                    if(changed) {
+//                        // Save quay to keep update original id key
+                        logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
                         quayRepository.save(existingQuay);
                         updatedQuays.incrementAndGet();
-                    }
+//                    }
                 } else {
                     logger.debug("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
                     newQuay.setId(null);
