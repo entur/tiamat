@@ -20,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test implemented to try to reproduce an issue with hibernate/spring boot/postgres where duplicate keys are tried inserted to the database.
  * This test requires tiamat to be running in another jvm
+ * See https://rutebanken.atlassian.net/browse/NRP-735
  */
-public class ReproduceDuplicateKeys {
+public class ReproduceDuplicateKeysException {
 
     @Ignore
     @Test
