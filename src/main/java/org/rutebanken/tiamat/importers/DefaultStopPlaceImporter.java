@@ -210,13 +210,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     Quay existingQuay = optionalExistingQuay.get();
                     logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
-//
-//                    if(changed) {
-//                        // Save quay to keep update original id key
-                        logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
-                        quayRepository.save(existingQuay);
-                        updatedQuays.incrementAndGet();
-//                    }
+
+                    /**
+                     * Updated quay will be saved when transaction commits. Explicity calling save will lead to duplicate key exception.
+                     * See test with name ReproduceDuplicateKeysException
+                     */
+                    logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
+                    updatedQuays.incrementAndGet();
                 } else {
                     logger.debug("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
                     newQuay.setId(null);
