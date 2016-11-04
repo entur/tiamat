@@ -61,45 +61,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     }
 
     /**
-     * Import two stop places, each with one quay.
-     * Expect one stop place with two quays.
-     * <p>
-     * Test data from chouette reggtopp import (kolumbus).
-     */
-    @Test
-    public void addQuaysToNearbyStopPlaceWithDataFromChouette() throws ExecutionException, InterruptedException {
-
-        String name = "Skillebekkgata";
-
-        double firstLatitude = 59.422556268440956728227320127189159393310546875;
-        double firstLongitude = 5.265704397012616055917533230967819690704345703125;
-
-        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
-                firstLongitude, firstLatitude, 11063200L, 11063200L);
-
-        AtomicInteger topographicPlacesCounter = new AtomicInteger();
-        SiteFrame siteFrame = new SiteFrame();
-
-        // Import first stop place.
-        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
-
-        double secondLatitude = 59.4221750629462661663637845776975154876708984375;
-        double secondLongitude = 5.2646351097871768587310725706629455089569091796875;
-
-        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
-                secondLongitude, secondLatitude, 11063198L, 11063198L);
-
-        // Import second stop place
-        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
-
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
-        assertThat(importResult.getQuays()).hasSize(2);
-
-        assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
-        assertThat(importResult.getQuays().get(1).getName().getValue()).isEqualTo(name);
-    }
-
-    /**
      * Two stop places with the same name and coordinates should become one stop place.
      * Because the those stop places each have one quay with the same coordinates, they should treated as one quay.
      */
