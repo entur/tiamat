@@ -70,7 +70,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
     }
 
-    @Transactional
+//    @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
@@ -157,7 +157,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         if(originalIdChanged) {
             logger.debug("Updated existing stop place {}", foundStopPlace);
-//            stopPlaceRepository.save(foundStopPlace);
+            stopPlaceRepository.save(foundStopPlace);
         }
         return foundStopPlace;
     }
@@ -208,15 +208,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
                 if(optionalExistingQuay.isPresent()) {
                     Quay existingQuay = optionalExistingQuay.get();
-                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
+                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key if required {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
-                    /**
-                     * Updated quay will be saved when transaction commits. Explicity calling save will lead to duplicate key exception.
-                     * See test with name ReproduceDuplicateKeysException
-                     */
-                    logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
-                    updatedQuays.incrementAndGet();
+                    if(changed) {
+                        logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
+                        updatedQuays.incrementAndGet();
+                        quayRepository.save(existingQuay);
+                    }
                 } else {
                     logger.debug("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
                     newQuay.setId(null);

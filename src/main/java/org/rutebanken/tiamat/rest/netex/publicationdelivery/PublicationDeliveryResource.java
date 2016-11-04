@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
-@Transactional
+//@Transactional
 public class PublicationDeliveryResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryResource.class);
