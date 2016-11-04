@@ -13,8 +13,8 @@ import java.util.List;
 @Entity
 public class Value {
 
-    @GeneratedValue
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @ElementCollection(fetch = FetchType.EAGER)

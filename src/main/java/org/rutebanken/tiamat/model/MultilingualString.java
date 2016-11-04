@@ -44,8 +44,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class MultilingualString {
 
     @Id
-    @GeneratedValue
-    @XmlTransient
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @XmlValue

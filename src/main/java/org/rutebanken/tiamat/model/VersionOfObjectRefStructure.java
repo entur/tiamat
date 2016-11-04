@@ -8,9 +8,7 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -112,8 +110,7 @@ import java.time.ZonedDateTime;
 public class VersionOfObjectRefStructure implements Serializable {
 
     @Id
-    @GeneratedValue
-    @XmlTransient
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
 

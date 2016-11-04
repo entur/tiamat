@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 
+import static org.hibernate.id.SequenceGenerator.SEQUENCE;
+
 
 /**
  * Type for ENTITY.
@@ -47,15 +49,9 @@ import java.io.Serializable;
 @MappedSuperclass
 public abstract class EntityStructure implements Serializable{
 
- /*   @XmlAttribute(name = "nameOfClass")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    public String nameOfClass;
-*/
 
-    @XmlAttribute(name = "id")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     protected Long id;
 
     /**

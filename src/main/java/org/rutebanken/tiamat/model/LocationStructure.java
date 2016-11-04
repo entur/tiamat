@@ -82,11 +82,7 @@ public class LocationStructure {
     protected BigDecimal precision;
 
     @Id
-    @GeneratedValue
-    // TODO: Use String as type for 'id'. Got this using String: org.h2.jdbc.JdbcSQLException: Hexadecimal string contains non-hex character.
-    @XmlAttribute(name = "id")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlTransient
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     protected long id;
 
     @XmlAttribute(name = "srsName")
