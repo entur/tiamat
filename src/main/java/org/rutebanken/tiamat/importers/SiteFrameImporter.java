@@ -78,7 +78,6 @@ public class SiteFrameImporter {
 
     private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
         try {
-            logger.info("transaction active? {}. Name: {}. Isolation level: {} ", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionName(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
             StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();
             return netexMapper.mapToNetexModel(importedStopPlace);
