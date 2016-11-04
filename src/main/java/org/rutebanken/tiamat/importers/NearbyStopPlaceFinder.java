@@ -35,7 +35,7 @@ public class NearbyStopPlaceFinder {
                                          @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.nearbyStopCache = CacheBuilder.newBuilder()
-                .maximumSize(maximumSize)
+                .maximumSize(0)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
                 .build();
 
