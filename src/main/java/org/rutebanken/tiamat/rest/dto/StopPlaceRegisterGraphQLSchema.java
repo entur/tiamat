@@ -7,6 +7,7 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
+import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -77,13 +78,23 @@ public class StopPlaceRegisterGraphQLSchema {
 		                    .name("location"))
 		            .build();
 
+		    GraphQLObjectType multiLingualString = newObject()
+		            .name("multiLingualString")
+		            .field(newFieldDefinition()
+		                    .type(GraphQLString)
+		                    .name("lang"))
+		            .field(newFieldDefinition()
+		                    .type(GraphQLString)
+		                    .name("value"))
+		            .build();
+
 		    GraphQLObjectType quayType = newObject()
 		            .name("quay")
 		            .field(newFieldDefinition()
 		                    .type(GraphQLLong)
 		                    .name("id"))
 		            .field(newFieldDefinition()
-		                    .type(GraphQLString)
+		                    .type(multiLingualString)
 		                    .name("name"))
 		            .field(newFieldDefinition()
 		                    .type(GraphQLBoolean)
@@ -99,8 +110,12 @@ public class StopPlaceRegisterGraphQLSchema {
 		                    .type(GraphQLLong)
 		                    .name("id"))
 		            .field(newFieldDefinition()
-		                    .type(GraphQLString)
+		                    .type(multiLingualString)
 		                    .name("name"))
+//		            .field(newFieldDefinition()
+//		                    .type(GraphQLString)
+//		                    .name("parentSiteRef")
+//		                    .dataFetcher(e -> ((StopPlace)e.getSource()).getParentSiteRef().getValue())) // TODO solve recursive parents
 		            .field(newFieldDefinition()
 		                    .type(GraphQLBoolean)
 		                    .name("allAreasWheelchairAccessible"))
@@ -116,6 +131,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
 		            .build();
 	        
+		    
 	        
 	        
 	    GraphQLObjectType queryType = newObject()
