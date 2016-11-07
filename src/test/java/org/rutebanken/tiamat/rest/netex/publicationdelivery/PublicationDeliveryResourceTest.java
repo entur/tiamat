@@ -161,6 +161,48 @@ public class PublicationDeliveryResourceTest {
         hasOriginalId(originalQuayId, quay);
     }
 
+    @Test
+    public void importPublicationDeliveryAndExpectCertainWordsToBeRemovedFromNames() throws Exception {
+        StopPlace stopPlace = new StopPlace()
+                .withName(new MultilingualString().withValue("Steinerskolen Moss (Buss)"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("Steinerskolen Moss [tog]"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
+
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        Quay quay = actualStopPlace.getQuays()
+                .getQuayRefOrQuay()
+                .stream()
+                .peek(object -> System.out.println(object))
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .peek(q-> System.out.println(q))
+                .findFirst().get();
+
+        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Steinerskolen Moss");
+        assertThat(quay.getName().getValue()).isEqualTo("Steinerskolen Moss");
+
+    }
+
     private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
         assertThat(object).isNotNull();
         assertThat(object.getKeyList()).isNotNull();
