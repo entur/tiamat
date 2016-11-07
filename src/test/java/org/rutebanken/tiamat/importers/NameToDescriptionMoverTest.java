@@ -11,11 +11,10 @@ public class NameToDescriptionMoverTest {
 
     /**
      *
-     *  (i Str�msveien)
      *  Dam (i Kvernstuveien)
-     *  Finsbr�ten (snuplass)
+     *  Finsbråten (snuplass)
      *  Hauger (KB mot sentrum)
-     *  H�kvikdalen kryss (gamle E6)
+     *  Håkvikdalen kryss (gamle E6)
      *  Linderudsletta (nordsiden)
      *  Linderudsletta (sydsiden)
      *  Skulane (Sykkylven)
@@ -27,8 +26,18 @@ public class NameToDescriptionMoverTest {
     private NameToDescriptionMover nameToDescriptionMover = new NameToDescriptionMover();
 
     @Test
+    public void kvernstuen() {
+        expectNameAndDescriptionToBeMoved("Dam (i Kvernstuveien)", "Dam", "i Kvernstuveien");
+    }
+
+    @Test
     public void strømsveien() {
       expectNameAndDescriptionToBeMoved("Alfaset (i Strømsveien)", "Alfaset", "i Strømsveien");
+    }
+
+    @Test
+    public void linderudsletta() {
+        expectNameAndDescriptionToBeMoved("Linderudsletta (nordsiden)", "Linderudsletta", "nordsiden");
     }
 
 
