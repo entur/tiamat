@@ -99,6 +99,17 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
     }
 
+    @Test
+    public void reproduceIssueWithCollectionNotAssosiatedWithAnySession() throws ExecutionException, InterruptedException {
+        String name = "Skillebekkgata";
+        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
+                6, 60, 11063200L, 11063200L);
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
+                6, 60.0001, 11063198L, 11063198L);
+        defaultStopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
+    }
+
     /**
      * Import two stop places with the same coordinates.
      * Verify that quays are not added multiple times.

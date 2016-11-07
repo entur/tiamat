@@ -48,9 +48,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         graph.addAttributeNodes("equipmentPlaces");
         graph.addAttributeNodes("validityConditions");
         graph.addAttributeNodes("accessibilityAssessment");
-        graph.addAttributeNodes("levels");
+//        graph.addAttributeNodes("levels");
         graph.addAttributeNodes("alternativeNames");
-        graph.addAttributeNodes("otherTransportModes");
+//        graph.addAttributeNodes("otherTransportModes");
         graph.addAttributeNodes("roadAddress");
         graph.addAttributeNodes("parentSiteRef");
 

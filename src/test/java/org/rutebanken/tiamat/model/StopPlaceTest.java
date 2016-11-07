@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -83,6 +84,7 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getCentroid()).isNotNull();
     }
 
+    @Ignore // level is transient
     @Test
     public void persistStopPlaceWithLevels() {
         StopPlace stopPlace = new StopPlace();
@@ -170,6 +172,7 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getParentSiteRef().getRef()).isEqualTo(stopPlaceReference.getRef());
     }
 
+    @Ignore // other vehicle mode is transient
     @Test
     public void persistStopPlaceWithOtherVehicleMode() {
         StopPlace stopPlace = new StopPlace();

@@ -116,6 +116,7 @@ public abstract class Site_VersionStructure
     protected TopographicPlaceRefStructure containedInPlaceRef;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @Transient
     private final List<Level> levels = new ArrayList<>();
 
     @Transient

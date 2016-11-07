@@ -97,7 +97,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             } else {
                 stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
             }
-            return initializeLazyReferences(stopPlace);
+            return stopPlace;
         }
         finally {
             semaphore.release();
@@ -168,14 +168,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         } catch (IOException|InterruptedException e) {
             logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
         }
-    }
-
-    private StopPlace initializeLazyReferences(StopPlace stopPlace) {
-        if(stopPlace != null) {
-            Hibernate.initialize(stopPlace.getLevels());
-            Hibernate.initialize(stopPlace.getOtherTransportModes());
-        }
-        return stopPlace;
     }
 
     /**

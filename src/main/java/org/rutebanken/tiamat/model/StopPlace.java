@@ -54,6 +54,7 @@ public class StopPlace
 
     @ElementCollection(targetClass = VehicleModeEnumeration.class)
     @Enumerated(EnumType.STRING)
+    @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
 
     @OneToMany
