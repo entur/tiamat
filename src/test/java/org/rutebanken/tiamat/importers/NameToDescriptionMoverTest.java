@@ -8,21 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NameToDescriptionMoverTest {
 
-
-    /**
-     *
-     *  Dam (i Kvernstuveien)
-     *  Finsbråten (snuplass)
-     *  Hauger (KB mot sentrum)
-     *  Håkvikdalen kryss (gamle E6)
-     *  Linderudsletta (nordsiden)
-     *  Linderudsletta (sydsiden)
-     *  Skulane (Sykkylven)
-     *
-     *  Ikke flyttes
-     *  Tonstadkrysset 4
-     */
-
     private NameToDescriptionMover nameToDescriptionMover = new NameToDescriptionMover();
 
     @Test
@@ -32,14 +17,13 @@ public class NameToDescriptionMoverTest {
 
     @Test
     public void strømsveien() {
-      expectNameAndDescriptionToBeMoved("Alfaset (i Strømsveien)", "Alfaset", "i Strømsveien");
+        expectNameAndDescriptionToBeMoved("Alfaset (i Strømsveien)", "Alfaset", "i Strømsveien");
     }
 
     @Test
     public void linderudsletta() {
         expectNameAndDescriptionToBeMoved("Linderudsletta (nordsiden)", "Linderudsletta", "nordsiden");
     }
-
 
     private void expectNameAndDescriptionToBeMoved(String originalName, String expectedName, String expectedDescription) {
         StopPlace stopPlace = new StopPlace(new MultilingualString(originalName));
