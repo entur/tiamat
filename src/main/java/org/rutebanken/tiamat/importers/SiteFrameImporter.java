@@ -27,6 +27,7 @@ public class SiteFrameImporter {
 
     private NetexMapper netexMapper;
     private StopPlaceNameCleaner stopPlaceNameCleaner;
+    private NameToDescriptionMover nameToDescriptionMover;
 
     @Autowired
     public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner) {
