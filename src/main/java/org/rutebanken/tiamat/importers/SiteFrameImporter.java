@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.importers;
 
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netexmapping.NetexMapper;
@@ -8,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Timer;
@@ -27,11 +26,13 @@ public class SiteFrameImporter {
     private TopographicPlaceCreator topographicPlaceCreator;
 
     private NetexMapper netexMapper;
+    private StopPlaceNameCleaner stopPlaceNameCleaner;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
+        this.stopPlaceNameCleaner = stopPlaceNameCleaner;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -55,6 +56,7 @@ public class SiteFrameImporter {
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
+                        .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
