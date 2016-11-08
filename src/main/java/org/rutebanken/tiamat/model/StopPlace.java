@@ -15,6 +15,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class StopPlace
@@ -343,6 +344,25 @@ public class StopPlace
 
     public void setQuays(List<Quay> quays) {
         this.quays = quays;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if(this == object) {
+            return true;
+        } else if (!(object instanceof StopPlace)) {
+            return false;
+        }
+
+        StopPlace other = (StopPlace) object;
+
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.centroid, other.centroid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, centroid);
     }
 
     @Override
