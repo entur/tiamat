@@ -78,7 +78,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         semaphore.acquire();
 
         try {
-            logger.info("Import stop place. Current ID: {}, Name: '{}', Quays: {}",
+            logger.info("Import stop place. Current ID: {}, Name: '{}', Quays: {}, Semaphore: {}",
                     newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
                     newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
 
@@ -197,12 +197,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
                     if(changed) {
-                        logger.debug("Updated quay {}, {}", existingQuay.getId(), existingQuay);
+                        logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
                         updatedQuays.incrementAndGet();
                         quayRepository.save(existingQuay);
                     }
                 } else {
-                    logger.debug("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
+                    logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
                     newQuay.setId(null);
                     foundStopPlace.getQuays().add(newQuay);
                     quayRepository.save(newQuay);
@@ -273,6 +273,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         } else {
             semaphoreKey = "all";
         }
+        logger.info("Using semaphore key '{}' for stop place {}", semaphoreKey, stopPlace);
         return stripedSemaphores.get(semaphoreKey);
     }
 
