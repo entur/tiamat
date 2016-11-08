@@ -149,7 +149,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
         if(originalIdChanged) {
-            logger.debug("Updated existing stop place {}", foundStopPlace);
+            logger.info("Updated existing stop place {}. ", foundStopPlace);
+            foundStopPlace.getQuays().forEach(q -> logger.info("{}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
             stopPlaceRepository.save(foundStopPlace);
         }
         return foundStopPlace;
