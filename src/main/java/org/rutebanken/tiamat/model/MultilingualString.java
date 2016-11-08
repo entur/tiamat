@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Objects;
 
 
 /**
@@ -158,6 +159,19 @@ public class MultilingualString {
         this.id = id;
     }
 
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null) return false;
+        if(!(object instanceof MultilingualString)) return false;
+
+        MultilingualString other = (MultilingualString) object;
+
+        return Objects.equals(this.value, other.value)
+                && Objects.equals(this.lang, other.lang)
+                && Objects.equals(this.textIdType, other.textIdType);
+    }
 
     @Override
     public String toString() {
