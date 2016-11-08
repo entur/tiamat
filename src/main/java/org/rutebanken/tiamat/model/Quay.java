@@ -19,7 +19,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<DestinationDisplayView> destinations;
-    //protected DestinationDisplayViews_RelStructure destinations;
 
     @Transient
     protected Float compassBearing;
@@ -35,7 +34,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
-    //protected BoardingPositions_RelStructure boardingPositions;
 
     public Quay(MultilingualString name) {
         super(name);
@@ -67,14 +65,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     public void setShortCode(BigInteger value) {
         this.shortCode = value;
     }
-
-     /*   public DestinationDisplayViews_RelStructure getDestinations() {
-        return destinations;
-    }
-*/
-    //   public void setDestinations(DestinationDisplayViews_RelStructure value) {
-    //       this.destinations = value;
-    //   }
 
     public Float getCompassBearing() {
         return compassBearing;
@@ -120,42 +110,18 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         return boardingPositions;
     }
 
-
-       /* public BoardingPositions_RelStructure getBoardingPositions() {
-        return boardingPositions;
-    }*
-
-       /* public void setBoardingPositions(BoardingPositions_RelStructure value) {
-        this.boardingPositions = value;
-    }*/
-
     @Override
-    public boolean equals(Object other) {
-        if(this == other) {
+    public boolean equals(Object object) {
+        if(this == object) {
             return true;
-        } else if (!(other instanceof Quay)) {
+        } else if (!(object instanceof Quay)) {
             return false;
         }
 
-        Quay otherQuay = (Quay) other;
-        boolean nameEquals = false;
-        if (this.getName() == null && otherQuay.getName() == null) {
-            nameEquals = true;
-        } else if (this.getName() != null
-                && otherQuay.getName() != null
-                && this.getName().getValue().equals(otherQuay.getName().getValue())) {
-            nameEquals = true;
-        }
+        Quay other = (Quay) object;
 
-//        )
-//
-//        boolean coordinatesEquals = this.getCentroid() != null && otherQuay.getCentroid() != null
-//                && this.centroid.getLocation() != null && otherQuay.getCentroid().getLocation() != null
-//                && this.centroid.getLocation().getLatitude().equals(otherQuay.getCentroid().getLocation().getLatitude())
-//                && this.centroid.getLocation().getLongitude().equals(otherQuay.getCentroid().getLocation().getLongitude());
-//
-        return nameEquals;
-
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.centroid, other.centroid);
     }
 
     @Override
@@ -172,5 +138,4 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("keyValues", getKeyValues())
                 .toString();
     }
-
 }
