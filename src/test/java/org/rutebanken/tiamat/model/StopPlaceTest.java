@@ -330,6 +330,28 @@ public class StopPlaceTest {
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems()).hasSize(1);
     }
 
+//    @Test
+//    public void testSavingDuplicateQuays() {
+//
+//        Quay quay = new Quay();
+//        quay.setName(new MultilingualString("q", "en", ""));
+//        quayRepository.save(quay);
+//
+//        Quay quay2 = new Quay();
+//        quay2.setName(new MultilingualString("q", "en", ""));
+//        quay2.setId(quay.getId());
+//
+//        StopPlace stopPlace = new StopPlace();
+//        stopPlace.setQuays(new ArrayList<>());
+//        stopPlace.getQuays().add(quay);
+//        stopPlace.getQuays().add(quay2);
+//
+//        System.out.println(quay.equals(quay2));
+//
+//        stopPlaceRepository.save(stopPlace);
+//
+//    }
+
     @Test
     public void testToString() {
         StopPlace stopPlace = new StopPlace();

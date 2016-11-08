@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Quay extends StopPlaceSpace_VersionStructure {
@@ -120,6 +121,40 @@ public class Quay extends StopPlaceSpace_VersionStructure {
        /* public void setBoardingPositions(BoardingPositions_RelStructure value) {
         this.boardingPositions = value;
     }*/
+//
+//    @Override
+//    public boolean equals(Object other) {
+//        if(this == other) {
+//            return true;
+//        } else if (!(other instanceof Quay)) {
+//            return false;
+//        }
+//
+//        Quay otherQuay = (Quay) other;
+//        boolean nameEquals = false;
+//        if (this.getName() == null && otherQuay.getName() == null) {
+//            nameEquals = true;
+//        } else if (this.getName() != null
+//                && otherQuay.getName() != null
+//                && this.getName().getValue().equals(otherQuay.getName().getValue())) {
+//            nameEquals = true;
+//        }
+//
+////        )
+////
+////        boolean coordinatesEquals = this.getCentroid() != null && otherQuay.getCentroid() != null
+////                && this.centroid.getLocation() != null && otherQuay.getCentroid().getLocation() != null
+////                && this.centroid.getLocation().getLatitude().equals(otherQuay.getCentroid().getLocation().getLatitude())
+////                && this.centroid.getLocation().getLongitude().equals(otherQuay.getCentroid().getLocation().getLongitude());
+////
+//        return nameEquals;
+//
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(quayType, name.getValue());
+//    }
 
     @Override
     public String toString() {
