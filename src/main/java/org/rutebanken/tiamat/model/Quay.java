@@ -126,7 +126,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @Override
     public int hashCode() {
-        return Objects.hash(quayType, name.getValue());
+        return Objects.hash(name, centroid);
     }
 
     @Override

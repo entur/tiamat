@@ -80,6 +80,11 @@ public class MultilingualString {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(this.lang, this.value, this.textIdType);
+    }
+
+    @Override
     public String toString() {
         return getValue() +" ("+lang+")";
     }

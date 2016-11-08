@@ -160,6 +160,11 @@ public class LocationStructure {
                 && geometryEquals(other);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.srsName, this.geometryPoint);
+    }
+
     private boolean geometryEquals(LocationStructure other) {
         if(this.geometryPoint == other.geometryPoint) return true;
         if(this.geometryPoint != null && other.geometryPoint == null) return false;
