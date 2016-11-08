@@ -67,8 +67,13 @@ public class PublicationDeliveryResource {
     @Produces(MediaType.APPLICATION_XML)
     public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
-        return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+        try {
+            PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
+            return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+        } catch (Exception e) {
+            logger.error("Caught exception while importing publication delivery: "+incomingPublicationDelivery, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -86,11 +91,9 @@ public class PublicationDeliveryResource {
                 .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
                 .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-        
         return new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
-
     }
 
     // Import publication delivery without using SiteFrameImporter
