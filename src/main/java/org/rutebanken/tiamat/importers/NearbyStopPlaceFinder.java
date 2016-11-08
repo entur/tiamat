@@ -44,6 +44,8 @@ public class NearbyStopPlaceFinder {
     public StopPlace find(StopPlace stopPlace) {
 
         try {
+            if(stopPlace.getCentroid() == null) return null;
+
             Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
                 return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue()));
