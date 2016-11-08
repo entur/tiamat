@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.importers;
 
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netexmapping.NetexMapper;
@@ -27,12 +25,14 @@ public class SiteFrameImporter {
 
     private NetexMapper netexMapper;
     private StopPlaceNameCleaner stopPlaceNameCleaner;
+    private NameToDescriptionMover nameToDescriptionMover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
+        this.nameToDescriptionMover = nameToDescriptionMover;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -57,6 +57,7 @@ public class SiteFrameImporter {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
+                        .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
