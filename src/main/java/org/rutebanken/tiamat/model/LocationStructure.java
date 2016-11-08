@@ -20,64 +20,20 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.math.BigDecimal;
+import java.util.Objects;
 
-
-/**
- * Type for geospatial Position of a point.
- * May be expressed in concrete WGS 84 Coordinates or any gml compatible point coordinates format.
- * 
- * <p>Java class for LocationStructure complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="LocationStructure">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;sequence>
- *           &lt;sequence minOccurs="0">
- *             &lt;element name="Longitude" type="{http://www.netex.org.uk/netex}LongitudeType"/>
- *             &lt;element name="Latitude" type="{http://www.netex.org.uk/netex}LatitudeType"/>
- *             &lt;element name="Altitude" type="{http://www.netex.org.uk/netex}AltitudeType" minOccurs="0"/>
- *           &lt;/sequence>
- *           &lt;element ref="{http://www.opengis.net/gml/3.2}pos" minOccurs="0"/>
- *         &lt;/sequence>
- *         &lt;element name="Precision" type="{http://www.netex.org.uk/netex}DistanceType" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}normalizedString" />
- *       &lt;attribute name="srsName" type="{http://www.netex.org.uk/netex}SrsNameType" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- * 
- * 
- */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LocationStructure", propOrder = {
-    "longitude",
-    "latitude",
-    "altitude",
-    "pos",
-    "precision"
-})
 @Entity
 @Table(name = "location")
 public class LocationStructure {
 
     private static final int SRID = 4326;
 
-
-    @XmlElement(name = "Altitude")
     @Transient
     protected BigDecimal altitude;
 
-    @XmlElement(namespace = "http://www.opengis.net/gml/3.2")
     @Transient
     protected DirectPositionType pos;
 
-    @XmlElement(name = "Precision")
     @Transient
     protected BigDecimal precision;
 
@@ -85,8 +41,6 @@ public class LocationStructure {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     protected long id;
 
-    @XmlAttribute(name = "srsName")
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @Transient
     protected String srsName;
 
@@ -146,14 +100,6 @@ public class LocationStructure {
         geometryPoint = geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude));
     }
 
-    /**
-     * Gets the value of the latitude property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
     @XmlElement(name = "Latitude")
     public BigDecimal getLatitude() {
         if (geometryPoint != null) {
@@ -162,15 +108,6 @@ public class LocationStructure {
         return null;
     }
 
-    /**
-     * Sets the value of the latitude property.
-     * 
-     * @param latitude
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
-    @XmlElement(name = "Latitude")
     public void setLatitude(BigDecimal latitude) {
         double longitude;
         if(geometryPoint != null) {
@@ -181,122 +118,43 @@ public class LocationStructure {
         geometryPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude.doubleValue()));
     }
 
-    /**
-     * Gets the value of the altitude property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
     public BigDecimal getAltitude() {
         return altitude;
     }
 
-    /**
-     * Sets the value of the altitude property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
+
     public void setAltitude(BigDecimal value) {
         this.altitude = value;
     }
 
-    /**
-     * Gets the value of the pos property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DirectPositionType }
-     *     
-     */
     public DirectPositionType getPos() {
         return pos;
     }
 
-    /**
-     * Sets the value of the pos property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DirectPositionType }
-     *     
-     */
     public void setPos(DirectPositionType value) {
         this.pos = value;
     }
 
-    /**
-     * Gets the value of the precision property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
     public BigDecimal getPrecision() {
         return precision;
     }
 
-    /**
-     * Sets the value of the precision property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
     public void setPrecision(BigDecimal value) {
         this.precision = value;
     }
 
-    /**
-     * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
     public long getId() {
         return id;
     }
 
-    /**
-     * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
     public void setId(long value) {
         this.id = value;
     }
 
-    /**
-     * Gets the value of the srsName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
     public String getSrsName() {
         return srsName;
     }
 
-    /**
-     * Sets the value of the srsName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
     public void setSrsName(String value) {
         this.srsName = value;
     }
@@ -307,5 +165,25 @@ public class LocationStructure {
 
     public void setGeometryPoint(Point geometryPoint) {
         this.geometryPoint = geometryPoint;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null) return false;
+        if(!(object instanceof LocationStructure)) return false;
+
+        LocationStructure other = (LocationStructure) object;
+
+        return Objects.equals(this.srsName, other.srsName)
+                && geometryEquals(other);
+    }
+
+    private boolean geometryEquals(LocationStructure other) {
+        if(this.geometryPoint == other.geometryPoint) return true;
+        if(this.geometryPoint == null && other.geometryPoint == null) return true;
+        if(this.geometryPoint != null && other.geometryPoint == null) return false;
+
+        return this.geometryPoint.equals(other.geometryPoint);
     }
 }
