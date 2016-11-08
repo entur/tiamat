@@ -61,18 +61,6 @@ public class LocationStructure {
     public LocationStructure() {
     }
 
-
-    /**
-     * Gets the value of the longitude property.
-     * TODO: Find a more elegant solution to geometry point
-     * Allow this class to be closer to a java bean with minimal logic.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
-    @XmlElement(name = "Longitude")
     public BigDecimal getLongitude() {
         if(geometryPoint != null) {
             return new BigDecimal(String.valueOf(geometryPoint.getX()));
@@ -83,13 +71,7 @@ public class LocationStructure {
     /**
      * Sets the value of the longitude property.
      * TODO: Not use the geometry factory in this class.
-     * 
-     * @param longitude
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
      */
-    @XmlElement(name = "Longitude")
     public void setLongitude(BigDecimal longitude) {
         double latitude;
         if(geometryPoint != null) {
@@ -100,7 +82,6 @@ public class LocationStructure {
         geometryPoint = geometryFactory.createPoint(new Coordinate(longitude.doubleValue(), latitude));
     }
 
-    @XmlElement(name = "Latitude")
     public BigDecimal getLatitude() {
         if (geometryPoint != null) {
             return new BigDecimal(String.valueOf(geometryPoint.getY()));
@@ -181,9 +162,7 @@ public class LocationStructure {
 
     private boolean geometryEquals(LocationStructure other) {
         if(this.geometryPoint == other.geometryPoint) return true;
-        if(this.geometryPoint == null && other.geometryPoint == null) return true;
         if(this.geometryPoint != null && other.geometryPoint == null) return false;
-
         return this.geometryPoint.equals(other.geometryPoint);
     }
 }
