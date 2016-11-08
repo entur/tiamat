@@ -12,7 +12,7 @@ public class QuayEqualsTest {
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     @Test
-    public void twoQuaysWithSameNameAndCoordinatesEquals() {
+    public void quaysWithSameNameAndCoordinatesEquals() {
         /**
          * Quay{id=52036,
          *      name=Ellas minne (no),
@@ -31,6 +31,37 @@ public class QuayEqualsTest {
 
         quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
         quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        assertThat(quay1).isEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithDifferentNameButNotSameCoordinates() {
+
+        double longitude = 39.61441;
+        double latitude = -144.22765;
+
+        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new MultilingualString("Different"));
+
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        assertThat(quay1).isNotEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithSameNameButDifferentCoordinates() {
+        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
+
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70, 80)))));
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 50)))));
+        assertThat(quay1).isNotEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithNoCoordinatesAndSameName() {
+        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
         assertThat(quay1).isEqualTo(quay2);
     }
 }
