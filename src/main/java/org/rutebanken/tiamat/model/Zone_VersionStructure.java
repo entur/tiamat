@@ -12,6 +12,7 @@ import net.opengis.gml._3.PolygonType;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
+import java.util.Optional;
 
 
 /**
@@ -201,4 +202,11 @@ public class Zone_VersionStructure
         this.parentZoneRef = value;
     }
 
+    public boolean hasCoordinates() {
+        return Optional.of(this)
+                .map(Zone_VersionStructure::getCentroid)
+                .map(SimplePoint::getLocation)
+                .map(LocationStructure::getGeometryPoint)
+                .isPresent();
+    }
 }

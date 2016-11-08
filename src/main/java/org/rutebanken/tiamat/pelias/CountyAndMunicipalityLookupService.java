@@ -41,6 +41,10 @@ public class CountyAndMunicipalityLookupService {
      */
     public void populateCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) throws IOException, InterruptedException {
 
+        if(!stopPlace.hasCoordinates()) {
+            return;
+        }
+
         Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
 
         Properties peliasProperties = reverseLookup(point, stopPlace);

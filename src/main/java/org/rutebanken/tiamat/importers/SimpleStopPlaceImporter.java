@@ -41,9 +41,7 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
     @Override
     public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        if (stopPlace.getCentroid() == null
-                || stopPlace.getCentroid().getLocation() == null
-                || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
+        if (!stopPlace.hasCoordinates()) {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
             return null;
         }
