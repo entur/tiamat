@@ -35,7 +35,7 @@ public class QuayEqualsTest {
     }
 
     @Test
-    public void quaysWithDifferentNameButNotSameCoordinates() {
+    public void quaysWithDifferentNameButSameCoordinates() {
 
         double longitude = 39.61441;
         double latitude = -144.22765;
