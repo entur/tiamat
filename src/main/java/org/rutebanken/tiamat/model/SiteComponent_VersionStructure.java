@@ -83,6 +83,13 @@ public abstract class SiteComponent_VersionStructure
     @Transient
     protected LocalServices_RelStructure localServices;
 
+    public SiteComponent_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    protected SiteComponent_VersionStructure() {
+    }
+
     /**
      * Gets the value of the siteRef property.
      * 

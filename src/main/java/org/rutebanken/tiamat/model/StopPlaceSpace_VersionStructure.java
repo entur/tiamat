@@ -68,6 +68,13 @@ public abstract class StopPlaceSpace_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
+    public StopPlaceSpace_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public StopPlaceSpace_VersionStructure() {
+    }
+
     /**
      * Gets the value of the boardingUse property.
      * 

@@ -123,6 +123,12 @@ public abstract class StopPlaceComponent_VersionStructure
     @OneToMany(fetch = FetchType.EAGER)
     private List<TariffZone> tariffZones;
 
+    public StopPlaceComponent_VersionStructure(MultilingualString name) {
+        super(name);
+    }
+
+    public StopPlaceComponent_VersionStructure() { }
+
     /**
      * Gets the value of the transportMode property.
      * 
