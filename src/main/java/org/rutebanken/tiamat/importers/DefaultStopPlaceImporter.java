@@ -74,13 +74,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        if (newStopPlace.getCentroid() == null
-                || newStopPlace.getCentroid().getLocation() == null
-                || newStopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
-            logger.info("Ignoring stop place {} - {} because it lacks geometry", newStopPlace.getName(), newStopPlace.getId());
-            return null;
-        }
-
         Semaphore semaphore = getStripedSemaphore(newStopPlace);
         semaphore.acquire();
 
