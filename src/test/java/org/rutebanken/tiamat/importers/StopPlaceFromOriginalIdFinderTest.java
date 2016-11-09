@@ -1,16 +1,55 @@
 package org.rutebanken.tiamat.importers;
 
 import org.junit.Test;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
-import static org.junit.Assert.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+
+import static org.mockito.Mockito.*;
+import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class StopPlaceFromOriginalIdFinderTest {
 
     @Test
-    public void find() throws Exception {
+    public void findShouldSearchForAllIdsInKeyVal() throws Exception {
 
+        StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(100L);
+        stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("some-original-id");
+        stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("another-original-id");
+        stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("the-one-original-id");
 
+        when(stopPlaceRepository.findOne(stopPlace.getId())).thenReturn(stopPlace);
+        when(stopPlaceRepository
+                .findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getKeyValues().get(ORIGINAL_ID_KEY).getItems()))
+                .thenReturn(stopPlace.getId());
+
+        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+        assertThat(actual).isNotNull();
     }
 
+    @Test
+    public void findShouldHandleEmptyValues() throws Exception {
+
+        StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(101L);
+
+        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+
+        verify(stopPlaceRepository, never()).findByKeyValue(anyString(), anyList());
+        verify(stopPlaceRepository, never()).findOne(any());
+        assertThat(actual).isNull();
+    }
 }
