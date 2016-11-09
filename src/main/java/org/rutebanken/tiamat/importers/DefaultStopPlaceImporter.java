@@ -202,6 +202,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 } else {
                     logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
                     newQuay.setId(null);
+                    resetLocationIds(newQuay);
                     foundStopPlace.getQuays().add(newQuay);
                     quayRepository.save(newQuay);
                     createdQuays.incrementAndGet();

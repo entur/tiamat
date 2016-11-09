@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -120,6 +121,20 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
 
+        assertThat(importResult).isNotNull();
+    }
+
+    /**
+     * Reproduced an issue with detached entity passed to persist when adding new quay to stop place.
+     */
+    @Test
+    public void detatchedEntityPassedToPersistAddingQuay() throws ExecutionException, InterruptedException {
+        StopPlace stopPlace = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
+        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace stopPlace2 = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
+        stopPlace2.getQuays().get(0).getCentroid().getLocation().setGeometryPoint(geometryFactory.createPoint(new Coordinate(60,10)));
+        stopPlace2.getQuays().get(0).getCentroid().getLocation().setId(10);
+        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace2, new SiteFrame(), new AtomicInteger());
         assertThat(importResult).isNotNull();
     }
 
