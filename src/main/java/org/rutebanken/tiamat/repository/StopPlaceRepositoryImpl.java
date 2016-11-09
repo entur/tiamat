@@ -114,15 +114,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findByKeyValue(String key, String value) {
+    public Long findByKeyValue(String key, List<String> values) {
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                                 "JOIN s.keyValues spkv " +
                                 "ON ( KEY(spkv) = :key) " +
-                                "WHERE :value IN elements(spkv.items)",
+                                "WHERE :values IN elements(spkv.items)",
                         Long.class);
         query.setParameter("key", key);
-        query.setParameter("value", value);
+        query.setParameter("values", values);
 
         try {
             return query.getSingleResult();

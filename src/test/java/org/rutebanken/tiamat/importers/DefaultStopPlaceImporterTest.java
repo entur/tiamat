@@ -20,9 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.concurrent.TimeUnit.HOURS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -116,7 +114,7 @@ public class DefaultStopPlaceImporterTest {
         StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger());
 
 
-        when(stopPlaceRepository.findByKeyValue(anyString(), anyString()))
+        when(stopPlaceRepository.findByKeyValue(anyString(), anyList()))
                 .then(invocationOnMock -> {
                     System.out.println("Returning the first stop place");
                     return importedStopPlace1;
@@ -163,7 +161,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
@@ -201,7 +199,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)

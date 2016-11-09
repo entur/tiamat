@@ -53,7 +53,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "value");
+        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("value"));
         StopPlace actual = stopPlaceRepository.findOne(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
@@ -67,7 +67,7 @@ public class StopPlaceRepositoryImplTest {
         firstStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(firstStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "anotherValue");
+        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("anotherValue"));
         assertThat(id).isNull();
     }
 
@@ -81,7 +81,7 @@ public class StopPlaceRepositoryImplTest {
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "value");
+        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("value"));
 
         assertThat(id).isEqualTo(matchingStopPlace.getId());
 

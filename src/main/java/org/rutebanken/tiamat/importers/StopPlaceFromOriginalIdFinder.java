@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,7 @@ public class StopPlaceFromOriginalIdFinder {
         try {
             String stringId = String.valueOf(id);
             Optional<Long> stopPlaceId = keyValueCache.get(cacheKey, () ->
-                    Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, stringId)));
+                    Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, Arrays.asList(stringId))));
             if(stopPlaceId.isPresent()) {
                 return stopPlaceRepository.findOne(stopPlaceId.get());
             }
