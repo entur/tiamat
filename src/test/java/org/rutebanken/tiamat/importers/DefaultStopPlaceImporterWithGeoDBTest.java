@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,6 +100,33 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
 
+    }
+
+    @Test
+    public void addQuaysToStopPlaceWithoutQuays() throws ExecutionException, InterruptedException {
+        String name = "Eselbergveien";
+
+        double longitude = 5;
+        double latitude = 71;
+
+        StopPlace firstStopPlace = createStopPlace(name, longitude, latitude, null);
+
+        AtomicInteger topographicPlacesCounter = new AtomicInteger();
+        SiteFrame siteFrame = new SiteFrame();
+
+        // Import first stop place.
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+
+        StopPlace secondStopPlace = createStopPlace(name, longitude, latitude, null);
+        secondStopPlace.getQuays().add(createQuay(name, longitude, latitude, null));
+
+        // Import second stop place
+        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
+
+        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getQuays()).hasSize(1);
+
+        assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
     }
 
     /**
