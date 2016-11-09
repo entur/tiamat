@@ -52,7 +52,7 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("72"))));
 
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
 
         PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
@@ -232,7 +232,7 @@ public class PublicationDeliveryResourceTest {
 
     }
 
-    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace stopPlace) {
+    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace));
