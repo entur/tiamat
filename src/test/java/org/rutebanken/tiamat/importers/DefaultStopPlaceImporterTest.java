@@ -138,15 +138,15 @@ public class DefaultStopPlaceImporterTest {
     @Test
     public void detectAndMergeQuaysForExistingStopPlace() throws ExecutionException, InterruptedException {
         final Long savedStopPlaceId = 1L;
-        final Long chouetteId = 2L;
-        final Long chouetteQuayId = 3L;
+        final String chouetteId = "OPP:StopArea:321";
+        final String chouetteQuayId = "OPP:Quays:3333";
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
-        firstStopPlace.setId(chouetteId);
+        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal1 = new Quay();
-        terminal1.setId(chouetteQuayId);
+        terminal1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
         firstStopPlace.getQuays().add(terminal1);
 
@@ -154,10 +154,10 @@ public class DefaultStopPlaceImporterTest {
         // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
         secondStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(80.000, 20.78)))));
         // Set same ID as first stop place
-        secondStopPlace.setId(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
-        terminal2.setId(chouetteQuayId);
+        terminal2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
         secondStopPlace.getQuays().add(terminal2);
 
