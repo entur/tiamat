@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +44,11 @@ public class StopPlaceFromOriginalIdFinder {
 
     public StopPlace find(StopPlace stopPlace) {
 
-        StopPlace existingStopPlace = findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getId());
+        List<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);
+
+        if(originalIds.isEmpty()) return null;
+
+        StopPlace existingStopPlace = findByKeyValue(originalIds);
 
         if (existingStopPlace != null) {
             logger.debug("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
@@ -51,31 +57,35 @@ public class StopPlaceFromOriginalIdFinder {
         return null;
     }
 
-    public void update(Long originalId, Long newId) {
-        keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(newId));
+    public void update(StopPlace stopPlace) {
+        if(stopPlace.getId() == null) {
+            logger.warn("Attempt to update cache when stop place does not have any ID! stop place: {}", stopPlace);
+            return;
+        }
+        for(String originalId : stopPlace.getOrCreateValues(ORIGINAL_ID_KEY)) {
+            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getId()));
+        }
     }
 
-    private StopPlace findByKeyValue(String key, Long id) {
-        if(id == null) {
-            return null;
-        }
-        String cacheKey = keyValKey(key, id);
-        try {
-            String stringId = String.valueOf(id);
-            Optional<Long> stopPlaceId = keyValueCache.get(cacheKey, () ->
-                    Optional.ofNullable(stopPlaceRepository.findByKeyValue(key, stringId)));
-            if(stopPlaceId.isPresent()) {
-                return stopPlaceRepository.findOne(stopPlaceId.get());
+    private StopPlace findByKeyValue(List<String> originalIds) {
+        for(String originalId : originalIds) {
+            String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
+            Optional<Long> matchingStopPlaceId = keyValueCache.getIfPresent(cacheKey);
+            if(matchingStopPlaceId != null && matchingStopPlaceId.isPresent()) {
+                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceId.get());
+                return stopPlaceRepository.findOne(matchingStopPlaceId.get());
             }
-            return null;
         }
-        catch (ExecutionException e) {
-            logger.warn("Caught exception while finding stop place by key and value.", e);
-            throw new RuntimeException(e);
+
+        // No cache match
+        Long stopPlaceId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
+        if(stopPlaceId != null) {
+            return stopPlaceRepository.findOne(stopPlaceId);
         }
+        return null;
     }
 
-    private String keyValKey(String key, Long value) {
+    private String keyValKey(String key, String value) {
         return key + "-" + value;
     }
 }

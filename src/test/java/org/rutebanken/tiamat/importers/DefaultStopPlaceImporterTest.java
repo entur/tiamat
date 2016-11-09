@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -20,9 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.concurrent.TimeUnit.HOURS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -116,7 +115,7 @@ public class DefaultStopPlaceImporterTest {
         StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger());
 
 
-        when(stopPlaceRepository.findByKeyValue(anyString(), anyString()))
+        when(stopPlaceRepository.findByKeyValue(anyString(), anyList()))
                 .then(invocationOnMock -> {
                     System.out.println("Returning the first stop place");
                     return importedStopPlace1;
@@ -139,15 +138,15 @@ public class DefaultStopPlaceImporterTest {
     @Test
     public void detectAndMergeQuaysForExistingStopPlace() throws ExecutionException, InterruptedException {
         final Long savedStopPlaceId = 1L;
-        final Long chouetteId = 2L;
-        final Long chouetteQuayId = 3L;
+        final String chouetteId = "OPP:StopArea:321";
+        final String chouetteQuayId = "OPP:Quays:3333";
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
-        firstStopPlace.setId(chouetteId);
+        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal1 = new Quay();
-        terminal1.setId(chouetteQuayId);
+        terminal1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
         firstStopPlace.getQuays().add(terminal1);
 
@@ -155,15 +154,15 @@ public class DefaultStopPlaceImporterTest {
         // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
         secondStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(80.000, 20.78)))));
         // Set same ID as first stop place
-        secondStopPlace.setId(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
-        terminal2.setId(chouetteQuayId);
+        terminal2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
@@ -179,7 +178,7 @@ public class DefaultStopPlaceImporterTest {
     @Test
     public void detectTwoMatchingQuaysInTwoSeparateStopPlaces() throws ExecutionException, InterruptedException {
         final Long savedStopPlaceId = 1L;
-        final Long chouetteId = 2L;
+        final String chouetteId = "OPP:StopArea:123123";
 
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)))));
@@ -194,14 +193,14 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(80.000, 20.78)))));
 
         // Set same ID as first stop place
-        secondStopPlace.setId(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
         terminal2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70.000, 10.78)))));
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, String.valueOf(chouetteId))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)

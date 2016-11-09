@@ -24,7 +24,7 @@ public interface StopPlaceRepositoryCustom {
 
     Long findNearbyStopPlace(Envelope envelope, String name);
 
-    Long findByKeyValue(String key, String value);
+    Long findByKeyValue(String key, List<String> value);
 
     Page<StopPlace> findStopPlace(String query, List<String> municipalityId, List<String> countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable);
 }

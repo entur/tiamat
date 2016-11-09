@@ -4,7 +4,6 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.importers.DefaultStopPlaceImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,7 +16,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -54,14 +52,7 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("72"))));
 
 
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace, stopPlace2));
-
-        @SuppressWarnings(value = "unchecked")
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
 
         PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
@@ -88,13 +79,7 @@ public class PublicationDeliveryResourceTest {
                                     .withLatitude(new BigDecimal("9.1"))
                                     .withLongitude(new BigDecimal("71.2"))))));
 
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
 
         PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
@@ -112,6 +97,64 @@ public class PublicationDeliveryResourceTest {
 
         assertThat(quay.getName().getValue()).isEqualTo("quay");
         assertThat(quay.getId()).isNotNull();
+
+    }
+
+    @Test
+    public void importStopPlaceWithoutCoordinates() throws Exception {
+
+        String chouetteId = "OPP:StopArea:123";
+
+        StopPlace stopPlace = new StopPlace()
+                .withId(chouetteId)
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("quay"))));
+
+        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(firstPublicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(response);
+
+        assertThat(actualStopPlace).isNotNull();
+
+    }
+
+    @Test
+    public void matchStopPlaceWithoutCoordinates() throws Exception {
+
+        String chouetteId = "HED:StopArea:321321";
+
+        StopPlace stopPlace = new StopPlace()
+                .withId(chouetteId)
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("quay"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
+
+        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(firstPublicationDelivery);
+        StopPlace firstStopPlaceReturned = findFirstStopPlace(firstResponse);
+        // Same ID, but no coordinates
+        StopPlace stopPlaceWithoutCoordinates = new StopPlace()
+                .withId(chouetteId)
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("quay"))));
+
+        PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
+        PublicationDeliveryStructure secondResponse = publicationDeliveryResource.importPublicationDelivery(secondPublicationDelivery);
+
+        StopPlace secondStopPlaceReturned = findFirstStopPlace(secondResponse);
+        assertThat(secondStopPlaceReturned.getId()).isEqualTo(firstStopPlaceReturned.getId())
+                .as("Expecting IDs to be the same, because the chouette ID is the same");
 
     }
 
@@ -135,14 +178,7 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
-
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
@@ -177,14 +213,7 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
-
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
@@ -201,6 +230,18 @@ public class PublicationDeliveryResourceTest {
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Steinerskolen Moss");
         assertThat(quay.getName().getValue()).isEqualTo("Steinerskolen Moss");
 
+    }
+
+    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        return publicationDelivery;
     }
 
     private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
