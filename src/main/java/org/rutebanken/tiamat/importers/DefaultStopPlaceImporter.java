@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -113,12 +114,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             });
         }
 
-        stopPlaceRepository.save(newStopPlace);
-        stopPlaceFromOriginalIdFinder.update(newStopPlace);
-        nearbyStopPlaceFinder.update(newStopPlace);
-        logger.info("Saved stop place {}", newStopPlace);
-
-        return newStopPlace;
+        return saveAndUpdateCache(newStopPlace);
     }
 
     private void resetLocationIds(Zone_VersionStructure zone) {
@@ -129,6 +125,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 centroid.getLocation().setId(0);
             }
         }
+    }
+
+    private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceFromOriginalIdFinder.update(stopPlace);
+        nearbyStopPlaceFinder.update(stopPlace);
+        logger.info("Saved stop place {}", stopPlace);
+        return stopPlace;
     }
 
     private boolean hasTopographicPlaces(SiteFrame siteFrame) {
@@ -143,12 +147,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
-        if(originalIdChanged) {
+        if(originalIdChanged || quaysChanged) {
             logger.info("Updated existing stop place {}. ", foundStopPlace);
-            foundStopPlace.getQuays().forEach(q -> logger.info("{}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
-            stopPlaceRepository.save(foundStopPlace);
-            stopPlaceFromOriginalIdFinder.update(newStopPlace);
-            nearbyStopPlaceFinder.update(newStopPlace);
+            foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
+            saveAndUpdateCache(foundStopPlace);
         }
         return foundStopPlace;
     }
@@ -182,13 +184,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         Set<Quay> quaysToAdd = new HashSet<>();
 
-        if (foundStopPlace.getQuays().isEmpty()) {
+        if (foundStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
             logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}",
                     foundStopPlace, newStopPlace, newStopPlace.getName());
             quaysToAdd.addAll(newStopPlace.getQuays());
-        }
-
-        if (!newStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
+        } else if (!newStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
 
             logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID)", foundStopPlace, newStopPlace);
 
@@ -220,7 +220,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         logger.debug("Created {} quays and updated {} quays for stop place {}", createdQuays.get(), updatedQuays.get(), foundStopPlace);
-        return updatedQuays.get() > 0 || createdQuays.get() > 0 ;
+        return createdQuays.get() > 0 ;
     }
 
     /**
