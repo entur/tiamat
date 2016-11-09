@@ -78,9 +78,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         semaphore.acquire();
 
         try {
-            logger.info("Import stop place. Current ID: {}, Name: '{}', Quays: {}, Semaphore: {}",
-                    newStopPlace.getId(), newStopPlace.getName() != null ? newStopPlace.getName() : "",
-                    newStopPlace.getQuays() != null ? newStopPlace.getQuays().size() : 0);
+            logger.info("Import stop place {}", newStopPlace);
 
             final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
