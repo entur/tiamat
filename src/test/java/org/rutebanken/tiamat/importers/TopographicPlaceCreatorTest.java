@@ -98,6 +98,22 @@ public class TopographicPlaceCreatorTest {
         assertThat(actualMunicipality.getId()).isNotEqualTo(0L);
     }
 
+    @Test
+    public void findOrCreateTopographicPlace_handleNull() throws Exception {
+        // Arrange
+        TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
+        TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
+
+        TopographicPlaceRefStructure topographicPlace = new TopographicPlaceRefStructure();
+        topographicPlace.setRef(null);
+
+        // Act
+        Optional<TopographicPlace> actual = topographicPlaceCreator.findOrCreateTopographicPlace(Arrays.asList(), topographicPlace, new AtomicInteger());
+
+        // Assert
+        assertThat(actual).isEmpty();
+    }
+
 
     /**
      * Save both municipality and county.
