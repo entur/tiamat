@@ -91,6 +91,21 @@ public class StopPlaceRepositoryImplTest {
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
     }
 
+    @Test
+    public void findCorrectStopPlaceFromValues() {
+        StopPlace stopPlaceWithSomeValues = new StopPlace();
+        stopPlaceWithSomeValues.getKeyValues().put("key", new Value("One value", "Second value", "Third value"));
+        stopPlaceRepository.save(stopPlaceWithSomeValues);
+
+        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("Third value"));
+
+        assertThat(id).isEqualTo(stopPlaceWithSomeValues.getId());
+
+        StopPlace actual = stopPlaceRepository.findOne(id);
+        Assertions.assertThat(actual).isNotNull();
+        Assertions.assertThat(actual.getKeyValues()).containsKey("key");
+        Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("Third value");
+    }
 
     @Test
     public void findStopPlacesWithin() throws Exception {

@@ -116,17 +116,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         if (newStopPlace.getQuays() != null) {
             logger.info("Importing quays for new stop place {}", newStopPlace);
             newStopPlace.getQuays().forEach(quay -> {
-                if (quay.getCentroid() == null) {
-                    logger.warn("Centroid is null for quay with id {}. Ignoring it.", quay.getId());
-                } else if (quay.getCentroid().getLocation() == null) {
-                    logger.warn("Location for centroid of quay with id {} is null. Ignoring it.", quay.getId());
-                } else {
+                if (quay.hasCoordinates()) {
                     quay.getCentroid().setId(null);
                     quay.getCentroid().getLocation().setId(0);
-                    logger.info("Saving quay {}", quay);
-                    quayRepository.save(quay);
-                    logger.debug("Saved quay. Got id {} back", quay.getId());
+                } else {
+                    logger.warn("Quay does not have coordinates.", quay.getId());
                 }
+                logger.info("Saving quay {}", quay);
+                quayRepository.save(quay);
+                logger.debug("Saved quay. Got id {} back", quay.getId());
             });
         }
 

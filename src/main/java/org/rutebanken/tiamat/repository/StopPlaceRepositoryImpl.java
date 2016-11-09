@@ -118,14 +118,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                                 "JOIN s.keyValues spkv " +
-                                "ON ( KEY(spkv) = :key) " +
+                                "ON KEY(spkv) = :key " +
                                 "WHERE :values IN elements(spkv.items)",
                         Long.class);
         query.setParameter("key", key);
         query.setParameter("values", values);
 
         try {
-            return query.getSingleResult();
+            List<Long> results = query.getResultList();
+            if(results.isEmpty()) {
+                return null;
+            } else {
+                return results.get(0);
+            }
         } catch (NoResultException noResultException) {
             return null;
         }
