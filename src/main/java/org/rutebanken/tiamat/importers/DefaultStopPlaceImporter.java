@@ -1,25 +1,17 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
-import org.rutebanken.tiamat.model.LocationStructure;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SiteFrame;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.transaction.TransactionManager;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -97,10 +89,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
 
     public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
-        // TODO: Hack to avoid 'detached entity passed to persist'.
-        if(newStopPlace.hasCoordinates()) {
-            newStopPlace.getCentroid().getLocation().setId(0);
-        }
+
+        resetLocationIds(newStopPlace);
 
         if (hasTopographicPlaces(siteFrame)) {
             topographicPlaceCreator.setTopographicReference(newStopPlace,
@@ -109,17 +99,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         } else {
             lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
         }
-        Long originalId = newStopPlace.getId();
 
         if (newStopPlace.getQuays() != null) {
             logger.info("Importing quays for new stop place {}", newStopPlace);
             newStopPlace.getQuays().forEach(quay -> {
-                if (quay.hasCoordinates()) {
-                    quay.getCentroid().setId(null);
-                    quay.getCentroid().getLocation().setId(0);
-                } else {
+                if (!quay.hasCoordinates()) {
                     logger.warn("Quay does not have coordinates.", quay.getId());
                 }
+                resetLocationIds(quay);
                 logger.info("Saving quay {}", quay);
                 quayRepository.save(quay);
                 logger.debug("Saved quay. Got id {} back", quay.getId());
@@ -132,6 +119,16 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         logger.info("Saved stop place {}", newStopPlace);
 
         return newStopPlace;
+    }
+
+    private void resetLocationIds(Zone_VersionStructure zone) {
+        if(zone.getCentroid() != null) {
+           SimplePoint centroid = zone.getCentroid();
+           centroid.setId(null);
+            if(centroid.getLocation() != null) {
+                centroid.getLocation().setId(0);
+            }
+        }
     }
 
     private boolean hasTopographicPlaces(SiteFrame siteFrame) {
