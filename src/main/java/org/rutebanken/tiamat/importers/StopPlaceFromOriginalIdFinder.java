@@ -78,7 +78,11 @@ public class StopPlaceFromOriginalIdFinder {
         }
 
         // No cache match
-        return stopPlaceRepository.findOne(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds));
+        Long stopPlaceId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
+        if(stopPlaceId != null) {
+            return stopPlaceRepository.findOne(stopPlaceId);
+        }
+        return null;
     }
 
     private String keyValKey(String key, String value) {
