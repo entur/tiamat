@@ -108,21 +108,19 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
         stopPlace.getCentroid().getLocation().setId(10L);
-        stopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
+        stopPlace.setName(new MultilingualString("stop", "no", ""));
 
 
         Quay quay = new Quay();
-        quay.setName(new MultilingualString("terminal 1", "", ""));
+        quay.setName(new MultilingualString("quay", "", ""));
         quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.000, 10.78)))));
         quay.getCentroid().getLocation().setId(20L);
 
         stopPlace.getQuays().add(quay);
 
-        // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
 
         assertThat(importResult).isNotNull();
-
     }
 
     @Test
