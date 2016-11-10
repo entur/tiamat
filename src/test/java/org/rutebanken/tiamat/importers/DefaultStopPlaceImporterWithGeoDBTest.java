@@ -98,7 +98,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(2);
 
-        assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
+        assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
 
     }
 
@@ -126,7 +126,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
 
-        assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
+        assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
     }
 
     /**
@@ -161,8 +161,9 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace stopPlace = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
         defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
         StopPlace stopPlace2 = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
-        stopPlace2.getQuays().get(0).getCentroid().getLocation().setGeometryPoint(geometryFactory.createPoint(new Coordinate(60,10)));
-        stopPlace2.getQuays().get(0).getCentroid().getLocation().setId(10);
+        Quay quay = stopPlace2.getQuays().iterator().next();
+        quay.getCentroid().getLocation().setGeometryPoint(geometryFactory.createPoint(new Coordinate(60,10)));
+        quay.getCentroid().getLocation().setId(10);
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace2, new SiteFrame(), new AtomicInteger());
         assertThat(importResult).isNotNull();
     }

@@ -67,7 +67,7 @@ public class StopPlaceDisassembler {
                 .stream()
                 .filter(Objects::nonNull)
                 .map(quay -> quayDisassembler.disassemble(quay))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toSet()));
 
        return destination;
 

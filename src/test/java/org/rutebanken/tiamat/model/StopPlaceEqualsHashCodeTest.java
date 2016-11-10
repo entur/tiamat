@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ public class StopPlaceEqualsHashCodeTest {
         quay.setName(new MultilingualString(name));
         quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
         StopPlace stopPlace = new StopPlace(new MultilingualString(name));
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
         stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
         return stopPlace;

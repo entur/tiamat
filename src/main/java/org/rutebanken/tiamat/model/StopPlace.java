@@ -13,9 +13,7 @@ import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 public class StopPlace
@@ -84,7 +82,7 @@ public class StopPlace
     protected InterchangeWeightingEnumeration weighting;
 
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    private List<Quay> quays = new ArrayList<>();
+    private Set<Quay> quays = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
@@ -338,11 +336,11 @@ public class StopPlace
     }
 
 
-    public List<Quay> getQuays() {
+    public Set<Quay> getQuays() {
         return quays;
     }
 
-    public void setQuays(List<Quay> quays) {
+    public void setQuays(Set<Quay> quays) {
         this.quays = quays;
     }
 

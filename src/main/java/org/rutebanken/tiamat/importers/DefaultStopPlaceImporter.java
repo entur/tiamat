@@ -175,11 +175,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         logger.debug("About to compare quays for {}", foundStopPlace.getId());
 
         if (foundStopPlace.getQuays() == null) {
-            foundStopPlace.setQuays(new ArrayList<>());
+            foundStopPlace.setQuays(new HashSet<>());
         }
 
         if(newStopPlace.getQuays() == null) {
-            foundStopPlace.setQuays(new ArrayList<>());
+            foundStopPlace.setQuays(new HashSet<>());
         }
 
         if (foundStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {

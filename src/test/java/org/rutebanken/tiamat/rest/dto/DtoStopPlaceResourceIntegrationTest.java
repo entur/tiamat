@@ -23,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -125,7 +126,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
 
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
 

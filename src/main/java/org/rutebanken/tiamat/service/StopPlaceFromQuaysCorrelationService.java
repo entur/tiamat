@@ -205,7 +205,7 @@ public class StopPlaceFromQuaysCorrelationService {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
 
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
 
         quays.forEach(quay -> {
 
@@ -284,7 +284,7 @@ public class StopPlaceFromQuaysCorrelationService {
         return false;
     }
 
-    public boolean quayIsCloseToExistingQuays(Quay otherQuay, List<Quay> existingQuays) {
+    public boolean quayIsCloseToExistingQuays(Quay otherQuay, Set<Quay> existingQuays) {
         return existingQuays.stream().allMatch(q -> areClose(otherQuay, q));
     }
 
@@ -329,7 +329,7 @@ public class StopPlaceFromQuaysCorrelationService {
         return envelope;
     }
 
-    public Point calculateCentroidForStopPlace(List<Quay> quays) {
+    public Point calculateCentroidForStopPlace(Set<Quay> quays) {
         CentroidPoint centroidPoint = new CentroidPoint();
         quays.stream()
             .filter(quay -> quay.getCentroid() != null)

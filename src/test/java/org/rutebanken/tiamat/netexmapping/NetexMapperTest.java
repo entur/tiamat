@@ -14,6 +14,8 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NetexMapperTest {
@@ -173,6 +175,26 @@ public class NetexMapperTest {
         org.rutebanken.netex.model.Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
         assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+    }
+
+    @Test
+    public void mapStopPlaceWithQuayToNetex() {
+        org.rutebanken.tiamat.model.StopPlace stopPlace = new StopPlace();
+
+        org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
+        tiamatQuay.setId(1234567L);
+
+        stopPlace.getQuays().add(tiamatQuay);
+
+        org.rutebanken.netex.model.StopPlace actualStop = netexMapper.mapToNetexModel(stopPlace);
+
+        org.rutebanken.netex.model.Quay actualQuay = actualStop.getQuays().getQuayRefOrQuay().stream()
+                .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
+                .map(object -> ((org.rutebanken.netex.model.Quay) object))
+                .findFirst()
+                .get();
+
+        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
 
     }
 

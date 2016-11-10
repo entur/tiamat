@@ -17,6 +17,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -291,7 +292,7 @@ public class StopPlaceTest {
         quayRepository.save(quay);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
 
         stopPlaceRepository.save(stopPlace);
