@@ -71,7 +71,6 @@ public class NetexMapper {
     }
 
     public org.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {
-        logger.debug("About to map netex site frame {} to internal model", netexSiteFrame.getId());
         org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = mapperFactory.getMapperFacade().map(netexSiteFrame, org.rutebanken.tiamat.model.SiteFrame.class);
         return tiamatSiteFrame;
     }

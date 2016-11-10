@@ -32,8 +32,6 @@ import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
  */
 public class DefaultStopPlaceImporterTest {
 
-    private final String correlationId = "";
-
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     private TopographicPlaceCreator topographicPlaceCreator = mock(TopographicPlaceCreator.class);
@@ -84,7 +82,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger(), correlationId);
+        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(2);
@@ -114,7 +112,7 @@ public class DefaultStopPlaceImporterTest {
             return stopPlace;
         });
 
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger(), correlationId);
+        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger());
 
 
         when(stopPlaceRepository.findByKeyValue(anyString(), anyList()))
@@ -125,7 +123,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.findOne(anyLong())).then(invocationOnMock -> importedStopPlace1);
 
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger(), correlationId);
+        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
 
         assertThat(importedStopPlace2.getId())
@@ -168,7 +166,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger(), correlationId);
+        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
@@ -206,7 +204,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger(), correlationId);
+        StopPlace importResult = stopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, new AtomicInteger());
 
         assertThat(importResult.getId()).isEqualTo(savedStopPlaceId);
         // Expect only one quay when two quays have the same coordinates
@@ -256,7 +254,7 @@ public class DefaultStopPlaceImporterTest {
         List<Quay> existingQuays = Arrays.asList(existingQuay);
         List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAdded);
 
-        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays, correlationId).get();
+        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
         assertThat(actual).as("The same quay object as existingQuay should be returned").isSameAs(existingQuay);
     }
 
@@ -280,7 +278,7 @@ public class DefaultStopPlaceImporterTest {
         List<Quay> existingQuays = Arrays.asList(existingQuay);
         List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAddedQuay);
 
-        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays, correlationId).get();
+        Quay actual = stopPlaceImporter.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
         assertThat(actual).as("The same quay object as addedQuay should be returned").isSameAs(alreadyAddedQuay);
     }
 

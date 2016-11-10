@@ -88,9 +88,7 @@ public class PublicationDeliveryResource {
         org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> (SiteFrame) element.getValue())
-                .peek(netexSiteFrame -> logger.info("Publication delivery contains site frame with id: {} and created date", netexSiteFrame.getId(), netexSiteFrame.getCreated()))
-                .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
+                .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
                 .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
                 .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
         return new PublicationDeliveryStructure()

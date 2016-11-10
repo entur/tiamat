@@ -5,8 +5,6 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.CompositeFrame;
 import org.rutebanken.tiamat.model.SiteFrame;
 
-import java.util.Arrays;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NetexIdMapperTest {

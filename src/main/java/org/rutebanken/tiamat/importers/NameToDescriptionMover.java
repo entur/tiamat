@@ -20,26 +20,26 @@ public class NameToDescriptionMover {
     private static final Logger logger = LoggerFactory.getLogger(NameToDescriptionMover.class);
     private static final Pattern pattern = Pattern.compile("\\((.{3,})\\)");
 
-    public StopPlace updateDescriptionFromName(StopPlace stopPlace, String correlationId) {
+    public StopPlace updateDescriptionFromName(StopPlace stopPlace) {
 
-        updateEntityDescriptionFromName(stopPlace, correlationId);
+        updateEntityDescriptionFromName(stopPlace);
         if(stopPlace.getQuays() != null) {
-            stopPlace.getQuays().forEach(quay -> updateEntityDescriptionFromName(quay, correlationId));
+            stopPlace.getQuays().forEach(quay -> updateEntityDescriptionFromName(quay));
         }
         return stopPlace;
     }
 
-    public void updateEntityDescriptionFromName(GroupOfEntities_VersionStructure entity, String correlationId) {
+    public void updateEntityDescriptionFromName(GroupOfEntities_VersionStructure entity) {
         if(entity.getName() != null && entity.getName().getValue() != null) {
             String name = entity.getName().getValue();
 
             Matcher matcher = pattern.matcher(name);
 
             while (matcher.find()) {
-                logger.info("Matching {}. {}", name, correlationId);
+                logger.info("Matching {}", name);
                 if (matcher.groupCount() > 0) {
                     String description = matcher.group(1).trim();
-                    logger.info("Extracted description {}. {}", description, correlationId);
+                    logger.info("Extracted description {}", description);
                     entity.setDescription(new MultilingualString(description));
                 }
             }

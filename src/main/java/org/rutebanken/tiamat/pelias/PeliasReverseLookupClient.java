@@ -39,7 +39,7 @@ public class PeliasReverseLookupClient {
         this.peliasReverseLookupEndpoint = peliasReverseLookupEndpoint;
     }
 
-    public ReverseLookupResult reverseLookup(String latitude, String longitude, int size, String correlationId) throws IOException {
+    public ReverseLookupResult reverseLookup(String latitude, String longitude, int size) throws IOException {
 
         StringBuilder url = new StringBuilder();
         url.append(peliasReverseLookupEndpoint)
@@ -48,7 +48,7 @@ public class PeliasReverseLookupClient {
                 .append("&point.lon=").append(longitude)
                 .append("&size=").append(size);
 
-        logger.info("Request to Pelias on {}. {}", url.toString(), correlationId);
+        logger.info("Request to Pelias on {}", url.toString());
 
         HttpResponse response = Request.Get(url.toString())
                 .connectTimeout(50000)
@@ -58,7 +58,7 @@ public class PeliasReverseLookupClient {
         HttpClientUtils.closeQuietly(response);
 
         ReverseLookupResult result = objectMapper.readValue(response.getEntity().getContent(), ReverseLookupResult.class);
-        logger.info("Got {} features. {}", result.getFeatures().size(), correlationId);
+        logger.info("Got {} features", result.getFeatures().size());
         return result;
     }
 

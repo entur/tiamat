@@ -27,7 +27,7 @@ public class NameToDescriptionMoverTest {
 
     private void expectNameAndDescriptionToBeMoved(String originalName, String expectedName, String expectedDescription) {
         StopPlace stopPlace = new StopPlace(new MultilingualString(originalName));
-        nameToDescriptionMover.updateEntityDescriptionFromName(stopPlace, "");
+        nameToDescriptionMover.updateEntityDescriptionFromName(stopPlace);
         assertThat(stopPlace.getName().getValue()).isEqualTo(expectedName);
         assertThat(stopPlace.getDescription().getValue()).isEqualTo(expectedDescription);
     }
