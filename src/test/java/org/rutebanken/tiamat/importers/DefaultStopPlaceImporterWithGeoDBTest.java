@@ -242,7 +242,9 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
             System.out.println("Topographic place repo contains " + tp.getName());
         });
 
-        assertThat(size[0]).isEqualTo(2).withFailMessage("Number of topographic places in the repository is not as expected");
+        assertThat(size[0])
+                .as("Number of topographic places in the repository is not as expected")
+                .isEqualTo(2);
 
         List<TopographicPlace> counties = topographicPlaceRepository
                 .findByNameValueAndCountryRefRefAndTopographicPlaceType(
