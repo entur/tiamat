@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class KeyValueListAppender {
@@ -15,8 +16,8 @@ public class KeyValueListAppender {
 
     public boolean appendToOriginalId(String key, DataManagedObjectStructure newObject, DataManagedObjectStructure existingObject) {
 
-        List<String> existingObjectIds = existingObject.getOrCreateValues(key);
-        List<String> newObjectIds = newObject.getOrCreateValues(key);
+        Set<String> existingObjectIds = existingObject.getOrCreateValues(key);
+        Set<String> newObjectIds = newObject.getOrCreateValues(key);
 
         boolean changed = false;
         for(String newOriginalId : newObjectIds) {

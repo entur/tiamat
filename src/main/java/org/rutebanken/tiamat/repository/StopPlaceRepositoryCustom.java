@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.List;
+import java.util.Set;
 
 
 public interface StopPlaceRepositoryCustom {
@@ -24,7 +25,7 @@ public interface StopPlaceRepositoryCustom {
 
     Long findNearbyStopPlace(Envelope envelope, String name);
 
-    Long findByKeyValue(String key, List<String> value);
+    Long findByKeyValue(String key, Set<String> value);
 
     Page<StopPlace> findStopPlace(String query, List<String> municipalityId, List<String> countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable);
 }

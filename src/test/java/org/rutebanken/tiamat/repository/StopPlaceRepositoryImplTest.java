@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -53,7 +54,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("value"));
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
         StopPlace actual = stopPlaceRepository.findOne(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
@@ -67,7 +68,7 @@ public class StopPlaceRepositoryImplTest {
         firstStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(firstStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("anotherValue"));
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("anotherValue"));
         assertThat(id).isNull();
     }
 
@@ -81,7 +82,7 @@ public class StopPlaceRepositoryImplTest {
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("value"));
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
 
         assertThat(id).isEqualTo(matchingStopPlace.getId());
 
@@ -97,7 +98,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceWithSomeValues.getKeyValues().put("key", new Value("One value", "Second value", "Third value"));
         stopPlaceRepository.save(stopPlaceWithSomeValues);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Arrays.asList("Third value"));
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("Third value"));
 
         assertThat(id).isEqualTo(stopPlaceWithSomeValues.getId());
 

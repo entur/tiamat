@@ -48,7 +48,7 @@ public class StopPlaceFromOriginalIdFinderTest {
 
         StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
 
-        verify(stopPlaceRepository, never()).findByKeyValue(anyString(), anyList());
+        verify(stopPlaceRepository, never()).findByKeyValue(anyString(), anySet());
         verify(stopPlaceRepository, never()).findOne(any());
         assertThat(actual).isNull();
     }

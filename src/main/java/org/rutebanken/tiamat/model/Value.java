@@ -3,9 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Value class for use with Map<String, Value> in {@link DataManagedObjectStructure}.
@@ -18,7 +16,7 @@ public class Value {
     private long id;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> items = new ArrayList<>(0);
+    private Set<String> items = new HashSet<>();
 
     public Value() {}
 
@@ -30,11 +28,11 @@ public class Value {
         this.items.addAll(items);
     }
 
-    public List<String> getItems() {
+    public Set<String> getItems() {
         return items;
     }
 
-    public void setItems(List<String> items) {
+    public void setItems(Set<String> items) {
         this.items = items;
     }
 

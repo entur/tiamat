@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +45,7 @@ public class StopPlaceFromOriginalIdFinder {
 
     public StopPlace find(StopPlace stopPlace) {
 
-        List<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);
+        Set<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);
 
         if(originalIds.isEmpty()) return null;
 
@@ -67,7 +68,7 @@ public class StopPlaceFromOriginalIdFinder {
         }
     }
 
-    private StopPlace findByKeyValue(List<String> originalIds) {
+    private StopPlace findByKeyValue(Set<String> originalIds) {
         for(String originalId : originalIds) {
             String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
             Optional<Long> matchingStopPlaceId = keyValueCache.getIfPresent(cacheKey);

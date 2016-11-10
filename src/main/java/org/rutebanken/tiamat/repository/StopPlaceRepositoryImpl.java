@@ -21,10 +21,7 @@ import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional
@@ -114,7 +111,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findByKeyValue(String key, List<String> values) {
+    public Long findByKeyValue(String key, Set<String> values) {
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                                 "JOIN s.keyValues spkv " +

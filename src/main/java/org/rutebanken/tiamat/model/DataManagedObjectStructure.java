@@ -3,10 +3,7 @@ package org.rutebanken.tiamat.model;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @MappedSuperclass
 public abstract class DataManagedObjectStructure
@@ -52,7 +49,7 @@ public abstract class DataManagedObjectStructure
         return keyValues;
     }
 
-    public List<String> getOrCreateValues(String key) {
+    public Set<String> getOrCreateValues(String key) {
         if (keyValues.get(key) == null) {
             keyValues.put(key, new Value());
         }

@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importers;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -115,7 +116,7 @@ public class DefaultStopPlaceImporterTest {
         StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, new AtomicInteger());
 
 
-        when(stopPlaceRepository.findByKeyValue(anyString(), anyList()))
+        when(stopPlaceRepository.findByKeyValue(anyString(), anySet()))
                 .then(invocationOnMock -> {
                     System.out.println("Returning the first stop place");
                     return importedStopPlace1;
@@ -162,7 +163,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
@@ -200,7 +201,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
-        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Arrays.asList(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
+        when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
