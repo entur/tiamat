@@ -3,9 +3,12 @@ package org.rutebanken.tiamat.importers;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.netexmapping.NetexMapper;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,11 +45,13 @@ public class SiteFrameImporter {
 
         logger.info("Received site frame for import: {}", siteFrame);
 
+        final String originalIds = siteFrame.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).toString();
+
         Timer timer = new Timer(this.getClass().getName()+"-logger");
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated);
+                logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated, originalIds);
             }
         };
         timer.scheduleAtFixedRate(timerTask, 2000, 2000);
@@ -90,9 +95,10 @@ public class SiteFrameImporter {
         }
     }
 
-    private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated) {
+    private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
         long duration = System.currentTimeMillis() - startTime;
 
+        MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds);
         String stopPlacesPerSecond = "NA";
 
         if(duration >= 1000) {
