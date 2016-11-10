@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.netexmapping.NetexMapper;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class PublicationDeliveryResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryResource.class);
+    public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
 
     private SiteFrameImporter siteFrameImporter;
 
@@ -85,15 +87,24 @@ public class PublicationDeliveryResource {
         }
         logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
-                .stream()
-                .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
-                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
-                .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-        return new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
+        try {
+            org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+                    .stream()
+                    .filter(element -> element.getValue() instanceof SiteFrame)
+                    .map(element -> (SiteFrame) element.getValue())
+                    .peek(netexSiteFrame -> {
+                        MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
+                        logger.info("Publication delivery contains site frame created at ", netexSiteFrame.getCreated());
+                    })
+                    .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
+                    .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
+                    .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
+            return new PublicationDeliveryStructure()
+                    .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                            .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
+        } finally {
+            MDC.remove(IMPORT_CORRELATION_ID);
+        }
     }
 
     // Import publication delivery without using SiteFrameImporter
