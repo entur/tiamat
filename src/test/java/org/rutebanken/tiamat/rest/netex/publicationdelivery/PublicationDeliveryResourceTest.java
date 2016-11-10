@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -234,6 +235,7 @@ public class PublicationDeliveryResourceTest {
 
     private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = new SiteFrame();
+        siteFrame.setId(UUID.randomUUID().toString());
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace));
 

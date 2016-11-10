@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.netexmapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +40,16 @@ public class SiteFrameImporter {
         long startTime = System.currentTimeMillis();
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
+        final String correlationId;
+        if(siteFrame.getKeyValues().get(NetexIdMapper.ORIGINAL_ID_KEY) != null) {
+            correlationId = siteFrame.getKeyValues().get(NetexIdMapper.ORIGINAL_ID_KEY).getItems().toString();
+        } else {
+            correlationId = "";
+        }
 
-        logger.info("Received site frame for import: {}", siteFrame);
+        logger.info("Received site frame for import: {}", siteFrame); // Site frame id / correlation id will be logged
 
-        Timer timer = new Timer(this.getClass().getName()+"-logger");
+        Timer timer = new Timer(this.getClass().getName()+"-logger-"+correlationId);
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -57,13 +64,13 @@ public class SiteFrameImporter {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
-                        .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
+                        .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace, correlationId))
                         .map(stopPlace ->
-                                importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
+                                importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated, correlationId)
                         )
                         .collect(Collectors.toList());
 
-                logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
+                logger.info("Saved {} topographical places and {} stop places. {}", topographicPlacesCreated, stopPlacesCreated, correlationId);
 
                 topographicPlaceCreator.invalidateCache();
                 netexSiteFrame.withStopPlaces(
@@ -71,7 +78,7 @@ public class SiteFrameImporter {
                                 .withStopPlace(createdStopPlaces)
                 );
             } else {
-                logger.info("Site frame does not contain any stop places: ", siteFrame);
+                logger.info("Site frame does not contain any stop places: {}", correlationId);
             }
             return netexSiteFrame;
         } finally {
@@ -79,9 +86,9 @@ public class SiteFrameImporter {
         }
     }
 
-    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
+    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated, String correlationId) {
         try {
-            StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+            StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated, correlationId);
             stopPlacesCreated.incrementAndGet();
             return netexMapper.mapToNetexModel(importedStopPlace);
 

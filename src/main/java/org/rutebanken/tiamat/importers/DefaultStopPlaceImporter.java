@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -66,20 +65,20 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 //    @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
-                                     AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        Semaphore semaphore = getStripedSemaphore(newStopPlace);
+                                     AtomicInteger topographicPlacesCreatedCounter, final String correlationId) throws InterruptedException, ExecutionException {
+        Semaphore semaphore = getStripedSemaphore(newStopPlace, correlationId);
         semaphore.acquire();
 
         try {
-            logger.info("Import stop place {}", newStopPlace);
+            logger.info("Import stop place {}. {}", newStopPlace, correlationId);
 
-            final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
+            final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace, correlationId);
 
             final StopPlace stopPlace;
             if(foundStopPlace != null) {
-                stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
+                stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace, correlationId);
             } else {
-                stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
+                stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter, correlationId);
             }
             return stopPlace;
         }
@@ -89,7 +88,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
 
-    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter, final String correlationId) throws ExecutionException {
 
         resetLocationIds(newStopPlace);
 
@@ -98,23 +97,23 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
                     topographicPlacesCreatedCounter);
         } else {
-            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter, correlationId);
         }
 
         if (newStopPlace.getQuays() != null) {
-            logger.info("Importing quays for new stop place {}", newStopPlace);
+            logger.info("Importing quays for new stop place {}. {}", newStopPlace, correlationId);
             newStopPlace.getQuays().forEach(quay -> {
                 if (!quay.hasCoordinates()) {
-                    logger.warn("Quay does not have coordinates.", quay.getId());
+                    logger.warn("Quay does not have coordinates. {}", quay.getId(), correlationId);
                 }
                 resetLocationIds(quay);
-                logger.info("Saving quay {}", quay);
+                logger.info("Saving quay {}. {}", quay, correlationId);
                 quayRepository.save(quay);
-                logger.debug("Saved quay. Got id {} back", quay.getId());
+                logger.debug("Saved quay. Got id {} back. {}", quay.getId(), correlationId);
             });
         }
 
-        return saveAndUpdateCache(newStopPlace);
+        return saveAndUpdateCache(newStopPlace, correlationId);
     }
 
     private void resetLocationIds(Zone_VersionStructure zone) {
@@ -127,11 +126,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
     }
 
-    private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
+    private StopPlace saveAndUpdateCache(StopPlace stopPlace, final String correlationId) {
         stopPlaceRepository.save(stopPlace);
-        stopPlaceFromOriginalIdFinder.update(stopPlace);
-        nearbyStopPlaceFinder.update(stopPlace);
-        logger.info("Saved stop place {}", stopPlace);
+        stopPlaceFromOriginalIdFinder.update(stopPlace, correlationId);
+        nearbyStopPlaceFinder.update(stopPlace, correlationId);
+        logger.info("Saved stop place {}. {}", stopPlace, correlationId);
         return stopPlace;
     }
 
@@ -141,38 +140,37 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
     }
 
-    public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
-        logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
+    public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace, final String correlationId) {
+        logger.info("Found existing stop place {} from incoming {}. {}", foundStopPlace, newStopPlace, correlationId);
 
-        boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
+        boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace, correlationId);
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
         if(originalIdChanged || quaysChanged) {
             logger.info("Updated existing stop place {}. ", foundStopPlace);
-            foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
-            saveAndUpdateCache(foundStopPlace);
+            foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}. {}", foundStopPlace.getId(), q.getId(), q.getName(), correlationId));
+            saveAndUpdateCache(foundStopPlace, correlationId);
         }
         return foundStopPlace;
     }
 
-    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
+    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter, final String correlationId) {
         try {
             countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
         } catch (IOException|InterruptedException e) {
-            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
+            logger.warn("Could not lookup county and municipality for stop place with id {}. {}", stopPlace.getId(), correlationId);
         }
     }
 
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
-    public boolean addAndSaveNewQuays(StopPlace newStopPlace, StopPlace foundStopPlace) {
+    public boolean addAndSaveNewQuays(StopPlace newStopPlace, StopPlace foundStopPlace, final String correlationId) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
         AtomicInteger createdQuays = new AtomicInteger();
 
-
-        logger.debug("About to compare quays for {}", foundStopPlace.getId());
+        logger.debug("About to compare quays for {}. {}", foundStopPlace.getId(), correlationId);
 
         if (foundStopPlace.getQuays() == null) {
             foundStopPlace.setQuays(new HashSet<>());
@@ -183,34 +181,34 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         if (foundStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}",  foundStopPlace, newStopPlace, newStopPlace.getName());
+            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}. {}",  foundStopPlace, newStopPlace, newStopPlace.getName(), correlationId);
             for(Quay newQuay : newStopPlace.getQuays()) {
                 saveNewQuay(newQuay, foundStopPlace, createdQuays);
             }
         } else if (!newStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID)", foundStopPlace, newStopPlace);
+            logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID). {}", foundStopPlace, newStopPlace, correlationId);
 
             Set<Quay> quaysToAdd = new HashSet<>();
             for(Quay newQuay : newStopPlace.getQuays()) {
-               Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
+               Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd, correlationId);
                 if(optionalExistingQuay.isPresent()) {
                     Quay existingQuay = optionalExistingQuay.get();
-                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key if required {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
+                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key if required {}. {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY, correlationId);
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
                     if(changed) {
-                        logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
+                        logger.info("Updated quay {}, {}. {}", existingQuay.getId(), existingQuay, correlationId);
                         updatedQuays.incrementAndGet();
                         quayRepository.save(existingQuay);
                     }
                 } else {
-                    logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
+                    logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it. {}", newQuay, foundStopPlace, correlationId);
                     saveNewQuay(newQuay, foundStopPlace, createdQuays);
                 }
             }
         }
 
-        logger.debug("Created {} quays and updated {} quays for stop place {}", createdQuays.get(), updatedQuays.get(), foundStopPlace);
+        logger.debug("Created {} quays and updated {} quays for stop place {}. {}", createdQuays.get(), updatedQuays.get(), foundStopPlace, correlationId);
         return createdQuays.get() > 0 ;
     }
 
@@ -225,14 +223,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     /**
      * Find first matching quay that has the same coordinates as the new Quay.
      */
-    public Optional<Quay> findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
+    public Optional<Quay> findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd, final String correlationId) {
         List<Quay> concatenatedQuays = new ArrayList<>();
         concatenatedQuays.addAll(existingQuays);
         concatenatedQuays.addAll(quaysToAdd);
 
         for(Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
             boolean hasSameCoordinates = hasSameCoordinates(alreadyAddedOrExistingQuay, newQuay);
-            logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, hasSameCoordinates);
+            logger.info("Does quay {} and {} have the same coordinates? {}. {}", alreadyAddedOrExistingQuay, newQuay, hasSameCoordinates, correlationId);
             if(hasSameCoordinates) {
                 return Optional.of(alreadyAddedOrExistingQuay);
             }
@@ -248,23 +246,23 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 .distance(quay2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
     }
 
-    private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
-        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+    private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace, String correlationId) {
+        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace, correlationId);
         if (existingStopPlace != null) {
             return existingStopPlace;
         }
 
         if (newStopPlace.getName() != null) {
-            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace, correlationId);
             if (nearbyStopPlace != null) {
-                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                logger.debug("Found nearby stop place with name: {}, id: {}. {}", nearbyStopPlace.getName(), nearbyStopPlace.getId(), correlationId);
                 return nearbyStopPlace;
             }
         }
         return null;
     }
 
-    private Semaphore getStripedSemaphore(StopPlace stopPlace) {
+    private Semaphore getStripedSemaphore(StopPlace stopPlace, String correlationId) {
         final String semaphoreKey;
         if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null) {
             LocationStructure location = stopPlace.getCentroid().getLocation();
@@ -279,7 +277,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         } else {
             semaphoreKey = "all";
         }
-        logger.info("Using semaphore key '{}' for stop place {}", semaphoreKey, stopPlace);
+        logger.info("Using semaphore key '{}' for stop place {}. {}", semaphoreKey, stopPlace, correlationId);
         return stripedSemaphores.get(semaphoreKey);
     }
 

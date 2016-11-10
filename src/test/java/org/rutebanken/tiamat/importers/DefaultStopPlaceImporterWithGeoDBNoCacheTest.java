@@ -3,10 +3,8 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.LocationStructure;
@@ -25,9 +23,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @ActiveProfiles("geodb")
 public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
+
+    private final String correlationId = "";
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -97,7 +94,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
                 stopPlace.getQuays().add(quay);
                 System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
                 try {
-                    StopPlace response = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+                    StopPlace response = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger(), correlationId);
                     if (response != null) {
                         imports.incrementAndGet();
 
@@ -110,7 +107,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
         executeNTimes(sameStopImportedCount, executorService, () -> {
             try {
-                StopPlace response = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger());
+                StopPlace response = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger(), correlationId);
                 if(response != null) {
                     imports.incrementAndGet();
                 }
@@ -123,7 +120,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.MINUTES);
         assertThat(imports.get()).isEqualTo(sameStopImportedCount + (eachQuayImportedCount*uniqueQuays));
-        StopPlace importedStopPlace = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger(), correlationId);
         assertThat(importedStopPlace.getQuays()).hasSize(uniqueQuays)
                 .as("Regardless of how many times similar stop with two different quays as imported. We must end up with a stop place with two quays.");
     }

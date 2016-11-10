@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import org.rutebanken.tiamat.model.LocationStructure;
 import org.rutebanken.tiamat.model.SimplePoint;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -42,15 +41,15 @@ public class NearbyStopPlaceFinder {
 
     }
 
-    public StopPlace find(StopPlace stopPlace) {
+    public StopPlace find(StopPlace stopPlace, final String correlationId) {
 
         if(!stopPlace.hasCoordinates()) {
             return null;
         }
 
         try {
-            Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
-                Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
+            Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace, correlationId), () -> {
+                Envelope boundingBox = createBoundingBox(stopPlace.getCentroid(), correlationId);
                 return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue()));
             });
             if(stopPlaceId.isPresent()) {
@@ -58,14 +57,14 @@ public class NearbyStopPlaceFinder {
             }
             return null;
         } catch (ExecutionException e) {
-            logger.warn("Caught exception while finding stop place by key and value.", e);
+            logger.warn("Caught exception while finding stop place by key and value. "+correlationId, e);
             throw new RuntimeException(e);
         }
     }
 
-    public void update(StopPlace savedStopPlace) {
+    public void update(StopPlace savedStopPlace, final String correlationId) {
         if(savedStopPlace.hasCoordinates()) {
-            nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getId()));
+            nearbyStopCache.put(createKey(savedStopPlace, correlationId), Optional.ofNullable(savedStopPlace.getId()));
         }
     }
 
@@ -73,16 +72,16 @@ public class NearbyStopPlaceFinder {
         return stopPlace.getName() + "-" + envelope.toString();
     }
 
-    public final String createKey(StopPlace stopPlace) {
-        return createKey(stopPlace, createBoundingBox(stopPlace.getCentroid()));
+    public final String createKey(StopPlace stopPlace, final String correlationId) {
+        return createKey(stopPlace, createBoundingBox(stopPlace.getCentroid(), correlationId));
     }
 
-    public Envelope createBoundingBox(SimplePoint simplePoint) {
+    public Envelope createBoundingBox(SimplePoint simplePoint, final String correlationId) {
 
         Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(BOUNDING_BOX_BUFFER);
 
         Envelope envelope = buffer.getEnvelopeInternal();
-        logger.trace("Created envelope {}", envelope.toString());
+        logger.trace("Created envelope {}. {}", envelope.toString(), correlationId);
 
         return envelope;
     }

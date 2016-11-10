@@ -15,6 +15,7 @@ import static org.mockito.Mockito.*;
 import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class StopPlaceFromOriginalIdFinderTest {
+    private final String correlationId = "";
 
     @Test
     public void findShouldSearchForAllIdsInKeyVal() throws Exception {
@@ -33,7 +34,7 @@ public class StopPlaceFromOriginalIdFinderTest {
                 .findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getKeyValues().get(ORIGINAL_ID_KEY).getItems()))
                 .thenReturn(stopPlace.getId());
 
-        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace, correlationId);
         assertThat(actual).isNotNull();
     }
 
@@ -46,7 +47,7 @@ public class StopPlaceFromOriginalIdFinderTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setId(101L);
 
-        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace, correlationId);
 
         verify(stopPlaceRepository, never()).findByKeyValue(anyString(), anyList());
         verify(stopPlaceRepository, never()).findOne(any());

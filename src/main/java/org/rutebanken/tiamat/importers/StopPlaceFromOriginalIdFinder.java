@@ -9,10 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -42,24 +40,24 @@ public class StopPlaceFromOriginalIdFinder {
                 .build();
     }
 
-    public StopPlace find(StopPlace stopPlace) {
+    public StopPlace find(StopPlace stopPlace, final String correlationId) {
 
         List<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);
 
         if(originalIds.isEmpty()) return null;
 
-        StopPlace existingStopPlace = findByKeyValue(originalIds);
+        StopPlace existingStopPlace = findByKeyValue(originalIds, correlationId);
 
         if (existingStopPlace != null) {
-            logger.debug("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
+            logger.debug("Found stop place {} from original ID key {}. {}", existingStopPlace.getId(), stopPlace.getId(), correlationId);
             return existingStopPlace;
         }
         return null;
     }
 
-    public void update(StopPlace stopPlace) {
+    public void update(StopPlace stopPlace, final String correlationId) {
         if(stopPlace.getId() == null) {
-            logger.warn("Attempt to update cache when stop place does not have any ID! stop place: {}", stopPlace);
+            logger.warn("Attempt to update cache when stop place does not have any ID! stop place: {}. {}", stopPlace, correlationId);
             return;
         }
         for(String originalId : stopPlace.getOrCreateValues(ORIGINAL_ID_KEY)) {
@@ -67,12 +65,12 @@ public class StopPlaceFromOriginalIdFinder {
         }
     }
 
-    private StopPlace findByKeyValue(List<String> originalIds) {
+    private StopPlace findByKeyValue(List<String> originalIds, final String correlationId) {
         for(String originalId : originalIds) {
             String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
             Optional<Long> matchingStopPlaceId = keyValueCache.getIfPresent(cacheKey);
             if(matchingStopPlaceId != null && matchingStopPlaceId.isPresent()) {
-                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceId.get());
+                logger.debug("Cache match. Key {}, stop place id: {}. {}", cacheKey, matchingStopPlaceId.get(), correlationId);
                 return stopPlaceRepository.findOne(matchingStopPlaceId.get());
             }
         }
