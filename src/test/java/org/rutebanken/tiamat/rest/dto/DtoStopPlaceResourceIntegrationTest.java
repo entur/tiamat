@@ -360,7 +360,9 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void createStopPlaceWithNewQuayShouldExposeQuayIds() {
         StopPlaceDto stopPlaceDto = new StopPlaceDto();
         stopPlaceDto.quays = new ArrayList<>(1);
-        stopPlaceDto.quays.add(new QuayDto());
+        QuayDto quayDto = new QuayDto();
+        quayDto.name = "quay 1";
+        stopPlaceDto.quays.add(quayDto);
 
 
         // Create
@@ -371,7 +373,9 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .as(StopPlaceDto.class);
 
         // Add new quay
-        stopPlaceDto.quays.add(new QuayDto());
+        QuayDto anotherQuayDto = new QuayDto();
+        anotherQuayDto.name = "quay 2";
+        stopPlaceDto.quays.add(anotherQuayDto);
 
         // Update
         stopPlaceDto = given()
@@ -382,7 +386,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
         assertThat(stopPlaceDto.quays)
                 .hasSize(2)
-                .extracting(quayDto -> quayDto.id)
+                .extracting(actualQuayDto -> actualQuayDto.id)
                     .doesNotContain("null")
                     .isNotNull()
                     .isNotEmpty();
