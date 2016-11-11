@@ -247,7 +247,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     public boolean areClose(Quay quay1, Quay quay2) {
-        if (!quay1.hasCoordinates() && !quay2.hasCoordinates()) {
+        if (!quay1.hasCoordinates() || !quay2.hasCoordinates()) {
             return false;
         }
 
