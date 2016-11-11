@@ -322,7 +322,7 @@ public class StopPlaceTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        stopPlace.getKeyValues().get("ORIGINAL_ID").getItems().remove(1);
+        stopPlace.getKeyValues().get("ORIGINAL_ID").getItems().remove("TEL:StopArea:666");
 
         stopPlaceRepository.save(stopPlace);
 
