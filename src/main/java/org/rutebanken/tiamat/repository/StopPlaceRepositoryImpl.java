@@ -5,6 +5,7 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.postgresql.core.NativeQuery;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
@@ -17,10 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
+import java.math.BigInteger;
 import java.util.*;
 
 @Repository
@@ -112,21 +111,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public Long findByKeyValue(String key, Set<String> values) {
-        TypedQuery<Long> query = entityManager
-                .createQuery("SELECT s.id FROM StopPlace s " +
-                                "JOIN s.keyValues spkv " +
-                                "ON KEY(spkv) = :key " +
-                                "WHERE :values IN elements(spkv.items)",
-                        Long.class);
+
+        Query query = entityManager.createNativeQuery("SELECT stop_place_id " +
+                                                        "FROM stop_place_key_values spkv " +
+                                                            "INNER JOIN value_items v " +
+                                                            "ON spkv.key_values_id = v.value_id " +
+                                                        "WHERE  spkv.key_values_key = :key " +
+                                                            "AND v.items IN ( :values ) ");
+
         query.setParameter("key", key);
         query.setParameter("values", values);
 
         try {
-            List<Long> results = query.getResultList();
+            List<BigInteger> results = query.getResultList();
             if(results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0);
+                return results.get(0).longValue();
             }
         } catch (NoResultException noResultException) {
             return null;
