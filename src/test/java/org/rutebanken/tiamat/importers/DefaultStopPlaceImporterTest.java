@@ -214,14 +214,25 @@ public class DefaultStopPlaceImporterTest {
     }
 
     @Test
-    public void haveSameCoordinates() {
+    public void quaysAreClose() {
         Quay quay1 = new Quay();
         quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
         Quay quay2 = new Quay();
         quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
-        assertThat(stopPlaceImporter.hasSameCoordinates(quay1, quay2)).isTrue();
+        assertThat(stopPlaceImporter.areClose(quay1, quay2)).isTrue();
+    }
+
+    @Test
+    public void quaysAreCloseWithSimilarCoordinates() {
+        Quay quay1 = new Quay();
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933300, 10.775979)))));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
+
+        assertThat(stopPlaceImporter.areClose(quay1, quay2)).isTrue();
     }
 
     @Test
@@ -232,8 +243,29 @@ public class DefaultStopPlaceImporterTest {
         Quay quay2 = new Quay();
         quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
 
-        assertThat(stopPlaceImporter.hasSameCoordinates(quay1, quay2)).isFalse();
+        assertThat(stopPlaceImporter.areClose(quay1, quay2)).isFalse();
     }
+
+    @Test
+    public void notCloseEnoughIfAbout10MetersBetween() {
+        Quay quay1 = new Quay(new MultilingualString("One side of the road"));
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.858690, 10.493860)))));
+
+        Quay quay2 = new Quay(new MultilingualString("Other side of the road."));
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.858684, 10.493682)))));
+        assertThat(stopPlaceImporter.areClose(quay1, quay2)).isFalse();
+    }
+
+    @Test
+    public void closeEnoughIfAbout8MetersBetween() {
+        Quay quay1 = new Quay();
+        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.858690, 10.493860)))));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.858616, 10.493858)))));
+        assertThat(stopPlaceImporter.areClose(quay1, quay2)).isTrue();
+    }
+
 
     @Test
     public void findQuayIfAlreadyExisting() {

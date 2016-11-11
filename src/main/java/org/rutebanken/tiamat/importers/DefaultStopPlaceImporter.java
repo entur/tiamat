@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
+import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -24,8 +24,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Qualifier("defaultStopPlaceImporter")
 public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
-
     private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
+
+    /**
+     * The max distance for checking if two quays are nearby each other.
+     * http://gis.stackexchange.com/questions/28799/what-is-the-unit-of-measurement-for-buffer-calculation
+     * https://en.wikipedia.org/wiki/Decimal_degrees
+     */
+    public static final double DISTANCE = 0.0001;
 
     private TopographicPlaceCreator topographicPlaceCreator;
 
@@ -231,7 +237,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         concatenatedQuays.addAll(quaysToAdd);
 
         for(Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
-            boolean hasSameCoordinates = hasSameCoordinates(alreadyAddedOrExistingQuay, newQuay);
+            boolean hasSameCoordinates = areClose(alreadyAddedOrExistingQuay, newQuay);
             logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, hasSameCoordinates);
             if(hasSameCoordinates) {
                 return Optional.of(alreadyAddedOrExistingQuay);
@@ -240,12 +246,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return Optional.empty();
     }
 
-    public boolean hasSameCoordinates(Quay quay1, Quay quay2) {
-        if (quay1.getCentroid() == null || quay2.getCentroid() == null) {
+    public boolean areClose(Quay quay1, Quay quay2) {
+        if (!quay1.hasCoordinates() && !quay2.hasCoordinates()) {
             return false;
         }
-        return (quay1.getCentroid().getLocation().getGeometryPoint()
-                .distance(quay2.getCentroid().getLocation().getGeometryPoint()) == 0.0);
+
+        Geometry buffer = quay1.getCentroid().getLocation().getGeometryPoint().buffer(DISTANCE);
+        boolean intersects = buffer.intersects(quay2.getCentroid().getLocation().getGeometryPoint());
+        return intersects;
     }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
