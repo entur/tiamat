@@ -136,6 +136,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("id", id)
                 .add("name", name)
                 .add("keyValues", getKeyValues())
+                .add("centroid", centroid)
                 .toString();
     }
 }

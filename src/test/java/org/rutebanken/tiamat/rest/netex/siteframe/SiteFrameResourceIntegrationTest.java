@@ -89,13 +89,13 @@ public class SiteFrameResourceIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         String firstStopPlaceName = "first stop place name";
         stopPlace.setName(new MultilingualString(firstStopPlaceName, "en", ""));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
 
 
         Quay quay = new Quay();
         quay.setName(new MultilingualString("quay", "en", ""));
-        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(6, 70)))));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(6, 70)));
 
         quayRepository.save(quay);
         stopPlace.getQuays().add(quay);

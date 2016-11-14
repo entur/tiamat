@@ -12,7 +12,7 @@ public interface StopPlaceRepository extends PagingAndSortingRepository<StopPlac
 
     Page<StopPlace> findAllByOrderByChangedDesc(Pageable pageable);
 
-    StopPlace findByNameValueAndCentroidLocationGeometryPoint(String name, Point geometryPoint);
+    StopPlace findByNameValueAndCentroid(String name, Point geometryPoint);
 
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 

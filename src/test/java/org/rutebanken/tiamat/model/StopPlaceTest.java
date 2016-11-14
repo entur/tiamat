@@ -68,19 +68,6 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getEquipmentPlaces().get(0).getId()).isEqualTo(equipmentPlace.getId());
     }
 
-    @Test
-    public void persistStopPlaceWithCentroid() {
-
-        StopPlace stopPlace = new StopPlace();
-        SimplePoint centroid = new SimplePoint();
-        stopPlace.setCentroid(centroid);
-        stopPlaceRepository.save(stopPlace);
-
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
-
-        assertThat(actualStopPlace.getCentroid()).isNotNull();
-    }
-
     @Ignore // level is transient
     @Test
     public void persistStopPlaceWithLevels() {

@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.swing.plaf.multi.MultiButtonUI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -197,11 +196,8 @@ public class StopPlaceRepositoryImplTest {
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("name", "", ""));
-        SimplePoint centroid = new SimplePoint();
 
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
@@ -216,11 +212,7 @@ public class StopPlaceRepositoryImplTest {
     public void noNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("stop place", "", ""));
-        SimplePoint centroid = new SimplePoint();
-
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
@@ -233,10 +225,7 @@ public class StopPlaceRepositoryImplTest {
     public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new MultilingualString("This name is different", "", ""));
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
         // Stop place coordinates within envelope
@@ -249,10 +238,10 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void multipleNearbyStopPlaces() throws Exception {
         StopPlace stopPlace = new StopPlace(new MultilingualString("name"));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
 
         StopPlace stopPlace2 = new StopPlace(new MultilingualString("name"));
-        stopPlace2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)))));
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)));
 
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.save(stopPlace2);
@@ -515,13 +504,9 @@ public class StopPlaceRepositoryImplTest {
         return stopPlace;
     }
 
-
-
     private StopPlace createStopPlace(double latitude, double longitude) {
         StopPlace stopPlace = new StopPlace();
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         return stopPlace;
     }
 }

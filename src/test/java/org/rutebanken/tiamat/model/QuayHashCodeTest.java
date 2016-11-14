@@ -19,8 +19,8 @@ public class QuayHashCodeTest {
         Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
         Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
 
-        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
-        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         assertThat(quay1.hashCode()).isEqualTo(quay2.hashCode());
     }
 }

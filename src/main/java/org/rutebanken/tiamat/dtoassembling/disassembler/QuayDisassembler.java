@@ -17,12 +17,12 @@ public class QuayDisassembler {
 
     private QuayRepository quayRepository;
 
-    private SimplePointDisassembler simplePointDisassembler;
+    private PointDisassembler pointDisassembler;
 
     @Autowired
-    public QuayDisassembler(QuayRepository quayRepository, SimplePointDisassembler simplePointDisassembler) {
+    public QuayDisassembler(QuayRepository quayRepository, PointDisassembler pointDisassembler) {
         this.quayRepository = quayRepository;
-        this.simplePointDisassembler = simplePointDisassembler;
+        this.pointDisassembler = pointDisassembler;
     }
 
     public Quay disassemble(QuayDto quayDto) {
@@ -48,7 +48,7 @@ public class QuayDisassembler {
 
         quay.setName(new MultilingualString(quayDto.name, "no", ""));
         quay.setDescription(new MultilingualString(quayDto.description, "no", ""));
-        quay.setCentroid(simplePointDisassembler.disassemble(quayDto.centroid));
+        quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
         if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {
             logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDto.quayType);

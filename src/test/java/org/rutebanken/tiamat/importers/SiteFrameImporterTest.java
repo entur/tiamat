@@ -66,9 +66,7 @@ public class SiteFrameImporterTest {
                 double longitude = 39.61441 * Math.abs(random.nextDouble());
                 double latitude = -144.22765 * Math.abs(random.nextDouble());
 
-                SimplePoint centroid = new SimplePoint();
-                centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
-                stopPlace.setCentroid(centroid);
+                stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
 
                 siteFrame.getStopPlaces().getStopPlace().add(stopPlace);
             }

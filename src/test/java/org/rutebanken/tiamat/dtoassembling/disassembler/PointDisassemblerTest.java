@@ -1,15 +1,15 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
 import org.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.SimplePoint;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class SimplePointDisassemblerTest {
+public class PointDisassemblerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
@@ -20,11 +20,10 @@ public class SimplePointDisassemblerTest {
         simplePointDto.location.latitude = 10.123123;
         simplePointDto.location.longitude = 59.123123;
 
-        SimplePoint simplePoint = new SimplePointDisassembler(geometryFactory).disassemble(simplePointDto);
+        Point point = new PointDisassembler(geometryFactory).disassemble(simplePointDto);
 
-        assertThat(simplePoint).isNotNull();
-        assertThat(simplePoint.getLocation()).isNotNull();
-        assertThat(simplePoint.getLocation().getGeometryPoint().getX()).isEqualTo(simplePointDto.location.longitude);
-        assertThat(simplePoint.getLocation().getGeometryPoint().getY()).isEqualTo(simplePointDto.location.latitude);
+        assertThat(point).isNotNull();
+        assertThat(point.getX()).isEqualTo(simplePointDto.location.longitude);
+        assertThat(point.getY()).isEqualTo(simplePointDto.location.latitude);
     }
 }

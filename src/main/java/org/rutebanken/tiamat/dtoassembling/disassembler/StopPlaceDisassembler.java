@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.SimplePoint;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -25,7 +24,7 @@ public class StopPlaceDisassembler {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceDisassembler.class);
 
     @Autowired
-    private SimplePointDisassembler simplePointDisassembler;
+    private PointDisassembler pointDisassembler;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -53,11 +52,7 @@ public class StopPlaceDisassembler {
                 .orElse(null));
 
         if(simpleStopPlaceDto.centroid != null) {
-            if (destination.getCentroid() == null) {
-                destination.setCentroid(new SimplePoint());
-            }
-
-            destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDto.centroid));
+            destination.setCentroid(pointDisassembler.disassemble(simpleStopPlaceDto.centroid));
         }
 
         destination.setAllAreasWheelchairAccessible(simpleStopPlaceDto.allAreasWheelchairAccessible);

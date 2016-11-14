@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 
 public class QuayAssemblerTest {
 
-    private QuayAssembler quayAssembler = new QuayAssembler(mock(SimplePointAssembler.class));
+    private QuayAssembler quayAssembler = new QuayAssembler(mock(PointAssembler.class));
 
     @Test
     public void assembleQuayWithQuayType() {

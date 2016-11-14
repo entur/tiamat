@@ -58,10 +58,6 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualString description;
 
-    @XmlElement(name = "Location")
-    @Transient
-    protected LocationStructure location;
-
     @XmlElement(name = "ReferencePointRef")
     @OneToOne(cascade = CascadeType.ALL)
     protected PointRefStructure referencePointRef;
@@ -222,30 +218,6 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
      */
     public void setDescription(MultilingualString value) {
         this.description = value;
-    }
-
-    /**
-     * Gets the value of the location property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public LocationStructure getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets the value of the location property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public void setLocation(LocationStructure value) {
-        this.location = value;
     }
 
     /**

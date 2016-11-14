@@ -73,9 +73,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String queryString = "SELECT s FROM StopPlace s " +
-                "LEFT OUTER JOIN s.centroid sp " +
-                "LEFT OUTER JOIN sp.location l "+
-                "WHERE within(l.geometryPoint, :filter) = true " +
+                "WHERE within(s.centroid, :filter) = true " +
                 "AND (:ignoreStopPlaceId IS NULL OR s.id != :ignoreStopPlaceId)";
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
@@ -95,9 +93,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
-                                "LEFT OUTER JOIN s.centroid sp " +
-                                "LEFT OUTER JOIN sp.location l " +
-                             "WHERE within(l.geometryPoint, :filter) = true " +
+                             "WHERE within(s.centroid, :filter) = true " +
                             "AND s.name.value = :name", Long.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);

@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
@@ -69,7 +70,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
     }
 
-//    @Transactional
+    //    @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
@@ -82,22 +83,19 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
             final StopPlace stopPlace;
-            if(foundStopPlace != null) {
+            if (foundStopPlace != null) {
                 stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
             } else {
                 stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
             }
             return stopPlace;
-        }
-        finally {
+        } finally {
             semaphore.release();
         }
     }
 
 
     public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
-
-        resetLocationIds(newStopPlace);
 
         if (hasTopographicPlaces(siteFrame)) {
             topographicPlaceCreator.setTopographicReference(newStopPlace,
@@ -113,7 +111,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 if (!quay.hasCoordinates()) {
                     logger.warn("Quay does not have coordinates.", quay.getId());
                 }
-                resetLocationIds(quay);
                 logger.info("Saving quay {}", quay);
                 quayRepository.save(quay);
                 logger.debug("Saved quay. Got id {} back", quay.getId());
@@ -121,16 +118,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         return saveAndUpdateCache(newStopPlace);
-    }
-
-    private void resetLocationIds(Zone_VersionStructure zone) {
-        if(zone.getCentroid() != null) {
-           SimplePoint centroid = zone.getCentroid();
-           centroid.setId(null);
-            if(centroid.getLocation() != null) {
-                centroid.getLocation().setId(0);
-            }
-        }
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
@@ -153,7 +140,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean quaysChanged = addAndSaveNewQuays(newStopPlace, foundStopPlace);
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
 
-        if(originalIdChanged || quaysChanged) {
+        if (originalIdChanged || quaysChanged) {
             logger.info("Updated existing stop place {}. ", foundStopPlace);
             foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
             saveAndUpdateCache(foundStopPlace);
@@ -164,7 +151,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
         try {
             countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
-        } catch (IOException|InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
         }
     }
@@ -184,27 +171,27 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             foundStopPlace.setQuays(new HashSet<>());
         }
 
-        if(newStopPlace.getQuays() == null) {
+        if (newStopPlace.getQuays() == null) {
             foundStopPlace.setQuays(new HashSet<>());
         }
 
         if (foundStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}",  foundStopPlace, newStopPlace, newStopPlace.getName());
-            for(Quay newQuay : newStopPlace.getQuays()) {
+            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}", foundStopPlace, newStopPlace, newStopPlace.getName());
+            for (Quay newQuay : newStopPlace.getQuays()) {
                 saveNewQuay(newQuay, foundStopPlace, createdQuays);
             }
         } else if (!newStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
             logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID)", foundStopPlace, newStopPlace);
 
             Set<Quay> quaysToAdd = new HashSet<>();
-            for(Quay newQuay : newStopPlace.getQuays()) {
-               Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
-                if(optionalExistingQuay.isPresent()) {
+            for (Quay newQuay : newStopPlace.getQuays()) {
+                Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
+                if (optionalExistingQuay.isPresent()) {
                     Quay existingQuay = optionalExistingQuay.get();
                     logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key if required {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
                     boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
 
-                    if(changed) {
+                    if (changed) {
                         logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
                         updatedQuays.incrementAndGet();
                         quayRepository.save(existingQuay);
@@ -217,12 +204,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         logger.debug("Created {} quays and updated {} quays for stop place {}", createdQuays.get(), updatedQuays.get(), foundStopPlace);
-        return createdQuays.get() > 0 ;
+        return createdQuays.get() > 0;
     }
 
     private void saveNewQuay(Quay newQuay, StopPlace existingStopPlace, AtomicInteger createdQuays) {
         newQuay.setId(null);
-        resetLocationIds(newQuay);
         existingStopPlace.getQuays().add(newQuay);
         quayRepository.save(newQuay);
         createdQuays.incrementAndGet();
@@ -236,10 +222,10 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         concatenatedQuays.addAll(existingQuays);
         concatenatedQuays.addAll(quaysToAdd);
 
-        for(Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
-            boolean hasSameCoordinates = areClose(alreadyAddedOrExistingQuay, newQuay);
-            logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, hasSameCoordinates);
-            if(hasSameCoordinates) {
+        for (Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
+            boolean areClose = areClose(alreadyAddedOrExistingQuay, newQuay);
+            logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, areClose);
+            if (areClose) {
                 return Optional.of(alreadyAddedOrExistingQuay);
             }
         }
@@ -251,8 +237,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return false;
         }
 
-        Geometry buffer = quay1.getCentroid().getLocation().getGeometryPoint().buffer(DISTANCE);
-        boolean intersects = buffer.intersects(quay2.getCentroid().getLocation().getGeometryPoint());
+        Geometry buffer = quay1.getCentroid().buffer(DISTANCE);
+        boolean intersects = buffer.intersects(quay2.getCentroid());
         return intersects;
     }
 
@@ -274,16 +260,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private Semaphore getStripedSemaphore(StopPlace stopPlace) {
         final String semaphoreKey;
-        if (stopPlace.getCentroid() != null && stopPlace.getCentroid().getLocation() != null) {
-            LocationStructure location = stopPlace.getCentroid().getLocation();
+        if (stopPlace.getCentroid() != null) {
+            Point location = stopPlace.getCentroid();
             semaphoreKey = locationSemaphore(location);
-        } else
-        if (stopPlace.getId() != null) {
-            semaphoreKey = "new-stop-place-"+stopPlace.getId();
+        } else if (stopPlace.getId() != null) {
+            semaphoreKey = "new-stop-place-" + stopPlace.getId();
         } else if (stopPlace.getName() != null
                 && stopPlace.getName().getValue() != null
-                && !stopPlace.getName().getValue().isEmpty()){
-            semaphoreKey = "name-"+stopPlace.getName().getValue();
+                && !stopPlace.getName().getValue().isEmpty()) {
+            semaphoreKey = "name-" + stopPlace.getName().getValue();
         } else {
             semaphoreKey = "all";
         }
@@ -291,8 +276,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return stripedSemaphores.get(semaphoreKey);
     }
 
-    private String locationSemaphore(LocationStructure location) {
-        return "location-"+ format.format(location.getLongitude())+"-"+ format.format(location.getLatitude());
+    private String locationSemaphore(Point point) {
+        return "location-" + format.format(point.getX()) + "-" + format.format(point.getY());
     }
 
 

@@ -4,8 +4,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
-import org.rutebanken.tiamat.model.LocationStructure;
-import org.rutebanken.tiamat.model.SimplePoint;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,10 +15,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
-public class SimplePointAssemblerTest {
+public class LocationStructureAssemblerTest {
 
     @Autowired
-    private SimplePointAssembler simplePointAssembler;
+    private PointAssembler pointAssembler;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -29,11 +27,7 @@ public class SimplePointAssemblerTest {
     public void assembleLongitude() throws Exception {
         double longitude = 10.75885366;
 
-        SimplePoint simplePoint = new SimplePoint();
-
-        simplePoint.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, 0.0))));
-
-        SimplePointDto simplePointDto = simplePointAssembler.assemble(simplePoint);
+        SimplePointDto simplePointDto = pointAssembler.assemble(geometryFactory.createPoint(new Coordinate(longitude, 0.0)));
 
         assertThat(simplePointDto.location).isNotNull();
         assertThat(simplePointDto.location.longitude).isEqualTo(longitude);
@@ -41,7 +35,7 @@ public class SimplePointAssemblerTest {
 
     @Test
     public void assembleSimplePointIsNull() {
-        AssertionsForClassTypes.assertThat(simplePointAssembler.assemble(null)).isNull();
+        AssertionsForClassTypes.assertThat(pointAssembler.assemble(null)).isNull();
     }
 
 }

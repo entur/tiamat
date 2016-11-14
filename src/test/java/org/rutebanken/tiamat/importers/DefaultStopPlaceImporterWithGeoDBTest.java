@@ -2,9 +2,8 @@ package org.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.assertj.core.api.AssertionsForClassTypes;
+import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -18,14 +17,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -129,45 +123,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
     }
 
-    /**
-     * Reproduced an issue with detached entity passed to persist for Location.
-     */
-    @Test
-    public void detatchedEntityPassedToPersist() throws ExecutionException, InterruptedException {
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)))));
-        stopPlace.getCentroid().getLocation().setId(10L);
-        stopPlace.setName(new MultilingualString("stop", "no", ""));
-
-
-        Quay quay = new Quay();
-        quay.setName(new MultilingualString("quay", "", ""));
-        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60.000, 10.78)))));
-        quay.getCentroid().getLocation().setId(20L);
-
-        stopPlace.getQuays().add(quay);
-
-        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
-
-        assertThat(importResult).isNotNull();
-    }
-
-    /**
-     * Reproduced an issue with detached entity passed to persist when adding new quay to stop place.
-     */
-    @Test
-    public void detatchedEntityPassedToPersistAddingQuay() throws ExecutionException, InterruptedException {
-        StopPlace stopPlace = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
-        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
-        StopPlace stopPlace2 = createStopPlaceWithQuay("whatever", 59.933307, 10.775973, 0L, 0L);
-        Quay quay = stopPlace2.getQuays().iterator().next();
-        quay.getCentroid().getLocation().setGeometryPoint(geometryFactory.createPoint(new Coordinate(60,10)));
-        quay.getCentroid().getLocation().setId(10);
-        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(stopPlace2, new SiteFrame(), new AtomicInteger());
-        assertThat(importResult).isNotNull();
-    }
-
     @Test
     public void reproduceIssueWithCollectionNotAssosiatedWithAnySession() throws ExecutionException, InterruptedException {
         String name = "Skillebekkgata";
@@ -218,7 +173,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         for(int i = 0; i < 10; i++) {
             StopPlace stopPlace = new StopPlace(new MultilingualString("Stop place " + i));
             stopPlace.setId(Long.valueOf(i));
-            stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)))));
+            stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
             stopPlaces.add(stopPlace);
         }
 
@@ -266,10 +221,10 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     }
 
 
-    private SimplePoint point(double longitude, double latitude) {
-        return new SimplePoint(new LocationStructure(
+    private Point point(double longitude, double latitude) {
+        return 
                 geometryFactory.createPoint(
-                        new Coordinate(longitude, latitude))));
+                        new Coordinate(longitude, latitude));
     }
 
     private StopPlace createStopPlaceWithQuay(String name, double longitude, double latitude, Long stopPlaceId, Long quayId) {

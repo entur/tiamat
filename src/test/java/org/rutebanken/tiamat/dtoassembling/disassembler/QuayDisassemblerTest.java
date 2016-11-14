@@ -13,12 +13,12 @@ import static org.mockito.Mockito.when;
 public class QuayDisassemblerTest {
 
     QuayRepository quayRepository = mock(QuayRepository.class);
-    SimplePointDisassembler simplePointDisassembler = mock(SimplePointDisassembler.class);
+    PointDisassembler pointDisassembler = mock(PointDisassembler.class);
 
 
     @Test
     public void disassembledQuayNotNull() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
         QuayDto quayDto = new QuayDto();
 
@@ -29,7 +29,7 @@ public class QuayDisassemblerTest {
 
     @Test
     public void disassembledQuayNName() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
         QuayDto quayDto = new QuayDto();
         quayDto.name = "name";
@@ -40,7 +40,7 @@ public class QuayDisassemblerTest {
 
     @Test
     public void disassembledQuayDescription() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
         QuayDto quayDto = new QuayDto();
         quayDto.description = "description";
@@ -52,7 +52,7 @@ public class QuayDisassemblerTest {
 
     @Test
     public void disassembledExistingQuay() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
         QuayDto quayDto = new QuayDto();
         quayDto.id = "12333";
@@ -69,7 +69,7 @@ public class QuayDisassemblerTest {
 
     @Test
     public void dissasembleQuayWithQuayType() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, simplePointDisassembler);
+        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
         QuayDto quayDto = new QuayDto();
         quayDto.quayType = "vehicleLoadingPlace";

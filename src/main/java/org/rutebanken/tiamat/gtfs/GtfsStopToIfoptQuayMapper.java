@@ -31,13 +31,8 @@ public class GtfsStopToIfoptQuayMapper {
     }
 
     public void centroid(Zone_VersionStructure site, Stop stop) {
-        SimplePoint centroid = new SimplePoint();
-
         logger.trace("Setting location for {} latitude: {}, longitude: {}", site.getName(), stop.getLat(), stop.getLon());
-
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat()))));
-
-        site.setCentroid(centroid);
+        site.setCentroid(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
     }
 }
 

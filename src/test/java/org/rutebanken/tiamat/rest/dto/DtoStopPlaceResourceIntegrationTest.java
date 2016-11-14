@@ -4,7 +4,6 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.json.JSONArray;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
@@ -130,7 +129,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
 
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlaceRepository.save(stopPlace);
 
 
@@ -166,7 +165,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
         String stopPlaceName = "Grytnes";
         StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
         stopPlaceRepository.save(stopPlace);
 
         given()

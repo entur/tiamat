@@ -78,8 +78,7 @@ public class OrganisationPart_VersionStructure
     protected PrivateCodeStructure privateCode;
     @XmlElement(name = "ContactDetails")
     protected ContactStructure contactDetails;
-    @XmlElement(name = "Location")
-    protected LocationStructure location;
+
     @XmlElementRef(name = "OrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
     @XmlElement(name = "TypeOfOrganisationPartRef")
@@ -228,30 +227,6 @@ public class OrganisationPart_VersionStructure
      */
     public void setContactDetails(ContactStructure value) {
         this.contactDetails = value;
-    }
-
-    /**
-     * Gets the value of the location property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public LocationStructure getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets the value of the location property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public void setLocation(LocationStructure value) {
-        this.location = value;
     }
 
     /**

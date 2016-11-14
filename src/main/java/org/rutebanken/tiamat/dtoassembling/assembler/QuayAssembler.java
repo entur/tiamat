@@ -9,11 +9,11 @@ import org.rutebanken.tiamat.model.Quay;
 @Component
 public class QuayAssembler {
 
-    private final SimplePointAssembler simplePointAssembler;
+    private final PointAssembler pointAssembler;
 
     @Autowired
-    public QuayAssembler(SimplePointAssembler simplePointAssembler) {
-        this.simplePointAssembler = simplePointAssembler;
+    public QuayAssembler(PointAssembler pointAssembler) {
+        this.pointAssembler = pointAssembler;
     }
 
     public QuayDto assemble(Quay quay) {
@@ -22,7 +22,7 @@ public class QuayAssembler {
         quayDto.id = String.valueOf(quay.getId());
         if(quay.getName() != null) quayDto.name = quay.getName().getValue();
 
-        quayDto.centroid = simplePointAssembler.assemble(quay.getCentroid());
+        quayDto.centroid = pointAssembler.assemble(quay.getCentroid());
 
         if(quay.getQuayType() != null) {
             quayDto.quayType = quay.getQuayType().value();

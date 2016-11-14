@@ -5,9 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,11 +43,11 @@ public class StopPlaceEqualsHashCodeTest {
     private StopPlace createStopPlaceWithQuayAndCentroid(String name, double longitude, double latitude) {
         Quay quay = new Quay();
         quay.setName(new MultilingualString(name));
-        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         StopPlace stopPlace = new StopPlace(new MultilingualString(name));
         stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         return stopPlace;
     }
 

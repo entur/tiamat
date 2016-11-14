@@ -29,8 +29,8 @@ public class QuayEqualsTest {
         Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
         Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
 
-        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
-        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         assertThat(quay1).isEqualTo(quay2);
     }
 
@@ -43,8 +43,8 @@ public class QuayEqualsTest {
         Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
         Quay quay2 = new Quay(new MultilingualString("Different"));
 
-        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
-        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude)))));
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         assertThat(quay1).isNotEqualTo(quay2);
     }
 
@@ -53,8 +53,8 @@ public class QuayEqualsTest {
         Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
         Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
 
-        quay1.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(70, 80)))));
-        quay2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(60, 50)))));
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(70, 80)));
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 50)));
         assertThat(quay1).isNotEqualTo(quay2);
     }
 

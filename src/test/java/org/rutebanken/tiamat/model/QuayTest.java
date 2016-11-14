@@ -26,8 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("geodb")
 public class QuayTest {
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
     @Autowired
     public QuayRepository quayRepository;
 
@@ -118,18 +116,15 @@ public class QuayTest {
         double longitude = 39.61441;
         double latitude = -144.22765;
 
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
-        quay.setCentroid(centroid);
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
 
         quayRepository.save(quay);
         Quay actualQuay = quayRepository.findOne(quay.getId());
 
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getCentroid()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation()).isNotNull();
-        assertThat(actualQuay.getCentroid().getLocation().getGeometryPoint().getY()).isEqualTo(latitude);
-        assertThat(actualQuay.getCentroid().getLocation().getGeometryPoint().getX()).isEqualTo(longitude);
+        assertThat(actualQuay.getCentroid().getY()).isEqualTo(latitude);
+        assertThat(actualQuay.getCentroid().getX()).isEqualTo(longitude);
     }
 
     @Test

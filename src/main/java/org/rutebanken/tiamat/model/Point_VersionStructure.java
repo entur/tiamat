@@ -40,14 +40,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Point_VersionStructure", propOrder = {
-    "name",
-    "location",
-    "pointNumber",
-    "types",
-    "projections",
-    "groupMemberships"
-})
 @XmlSeeAlso({
     RoutePoint_VersionStructure.class,
     PathJunction_VersionStructure.class,
@@ -62,8 +54,8 @@ public class Point_VersionStructure
 
     @XmlElement(name = "Name")
     protected MultilingualString name;
-    @XmlElement(name = "Location")
-    protected LocationStructure location;
+//    @XmlElement(name = "Location")
+//    protected LocationStructure location;
     @XmlElement(name = "PointNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -94,30 +86,6 @@ public class Point_VersionStructure
      */
     public void setName(MultilingualString value) {
         this.name = value;
-    }
-
-    /**
-     * Gets the value of the location property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public LocationStructure getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets the value of the location property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LocationStructure }
-     *     
-     */
-    public void setLocation(LocationStructure value) {
-        this.location = value;
     }
 
     /**

@@ -51,14 +51,10 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
                 topographicPlacesCreatedCounter);
 
         logger.trace("Resetting IDs for stop place");
-        resetIds(stopPlace);
 
         if (stopPlace.getQuays() != null) {
             logger.debug("Stop place has {} quays", stopPlace.getQuays().size());
             stopPlace.getQuays().forEach(quay -> {
-
-                logger.trace("Resetting IDs for quay");
-                resetIds(quay);
                 logger.debug("Saving quay ");
                 quayRepository.save(quay);
             });
@@ -69,17 +65,4 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
         return stopPlace;
     }
 
-    /**
-     * Incoming data might contain IDs which may not correspond with our IDs. Reset.
-     * @param zone
-     */
-    public void resetIds(Zone_VersionStructure zone) {
-        zone.setId(null);
-        if(zone.getCentroid() != null) {
-            zone.getCentroid().setId(null);
-            if(zone.getCentroid().getLocation() != null) {
-                zone.getCentroid().getLocation().setId(0);
-            }
-        }
-    }
 }

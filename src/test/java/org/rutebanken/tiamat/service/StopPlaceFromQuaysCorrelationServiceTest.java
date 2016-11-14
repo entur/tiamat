@@ -74,8 +74,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     private Quay quayWithCentroid(double x, double y) {
         Quay quay = new Quay();
-        quay.setCentroid(new SimplePoint());
-        quay.getCentroid().setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(x, y, 0))));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(x, y)));
         return quay;
     }
 

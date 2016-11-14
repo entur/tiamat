@@ -1,15 +1,13 @@
 package org.rutebanken.tiamat.importers;
 
+import com.vividsolutions.jts.awt.PointShapeFactory;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.LocationStructure;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
@@ -25,9 +23,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -88,22 +83,20 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
         for (int j = 0; j < uniqueQuays; j++) {
             final String quayName = "QuayName" +j;
-            LocationStructure locationStructure = randomCoordinates();
             // Add quays to same stop place, but create it again to have fresh references
+            Point randomPoint = randomCoordinates();
             executeNTimes(eachQuayImportedCount, executorService, () -> {
                 StopPlace stopPlace = createStop();
                 Quay quay = new Quay(new MultilingualString(quayName));
-                quay.setCentroid(new SimplePoint(locationStructure));
+                quay.setCentroid(randomPoint);
                 stopPlace.getQuays().add(quay);
-                System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
                 try {
                     StopPlace response = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
                     if (response != null) {
                         imports.incrementAndGet();
-
                     }
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             });
         };
@@ -136,14 +129,11 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
     private final double longitudeMin = 50.0;
     private final double longitudeMax = 60.0;
 
-    public org.rutebanken.tiamat.model.LocationStructure randomCoordinates() {
+    public Point randomCoordinates() {
         double latitude = latitudeMin + (latitudeMax - latitudeMin) * random.nextDouble();
         double longitude = longitudeMin + (longitudeMax - longitudeMin) * random.nextDouble();
 
-        LocationStructure locationStructure = new LocationStructure();
-        locationStructure.setGeometryPoint(geometryFactory.createPoint(new Coordinate(latitude, longitude)));
-        System.out.println(locationStructure.getGeometryPoint());
-        return locationStructure;
+        return geometryFactory.createPoint(new Coordinate(latitude, longitude));
     }
 
     private void executeNTimes(int times, ExecutorService executorService, Runnable runnable) {
@@ -154,7 +144,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
     private StopPlace createStop() {
         StopPlace stopPlace = new StopPlace(new MultilingualString("Stopp"));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
         return stopPlace;
     }
 }

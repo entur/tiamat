@@ -45,7 +45,7 @@ public class CountyAndMunicipalityLookupService {
             return;
         }
 
-        Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
+        Point point = stopPlace.getCentroid();
 
         Properties peliasProperties = reverseLookup(point, stopPlace);
         if(peliasProperties == null) {

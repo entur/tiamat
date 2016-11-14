@@ -23,15 +23,15 @@ public class StopPlaceAssembler {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceAssembler.class);
 
-    private SimplePointAssembler simplePointAssembler;
+    private PointAssembler pointAssembler;
 
     private TopographicPlaceRepository topographicPlaceRepository;
 
     private QuayAssembler quayAssembler;
 
     @Autowired
-    public StopPlaceAssembler(SimplePointAssembler simplePointAssembler, TopographicPlaceRepository topographicPlaceRepository, QuayAssembler quayAssembler) {
-        this.simplePointAssembler = simplePointAssembler;
+    public StopPlaceAssembler(PointAssembler pointAssembler, TopographicPlaceRepository topographicPlaceRepository, QuayAssembler quayAssembler) {
+        this.pointAssembler = pointAssembler;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.quayAssembler = quayAssembler;
     }
@@ -44,7 +44,7 @@ public class StopPlaceAssembler {
         stopPlaceDto.shortName = multiLingualStringValue(stopPlace.getShortName());
         stopPlaceDto.description = multiLingualStringValue(stopPlace.getDescription());
         if(stopPlace.getStopPlaceType() != null) stopPlaceDto.stopPlaceType = stopPlace.getStopPlaceType().value();
-        stopPlaceDto.centroid = simplePointAssembler.assemble(stopPlace.getCentroid());
+        stopPlaceDto.centroid = pointAssembler.assemble(stopPlace.getCentroid());
 
         if(stopPlace.isAllAreasWheelchairAccessible() != null) {
             stopPlaceDto.allAreasWheelchairAccessible = stopPlace.isAllAreasWheelchairAccessible();

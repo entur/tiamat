@@ -319,6 +319,7 @@ public class StopPlace
 
         StopPlace other = (StopPlace) object;
 
+        // Could have used super
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.centroid, other.centroid);
     }
@@ -334,7 +335,8 @@ public class StopPlace
                 .omitNullValues()
                 .add("id", id)
                 .add("name", name)
-                .add("quays", getQuays() != null ? getQuays().size() : 0)
+                .add("quays", quays)
+                .add("centroid", centroid)
                 .add("keyValues", getKeyValues())
                 .toString();
     }

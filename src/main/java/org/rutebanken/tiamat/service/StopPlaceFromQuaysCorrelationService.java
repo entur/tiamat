@@ -224,10 +224,10 @@ public class StopPlaceFromQuaysCorrelationService {
 
                 logger.debug("Quay {}, {} is close enough to be added",
                         quay.getName(),
-                        quay.getCentroid().getLocation().getGeometryPoint().toText());
+                        quay.getCentroid().toText());
                 addQuay = true;
             } else {
-                logger.debug("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().getGeometryPoint().toText());
+                logger.debug("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().toText());
             }
 
             if (addQuay) {
@@ -259,10 +259,7 @@ public class StopPlaceFromQuaysCorrelationService {
         if (stopPlace.getQuays().isEmpty()) {
             logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
         } else {
-
-            stopPlace.setCentroid(new SimplePoint());
-            stopPlace.getCentroid().setLocation(new LocationStructure());
-            stopPlace.getCentroid().getLocation().setGeometryPoint(calculateCentroidForStopPlace(stopPlace.getQuays()));
+            stopPlace.setCentroid(calculateCentroidForStopPlace(stopPlace.getQuays()));
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, new AtomicInteger());
@@ -299,29 +296,29 @@ public class StopPlaceFromQuaysCorrelationService {
         if (quay == null || otherQuay == null && quay.getCentroid() == null || otherQuay.getCentroid() == null) {
             return false;
         }
-        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(DISTANCE);
-        boolean intersects = buffer.intersects(otherQuay.getCentroid().getLocation().getGeometryPoint());
+        Geometry buffer = quay.getCentroid().buffer(DISTANCE);
+        boolean intersects = buffer.intersects(otherQuay.getCentroid());
 
         if (intersects) {
             logger.debug("Quay {} {} is close to quay {} {}",
                     quay.getName(),
-                    quay.getCentroid().getLocation().getGeometryPoint().toText(),
+                    quay.getCentroid().toText(),
                     otherQuay.getName(),
-                    otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
+                    otherQuay.getCentroid().toText());
             return true;
         }
 
         logger.debug("Quay {} {} is NOT close to quay {} {}",
                 quay.getName(),
-                quay.getCentroid().getLocation().getGeometryPoint().toText(),
+                quay.getCentroid().toText(),
                 otherQuay.getName(),
-                otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
+                otherQuay.getCentroid().toText());
         return false;
     }
 
     public Envelope createEnvelopeForQuay(Quay quay) {
 
-        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(0.004);
+        Geometry buffer = quay.getCentroid().buffer(0.004);
 
         Envelope envelope = buffer.getEnvelopeInternal();
         logger.trace("Created envelope {}", envelope.toString());
@@ -333,7 +330,7 @@ public class StopPlaceFromQuaysCorrelationService {
         CentroidPoint centroidPoint = new CentroidPoint();
         quays.stream()
             .filter(quay -> quay.getCentroid() != null)
-            .forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation().getGeometryPoint()));
+            .forEach(quay -> centroidPoint.add(quay.getCentroid()));
 
         logger.debug("Created centroid for stop place based on {} quays. x: {}, y: {}", quays.size(),
                 centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);

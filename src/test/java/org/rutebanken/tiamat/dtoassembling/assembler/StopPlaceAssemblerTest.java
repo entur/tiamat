@@ -20,7 +20,7 @@ public class StopPlaceAssemblerTest {
 
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
 
-        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(PointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
 
         String municipalityName = "Asker";
 
@@ -45,7 +45,7 @@ public class StopPlaceAssemblerTest {
     public void testAssembleMunicipalityWithCounty() throws Exception {
 
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
-        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(PointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
 
         String municipalityName = "Bærum";
 
@@ -84,7 +84,7 @@ public class StopPlaceAssemblerTest {
     public void testAssembleMunicipalityNullName() throws Exception {
 
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
-        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(PointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
 
         TopographicPlace municipality = new TopographicPlace();
         municipality.setId(1L);
@@ -101,7 +101,7 @@ public class StopPlaceAssemblerTest {
     public void testAssembleMunicipalityNull() throws Exception {
 
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
-        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(SimplePointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
+        StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(PointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
 
         TopographicPlaceRefStructure municipalityReference = topographicRef("123");
 
