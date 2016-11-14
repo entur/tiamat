@@ -35,9 +35,6 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ScheduledStopPointRefStructure")
-@XmlSeeAlso({
-    FareScheduledStopPointRefStructure.class
-})
 public class ScheduledStopPointRefStructure
     extends TimingPointRefStructure
 {

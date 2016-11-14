@@ -4,12 +4,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -32,9 +30,6 @@ public class QuayTest {
 
     @Autowired
     public QuayRepository quayRepository;
-
-    @Autowired
-    private TariffZoneRepository tariffZoneRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -263,27 +258,6 @@ public class QuayTest {
         EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().get(0);
         assertThat(actualEquipmentPosition).isEqualToComparingOnlyGivenFields(equipmentPosition, "description.value", "xOffset", "yOffset");
         assertThat(actualEquipmentPosition.getReferencePointRef().getRef()).isEqualTo(pointRefStructure.getRef());
-    }
-
-    @Test
-    public void persistQuayWithTariffZone() {
-        Quay quay = new Quay();
-
-        TariffZone tariffZone = new TariffZone();
-        tariffZoneRepository.save(tariffZone);
-
-        List<TariffZone> tariffZones = new ArrayList<>();
-        tariffZones.add(tariffZone);
-        quay.setTariffZones(tariffZones);
-
-        quayRepository.save(quay);
-
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-
-        assertThat(actualQuay.getTariffZones()).isNotEmpty();
-        TariffZone actualTariffZone = actualQuay.getTariffZones().get(0);
-
-        assertThat(actualTariffZone.getId()).isEqualTo(tariffZone.getId());
     }
 
     @Test

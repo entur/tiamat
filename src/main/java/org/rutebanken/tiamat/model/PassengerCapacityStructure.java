@@ -54,10 +54,6 @@ import javax.xml.bind.annotation.XmlType;
 public class PassengerCapacityStructure
     extends DataManagedObjectStructure
 {
-
-    @XmlElement(name = "FareClass", defaultValue = "any")
-    @XmlSchemaType(name = "NMTOKEN")
-    protected FareClassEnumeration fareClass;
     @XmlElement(name = "TotalCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger totalCapacity;
@@ -76,30 +72,6 @@ public class PassengerCapacityStructure
     @XmlElement(name = "WheelchairPlaceCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger wheelchairPlaceCapacity;
-
-    /**
-     * Gets the value of the fareClass property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public FareClassEnumeration getFareClass() {
-        return fareClass;
-    }
-
-    /**
-     * Sets the value of the fareClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public void setFareClass(FareClassEnumeration value) {
-        this.fareClass = value;
-    }
 
     /**
      * Gets the value of the totalCapacity property.

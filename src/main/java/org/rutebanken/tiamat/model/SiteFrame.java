@@ -25,7 +25,6 @@ public class SiteFrame
     protected CheckConstraintThroughputsInFrame_RelStructure checkConstraintThroughputs;
     protected PointOfInterestClassifications pointOfInterestClassifications;
     protected PointOfInterestClassificationHierarchiesInFrame_RelStructure pointOfInterestClassificationHierarchies;
-    protected TariffZonesInFrame_RelStructure tariffZones;
     protected SiteFacilitySetsInFrame_RelStructure siteFacilitySets;
 
     /**
@@ -326,26 +325,6 @@ public class SiteFrame
      */
     public void setPointOfInterestClassificationHierarchies(PointOfInterestClassificationHierarchiesInFrame_RelStructure value) {
         this.pointOfInterestClassificationHierarchies = value;
-    }
-
-    /**
-     * Gets the value of the tariffZones property.
-     *
-     * @return possible object is
-     * {@link TariffZonesInFrame_RelStructure }
-     */
-    public TariffZonesInFrame_RelStructure getTariffZones() {
-        return tariffZones;
-    }
-
-    /**
-     * Sets the value of the tariffZones property.
-     *
-     * @param value allowed object is
-     *              {@link TariffZonesInFrame_RelStructure }
-     */
-    public void setTariffZones(TariffZonesInFrame_RelStructure value) {
-        this.tariffZones = value;
     }
 
     /**

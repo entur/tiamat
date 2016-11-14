@@ -59,9 +59,7 @@ public class SimpleFeature_VersionStructure
      *     {@link JAXBElement }{@code <}{@link StopAreaRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link AdministrativeZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link ZoneRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link FareZoneRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link AccessZoneRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link TariffZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link TransportAdministrativeZoneRef }{@code >}
      *     
      */
@@ -77,9 +75,7 @@ public class SimpleFeature_VersionStructure
      *     {@link JAXBElement }{@code <}{@link StopAreaRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link AdministrativeZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link ZoneRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link FareZoneRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link AccessZoneRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link TariffZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link TransportAdministrativeZoneRef }{@code >}
      *     
      */

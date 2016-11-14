@@ -67,10 +67,7 @@ public class TrainComponent_DerivedViewStructure
     protected MultilingualString description;
     @XmlElement(name = "TrainElementRef")
     protected TrainElementRefStructure trainElementRef;
-    @XmlList
-    @XmlElement(name = "FareClasses")
-    @XmlSchemaType(name = "anySimpleType")
-    protected List<FareClassEnumeration> fareClasses;
+
     @XmlElement(name = "TrainElementType")
     @XmlSchemaType(name = "NMTOKEN")
     protected TrainElementTypeEnumeration trainElementType;
@@ -174,34 +171,6 @@ public class TrainComponent_DerivedViewStructure
         this.trainElementRef = value;
     }
 
-    /**
-     * Gets the value of the fareClasses property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the fareClasses property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getFareClasses().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link FareClassEnumeration }
-     * 
-     * 
-     */
-    public List<FareClassEnumeration> getFareClasses() {
-        if (fareClasses == null) {
-            fareClasses = new ArrayList<FareClassEnumeration>();
-        }
-        return this.fareClasses;
-    }
 
     /**
      * Gets the value of the trainElementType property.

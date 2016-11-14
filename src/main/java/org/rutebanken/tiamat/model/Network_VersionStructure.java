@@ -40,8 +40,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Network_VersionStructure", propOrder = {
     "transportOrganisationRef",
-    "groupsOfLines",
-    "tariffZones"
+    "groupsOfLines"
 })
 @XmlSeeAlso({
     Network.class
@@ -53,7 +52,6 @@ public class Network_VersionStructure
     @XmlElementRef(name = "TransportOrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
     protected GroupsOfLinesInFrame_RelStructure groupsOfLines;
-    protected TariffZoneRefs_RelStructure tariffZones;
 
     /**
      * Gets the value of the transportOrganisationRef property.
@@ -105,30 +103,6 @@ public class Network_VersionStructure
      */
     public void setGroupsOfLines(GroupsOfLinesInFrame_RelStructure value) {
         this.groupsOfLines = value;
-    }
-
-    /**
-     * Gets the value of the tariffZones property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public TariffZoneRefs_RelStructure getTariffZones() {
-        return tariffZones;
-    }
-
-    /**
-     * Sets the value of the tariffZones property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
     }
 
 }

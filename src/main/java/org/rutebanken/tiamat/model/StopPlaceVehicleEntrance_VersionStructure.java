@@ -52,8 +52,7 @@ import javax.xml.bind.annotation.XmlType;
     "telecabinSubmode",
     "railSubmode",
     "waterSubmode",
-    "otherTransportModes",
-    "tariffZones"
+    "otherTransportModes"
 })
 @XmlSeeAlso({
     StopPlaceVehicleEntrance.class
@@ -92,11 +91,6 @@ public class StopPlaceVehicleEntrance_VersionStructure
     @XmlElement(name = "WaterSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected WaterSubmodeEnumeration waterSubmode;
-    @XmlList
-    @XmlElement(name = "OtherTransportModes")
-    @XmlSchemaType(name = "anySimpleType")
-    protected List<VehicleModeEnumeration> otherTransportModes;
-    protected TariffZoneRefs_RelStructure tariffZones;
 
     /**
      * Gets the value of the transportMode property.
@@ -336,59 +330,6 @@ public class StopPlaceVehicleEntrance_VersionStructure
      */
     public void setWaterSubmode(WaterSubmodeEnumeration value) {
         this.waterSubmode = value;
-    }
-
-    /**
-     * Gets the value of the otherTransportModes property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the otherTransportModes property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getOtherTransportModes().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link VehicleModeEnumeration }
-     * 
-     * 
-     */
-    public List<VehicleModeEnumeration> getOtherTransportModes() {
-        if (otherTransportModes == null) {
-            otherTransportModes = new ArrayList<VehicleModeEnumeration>();
-        }
-        return this.otherTransportModes;
-    }
-
-    /**
-     * Gets the value of the tariffZones property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public TariffZoneRefs_RelStructure getTariffZones() {
-        return tariffZones;
-    }
-
-    /**
-     * Sets the value of the tariffZones property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
     }
 
 }

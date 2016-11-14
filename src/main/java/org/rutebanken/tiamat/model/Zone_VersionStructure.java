@@ -46,10 +46,8 @@ import java.util.Optional;
 })
 @XmlSeeAlso({
     AccessZone_VersionStructure.class,
-    GeneralZone_VersionStructure.class,
     AdministrativeZone_VersionStructure.class,
     RoutingConstraintZone_VersionStructure.class,
-    TariffZone_VersionStructure.class,
     StopArea_VersionStructure.class,
     Place_VersionStructure.class
 })

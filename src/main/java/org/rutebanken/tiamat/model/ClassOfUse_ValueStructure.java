@@ -48,32 +48,4 @@ public class ClassOfUse_ValueStructure
     extends TypeOfValue_VersionStructure
 {
 
-    @XmlElement(name = "FareClass")
-    @XmlSchemaType(name = "NMTOKEN")
-    protected FareClassEnumeration fareClass;
-
-    /**
-     * Gets the value of the fareClass property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public FareClassEnumeration getFareClass() {
-        return fareClass;
-    }
-
-    /**
-     * Sets the value of the fareClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public void setFareClass(FareClassEnumeration value) {
-        this.fareClass = value;
-    }
-
 }

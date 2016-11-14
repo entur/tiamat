@@ -4,7 +4,6 @@ import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,6 @@ public class StopPlaceTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private TariffZoneRepository tariffZoneRepository;
 
     @Autowired
     private QuayRepository quayRepository;
@@ -116,27 +112,6 @@ public class StopPlaceTest {
 
         assertThat(actualStopPlace.getRoadAddress()).isNotNull();
         assertThat(actualStopPlace.getRoadAddress().getId()).isEqualTo(roadAddress.getId());
-    }
-
-    @Test
-    public void persistStopPlaceWithTariffZone() {
-        StopPlace stopPlace = new StopPlace();
-
-        TariffZone tariffZone = new TariffZone();
-        tariffZone.setShortName(new MultilingualString("V2", "no", "type"));
-
-        tariffZoneRepository.save(tariffZone);
-
-        List<TariffZone> tariffZones = new ArrayList<>();
-        tariffZones.add(tariffZone);
-        stopPlace.setTariffZones(tariffZones);
-
-        stopPlaceRepository.save(stopPlace);
-
-        StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
-
-        assertThat(actualStopPlace.getTariffZones()).isNotEmpty();
-        assertThat(actualStopPlace.getTariffZones().get(0).getId()).isEqualTo(tariffZone.getId());
     }
 
     @Test

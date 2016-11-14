@@ -52,39 +52,11 @@ import javax.xml.datatype.Duration;
 public class OnboardStay_VersionedChlldStructure
     extends VersionedChildStructure
 {
-
-    @XmlElement(name = "FareClass", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
-    protected FareClassEnumeration fareClass;
     @XmlElement(name = "BoardingPermisssion")
     @XmlSchemaType(name = "NMTOKEN")
     protected BoardingPermissionEnumeration boardingPermisssion;
     @XmlElement(name = "Period")
     protected Duration period;
-
-    /**
-     * Fare class of Boarding permission.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public FareClassEnumeration getFareClass() {
-        return fareClass;
-    }
-
-    /**
-     * Sets the value of the fareClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public void setFareClass(FareClassEnumeration value) {
-        this.fareClass = value;
-    }
 
     /**
      * Type of Accommodation . Default is seating.

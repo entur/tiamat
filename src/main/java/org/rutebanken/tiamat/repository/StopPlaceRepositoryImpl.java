@@ -40,7 +40,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         EntityGraph<StopPlace> graph = entityManager.createEntityGraph(StopPlace.class);
 
-        graph.addAttributeNodes("tariffZones");
         graph.addAttributeNodes("accessSpaces");
         graph.addAttributeNodes("equipmentPlaces");
         graph.addAttributeNodes("validityConditions");

@@ -45,7 +45,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ScheduledStopPoint_VersionStructure", propOrder = {
     "stopAreas",
-    "tariffZones",
     "shortName",
     "description",
     "label",
@@ -67,15 +66,13 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "atCentre"
 })
 @XmlSeeAlso({
-    ScheduledStopPoint.class,
-    FareScheduledStopPoint_VersionStructure.class
+    ScheduledStopPoint.class
 })
 public class ScheduledStopPoint_VersionStructure
     extends TimingPoint_VersionStructure
 {
 
     protected StopAreaRefs_RelStructure stopAreas;
-    protected TariffZoneRefs_RelStructure tariffZones;
     @XmlElement(name = "ShortName")
     protected MultilingualString shortName;
     @XmlElement(name = "Description")
@@ -145,30 +142,6 @@ public class ScheduledStopPoint_VersionStructure
      */
     public void setStopAreas(StopAreaRefs_RelStructure value) {
         this.stopAreas = value;
-    }
-
-    /**
-     * Gets the value of the tariffZones property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public TariffZoneRefs_RelStructure getTariffZones() {
-        return tariffZones;
-    }
-
-    /**
-     * Sets the value of the tariffZones property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
     }
 
     /**

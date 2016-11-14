@@ -273,7 +273,6 @@ public class ComplexFeatureMember_VersionedChildStructure
      *     {@link JAXBElement }{@code <}{@link VersionOfObjectRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link VehicleEquipmentProfileRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link PurposeOfGroupingRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link TariffZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link TrainInCompoundTrainRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link GeneralOrganisationRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link ManagementAgentRefStructure }{@code >}
@@ -519,7 +518,6 @@ public class ComplexFeatureMember_VersionedChildStructure
      *     {@link JAXBElement }{@code <}{@link VersionOfObjectRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link VehicleEquipmentProfileRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link PurposeOfGroupingRefStructure }{@code >}
-     *     {@link JAXBElement }{@code <}{@link TariffZoneRef }{@code >}
      *     {@link JAXBElement }{@code <}{@link TrainInCompoundTrainRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link GeneralOrganisationRefStructure }{@code >}
      *     {@link JAXBElement }{@code <}{@link ManagementAgentRefStructure }{@code >}

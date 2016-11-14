@@ -52,8 +52,7 @@ import javax.xml.bind.annotation.XmlType;
     "telecabinSubmode",
     "railSubmode",
     "waterSubmode",
-    "otherTransportModes",
-    "tariffZones"
+    "otherTransportModes"
 })
 @XmlSeeAlso({
     StopPlaceEntrance.class
@@ -96,7 +95,6 @@ public class StopPlaceEntrance_VersionStructure
     @XmlElement(name = "OtherTransportModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<VehicleModeEnumeration> otherTransportModes;
-    protected TariffZoneRefs_RelStructure tariffZones;
 
     /**
      * Gets the value of the transportMode property.
@@ -365,30 +363,6 @@ public class StopPlaceEntrance_VersionStructure
             otherTransportModes = new ArrayList<VehicleModeEnumeration>();
         }
         return this.otherTransportModes;
-    }
-
-    /**
-     * Gets the value of the tariffZones property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public TariffZoneRefs_RelStructure getTariffZones() {
-        return tariffZones;
-    }
-
-    /**
-     * Sets the value of the tariffZones property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TariffZoneRefs_RelStructure }
-     *     
-     */
-    public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
     }
 
 }

@@ -53,8 +53,7 @@ import javax.xml.bind.annotation.XmlType;
     "telecabinSubmode",
     "railSubmode",
     "waterSubmode",
-    "otherTransportModes",
-    "tariffZones"
+    "otherTransportModes"
 })
 @XmlSeeAlso({
     StopPlaceSpace_VersionStructure.class
@@ -119,9 +118,6 @@ public abstract class StopPlaceComponent_VersionStructure
     @XmlSchemaType(name = "anySimpleType")
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<TariffZone> tariffZones;
 
     public StopPlaceComponent_VersionStructure(MultilingualString name) {
         super(name);
@@ -398,12 +394,4 @@ public abstract class StopPlaceComponent_VersionStructure
         return this.otherTransportModes;
     }
 
-
-    public List<TariffZone> getTariffZones() {
-        return tariffZones;
-    }
-
-    public void setTariffZones(List<TariffZone> tariffZones) {
-        this.tariffZones = tariffZones;
-    }
 }

@@ -39,7 +39,6 @@ import javax.xml.bind.annotation.XmlType;
     StopAreaRefStructure.class,
     AccessZoneRefStructure.class,
     RoutingConstraintZoneRefStructure.class,
-    TariffZoneRefStructure.class,
     AdministrativeZoneRefStructure.class
 })
 @MappedSuperclass

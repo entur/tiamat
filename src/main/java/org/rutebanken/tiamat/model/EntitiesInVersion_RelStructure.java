@@ -112,7 +112,6 @@ public class EntitiesInVersion_RelStructure
      * {@link JAXBElement }{@code <}{@link PlaceEquipment_VersionStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link ParkingCapacity }{@code >}
      * {@link JAXBElement }{@code <}{@link HeadingSign }{@code >}
-     * {@link JAXBElement }{@code <}{@link TariffZone }{@code >}
      * {@link JAXBElement }{@code <}{@link VehicleRequirement_VersionStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link GroupOfPoints }{@code >}
      * {@link JAXBElement }{@code <}{@link ReliefPoint }{@code >}

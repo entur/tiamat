@@ -54,10 +54,6 @@ public class WaitingRoomEquipment_VersionStructure
     extends WaitingEquipment_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "FareClass")
-    @XmlSchemaType(name = "anySimpleType")
-    protected List<FareClassEnumeration> fareClass;
     @XmlElement(name = "WomenOnly")
     protected Boolean womenOnly;
     @XmlList
@@ -66,35 +62,6 @@ public class WaitingRoomEquipment_VersionStructure
     protected List<SanitaryFacilityEnumeration> sanitary;
     @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
-
-    /**
-     * Gets the value of the fareClass property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the fareClass property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getFareClass().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link FareClassEnumeration }
-     * 
-     * 
-     */
-    public List<FareClassEnumeration> getFareClass() {
-        if (fareClass == null) {
-            fareClass = new ArrayList<FareClassEnumeration>();
-        }
-        return this.fareClass;
-    }
 
     /**
      * Gets the value of the womenOnly property.

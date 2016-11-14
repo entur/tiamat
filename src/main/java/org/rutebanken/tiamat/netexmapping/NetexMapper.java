@@ -22,7 +22,6 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new QuayListConverter());
         mapperFactory.getConverterFactory().registerConverter(new AlternativeNamesConverter());
         mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
-        mapperFactory.getConverterFactory().registerConverter(new TariffZonesConverter());
         mapperFactory.getConverterFactory().registerConverter(new ValidityConditionsConverter());
         mapperFactory.getConverterFactory().registerConverter(new BoardinPositionsConverter());
         mapperFactory.getConverterFactory().registerConverter(new CheckConstraintsConverter());

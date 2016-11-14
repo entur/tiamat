@@ -76,9 +76,7 @@ public class Accommodation_VersionedChildStructure
 
     @XmlElement(name = "Name")
     protected MultilingualString name;
-    @XmlElement(name = "FareClass", defaultValue = "unknown")
-    @XmlSchemaType(name = "NMTOKEN")
-    protected FareClassEnumeration fareClass;
+
     @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
     @XmlElement(name = "AccommodationFacility", defaultValue = "seating")
@@ -132,30 +130,6 @@ public class Accommodation_VersionedChildStructure
      */
     public void setName(MultilingualString value) {
         this.name = value;
-    }
-
-    /**
-     * Fare class of ACCOMMODATION.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public FareClassEnumeration getFareClass() {
-        return fareClass;
-    }
-
-    /**
-     * Sets the value of the fareClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FareClassEnumeration }
-     *     
-     */
-    public void setFareClass(FareClassEnumeration value) {
-        this.fareClass = value;
     }
 
     /**

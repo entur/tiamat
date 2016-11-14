@@ -56,9 +56,6 @@ public class StopPlace
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
 
-    @OneToMany
-    private List<TariffZone> tariffZones;
-
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
 
@@ -210,15 +207,6 @@ public class StopPlace
         return this.otherTransportModes;
     }
 
-   /* public TariffZoneRefs_RelStructure getTariffZones() {
-        return tariffZones;
-    }*/
-
-    
-  /*  public void setTariffZones(TariffZoneRefs_RelStructure value) {
-        this.tariffZones = value;
-    }*/
-
     public StopTypeEnumeration getStopPlaceType() {
         return stopPlaceType;
     }
@@ -234,16 +222,6 @@ public class StopPlace
     public void setBorderCrossing(Boolean value) {
         this.borderCrossing = value;
     }
-
-/*    public ExplicitEquipments_RelStructure getUnlocalisedEquipments() {
-        return unlocalisedEquipments;
-    }
-*/
-    
- /*   public void setUnlocalisedEquipments(ExplicitEquipments_RelStructure value) {
-        this.unlocalisedEquipments = value;
-    }
-*/
 
     public TopographicPlaceRefs_RelStructure getServedPlaces() {
         return servedPlaces;
@@ -277,11 +255,6 @@ public class StopPlace
     public void setWeighting(InterchangeWeightingEnumeration value) {
         this.weighting = value;
     }
-
-    //   public void setAccessSpaces(AccessSpaces_RelStructure value) {
-    //       this.accessSpaces = value;
-    //   }
-
 
     public SitePathLinks_RelStructure getPathLinks() {
         return pathLinks;
@@ -321,14 +294,6 @@ public class StopPlace
 
     public void setVehicleStoppingPlaces(VehicleStoppingPlaces_RelStructure value) {
         this.vehicleStoppingPlaces = value;
-    }
-
-    public List<TariffZone> getTariffZones() {
-        return tariffZones;
-    }
-
-    public void setTariffZones(List<TariffZone> tariffZones) {
-        this.tariffZones = tariffZones;
     }
 
     public List<AccessSpace> getAccessSpaces() {
