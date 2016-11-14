@@ -19,18 +19,7 @@ public class SimplePoint
     }
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString name;
-
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected LocationStructure location;
-
-    public MultilingualString getName() {
-        return name;
-    }
-
-    public void setName(MultilingualString value) {
-        this.name = value;
-    }
 
     public LocationStructure getLocation() {
         return location;
@@ -48,12 +37,11 @@ public class SimplePoint
         if(!(object instanceof SimplePoint)) return false;
 
         SimplePoint other = (SimplePoint) object;
-        return Objects.equals(this.name, other.name)
-                && Objects.equals(this.location, other.location);
+        return Objects.equals(this.location, other.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, location);
+        return Objects.hash(location);
     }
 }
