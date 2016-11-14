@@ -5,7 +5,6 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.postgresql.core.NativeQuery;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -16,8 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.NumberUtils;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -136,13 +133,31 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public List<IdMappingDto> findAllKeyValueMappings() {
-        TypedQuery<IdMappingDto> query = entityManager.createQuery(
-                "SELECT NEW " + IdMappingDto.class.getCanonicalName() + "('Quay', id, VALUE(keyValues)) FROM Quay "
-                , IdMappingDto.class);
+    public int findKeyValueMappingCount() {
 
-        return query.getResultList();
+        TypedQuery<Long> query = entityManager.createQuery(
+                "SELECT count(id) FROM Quay "
+                , Long.class);
+
+        return query.getSingleResult().intValue();
     }
+
+
+    @Override
+    public List<IdMappingDto> findKeyValueMappings(int recordPosition, int recordsPerRoundTrip) {
+        String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
+        Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<IdMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new IdMappingDto("Quay", (String)row[0], (BigInteger)row[1]));
+        }
+
+        return mappingResult;
+    }
+
 
     @Override
     public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {

@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
 import java.util.List;
 
 @Produces("text/plain")
@@ -19,17 +21,27 @@ public class DtoIdMappingResource {
     private StopPlaceRepository stopPlaceRepository;
 
     @GET
-    public Response getStopPlaces() {
-        List<IdMappingDto> dtoList = stopPlaceRepository.findAllKeyValueMappings();
+    public Response getIdMapping() {
 
-        return  Response.ok(getOut(dtoList)).build();
-    }
+        return  Response.ok().entity((StreamingOutput) output -> {
 
-    private StreamingOutput getOut(final List<IdMappingDto> idMapping) {
-        return out -> {
-            for (IdMappingDto idMappingDto : idMapping) {
-                out.write(idMappingDto.toCsvString().getBytes());
+            int recordsPerRoundTrip = 1000;
+            int recordPosition = 0;
+            int numberOfKeyValueMappings = stopPlaceRepository.findKeyValueMappingCount();
+
+            try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( output ) ) ) ) {
+                while (numberOfKeyValueMappings > 0) {
+
+                    List<IdMappingDto> keyValueMappings = stopPlaceRepository.findKeyValueMappings(recordPosition, recordsPerRoundTrip);
+                    for (IdMappingDto mapping : keyValueMappings) {
+                        writer.println(mapping.toCsvString());
+                        recordPosition++;
+                    }
+                    numberOfKeyValueMappings -= recordsPerRoundTrip;
+                    writer.flush();
+                }
+                writer.close();
             }
-        };
+        }).build();
     }
 }
