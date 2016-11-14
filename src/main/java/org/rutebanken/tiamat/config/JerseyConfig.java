@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.config;
 
+import org.rutebanken.tiamat.rest.dto.DtoIdMappingResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
 import org.rutebanken.tiamat.rest.dto.DtoTopographicPlaceResource;
@@ -15,6 +16,7 @@ import javax.ws.rs.ApplicationPath;
 @ApplicationPath("/jersey")
 public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
+        register(DtoIdMappingResource.class);
         register(DtoStopPlaceResource.class);
         register(DtoQuayResource.class);
         register(DtoTopographicPlaceResource.class);

@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.postgresql.core.NativeQuery;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
@@ -132,6 +133,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         } catch (NoResultException noResultException) {
             return null;
         }
+    }
+
+    @Override
+    public List<IdMappingDto> findAllKeyValueMappings() {
+        TypedQuery<IdMappingDto> query = entityManager.createQuery(
+                "SELECT NEW " + IdMappingDto.class.getCanonicalName() + "('Quay', id, VALUE(keyValues)) FROM Quay "
+                , IdMappingDto.class);
+
+        return query.getResultList();
     }
 
     @Override

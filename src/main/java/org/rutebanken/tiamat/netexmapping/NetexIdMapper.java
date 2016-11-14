@@ -5,8 +5,6 @@ import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
@@ -28,8 +26,12 @@ public class NetexIdMapper {
             logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
-            netexEntity.setId("NSR:" +  determineIdType(internalEntity)+":" + internalEntity.getId().toString());
+            netexEntity.setId(getNetexId(determineIdType(internalEntity), internalEntity.getId().toString()));
         }
+    }
+
+    public static String getNetexId(String idType, String id) {
+        return "NSR:" + idType +":" + id;
     }
 
     public void toTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
