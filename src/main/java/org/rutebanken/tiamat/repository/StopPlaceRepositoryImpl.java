@@ -39,12 +39,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         graph.addAttributeNodes("accessSpaces");
         graph.addAttributeNodes("equipmentPlaces");
-        graph.addAttributeNodes("validityConditions");
+//        graph.addAttributeNodes("validityConditions");
         graph.addAttributeNodes("accessibilityAssessment");
 //        graph.addAttributeNodes("levels");
         graph.addAttributeNodes("alternativeNames");
 //        graph.addAttributeNodes("otherTransportModes");
-        graph.addAttributeNodes("roadAddress");
+//        graph.addAttributeNodes("roadAddress");
         graph.addAttributeNodes("parentSiteRef");
 
         // Be aware of https://hibernate.atlassian.net/browse/HHH-10261
