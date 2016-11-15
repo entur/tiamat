@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,16 +27,21 @@ public class DtoIdMappingResourceTest {
 
     @Test
     public void keyValueMappingWithWithSize() throws IOException {
-        int keyValueMappingCount = 10;
+        int keyValueMappingCount = 3;
         int size = 1;
+
         when(stopPlaceRepository.findKeyValueMappings(anyInt(), anyInt()))
-                .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.ONE)));
-        when(stopPlaceRepository.findKeyValueMappingCount()).thenReturn(new Integer(keyValueMappingCount));
+                .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.ONE)))
+                .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.TEN)))
+                .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.ZERO)))
+                .thenReturn(new ArrayList<>());
+
         Response response = dtoIdMappingResource.getIdMapping(size);
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
-        verify(stopPlaceRepository, times(keyValueMappingCount/size)).findKeyValueMappings(anyInt(), anyInt());
+        // plus one for the last empty call.
+        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappings(anyInt(), anyInt());
     }
 
 }

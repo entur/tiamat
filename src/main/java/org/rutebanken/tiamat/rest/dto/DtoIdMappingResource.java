@@ -28,18 +28,18 @@ public class DtoIdMappingResource {
         return  Response.ok().entity((StreamingOutput) output -> {
             
             int recordPosition = 0;
-            int numberOfKeyValueMappings = stopPlaceRepository.findKeyValueMappingCount();
+            boolean lastEmpty = false;
 
             try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( output ) ) ) ) {
-                while (numberOfKeyValueMappings > 0) {
+                while (!lastEmpty) {
 
                     List<IdMappingDto> keyValueMappings = stopPlaceRepository.findKeyValueMappings(recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : keyValueMappings) {
                         writer.println(mapping.toCsvString());
                         recordPosition ++;
                     }
-                    numberOfKeyValueMappings -= recordsPerRoundTrip;
                     writer.flush();
+                    if(keyValueMappings.isEmpty()) lastEmpty = true;
                 }
                 writer.close();
             }

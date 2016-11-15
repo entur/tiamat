@@ -133,17 +133,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public int findKeyValueMappingCount() {
-
-        TypedQuery<Long> query = entityManager.createQuery(
-                "SELECT count(id) FROM Quay "
-                , Long.class);
-
-        return query.getSingleResult().intValue();
-    }
-
-
-    @Override
     public List<IdMappingDto> findKeyValueMappings(int recordPosition, int recordsPerRoundTrip) {
         String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN stop_place_quays spq on spq.quays_id = q.quay_id INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
