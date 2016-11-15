@@ -112,7 +112,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     logger.warn("Quay does not have coordinates.", quay.getId());
                 }
                 logger.info("Saving quay {}", quay);
-                quayRepository.save(quay);
+                quayRepository.saveAndFlush(quay);
                 logger.debug("Saved quay. Got id {} back", quay.getId());
             });
         }
@@ -121,7 +121,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
-        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.saveAndFlush(stopPlace);
         stopPlaceFromOriginalIdFinder.update(stopPlace);
         nearbyStopPlaceFinder.update(stopPlace);
         logger.info("Saved stop place {}", stopPlace);
@@ -194,7 +194,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     if (changed) {
                         logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
                         updatedQuays.incrementAndGet();
-                        quayRepository.save(existingQuay);
+                        quayRepository.saveAndFlush(existingQuay);
                     }
                 } else {
                     logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
@@ -210,7 +210,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private void saveNewQuay(Quay newQuay, StopPlace existingStopPlace, AtomicInteger createdQuays) {
         newQuay.setId(null);
         existingStopPlace.getQuays().add(newQuay);
-        quayRepository.save(newQuay);
+        quayRepository.saveAndFlush(newQuay);
         createdQuays.incrementAndGet();
     }
 

@@ -71,10 +71,10 @@ public abstract class SiteComponent_VersionStructure
     @Transient
     protected ClassOfUseRef classOfUseRef;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<CheckConstraint> checkConstraints;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
 
     @Transient

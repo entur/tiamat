@@ -59,7 +59,7 @@ public class AccessibilityAssessment_VersionedChildStructure
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     protected List<AccessibilityLimitation> limitations;
 
     @Transient

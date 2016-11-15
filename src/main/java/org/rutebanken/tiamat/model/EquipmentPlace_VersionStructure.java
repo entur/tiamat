@@ -48,7 +48,7 @@ import java.util.List;
 @MappedSuperclass
 public class EquipmentPlace_VersionStructure extends Place_VersionStructure
 {
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPosition> equipmentPositions;
 
     @Transient

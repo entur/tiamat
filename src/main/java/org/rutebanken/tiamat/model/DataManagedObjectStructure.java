@@ -9,7 +9,7 @@ import java.util.*;
 public abstract class DataManagedObjectStructure
     extends EntityInVersionStructure
 {
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final Map<String,Value> keyValues = new HashMap<>();
 
     @Transient

@@ -17,7 +17,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     protected BigInteger shortCode;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<DestinationDisplayView> destinations;
 
     @Transient
@@ -32,7 +32,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected QuayReference parentQuayRef;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
 
     public Quay(MultilingualString name) {

@@ -15,7 +15,7 @@ public class Value {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<String> items = new HashSet<>();
 
     public Value() {}

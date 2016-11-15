@@ -78,7 +78,7 @@ public class StopPlace
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.MERGE)
     private Set<Quay> quays = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

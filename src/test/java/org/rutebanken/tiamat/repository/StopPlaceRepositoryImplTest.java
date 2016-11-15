@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
+@Transactional
 public class StopPlaceRepositoryImplTest {
 
     @Autowired
