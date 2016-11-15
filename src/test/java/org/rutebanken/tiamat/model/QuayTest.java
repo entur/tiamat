@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.assertj.core.api.Assertions;
@@ -90,6 +91,7 @@ public class QuayTest {
         assertThat(actualDestinationDisplayView.getName().getValue()).isEqualTo(destinationDisplayView.getName().getValue());
     }
 
+    @Ignore
     @Test
     public void persistQuayWithRoadAddress() {
         Quay quay = new Quay();

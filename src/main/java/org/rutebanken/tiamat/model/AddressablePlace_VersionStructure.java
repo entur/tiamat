@@ -55,18 +55,18 @@ public class AddressablePlace_VersionStructure
     extends Place_VersionStructure
 {
 
-    @XmlElement(name = "Url")
-    @XmlSchemaType(name = "anyURI")
+    @Transient
     protected String url;
-    @XmlElement(name = "Image")
-    @XmlSchemaType(name = "anyURI")
+
+    @Transient
     protected String image;
-    @XmlElement(name = "PostalAddress")
+
     @Transient
     protected PostalAddress postalAddress;
 
-    @XmlElement(name = "RoadAddress")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Transient
     protected RoadAddress roadAddress;
 
     public AddressablePlace_VersionStructure(MultilingualString name) {
