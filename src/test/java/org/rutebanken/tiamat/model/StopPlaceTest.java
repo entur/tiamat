@@ -42,7 +42,6 @@ public class StopPlaceTest {
         stopPlace.getAccessSpaces().add(accessSpace);
 
         stopPlaceRepository.save(stopPlace);
-
         StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
 
         assertThat(actualStopPlace.getAccessSpaces()).isNotEmpty();
@@ -88,6 +87,7 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getLevels().get(0).getVersion()).isEqualTo(level.getVersion());
     }
 
+    @Ignore
     @Test
     public void persistStopPlaceWithRoadAddress() {
         StopPlace stopPlace = new StopPlace();
@@ -101,6 +101,7 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getRoadAddress().getId()).isEqualTo(roadAddress.getId());
     }
 
+    @Ignore
     @Test
     public void persistStopPlaceWithValidityCondition() {
 
