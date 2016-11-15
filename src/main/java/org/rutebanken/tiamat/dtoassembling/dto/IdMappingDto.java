@@ -1,25 +1,23 @@
 package org.rutebanken.tiamat.dtoassembling.dto;
 
-import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.math.BigInteger;
 
 public class IdMappingDto {
-    public String id;
     public String idType;
-    public Set<String> mappingValue;
+    public String originalId;
+    public String id;
 
 
-    public IdMappingDto(String idType, long id, Value value) {
-        this.id = NetexIdMapper.getNetexId(idType, ""+id);
+    public IdMappingDto(String idType, String originalId, BigInteger id) {
+        this.originalId = originalId;
         this.idType = idType;
-        mappingValue = value.getItems();
+        this.id = id.toString();
     }
 
     public String toCsvString() {
-        return id + "," + mappingValue.stream().map(String::toString).collect(Collectors.joining(",")) + "\n";
+        return originalId + "," + NetexIdMapper.getNetexId(idType, id);
     }
 
 }

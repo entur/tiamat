@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 
 public interface StopPlaceRepositoryCustom {
@@ -27,8 +28,8 @@ public interface StopPlaceRepositoryCustom {
     Long findNearbyStopPlace(Envelope envelope, String name);
 
     Long findByKeyValue(String key, Set<String> value);
-
-    List<IdMappingDto> findAllKeyValueMappings();
+    
+    List<IdMappingDto> findKeyValueMappings(int recordPosition, int recordsPerRoundTrip);
 
     Page<StopPlace> findStopPlace(String query, List<String> municipalityId, List<String> countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable);
 }

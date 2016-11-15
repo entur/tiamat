@@ -4,32 +4,45 @@ import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
 import java.util.List;
 
 @Produces("text/plain")
 @Path("/id_mapping")
 public class DtoIdMappingResource {
 
-    @Autowired
+
     private StopPlaceRepository stopPlaceRepository;
 
-    @GET
-    public Response getStopPlaces() {
-        List<IdMappingDto> dtoList = stopPlaceRepository.findAllKeyValueMappings();
-
-        return  Response.ok(getOut(dtoList)).build();
+    @Autowired
+    public DtoIdMappingResource(StopPlaceRepository stopPlaceRepository) {
+        this.stopPlaceRepository = stopPlaceRepository;
     }
 
-    private StreamingOutput getOut(final List<IdMappingDto> idMapping) {
-        return out -> {
-            for (IdMappingDto idMappingDto : idMapping) {
-                out.write(idMappingDto.toCsvString().getBytes());
+    @GET
+    public Response getIdMapping(@DefaultValue(value = "20000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
+
+        return  Response.ok().entity((StreamingOutput) output -> {
+            
+            int recordPosition = 0;
+            boolean lastEmpty = false;
+
+            try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( output ) ) ) ) {
+                while (!lastEmpty) {
+
+                    List<IdMappingDto> keyValueMappings = stopPlaceRepository.findKeyValueMappings(recordPosition, recordsPerRoundTrip);
+                    for (IdMappingDto mapping : keyValueMappings) {
+                        writer.println(mapping.toCsvString());
+                        recordPosition ++;
+                    }
+                    writer.flush();
+                    if(keyValueMappings.isEmpty()) lastEmpty = true;
+                }
+                writer.close();
             }
-        };
+        }).build();
     }
 }
