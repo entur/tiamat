@@ -73,10 +73,14 @@ public class StopPlaceAssembler {
 
     public StopPlaceDto assembleMunicipalityAndCounty(StopPlaceDto stopPlaceDto, StopPlace stopPlace) {
         TopographicPlaceRefStructure topographicRef = stopPlace.getTopographicPlaceRef();
+
         if(topographicRef != null) {
+            long municipalityId = toLong(topographicRef.getRef(), stopPlace);
+            if(municipalityId == 0) return stopPlaceDto;
+
             logger.trace("Found reference from stop place '{}' {} to a topographic place {}", stopPlace.getName(), stopPlace.getId(), topographicRef.getRef());
 
-            TopographicPlace municipality = topographicPlaceRepository.findOne(Long.valueOf(topographicRef.getRef()));
+            TopographicPlace municipality = topographicPlaceRepository.findOne(municipalityId);
 
             if (municipality == null) {
                 logger.warn("Municipality was null from reference {}", topographicRef.getRef());
@@ -89,9 +93,12 @@ public class StopPlaceAssembler {
 
             logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDto.municipality, stopPlace.getName(), stopPlace.getId());
 
-            if(municipality.getParentTopographicPlaceRef() != null) {
+            TopographicPlaceRefStructure countyRef = municipality.getParentTopographicPlaceRef();
+            if(countyRef != null) {
 
-                TopographicPlace county = topographicPlaceRepository.findOne(Long.valueOf(municipality.getParentTopographicPlaceRef().getRef()));
+                long countyId = toLong(countyRef.getRef(), stopPlace);
+                if(countyId == 0 ) return stopPlaceDto;
+                TopographicPlace county = topographicPlaceRepository.findOne(countyId);
 
                 if(county != null && county.getName() != null) {
                     logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getId(), municipality.getName(), municipality.getId());
@@ -104,6 +111,19 @@ public class StopPlaceAssembler {
         }
 
         return stopPlaceDto;
+    }
+
+    private long toLong(String ref, StopPlace stopPlace) {
+        if(ref == null) {
+            logger.warn("Found null reference to topographic place for stop place {}", stopPlace);
+            return 0L;
+        }
+        try {
+            return Long.valueOf(ref);
+        } catch (NumberFormatException e) {
+            logger.warn("Cannot parse topographic place ref {} to long, and can therefore not look it up from the repository. During assembal of stop place to DTO: {}", ref, stopPlace);
+        }
+        return 0L;
     }
 
     public String multiLingualStringValue(MultilingualString multilingualString) {
