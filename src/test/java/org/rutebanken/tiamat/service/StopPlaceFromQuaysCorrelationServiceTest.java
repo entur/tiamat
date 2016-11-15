@@ -83,19 +83,19 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
         Quay quayWithSameName1 = quayWithCentroid(10.489552, 59.866439);
         quayWithSameName1.setId(1L);
-        quayWithSameName1.setName(new MultilingualString("name", "no", ""));
+        quayWithSameName1.setName(new MultilingualString("name", "no"));
 
         Quay quayWithSameName2 = quayWithCentroid(10.489552, 59.866439);
         quayWithSameName2.setId(2L);
-        quayWithSameName2.setName(new MultilingualString("name", "no", ""));
+        quayWithSameName2.setName(new MultilingualString("name", "no"));
 
         Quay quayWithSameNameButFarAway = quayWithCentroid(4.489552, 59.866439);
         quayWithSameNameButFarAway.setId(3L);
-        quayWithSameNameButFarAway.setName(new MultilingualString("name", "no", ""));
+        quayWithSameNameButFarAway.setName(new MultilingualString("name", "no"));
 
         Quay quayWithOtherName = quayWithCentroid(10.489552, 59.866439);
         quayWithOtherName.setId(4L);
-        quayWithOtherName.setName(new MultilingualString("othername", "no", ""));
+        quayWithOtherName.setName(new MultilingualString("othername", "no"));
 
         List<Quay> quays = Arrays.asList(quayWithSameName1, quayWithSameName2, quayWithSameNameButFarAway, quayWithOtherName);
 
@@ -119,15 +119,15 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
         Quay quay1 = quayWithCentroid(4.0, 59.866439);
         quay1.setId(1L);
-        quay1.setName(new MultilingualString("name", "no", ""));
+        quay1.setName(new MultilingualString("name", "no"));
 
         Quay quay2 = quayWithCentroid(5.0, 59.866439);
         quay2.setId(2L);
-        quay2.setName(new MultilingualString("name", "no", ""));
+        quay2.setName(new MultilingualString("name", "no"));
 
         Quay quay3 = quayWithCentroid(6.0, 59.866439);
         quay3.setId(3L);
-        quay3.setName(new MultilingualString("name", "no", ""));
+        quay3.setName(new MultilingualString("name", "no"));
 
         List<Quay> quays = Arrays.asList(quay1, quay2, quay3);
 

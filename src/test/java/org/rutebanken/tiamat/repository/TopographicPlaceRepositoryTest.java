@@ -28,7 +28,7 @@ public class TopographicPlaceRepositoryTest {
         countryRef.setRef(IanaCountryTldEnumeration.NO);
 
         TopographicPlace akershus = new TopographicPlace();
-        akershus.setName(new MultilingualString("Akershus", "no", ""));
+        akershus.setName(new MultilingualString("Akershus", "no"));
         akershus.setCountryRef(countryRef);
         akershus.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 

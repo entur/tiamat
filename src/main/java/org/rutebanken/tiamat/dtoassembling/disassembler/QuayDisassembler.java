@@ -46,8 +46,8 @@ public class QuayDisassembler {
         }
 
 
-        quay.setName(new MultilingualString(quayDto.name, "no", ""));
-        quay.setDescription(new MultilingualString(quayDto.description, "no", ""));
+        quay.setName(new MultilingualString(quayDto.name, "no"));
+        quay.setDescription(new MultilingualString(quayDto.description, "no"));
         quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
         if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {

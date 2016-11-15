@@ -30,7 +30,7 @@ public class QuayAssemblerTest {
     public void assembleQuayWithQuayDescription() {
 
         Quay quay = new Quay();
-        quay.setDescription(new MultilingualString("description","no",""));
+        quay.setDescription(new MultilingualString("description","no"));
 
         QuayDto quayDto = quayAssembler.assemble(quay);
 

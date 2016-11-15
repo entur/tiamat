@@ -66,7 +66,7 @@ public class NvdbStopPlaceRetrievalService {
         roadObject.getEgenskaper().stream()
                 .filter(egenskap -> egenskap.getId().equals(EGENSKAP_HOLDEPLASS_NAVN))
                 .forEach(egenskap -> {
-                    stopPlace.setName(new MultilingualString(egenskap.getVerdi(), "no", ""));
+                    stopPlace.setName(new MultilingualString(egenskap.getVerdi(), "no"));
                 });
 
         return stopPlace;

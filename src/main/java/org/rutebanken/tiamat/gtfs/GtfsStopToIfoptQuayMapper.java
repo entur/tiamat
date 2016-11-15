@@ -22,8 +22,8 @@ public class GtfsStopToIfoptQuayMapper {
     public Quay mapToQuay(Stop stop){
     	logger.debug("Mapping data from GTFS stop to IFOPT quay {} - {}", stop.getId(), stop.getName());
     	Quay quay = new Quay();
-    	quay.setName(new MultilingualString(stop.getName(), "no", ""));
-    	quay.setDescription(new MultilingualString(stop.getDesc(), "no", ""));
+    	quay.setName(new MultilingualString(stop.getName(), "no"));
+    	quay.setDescription(new MultilingualString(stop.getDesc(), "no"));
     	
     	centroid(quay, stop);
     	

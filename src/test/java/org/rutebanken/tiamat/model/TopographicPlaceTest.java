@@ -28,7 +28,7 @@ public class TopographicPlaceTest {
     public void stopPlaceShouldBeReferencingTopographicalPlace() {
 
         TopographicPlace nedreEiker = new TopographicPlace();
-        nedreEiker.setName(new MultilingualString("Nedre Eiker", "no", ""));
+        nedreEiker.setName(new MultilingualString("Nedre Eiker", "no"));
 
         topographicPlaceRepository.save(nedreEiker);
 
@@ -36,7 +36,7 @@ public class TopographicPlaceTest {
         topographicPlaceRefStructure.setRef(String.valueOf(nedreEiker.getId()));
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("Steinberg", "no", ""));
+        stopPlace.setName(new MultilingualString("Steinberg", "no"));
         stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
 
         stopPlaceRepository.save(stopPlace);
@@ -51,7 +51,7 @@ public class TopographicPlaceTest {
 
         // County
         TopographicPlace buskerud = new TopographicPlace();
-        buskerud.setName(new MultilingualString("Buskerud", "no", ""));
+        buskerud.setName(new MultilingualString("Buskerud", "no"));
 
         topographicPlaceRepository.save(buskerud);
 
@@ -60,7 +60,7 @@ public class TopographicPlaceTest {
 
         // Municipality
         TopographicPlace nedreEiker = new TopographicPlace();
-        nedreEiker.setName(new MultilingualString("Nedre Eiker", "no", ""));
+        nedreEiker.setName(new MultilingualString("Nedre Eiker", "no"));
         nedreEiker.setParentTopographicPlaceRef(buskerudReference);
 
         topographicPlaceRepository.save(nedreEiker);
@@ -80,7 +80,7 @@ public class TopographicPlaceTest {
         countryRef.setRef(IanaCountryTldEnumeration.NO);
 
         TopographicPlace akershus = new TopographicPlace();
-        akershus.setName(new MultilingualString("Akershus", "no", ""));
+        akershus.setName(new MultilingualString("Akershus", "no"));
         akershus.setCountryRef(countryRef);
 
         topographicPlaceRepository.save(akershus);

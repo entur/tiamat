@@ -277,7 +277,7 @@ public class TopographicPlaceCreatorTest {
                                                     String name) {
         TopographicPlace topographicPlace = new TopographicPlace();
         topographicPlace.setId(id);
-        topographicPlace.setName(new MultilingualString(name, "no", ""));
+        topographicPlace.setName(new MultilingualString(name, "no"));
         topographicPlace.setParentTopographicPlaceRef(parentTopographicPlaceRef);
         topographicPlace.setCountryRef(countryRef);
         return topographicPlace;

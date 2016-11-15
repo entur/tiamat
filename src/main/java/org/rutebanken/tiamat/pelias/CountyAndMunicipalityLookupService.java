@@ -131,7 +131,7 @@ public class CountyAndMunicipalityLookupService {
             logger.debug("Creating new municipality for locality {}", locality);
 
             municipality = new TopographicPlace();
-            municipality.setName(new MultilingualString(locality, "no", ""));
+            municipality.setName(new MultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
@@ -164,7 +164,7 @@ public class CountyAndMunicipalityLookupService {
 
             logger.debug("Creating new county from pelias county: {}", peliasCounty);
             county = new TopographicPlace();
-            county.setName(new MultilingualString(peliasCounty, "no", ""));
+            county.setName(new MultilingualString(peliasCounty, "no"));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
             CountryRef countryRef = new CountryRef();

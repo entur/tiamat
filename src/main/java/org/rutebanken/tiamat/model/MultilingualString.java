@@ -19,14 +19,11 @@ public class MultilingualString {
 
     protected String lang;
 
-    protected String textIdType;
-
     public MultilingualString() {}
 
-    public MultilingualString(String value, String lang, String textIdType) {
+    public MultilingualString(String value, String lang) {
         this.value = value;
         this.lang = lang;
-        this.textIdType = textIdType;
     }
 
     public MultilingualString(String value) {
@@ -49,14 +46,6 @@ public class MultilingualString {
         this.lang = value;
     }
 
-    public String getTextIdType() {
-        return textIdType;
-    }
-
-    public void setTextIdType(String value) {
-        this.textIdType = value;
-    }
-
     public long getId() {
         return id;
     }
@@ -75,13 +64,12 @@ public class MultilingualString {
         MultilingualString other = (MultilingualString) object;
 
         return Objects.equals(this.value, other.value)
-                && Objects.equals(this.lang, other.lang)
-                && Objects.equals(this.textIdType, other.textIdType);
+                && Objects.equals(this.lang, other.lang);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.lang, this.value, this.textIdType);
+        return Objects.hash(this.lang, this.value);
     }
 
     @Override

@@ -236,14 +236,14 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     private StopPlace createStopPlace(String name, double longitude, double latitude, Long stopPlaceId) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point(longitude, latitude));
-        stopPlace.setName(new MultilingualString(name, "", ""));
+        stopPlace.setName(new MultilingualString(name, ""));
         stopPlace.setId(stopPlaceId);
         return stopPlace;
     }
 
     private Quay createQuay(String name, double longitude, double latitude, Long id) {
         Quay quay = new Quay();
-        quay.setName(new MultilingualString(name, "", ""));
+        quay.setName(new MultilingualString(name, ""));
         quay.setId(id);
         quay.setCentroid(point(longitude, latitude));
         return quay;

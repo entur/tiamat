@@ -58,11 +58,11 @@ public class DefaultStopPlaceImporterTest {
         Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        firstStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
+        firstStopPlace.setName(new MultilingualString("Andalsnes", "no"));
         firstStopPlace.setId(firstStopId);
 
         Quay terminal1 = new Quay();
-        terminal1.setName(new MultilingualString("terminal 1", "", ""));
+        terminal1.setName(new MultilingualString("terminal 1"));
         terminal1.setId(2L);
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
 
@@ -70,10 +70,10 @@ public class DefaultStopPlaceImporterTest {
 
         StopPlace secondStopPlace = new StopPlace();
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
-        secondStopPlace.setName(new MultilingualString("Andalsnes", "no", ""));
+        secondStopPlace.setName(new MultilingualString("Andalsnes", "no"));
 
         Quay terminal2 = new Quay();
-        terminal2.setName(new MultilingualString("terminal 2", "", ""));
+        terminal2.setName(new MultilingualString("terminal 2"));
         terminal2.setId(3L);
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(60.01, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
@@ -97,12 +97,12 @@ public class DefaultStopPlaceImporterTest {
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setId(1L);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        firstStopPlace.setName(new MultilingualString("skjeberg", "no", ""));
+        firstStopPlace.setName(new MultilingualString("skjeberg", "no"));
 
         StopPlace secondStopPlace = new StopPlace();
         secondStopPlace.setId(firstStopPlace.getId());
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        secondStopPlace.setName(new MultilingualString("skjeberg", "no", ""));
+        secondStopPlace.setName(new MultilingualString("skjeberg", "no"));
 
 
         Long savedId = 2L;

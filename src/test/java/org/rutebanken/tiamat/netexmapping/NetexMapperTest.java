@@ -29,7 +29,7 @@ public class NetexMapperTest {
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", "en", ""));
+        stopPlace.setName(new MultilingualString("name", "en"));
 
         stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
 
@@ -71,7 +71,7 @@ public class NetexMapperTest {
     @Test
     public void mapStopPlaceToNetex() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", "en", ""));
+        stopPlace.setName(new MultilingualString("name", "en"));
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 

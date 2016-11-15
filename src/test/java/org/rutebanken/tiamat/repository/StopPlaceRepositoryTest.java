@@ -51,10 +51,10 @@ public class StopPlaceRepositoryTest {
         StopPlace stopPlaceNewer = new StopPlace();
 
         stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-        stopPlaceOlder.setName(new MultilingualString("it's older", "en", ""));
+        stopPlaceOlder.setName(new MultilingualString("it's older", "en"));
 
         stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
-        stopPlaceNewer.setName(new MultilingualString("it's newer", "en", ""));
+        stopPlaceNewer.setName(new MultilingualString("it's newer", "en"));
 
         stopPlaceRepository.save(stopPlaceNewer);
         stopPlaceRepository.save(stopPlaceOlder);
