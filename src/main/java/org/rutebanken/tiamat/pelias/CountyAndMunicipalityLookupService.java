@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+//@Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
 public class CountyAndMunicipalityLookupService {
 
