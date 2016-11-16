@@ -70,12 +70,13 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
     }
 
-    //    @Transactional
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        Semaphore semaphore = getStripedSemaphore(newStopPlace);
+        String semaphoreKey = getStripedSemaphoreKey(newStopPlace);
+        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
         semaphore.acquire();
+        logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, newStopPlace);
 
         try {
             logger.info("Import stop place {}", newStopPlace);
@@ -91,6 +92,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return stopPlace;
         } finally {
             semaphore.release();
+            logger.info("Released semaphore '{}'", semaphoreKey);
         }
     }
 
@@ -258,27 +260,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return null;
     }
 
-    private Semaphore getStripedSemaphore(StopPlace stopPlace) {
+    private String getStripedSemaphoreKey(StopPlace stopPlace) {
         final String semaphoreKey;
-        if (stopPlace.getCentroid() != null) {
-            Point location = stopPlace.getCentroid();
-            semaphoreKey = locationSemaphore(location);
-        } else if (stopPlace.getId() != null) {
-            semaphoreKey = "new-stop-place-" + stopPlace.getId();
-        } else if (stopPlace.getName() != null
+        if (stopPlace.getName() != null
                 && stopPlace.getName().getValue() != null
                 && !stopPlace.getName().getValue().isEmpty()) {
             semaphoreKey = "name-" + stopPlace.getName().getValue();
         } else {
             semaphoreKey = "all";
         }
-        logger.info("Using semaphore key '{}' for stop place {}", semaphoreKey, stopPlace);
-        return stripedSemaphores.get(semaphoreKey);
+        return semaphoreKey;
     }
-
-    private String locationSemaphore(Point point) {
-        return "location-" + format.format(point.getX()) + "-" + format.format(point.getY());
-    }
-
-
 }
