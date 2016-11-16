@@ -107,7 +107,7 @@ public class DefaultStopPlaceImporterTest {
 
         Long savedId = 2L;
 
-        when(stopPlaceRepository.save(firstStopPlace)).then(invocationOnMock -> {
+        when(stopPlaceRepository.saveAndFlush(firstStopPlace)).then(invocationOnMock -> {
             StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
             stopPlace.setId(savedId);
             return stopPlace;
