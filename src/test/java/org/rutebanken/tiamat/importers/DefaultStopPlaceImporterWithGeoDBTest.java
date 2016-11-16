@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = TiamatApplication.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ActiveProfiles("geodb")
+@Transactional
 public class DefaultStopPlaceImporterWithGeoDBTest {
 
     @Autowired
@@ -72,9 +75,11 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         double quayLongitude = 5.2646351097871768587310725706629455089569091796875;
 
         StopPlace firstStopPlace = createStopPlace(name,
-                stopPlaceLongitude, stopPlaceLatitude, 987987L);
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, 987987L));
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude + 0.01, quayLatitude + 0.01, 987987L));
+                stopPlaceLongitude, stopPlaceLatitude, null);
+        firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
+
+        // Another quay with different coordinates
+        firstStopPlace.getQuays().add(createQuay(name, quayLongitude + 0.01, quayLatitude + 0.01, null));
 
         AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
@@ -83,8 +88,8 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
 
         StopPlace secondStopPlace = createStopPlace(name,
-                stopPlaceLongitude, stopPlaceLatitude, 321321321L);
-        secondStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, 321321321L));
+                stopPlaceLongitude, stopPlaceLatitude, null);
+        secondStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
 
         // Import second stop place
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);

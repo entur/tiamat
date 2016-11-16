@@ -21,6 +21,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Random;
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "stopPlaceFromOriginalIdFinderCache.maxSize = 0"}
 )
 @ActiveProfiles("geodb")
+@Transactional
 public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
     @Autowired
