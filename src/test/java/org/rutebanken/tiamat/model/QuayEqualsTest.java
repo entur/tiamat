@@ -64,4 +64,20 @@ public class QuayEqualsTest {
         Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
         assertThat(quay1).isEqualTo(quay2);
     }
+
+    @Test
+    public void quaysWithSlightlyDifferentCoordinatesShouldNotBeEqaual() {
+        double quayLatitude = 59.4221750629462661663637845776975154876708984375;
+        double quayLongitude = 5.2646351097871768587310725706629455089569091796875;
+
+        String name = "Name";
+        Quay quay1 = new Quay(new MultilingualString(name));
+        quay1.setId(987987L); // The ID should not influence the equals method.
+        Quay quay2 = new Quay(new MultilingualString(name));
+        quay2.setId(987987L);
+
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude, quayLatitude)));
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude + 0.01, quayLatitude + 0.01)));
+        assertThat(quay1).isNotEqualTo(quay2);
+    }
 }
