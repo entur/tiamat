@@ -20,10 +20,9 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     @OneToMany(cascade = CascadeType.ALL)
     private List<DestinationDisplayView> destinations;
 
-    @Transient
     protected Float compassBearing;
 
-    @Enumerated(EnumType.STRING)
+    @Transient
     protected CompassBearing8Enumeration compassOctant;
 
     @Enumerated(EnumType.STRING)
