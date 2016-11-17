@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
-//@Transactional
 public class PublicationDeliveryResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryResource.class);
@@ -73,7 +72,7 @@ public class PublicationDeliveryResource {
             PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
             return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
         } catch (Exception e) {
-            logger.error("Caught exception while importing publication delivery: "+incomingPublicationDelivery, e);
+            logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
         }
     }
@@ -85,7 +84,7 @@ public class PublicationDeliveryResource {
             logger.warn(responseMessage);
             throw new RuntimeException(responseMessage);
         }
-        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+        logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
         try {
             org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
@@ -106,49 +105,6 @@ public class PublicationDeliveryResource {
             MDC.remove(IMPORT_CORRELATION_ID);
         }
     }
-
-    // Import publication delivery without using SiteFrameImporter
-//    public PublicationDeliveryStructure importPublicationDelivery2(PublicationDeliveryStructure incomingPublicationDelivery) {
-//        if(incomingPublicationDelivery.getDataObjects() == null) {
-//            String responseMessage = "Received publication delivery but it does not contain any data objects.";
-//            logger.warn(responseMessage);
-//            throw new RuntimeException(responseMessage);
-//        }
-//        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
-//
-//        SiteFrame netexSiteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
-//                .stream()
-//                .filter(element -> element.getValue() instanceof SiteFrame)
-//                .map(element -> (SiteFrame) element.getValue())
-//                .findFirst().get();
-//
-//        org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
-//
-//        AtomicInteger topographicPlacesCreated = new AtomicInteger();
-//
-//        List<StopPlace> importedStopPlaces = tiamatSiteFrame.getStopPlaces().getStopPlace()
-//                .parallelStream()
-//                .map(stopPlace -> {
-//                    try {
-//                        return stopPlaceImporter.importStopPlace(stopPlace, tiamatSiteFrame, topographicPlacesCreated);
-//                    } catch (InterruptedException|ExecutionException e) {
-//                        e.printStackTrace();
-//                        return null;
-//                    }
-//                })
-//                .map(importedStopPlace -> netexMapper.mapToNetexModel(importedStopPlace))
-//                .collect(Collectors.toList());
-//
-//
-//
-//        netexSiteFrame.getStopPlaces().getStopPlace().clear();
-//        netexSiteFrame.getStopPlaces().getStopPlace().addAll(importedStopPlaces);
-//
-//
-//        return new PublicationDeliveryStructure()                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-//                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(netexSiteFrame)));
-//
-//    }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
