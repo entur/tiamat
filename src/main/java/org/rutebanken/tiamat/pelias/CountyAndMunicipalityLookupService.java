@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
 public class CountyAndMunicipalityLookupService {
 
@@ -32,7 +32,7 @@ public class CountyAndMunicipalityLookupService {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
     
-    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
+    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
 
 
     /**
@@ -100,7 +100,7 @@ public class CountyAndMunicipalityLookupService {
         stopPlace.setTopographicPlaceRef(municipalityRef);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private TopographicPlace populateCountyAndMunicipality(String peliasCounty, String peliasLocalAdmin, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException {
         List<TopographicPlace> counties = topographicPlaceRepository
                 .findByNameValueAndCountryRefRefAndTopographicPlaceType(
