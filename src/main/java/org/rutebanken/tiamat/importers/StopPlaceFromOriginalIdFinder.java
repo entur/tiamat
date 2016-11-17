@@ -52,7 +52,7 @@ public class StopPlaceFromOriginalIdFinder {
         StopPlace existingStopPlace = findByKeyValue(originalIds);
 
         if (existingStopPlace != null) {
-            logger.debug("Found stop place {} from original ID key {}", existingStopPlace.getId(), stopPlace.getId());
+            logger.debug("Found stop place {} from original ID", existingStopPlace.getId());
             return existingStopPlace;
         }
         return null;
