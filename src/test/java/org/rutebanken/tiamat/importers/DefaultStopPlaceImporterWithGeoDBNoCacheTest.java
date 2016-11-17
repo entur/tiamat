@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importers;
 
-import com.vividsolutions.jts.awt.PointShapeFactory;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -9,10 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SiteFrame;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -23,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -94,7 +89,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
             Point randomPoint = randomCoordinates();
             executeNTimes(eachQuayImportedCount, executorService, () -> {
                 StopPlace stopPlace = createStop();
-                Quay quay = new Quay(new MultilingualString(quayName));
+                Quay quay = new Quay(new EmbeddableMultilingualString(quayName));
                 quay.setCentroid(randomPoint);
                 stopPlace.getQuays().add(quay);
                 try {
@@ -150,7 +145,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
     }
 
     private StopPlace createStop() {
-        StopPlace stopPlace = new StopPlace(new MultilingualString("Stopp"));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stopp"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
         return stopPlace;
     }

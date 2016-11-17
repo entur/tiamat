@@ -58,11 +58,11 @@ public class DefaultStopPlaceImporterTest {
         Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        firstStopPlace.setName(new MultilingualString("Andalsnes", "no"));
+        firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstStopPlace.setId(firstStopId);
 
         Quay terminal1 = new Quay();
-        terminal1.setName(new MultilingualString("terminal 1"));
+        terminal1.setName(new EmbeddableMultilingualString("terminal 1"));
         terminal1.setId(2L);
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
 
@@ -70,10 +70,10 @@ public class DefaultStopPlaceImporterTest {
 
         StopPlace secondStopPlace = new StopPlace();
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
-        secondStopPlace.setName(new MultilingualString("Andalsnes", "no"));
+        secondStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
 
         Quay terminal2 = new Quay();
-        terminal2.setName(new MultilingualString("terminal 2"));
+        terminal2.setName(new EmbeddableMultilingualString("terminal 2"));
         terminal2.setId(3L);
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(60.01, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
@@ -97,12 +97,12 @@ public class DefaultStopPlaceImporterTest {
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.setId(1L);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        firstStopPlace.setName(new MultilingualString("skjeberg", "no"));
+        firstStopPlace.setName(new EmbeddableMultilingualString("skjeberg", "no"));
 
         StopPlace secondStopPlace = new StopPlace();
         secondStopPlace.setId(firstStopPlace.getId());
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        secondStopPlace.setName(new MultilingualString("skjeberg", "no"));
+        secondStopPlace.setName(new EmbeddableMultilingualString("skjeberg", "no"));
 
 
         Long savedId = 2L;
@@ -248,10 +248,10 @@ public class DefaultStopPlaceImporterTest {
 
     @Test
     public void notCloseEnoughIfAbout10MetersBetween() {
-        Quay quay1 = new Quay(new MultilingualString("One side of the road"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("One side of the road"));
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59.858690, 10.493860)));
 
-        Quay quay2 = new Quay(new MultilingualString("Other side of the road."));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Other side of the road."));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(59.858684, 10.493682)));
         assertThat(stopPlaceImporter.areClose(quay1, quay2)).isFalse();
     }
@@ -273,15 +273,15 @@ public class DefaultStopPlaceImporterTest {
         Point existingQuayPoint = geometryFactory.createPoint(new Coordinate(60, 11));
 
         Quay existingQuay = new Quay();
-        existingQuay.setName(new MultilingualString("existing quay"));
+        existingQuay.setName(new EmbeddableMultilingualString("existing quay"));
         existingQuay.setCentroid(existingQuayPoint);
 
         Quay alreadyAdded = new Quay();
-        alreadyAdded.setName(new MultilingualString("already added quay"));
+        alreadyAdded.setName(new EmbeddableMultilingualString("already added quay"));
         alreadyAdded.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
 
         Quay newQuayToInspect = new Quay();
-        newQuayToInspect.setName(new MultilingualString("New quay which matches existing quay on the coordinates"));
+        newQuayToInspect.setName(new EmbeddableMultilingualString("New quay which matches existing quay on the coordinates"));
         newQuayToInspect.setCentroid(existingQuayPoint);
 
         List<Quay> existingQuays = Arrays.asList(existingQuay);
@@ -297,15 +297,15 @@ public class DefaultStopPlaceImporterTest {
         Point alreadyAddedQuayPoint = geometryFactory.createPoint(new Coordinate(61, 12));
 
         Quay existingQuay = new Quay();
-        existingQuay.setName(new MultilingualString("Existing quay"));
+        existingQuay.setName(new EmbeddableMultilingualString("Existing quay"));
         existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(71, 9)));
 
         Quay alreadyAddedQuay = new Quay();
-        alreadyAddedQuay.setName(new MultilingualString("Quay to be added"));
+        alreadyAddedQuay.setName(new EmbeddableMultilingualString("Quay to be added"));
         alreadyAddedQuay.setCentroid(alreadyAddedQuayPoint);
 
         Quay newQuayToInspect = new Quay();
-        newQuayToInspect.setName(new MultilingualString("New quay to check for match"));
+        newQuayToInspect.setName(new EmbeddableMultilingualString("New quay to check for match"));
         newQuayToInspect.setCentroid(alreadyAddedQuayPoint);
 
         List<Quay> existingQuays = Arrays.asList(existingQuay);

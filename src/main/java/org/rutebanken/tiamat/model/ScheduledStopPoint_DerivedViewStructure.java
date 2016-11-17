@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;extension base="{http://www.netex.org.uk/netex}DerivedViewStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}ScheduledStopPointRef" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}TypeOfPointRef" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}StopPointDescriptionGroup"/>
  *       &lt;/sequence>
@@ -67,15 +67,15 @@ public class ScheduledStopPoint_DerivedViewStructure
     @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "TypeOfPointRef")
     protected TypeOfPointRefStructure typeOfPointRef;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     @XmlElement(name = "ShortStopCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -130,10 +130,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -142,10 +142,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -178,10 +178,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -190,10 +190,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -202,10 +202,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -214,10 +214,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -226,10 +226,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -238,10 +238,10 @@ public class ScheduledStopPoint_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

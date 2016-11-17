@@ -62,7 +62,7 @@ public class DeliveryVariant_VersionStructure
     @XmlElement(name = "TypeOfDeliveryVariantRef")
     protected TypeOfDeliveryVariantRefStructure typeOfDeliveryVariantRef;
     @XmlElement(name = "VariantText")
-    protected MultilingualString variantText;
+    protected MultilingualStringEntity variantText;
     @XmlAttribute(name = "order")
     protected BigInteger order;
 
@@ -143,10 +143,10 @@ public class DeliveryVariant_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getVariantText() {
+    public MultilingualStringEntity getVariantText() {
         return variantText;
     }
 
@@ -155,10 +155,10 @@ public class DeliveryVariant_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setVariantText(MultilingualString value) {
+    public void setVariantText(MultilingualStringEntity value) {
         this.variantText = value;
     }
 

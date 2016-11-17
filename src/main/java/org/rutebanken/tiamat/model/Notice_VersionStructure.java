@@ -59,9 +59,9 @@ public class Notice_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "Text")
-    protected MultilingualString text;
+    protected MultilingualStringEntity text;
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -77,7 +77,7 @@ public class Notice_VersionStructure
     @XmlElement(name = "CanBeAdvertised")
     protected Boolean canBeAdvertised;
     @XmlElement(name = "DriverDisplayText")
-    protected MultilingualString driverDisplayText;
+    protected MultilingualStringEntity driverDisplayText;
     protected DeliveryVariants_RelStructure variants;
 
     /**
@@ -85,10 +85,10 @@ public class Notice_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -97,10 +97,10 @@ public class Notice_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -109,10 +109,10 @@ public class Notice_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getText() {
+    public MultilingualStringEntity getText() {
         return text;
     }
 
@@ -121,10 +121,10 @@ public class Notice_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setText(MultilingualString value) {
+    public void setText(MultilingualStringEntity value) {
         this.text = value;
     }
 
@@ -253,10 +253,10 @@ public class Notice_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDriverDisplayText() {
+    public MultilingualStringEntity getDriverDisplayText() {
         return driverDisplayText;
     }
 
@@ -265,10 +265,10 @@ public class Notice_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDriverDisplayText(MultilingualString value) {
+    public void setDriverDisplayText(MultilingualStringEntity value) {
         this.driverDisplayText = value;
     }
 

@@ -1,7 +1,8 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -41,10 +42,10 @@ public class StopPlaceDisassembler {
 
         logger.debug("Disassemble simpleStopPlaceDto with id {}", simpleStopPlaceDto.id);
 
-        destination.setName(new MultilingualString(simpleStopPlaceDto.name, "no"));
+        destination.setName(new EmbeddableMultilingualString(simpleStopPlaceDto.name, "no"));
         destination.setChanged(ZonedDateTime.now());
-        destination.setShortName(new MultilingualString(simpleStopPlaceDto.shortName, "no"));
-        destination.setDescription(new MultilingualString(simpleStopPlaceDto.description, "no"));
+        destination.setShortName(new EmbeddableMultilingualString(simpleStopPlaceDto.shortName, "no"));
+        destination.setDescription(new EmbeddableMultilingualString(simpleStopPlaceDto.description, "no"));
 
         destination.setStopPlaceType(Optional.ofNullable(simpleStopPlaceDto.stopPlaceType)
                 .filter(type -> !type.isEmpty())

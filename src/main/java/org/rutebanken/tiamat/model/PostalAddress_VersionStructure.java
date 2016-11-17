@@ -67,17 +67,17 @@ public class PostalAddress_VersionStructure
     @XmlSchemaType(name = "normalizedString")
     protected String houseNumber;
     @XmlElement(name = "BuildingName")
-    protected MultilingualString buildingName;
+    protected MultilingualStringEntity buildingName;
     @XmlElement(name = "AddressLine1")
-    protected MultilingualString addressLine1;
+    protected MultilingualStringEntity addressLine1;
     @XmlElement(name = "AddressLine2")
-    protected MultilingualString addressLine2;
+    protected MultilingualStringEntity addressLine2;
     @XmlElement(name = "Street")
-    protected MultilingualString street;
+    protected MultilingualStringEntity street;
     @XmlElement(name = "Town")
-    protected MultilingualString town;
+    protected MultilingualStringEntity town;
     @XmlElement(name = "Suburb")
-    protected MultilingualString suburb;
+    protected MultilingualStringEntity suburb;
     @XmlElement(name = "PostCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -91,7 +91,7 @@ public class PostalAddress_VersionStructure
     @XmlSchemaType(name = "normalizedString")
     protected String postalRegion;
     @XmlElement(name = "Province")
-    protected MultilingualString province;
+    protected MultilingualStringEntity province;
     @XmlElement(name = "RoadAddressRef")
     protected AddressRefStructure roadAddressRef;
 
@@ -124,10 +124,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getBuildingName() {
+    public MultilingualStringEntity getBuildingName() {
         return buildingName;
     }
 
@@ -136,10 +136,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setBuildingName(MultilingualString value) {
+    public void setBuildingName(MultilingualStringEntity value) {
         this.buildingName = value;
     }
 
@@ -148,10 +148,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getAddressLine1() {
+    public MultilingualStringEntity getAddressLine1() {
         return addressLine1;
     }
 
@@ -160,10 +160,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setAddressLine1(MultilingualString value) {
+    public void setAddressLine1(MultilingualStringEntity value) {
         this.addressLine1 = value;
     }
 
@@ -172,10 +172,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getAddressLine2() {
+    public MultilingualStringEntity getAddressLine2() {
         return addressLine2;
     }
 
@@ -184,10 +184,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setAddressLine2(MultilingualString value) {
+    public void setAddressLine2(MultilingualStringEntity value) {
         this.addressLine2 = value;
     }
 
@@ -196,10 +196,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getStreet() {
+    public MultilingualStringEntity getStreet() {
         return street;
     }
 
@@ -208,10 +208,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setStreet(MultilingualString value) {
+    public void setStreet(MultilingualStringEntity value) {
         this.street = value;
     }
 
@@ -220,10 +220,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getTown() {
+    public MultilingualStringEntity getTown() {
         return town;
     }
 
@@ -232,10 +232,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setTown(MultilingualString value) {
+    public void setTown(MultilingualStringEntity value) {
         this.town = value;
     }
 
@@ -244,10 +244,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getSuburb() {
+    public MultilingualStringEntity getSuburb() {
         return suburb;
     }
 
@@ -256,10 +256,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setSuburb(MultilingualString value) {
+    public void setSuburb(MultilingualStringEntity value) {
         this.suburb = value;
     }
 
@@ -340,10 +340,10 @@ public class PostalAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getProvince() {
+    public MultilingualStringEntity getProvince() {
         return province;
     }
 
@@ -352,10 +352,10 @@ public class PostalAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setProvince(MultilingualString value) {
+    public void setProvince(MultilingualStringEntity value) {
         this.province = value;
     }
 

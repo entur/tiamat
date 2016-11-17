@@ -49,9 +49,9 @@ public class BorderPoint_ValueStructure
 {
 
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "GroupOfOperatorsRef")
     protected GroupOfOperatorsRefStructure groupOfOperatorsRef;
     @XmlElement(name = "GroupOfOperators")
@@ -62,10 +62,10 @@ public class BorderPoint_ValueStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -74,10 +74,10 @@ public class BorderPoint_ValueStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -86,10 +86,10 @@ public class BorderPoint_ValueStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -98,10 +98,10 @@ public class BorderPoint_ValueStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

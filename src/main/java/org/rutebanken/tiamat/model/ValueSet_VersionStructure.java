@@ -53,7 +53,7 @@ public class ValueSet_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     protected TypesOfValueStructure values;
     @XmlAttribute(name = "classOfValues")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -64,10 +64,10 @@ public class ValueSet_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -76,10 +76,10 @@ public class ValueSet_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 

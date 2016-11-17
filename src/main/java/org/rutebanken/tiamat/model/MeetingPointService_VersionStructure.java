@@ -53,7 +53,7 @@ public class MeetingPointService_VersionStructure
     @XmlSchemaType(name = "NMTOKEN")
     protected MeetingPointEnumeration meetingPointServiceType;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
 
     /**
      * Gets the value of the meetingPointServiceType property.
@@ -84,10 +84,10 @@ public class MeetingPointService_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -96,10 +96,10 @@ public class MeetingPointService_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

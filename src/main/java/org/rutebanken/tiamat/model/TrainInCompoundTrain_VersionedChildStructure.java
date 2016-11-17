@@ -51,7 +51,7 @@ public class TrainInCompoundTrain_VersionedChildStructure
 {
 
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "CompoundTrainRef")
     protected CompoundTrainRef compoundTrainRef;
     @XmlElement(name = "TrainRef")
@@ -61,7 +61,7 @@ public class TrainInCompoundTrain_VersionedChildStructure
     @XmlElement(name = "ReversedOrientation", defaultValue = "false")
     protected Boolean reversedOrientation;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger order;
@@ -71,10 +71,10 @@ public class TrainInCompoundTrain_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -83,10 +83,10 @@ public class TrainInCompoundTrain_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -191,10 +191,10 @@ public class TrainInCompoundTrain_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -203,10 +203,10 @@ public class TrainInCompoundTrain_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

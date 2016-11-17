@@ -24,9 +24,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.netex.org.uk/netex}StopPlace_DerivedViewStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}StopPlaceRef" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="placeTypes" type="{http://www.netex.org.uk/netex}typeOfPlaceRefs_RelStructure" minOccurs="0"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}StopIdentifierGroup"/>
  *         &lt;element name="StopPlaceType" type="{http://www.netex.org.uk/netex}StopTypeEnumeration" minOccurs="0"/>
  *         &lt;element name="TransportMode" type="{http://www.netex.org.uk/netex}VehicleModeEnumeration" minOccurs="0"/>

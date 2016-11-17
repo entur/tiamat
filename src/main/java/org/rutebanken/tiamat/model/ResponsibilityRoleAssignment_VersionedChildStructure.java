@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;extension base="{http://www.netex.org.uk/netex}VersionedChildStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}ResponsibilitySetRef" minOccurs="0"/>
- *         &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}ResponsibilityRolesGroup"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}ResponsiblePartiesGroup"/>
  *       &lt;/sequence>
@@ -60,7 +60,7 @@ public class ResponsibilityRoleAssignment_VersionedChildStructure
     @XmlElement(name = "ResponsibilitySetRef")
     protected ResponsibilitySetRefStructure responsibilitySetRef;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlList
     @XmlElement(name = "DataRoleType")
     @XmlSchemaType(name = "anySimpleType")
@@ -107,10 +107,10 @@ public class ResponsibilityRoleAssignment_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -119,10 +119,10 @@ public class ResponsibilityRoleAssignment_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;/sequence>
  *         &lt;sequence>
  *           &lt;element name="Formula" type="{http://www.w3.org/2001/XMLSchema}Name" minOccurs="0"/>
- *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}LinkRef" minOccurs="0"/>
  *           &lt;element name="LocatingSystemRef" type="{http://www.netex.org.uk/netex}SrsNameType" minOccurs="0"/>
  *         &lt;/sequence>

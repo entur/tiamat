@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}DerivedViewStructure">
  *       &lt;sequence>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}NoticeRef" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}NoticeAssignmentPropertiesGroup"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}NoticePropertiesGroup"/>
@@ -68,7 +68,7 @@ public class NoticeAssignment_DerivedViewStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "NoticeRef")
     protected NoticeRefStructure noticeRef;
     @XmlElement(name = "Mark")
@@ -82,7 +82,7 @@ public class NoticeAssignment_DerivedViewStructure
     @XmlElement(name = "Advertised")
     protected Boolean advertised;
     @XmlElement(name = "Text")
-    protected MultilingualString text;
+    protected MultilingualStringEntity text;
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -105,10 +105,10 @@ public class NoticeAssignment_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -117,10 +117,10 @@ public class NoticeAssignment_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -249,10 +249,10 @@ public class NoticeAssignment_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getText() {
+    public MultilingualStringEntity getText() {
         return text;
     }
 
@@ -261,10 +261,10 @@ public class NoticeAssignment_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setText(MultilingualString value) {
+    public void setText(MultilingualStringEntity value) {
         this.text = value;
     }
 

@@ -52,9 +52,9 @@ public class VehicleStoppingPosition_VersionStructure
 {
 
     @XmlElement(name = "StoppingPositionName")
-    protected MultilingualString stoppingPositionName;
+    protected MultilingualStringEntity stoppingPositionName;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     @XmlElement(name = "Bearing")
     protected BigInteger bearing;
     protected VehiclePositionAlignments_RelStructure vehiclePositionAlignments;
@@ -64,10 +64,10 @@ public class VehicleStoppingPosition_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getStoppingPositionName() {
+    public MultilingualStringEntity getStoppingPositionName() {
         return stoppingPositionName;
     }
 
@@ -76,10 +76,10 @@ public class VehicleStoppingPosition_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setStoppingPositionName(MultilingualString value) {
+    public void setStoppingPositionName(MultilingualStringEntity value) {
         this.stoppingPositionName = value;
     }
 
@@ -88,10 +88,10 @@ public class VehicleStoppingPosition_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -100,10 +100,10 @@ public class VehicleStoppingPosition_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

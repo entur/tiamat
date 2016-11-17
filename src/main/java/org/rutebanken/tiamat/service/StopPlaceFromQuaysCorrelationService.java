@@ -203,7 +203,7 @@ public class StopPlaceFromQuaysCorrelationService {
         }
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(quayGroupName, "no"));
+        stopPlace.setName(new EmbeddableMultilingualString(quayGroupName, "no"));
 
         stopPlace.setQuays(new HashSet<>());
 

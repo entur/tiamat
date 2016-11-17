@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -53,7 +52,7 @@ public class Point_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
 //    @XmlElement(name = "Location")
 //    protected LocationStructure location;
     @XmlElement(name = "PointNumber")
@@ -69,10 +68,10 @@ public class Point_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -81,10 +80,10 @@ public class Point_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 

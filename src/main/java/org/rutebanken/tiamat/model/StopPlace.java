@@ -104,7 +104,7 @@ public class StopPlace
     @Transient
     protected VehicleStoppingPlaces_RelStructure vehicleStoppingPlaces;
 
-    public StopPlace(MultilingualString name) {
+    public StopPlace(EmbeddableMultilingualString name) {
         super(name);
     }
 

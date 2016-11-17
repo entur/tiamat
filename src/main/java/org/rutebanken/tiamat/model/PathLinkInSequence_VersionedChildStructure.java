@@ -57,7 +57,7 @@ public class PathLinkInSequence_VersionedChildStructure
     @XmlElement(name = "PathLinkRef", required = true)
     protected PathLinkRefStructure pathLinkRef;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "Reverse")
     protected Boolean reverse;
     @XmlElement(name = "Heading")
@@ -67,7 +67,7 @@ public class PathLinkInSequence_VersionedChildStructure
     @XmlSchemaType(name = "NMTOKEN")
     protected TransitionEnumeration transition;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     protected Views views;
 
     /**
@@ -99,10 +99,10 @@ public class PathLinkInSequence_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -111,10 +111,10 @@ public class PathLinkInSequence_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -195,10 +195,10 @@ public class PathLinkInSequence_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -207,10 +207,10 @@ public class PathLinkInSequence_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualString"/>
+ *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}TopographicPlaceRef" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -42,7 +42,7 @@ import javax.xml.bind.annotation.XmlType;
 public class Qualify {
 
     @XmlElement(name = "QualifierName", required = true)
-    protected MultilingualString qualifierName;
+    protected MultilingualStringEntity qualifierName;
     @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
 
@@ -51,10 +51,10 @@ public class Qualify {
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getQualifierName() {
+    public MultilingualStringEntity getQualifierName() {
         return qualifierName;
     }
 
@@ -63,10 +63,10 @@ public class Qualify {
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setQualifierName(MultilingualString value) {
+    public void setQualifierName(MultilingualStringEntity value) {
         this.qualifierName = value;
     }
 

@@ -64,9 +64,9 @@ public class OperatingDay_VersionStructure
     @XmlElement(name = "ServiceCalendarRef")
     protected ServiceCalendarRefStructure serviceCalendarRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "DayNumber")
     protected BigInteger dayNumber;
     @XmlElement(name = "PrivateCode")
@@ -130,10 +130,10 @@ public class OperatingDay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -142,10 +142,10 @@ public class OperatingDay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -154,10 +154,10 @@ public class OperatingDay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -166,10 +166,10 @@ public class OperatingDay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 

@@ -34,7 +34,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
 
-    public Quay(MultilingualString name) {
+    public Quay(EmbeddableMultilingualString name) {
         super(name);
     }
 

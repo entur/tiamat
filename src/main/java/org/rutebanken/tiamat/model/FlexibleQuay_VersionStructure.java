@@ -59,7 +59,7 @@ public class FlexibleQuay_VersionStructure
 {
 
     @XmlElement(name = "NameSuffix")
-    protected MultilingualString nameSuffix;
+    protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;
     @XmlElement(name = "FlexibleStopPlaceRef")
     protected FlexibleStopPlaceRefStructure flexibleStopPlaceRef;
@@ -80,10 +80,10 @@ public class FlexibleQuay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getNameSuffix() {
+    public MultilingualStringEntity getNameSuffix() {
         return nameSuffix;
     }
 
@@ -92,10 +92,10 @@ public class FlexibleQuay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setNameSuffix(MultilingualString value) {
+    public void setNameSuffix(MultilingualStringEntity value) {
         this.nameSuffix = value;
     }
 

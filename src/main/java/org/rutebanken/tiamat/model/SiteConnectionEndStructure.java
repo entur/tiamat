@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;element ref="{http://www.netex.org.uk/netex}OperatorRef" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}OperatorView" minOccurs="0"/>
  *         &lt;/choice>
- *         &lt;element name="Label" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Label" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -104,7 +104,7 @@ public class SiteConnectionEndStructure {
     @XmlElement(name = "OperatorView")
     protected OperatorView operatorView;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
 
     /**
      * Gets the value of the transportMode property.
@@ -495,10 +495,10 @@ public class SiteConnectionEndStructure {
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -507,10 +507,10 @@ public class SiteConnectionEndStructure {
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

@@ -74,11 +74,11 @@ public class ScheduledStopPoint_VersionStructure
 
     protected StopAreaRefs_RelStructure stopAreas;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     @XmlElement(name = "ShortStopCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -149,10 +149,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -161,10 +161,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -173,10 +173,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -185,10 +185,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -197,10 +197,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -209,10 +209,10 @@ public class ScheduledStopPoint_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

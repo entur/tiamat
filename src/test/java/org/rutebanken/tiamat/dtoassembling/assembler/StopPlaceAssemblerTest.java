@@ -128,7 +128,7 @@ public class StopPlaceAssemblerTest {
     private TopographicPlace topographicPlace(Long id, String name) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setId(id);
-        municipality.setName(new MultilingualString(name, ""));
+        municipality.setName(new EmbeddableMultilingualString(name, ""));
         return municipality;
     }
 

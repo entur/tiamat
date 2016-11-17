@@ -58,7 +58,7 @@ public abstract class Equipment_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
     @XmlElement(name = "PublicCode")
@@ -69,9 +69,9 @@ public abstract class Equipment_VersionStructure
     @XmlElement(name = "TypeOfEquipmentRef")
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "Note", defaultValue = "false.")
-    protected MultilingualString note;
+    protected MultilingualStringEntity note;
     @XmlElement(name = "OutOfService")
     protected Boolean outOfService;
 
@@ -80,10 +80,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -92,10 +92,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -200,10 +200,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -212,10 +212,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -224,10 +224,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getNote() {
+    public MultilingualStringEntity getNote() {
         return note;
     }
 
@@ -236,10 +236,10 @@ public abstract class Equipment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setNote(MultilingualString value) {
+    public void setNote(MultilingualStringEntity value) {
         this.note = value;
     }
 

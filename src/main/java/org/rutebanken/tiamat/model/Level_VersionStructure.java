@@ -63,15 +63,15 @@ public class Level_VersionStructure
 
     @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
 
     @XmlElement(name = "ShortName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
 
     @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
 
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
@@ -97,10 +97,10 @@ public class Level_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -109,10 +109,10 @@ public class Level_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -121,10 +121,10 @@ public class Level_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -133,10 +133,10 @@ public class Level_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -145,10 +145,10 @@ public class Level_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -157,10 +157,10 @@ public class Level_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

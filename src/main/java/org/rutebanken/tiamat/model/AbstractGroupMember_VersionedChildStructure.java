@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}VersionedChildStructure">
  *       &lt;sequence>
- *         &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}positiveInteger" />
  *     &lt;/extension>
@@ -56,7 +56,7 @@ public abstract class AbstractGroupMember_VersionedChildStructure
 {
 
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger order;
@@ -66,10 +66,10 @@ public abstract class AbstractGroupMember_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -78,10 +78,10 @@ public abstract class AbstractGroupMember_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

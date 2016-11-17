@@ -26,8 +26,8 @@ public class QuayEqualsTest {
         double longitude = 39.61441;
         double latitude = -144.22765;
 
-        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
-        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
@@ -40,8 +40,8 @@ public class QuayEqualsTest {
         double longitude = 39.61441;
         double latitude = -144.22765;
 
-        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
-        Quay quay2 = new Quay(new MultilingualString("Different"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Different"));
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
@@ -50,8 +50,8 @@ public class QuayEqualsTest {
 
     @Test
     public void quaysWithSameNameButDifferentCoordinates() {
-        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
-        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(70, 80)));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 50)));
@@ -60,8 +60,8 @@ public class QuayEqualsTest {
 
     @Test
     public void quaysWithNoCoordinatesAndSameName() {
-        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
-        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
         assertThat(quay1).isEqualTo(quay2);
     }
 
@@ -71,9 +71,9 @@ public class QuayEqualsTest {
         double quayLongitude = 5.2646351097871768587310725706629455089569091796875;
 
         String name = "Name";
-        Quay quay1 = new Quay(new MultilingualString(name));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString(name));
         quay1.setId(987987L); // The ID should not influence the equals method.
-        Quay quay2 = new Quay(new MultilingualString(name));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString(name));
         quay2.setId(987987L);
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude, quayLatitude)));

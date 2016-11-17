@@ -27,9 +27,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;extension base="{http://www.netex.org.uk/netex}DerivedViewStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}PointOfInterestRef" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="placeTypes" type="{http://www.netex.org.uk/netex}typeOfPlaceRefs_RelStructure" minOccurs="0"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -52,10 +52,10 @@ public class PointOfInterest_DerivedViewStructure
     @XmlElement(name = "PointOfInterestRef")
     protected PointOfInterestRefStructure pointOfInterestRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     protected TypeOfPlaceRefs_RelStructure placeTypes;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
 
     /**
      * Gets the value of the pointOfInterestRef property.
@@ -86,10 +86,10 @@ public class PointOfInterest_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -98,10 +98,10 @@ public class PointOfInterest_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -134,10 +134,10 @@ public class PointOfInterest_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -146,10 +146,10 @@ public class PointOfInterest_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 

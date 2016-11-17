@@ -53,13 +53,13 @@ public class VehicleEquipmentProfile_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
     @XmlElement(name = "Units")
     protected BigInteger units;
     @XmlElement(name = "Manufacturer")
-    protected MultilingualString manufacturer;
+    protected MultilingualStringEntity manufacturer;
     @XmlElement(name = "PurposeOfEquipmentProfileRef")
     protected PurposeOfEquipmentProfileRefStructure purposeOfEquipmentProfileRef;
 
@@ -68,10 +68,10 @@ public class VehicleEquipmentProfile_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -80,10 +80,10 @@ public class VehicleEquipmentProfile_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -244,10 +244,10 @@ public class VehicleEquipmentProfile_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getManufacturer() {
+    public MultilingualStringEntity getManufacturer() {
         return manufacturer;
     }
 
@@ -256,10 +256,10 @@ public class VehicleEquipmentProfile_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setManufacturer(MultilingualString value) {
+    public void setManufacturer(MultilingualStringEntity value) {
         this.manufacturer = value;
     }
 

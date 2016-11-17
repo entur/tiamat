@@ -26,14 +26,14 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}VersionedChildStructure">
  *       &lt;sequence>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="Qualify" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualString"/>
+ *                   &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
  *                   &lt;element ref="{http://www.netex.org.uk/netex}TopographicPlaceRef" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
@@ -59,9 +59,9 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
 {
 
     @XmlElement(name = "Name", required = true)
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "Qualify")
     protected Qualify qualify;
 
@@ -70,10 +70,10 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -82,10 +82,10 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -94,10 +94,10 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -106,10 +106,10 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 

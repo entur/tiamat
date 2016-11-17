@@ -38,10 +38,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="Lang" type="{http://www.w3.org/2001/XMLSchema}language" minOccurs="0"/>
  *         &lt;element name="NameType" type="{http://www.netex.org.uk/netex}NameTypeEnumeration" minOccurs="0"/>
  *         &lt;element name="TypeOfName" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *         &lt;element name="Abbreviation" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *         &lt;element name="Abbreviation" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}integer" />
  *     &lt;/extension>
@@ -87,19 +87,19 @@ public class AlternativeName_VersionedChildStructure
 
     @XmlElement(name = "Name", required = true)
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
 
     @XmlElement(name = "ShortName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
 
     @XmlElement(name = "Abbreviation")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString abbreviation;
+    protected MultilingualStringEntity abbreviation;
 
     @XmlElement(name = "QualifierName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString qualifierName;
+    protected MultilingualStringEntity qualifierName;
 
     @XmlAttribute(name = "order")
     @Transient
@@ -189,9 +189,9 @@ public class AlternativeName_VersionedChildStructure
      * Gets the value of the name property.
      *
      * @return possible object is
-     * {@link MultilingualString }
+     * {@link MultilingualStringEntity }
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -199,9 +199,9 @@ public class AlternativeName_VersionedChildStructure
      * Sets the value of the name property.
      *
      * @param value allowed object is
-     *              {@link MultilingualString }
+     *              {@link MultilingualStringEntity }
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -209,9 +209,9 @@ public class AlternativeName_VersionedChildStructure
      * Gets the value of the shortName property.
      *
      * @return possible object is
-     * {@link MultilingualString }
+     * {@link MultilingualStringEntity }
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -219,9 +219,9 @@ public class AlternativeName_VersionedChildStructure
      * Sets the value of the shortName property.
      *
      * @param value allowed object is
-     *              {@link MultilingualString }
+     *              {@link MultilingualStringEntity }
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -229,9 +229,9 @@ public class AlternativeName_VersionedChildStructure
      * Gets the value of the abbreviation property.
      *
      * @return possible object is
-     * {@link MultilingualString }
+     * {@link MultilingualStringEntity }
      */
-    public MultilingualString getAbbreviation() {
+    public MultilingualStringEntity getAbbreviation() {
         return abbreviation;
     }
 
@@ -239,9 +239,9 @@ public class AlternativeName_VersionedChildStructure
      * Sets the value of the abbreviation property.
      *
      * @param value allowed object is
-     *              {@link MultilingualString }
+     *              {@link MultilingualStringEntity }
      */
-    public void setAbbreviation(MultilingualString value) {
+    public void setAbbreviation(MultilingualStringEntity value) {
         this.abbreviation = value;
     }
 
@@ -249,9 +249,9 @@ public class AlternativeName_VersionedChildStructure
      * Gets the value of the qualifierName property.
      *
      * @return possible object is
-     * {@link MultilingualString }
+     * {@link MultilingualStringEntity }
      */
-    public MultilingualString getQualifierName() {
+    public MultilingualStringEntity getQualifierName() {
         return qualifierName;
     }
 
@@ -259,9 +259,9 @@ public class AlternativeName_VersionedChildStructure
      * Sets the value of the qualifierName property.
      *
      * @param value allowed object is
-     *              {@link MultilingualString }
+     *              {@link MultilingualStringEntity }
      */
-    public void setQualifierName(MultilingualString value) {
+    public void setQualifierName(MultilingualStringEntity value) {
         this.qualifierName = value;
     }
 

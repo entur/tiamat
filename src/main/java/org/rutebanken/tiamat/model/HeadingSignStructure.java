@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}SignEquipment_VersionStructure">
  *       &lt;sequence>
- *         &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualString"/>
+ *         &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}HeadingSignGroup"/>
  *       &lt;/sequence>
  *     &lt;/extension>
@@ -63,11 +63,11 @@ public class HeadingSignStructure
 {
 
     @XmlElement(name = "PlaceName", required = true)
-    protected MultilingualString placeName;
+    protected MultilingualStringEntity placeName;
     @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
     @XmlElement(name = "LineName")
-    protected MultilingualString lineName;
+    protected MultilingualStringEntity lineName;
     @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
@@ -79,7 +79,7 @@ public class HeadingSignStructure
     @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
     @XmlElement(name = "DirectionName")
-    protected MultilingualString directionName;
+    protected MultilingualStringEntity directionName;
     @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
     @XmlElement(name = "LinePublicCode")
@@ -92,10 +92,10 @@ public class HeadingSignStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getPlaceName() {
+    public MultilingualStringEntity getPlaceName() {
         return placeName;
     }
 
@@ -104,10 +104,10 @@ public class HeadingSignStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setPlaceName(MultilingualString value) {
+    public void setPlaceName(MultilingualStringEntity value) {
         this.placeName = value;
     }
 
@@ -142,10 +142,10 @@ public class HeadingSignStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLineName() {
+    public MultilingualStringEntity getLineName() {
         return lineName;
     }
 
@@ -154,10 +154,10 @@ public class HeadingSignStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLineName(MultilingualString value) {
+    public void setLineName(MultilingualStringEntity value) {
         this.lineName = value;
     }
 
@@ -262,10 +262,10 @@ public class HeadingSignStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDirectionName() {
+    public MultilingualStringEntity getDirectionName() {
         return directionName;
     }
 
@@ -274,10 +274,10 @@ public class HeadingSignStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDirectionName(MultilingualString value) {
+    public void setDirectionName(MultilingualStringEntity value) {
         this.directionName = value;
     }
 

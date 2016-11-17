@@ -1,34 +1,18 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.hibernate.validator.constraints.Length;
+
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import java.util.Objects;
 
-@Entity
-@Table(name = "multilingual_string", indexes = {@Index(name = "multilingual_value", columnList = "value")})
-public class MultilingualString {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private long id;
+@MappedSuperclass
+public abstract class MultilingualString {
 
     protected String value;
 
+    @Column(length = 5)
     protected String lang;
-
-    public MultilingualString() {}
-
-    public MultilingualString(String value, String lang) {
-        this.value = value;
-        this.lang = lang;
-    }
-
-    public MultilingualString(String value) {
-        this.value = value;
-    }
 
     public String getValue() {
         return value;
@@ -45,15 +29,6 @@ public class MultilingualString {
     public void setLang(String value) {
         this.lang = value;
     }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
 
     @Override
     public boolean equals(Object object) {

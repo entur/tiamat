@@ -79,7 +79,7 @@ public abstract class PathLink_VersionStructure
     @XmlElement(name = "To", required = true)
     protected PathLinkEndStructure to;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "AccessibilityAssessmentRef")
     protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
     @XmlElement(name = "AccessibilityAssessment")
@@ -107,9 +107,9 @@ public abstract class PathLink_VersionStructure
     protected BigInteger personCapacity;
     protected SiteFacilitySets_RelStructure facilities;
     @XmlElement(name = "Towards")
-    protected MultilingualString towards;
+    protected MultilingualStringEntity towards;
     @XmlElement(name = "Back")
-    protected MultilingualString back;
+    protected MultilingualStringEntity back;
     @XmlElement(name = "NumberOfSteps")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfSteps;
@@ -184,10 +184,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -196,10 +196,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 
@@ -453,10 +453,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getTowards() {
+    public MultilingualStringEntity getTowards() {
         return towards;
     }
 
@@ -465,10 +465,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setTowards(MultilingualString value) {
+    public void setTowards(MultilingualStringEntity value) {
         this.towards = value;
     }
 
@@ -477,10 +477,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getBack() {
+    public MultilingualStringEntity getBack() {
         return back;
     }
 
@@ -489,10 +489,10 @@ public abstract class PathLink_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setBack(MultilingualString value) {
+    public void setBack(MultilingualStringEntity value) {
         this.back = value;
     }
 

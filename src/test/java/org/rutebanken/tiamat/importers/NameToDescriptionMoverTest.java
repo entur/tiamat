@@ -1,7 +1,8 @@
 package org.rutebanken.tiamat.importers;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +27,7 @@ public class NameToDescriptionMoverTest {
     }
 
     private void expectNameAndDescriptionToBeMoved(String originalName, String expectedName, String expectedDescription) {
-        StopPlace stopPlace = new StopPlace(new MultilingualString(originalName));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(originalName));
         nameToDescriptionMover.updateEntityDescriptionFromName(stopPlace);
         assertThat(stopPlace.getName().getValue()).isEqualTo(expectedName);
         assertThat(stopPlace.getDescription().getValue()).isEqualTo(expectedDescription);

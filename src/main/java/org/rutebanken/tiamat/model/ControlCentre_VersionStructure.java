@@ -53,7 +53,7 @@ public class ControlCentre_VersionStructure
     @XmlElement(name = "Number")
     protected BigInteger number;
     @XmlElement(name = "ControlCentreCode")
-    protected MultilingualString controlCentreCode;
+    protected MultilingualStringEntity controlCentreCode;
     @XmlElement(name = "DepartmentRef")
     protected DepartmentRefStructure departmentRef;
 
@@ -86,10 +86,10 @@ public class ControlCentre_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getControlCentreCode() {
+    public MultilingualStringEntity getControlCentreCode() {
         return controlCentreCode;
     }
 
@@ -98,10 +98,10 @@ public class ControlCentre_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setControlCentreCode(MultilingualString value) {
+    public void setControlCentreCode(MultilingualStringEntity value) {
         this.controlCentreCode = value;
     }
 

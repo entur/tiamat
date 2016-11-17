@@ -17,7 +17,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +175,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         List<StopPlace> stopPlaces = new ArrayList<>();
 
         for(int i = 0; i < 10; i++) {
-            StopPlace stopPlace = new StopPlace(new MultilingualString("Stop place " + i));
+            StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop place " + i));
             stopPlace.setId(Long.valueOf(i));
             stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
             stopPlaces.add(stopPlace);
@@ -241,14 +240,14 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     private StopPlace createStopPlace(String name, double longitude, double latitude, Long stopPlaceId) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point(longitude, latitude));
-        stopPlace.setName(new MultilingualString(name, ""));
+        stopPlace.setName(new EmbeddableMultilingualString(name, ""));
         stopPlace.setId(stopPlaceId);
         return stopPlace;
     }
 
     private Quay createQuay(String name, double longitude, double latitude, Long id) {
         Quay quay = new Quay();
-        quay.setName(new MultilingualString(name, ""));
+        quay.setName(new EmbeddableMultilingualString(name, ""));
         quay.setId(id);
         quay.setCentroid(point(longitude, latitude));
         return quay;

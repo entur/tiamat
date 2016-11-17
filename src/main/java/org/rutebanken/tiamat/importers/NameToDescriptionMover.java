@@ -1,8 +1,9 @@
 package org.rutebanken.tiamat.importers;
 
 
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class NameToDescriptionMover {
                 if (matcher.groupCount() > 0) {
                     String description = matcher.group(1).trim();
                     logger.info("Extracted description {}", description);
-                    entity.setDescription(new MultilingualString(description));
+                    entity.setDescription(new EmbeddableMultilingualString(description));
                 }
             }
 

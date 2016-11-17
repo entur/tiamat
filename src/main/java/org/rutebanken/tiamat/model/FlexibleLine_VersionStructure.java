@@ -90,7 +90,7 @@ public class FlexibleLine_VersionStructure
     @XmlSchemaType(name = "anyURI")
     protected String bookingUrl;
     @XmlElement(name = "BookingNote")
-    protected MultilingualString bookingNote;
+    protected MultilingualStringEntity bookingNote;
 
     /**
      * Gets the value of the flexibleLineType property.
@@ -323,10 +323,10 @@ public class FlexibleLine_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getBookingNote() {
+    public MultilingualStringEntity getBookingNote() {
         return bookingNote;
     }
 
@@ -335,10 +335,10 @@ public class FlexibleLine_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setBookingNote(MultilingualString value) {
+    public void setBookingNote(MultilingualStringEntity value) {
         this.bookingNote = value;
     }
 

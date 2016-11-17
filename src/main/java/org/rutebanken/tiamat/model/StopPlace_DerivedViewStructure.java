@@ -31,9 +31,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;extension base="{http://www.netex.org.uk/netex}DerivedViewStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}StopPlaceRef" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="placeTypes" type="{http://www.netex.org.uk/netex}typeOfPlaceRefs_RelStructure" minOccurs="0"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}StopIdentifierGroup"/>
  *         &lt;element name="StopPlaceType" type="{http://www.netex.org.uk/netex}StopTypeEnumeration" minOccurs="0"/>
  *         &lt;element name="TransportMode" type="{http://www.netex.org.uk/netex}VehicleModeEnumeration" minOccurs="0"/>
@@ -65,10 +65,10 @@ public class StopPlace_DerivedViewStructure
     @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     protected TypeOfPlaceRefs_RelStructure placeTypes;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -109,10 +109,10 @@ public class StopPlace_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -121,10 +121,10 @@ public class StopPlace_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -157,10 +157,10 @@ public class StopPlace_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -169,10 +169,10 @@ public class StopPlace_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 

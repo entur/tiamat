@@ -60,7 +60,7 @@ public class PlaceInSequence_VersionedChildStructure
     @XmlSchemaType(name = "NMTOKEN")
     protected String branchLevel;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     protected OnwardLinks onwardLinks;
 
     /**
@@ -116,10 +116,10 @@ public class PlaceInSequence_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -128,10 +128,10 @@ public class PlaceInSequence_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

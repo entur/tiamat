@@ -2,16 +2,13 @@ package org.rutebanken.tiamat.dtoassembling.assembler;
 
 
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +123,7 @@ public class StopPlaceAssembler {
         return 0L;
     }
 
-    public String multiLingualStringValue(MultilingualString multilingualString) {
+    public String multiLingualStringValue(EmbeddableMultilingualString multilingualString) {
 
         if(multilingualString != null) {
             return multilingualString.getValue();

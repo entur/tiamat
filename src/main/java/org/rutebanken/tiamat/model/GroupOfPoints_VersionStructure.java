@@ -51,7 +51,7 @@ public class GroupOfPoints_VersionStructure
 
     protected PointRefs_RelStructure members;
 
-    public GroupOfPoints_VersionStructure(MultilingualString name) {
+    public GroupOfPoints_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 

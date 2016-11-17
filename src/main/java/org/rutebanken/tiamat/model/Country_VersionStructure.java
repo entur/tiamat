@@ -52,7 +52,7 @@ public class Country_VersionStructure
     @XmlElement(name = "UicCode")
     protected PrivateCodeStructure uicCode;
     @XmlElement(name = "CountryName")
-    protected MultilingualString countryName;
+    protected MultilingualStringEntity countryName;
     protected AlternativeNames_RelStructure alternativeNames;
 
     /**
@@ -84,10 +84,10 @@ public class Country_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getCountryName() {
+    public MultilingualStringEntity getCountryName() {
         return countryName;
     }
 
@@ -96,10 +96,10 @@ public class Country_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setCountryName(MultilingualString value) {
+    public void setCountryName(MultilingualStringEntity value) {
         this.countryName = value;
     }
 

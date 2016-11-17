@@ -108,26 +108,26 @@ public abstract class Organisation_VersionStructure
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link ResponsibilitySet_VersionStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link ValidityPeriod }{@code >}
      * {@link JAXBElement }{@code <}{@link String }{@code >}
      * {@link JAXBElement }{@code <}{@link ExternalObjectRefStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link AlternativeNames_RelStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link OrganisationRefs_RelStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link String }{@code >}
      * {@link JAXBElement }{@code <}{@link LocaleStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link ResponsibilitySetRefStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link List }{@code <}{@link OrganisationTypeEnumeration }{@code >}{@code >}
      * {@link JAXBElement }{@code <}{@link ContactStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link PrivateCodeStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
      * {@link JAXBElement }{@code <}{@link ContactStructure }{@code >}
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link TypeOfOrganisationRefs_RelStructure }{@code >}
      * {@link JAXBElement }{@code <}{@link Parts }{@code >}
      * 

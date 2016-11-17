@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}SignEquipment_VersionStructure">
  *       &lt;sequence>
- *         &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualString"/>
+ *         &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}PlaceRef" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
@@ -50,7 +50,7 @@ public class PlaceSignStructure
 {
 
     @XmlElement(name = "PlaceName", required = true)
-    protected MultilingualString placeName;
+    protected MultilingualStringEntity placeName;
     @XmlElement(name = "PlaceRef")
     protected PlaceRef placeRef;
 
@@ -59,10 +59,10 @@ public class PlaceSignStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getPlaceName() {
+    public MultilingualStringEntity getPlaceName() {
         return placeName;
     }
 
@@ -71,10 +71,10 @@ public class PlaceSignStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setPlaceName(MultilingualString value) {
+    public void setPlaceName(MultilingualStringEntity value) {
         this.placeName = value;
     }
 

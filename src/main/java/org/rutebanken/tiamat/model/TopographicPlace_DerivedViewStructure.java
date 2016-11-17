@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;extension base="{http://www.netex.org.uk/netex}DerivedViewStructure">
  *       &lt;sequence>
  *         &lt;element ref="{http://www.netex.org.uk/netex}TopographicPlaceRef" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *         &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *         &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}CountryRef" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
@@ -58,11 +58,11 @@ public class TopographicPlace_DerivedViewStructure
     @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "QualifierName")
-    protected MultilingualString qualifierName;
+    protected MultilingualStringEntity qualifierName;
     @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
 
@@ -95,10 +95,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -107,10 +107,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -119,10 +119,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -131,10 +131,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -143,10 +143,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getQualifierName() {
+    public MultilingualStringEntity getQualifierName() {
         return qualifierName;
     }
 
@@ -155,10 +155,10 @@ public class TopographicPlace_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setQualifierName(MultilingualString value) {
+    public void setQualifierName(MultilingualStringEntity value) {
         this.qualifierName = value;
     }
 

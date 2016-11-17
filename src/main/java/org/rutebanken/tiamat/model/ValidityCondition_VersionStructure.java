@@ -51,10 +51,10 @@ public class ValidityCondition_VersionStructure
 {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private MultilingualString name;
+    private MultilingualStringEntity name;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private MultilingualString description;
+    private MultilingualStringEntity description;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private VersionOfObjectRefStructure conditionedObjectRef;
@@ -62,11 +62,11 @@ public class ValidityCondition_VersionStructure
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private ValidityConditionRefStructure withConditionRef;
 
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
-    public void setDescription(MultilingualString description) {
+    public void setDescription(MultilingualStringEntity description) {
         this.description = description;
     }
 
@@ -87,11 +87,11 @@ public class ValidityCondition_VersionStructure
     }
 
 
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
-    public void setName(MultilingualString name) {
+    public void setName(MultilingualStringEntity name) {
         this.name = name;
     }
 }

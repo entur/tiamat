@@ -37,7 +37,7 @@ public class StopPlaceTest {
         StopPlace stopPlace = new StopPlace();
 
         AccessSpace accessSpace = new AccessSpace();
-        accessSpace.setShortName(new MultilingualString("Østbanehallen", "no"));
+        accessSpace.setShortName(new EmbeddableMultilingualString("Østbanehallen", "no"));
 
         stopPlace.getAccessSpaces().add(accessSpace);
 
@@ -73,7 +73,7 @@ public class StopPlaceTest {
         StopPlace stopPlace = new StopPlace();
 
         Level level = new Level();
-        level.setName(new MultilingualString("Erde", "fr"));
+        level.setName(new MultilingualStringEntity("Erde", "fr"));
         level.setPublicCode("E");
         level.setVersion("01");
         stopPlace.getLevels().add(level);
@@ -108,7 +108,7 @@ public class StopPlaceTest {
         StopPlace stopPlace = new StopPlace();
 
         ValidityCondition validityCondition = new ValidityCondition();
-        validityCondition.setName(new MultilingualString("Validity condition", "en"));
+        validityCondition.setName(new MultilingualStringEntity("Validity condition", "en"));
 
         stopPlace.getValidityConditions().add(validityCondition);
 
@@ -178,7 +178,7 @@ public class StopPlaceTest {
         StopPlace stopPlace = new StopPlace();
 
         AlternativeName alternativeName = new AlternativeName();
-        alternativeName.setShortName(new MultilingualString("short name", "en"));
+        alternativeName.setShortName(new MultilingualStringEntity("short name", "en"));
         stopPlace.getAlternativeNames().add(alternativeName);
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findStopPlaceDetailed(stopPlace.getId());
@@ -189,7 +189,7 @@ public class StopPlaceTest {
     @Test
     public void persistStopPlaceWithDescription() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setDescription(new MultilingualString("description", "en"));
+        stopPlace.setDescription(new EmbeddableMultilingualString("description", "en"));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
         assertThat(actualStopPlace.getDescription().getValue()).isEqualTo(stopPlace.getDescription().getValue());
@@ -199,10 +199,8 @@ public class StopPlaceTest {
     public void persistStopPlaceShortNameAndPublicCode() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setPublicCode("public-code");
-        MultilingualString shortName = new MultilingualString();
-        shortName.setLang("no");
-        shortName.setValue("Skjervik");
-        stopPlace.setShortName(shortName);
+        stopPlace.setName(new EmbeddableMultilingualString("Skjervik", "no"));
+        stopPlace.setShortName(new EmbeddableMultilingualString("short name"));
 
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
@@ -251,7 +249,7 @@ public class StopPlaceTest {
     @Test
     public void testAttachingQuaysToStopPlace() throws Exception {
         Quay quay = new Quay();
-        quay.setName(new MultilingualString("q", "en"));
+        quay.setName(new EmbeddableMultilingualString("q", "en"));
         quayRepository.save(quay);
 
         StopPlace stopPlace = new StopPlace();
@@ -297,7 +295,7 @@ public class StopPlaceTest {
     @Test
     public void testToString() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("stoppested"));
+        stopPlace.setName(new EmbeddableMultilingualString("stoppested"));
         stopPlace.setId(123123123L);
 
         System.out.println(stopPlace.toString());

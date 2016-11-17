@@ -52,7 +52,7 @@ public class Address_VersionStructure
     @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
     @XmlElement(name = "CountryName")
-    protected MultilingualString countryName;
+    protected MultilingualStringEntity countryName;
 
     /**
      * Gets the value of the countryRef property.
@@ -83,10 +83,10 @@ public class Address_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getCountryName() {
+    public MultilingualStringEntity getCountryName() {
         return countryName;
     }
 
@@ -95,10 +95,10 @@ public class Address_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setCountryName(MultilingualString value) {
+    public void setCountryName(MultilingualStringEntity value) {
         this.countryName = value;
     }
 

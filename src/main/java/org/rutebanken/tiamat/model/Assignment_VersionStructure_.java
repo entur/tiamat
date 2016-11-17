@@ -55,11 +55,11 @@ public abstract class Assignment_VersionStructure_
 
     @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
 
     @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
 
     @XmlAttribute(name = "order")
     @Transient
@@ -70,10 +70,10 @@ public abstract class Assignment_VersionStructure_
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -82,10 +82,10 @@ public abstract class Assignment_VersionStructure_
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -94,10 +94,10 @@ public abstract class Assignment_VersionStructure_
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -106,10 +106,10 @@ public abstract class Assignment_VersionStructure_
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

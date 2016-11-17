@@ -92,7 +92,7 @@ public class CodespaceAssignment_VersionedChildStructure
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link MultilingualString }{@code >}
+     * {@link JAXBElement }{@code <}{@link MultilingualStringEntity }{@code >}
      * {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
      * {@link JAXBElement }{@code <}{@link AdministrativeZoneRef }{@code >}
      * {@link Codespace }

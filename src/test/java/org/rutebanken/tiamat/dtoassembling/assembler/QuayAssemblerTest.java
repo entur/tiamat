@@ -2,7 +2,8 @@ package org.rutebanken.tiamat.dtoassembling.assembler;
 
 
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.QuayTypeEnumeration;
@@ -30,7 +31,7 @@ public class QuayAssemblerTest {
     public void assembleQuayWithQuayDescription() {
 
         Quay quay = new Quay();
-        quay.setDescription(new MultilingualString("description","no"));
+        quay.setDescription(new EmbeddableMultilingualString("description","no"));
 
         QuayDto quayDto = quayAssembler.assemble(quay);
 

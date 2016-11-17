@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;element name="StartDate" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *           &lt;element name="EndDate" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *           &lt;element name="Status" type="{http://www.netex.org.uk/netex}VersionStatusEnumeration" minOccurs="0"/>
- *           &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *           &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *           &lt;element name="VersionType" type="{http://www.netex.org.uk/netex}VersionTypeEnumeration" minOccurs="0"/>
  *           &lt;element name="DerivedFromVersionRef" type="{http://www.netex.org.uk/netex}VersionRefStructure" minOccurs="0"/>
  *         &lt;/sequence>

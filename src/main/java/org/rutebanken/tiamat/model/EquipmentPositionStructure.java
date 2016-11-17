@@ -56,7 +56,7 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
 
     @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
 
     @XmlElement(name = "ReferencePointRef")
     @OneToOne(cascade = CascadeType.ALL)
@@ -201,10 +201,10 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -213,10 +213,10 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

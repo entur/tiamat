@@ -56,13 +56,13 @@ public class Operator_DerivedViewStructure
     @XmlElement(name = "OperatorRef")
     protected OperatorRefStructure operatorRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "LegalName")
-    protected MultilingualString legalName;
+    protected MultilingualStringEntity legalName;
     @XmlElement(name = "TradingName")
-    protected MultilingualString tradingName;
+    protected MultilingualStringEntity tradingName;
     protected AlternativeNames_RelStructure alternativeNames;
 
     /**
@@ -94,10 +94,10 @@ public class Operator_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -106,10 +106,10 @@ public class Operator_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -118,10 +118,10 @@ public class Operator_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -130,10 +130,10 @@ public class Operator_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -142,10 +142,10 @@ public class Operator_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLegalName() {
+    public MultilingualStringEntity getLegalName() {
         return legalName;
     }
 
@@ -154,10 +154,10 @@ public class Operator_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLegalName(MultilingualString value) {
+    public void setLegalName(MultilingualStringEntity value) {
         this.legalName = value;
     }
 
@@ -166,10 +166,10 @@ public class Operator_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getTradingName() {
+    public MultilingualStringEntity getTradingName() {
         return tradingName;
     }
 
@@ -178,10 +178,10 @@ public class Operator_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setTradingName(MultilingualString value) {
+    public void setTradingName(MultilingualStringEntity value) {
         this.tradingName = value;
     }
 

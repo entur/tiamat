@@ -119,7 +119,7 @@ public abstract class StopPlaceComponent_VersionStructure
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
 
-    public StopPlaceComponent_VersionStructure(MultilingualString name) {
+    public StopPlaceComponent_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 

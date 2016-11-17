@@ -4,7 +4,6 @@ package org.rutebanken.tiamat.pelias;
 import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.pelias.model.Feature;
 import org.rutebanken.tiamat.pelias.model.Properties;
 import org.rutebanken.tiamat.pelias.model.ReverseLookupResult;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -131,7 +130,7 @@ public class CountyAndMunicipalityLookupService {
             logger.debug("Creating new municipality for locality {}", locality);
 
             municipality = new TopographicPlace();
-            municipality.setName(new MultilingualString(locality, "no"));
+            municipality.setName(new EmbeddableMultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
@@ -164,7 +163,7 @@ public class CountyAndMunicipalityLookupService {
 
             logger.debug("Creating new county from pelias county: {}", peliasCounty);
             county = new TopographicPlace();
-            county.setName(new MultilingualString(peliasCounty, "no"));
+            county.setName(new EmbeddableMultilingualString(peliasCounty, "no"));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
             CountryRef countryRef = new CountryRef();

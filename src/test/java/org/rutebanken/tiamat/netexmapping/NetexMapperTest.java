@@ -1,20 +1,14 @@
 package org.rutebanken.tiamat.netexmapping;
 
-import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
-import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.model.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
-
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +23,7 @@ public class NetexMapperTest {
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", "en"));
+        stopPlace.setName(new EmbeddableMultilingualString("name", "en"));
 
         stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
 
@@ -71,7 +65,7 @@ public class NetexMapperTest {
     @Test
     public void mapStopPlaceToNetex() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", "en"));
+        stopPlace.setName(new EmbeddableMultilingualString("name", "en"));
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 

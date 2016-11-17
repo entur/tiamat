@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.nvdb.service;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.rutebanken.tiamat.nvdb.model.VegobjekterResultat;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -10,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class NvdbStopPlaceRetrievalService {
         roadObject.getEgenskaper().stream()
                 .filter(egenskap -> egenskap.getId().equals(EGENSKAP_HOLDEPLASS_NAVN))
                 .forEach(egenskap -> {
-                    stopPlace.setName(new MultilingualString(egenskap.getVerdi(), "no"));
+                    stopPlace.setName(new EmbeddableMultilingualString(egenskap.getVerdi(), "no"));
                 });
 
         return stopPlace;

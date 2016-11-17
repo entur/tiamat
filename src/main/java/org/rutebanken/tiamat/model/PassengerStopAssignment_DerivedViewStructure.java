@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element ref="{http://www.netex.org.uk/netex}PassengerStopAssignmentRef" minOccurs="0"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}StopPlaceRef" minOccurs="0"/>
  *         &lt;element name="QuayRef" type="{http://www.netex.org.uk/netex}QuayReference" minOccurs="0"/>
- *         &lt;element name="QuayName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="QuayName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="Label" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}integer" />
@@ -71,7 +71,7 @@ public class PassengerStopAssignment_DerivedViewStructure
     @XmlElement(name = "QuayRef")
     protected QuayReference quayRef;
     @XmlElement(name = "QuayName")
-    protected MultilingualString quayName;
+    protected MultilingualStringEntity quayName;
     @XmlElement(name = "Label")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -158,10 +158,10 @@ public class PassengerStopAssignment_DerivedViewStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getQuayName() {
+    public MultilingualStringEntity getQuayName() {
         return quayName;
     }
 
@@ -170,10 +170,10 @@ public class PassengerStopAssignment_DerivedViewStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setQuayName(MultilingualString value) {
+    public void setQuayName(MultilingualStringEntity value) {
         this.quayName = value;
     }
 

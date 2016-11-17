@@ -78,7 +78,7 @@ public class FacilitySet_VersionStructure
     @XmlElement(name = "ProvidedByRef")
     protected OrganisationRefStructure providedByRef;
     @XmlElement(name = "Description")
-    protected MultilingualString description;
+    protected MultilingualStringEntity description;
     @XmlElement(name = "TypeOfFacilityRef")
     protected TypeOfFacilityRefStructure typeOfFacilityRef;
     protected TypesOfEquipment_RelStructure otherFacilities;
@@ -188,10 +188,10 @@ public class FacilitySet_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDescription() {
+    public MultilingualStringEntity getDescription() {
         return description;
     }
 
@@ -200,10 +200,10 @@ public class FacilitySet_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDescription(MultilingualString value) {
+    public void setDescription(MultilingualStringEntity value) {
         this.description = value;
     }
 

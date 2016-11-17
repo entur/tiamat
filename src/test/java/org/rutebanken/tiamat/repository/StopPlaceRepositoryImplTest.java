@@ -197,7 +197,7 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", ""));
+        stopPlace.setName(new EmbeddableMultilingualString("name", ""));
 
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679)));
         stopPlaceRepository.save(stopPlace);
@@ -213,7 +213,7 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void noNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("stop place", ""));
+        stopPlace.setName(new EmbeddableMultilingualString("stop place", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
@@ -226,7 +226,7 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("This name is different", ""));
+        stopPlace.setName(new EmbeddableMultilingualString("This name is different", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
@@ -239,10 +239,10 @@ public class StopPlaceRepositoryImplTest {
 
     @Test
     public void multipleNearbyStopPlaces() throws Exception {
-        StopPlace stopPlace = new StopPlace(new MultilingualString("name"));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
 
-        StopPlace stopPlace2 = new StopPlace(new MultilingualString("name"));
+        StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)));
 
         stopPlaceRepository.save(stopPlace);
@@ -470,7 +470,7 @@ public class StopPlaceRepositoryImplTest {
 
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
-        municipality.setName(new MultilingualString(municipalityName, ""));
+        municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
 
         if(parentCounty != null) {
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
@@ -485,7 +485,7 @@ public class StopPlaceRepositoryImplTest {
     private TopographicPlace createCounty(String countyName) {
 
         TopographicPlace county = new TopographicPlace();
-        county.setName(new MultilingualString(countyName, ""));
+        county.setName(new EmbeddableMultilingualString(countyName, ""));
         topographicPlaceRepository.save(county);
 
         return county;
@@ -493,7 +493,7 @@ public class StopPlaceRepositoryImplTest {
 
     private StopPlace createStopPlaceWithMunicipality(String name, TopographicPlace municipality) {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(name, ""));
+        stopPlace.setName(new EmbeddableMultilingualString(name, ""));
 
         if(municipality != null) {
             TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();

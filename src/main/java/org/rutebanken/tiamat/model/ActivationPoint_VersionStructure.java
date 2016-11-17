@@ -59,7 +59,7 @@ public class ActivationPoint_VersionStructure
     @XmlSchemaType(name = "normalizedString")
     protected String activationPointNumber;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
     @XmlElement(name = "TypeOfActivationRef")
@@ -94,10 +94,10 @@ public class ActivationPoint_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -106,10 +106,10 @@ public class ActivationPoint_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 

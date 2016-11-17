@@ -42,9 +42,9 @@ public class StopPlaceEqualsHashCodeTest {
 
     private StopPlace createStopPlaceWithQuayAndCentroid(String name, double longitude, double latitude) {
         Quay quay = new Quay();
-        quay.setName(new MultilingualString(name));
+        quay.setName(new EmbeddableMultilingualString(name));
         quay.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
-        StopPlace stopPlace = new StopPlace(new MultilingualString(name));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));

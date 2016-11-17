@@ -49,19 +49,19 @@ public class AlternativeQuayDescriptor_VersionedChildStructure
 {
 
     @XmlElement(name = "CrossRoad")
-    protected MultilingualString crossRoad;
+    protected MultilingualStringEntity crossRoad;
     @XmlElement(name = "Landmark")
-    protected MultilingualString landmark;
+    protected MultilingualStringEntity landmark;
 
     /**
      * Gets the value of the crossRoad property.
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getCrossRoad() {
+    public MultilingualStringEntity getCrossRoad() {
         return crossRoad;
     }
 
@@ -70,10 +70,10 @@ public class AlternativeQuayDescriptor_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setCrossRoad(MultilingualString value) {
+    public void setCrossRoad(MultilingualStringEntity value) {
         this.crossRoad = value;
     }
 
@@ -82,10 +82,10 @@ public class AlternativeQuayDescriptor_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLandmark() {
+    public MultilingualStringEntity getLandmark() {
         return landmark;
     }
 
@@ -94,10 +94,10 @@ public class AlternativeQuayDescriptor_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLandmark(MultilingualString value) {
+    public void setLandmark(MultilingualStringEntity value) {
         this.landmark = value;
     }
 

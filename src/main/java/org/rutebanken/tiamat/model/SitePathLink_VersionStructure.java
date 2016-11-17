@@ -66,7 +66,7 @@ public class SitePathLink_VersionStructure
     protected PlaceEquipments_RelStructure placeEquipments;
     protected LocalServices_RelStructure localServices;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
 
     /**
      * Gets the value of the siteRef property.
@@ -241,10 +241,10 @@ public class SitePathLink_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -253,10 +253,10 @@ public class SitePathLink_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

@@ -31,10 +31,10 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;element name="NamedObjectRef" type="{http://www.netex.org.uk/netex}VersionOfObjectRefStructure" minOccurs="0"/>
  *           &lt;element name="Lang" type="{http://www.w3.org/2001/XMLSchema}language" minOccurs="0"/>
  *           &lt;element name="TypeOfName" type="{http://www.w3.org/2001/XMLSchema}normalizedString"/>
- *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString"/>
- *           &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *           &lt;element name="Abbreviation" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *           &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
+ *           &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *           &lt;element name="Abbreviation" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *           &lt;element name="QualifierName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;/sequence>
  *         &lt;sequence>
  *           &lt;group ref="{http://www.netex.org.uk/netex}RelativeLocationGroup"/>

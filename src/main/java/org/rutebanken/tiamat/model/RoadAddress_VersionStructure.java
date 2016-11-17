@@ -71,7 +71,7 @@ public class RoadAddress_VersionStructure
 
     @XmlElement(name = "RoadName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString roadName;
+    protected MultilingualStringEntity roadName;
 
     @XmlElement(name = "BearingCompass")
     protected String bearingCompass;
@@ -140,10 +140,10 @@ public class RoadAddress_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getRoadName() {
+    public MultilingualStringEntity getRoadName() {
         return roadName;
     }
 
@@ -152,10 +152,10 @@ public class RoadAddress_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setRoadName(MultilingualString value) {
+    public void setRoadName(MultilingualStringEntity value) {
         this.roadName = value;
     }
 

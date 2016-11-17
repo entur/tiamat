@@ -67,7 +67,7 @@ public class AccessibilityAssessment_VersionedChildStructure
 
     @XmlElement(name = "Comment")
     @Transient
-    protected MultilingualString comment;
+    protected MultilingualStringEntity comment;
 
     /**
      * Gets the value of the mobilityImpairedAccess property.
@@ -146,10 +146,10 @@ public class AccessibilityAssessment_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getComment() {
+    public MultilingualStringEntity getComment() {
         return comment;
     }
 
@@ -158,10 +158,10 @@ public class AccessibilityAssessment_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setComment(MultilingualString value) {
+    public void setComment(MultilingualStringEntity value) {
         this.comment = value;
     }
 

@@ -16,8 +16,8 @@ public class QuayHashCodeTest {
         double longitude = 39.61441;
         double latitude = -144.22765;
 
-        Quay quay1 = new Quay(new MultilingualString("Ellas minne"));
-        Quay quay2 = new Quay(new MultilingualString("Ellas minne"));
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));

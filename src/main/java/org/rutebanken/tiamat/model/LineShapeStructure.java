@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;extension base="{http://www.netex.org.uk/netex}DataManagedObjectStructure">
  *       &lt;sequence>
  *         &lt;element name="Formula" type="{http://www.w3.org/2001/XMLSchema}Name" minOccurs="0"/>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element ref="{http://www.netex.org.uk/netex}LinkRef" minOccurs="0"/>
  *         &lt;element name="LocatingSystemRef" type="{http://www.netex.org.uk/netex}SrsNameType" minOccurs="0"/>
  *       &lt;/sequence>
@@ -64,7 +64,7 @@ public class LineShapeStructure
     @XmlSchemaType(name = "Name")
     protected String formula;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElementRef(name = "LinkRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkRefStructure> linkRef;
     @XmlElement(name = "LocatingSystemRef")
@@ -101,10 +101,10 @@ public class LineShapeStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -113,10 +113,10 @@ public class LineShapeStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 

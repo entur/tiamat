@@ -31,7 +31,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.netex.org.uk/netex}DataManagedObjectStructure">
  *       &lt;sequence>
- *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;group ref="{http://www.netex.org.uk/netex}TimeSpanGroup"/>
  *       &lt;/sequence>
  *     &lt;/extension>
@@ -57,7 +57,7 @@ public class Timeband_VersionedChildStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "StartTime", required = true)
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar startTime;
@@ -74,10 +74,10 @@ public class Timeband_VersionedChildStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -86,10 +86,10 @@ public class Timeband_VersionedChildStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 

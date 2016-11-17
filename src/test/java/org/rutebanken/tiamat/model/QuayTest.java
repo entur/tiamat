@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +47,15 @@ public class QuayTest {
         quay.setDataSourceRef("nptg:DataSource:NaPTAN");
         quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
 
-        quay.setName(new MultilingualString("Wimbledon, Stop P", "en"));
-        quay.setShortName(new MultilingualString("Wimbledon", "en"));
-        quay.setDescription(new MultilingualString("Stop P  is paired with Stop C outside the station", "en"));
+        quay.setName(new EmbeddableMultilingualString("Wimbledon, Stop P", "en"));
+        quay.setShortName(new EmbeddableMultilingualString("Wimbledon", "en"));
+        quay.setDescription(new EmbeddableMultilingualString("Stop P  is paired with Stop C outside the station", "en"));
 
         quay.setCovered(CoveredEnumeration.COVERED);
 
         quay.setBoardingUse(true);
         quay.setAlightingUse(true);
-        quay.setLabel(new MultilingualString("Stop P", "en"));
+        quay.setLabel(new MultilingualStringEntity("Stop P", "en"));
         quay.setPublicCode("1-2345");
 
         quay.setQuayType(QuayTypeEnumeration.BUS_STOP);
@@ -88,7 +87,7 @@ public class QuayTest {
 
         Quay quay = new Quay();
         DestinationDisplayView destinationDisplayView = new DestinationDisplayView();
-        destinationDisplayView.setName(new MultilingualString("Towards London", "en"));
+        destinationDisplayView.setName(new MultilingualStringEntity("Towards London", "en"));
 
         quay.setDestinations(new ArrayList<>());
         quay.getDestinations().add(destinationDisplayView);
@@ -108,7 +107,7 @@ public class QuayTest {
         Quay quay = new Quay();
         RoadAddress roadAddress = new RoadAddress();
         roadAddress.setVersion("any");
-        roadAddress.setRoadName(new MultilingualString("Wimbledon Bridge", "en"));
+        roadAddress.setRoadName(new MultilingualStringEntity("Wimbledon Bridge", "en"));
         roadAddress.setBearingCompass("W");
         quay.setRoadAddress(roadAddress);
         quayRepository.save(quay);
@@ -233,7 +232,7 @@ public class QuayTest {
         equipmentRefStructure.setRef("tbd:WaitingRoomEquipment:4900ZZLUWIM3n4_Eq-Seats1");
 
         EquipmentPosition equipmentPosition = new EquipmentPosition();
-        equipmentPosition.setDescription(new MultilingualString("Seats on Platform 1 and 2. \"0 metres from platform entrance", "en"));
+        equipmentPosition.setDescription(new MultilingualStringEntity("Seats on Platform 1 and 2. \"0 metres from platform entrance", "en"));
         equipmentPosition.setReferencePointRef(pointRefStructure);
         equipmentPosition.setXOffset(new BigDecimal(1).setScale(2, BigDecimal.ROUND_HALF_UP));
         equipmentPosition.setYOffset(new BigDecimal(20).setScale(2, BigDecimal.ROUND_HALF_UP));
@@ -273,7 +272,7 @@ public class QuayTest {
         Quay quay = new Quay();
 
         CheckConstraint checkConstraint = new CheckConstraint();
-        checkConstraint.setName(new MultilingualString("Queue for Ticket Barrier", "en"));
+        checkConstraint.setName(new MultilingualStringEntity("Queue for Ticket Barrier", "en"));
 
         List<CheckConstraint> checkConstraints = new ArrayList<>();
         checkConstraints.add(checkConstraint);
@@ -295,8 +294,8 @@ public class QuayTest {
         Quay quay = new Quay();
 
         AlternativeName alternativeName = new AlternativeName();
-        alternativeName.setShortName(new MultilingualString("short name", "en"));
-        alternativeName.setName(new MultilingualString("name", "en"));
+        alternativeName.setShortName(new MultilingualStringEntity("short name", "en"));
+        alternativeName.setName(new MultilingualStringEntity("name", "en"));
 
         quay.getAlternativeNames().add(alternativeName);
 
@@ -313,7 +312,7 @@ public class QuayTest {
     @Test
     public void persistQuayWithBoardingPosition() {
         BoardingPosition boardingPosition = new BoardingPosition();
-        boardingPosition.setName(new MultilingualString("boarding position", "en"));
+        boardingPosition.setName(new EmbeddableMultilingualString("boarding position", "en"));
         boardingPosition.setPublicCode("A");
 
         Quay quay = new Quay();

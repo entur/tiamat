@@ -1,12 +1,13 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.QuayTypeEnumeration;
 
@@ -46,8 +47,8 @@ public class QuayDisassembler {
         }
 
 
-        quay.setName(new MultilingualString(quayDto.name, "no"));
-        quay.setDescription(new MultilingualString(quayDto.description, "no"));
+        quay.setName(new EmbeddableMultilingualString(quayDto.name, "no"));
+        quay.setDescription(new EmbeddableMultilingualString(quayDto.description, "no"));
         quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
         if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {

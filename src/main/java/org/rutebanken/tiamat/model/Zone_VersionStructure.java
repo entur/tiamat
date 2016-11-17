@@ -5,7 +5,6 @@ import net.opengis.gml._3.PolygonType;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
-import java.util.Optional;
 
 
 @MappedSuperclass
@@ -31,7 +30,7 @@ public class Zone_VersionStructure
 
     public Zone_VersionStructure() {}
 
-    public Zone_VersionStructure(MultilingualString name) {
+    public Zone_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 

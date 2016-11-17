@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;group ref="{http://www.netex.org.uk/netex}SignEquipmentGroup"/>
  *         &lt;/sequence>
  *         &lt;sequence>
- *           &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualString"/>
+ *           &lt;element name="PlaceName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity"/>
  *           &lt;group ref="{http://www.netex.org.uk/netex}HeadingSignGroup"/>
  *         &lt;/sequence>
  *       &lt;/sequence>

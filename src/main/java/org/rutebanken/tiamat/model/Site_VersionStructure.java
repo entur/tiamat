@@ -131,7 +131,7 @@ public abstract class Site_VersionStructure
     @Transient
     protected LocalServices_RelStructure localServices;
 
-    public Site_VersionStructure(MultilingualString name) {
+    public Site_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 

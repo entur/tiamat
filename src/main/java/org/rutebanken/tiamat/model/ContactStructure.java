@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="ContactPerson" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="ContactPerson" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *         &lt;element name="Email" type="{http://www.netex.org.uk/netex}EmailAddressType" minOccurs="0"/>
  *         &lt;element name="Phone" type="{http://www.netex.org.uk/netex}PhoneType" minOccurs="0"/>
  *         &lt;element name="Fax" type="{http://www.netex.org.uk/netex}PhoneType" minOccurs="0"/>
  *         &lt;element name="Url" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
- *         &lt;element name="FurtherDetails" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *         &lt;element name="FurtherDetails" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class ContactStructure {
 
     @XmlElement(name = "ContactPerson")
-    protected MultilingualString contactPerson;
+    protected MultilingualStringEntity contactPerson;
     @XmlElement(name = "Email")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -72,17 +72,17 @@ public class ContactStructure {
     @XmlSchemaType(name = "anyURI")
     protected String url;
     @XmlElement(name = "FurtherDetails")
-    protected MultilingualString furtherDetails;
+    protected MultilingualStringEntity furtherDetails;
 
     /**
      * Gets the value of the contactPerson property.
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getContactPerson() {
+    public MultilingualStringEntity getContactPerson() {
         return contactPerson;
     }
 
@@ -91,10 +91,10 @@ public class ContactStructure {
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setContactPerson(MultilingualString value) {
+    public void setContactPerson(MultilingualStringEntity value) {
         this.contactPerson = value;
     }
 
@@ -199,10 +199,10 @@ public class ContactStructure {
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getFurtherDetails() {
+    public MultilingualStringEntity getFurtherDetails() {
         return furtherDetails;
     }
 
@@ -211,10 +211,10 @@ public class ContactStructure {
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setFurtherDetails(MultilingualString value) {
+    public void setFurtherDetails(MultilingualStringEntity value) {
         this.furtherDetails = value;
     }
 

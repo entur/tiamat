@@ -62,7 +62,7 @@ public class Projection_VersionStructure
     @XmlElement(name = "TypeOfProjectionRef")
     protected TypeOfProjectionRefStructure typeOfProjectionRef;
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElementRef(name = "SpatialFeatureRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends GroupOfPointsRefStructure> spatialFeatureRef;
     @XmlAttribute(name = "order")
@@ -98,10 +98,10 @@ public class Projection_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -110,10 +110,10 @@ public class Projection_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 

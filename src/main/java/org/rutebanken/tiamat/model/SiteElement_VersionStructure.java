@@ -71,18 +71,18 @@ public abstract class SiteElement_VersionStructure
 
     @XmlElement(name = "NameSuffix")
     @Transient
-    protected MultilingualString nameSuffix;
+    protected MultilingualStringEntity nameSuffix;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     @XmlElement(name = "CrossRoad")
     @Transient
-    protected MultilingualString crossRoad;
+    protected MultilingualStringEntity crossRoad;
 
     @XmlElement(name = "Landmark")
     @Transient
-    protected MultilingualString landmark;
+    protected MultilingualStringEntity landmark;
 
     @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
@@ -114,7 +114,7 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected SiteFacilitySets_RelStructure facilities;
 
-    public SiteElement_VersionStructure(MultilingualString name) {
+    public SiteElement_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 
@@ -178,10 +178,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getNameSuffix() {
+    public MultilingualStringEntity getNameSuffix() {
         return nameSuffix;
     }
 
@@ -190,10 +190,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setNameSuffix(MultilingualString value) {
+    public void setNameSuffix(MultilingualStringEntity value) {
         this.nameSuffix = value;
     }
 
@@ -224,10 +224,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getCrossRoad() {
+    public MultilingualStringEntity getCrossRoad() {
         return crossRoad;
     }
 
@@ -236,10 +236,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setCrossRoad(MultilingualString value) {
+    public void setCrossRoad(MultilingualStringEntity value) {
         this.crossRoad = value;
     }
 
@@ -248,10 +248,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLandmark() {
+    public MultilingualStringEntity getLandmark() {
         return landmark;
     }
 
@@ -260,10 +260,10 @@ public abstract class SiteElement_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLandmark(MultilingualString value) {
+    public void setLandmark(MultilingualStringEntity value) {
         this.landmark = value;
     }
 

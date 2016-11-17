@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;group ref="{http://www.netex.org.uk/netex}VersionedChildGroup"/>
  *         &lt;/sequence>
  *         &lt;sequence>
- *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *           &lt;element name="Name" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}FareClass" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}ClassOfUseRef" minOccurs="0"/>
  *           &lt;element ref="{http://www.netex.org.uk/netex}AccommodationFacility" minOccurs="0"/>

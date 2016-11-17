@@ -64,7 +64,7 @@ public abstract class SignEquipment_VersionStructure
     @XmlElement(name = "HeightFromFloor")
     protected BigDecimal heightFromFloor;
     @XmlElement(name = "Placement")
-    protected MultilingualString placement;
+    protected MultilingualStringEntity placement;
     @XmlElement(name = "BrandGraphic")
     @XmlSchemaType(name = "anyURI")
     protected String brandGraphic;
@@ -151,10 +151,10 @@ public abstract class SignEquipment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getPlacement() {
+    public MultilingualStringEntity getPlacement() {
         return placement;
     }
 
@@ -163,10 +163,10 @@ public abstract class SignEquipment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setPlacement(MultilingualString value) {
+    public void setPlacement(MultilingualStringEntity value) {
         this.placement = value;
     }
 

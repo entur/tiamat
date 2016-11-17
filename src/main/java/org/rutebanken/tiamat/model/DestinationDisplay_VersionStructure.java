@@ -60,15 +60,15 @@ public class DestinationDisplay_VersionStructure
 {
 
     @XmlElement(name = "Name")
-    protected MultilingualString name;
+    protected MultilingualStringEntity name;
     @XmlElement(name = "ShortName")
-    protected MultilingualString shortName;
+    protected MultilingualStringEntity shortName;
     @XmlElement(name = "SideText")
-    protected MultilingualString sideText;
+    protected MultilingualStringEntity sideText;
     @XmlElement(name = "FrontText")
-    protected MultilingualString frontText;
+    protected MultilingualStringEntity frontText;
     @XmlElement(name = "DriverDisplayText")
-    protected MultilingualString driverDisplayText;
+    protected MultilingualStringEntity driverDisplayText;
     @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -87,10 +87,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getName() {
+    public MultilingualStringEntity getName() {
         return name;
     }
 
@@ -99,10 +99,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setName(MultilingualString value) {
+    public void setName(MultilingualStringEntity value) {
         this.name = value;
     }
 
@@ -111,10 +111,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getShortName() {
+    public MultilingualStringEntity getShortName() {
         return shortName;
     }
 
@@ -123,10 +123,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setShortName(MultilingualString value) {
+    public void setShortName(MultilingualStringEntity value) {
         this.shortName = value;
     }
 
@@ -135,10 +135,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getSideText() {
+    public MultilingualStringEntity getSideText() {
         return sideText;
     }
 
@@ -147,10 +147,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setSideText(MultilingualString value) {
+    public void setSideText(MultilingualStringEntity value) {
         this.sideText = value;
     }
 
@@ -159,10 +159,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getFrontText() {
+    public MultilingualStringEntity getFrontText() {
         return frontText;
     }
 
@@ -171,10 +171,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setFrontText(MultilingualString value) {
+    public void setFrontText(MultilingualStringEntity value) {
         this.frontText = value;
     }
 
@@ -183,10 +183,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getDriverDisplayText() {
+    public MultilingualStringEntity getDriverDisplayText() {
         return driverDisplayText;
     }
 
@@ -195,10 +195,10 @@ public class DestinationDisplay_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setDriverDisplayText(MultilingualString value) {
+    public void setDriverDisplayText(MultilingualStringEntity value) {
         this.driverDisplayText = value;
     }
 

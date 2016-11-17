@@ -63,12 +63,12 @@ public abstract class StopPlaceSpace_VersionStructure
 
     @XmlElement(name = "Label")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
 
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    public StopPlaceSpace_VersionStructure(MultilingualString name) {
+    public StopPlaceSpace_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 
@@ -128,10 +128,10 @@ public abstract class StopPlaceSpace_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -140,10 +140,10 @@ public abstract class StopPlaceSpace_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

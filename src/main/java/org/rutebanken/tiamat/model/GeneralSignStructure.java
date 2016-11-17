@@ -50,7 +50,7 @@ public class GeneralSignStructure
 {
 
     @XmlElement(name = "Content")
-    protected MultilingualString content;
+    protected MultilingualStringEntity content;
     @XmlElement(name = "SignContentType")
     @XmlSchemaType(name = "string")
     protected SignContentEnumeration signContentType;
@@ -60,10 +60,10 @@ public class GeneralSignStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getContent() {
+    public MultilingualStringEntity getContent() {
         return content;
     }
 
@@ -72,10 +72,10 @@ public class GeneralSignStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setContent(MultilingualString value) {
+    public void setContent(MultilingualStringEntity value) {
         this.content = value;
     }
 

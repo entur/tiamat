@@ -92,7 +92,7 @@ public class Parking_VersionStructure
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
     @XmlElement(name = "Label")
-    protected MultilingualString label;
+    protected MultilingualStringEntity label;
     @XmlElement(name = "ParkingType")
     @XmlSchemaType(name = "string")
     protected ParkingTypeEnumeration parkingType;
@@ -281,10 +281,10 @@ public class Parking_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getLabel() {
+    public MultilingualStringEntity getLabel() {
         return label;
     }
 
@@ -293,10 +293,10 @@ public class Parking_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setLabel(MultilingualString value) {
+    public void setLabel(MultilingualStringEntity value) {
         this.label = value;
     }
 

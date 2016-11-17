@@ -104,7 +104,7 @@ public class TopographicPlace_VersionStructure
     @Transient
     protected Accesses_RelStructure accesses;
 
-    public TopographicPlace_VersionStructure(MultilingualString name) {
+    public TopographicPlace_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 

@@ -71,7 +71,7 @@ public class TrainStopAssignment_VersionStructure
     @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
     @XmlElement(name = "EntranceToVehicle")
-    protected MultilingualString entranceToVehicle;
+    protected MultilingualStringEntity entranceToVehicle;
 
     /**
      * Gets the value of the passengerStopAssignmentRef property.
@@ -224,10 +224,10 @@ public class TrainStopAssignment_VersionStructure
      * 
      * @return
      *     possible object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public MultilingualString getEntranceToVehicle() {
+    public MultilingualStringEntity getEntranceToVehicle() {
         return entranceToVehicle;
     }
 
@@ -236,10 +236,10 @@ public class TrainStopAssignment_VersionStructure
      * 
      * @param value
      *     allowed object is
-     *     {@link MultilingualString }
+     *     {@link MultilingualStringEntity }
      *     
      */
-    public void setEntranceToVehicle(MultilingualString value) {
+    public void setEntranceToVehicle(MultilingualStringEntity value) {
         this.entranceToVehicle = value;
     }
 

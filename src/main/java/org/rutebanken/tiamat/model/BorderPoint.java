@@ -36,8 +36,8 @@ import javax.xml.bind.annotation.XmlType;
  *           &lt;group ref="{http://www.netex.org.uk/netex}TimingPointGroup"/>
  *         &lt;/sequence>
  *         &lt;sequence>
- *           &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
- *           &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualString" minOccurs="0"/>
+ *           &lt;element name="ShortName" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
+ *           &lt;element name="Description" type="{http://www.netex.org.uk/netex}MultilingualStringEntity" minOccurs="0"/>
  *           &lt;choice minOccurs="0">
  *             &lt;element ref="{http://www.netex.org.uk/netex}GroupOfOperatorsRef"/>
  *             &lt;element ref="{http://www.netex.org.uk/netex}GroupOfOperators"/>

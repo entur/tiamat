@@ -54,7 +54,7 @@ public abstract class Place_VersionStructure
 
     public Place_VersionStructure(){}
 
-    public Place_VersionStructure(MultilingualString name) {
+    public Place_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
 
