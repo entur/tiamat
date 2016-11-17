@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -52,7 +53,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private static DecimalFormat format = new DecimalFormat("#.#");
 
-    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
 
     @Autowired
@@ -73,27 +73,17 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     @Override
     public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                      AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        String semaphoreKey = getStripedSemaphoreKey(newStopPlace);
-        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
-        semaphore.acquire();
-        logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, newStopPlace);
+        logger.info("Import stop place {}", newStopPlace);
 
-        try {
-            logger.info("Import stop place {}", newStopPlace);
+        final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
-            final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
-
-            final StopPlace stopPlace;
-            if (foundStopPlace != null) {
-                stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
-            } else {
-                stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
-            }
-            return stopPlace;
-        } finally {
-            semaphore.release();
-            logger.info("Released semaphore '{}'", semaphoreKey);
+        final StopPlace stopPlace;
+        if (foundStopPlace != null) {
+            stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
+        } else {
+            stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
         }
+        return stopPlace;
     }
 
 
@@ -114,7 +104,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     logger.warn("Quay does not have coordinates.", quay.getId());
                 }
                 logger.info("Saving quay {}", quay);
-                quayRepository.saveAndFlush(quay);
+                quayRepository.save(quay);
                 logger.debug("Saved quay. Got id {} back", quay.getId());
             });
         }
@@ -123,7 +113,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
-        stopPlaceRepository.saveAndFlush(stopPlace);
+        stopPlaceRepository.save(stopPlace);
         stopPlaceFromOriginalIdFinder.update(stopPlace);
         nearbyStopPlaceFinder.update(stopPlace);
         logger.info("Saved stop place {}", stopPlace);
@@ -196,7 +186,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     if (changed) {
                         logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
                         updatedQuays.incrementAndGet();
-                        quayRepository.saveAndFlush(existingQuay);
+                        quayRepository.save(existingQuay);
                     }
                 } else {
                     logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
@@ -212,7 +202,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private void saveNewQuay(Quay newQuay, StopPlace existingStopPlace, AtomicInteger createdQuays) {
         newQuay.setId(null);
         existingStopPlace.getQuays().add(newQuay);
-        quayRepository.saveAndFlush(newQuay);
+        quayRepository.save(newQuay);
         createdQuays.incrementAndGet();
     }
 
@@ -260,15 +250,4 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return null;
     }
 
-    private String getStripedSemaphoreKey(StopPlace stopPlace) {
-        final String semaphoreKey;
-        if (stopPlace.getName() != null
-                && stopPlace.getName().getValue() != null
-                && !stopPlace.getName().getValue().isEmpty()) {
-            semaphoreKey = "name-" + stopPlace.getName().getValue();
-        } else {
-            semaphoreKey = "all";
-        }
-        return semaphoreKey;
-    }
 }
