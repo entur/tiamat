@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importers;
 
+import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -11,16 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Transactional
 @Component
 public class SiteFrameImporter {
 
@@ -31,6 +33,9 @@ public class SiteFrameImporter {
     private NetexMapper netexMapper;
     private StopPlaceNameCleaner stopPlaceNameCleaner;
     private NameToDescriptionMover nameToDescriptionMover;
+
+    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
+
 
     @Autowired
     public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover) {
@@ -62,7 +67,7 @@ public class SiteFrameImporter {
             org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                        .stream()
+                        .parallelStream()
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace ->
@@ -86,16 +91,39 @@ public class SiteFrameImporter {
         }
     }
 
-    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
-        try {
-            StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
-            stopPlacesCreated.incrementAndGet();
-            return netexMapper.mapToNetexModel(importedStopPlace);
+    /**
+     * When importing site frames in multiple threads, and those site frames might contain different stop place that will be merged,
+     * we run into the risc of having multiple threads trying to save the same stop place.
+     *
+     * That's why we use a striped semaphore to not work on the same stop place concurrently.
+     * it is important to flush the session between each stop place, *before* the semaphore has been released.
+     *
+     * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
+     */
+    @Transactional
+    private org.rutebanken.netex.model.StopPlace importStopPlaceInsideLock(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) throws ExecutionException, InterruptedException {
+        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+        stopPlacesCreated.incrementAndGet();
+        return netexMapper.mapToNetexModel(importedStopPlace);
+    }
 
+    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
+        String semaphoreKey = getStripedSemaphoreKey(stopPlace);
+        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
+
+        try {
+            semaphore.acquire();
+            logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
+            return importStopPlaceInsideLock(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
+        } finally {
+            semaphore.release();
+            logger.info("Released semaphore '{}'", semaphoreKey);
         }
     }
+
+
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
         long duration = System.currentTimeMillis() - startTime;
@@ -114,5 +142,18 @@ public class SiteFrameImporter {
                 stopPlacesPerSecond,
                 topographicPlacesCreated);
 
+    }
+
+
+    private String getStripedSemaphoreKey(StopPlace stopPlace) {
+        final String semaphoreKey;
+        if (stopPlace.getName() != null
+                && stopPlace.getName().getValue() != null
+                && !stopPlace.getName().getValue().isEmpty()) {
+            semaphoreKey = "name-" + stopPlace.getName().getValue();
+        } else {
+            semaphoreKey = "all";
+        }
+        return semaphoreKey;
     }
 }
