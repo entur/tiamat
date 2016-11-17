@@ -52,7 +52,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private static DecimalFormat format = new DecimalFormat("#.#");
 
-    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
+    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
 
     @Autowired
