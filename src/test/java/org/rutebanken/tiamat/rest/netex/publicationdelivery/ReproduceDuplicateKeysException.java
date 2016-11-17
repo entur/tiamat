@@ -28,7 +28,7 @@ public class ReproduceDuplicateKeysException {
     @Test
     public void reproduceDuplicateKeyIssue() throws JAXBException, InterruptedException {
         final int threads = 20;
-        final int publicationDeliveries = 10;
+        final int publicationDeliveries = 100;
         final int eachPublicationDeliverySentTimes = 5;
 
         final int stopPlacesPerPublicationDelivery = 20;
