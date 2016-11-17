@@ -73,6 +73,16 @@ public class QuayTest {
     }
 
     @Test
+    public void persistQuayWithCompassBearing() {
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(0.01));
+        quayRepository.save(quay);
+
+        Quay actual = quayRepository.findOne(quay.getId());
+        assertThat(actual.getCompassBearing()).isEqualTo(quay.getCompassBearing());
+    }
+
+    @Test
     public void persistQuayWithDestinations() {
 
         Quay quay = new Quay();
@@ -327,7 +337,6 @@ public class QuayTest {
     @Test
     public void orphanRemovalOfQuayReference() {
         Quay quay = persistedQuayWithParentReference();
-
         quay.setParentQuayRef(null);
         quayRepository.save(quay);
 
