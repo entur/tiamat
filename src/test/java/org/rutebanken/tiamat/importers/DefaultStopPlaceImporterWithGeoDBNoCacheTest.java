@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
@@ -72,6 +73,10 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
         quayRepository.deleteAll();
     }
 
+    /**
+     * Test is ignored because the striped semaphore has been moved to SiteFrameImporter
+     */
+    @Ignore
     @Test
     public void multipleThreadsStopPlaceWithQuaysImporter() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
