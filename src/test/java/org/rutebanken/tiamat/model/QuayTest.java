@@ -57,7 +57,6 @@ public class QuayTest {
         quay.setLabel(new MultilingualString("Stop P", "en"));
         quay.setPublicCode("1-2345");
 
-        quay.setCompassOctant(CompassBearing8Enumeration.W);
         quay.setQuayType(QuayTypeEnumeration.BUS_STOP);
 
         quayRepository.save(quay);
@@ -68,7 +67,7 @@ public class QuayTest {
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
         String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created", "shortName.value", "covered", "description.value", "publicCode",
-                "label.value", "boardingUse", "compassOctant", "quayType", "alightingUse"};
+                "label.value", "boardingUse", "quayType", "alightingUse"};
         assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
 
