@@ -1,11 +1,9 @@
 package org.rutebanken.tiamat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
@@ -55,6 +53,8 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final NvdbQuayAugmenter nvdbQuayAugmenter;
 
+    private final CentroidComputer centroidComputer;
+
     private int maxLimit;
 
     private int threads;
@@ -65,7 +65,7 @@ public class StopPlaceFromQuaysCorrelationService {
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                                 NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
-                                                @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:1000000}") int maxLimit,
+                                                CentroidComputer centroidComputer, @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:1000000}") int maxLimit,
                                                 @Value("${StopPlaceFromQuaysCorrelationService.threads:20}") int threads) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
@@ -73,6 +73,7 @@ public class StopPlaceFromQuaysCorrelationService {
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.nvdbSearchService = nvdbSearchService;
         this.nvdbQuayAugmenter = nvdbQuayAugmenter;
+        this.centroidComputer = centroidComputer;
         this.maxLimit = maxLimit;
         this.threads = threads;
     }
@@ -259,7 +260,7 @@ public class StopPlaceFromQuaysCorrelationService {
         if (stopPlace.getQuays().isEmpty()) {
             logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
         } else {
-            stopPlace.setCentroid(calculateCentroidForStopPlace(stopPlace.getQuays()));
+            stopPlace.setCentroid(centroidComputer.computeCentroidForStopPlace(stopPlace.getQuays()).get());
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, new AtomicInteger());
@@ -325,17 +326,4 @@ public class StopPlaceFromQuaysCorrelationService {
 
         return envelope;
     }
-
-    public Point calculateCentroidForStopPlace(Set<Quay> quays) {
-        CentroidPoint centroidPoint = new CentroidPoint();
-        quays.stream()
-            .filter(quay -> quay.getCentroid() != null)
-            .forEach(quay -> centroidPoint.add(quay.getCentroid()));
-
-        logger.debug("Created centroid for stop place based on {} quays. x: {}, y: {}", quays.size(),
-                centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);
-
-        return geometryFactory.createPoint(centroidPoint.getCentroid());
-    }
-
 }

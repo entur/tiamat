@@ -28,6 +28,8 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
+    private CentroidComputer centroidComputer = new CentroidComputer(geometryFactory);
+
     private StopPlaceFromQuaysCorrelationService stopPlaceFromQuaysCorrelationService =
             new StopPlaceFromQuaysCorrelationService(quayRepository,
                     stopPlaceRepository,
@@ -35,7 +37,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
                     mock(NvdbQuayAugmenter.class),
-                    Integer.MAX_VALUE,
+                    centroidComputer, Integer.MAX_VALUE,
                     1);
 
     @Test

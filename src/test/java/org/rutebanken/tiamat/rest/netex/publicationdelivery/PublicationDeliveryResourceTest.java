@@ -233,6 +233,40 @@ public class PublicationDeliveryResourceTest {
 
     }
 
+    @Test
+    public void computeStopPlaceCentroid() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("CentroidStopPlace")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("1"))
+                                .withLongitude(new BigDecimal("2"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withName(new MultilingualString().withValue("quay number one"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10"))
+                                                .withLongitude(new BigDecimal("20")))),
+                                new Quay()
+                                        .withName(new MultilingualString().withValue("quay number two"))
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("12"))
+                                                        .withLongitude(new BigDecimal("22"))))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude()).isEqualTo(new BigDecimal(21));
+        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude()).isEqualTo(new BigDecimal(11));
+    }
+
+
     private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setId(UUID.randomUUID().toString());
