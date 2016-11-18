@@ -43,10 +43,12 @@ public class CentroidComputer {
         CentroidPoint centroidPoint = new CentroidPoint();
 
         boolean anyAdded = false;
-        for(Quay quay : quays) {
-            if(quay.getCentroid() != null) {
-                centroidPoint.add(quay.getCentroid());
-                anyAdded = true;
+        if(quays != null) {
+            for (Quay quay : quays) {
+                if (quay.getCentroid() != null) {
+                    centroidPoint.add(quay.getCentroid());
+                    anyAdded = true;
+                }
             }
         }
         if(anyAdded) {

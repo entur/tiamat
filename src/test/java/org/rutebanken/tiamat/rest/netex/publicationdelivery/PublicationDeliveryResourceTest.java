@@ -262,8 +262,8 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
-        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude()).isEqualTo(new BigDecimal(21));
-        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude()).isEqualTo(new BigDecimal(11));
+        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(21.0);
+        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(11.0);
     }
 
 
