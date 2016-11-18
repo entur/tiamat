@@ -70,8 +70,8 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         double stopPlaceLatitude = 59.422556;
         double stopPlaceLongitude = 5.265704;
 
-        double quayLatitude = 59.422175;
-        double quayLongitude = 5.264635;
+        double quayLatitude = 59.422556;
+        double quayLongitude = 5.265704;
 
         StopPlace firstStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
@@ -81,7 +81,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
-        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace firstImportResult = defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
 
         StopPlace secondStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
@@ -90,7 +90,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         // Import second stop place
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getId()).isEqualTo(firstImportResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
 
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
