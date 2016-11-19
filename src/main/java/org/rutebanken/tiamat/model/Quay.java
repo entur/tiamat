@@ -11,8 +11,6 @@ import java.util.Objects;
 @Entity
 public class Quay extends StopPlaceSpace_VersionStructure {
 
-    protected String publicCode;
-
     protected String plateCode;
 
     protected BigInteger shortCode;
@@ -39,14 +37,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     }
 
     public Quay() {
-    }
-
-    public String getPublicCode() {
-        return publicCode;
-    }
-
-    public void setPublicCode(String value) {
-        this.publicCode = value;
     }
 
     public String getPlateCode() {
