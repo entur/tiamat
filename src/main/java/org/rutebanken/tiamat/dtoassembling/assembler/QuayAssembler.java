@@ -24,9 +24,6 @@ public class QuayAssembler {
 
         quayDto.centroid = pointAssembler.assemble(quay.getCentroid());
 
-        if(quay.getQuayType() != null) {
-            quayDto.quayType = quay.getQuayType().value();
-        }
         if(quay.isAllAreasWheelchairAccessible() != null) {
             quayDto.allAreasWheelchairAccessible = quay.isAllAreasWheelchairAccessible();
         }

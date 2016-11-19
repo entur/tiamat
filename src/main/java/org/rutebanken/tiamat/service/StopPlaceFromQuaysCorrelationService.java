@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
-import org.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -53,7 +53,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final NvdbSearchService nvdbSearchService;
 
-    private final NvdbQuayAugmenter nvdbQuayAugmenter;
+    private final NvdbStopPlaceTypeMapper nvdbStopPlaceTypeMapper;
 
     private int maxLimit;
 
@@ -64,7 +64,7 @@ public class StopPlaceFromQuaysCorrelationService {
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
-                                                NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
+                                                NvdbSearchService nvdbSearchService, NvdbStopPlaceTypeMapper nvdbStopPlaceTypeMapper,
                                                 @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:1000000}") int maxLimit,
                                                 @Value("${StopPlaceFromQuaysCorrelationService.threads:20}") int threads) {
         this.quayRepository = quayRepository;
@@ -72,7 +72,7 @@ public class StopPlaceFromQuaysCorrelationService {
         this.geometryFactory = geometryFactory;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.nvdbSearchService = nvdbSearchService;
-        this.nvdbQuayAugmenter = nvdbQuayAugmenter;
+        this.nvdbStopPlaceTypeMapper = nvdbStopPlaceTypeMapper;
         this.maxLimit = maxLimit;
         this.threads = threads;
     }
@@ -236,12 +236,7 @@ public class StopPlaceFromQuaysCorrelationService {
                 try {
                     VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
                     if(vegObjekt != null) {
-                        quay = nvdbQuayAugmenter.augmentFromNvdb(quay, vegObjekt);
-                        if (quay.getQuayType() != null && stopPlace.getStopPlaceType() == null) {
-                            if (quay.getQuayType().equals(QuayTypeEnumeration.BUS_BAY) || quay.getQuayType().equals(QuayTypeEnumeration.BUS_STOP)) {
-                                stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-                            }
-                        }
+                        nvdbStopPlaceTypeMapper.augmentFromNvdb(stopPlace, vegObjekt);
                     }
                 } catch (JsonProcessingException | UnsupportedEncodingException e) {
                     logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);

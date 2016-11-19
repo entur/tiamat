@@ -13,21 +13,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     protected String plateCode;
 
-    protected BigInteger shortCode;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<DestinationDisplayView> destinations;
-
     protected Float compassBearing;
-
-    @Transient
-    protected CompassBearing8Enumeration compassOctant;
-
-    @Enumerated(EnumType.STRING)
-    protected QuayTypeEnumeration quayType;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    protected QuayReference parentQuayRef;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
@@ -47,52 +33,12 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         this.plateCode = value;
     }
 
-    public BigInteger getShortCode() {
-        return shortCode;
-    }
-
-    public void setShortCode(BigInteger value) {
-        this.shortCode = value;
-    }
-
     public Float getCompassBearing() {
         return compassBearing;
     }
 
     public void setCompassBearing(Float value) {
         this.compassBearing = value;
-    }
-
-    public CompassBearing8Enumeration getCompassOctant() {
-        return compassOctant;
-    }
-
-    public void setCompassOctant(CompassBearing8Enumeration value) {
-        this.compassOctant = value;
-    }
-
-    public QuayTypeEnumeration getQuayType() {
-        return quayType;
-    }
-
-    public void setQuayType(QuayTypeEnumeration value) {
-        this.quayType = value;
-    }
-
-    public QuayReference getParentQuayRef() {
-        return parentQuayRef;
-    }
-
-    public void setParentQuayRef(QuayReference value) {
-        this.parentQuayRef = value;
-    }
-
-    public List<DestinationDisplayView> getDestinations() {
-        return destinations;
-    }
-
-    public void setDestinations(List<DestinationDisplayView> destinations) {
-        this.destinations = destinations;
     }
 
     public List<BoardingPosition> getBoardingPositions() {
@@ -124,8 +70,8 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .omitNullValues()
                 .add("id", id)
                 .add("name", name)
-                .add("keyValues", getKeyValues())
                 .add("centroid", centroid)
+                .add("keyValues", getKeyValues())
                 .toString();
     }
 }

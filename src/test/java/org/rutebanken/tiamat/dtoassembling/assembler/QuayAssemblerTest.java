@@ -16,18 +16,6 @@ public class QuayAssemblerTest {
     private QuayAssembler quayAssembler = new QuayAssembler(mock(PointAssembler.class));
 
     @Test
-    public void assembleQuayWithQuayType() {
-
-
-        Quay quay = new Quay();
-        quay.setQuayType(QuayTypeEnumeration.BUS_BAY);
-
-        QuayDto quayDto = quayAssembler.assemble(quay);
-
-        assertThat(quayDto.quayType).isEqualTo("busBay");
-    }
-
-    @Test
     public void assembleQuayWithQuayDescription() {
 
         Quay quay = new Quay();

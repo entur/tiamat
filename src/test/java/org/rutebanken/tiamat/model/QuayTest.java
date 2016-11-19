@@ -57,8 +57,6 @@ public class QuayTest {
         quay.setAlightingUse(true);
         quay.setLabel(new MultilingualStringEntity("Stop P", "en"));
 
-        quay.setQuayType(QuayTypeEnumeration.BUS_STOP);
-
         quayRepository.save(quay);
 
         Quay actualQuay = quayRepository.findOne(quay.getId());
@@ -67,7 +65,7 @@ public class QuayTest {
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
         String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created", "shortName.value", "covered", "description.value",
-                "label.value", "boardingUse", "quayType", "alightingUse"};
+                "label.value", "boardingUse", "alightingUse"};
         assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
 
@@ -81,24 +79,6 @@ public class QuayTest {
         assertThat(actual.getCompassBearing()).isEqualTo(quay.getCompassBearing());
     }
 
-    @Test
-    public void persistQuayWithDestinations() {
-
-        Quay quay = new Quay();
-        DestinationDisplayView destinationDisplayView = new DestinationDisplayView();
-        destinationDisplayView.setName(new MultilingualStringEntity("Towards London", "en"));
-
-        quay.setDestinations(new ArrayList<>());
-        quay.getDestinations().add(destinationDisplayView);
-
-        quayRepository.save(quay);
-
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-
-        Assertions.assertThat(actualQuay.getDestinations()).isNotEmpty();
-        DestinationDisplayView actualDestinationDisplayView = actualQuay.getDestinations().get(0);
-        assertThat(actualDestinationDisplayView.getName().getValue()).isEqualTo(destinationDisplayView.getName().getValue());
-    }
 
     @Ignore
     @Test
@@ -324,33 +304,4 @@ public class QuayTest {
         assertThat(actualQuay.getBoardingPositions()).isNotEmpty();
     }
 
-    @Test
-    public void persistQuayWithParentQuayReference() {
-        Quay quay = persistedQuayWithParentReference();
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-
-        assertThat(actualQuay.getParentQuayRef()).isNotNull();
-        assertThat(actualQuay.getParentQuayRef().getRef()).isEqualTo(quay.getParentQuayRef().getRef());
-    }
-
-    @Test
-    public void orphanRemovalOfQuayReference() {
-        Quay quay = persistedQuayWithParentReference();
-        quay.setParentQuayRef(null);
-        quayRepository.save(quay);
-
-        Quay actualQuay = quayRepository.findOne(quay.getId());
-        assertThat(actualQuay.getParentQuayRef()).isNull();
-    }
-
-    private Quay persistedQuayWithParentReference() {
-        Quay quay = new Quay();
-
-        QuayReference quayReference = new QuayReference();
-        quayReference.setRef("id-to-parent-quay");
-        quay.setParentQuayRef(quayReference);
-        quayRepository.save(quay);
-
-        return quay;
-    }
 }

@@ -67,16 +67,4 @@ public class QuayDisassemblerTest {
         assertThat(actualQuay.getId().toString()).isEqualTo(quayDto.id);
     }
 
-    @Test
-    public void dissasembleQuayWithQuayType() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
-
-        QuayDto quayDto = new QuayDto();
-        quayDto.quayType = "vehicleLoadingPlace";
-
-        Quay actualQuay = quayDisassembler.disassemble(quayDto);
-
-        assertThat(actualQuay.getQuayType()).isEqualTo(QuayTypeEnumeration.VEHICLE_LOADING_PLACE);
-    }
-
 }

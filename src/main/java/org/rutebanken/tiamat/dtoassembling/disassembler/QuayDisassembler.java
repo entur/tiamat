@@ -51,11 +51,6 @@ public class QuayDisassembler {
         quay.setDescription(new EmbeddableMultilingualString(quayDto.description, "no"));
         quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
-        if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {
-            logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDto.quayType);
-            quay.setQuayType(QuayTypeEnumeration.fromValue(quayDto.quayType));
-        }
-
         logger.trace("Set allAreasWheelchairAccessible {}", quayDto.allAreasWheelchairAccessible);
         quay.setAllAreasWheelchairAccessible(quayDto.allAreasWheelchairAccessible);
 
