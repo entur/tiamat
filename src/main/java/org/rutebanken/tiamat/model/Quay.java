@@ -64,7 +64,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, centroid, compassBearing);
+        return Objects.hash(name, centroid, compassBearing, getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
