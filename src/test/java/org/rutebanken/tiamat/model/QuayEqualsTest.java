@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,6 +63,35 @@ public class QuayEqualsTest {
     public void quaysWithNoCoordinatesAndSameName() {
         Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
         Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        assertThat(quay1).isEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithDifferentIdInKeyValNotEqual() {
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("1");
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("12");
+        assertThat(quay1).isNotEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithSameNameAndIdEquals() {
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("1");
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("1");
+        assertThat(quay1).isEqualTo(quay2);
+    }
+
+    @Test
+    public void quaysWithSameNameAndIdEqualsEvenIfOrderDiffers() {
+        Quay quay1 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("1");
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("2");
+        Quay quay2 = new Quay(new EmbeddableMultilingualString("Ellas minne"));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("2");
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("1");
         assertThat(quay1).isEqualTo(quay2);
     }
 

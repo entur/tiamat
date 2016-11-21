@@ -12,6 +12,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
+import org.rutebanken.tiamat.service.CentroidComputer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,8 @@ public class DefaultStopPlaceImporterTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
+    private CentroidComputer centroidComputer = new CentroidComputer(geometryFactory);
+
     private TopographicPlaceCreator topographicPlaceCreator = mock(TopographicPlaceCreator.class);
 
     private QuayRepository quayRepository = mock(QuayRepository.class);
@@ -48,7 +51,8 @@ public class DefaultStopPlaceImporterTest {
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService = mock(CountyAndMunicipalityLookupService.class);
 
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
-            countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder, nearbyStopPlaceFinder, new KeyValueListAppender());
+            countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
+            nearbyStopPlaceFinder, centroidComputer, new KeyValueListAppender());
 
     private SiteFrame siteFrame = new SiteFrame();
 

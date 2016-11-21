@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -28,6 +29,8 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
+    private CentroidComputer centroidComputer = new CentroidComputer(geometryFactory);
+
     private StopPlaceFromQuaysCorrelationService stopPlaceFromQuaysCorrelationService =
             new StopPlaceFromQuaysCorrelationService(quayRepository,
                     stopPlaceRepository,
@@ -35,6 +38,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
                     mock(NvdbStopPlaceTypeMapper.class),
+                    centroidComputer,
                     Integer.MAX_VALUE,
                     1);
 

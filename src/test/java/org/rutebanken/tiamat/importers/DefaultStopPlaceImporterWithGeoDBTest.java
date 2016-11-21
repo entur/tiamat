@@ -67,24 +67,21 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes() throws ExecutionException, InterruptedException {
         String name = "Hestehovveien";
 
-        double stopPlaceLatitude = 59.422556268440956728227320127189159393310546875;
-        double stopPlaceLongitude = 5.265704397012616055917533230967819690704345703125;
+        double stopPlaceLatitude = 59.422556;
+        double stopPlaceLongitude = 5.265704;
 
-        double quayLatitude = 59.4221750629462661663637845776975154876708984375;
-        double quayLongitude = 5.2646351097871768587310725706629455089569091796875;
+        double quayLatitude = 59.422556;
+        double quayLongitude = 5.265704;
 
         StopPlace firstStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
         firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
 
-        // Another quay with different coordinates
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude + 0.01, quayLatitude + 0.01, null));
-
         AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
-        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace firstImportResult = defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
 
         StopPlace secondStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
@@ -93,8 +90,8 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         // Import second stop place
         StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
-        assertThat(importResult.getQuays()).hasSize(2);
+        assertThat(importResult.getId()).isEqualTo(firstImportResult.getId());
+        assertThat(importResult.getQuays()).hasSize(1);
 
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
 
