@@ -1,11 +1,8 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import javax.persistence.Embeddable;
 
-@Entity
+@Embeddable
 public class TopographicPlaceRefStructure
     extends PlaceRefStructure
 {

@@ -8,10 +8,7 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -56,10 +53,10 @@ public class ValidityCondition_VersionStructure
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private MultilingualStringEntity description;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Transient
     private VersionOfObjectRefStructure conditionedObjectRef;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Transient
     private ValidityConditionRefStructure withConditionRef;
 
     public MultilingualStringEntity getDescription() {

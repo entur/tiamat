@@ -8,6 +8,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -44,7 +45,7 @@ import javax.xml.bind.annotation.XmlType;
     RoutePointRefStructure.class,
     PointOnLinkRefStructure_.class
 })
-@Entity
+@Embeddable
 public class PointRefStructure
     extends VersionOfObjectRefStructure
 {

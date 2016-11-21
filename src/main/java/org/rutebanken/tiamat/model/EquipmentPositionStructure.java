@@ -58,8 +58,7 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity description;
 
-    @XmlElement(name = "ReferencePointRef")
-    @OneToOne(cascade = CascadeType.ALL)
+    @Embedded
     protected PointRefStructure referencePointRef;
 
     @XmlElement(name = "XOffset")

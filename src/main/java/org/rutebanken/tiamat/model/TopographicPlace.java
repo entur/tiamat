@@ -17,7 +17,7 @@ public class TopographicPlace
     @Embedded
     protected CountryRef countryRef;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Embedded
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
 
     public TopographicPlace(EmbeddableMultilingualString name) {
