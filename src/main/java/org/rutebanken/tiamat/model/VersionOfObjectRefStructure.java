@@ -99,7 +99,7 @@ import java.time.ZonedDateTime;
     LinkRefStructure.class,
     JourneyTimingRefStructure.class,
     OrderedVersionOfObjectRefStructure.class,
-    GroupOfEntitiesRefStructure_.class,
+    GroupOfEntitiesRefStructure.class,
     PointRefStructure.class,
     EntityInVersionInFrameRefStructure.class,
     VehicleTypeRefStructure.class,
