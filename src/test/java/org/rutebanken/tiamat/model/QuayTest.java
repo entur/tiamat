@@ -52,20 +52,16 @@ public class QuayTest {
         quay.setDescription(new EmbeddableMultilingualString("Stop P  is paired with Stop C outside the station", "en"));
 
         quay.setCovered(CoveredEnumeration.COVERED);
-
-        quay.setBoardingUse(true);
-        quay.setAlightingUse(true);
-        quay.setLabel(new MultilingualStringEntity("Stop P", "en"));
+        quay.setLabel(new EmbeddableMultilingualString("Stop P", "en"));
 
         quayRepository.save(quay);
 
         Quay actualQuay = quayRepository.findOne(quay.getId());
-
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getId()).isEqualTo(quay.getId());
         String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created", "shortName.value", "covered", "description.value",
-                "label.value", "boardingUse", "alightingUse"};
+                "label.value"};
         assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
     }
 
