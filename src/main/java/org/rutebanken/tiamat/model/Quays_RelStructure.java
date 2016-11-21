@@ -20,6 +20,7 @@ public class Quays_RelStructure
 {
 
     @Column
+    @ElementCollection(targetClass = Quay.class)
     protected List<Quay> quayRefOrQuay;
 
     public List<Quay> getQuayRefOrQuay() {

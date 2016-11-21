@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -16,8 +17,9 @@ public abstract class Site_VersionStructure
         extends SiteElement_VersionStructure {
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column=@Column(name="topographic_place_ref")),
-            @AttributeOverride(name="version", column=@Column(name="topographic_place_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "topographic_place_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "topographic_place_version"))
+    })
     @Embedded
     protected TopographicPlaceRefStructure topographicPlaceRef;
 
@@ -43,8 +45,9 @@ public abstract class Site_VersionStructure
     protected Organisation_DerivedViewStructure operatingOrganisationView;
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column=@Column(name="parent_site_ref")),
-            @AttributeOverride(name="version", column=@Column(name="parent_site_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "parent_site_version"))
+    })
     @Embedded
     protected SiteRefStructure parentSiteRef;
 

@@ -21,6 +21,7 @@ public class ClassRefs_RelStructure
         if (classRef == null) {
             classRef = new ArrayList<JAXBElement<? extends ClassRefStructure>>();
         }
+        return classRef;
     }
 
 }

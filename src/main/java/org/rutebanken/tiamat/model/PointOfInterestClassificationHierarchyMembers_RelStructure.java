@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ public class PointOfInterestClassificationHierarchyMembers_RelStructure
         if (classificationHierarchyMember == null) {
             classificationHierarchyMember = new ArrayList<PointOfInterestClassificationHierarchyMemberStructure>();
         }
+        return this.classificationHierarchyMember;
     }
 
 }

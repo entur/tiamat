@@ -2,6 +2,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;

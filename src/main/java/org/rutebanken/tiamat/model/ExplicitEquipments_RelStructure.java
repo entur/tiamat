@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import org.hibernate.annotations.AnyMetaDef;
@@ -23,10 +21,14 @@ public class ExplicitEquipments_RelStructure
 
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(
+            idType = "integer", metaType = "string",
             metaValues = {
+                    @MetaValue( targetEntity = EquipmentRefStructure.class, value="ERS" ),
+                    @MetaValue( targetEntity = Equipment_VersionStructure.class, value="EVS" )
             }
     )
     @JoinTable(
+            name = "installedEquipment",
             joinColumns = @JoinColumn( name = "id" ),
             inverseJoinColumns = @JoinColumn( name = "equipment_id" )
     )

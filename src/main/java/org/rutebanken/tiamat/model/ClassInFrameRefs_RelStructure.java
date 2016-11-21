@@ -20,6 +20,7 @@ public class ClassInFrameRefs_RelStructure
         if (classInFrameRef == null) {
             classInFrameRef = new ArrayList<ClassInFrameRefStructure>();
         }
+        return classInFrameRef;
     }
 
 }

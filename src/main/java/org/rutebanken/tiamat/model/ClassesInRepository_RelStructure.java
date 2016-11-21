@@ -21,6 +21,7 @@ public class ClassesInRepository_RelStructure
         if (classInFrameRefOrClassInFrame == null) {
             classInFrameRefOrClassInFrame = new ArrayList<Object>();
         }
+        return classInFrameRefOrClassInFrame;
     }
 
 }

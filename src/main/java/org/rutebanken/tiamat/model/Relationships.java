@@ -18,6 +18,7 @@ public class Relationships {
         if (classRelationshipInFrame == null) {
             classRelationshipInFrame = new ArrayList<ClassRelationshipInFrameStructure>();
         }
+        return classRelationshipInFrame;
     }
 
 }

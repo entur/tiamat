@@ -2,6 +2,14 @@ package org.rutebanken.tiamat.model;
 
 import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
+import javax.persistence.CascadeType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 
 @MappedSuperclass
 public abstract class DataManagedObjectStructure

@@ -20,6 +20,7 @@ public class Accesses_RelStructure
 {
 
     @Column
+    @ElementCollection(targetClass=AccessRefStructure.class)
     protected List<AccessRefStructure> accessRefOrAccess;
 
     public List<AccessRefStructure> getAccessRefOrAccess() {

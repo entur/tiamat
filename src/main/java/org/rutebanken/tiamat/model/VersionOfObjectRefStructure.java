@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 

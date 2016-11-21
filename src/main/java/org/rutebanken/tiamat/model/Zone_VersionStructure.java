@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.model;
 import com.vividsolutions.jts.geom.Point;
 import net.opengis.gml._3.PolygonType;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 
 @MappedSuperclass

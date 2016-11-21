@@ -14,11 +14,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 @Entity
-public class VehicleStoppingPlaces_RelStructure
-    extends ContainmentAggregationStructure
+public class VehicleStoppingPlaces_RelStructure extends ContainmentAggregationStructure
 {
-
-    }   )
+    @ElementCollection(targetClass = VehicleStoppingPlaceRefStructure.class)
     protected List<VehicleStoppingPlaceRefStructure> vehicleStoppingPlaceRefOrVehicleStoppingPlace;
 
     public List<VehicleStoppingPlaceRefStructure> getVehicleStoppingPlaceRefOrVehicleStoppingPlace() {

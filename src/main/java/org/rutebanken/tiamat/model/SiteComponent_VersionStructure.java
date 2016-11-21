@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
@@ -8,9 +9,17 @@ import java.util.List;
 public abstract class SiteComponent_VersionStructure
         extends SiteElement_VersionStructure {
 
+    @AttributeOverrides({
+            @AttributeOverride(name="ref", column= @Column(name="site_ref")),
+            @AttributeOverride(name="version", column= @Column(name="site_ref_version"))
+    })
     @Embedded
     protected SiteRefStructure siteRef;
 
+    @AttributeOverrides({
+            @AttributeOverride(name="ref", column= @Column(name="level_ref")),
+            @AttributeOverride(name="version", column= @Column(name="level_ref_version"))
+    })
     @Embedded
     protected LevelRefStructure levelRef;
 

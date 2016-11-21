@@ -18,6 +18,7 @@ public class Attributes {
         if (classAttributeInFrame == null) {
             classAttributeInFrame = new ArrayList<ClassAttributeInFrame>();
         }
+        return classAttributeInFrame;
     }
 
 }

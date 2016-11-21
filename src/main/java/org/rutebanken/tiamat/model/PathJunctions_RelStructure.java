@@ -18,7 +18,7 @@ public class PathJunctions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-
+    @ElementCollection(targetClass=PathJunctionRefStructure.class)
     protected List<PathJunctionRefStructure> pathJunctionRefOrPathJunction;
 
     public List<PathJunctionRefStructure> getPathJunctionRefOrPathJunction() {

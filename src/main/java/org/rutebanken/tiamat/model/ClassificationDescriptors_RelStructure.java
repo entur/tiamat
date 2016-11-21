@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ public class ClassificationDescriptors_RelStructure
         if (classificationDescriptor == null) {
             classificationDescriptor = new ArrayList<ClassificationDescriptor_VersionStructure>();
         }
+        return classificationDescriptor;
     }
 
 }

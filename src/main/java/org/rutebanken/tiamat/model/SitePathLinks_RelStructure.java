@@ -18,6 +18,7 @@ public class SitePathLinks_RelStructure
     extends ContainmentAggregationStructure
 {
 
+    @ElementCollection(targetClass = PathLinkRefStructure.class)
     protected List<PathLinkRefStructure> pathLinkRefOrSitePathLink;
 
     public List<PathLinkRefStructure> getPathLinkRefOrSitePathLink() {
