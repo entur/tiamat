@@ -82,7 +82,7 @@ public class PropertyOfDayStructure {
     @XmlSchemaType(name = "gMonthDay")
     protected XMLGregorianCalendar dayOfYear;
     @XmlElement(name = "CountryRef")
-    protected CountryRefStructure countryRef;
+    protected CountryRef countryRef;
     @XmlList
     @XmlElement(name = "HolidayTypes", defaultValue = "AnyDay")
     @XmlSchemaType(name = "anySimpleType")
@@ -261,10 +261,10 @@ public class PropertyOfDayStructure {
      * 
      * @return
      *     possible object is
-     *     {@link CountryRefStructure }
+     *     {@link CountryRef }
      *     
      */
-    public CountryRefStructure getCountryRef() {
+    public CountryRef getCountryRef() {
         return countryRef;
     }
 
@@ -273,10 +273,10 @@ public class PropertyOfDayStructure {
      * 
      * @param value
      *     allowed object is
-     *     {@link CountryRefStructure }
+     *     {@link CountryRef }
      *     
      */
-    public void setCountryRef(CountryRefStructure value) {
+    public void setCountryRef(CountryRef value) {
         this.countryRef = value;
     }
 
