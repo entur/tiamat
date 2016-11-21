@@ -4,8 +4,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -36,8 +37,9 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
                     geometryFactory,
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
-                    mock(NvdbQuayAugmenter.class),
-                    centroidComputer, Integer.MAX_VALUE,
+                    mock(NvdbStopPlaceTypeMapper.class),
+                    centroidComputer,
+                    Integer.MAX_VALUE,
                     1);
 
     @Test
