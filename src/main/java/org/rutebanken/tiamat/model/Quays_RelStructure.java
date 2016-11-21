@@ -16,7 +16,7 @@ public class Quays_RelStructure
 
     public List<Quay> getQuayRefOrQuay() {
         if (quayRefOrQuay == null) {
-            quayRefOrQuay = new ArrayList<Quay>();
+            quayRefOrQuay = new ArrayList<>();
         }
         return this.quayRefOrQuay;
     }
