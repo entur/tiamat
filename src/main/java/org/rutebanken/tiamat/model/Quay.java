@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -57,7 +58,8 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.centroid, other.centroid)
-                && Objects.equals(this.compassBearing, other.compassBearing);
+                && Objects.equals(this.compassBearing, other.compassBearing)
+                && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
