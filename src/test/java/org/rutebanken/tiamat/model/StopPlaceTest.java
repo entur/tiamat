@@ -220,7 +220,6 @@ public class StopPlaceTest {
         stopPlace.setCoachSubmode(CoachSubmodeEnumeration.REGIONAL_COACH);
         stopPlace.setFunicularSubmode(FunicularSubmodeEnumeration.UNKNOWN);
         stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
-        stopPlace.setLimitedUse(LimitedUseTypeEnumeration.LONG_WALK_TO_ACCESS);
         stopPlace.setWeighting(InterchangeWeightingEnumeration.RECOMMENDED_INTERCHANGE);
         stopPlace.setBusSubmode(BusSubmodeEnumeration.DEMAND_AND_RESPONSE_BUS);
         stopPlace.setCovered(CoveredEnumeration.INDOORS);
@@ -240,7 +239,7 @@ public class StopPlaceTest {
 
         assertThat(actualStopPlace).isEqualToComparingOnlyGivenFields(actualStopPlace,
                 "stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
-                "funicularSubmode", "otherTransportModes", "limitedUse",
+                "funicularSubmode", "otherTransportModes",
                 "weighting", "busSubmode", "covered", "gated", "modification",
                 "railSubmode", "metroSubmode", "siteType", "status", "waterSubmode",
                 "tramSubmode", "telecabinSubmode");

@@ -53,20 +53,6 @@ public class StopPlace
 
     protected Boolean borderCrossing;
 
-//    @Embedded
-//    protected ExplicitEquipments_RelStructure unlocalisedEquipments;
-
-    @OneToOne
-    @Transient
-    protected TopographicPlaceRefs_RelStructure servedPlaces;
-
-    @OneToOne
-    @Transient
-    protected TopographicPlaceRefs_RelStructure mainTerminusForPlaces;
-
-    @Enumerated(EnumType.STRING)
-    protected LimitedUseTypeEnumeration limitedUse;
-
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
 
@@ -86,15 +72,7 @@ public class StopPlace
 
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
-    protected Accesses_RelStructure accesses;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @Transient
     protected NavigationPaths_RelStructure navigationPaths;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @Transient
-    protected VehicleStoppingPlaces_RelStructure vehicleStoppingPlaces;
 
     public StopPlace(EmbeddableMultilingualString name) {
         super(name);
@@ -215,31 +193,6 @@ public class StopPlace
         this.borderCrossing = value;
     }
 
-    public TopographicPlaceRefs_RelStructure getServedPlaces() {
-        return servedPlaces;
-    }
-
-    public void setServedPlaces(TopographicPlaceRefs_RelStructure value) {
-        this.servedPlaces = value;
-    }
-
-    public TopographicPlaceRefs_RelStructure getMainTerminusForPlaces() {
-        return mainTerminusForPlaces;
-    }
-
-    public void setMainTerminusForPlaces(TopographicPlaceRefs_RelStructure value) {
-        this.mainTerminusForPlaces = value;
-    }
-
-    public LimitedUseTypeEnumeration getLimitedUse() {
-        return limitedUse;
-    }
-
-
-    public void setLimitedUse(LimitedUseTypeEnumeration value) {
-        this.limitedUse = value;
-    }
-
     public InterchangeWeightingEnumeration getWeighting() {
         return weighting;
     }
@@ -264,15 +217,7 @@ public class StopPlace
         this.pathJunctions = value;
     }
 
-    public Accesses_RelStructure getAccesses() {
-        return accesses;
-    }
-
-    public void setAccesses(Accesses_RelStructure value) {
-        this.accesses = value;
-    }
-
-    public NavigationPaths_RelStructure getNavigationPaths() {
+     public NavigationPaths_RelStructure getNavigationPaths() {
         return navigationPaths;
     }
 
@@ -280,13 +225,6 @@ public class StopPlace
         this.navigationPaths = value;
     }
 
-    public VehicleStoppingPlaces_RelStructure getVehicleStoppingPlaces() {
-        return vehicleStoppingPlaces;
-    }
-
-    public void setVehicleStoppingPlaces(VehicleStoppingPlaces_RelStructure value) {
-        this.vehicleStoppingPlaces = value;
-    }
 
     public List<AccessSpace> getAccessSpaces() {
         return accessSpaces;
