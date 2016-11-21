@@ -25,7 +25,7 @@ public abstract class StopPlaceSpace_VersionStructure
 
     public StopPlaceSpace_VersionStructure() {
     }
-    
+
     public EmbeddableMultilingualString getLabel() {
         return label;
     }
