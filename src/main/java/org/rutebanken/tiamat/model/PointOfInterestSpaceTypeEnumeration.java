@@ -66,86 +66,46 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PointOfInterestSpaceTypeEnumeration")
-@XmlEnum
 public enum PointOfInterestSpaceTypeEnumeration {
 
-    @XmlEnumValue("arena")
     ARENA("arena"),
-    @XmlEnumValue("archeryArena")
     ARCHERY_ARENA("archeryArena"),
-    @XmlEnumValue("athleteArea")
     ATHLETE_AREA("athleteArea"),
-    @XmlEnumValue("auditorium")
     AUDITORIUM("auditorium"),
-    @XmlEnumValue("changingRoom")
     CHANGING_ROOM("changingRoom"),
-    @XmlEnumValue("court")
     COURT("court"),
-    @XmlEnumValue("downhillSkiingCourse")
     DOWNHILL_SKIING_COURSE("downhillSkiingCourse"),
-    @XmlEnumValue("freestyleSkiingCourse")
     FREESTYLE_SKIING_COURSE("freestyleSkiingCourse"),
-    @XmlEnumValue("skiboardingArea")
     SKIBOARDING_AREA("skiboardingArea"),
-    @XmlEnumValue("gates")
     GATES("gates"),
-    @XmlEnumValue("greenRoom")
     GREEN_ROOM("greenRoom"),
-    @XmlEnumValue("hospitalityZone")
     HOSPITALITY_ZONE("hospitalityZone"),
-    @XmlEnumValue("iceRink")
     ICE_RINK("iceRink"),
-    @XmlEnumValue("orchestralPit")
     ORCHESTRAL_PIT("orchestralPit"),
-    @XmlEnumValue("playingField")
     PLAYING_FIELD("playingField"),
-    @XmlEnumValue("podium")
     PODIUM("podium"),
-    @XmlEnumValue("pool")
     POOL("pool"),
-    @XmlEnumValue("divingPool")
     DIVING_POOL("divingPool"),
-    @XmlEnumValue("pressArea")
     PRESS_AREA("pressArea"),
-    @XmlEnumValue("queuingAreaForEntrance")
     QUEUING_AREA_FOR_ENTRANCE("queuingAreaForEntrance"),
-    @XmlEnumValue("ridingArea")
     RIDING_AREA("ridingArea"),
-    @XmlEnumValue("rowingArea")
     ROWING_AREA("rowingArea"),
-    @XmlEnumValue("securityScreeningArea")
     SECURITY_SCREENING_AREA("securityScreeningArea"),
-    @XmlEnumValue("sledRun")
     SLED_RUN("sledRun"),
-    @XmlEnumValue("spectatorTerrace")
     SPECTATOR_TERRACE("spectatorTerrace"),
-    @XmlEnumValue("spectatorSeating")
     SPECTATOR_SEATING("spectatorSeating"),
-    @XmlEnumValue("spectatorStandingArea")
     SPECTATOR_STANDING_AREA("spectatorStandingArea"),
-    @XmlEnumValue("sportsArea")
     SPORTS_AREA("sportsArea"),
-    @XmlEnumValue("stabling")
     STABLING("stabling"),
-    @XmlEnumValue("stage")
     STAGE("stage"),
-    @XmlEnumValue("ring")
     RING("ring"),
-    @XmlEnumValue("ticketing")
     TICKETING("ticketing"),
-    @XmlEnumValue("track")
     TRACK("track"),
-    @XmlEnumValue("trackside")
     TRACKSIDE("trackside"),
-    @XmlEnumValue("velodrome")
     VELODROME("velodrome"),
-    @XmlEnumValue("warmUpArea")
     WARM_UP_AREA("warmUpArea"),
-    @XmlEnumValue("waterside")
     WATERSIDE("waterside"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -50,17 +50,11 @@ public class TrainInCompoundTrain_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "CompoundTrainRef")
     protected CompoundTrainRef compoundTrainRef;
-    @XmlElement(name = "TrainRef")
     protected TrainRefStructure trainRef;
-    @XmlElement(name = "Train")
     protected Train train;
-    @XmlElement(name = "ReversedOrientation", defaultValue = "false")
     protected Boolean reversedOrientation;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

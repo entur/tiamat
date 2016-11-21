@@ -45,7 +45,6 @@ public class BoardingPositionRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "BoardingPositionRef", required = true)
     protected List<BoardingPositionRefStructure> boardingPositionRef;
 
     /**

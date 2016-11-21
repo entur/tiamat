@@ -45,7 +45,6 @@ public class NoticeAssignmentViews_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "NoticeAssignmentView", required = true)
     protected List<NoticeAssignmentView> noticeAssignmentView;
 
     /**

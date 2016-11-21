@@ -45,7 +45,6 @@ public class NavigationPathsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "NavigationPath", required = true)
     protected List<NavigationPath> navigationPath;
 
     /**

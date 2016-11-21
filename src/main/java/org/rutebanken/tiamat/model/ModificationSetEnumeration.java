@@ -29,7 +29,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ModificationSetEnumeration")
-@XmlEnum
 public enum ModificationSetEnumeration {
 
 
@@ -37,14 +36,12 @@ public enum ModificationSetEnumeration {
      * This is a definition of a new entity.
      * 
      */
-    @XmlEnumValue("all")
     ALL("all"),
 
     /**
      * This is a deletion of an existing entity.
      * 
      */
-    @XmlEnumValue("changesOnly")
     CHANGES_ONLY("changesOnly");
     private final String value;
 

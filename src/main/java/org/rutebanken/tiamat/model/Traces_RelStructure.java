@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Traces_RelStructure {
 
-    @XmlElement(name = "Trace", required = true)
     protected List<Trace> trace;
 
     /**

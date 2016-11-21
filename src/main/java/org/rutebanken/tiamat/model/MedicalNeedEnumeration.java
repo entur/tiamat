@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MedicalNeedEnumeration")
-@XmlEnum
 public enum MedicalNeedEnumeration {
 
-    @XmlEnumValue("allergic")
     ALLERGIC("allergic"),
-    @XmlEnumValue("heartCondition")
     HEART_CONDITION("heartCondition"),
-    @XmlEnumValue("otherMedicalNeed")
     OTHER_MEDICAL_NEED("otherMedicalNeed");
     private final String value;
 

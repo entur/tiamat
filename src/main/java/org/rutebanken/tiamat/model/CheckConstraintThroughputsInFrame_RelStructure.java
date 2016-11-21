@@ -45,7 +45,6 @@ public class CheckConstraintThroughputsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CheckConstraintDelay", required = true)
     protected List<CheckConstraintDelay> checkConstraintDelay;
 
     /**

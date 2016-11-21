@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Languages {
 
-    @XmlElement(name = "LanguageUsage")
     protected List<LanguageUsageStructure> languageUsage;
 
     /**

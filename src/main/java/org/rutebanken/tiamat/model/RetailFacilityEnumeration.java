@@ -38,30 +38,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RetailFacilityEnumeration")
-@XmlEnum
 public enum RetailFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("food")
     FOOD("food"),
-    @XmlEnumValue("newspaperTobacco")
     NEWSPAPER_TOBACCO("newspaperTobacco"),
-    @XmlEnumValue("recreationTravel")
     RECREATION_TRAVEL("recreationTravel"),
-    @XmlEnumValue("hygieneHealthBeauty")
     HYGIENE_HEALTH_BEAUTY("hygieneHealthBeauty"),
-    @XmlEnumValue("fashionAccessories")
     FASHION_ACCESSORIES("fashionAccessories"),
-    @XmlEnumValue("bankFinanceInsurance")
     BANK_FINANCE_INSURANCE("bankFinanceInsurance"),
-    @XmlEnumValue("cashMachine")
     CASH_MACHINE("cashMachine"),
-    @XmlEnumValue("currencyExchange")
     CURRENCY_EXCHANGE("currencyExchange"),
-    @XmlEnumValue("tourismService")
     TOURISM_SERVICE("tourismService"),
-    @XmlEnumValue("photoBooth")
     PHOTO_BOOTH("photoBooth");
     private final String value;
 

@@ -46,9 +46,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class AliasStructure {
 
-    @XmlElement(name = "PrivateCode", required = true)
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "IdentifierType")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String identifierType;

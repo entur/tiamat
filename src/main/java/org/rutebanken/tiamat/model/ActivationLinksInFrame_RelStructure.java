@@ -45,7 +45,6 @@ public class ActivationLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ActivationLink", required = true)
     protected List<ActivationLink> activationLink;
 
     /**

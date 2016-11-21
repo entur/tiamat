@@ -50,11 +50,8 @@ public class ServiceExclusion_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "ExcludingJourneyPatternRef")
     protected JourneyPatternRefStructure excludingJourneyPatternRef;
-    @XmlElement(name = "StartPointRef")
     protected ScheduledStopPointRefStructure startPointRef;
-    @XmlElement(name = "EndPointRef")
     protected ScheduledStopPointRefStructure endPointRef;
     protected JourneyPatternRefs_RelStructure excludedJourneyPatternRefs;
 

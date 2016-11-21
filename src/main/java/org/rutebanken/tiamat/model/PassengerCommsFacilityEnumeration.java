@@ -38,50 +38,38 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PassengerCommsFacilityEnumeration")
-@XmlEnum
 public enum PassengerCommsFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("freeWifi")
     FREE_WIFI("freeWifi"),
-    @XmlEnumValue("publicWifi")
     PUBLIC_WIFI("publicWifi"),
-    @XmlEnumValue("powerSupplySockets")
     POWER_SUPPLY_SOCKETS("powerSupplySockets"),
 
     /**
      * pti23_21
      * 
      */
-    @XmlEnumValue("telephone")
     TELEPHONE("telephone"),
 
     /**
      * pti23_14
      * 
      */
-    @XmlEnumValue("audioEntertainment")
     AUDIO_ENTERTAINMENT("audioEntertainment"),
 
     /**
      * pti23_15
      * 
      */
-    @XmlEnumValue("videoEntertainment")
     VIDEO_ENTERTAINMENT("videoEntertainment"),
 
     /**
      * pti23_25
      * 
      */
-    @XmlEnumValue("businessServices")
     BUSINESS_SERVICES("businessServices"),
-    @XmlEnumValue("internet")
     INTERNET("internet"),
-    @XmlEnumValue("postOffice")
     POST_OFFICE("postOffice"),
-    @XmlEnumValue("postBox")
     POST_BOX("postBox");
     private final String value;
 

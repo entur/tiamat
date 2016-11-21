@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MobilityEnumeration")
-@XmlEnum
 public enum MobilityEnumeration {
 
-    @XmlEnumValue("wheelchair")
     WHEELCHAIR("wheelchair"),
-    @XmlEnumValue("assistedWheelchair")
     ASSISTED_WHEELCHAIR("assistedWheelchair"),
-    @XmlEnumValue("motorizedWheelchair")
     MOTORIZED_WHEELCHAIR("motorizedWheelchair"),
-    @XmlEnumValue("mobilityScooter")
     MOBILITY_SCOOTER("mobilityScooter"),
-    @XmlEnumValue("roadMobilityScooter")
     ROAD_MOBILITY_SCOOTER("roadMobilityScooter"),
-    @XmlEnumValue("walkingFrame")
     WALKING_FRAME("walkingFrame"),
-    @XmlEnumValue("restrictedMobility")
     RESTRICTED_MOBILITY("restrictedMobility"),
-    @XmlEnumValue("otherMobilityNeed")
     OTHER_MOBILITY_NEED("otherMobilityNeed"),
-    @XmlEnumValue("normal")
     NORMAL("normal");
     private final String value;
 

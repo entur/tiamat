@@ -45,7 +45,6 @@ public class TimingPoints_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimingPoint", required = true)
     protected List<TimingPoint> timingPoint;
 
     /**

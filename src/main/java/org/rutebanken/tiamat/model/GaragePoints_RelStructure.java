@@ -47,9 +47,6 @@ public class GaragePoints_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "GaragePointRef", type = GaragePointRefStructure.class),
-        @XmlElement(name = "GaragePoint", type = GaragePoint.class)
     })
     protected List<Object> garagePointRefOrGaragePoint;
 

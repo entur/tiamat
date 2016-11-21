@@ -49,9 +49,7 @@ public class Vias_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "None")
     protected String none;
-    @XmlElement(name = "Via")
     protected List<Via_VersionedChildStructure> via;
 
     /**

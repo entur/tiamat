@@ -45,7 +45,6 @@ public class TransferRestrictionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TransferRestriction", required = true)
     protected List<TransferRestriction> transferRestriction;
 
     /**

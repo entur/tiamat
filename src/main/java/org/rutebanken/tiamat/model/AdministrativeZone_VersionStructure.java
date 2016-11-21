@@ -51,7 +51,6 @@ public class AdministrativeZone_VersionStructure
     extends Zone_VersionStructure
 {
 
-    @XmlElementRef(name = "OrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
     protected ResponsibilitySets_RelStructure responsibilities;
     protected CodespaceAssignments_RelStructure codespaceAssignments;

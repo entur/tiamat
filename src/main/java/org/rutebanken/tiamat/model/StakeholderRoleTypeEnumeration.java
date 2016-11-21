@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StakeholderRoleTypeEnumeration")
-@XmlEnum
 public enum StakeholderRoleTypeEnumeration {
 
-    @XmlEnumValue("Planning")
     PLANNING("Planning"),
-    @XmlEnumValue("Operation")
     OPERATION("Operation"),
-    @XmlEnumValue("Control")
     CONTROL("Control"),
-    @XmlEnumValue("Reservation")
     RESERVATION("Reservation"),
-    @XmlEnumValue("EntityLegalOwnership")
     ENTITY_LEGAL_OWNERSHIP("EntityLegalOwnership"),
-    @XmlEnumValue("Other")
     OTHER("Other");
     private final String value;
 

@@ -52,15 +52,10 @@ public class OvertakingPossibility_VersionStructure
     extends NetworkRestriction_VersionStructure
 {
 
-    @XmlElement(name = "OvertakingWidth")
     protected BigDecimal overtakingWidth;
-    @XmlElement(name = "OvertakingOnLinkRef", required = true)
     protected LinkRefStructure overtakingOnLinkRef;
-    @XmlElement(name = "OvertakingAtPointRef")
     protected PointRefStructure overtakingAtPointRef;
-    @XmlElement(name = "OvertakingVehicleTypeRef")
     protected VehicleTypeRefStructure overtakingVehicleTypeRef;
-    @XmlElement(name = "OvertakenVehicleTypeRef")
     protected VehicleTypeRefStructure overtakenVehicleTypeRef;
 
     /**

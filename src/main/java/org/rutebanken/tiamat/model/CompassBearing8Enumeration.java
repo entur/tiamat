@@ -34,7 +34,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CompassBearing8Enumeration")
-@XmlEnum
 public enum CompassBearing8Enumeration {
 
     SW,

@@ -50,7 +50,6 @@ public class PurposeOfGrouping_ValueStructure
 {
 
     protected ClassRefs_RelStructure classes;
-    @XmlElementRef(name = "TypeOfEntity", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends TypeOfEntity_VersionStructure> typeOfEntity;
 
     /**

@@ -48,9 +48,6 @@ public class PlaceEquipments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "InstalledEquipment", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "InstalledEquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> installedEquipmentRefOrInstalledEquipment;
 

@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TaxiSubmodeEnumeration")
-@XmlEnum
 public enum TaxiSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("communalTaxi")
     COMMUNAL_TAXI("communalTaxi"),
-    @XmlEnumValue("waterTaxi")
     WATER_TAXI("waterTaxi"),
-    @XmlEnumValue("railTaxi")
     RAIL_TAXI("railTaxi"),
-    @XmlEnumValue("bikeTaxi")
     BIKE_TAXI("bikeTaxi"),
-    @XmlEnumValue("blackCab")
     BLACK_CAB("blackCab"),
-    @XmlEnumValue("miniCab")
     MINI_CAB("miniCab"),
-    @XmlEnumValue("allTaxiServices")
     ALL_TAXI_SERVICES("allTaxiServices");
     private final String value;
 

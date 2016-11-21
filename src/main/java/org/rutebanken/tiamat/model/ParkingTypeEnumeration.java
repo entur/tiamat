@@ -41,36 +41,21 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingTypeEnumeration")
-@XmlEnum
 public enum ParkingTypeEnumeration {
 
-    @XmlEnumValue("parkAndRide")
     PARK_AND_RIDE("parkAndRide"),
-    @XmlEnumValue("liftShareParking")
     LIFT_SHARE_PARKING("liftShareParking"),
-    @XmlEnumValue("urbanParking")
     URBAN_PARKING("urbanParking"),
-    @XmlEnumValue("airportParking")
     AIRPORT_PARKING("airportParking"),
-    @XmlEnumValue("trainStationParking")
     TRAIN_STATION_PARKING("trainStationParking"),
-    @XmlEnumValue("exhibitionCentreParking")
     EXHIBITION_CENTRE_PARKING("exhibitionCentreParking"),
-    @XmlEnumValue("rentalCarParking")
     RENTAL_CAR_PARKING("rentalCarParking"),
-    @XmlEnumValue("shoppingCentreParking")
     SHOPPING_CENTRE_PARKING("shoppingCentreParking"),
-    @XmlEnumValue("motorwayParking")
     MOTORWAY_PARKING("motorwayParking"),
-    @XmlEnumValue("roadside")
     ROADSIDE("roadside"),
-    @XmlEnumValue("parkingZone")
     PARKING_ZONE("parkingZone"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("cycleRental")
     CYCLE_RENTAL("cycleRental"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -45,7 +45,6 @@ public class QuayRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "QuayRef", required = true)
     protected List<QuayReference> quayRef;
 
     /**

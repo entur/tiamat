@@ -50,9 +50,7 @@ public class GroupOfPlaces_VersionStructure
 {
 
     protected PlaceRefs_RelStructure members;
-    @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
-    @XmlElement(name = "MainPlaceRef")
     protected PlaceRefStructure mainPlaceRef;
 
     /**

@@ -57,7 +57,6 @@ public abstract class PointInLinkSequence_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElementRef(name = "LinkSequenceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkSequenceRefStructure> linkSequenceRef;
     protected Projections_RelStructure projections;
     @XmlAttribute(name = "order")

@@ -48,9 +48,7 @@ public class VehicleQuayAlignment_VersionStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "VehicleStoppingPlaceRef")
     protected VehicleStoppingPlaceRefStructure vehicleStoppingPlaceRef;
-    @XmlElement(name = "QuayRef")
     protected QuayReference quayRef;
 
     /**

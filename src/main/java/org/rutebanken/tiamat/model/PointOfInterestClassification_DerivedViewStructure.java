@@ -45,9 +45,7 @@ public class PointOfInterestClassification_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "PointOfInterestClassificationRef")
     protected PointOfInterestClassificationRefStructure pointOfInterestClassificationRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
 
     /**

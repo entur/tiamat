@@ -45,7 +45,6 @@ public class TimingPointsInJourneyPattern_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimingPointInJourneyPattern", required = true)
     protected List<TimingPointInJourneyPattern> timingPointInJourneyPattern;
 
     /**

@@ -45,7 +45,6 @@ public class CrewBasesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CrewBase", required = true)
     protected List<CrewBase> crewBase;
 
     /**

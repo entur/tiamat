@@ -45,7 +45,6 @@ public class CommonSectionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CommonSection", required = true)
     protected List<CommonSection> commonSection;
 
     /**

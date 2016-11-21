@@ -59,54 +59,42 @@ public abstract class SiteElement_VersionStructure
     extends AddressablePlace_VersionStructure
 {
 
-    @XmlElement(name = "AccessibilityAssessment")
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected AccessibilityAssessment accessibilityAssessment;
 
-    @XmlList
-    @XmlElement(name = "AccessModes")
     @XmlSchemaType(name = "anySimpleType")
     @Transient
     protected List<AccessModeEnumeration> accessModes;
 
-    @XmlElement(name = "NameSuffix")
     @Transient
     protected MultilingualStringEntity nameSuffix;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
-    @XmlElement(name = "CrossRoad")
     @Transient
     protected MultilingualStringEntity crossRoad;
 
-    @XmlElement(name = "Landmark")
     @Transient
     protected MultilingualStringEntity landmark;
 
-    @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
     @Transient
     protected PublicUseEnumeration publicUse;
 
-    @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
     protected CoveredEnumeration covered;
 
-    @XmlElement(name = "Gated")
     @XmlSchemaType(name = "string")
     @Transient
     protected GatedEnumeration gated;
 
-    @XmlElement(name = "Lighting", defaultValue = "wellLit")
     @XmlSchemaType(name = "normalizedString")
     @Transient
     protected LightingEnumeration lighting;
 
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
 
-    @XmlElement(name = "PersonCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     @Transient
     protected BigInteger personCapacity;

@@ -47,9 +47,6 @@ public class GroupOfTimebands_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "GroupOfTimebandsRef", type = GroupOfTimebandsRefStructure.class),
-        @XmlElement(name = "GroupOfTimebands", type = GroupOfTimebands_VersionedChildStructure.class)
     })
     protected List<Object> groupOfTimebandsRefOrGroupOfTimebands;
 

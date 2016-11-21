@@ -45,7 +45,6 @@ public class DestinationDisplayVariantRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "DestinationDisplayVariantRef", required = true)
     protected List<DestinationDisplayVariantRefStructure> destinationDisplayVariantRef;
 
     /**

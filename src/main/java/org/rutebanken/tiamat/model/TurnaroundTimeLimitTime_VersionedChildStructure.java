@@ -49,9 +49,7 @@ public class TurnaroundTimeLimitTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElement(name = "MinimumDuration")
     protected Duration minimumDuration;
-    @XmlElement(name = "MaximumDuration")
     protected Duration maximumDuration;
 
     /**

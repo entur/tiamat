@@ -65,7 +65,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PassengerAccessibilityNeedsStructure {
 
-    @XmlElement(name = "AccompaniedByCarer")
     protected Boolean accompaniedByCarer;
     protected UserNeeds userNeeds;
     protected Suitabilities suitabilities;

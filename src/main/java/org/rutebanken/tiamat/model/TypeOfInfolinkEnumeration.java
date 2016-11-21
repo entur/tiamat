@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TypeOfInfolinkEnumeration")
-@XmlEnum
 public enum TypeOfInfolinkEnumeration {
 
-    @XmlEnumValue("contact")
     CONTACT("contact"),
-    @XmlEnumValue("resource")
     RESOURCE("resource"),
-    @XmlEnumValue("info")
     INFO("info"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -47,9 +47,6 @@ public class HailAndRideAreas_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "HailAndRideAreaRef", type = HailAndRideAreaRefStructure.class),
-        @XmlElement(name = "HailAndRideArea", type = HailAndRideArea.class)
     })
     protected List<Object> hailAndRideAreaRefOrHailAndRideArea;
 

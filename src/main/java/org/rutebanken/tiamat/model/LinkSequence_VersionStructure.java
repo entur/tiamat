@@ -55,13 +55,9 @@ public abstract class LinkSequence_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
 
     /**

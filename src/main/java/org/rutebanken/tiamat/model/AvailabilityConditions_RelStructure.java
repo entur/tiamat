@@ -49,11 +49,6 @@ public class AvailabilityConditions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AvailabilityConditionRef", type = AvailabilityConditionRefStructure.class),
-        @XmlElement(name = "AvailabilityCondition", type = AvailabilityCondition.class),
-        @XmlElement(name = "ValidDuring", type = ValidDuring.class),
-        @XmlElement(name = "ValidBetween", type = ValidBetween.class)
     })
     protected List<Object> availabilityConditionRefOrAvailabilityConditionOrValidDuring;
 

@@ -58,25 +58,17 @@ public class Notice_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Text")
     protected MultilingualStringEntity text;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "TypeOfNoticeRef")
     protected TypeOfNoticeRefStructure typeOfNoticeRef;
-    @XmlElement(name = "CanBeAdvertised")
     protected Boolean canBeAdvertised;
-    @XmlElement(name = "DriverDisplayText")
     protected MultilingualStringEntity driverDisplayText;
     protected DeliveryVariants_RelStructure variants;
 

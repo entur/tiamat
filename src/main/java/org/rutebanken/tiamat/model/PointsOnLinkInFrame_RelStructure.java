@@ -45,7 +45,6 @@ public class PointsOnLinkInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PointOnLink", required = true)
     protected List<PointOnLink> pointOnLink;
 
     /**

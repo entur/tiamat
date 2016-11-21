@@ -45,7 +45,6 @@ public class DepartmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Department", required = true)
     protected List<Department> department;
 
     /**

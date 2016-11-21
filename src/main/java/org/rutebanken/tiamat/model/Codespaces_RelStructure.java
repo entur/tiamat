@@ -47,9 +47,6 @@ public class Codespaces_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "CodespaceRef", type = CodespaceRefStructure.class),
-        @XmlElement(name = "Codespace", type = Codespace.class)
     })
     protected List<Object> codespaceRefOrCodespace;
 

@@ -45,7 +45,6 @@ public class OpenTransportModeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "OpenTransportModeRef", required = true)
     protected List<OpenTransportModeRefStructure> openTransportModeRef;
 
     /**

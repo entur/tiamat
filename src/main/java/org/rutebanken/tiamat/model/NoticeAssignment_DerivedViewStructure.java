@@ -67,35 +67,23 @@ public class NoticeAssignment_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "NoticeRef")
     protected NoticeRefStructure noticeRef;
-    @XmlElement(name = "Mark")
     protected String mark;
-    @XmlElement(name = "MarkUrl")
     @XmlSchemaType(name = "anyURI")
     protected String markUrl;
-    @XmlElement(name = "PublicityChannel", defaultValue = "all")
     @XmlSchemaType(name = "NMTOKEN")
     protected PublicityChannelEnumeration publicityChannel;
-    @XmlElement(name = "Advertised")
     protected Boolean advertised;
-    @XmlElement(name = "Text")
     protected MultilingualStringEntity text;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "TypeOfNoticeRef")
     protected TypeOfNoticeRefStructure typeOfNoticeRef;
-    @XmlElement(name = "CanBeAdvertised")
     protected Boolean canBeAdvertised;
     @XmlAttribute(name = "order")
     protected BigInteger order;

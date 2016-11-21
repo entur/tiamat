@@ -51,11 +51,8 @@ public class ComplexFeatureMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {
 
-    @XmlElement(name = "ComplexFeatureRef")
     protected ComplexFeatureRefStructure complexFeatureRef;
-    @XmlElement(name = "SimpleFeatureRef")
     protected SimpleFeatureRefStructure simpleFeatureRef;
-    @XmlElementRef(name = "VersionOfObjectRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends VersionOfObjectRefStructure> versionOfObjectRef;
 
     /**

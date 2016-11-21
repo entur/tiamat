@@ -46,7 +46,6 @@ public class AddressesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Address", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends Address_VersionStructure>> address;
 
     /**

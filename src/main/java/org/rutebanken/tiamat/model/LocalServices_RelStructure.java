@@ -48,9 +48,6 @@ public class LocalServices_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "LocalServiceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "LocalService", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> localServiceRefOrLocalService;
 

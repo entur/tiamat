@@ -47,9 +47,6 @@ public class BoardingPositions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "BoardingPositionRef", type = BoardingPositionRefStructure.class),
-        @XmlElement(name = "BoardingPosition", type = BoardingPosition.class)
     })
     protected List<Object> boardingPositionRefOrBoardingPosition;
 

@@ -60,29 +60,18 @@ public class NoticeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "NoticeRef")
     protected NoticeRefStructure noticeRef;
-    @XmlElement(name = "GroupOfNoticesRef")
     protected GeneralGroupOfEntitiesRefStructure groupOfNoticesRef;
-    @XmlElement(name = "NoticedObjectRef")
     protected VersionOfObjectRefStructure noticedObjectRef;
-    @XmlElementRef(name = "LinkSequenceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkSequenceRefStructure> linkSequenceRef;
-    @XmlElementRef(name = "CommonSectionRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends CommonSectionRefStructure> commonSectionRef;
-    @XmlElement(name = "StartPointInPatternRef")
     protected PointInSequenceRefStructure startPointInPatternRef;
-    @XmlElement(name = "EndPointInPatternRef")
     protected PointInSequenceRefStructure endPointInPatternRef;
-    @XmlElement(name = "Mark")
     protected String mark;
-    @XmlElement(name = "MarkUrl")
     @XmlSchemaType(name = "anyURI")
     protected String markUrl;
-    @XmlElement(name = "PublicityChannel", defaultValue = "all")
     @XmlSchemaType(name = "NMTOKEN")
     protected PublicityChannelEnumeration publicityChannel;
-    @XmlElement(name = "Advertised")
     protected Boolean advertised;
 
     /**

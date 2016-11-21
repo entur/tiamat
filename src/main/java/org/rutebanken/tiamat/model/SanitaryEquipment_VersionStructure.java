@@ -67,37 +67,23 @@ public class SanitaryEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
-    @XmlElement(name = "Gender", required = true)
     @XmlSchemaType(name = "normalizedString")
     protected GenderLimitationEnumeration gender;
-    @XmlList
-    @XmlElement(name = "SanitaryFacilityList", required = true)
     @XmlSchemaType(name = "anySimpleType")
     protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
-    @XmlElement(name = "NumberOfToilets")
     protected BigInteger numberOfToilets;
-    @XmlElement(name = "FreeToUse")
     protected Boolean freeToUse;
-    @XmlElement(name = "Charge")
     protected BigDecimal charge;
-    @XmlElement(name = "Currency")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String currency;
-    @XmlList
-    @XmlElement(name = "PaymentMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PaymentMethodEnumeration> paymentMethods;
-    @XmlElement(name = "WheelchairTurningCircle")
     protected BigDecimal wheelchairTurningCircle;
-    @XmlElement(name = "SharpsDisposal")
     protected Boolean sharpsDisposal;
-    @XmlElement(name = "Staffing")
     @XmlSchemaType(name = "normalizedString")
     protected StaffingEnumeration staffing;
-    @XmlElement(name = "KeySCheme")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String keySCheme;

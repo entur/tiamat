@@ -45,7 +45,6 @@ public class PointOfInterestClassificationHierarchiesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PointOfInterestClassificationHierarchy", required = true)
     protected List<PointOfInterestClassificationHierarchy> pointOfInterestClassificationHierarchy;
 
     /**

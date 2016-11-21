@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MeetingPointEnumeration")
-@XmlEnum
 public enum MeetingPointEnumeration {
 
-    @XmlEnumValue("meetingPoint")
     MEETING_POINT("meetingPoint"),
-    @XmlEnumValue("groupMeeting")
     GROUP_MEETING("groupMeeting"),
-    @XmlEnumValue("schoolMeetingPoint")
     SCHOOL_MEETING_POINT("schoolMeetingPoint"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

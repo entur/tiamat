@@ -49,12 +49,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class LanguageUsageStructure {
 
-    @XmlElement(name = "Language", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "language")
     protected String language;
-    @XmlList
-    @XmlElement(name = "LanguageUse", required = true)
     @XmlSchemaType(name = "anySimpleType")
     protected List<LanguageUseEnumeration> languageUse;
 

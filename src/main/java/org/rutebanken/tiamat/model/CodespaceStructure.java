@@ -56,14 +56,11 @@ public class CodespaceStructure
     extends EntityStructure
 {
 
-    @XmlElement(name = "Xmlns", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String xmlns;
-    @XmlElement(name = "XmlnsUrl")
     @XmlSchemaType(name = "anyURI")
     protected String xmlnsUrl;
-    @XmlElement(name = "Description")
     protected String description;
     @XmlAttribute(name = "dataSourceRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)

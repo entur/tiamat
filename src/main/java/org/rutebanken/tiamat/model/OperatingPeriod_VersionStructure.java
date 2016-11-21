@@ -60,26 +60,17 @@ public class OperatingPeriod_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "ServiceCalendarRef")
     protected ServiceCalendarRefStructure serviceCalendarRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "FromOperatingDayRef")
     protected OperatingDayRefStructure fromOperatingDayRef;
-    @XmlElement(name = "FromDate")
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar fromDate;
-    @XmlElement(name = "ToOperatingDayRef")
     protected OperatingDayRefStructure toOperatingDayRef;
-    @XmlElement(name = "ToDate")
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar toDate;
-    @XmlElement(name = "HolidayType", defaultValue = "AnyDay")
     @XmlSchemaType(name = "string")
     protected List<HolidayTypeEnumeration> holidayType;
-    @XmlElement(name = "Season", defaultValue = "Perennially")
     @XmlSchemaType(name = "string")
     protected List<SeasonEnumeration> season;
 

@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ViaTypeEnumeration")
-@XmlEnum
 public enum ViaTypeEnumeration {
 
-    @XmlEnumValue("stopPoint")
     STOP_POINT("stopPoint"),
-    @XmlEnumValue("name")
     NAME("name"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

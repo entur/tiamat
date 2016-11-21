@@ -52,15 +52,10 @@ public class VehicleEquipmentProfile_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
-    @XmlElement(name = "Units")
     protected BigInteger units;
-    @XmlElement(name = "Manufacturer")
     protected MultilingualStringEntity manufacturer;
-    @XmlElement(name = "PurposeOfEquipmentProfileRef")
     protected PurposeOfEquipmentProfileRefStructure purposeOfEquipmentProfileRef;
 
     /**

@@ -52,11 +52,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ClassAttributeInFrameStructure {
 
-    @XmlElement(name = "Type")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "Name")
     protected String type;
-    @XmlElement(name = "Mandatory", defaultValue = "optional")
     @XmlSchemaType(name = "normalizedString")
     protected MandatoryEnumeration mandatory;
     @XmlAttribute(name = "name")

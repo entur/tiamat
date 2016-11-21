@@ -49,12 +49,9 @@ public class PointOfInterest_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "PointOfInterestRef")
     protected PointOfInterestRefStructure pointOfInterestRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
     protected TypeOfPlaceRefs_RelStructure placeTypes;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
 
     /**

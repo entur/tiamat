@@ -57,13 +57,10 @@ public class FlexibleStopPlace_VersionStructure
     extends Place_VersionStructure
 {
 
-    @XmlElement(name = "NameSuffix")
     protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;

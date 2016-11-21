@@ -17,14 +17,12 @@ public class Zone_VersionStructure
 
     protected Point centroid;
 
-    @XmlElement(name = "Polygon", namespace = "http://www.opengis.net/gml/3.2")
     @Transient
     protected PolygonType polygon;
 
     @Transient
     protected Projections_RelStructure projections;
 
-    @XmlElement(name = "ParentZoneRef")
     @Transient
     protected ZoneRefStructure parentZoneRef;
 

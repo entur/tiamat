@@ -39,32 +39,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SignContentEnumeration")
-@XmlEnum
 public enum SignContentEnumeration {
 
-    @XmlEnumValue("entrance")
     ENTRANCE("entrance"),
-    @XmlEnumValue("exit")
     EXIT("exit"),
-    @XmlEnumValue("emergencyExit")
     EMERGENCY_EXIT("emergencyExit"),
-    @XmlEnumValue("transportMode")
     TRANSPORT_MODE("transportMode"),
-    @XmlEnumValue("noSmoking")
     NO_SMOKING("noSmoking"),
-    @XmlEnumValue("tickets")
     TICKETS("tickets"),
-    @XmlEnumValue("assistance")
     ASSISTANCE("assistance"),
-    @XmlEnumValue("sosPhone")
     SOS_PHONE("sosPhone"),
-    @XmlEnumValue("touchPoint")
     TOUCH_POINT("touchPoint"),
-    @XmlEnumValue("meetingPoint")
     MEETING_POINT("meetingPoint"),
-    @XmlEnumValue("TransportModePoint")
     TRANSPORT_MODE_POINT("TransportModePoint"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

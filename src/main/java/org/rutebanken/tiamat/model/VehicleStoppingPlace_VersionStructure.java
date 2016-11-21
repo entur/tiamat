@@ -51,10 +51,8 @@ public class VehicleStoppingPlace_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {
 
-    @XmlElement(name = "RelationToVehicle")
     @XmlSchemaType(name = "string")
     protected RelationToVehicleEnumeration relationToVehicle;
-    @XmlElement(name = "InfrastructureElementRef")
     protected InfrastructureLinkRefStructure infrastructureElementRef;
     protected VehicleStoppingPositions_RelStructure vehicleStoppingPositions;
     protected VehicleQuayAlignments_RelStructure quayAlignments;

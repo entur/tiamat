@@ -57,12 +57,6 @@ public class ExplicitEquipments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "LocalServiceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "OtherPlaceEquipment", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "InstalledEquipment", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "LocalService", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "InstalledEquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(

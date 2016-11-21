@@ -47,9 +47,6 @@ public class LineSections_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "LineSectionRef", type = LineSectionRefStructure.class),
-        @XmlElement(name = "LineSection", type = LineSection.class)
     })
     protected List<Object> lineSectionRefOrLineSection;
 

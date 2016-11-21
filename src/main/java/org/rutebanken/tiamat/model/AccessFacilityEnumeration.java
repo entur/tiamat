@@ -38,30 +38,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccessFacilityEnumeration")
-@XmlEnum
 public enum AccessFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("lift")
     LIFT("lift"),
-    @XmlEnumValue("escalator")
     ESCALATOR("escalator"),
-    @XmlEnumValue("travelator")
     TRAVELATOR("travelator"),
-    @XmlEnumValue("ramp")
     RAMP("ramp"),
-    @XmlEnumValue("stairs")
     STAIRS("stairs"),
-    @XmlEnumValue("shuttle")
     SHUTTLE("shuttle"),
-    @XmlEnumValue("narrowEntrance")
     NARROW_ENTRANCE("narrowEntrance"),
-    @XmlEnumValue("barrier")
     BARRIER("barrier"),
-    @XmlEnumValue("palletAccess_lowFloor")
     PALLET_ACCESS___LOW_FLOOR("palletAccess_lowFloor"),
-    @XmlEnumValue("validator")
     VALIDATOR("validator");
     private final String value;
 

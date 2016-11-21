@@ -45,7 +45,6 @@ public class SchematicMapsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "SchematicMap", required = true)
     protected List<SchematicMap> schematicMap;
 
     /**

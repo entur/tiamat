@@ -51,9 +51,7 @@ public class PointOnRoute_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElement(name = "OnwardRouteLinkRef")
     protected RouteLinkRefStructure onwardRouteLinkRef;
 
     /**

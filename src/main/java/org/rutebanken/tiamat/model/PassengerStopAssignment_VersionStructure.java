@@ -51,11 +51,8 @@ public class PassengerStopAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {
 
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElement(name = "QuayRef")
     protected QuayReference quayRef;
-    @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
     protected TrainElements trainElements;
 

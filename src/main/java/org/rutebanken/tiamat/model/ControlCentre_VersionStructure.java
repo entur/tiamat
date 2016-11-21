@@ -50,11 +50,8 @@ public class ControlCentre_VersionStructure
     extends OrganisationPart_VersionStructure
 {
 
-    @XmlElement(name = "Number")
     protected BigInteger number;
-    @XmlElement(name = "ControlCentreCode")
     protected MultilingualStringEntity controlCentreCode;
-    @XmlElement(name = "DepartmentRef")
     protected DepartmentRefStructure departmentRef;
 
     /**

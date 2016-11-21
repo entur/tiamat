@@ -54,29 +54,6 @@ public abstract class Organisation_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "ShortName", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "DelegatedResponsibilitiesSet", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "ValidityPeriod", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "PublicCode", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "ExternalOperatorRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "TradingName", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "alternativeNames", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "delegatedFrom", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "CompanyNumber", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Locale", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Name", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "DelegatedResponsibilitySetRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "OrganisationType", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "PrivateContactDetails", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "PrivateCode", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "LegalName", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Status", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "ContactDetails", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Description", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Remarks", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "typesOfOrganisation", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "parts", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> rest;
 

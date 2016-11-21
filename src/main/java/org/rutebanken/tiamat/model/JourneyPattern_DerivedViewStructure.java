@@ -57,28 +57,17 @@ public class JourneyPattern_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "JourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends JourneyPatternRefStructure> journeyPatternRef;
-    @XmlElement(name = "RouteRef")
     protected RouteRefStructure routeRef;
-    @XmlElement(name = "RouteView")
     protected RouteView routeView;
-    @XmlElement(name = "DirectionType")
     @XmlSchemaType(name = "normalizedString")
     protected DirectionTypeEnumeration directionType;
-    @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
-    @XmlElement(name = "DirectionView")
     protected DirectionView directionView;
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "DestinationDisplayView")
     protected DestinationDisplayView destinationDisplayView;
-    @XmlElement(name = "TypeOfJourneyPatternRef")
     protected TypeOfJourneyPatternRefStructure typeOfJourneyPatternRef;
-    @XmlElement(name = "OperationalContextRef")
     protected OperationalContextRefStructure operationalContextRef;
-    @XmlElement(name = "TimingPatternRef")
     protected TimingPatternRefStructure timingPatternRef;
 
     /**

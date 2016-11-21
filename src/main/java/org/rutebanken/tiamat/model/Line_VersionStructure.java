@@ -74,50 +74,31 @@ public class Line_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name", required = true)
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "TransportSubmode")
     protected TransportSubmodeStructure transportSubmode;
-    @XmlElement(name = "Url")
     @XmlSchemaType(name = "anyURI")
     protected String url;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ExternalLineRef")
     protected ExternalObjectRefStructure externalLineRef;
-    @XmlElement(name = "AuthorityRef")
     protected AuthorityRefStructure authorityRef;
-    @XmlElement(name = "OperatorRef")
     protected OperatorRefStructure operatorRef;
     protected TransportOrganisationRefs_RelStructure additionalOperators;
     protected ModeRefs_RelStructure otherModes;
-    @XmlElement(name = "OperationalContextRef")
     protected OperationalContextRefStructure operationalContextRef;
-    @XmlElement(name = "TypeOfLineRef")
     protected TypeOfLineRefStructure typeOfLineRef;
-    @XmlElement(name = "ExternalProductCategoryRef")
     protected ExternalObjectRefStructure externalProductCategoryRef;
-    @XmlElement(name = "Monitored")
     protected Boolean monitored;
     protected RouteRefs_RelStructure routes;
-    @XmlElement(name = "RepresentedByGroupRef")
     protected GroupOfLinesRefStructure representedByGroupRef;
-    @XmlElement(name = "Presentation")
     protected PresentationStructure presentation;
-    @XmlElement(name = "AlternativePresentation")
     protected PresentationStructure alternativePresentation;
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
     protected AllowedLineDirections_RelStructure allowedDirections;
     protected NoticeAssignments_RelStructure noticeAssignments;

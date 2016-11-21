@@ -46,9 +46,7 @@ public class OrganisationDayType_VersionStructure
     extends DayType_VersionStructure
 {
 
-    @XmlElement(name = "IsServiceDay")
     protected Boolean isServiceDay;
-    @XmlElement(name = "ServicedOrganisationRef")
     protected ServicedOrganisationRefStructure servicedOrganisationRef;
 
     /**

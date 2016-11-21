@@ -44,7 +44,6 @@ public class ZoneRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "ZoneRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends ZoneRefStructure> zoneRef;
 
     /**

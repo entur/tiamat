@@ -47,9 +47,6 @@ public class EquipmentPlaces_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "EquipmentPlaceRef", type = EquipmentPlaceRefStructure.class),
-        @XmlElement(name = "EquipmentPlace", type = EquipmentPlace.class)
     })
     protected List<Object> equipmentPlaceRefOrEquipmentPlace;
 

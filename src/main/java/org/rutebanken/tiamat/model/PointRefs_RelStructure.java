@@ -46,7 +46,6 @@ public class PointRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends PointRefStructure>> pointRef;
 
     /**

@@ -48,9 +48,7 @@ public abstract class InfrastructureLinkRestriction_VersionStructure
     extends NetworkRestriction_VersionStructure
 {
 
-    @XmlElement(name = "FromLinkRef", required = true)
     protected LinkRefStructure fromLinkRef;
-    @XmlElement(name = "ToLinkRef", required = true)
     protected LinkRefStructure toLinkRef;
 
     /**

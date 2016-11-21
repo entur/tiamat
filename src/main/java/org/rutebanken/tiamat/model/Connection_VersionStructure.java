@@ -50,13 +50,9 @@ public class Connection_VersionStructure
     extends Transfer_VersionStructure
 {
 
-    @XmlElement(name = "ExternalConnectionLinkRef")
     protected ExternalObjectRefStructure externalConnectionLinkRef;
-    @XmlElement(name = "From")
     protected ConnectionEndStructure from;
-    @XmlElement(name = "To")
     protected ConnectionEndStructure to;
-    @XmlElement(name = "TransferOnly")
     protected Boolean transferOnly;
 
     /**

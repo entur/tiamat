@@ -45,7 +45,6 @@ public class TimeDemandTypeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TimeDemandTypeRef", required = true)
     protected List<TimeDemandTypeRefStructure> timeDemandTypeRef;
 
     /**

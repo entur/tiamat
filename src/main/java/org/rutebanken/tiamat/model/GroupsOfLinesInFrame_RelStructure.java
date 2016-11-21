@@ -45,7 +45,6 @@ public class GroupsOfLinesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfLines", required = true)
     protected List<GroupOfLines> groupOfLines;
 
     /**

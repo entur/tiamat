@@ -58,19 +58,13 @@ public class FlexibleQuay_VersionStructure
     extends Place_VersionStructure
 {
 
-    @XmlElement(name = "NameSuffix")
     protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;
-    @XmlElement(name = "FlexibleStopPlaceRef")
     protected FlexibleStopPlaceRefStructure flexibleStopPlaceRef;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
-    @XmlElement(name = "BoardingUse", defaultValue = "true")
     protected Boolean boardingUse;
-    @XmlElement(name = "AlightingUse", defaultValue = "true")
     protected Boolean alightingUse;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;

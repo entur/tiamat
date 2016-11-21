@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "NameTypeEnumeration")
-@XmlEnum
 public enum NameTypeEnumeration {
 
-    @XmlEnumValue("alias")
     ALIAS("alias"),
-    @XmlEnumValue("translation")
     TRANSLATION("translation"),
-    @XmlEnumValue("copy")
     COPY("copy"),
-    @XmlEnumValue("label")
     LABEL("label"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

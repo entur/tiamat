@@ -61,24 +61,15 @@ public abstract class WaitingEquipment_VersionStructure
     extends SiteEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Seats")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger seats;
-    @XmlElement(name = "Width")
     protected BigDecimal width;
-    @XmlElement(name = "Length")
     protected BigDecimal length;
-    @XmlElement(name = "StepFree")
     protected Boolean stepFree;
-    @XmlElement(name = "WheelchairAreaWidth")
     protected BigDecimal wheelchairAreaWidth;
-    @XmlElement(name = "WheelchairAreaLength")
     protected BigDecimal wheelchairAreaLength;
-    @XmlElement(name = "SmokingAllowed")
     protected Boolean smokingAllowed;
-    @XmlElement(name = "Heated", defaultValue = "false")
     protected Boolean heated;
-    @XmlElement(name = "AirConditioned", defaultValue = "false")
     protected Boolean airConditioned;
 
     /**

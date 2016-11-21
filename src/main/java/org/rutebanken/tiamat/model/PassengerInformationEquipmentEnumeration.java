@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PassengerInformationEquipmentEnumeration")
-@XmlEnum
 public enum PassengerInformationEquipmentEnumeration {
 
-    @XmlEnumValue("timetablePoster")
     TIMETABLE_POSTER("timetablePoster"),
-    @XmlEnumValue("fareInformation")
     FARE_INFORMATION("fareInformation"),
-    @XmlEnumValue("lineNetworkPlan")
     LINE_NETWORK_PLAN("lineNetworkPlan"),
-    @XmlEnumValue("lineTimetable")
     LINE_TIMETABLE("lineTimetable"),
-    @XmlEnumValue("stopTimetable")
     STOP_TIMETABLE("stopTimetable"),
-    @XmlEnumValue("journeyPlanning")
     JOURNEY_PLANNING("journeyPlanning"),
-    @XmlEnumValue("interactiveKiosk")
     INTERACTIVE_KIOSK("interactiveKiosk"),
-    @XmlEnumValue("informationDesk")
     INFORMATION_DESK("informationDesk"),
-    @XmlEnumValue("realTimeDepartures")
     REAL_TIME_DEPARTURES("realTimeDepartures"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

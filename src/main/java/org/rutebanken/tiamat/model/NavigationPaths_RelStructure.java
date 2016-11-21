@@ -57,9 +57,6 @@ public class NavigationPaths_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "NavigationPathRef", type = NavigationPathRefStructure.class),
-        @XmlElement(name = "NavigationPath", type = NavigationPath.class)
     })
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(

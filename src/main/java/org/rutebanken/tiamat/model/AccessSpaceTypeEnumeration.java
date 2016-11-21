@@ -43,40 +43,23 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccessSpaceTypeEnumeration")
-@XmlEnum
 public enum AccessSpaceTypeEnumeration {
 
-    @XmlEnumValue("concourse")
     CONCOURSE("concourse"),
-    @XmlEnumValue("bookingHall")
     BOOKING_HALL("bookingHall"),
-    @XmlEnumValue("forecourt")
     FORECOURT("forecourt"),
-    @XmlEnumValue("underpass")
     UNDERPASS("underpass"),
-    @XmlEnumValue("overpass")
     OVERPASS("overpass"),
-    @XmlEnumValue("passage")
     PASSAGE("passage"),
-    @XmlEnumValue("passageSection")
     PASSAGE_SECTION("passageSection"),
-    @XmlEnumValue("lift")
     LIFT("lift"),
-    @XmlEnumValue("gallery")
     GALLERY("gallery"),
-    @XmlEnumValue("garage")
     GARAGE("garage"),
-    @XmlEnumValue("shop")
     SHOP("shop"),
-    @XmlEnumValue("waitingRoom")
     WAITING_ROOM("waitingRoom"),
-    @XmlEnumValue("restaurant")
     RESTAURANT("restaurant"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("staircase")
     STAIRCASE("staircase"),
-    @XmlEnumValue("wc")
     WC("wc");
     private final String value;
 

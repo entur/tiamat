@@ -46,46 +46,26 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BusSubmodeEnumeration")
-@XmlEnum
 public enum BusSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("localBus")
     LOCAL_BUS("localBus"),
-    @XmlEnumValue("regionalBus")
     REGIONAL_BUS("regionalBus"),
-    @XmlEnumValue("expressBus")
     EXPRESS_BUS("expressBus"),
-    @XmlEnumValue("nightBus")
     NIGHT_BUS("nightBus"),
-    @XmlEnumValue("postBus")
     POST_BUS("postBus"),
-    @XmlEnumValue("specialNeedsBus")
     SPECIAL_NEEDS_BUS("specialNeedsBus"),
-    @XmlEnumValue("mobilityBus")
     MOBILITY_BUS("mobilityBus"),
-    @XmlEnumValue("mobilityBusForRegisteredDisabled")
     MOBILITY_BUS_FOR_REGISTERED_DISABLED("mobilityBusForRegisteredDisabled"),
-    @XmlEnumValue("sightseeingBus")
     SIGHTSEEING_BUS("sightseeingBus"),
-    @XmlEnumValue("shuttleBus")
     SHUTTLE_BUS("shuttleBus"),
-    @XmlEnumValue("highFrequencyBus")
     HIGH_FREQUENCY_BUS("highFrequencyBus"),
-    @XmlEnumValue("dedicatedLaneBus")
     DEDICATED_LANE_BUS("dedicatedLaneBus"),
-    @XmlEnumValue("schoolBus")
     SCHOOL_BUS("schoolBus"),
-    @XmlEnumValue("schoolAndPublicServiceBus")
     SCHOOL_AND_PUBLIC_SERVICE_BUS("schoolAndPublicServiceBus"),
-    @XmlEnumValue("railReplacementBus")
     RAIL_REPLACEMENT_BUS("railReplacementBus"),
-    @XmlEnumValue("demandAndResponseBus")
     DEMAND_AND_RESPONSE_BUS("demandAndResponseBus"),
-    @XmlEnumValue("airportLinkBus")
     AIRPORT_LINK_BUS("airportLinkBus");
     private final String value;
 

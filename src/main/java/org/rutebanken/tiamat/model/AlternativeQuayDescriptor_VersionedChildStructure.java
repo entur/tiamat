@@ -48,9 +48,7 @@ public class AlternativeQuayDescriptor_VersionedChildStructure
     extends AlternativeName_VersionedChildStructure
 {
 
-    @XmlElement(name = "CrossRoad")
     protected MultilingualStringEntity crossRoad;
-    @XmlElement(name = "Landmark")
     protected MultilingualStringEntity landmark;
 
     /**

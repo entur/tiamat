@@ -42,38 +42,22 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "QuayTypeEnumeration")
-@XmlEnum
 public enum QuayTypeEnumeration {
 
-    @XmlEnumValue("airlineGate")
     AIRLINE_GATE("airlineGate"),
-    @XmlEnumValue("railPlatform")
     RAIL_PLATFORM("railPlatform"),
-    @XmlEnumValue("metroPlatform")
     METRO_PLATFORM("metroPlatform"),
-    @XmlEnumValue("coachStop")
     COACH_STOP("coachStop"),
-    @XmlEnumValue("busStop")
     BUS_STOP("busStop"),
-    @XmlEnumValue("busBay")
     BUS_BAY("busBay"),
-    @XmlEnumValue("tramPlatform")
     TRAM_PLATFORM("tramPlatform"),
-    @XmlEnumValue("tramStop")
     TRAM_STOP("tramStop"),
-    @XmlEnumValue("boatQuay")
     BOAT_QUAY("boatQuay"),
-    @XmlEnumValue("ferryLanding")
     FERRY_LANDING("ferryLanding"),
-    @XmlEnumValue("telecabinePlatform")
     TELECABINE_PLATFORM("telecabinePlatform"),
-    @XmlEnumValue("taxiStand")
     TAXI_STAND("taxiStand"),
-    @XmlEnumValue("setDownPlace")
     SET_DOWN_PLACE("setDownPlace"),
-    @XmlEnumValue("vehicleLoadingPlace")
     VEHICLE_LOADING_PLACE("vehicleLoadingPlace"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

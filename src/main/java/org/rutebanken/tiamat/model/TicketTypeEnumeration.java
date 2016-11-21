@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TicketTypeEnumeration")
-@XmlEnum
 public enum TicketTypeEnumeration {
 
-    @XmlEnumValue("standard")
     STANDARD("standard"),
-    @XmlEnumValue("promotion")
     PROMOTION("promotion"),
-    @XmlEnumValue("concession")
     CONCESSION("concession"),
-    @XmlEnumValue("group")
     GROUP("group"),
-    @XmlEnumValue("season")
     SEASON("season"),
-    @XmlEnumValue("carnet")
     CARNET("carnet"),
-    @XmlEnumValue("travelCard")
     TRAVEL_CARD("travelCard"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

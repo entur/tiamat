@@ -66,28 +66,18 @@ public class SiteEntrance_VersionStructure
     extends SiteComponent_VersionStructure
 {
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "EntranceType")
     @XmlSchemaType(name = "string")
     protected EntranceEnumeration entranceType;
-    @XmlElement(name = "IsExternal", defaultValue = "true")
     protected Boolean isExternal;
-    @XmlElement(name = "IsEntry", defaultValue = "true")
     protected Boolean isEntry;
-    @XmlElement(name = "IsExit", defaultValue = "true")
     protected Boolean isExit;
-    @XmlElement(name = "Width")
     protected BigDecimal width;
-    @XmlElement(name = "Height")
     protected BigDecimal height;
-    @XmlElement(name = "DroppedKerbOutside")
     protected Boolean droppedKerbOutside;
-    @XmlElement(name = "DropOffPointClose")
     protected Boolean dropOffPointClose;
 
     /**

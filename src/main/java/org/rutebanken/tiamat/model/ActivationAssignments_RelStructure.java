@@ -47,9 +47,6 @@ public class ActivationAssignments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ActivationAssignmentRef", type = ActivationAssignmentRefStructure.class),
-        @XmlElement(name = "ActivationAssignment", type = ActivationAssignment.class)
     })
     protected List<Object> activationAssignmentRefOrActivationAssignment;
 

@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SanitaryFacilityEnumeration")
-@XmlEnum
 public enum SanitaryFacilityEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("toilet")
     TOILET("toilet"),
-    @XmlEnumValue("wheelChairAccessToilet")
     WHEEL_CHAIR_ACCESS_TOILET("wheelChairAccessToilet"),
-    @XmlEnumValue("shower")
     SHOWER("shower"),
-    @XmlEnumValue("washingAndChangeFacilities")
     WASHING_AND_CHANGE_FACILITIES("washingAndChangeFacilities"),
-    @XmlEnumValue("babyChange")
     BABY_CHANGE("babyChange"),
-    @XmlEnumValue("wheelchairBabyChange")
     WHEELCHAIR_BABY_CHANGE("wheelchairBabyChange"),
-    @XmlEnumValue("shoeShiner")
     SHOE_SHINER("shoeShiner"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CoveredEnumeration")
-@XmlEnum
 public enum CoveredEnumeration {
 
-    @XmlEnumValue("indoors")
     INDOORS("indoors"),
-    @XmlEnumValue("outdoors")
     OUTDOORS("outdoors"),
-    @XmlEnumValue("covered")
     COVERED("covered"),
-    @XmlEnumValue("mixed")
     MIXED("mixed"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

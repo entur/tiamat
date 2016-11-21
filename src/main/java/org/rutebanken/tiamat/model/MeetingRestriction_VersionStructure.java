@@ -46,9 +46,7 @@ public class MeetingRestriction_VersionStructure
     extends InfrastructureLinkRestriction_VersionStructure
 {
 
-    @XmlElement(name = "ForVehicleTypeRef")
     protected VehicleTypeRefStructure forVehicleTypeRef;
-    @XmlElement(name = "AgainstVehicleTypeRef")
     protected VehicleTypeRefStructure againstVehicleTypeRef;
 
     /**

@@ -46,7 +46,6 @@ public class LineRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends LineRefStructure>> lineRef;
 
     /**

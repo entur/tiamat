@@ -56,13 +56,9 @@ public class TimingPointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "TimingPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends TimingPointRefStructure> timingPointRef;
-    @XmlElement(name = "OnwardTimingLinkRef")
     protected TimingLinkRefStructure onwardTimingLinkRef;
-    @XmlElement(name = "IsWaitPoint", defaultValue = "false")
     protected Boolean isWaitPoint;
-    @XmlElement(name = "WaitTime")
     protected Duration waitTime;
     protected JourneyPatternWaitTimes_RelStructure waitTimes;
     protected JourneyPatternHeadways_RelStructure headways;

@@ -71,42 +71,27 @@ public class NavigationPath_VersionStructure
     extends LinkSequence_VersionStructure
 {
 
-    @XmlElement(name = "From")
     protected PathLinkEndStructure from;
-    @XmlElement(name = "To")
     protected PathLinkEndStructure to;
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
-    @XmlList
-    @XmlElement(name = "AccessModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessModeEnumeration> accessModes;
     protected AccessSummaries_RelStructure summaries;
-    @XmlElement(name = "TransferDuration")
     protected TransferDurationStructure transferDuration;
-    @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
     protected PublicUseEnumeration publicUse;
-    @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
     protected CoveredEnumeration covered;
-    @XmlElement(name = "Gated")
     @XmlSchemaType(name = "string")
     protected GatedEnumeration gated;
-    @XmlElement(name = "Lighting", defaultValue = "wellLit")
     @XmlSchemaType(name = "normalizedString")
     protected LightingEnumeration lighting;
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
-    @XmlElement(name = "PersonCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger personCapacity;
     protected SiteFacilitySets_RelStructure facilities;
-    @XmlList
-    @XmlElement(name = "AccessFeatureList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessFeatureEnumeration> accessFeatureList;
-    @XmlElement(name = "NavigationType")
     @XmlSchemaType(name = "NMTOKEN")
     protected NavigationTypeEnumeration navigationType;
     protected PlacesInSequence_RelStructure placesInSequence;

@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FlexibleRouteTypeEnumeration")
-@XmlEnum
 public enum FlexibleRouteTypeEnumeration {
 
-    @XmlEnumValue("flexibleAreasOnly")
     FLEXIBLE_AREAS_ONLY("flexibleAreasOnly"),
-    @XmlEnumValue("hailAndRideSections")
     HAIL_AND_RIDE_SECTIONS("hailAndRideSections"),
-    @XmlEnumValue("mixed")
     MIXED("mixed"),
-    @XmlEnumValue("fixed")
     FIXED("fixed"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

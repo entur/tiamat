@@ -47,9 +47,6 @@ public class ClassesInRepository_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ClassInFrameRef", type = ClassInFrameRefStructure.class),
-        @XmlElement(name = "ClassInFrame", type = ClassInFrameStructure.class)
     })
     protected List<Object> classInFrameRefOrClassInFrame;
 

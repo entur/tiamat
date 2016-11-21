@@ -54,13 +54,9 @@ public class WaitingRoomEquipment_VersionStructure
     extends WaitingEquipment_VersionStructure
 {
 
-    @XmlElement(name = "WomenOnly")
     protected Boolean womenOnly;
-    @XmlList
-    @XmlElement(name = "Sanitary")
     @XmlSchemaType(name = "anySimpleType")
     protected List<SanitaryFacilityEnumeration> sanitary;
-    @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
 
     /**

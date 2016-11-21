@@ -48,10 +48,6 @@ public class PointsInJourneyPattern_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PointInJourneyPattern", type = PointInJourneyPattern.class),
-        @XmlElement(name = "StopPointInJourneyPattern", type = StopPointInJourneyPattern.class),
-        @XmlElement(name = "TimingPointInJourneyPattern", type = TimingPointInJourneyPattern.class)
     })
     protected List<PointInLinkSequence_VersionedChildStructure> pointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern;
 

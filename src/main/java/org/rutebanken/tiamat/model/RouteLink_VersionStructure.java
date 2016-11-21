@@ -47,11 +47,8 @@ public class RouteLink_VersionStructure
     extends Link_VersionStructure
 {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected RoutePointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected RoutePointRefStructure toPointRef;
-    @XmlElement(name = "OperationalContextRef")
     protected OperationalContextRefStructure operationalContextRef;
 
     /**

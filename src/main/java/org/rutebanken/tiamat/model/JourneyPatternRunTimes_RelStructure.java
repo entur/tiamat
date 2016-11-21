@@ -47,9 +47,6 @@ public class JourneyPatternRunTimes_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "JourneyPatternRunTimeRef", type = JourneyPatternRunTimeRefStructure.class),
-        @XmlElement(name = "JourneyPatternRunTime", type = JourneyPatternRunTime.class)
     })
     protected List<Object> journeyPatternRunTimeRefOrJourneyPatternRunTime;
 

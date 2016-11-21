@@ -54,19 +54,13 @@ public class PathLinkInSequence_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElement(name = "PathLinkRef", required = true)
     protected PathLinkRefStructure pathLinkRef;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Reverse")
     protected Boolean reverse;
-    @XmlElement(name = "Heading")
     @XmlSchemaType(name = "NMTOKEN")
     protected PathHeadingEnumeration heading;
-    @XmlElement(name = "Transition")
     @XmlSchemaType(name = "NMTOKEN")
     protected TransitionEnumeration transition;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
     protected Views views;
 

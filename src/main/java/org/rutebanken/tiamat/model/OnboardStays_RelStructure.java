@@ -45,7 +45,6 @@ public class OnboardStays_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "OnboardStay", required = true)
     protected List<OnboardStay> onboardStay;
 
     /**

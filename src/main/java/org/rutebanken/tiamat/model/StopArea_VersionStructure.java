@@ -53,15 +53,11 @@ public class StopArea_VersionStructure
     extends Zone_VersionStructure
 {
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "ParentStopAreaRef")
     protected StopAreaRefStructure parentStopAreaRef;
-    @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
-    @XmlElement(name = "TopographicPlaceView")
     protected TopographicPlaceView topographicPlaceView;
 
     /**

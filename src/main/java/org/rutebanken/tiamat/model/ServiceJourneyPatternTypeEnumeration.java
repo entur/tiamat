@@ -32,33 +32,27 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ServiceJourneyPatternTypeEnumeration")
-@XmlEnum
 public enum ServiceJourneyPatternTypeEnumeration {
 
-    @XmlEnumValue("passenger")
     PASSENGER("passenger"),
 
     /**
      * INTERCHANGE is considered a possible connection between journeys.
      * 
      */
-    @XmlEnumValue("garageRunOut")
     GARAGE_RUN_OUT("garageRunOut"),
 
     /**
      * INTERCHANGE is advertised to public as a possible connection between journeys.
      * 
      */
-    @XmlEnumValue("garageRunIn")
     GARAGE_RUN_IN("garageRunIn"),
 
     /**
      * INTERCHANGE is actively managed as a possible connection between journeys and passengers are informed of real-time alterations.
      * 
      */
-    @XmlEnumValue("turningManoeuvre")
     TURNING_MANOEUVRE("turningManoeuvre"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

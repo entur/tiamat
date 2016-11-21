@@ -46,7 +46,6 @@ public class LinesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Line_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends DataManagedObjectStructure>> line_;
 
     /**

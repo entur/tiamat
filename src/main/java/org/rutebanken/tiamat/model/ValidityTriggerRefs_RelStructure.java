@@ -45,7 +45,6 @@ public class ValidityTriggerRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ValidityTriggerRef", required = true)
     protected List<ValidityTriggerRefStructure> validityTriggerRef;
 
     /**

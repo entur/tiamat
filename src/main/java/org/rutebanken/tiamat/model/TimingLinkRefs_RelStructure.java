@@ -47,9 +47,6 @@ public class TimingLinkRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TimingLinkRef", type = TimingLinkRefStructure.class),
-        @XmlElement(name = "TimingLinkRefByValue", type = TimingLinkRefByValueStructure.class)
     })
     protected List<Object> timingLinkRefOrTimingLinkRefByValue;
 

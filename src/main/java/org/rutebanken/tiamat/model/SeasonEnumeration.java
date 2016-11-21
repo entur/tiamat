@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SeasonEnumeration")
-@XmlEnum
 public enum SeasonEnumeration {
 
-    @XmlEnumValue("Spring")
     SPRING("Spring"),
-    @XmlEnumValue("Summer")
     SUMMER("Summer"),
-    @XmlEnumValue("Autumn")
     AUTUMN("Autumn"),
-    @XmlEnumValue("Winter")
     WINTER("Winter"),
-    @XmlEnumValue("Perennially")
     PERENNIALLY("Perennially");
     private final String value;
 

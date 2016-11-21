@@ -45,7 +45,6 @@ public class PathJunctionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PathJunction", required = true)
     protected List<PathJunction> pathJunction;
 
     /**

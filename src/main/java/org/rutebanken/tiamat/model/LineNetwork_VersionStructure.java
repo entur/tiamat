@@ -53,13 +53,9 @@ public class LineNetwork_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElementRef(name = "GroupOfLinesRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends GroupOfLinesRefStructure> groupOfLinesRef;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
     protected LineSections_RelStructure sections;
 

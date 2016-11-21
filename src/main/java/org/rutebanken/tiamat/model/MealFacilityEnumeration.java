@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MealFacilityEnumeration")
-@XmlEnum
 public enum MealFacilityEnumeration {
 
-    @XmlEnumValue("breakfast")
     BREAKFAST("breakfast"),
-    @XmlEnumValue("lunch")
     LUNCH("lunch"),
-    @XmlEnumValue("dinner")
     DINNER("dinner"),
-    @XmlEnumValue("snack")
     SNACK("snack"),
-    @XmlEnumValue("drinks")
     DRINKS("drinks");
     private final String value;
 

@@ -49,9 +49,7 @@ public class Address_VersionStructure
     extends Place_VersionStructure
 {
 
-    @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
-    @XmlElement(name = "CountryName")
     protected MultilingualStringEntity countryName;
 
     /**

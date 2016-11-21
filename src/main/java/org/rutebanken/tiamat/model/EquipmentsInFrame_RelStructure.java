@@ -46,7 +46,6 @@ public class EquipmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Equipment", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends Equipment_VersionStructure>> equipment;
 
     /**

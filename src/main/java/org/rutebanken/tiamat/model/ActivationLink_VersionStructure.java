@@ -49,11 +49,8 @@ public class ActivationLink_VersionStructure
     extends Link_VersionStructure
 {
 
-    @XmlElement(name = "TypeOfActivationRef")
     protected TypeOfActivationRefStructure typeOfActivationRef;
-    @XmlElement(name = "FromPointRef", required = true)
     protected ActivationPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected ActivationPointRefStructure toPointRef;
 
     /**

@@ -48,7 +48,6 @@ public class ReliefPoint_VersionStructure
     extends TimingPoint_VersionStructure
 {
 
-    @XmlElement(name = "CrewBaseRef")
     protected CrewBaseRefStructure crewBaseRef;
 
     /**

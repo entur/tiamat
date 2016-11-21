@@ -60,27 +60,17 @@ public class StairFlight_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Depth")
     protected BigDecimal depth;
-    @XmlElement(name = "NumberOfSteps")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger numberOfSteps;
-    @XmlElement(name = "StepHeight")
     protected BigDecimal stepHeight;
-    @XmlElement(name = "StepColourContrast")
     protected Boolean stepColourContrast;
-    @XmlElement(name = "HandrailType")
     @XmlSchemaType(name = "string")
     protected HandrailEnumeration handrailType;
-    @XmlElement(name = "HandrailHeight")
     protected BigDecimal handrailHeight;
-    @XmlElement(name = "LowerHandrailHeight")
     protected BigDecimal lowerHandrailHeight;
-    @XmlElement(name = "TopEnd")
     protected StairEndStructure topEnd;
-    @XmlElement(name = "BottomEnd")
     protected StairEndStructure bottomEnd;
-    @XmlElement(name = "ContinuousHandrail")
     protected Boolean continuousHandrail;
 
     /**

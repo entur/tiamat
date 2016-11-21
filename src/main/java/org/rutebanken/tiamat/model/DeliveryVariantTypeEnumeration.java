@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DeliveryVariantTypeEnumeration")
-@XmlEnum
 public enum DeliveryVariantTypeEnumeration {
 
-    @XmlEnumValue("printed")
     PRINTED("printed"),
-    @XmlEnumValue("textToSpeech")
     TEXT_TO_SPEECH("textToSpeech"),
-    @XmlEnumValue("web")
     WEB("web"),
-    @XmlEnumValue("mobile")
     MOBILE("mobile"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

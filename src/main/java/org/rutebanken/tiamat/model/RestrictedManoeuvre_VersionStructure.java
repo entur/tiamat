@@ -45,7 +45,6 @@ public abstract class RestrictedManoeuvre_VersionStructure
     extends InfrastructureLinkRestriction_VersionStructure
 {
 
-    @XmlElement(name = "VehicleTypeRef")
     protected VehicleTypeRefStructure vehicleTypeRef;
 
     /**

@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MetroSubmodeEnumeration")
-@XmlEnum
 public enum MetroSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("metro")
     METRO("metro"),
-    @XmlEnumValue("tube")
     TUBE("tube"),
-    @XmlEnumValue("urbanRailway")
     URBAN_RAILWAY("urbanRailway");
     private final String value;
 

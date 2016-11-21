@@ -47,9 +47,6 @@ public class FacilityRequirements_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "FacilityRequirementRef", type = FacilityRequirementRefStructure.class),
-        @XmlElement(name = "FacilityRequirement", type = FacilityRequirement.class)
     })
     protected List<Object> facilityRequirementRefOrFacilityRequirement;
 

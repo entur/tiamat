@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Attributes {
 
-    @XmlElement(name = "ClassAttributeInFrame", required = true)
     protected List<ClassAttributeInFrame> classAttributeInFrame;
 
     /**

@@ -63,42 +63,25 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class PropertyOfDayStructure {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlList
-    @XmlElement(name = "DaysOfWeek")
     @XmlSchemaType(name = "anySimpleType")
     protected List<DayOfWeekEnumeration> daysOfWeek;
-    @XmlList
-    @XmlElement(name = "WeeksOfMonth", defaultValue = "EveryWeek")
     @XmlSchemaType(name = "anySimpleType")
     protected List<String> weeksOfMonth;
-    @XmlElement(name = "MonthOfYear")
     @XmlSchemaType(name = "gMonth")
     protected XMLGregorianCalendar monthOfYear;
-    @XmlElement(name = "DayOfYear")
     @XmlSchemaType(name = "gMonthDay")
     protected XMLGregorianCalendar dayOfYear;
-    @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
-    @XmlList
-    @XmlElement(name = "HolidayTypes", defaultValue = "AnyDay")
     @XmlSchemaType(name = "anySimpleType")
     protected List<HolidayTypeEnumeration> holidayTypes;
-    @XmlList
-    @XmlElement(name = "Seasons", defaultValue = "Perennially")
     @XmlSchemaType(name = "anySimpleType")
     protected List<SeasonEnumeration> seasons;
-    @XmlList
-    @XmlElement(name = "Tides", defaultValue = "AllTides")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TideEnumeration> tides;
-    @XmlElement(name = "DayEvent")
     @XmlSchemaType(name = "string")
     protected DayEventEnumeration dayEvent;
-    @XmlElement(name = "Crowding")
     @XmlSchemaType(name = "string")
     protected CrowdingEnumeration crowding;
 

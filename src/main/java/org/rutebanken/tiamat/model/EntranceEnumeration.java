@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EntranceEnumeration")
-@XmlEnum
 public enum EntranceEnumeration {
 
-    @XmlEnumValue("opening")
     OPENING("opening"),
-    @XmlEnumValue("openDoor")
     OPEN_DOOR("openDoor"),
-    @XmlEnumValue("door")
     DOOR("door"),
-    @XmlEnumValue("swingDoor")
     SWING_DOOR("swingDoor"),
-    @XmlEnumValue("revolvingDoor")
     REVOLVING_DOOR("revolvingDoor"),
-    @XmlEnumValue("automaticDoor")
     AUTOMATIC_DOOR("automaticDoor"),
-    @XmlEnumValue("ticketBarrier")
     TICKET_BARRIER("ticketBarrier"),
-    @XmlEnumValue("gate")
     GATE("gate"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

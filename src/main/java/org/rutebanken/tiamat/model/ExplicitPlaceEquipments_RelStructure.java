@@ -50,27 +50,6 @@ public class ExplicitPlaceEquipments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "OtherPlaceEquipment", type = PlaceEquipment_VersionStructure.class),
-        @XmlElement(name = "RoughSurface", type = RoughSurface.class),
-        @XmlElement(name = "EntranceEquipment", type = EntranceEquipment.class),
-        @XmlElement(name = "StaircaseEquipment", type = StaircaseEquipment.class),
-        @XmlElement(name = "LiftEquipment", type = LiftEquipment.class),
-        @XmlElement(name = "EscalatorEquipment", type = EscalatorEquipment.class),
-        @XmlElement(name = "TravelatorEquipment", type = TravelatorEquipment.class),
-        @XmlElement(name = "RampEquipment", type = RampEquipment.class),
-        @XmlElement(name = "QueueingEquipment", type = QueueingEquipment.class),
-        @XmlElement(name = "CrossingEquipment", type = CrossingEquipment.class),
-        @XmlElement(name = "PlaceLighting", type = PlaceLighting.class),
-        @XmlElement(name = "PlaceSign", type = PlaceSignStructure.class),
-        @XmlElement(name = "HeadingSign", type = HeadingSignStructure.class),
-        @XmlElement(name = "GeneralSign", type = GeneralSignStructure.class),
-        @XmlElement(name = "HelpPointEquipment", type = HelpPointEquipment.class),
-        @XmlElement(name = "PassengerSafetyEquipment", type = PassengerSafetyEquipment.class),
-        @XmlElement(name = "RubbishDisposalEquipment", type = RubbishDisposalEquipment.class),
-        @XmlElement(name = "SanitaryEquipment", type = SanitaryEquipment.class),
-        @XmlElement(name = "TicketingEquipment", type = TicketingEquipment.class),
-        @XmlElement(name = "TicketValidatorEquipment", type = TicketValidatorEquipment.class)
     })
     protected List<InstalledEquipment_VersionStructure> otherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment;
 

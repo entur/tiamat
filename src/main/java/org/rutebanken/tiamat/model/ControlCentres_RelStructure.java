@@ -47,9 +47,6 @@ public class ControlCentres_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ControlCentreRef", type = ControlCentreRefStructure.class),
-        @XmlElement(name = "ControlCentre", type = ControlCentre.class)
     })
     protected List<Object> controlCentreRefOrControlCentre;
 

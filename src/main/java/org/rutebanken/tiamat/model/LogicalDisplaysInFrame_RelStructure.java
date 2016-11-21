@@ -45,7 +45,6 @@ public class LogicalDisplaysInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "LogicalDisplay", required = true)
     protected List<LogicalDisplay> logicalDisplay;
 
     /**

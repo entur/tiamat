@@ -57,19 +57,14 @@ public class TrainElement_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TrainElementType")
     @XmlSchemaType(name = "NMTOKEN")
     protected TrainElementTypeEnumeration trainElementType;
 
-    @XmlElement(name = "PassengerCapacity")
     protected PassengerCapacityStructure passengerCapacity;
     protected PassengerCapacities_RelStructure capacities;
 
-    @XmlElement(name = "Length")
     protected BigDecimal length;
     protected ServiceFacilitySets_RelStructure facilities;
     protected Equipments_RelStructure equipments;

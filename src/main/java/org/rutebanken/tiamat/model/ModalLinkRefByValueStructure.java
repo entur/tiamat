@@ -46,7 +46,6 @@ public class ModalLinkRefByValueStructure
     extends LinkRefByValueStructure
 {
 
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
 

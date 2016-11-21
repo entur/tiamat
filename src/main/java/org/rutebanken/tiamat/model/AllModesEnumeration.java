@@ -48,55 +48,33 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AllModesEnumeration")
-@XmlEnum
 public enum AllModesEnumeration {
 
-    @XmlEnumValue("all")
     ALL("all"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("air")
     AIR("air"),
-    @XmlEnumValue("bus")
     BUS("bus"),
-    @XmlEnumValue("trolleyBus")
     TROLLEY_BUS("trolleyBus"),
-    @XmlEnumValue("tram")
     TRAM("tram"),
-    @XmlEnumValue("coach")
     COACH("coach"),
-    @XmlEnumValue("rail")
     RAIL("rail"),
-    @XmlEnumValue("intercityRail")
     INTERCITY_RAIL("intercityRail"),
-    @XmlEnumValue("urbanRail")
     URBAN_RAIL("urbanRail"),
-    @XmlEnumValue("metro")
     METRO("metro"),
-    @XmlEnumValue("water")
     WATER("water"),
-    @XmlEnumValue("cableway")
     CABLEWAY("cableway"),
-    @XmlEnumValue("funicular")
     FUNICULAR("funicular"),
-    @XmlEnumValue("taxi")
     TAXI("taxi"),
 
     /**
      * See pti12_x.
      * 
      */
-    @XmlEnumValue("selfDrive")
     SELF_DRIVE("selfDrive"),
-    @XmlEnumValue("foot")
     FOOT("foot"),
-    @XmlEnumValue("bicycle")
     BICYCLE("bicycle"),
-    @XmlEnumValue("motorcycle")
     MOTORCYCLE("motorcycle"),
-    @XmlEnumValue("car")
     CAR("car"),
-    @XmlEnumValue("shuttle")
     SHUTTLE("shuttle");
     private final String value;
 

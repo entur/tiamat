@@ -47,9 +47,6 @@ public class VehicleStoppingPositions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "VehicleStoppingPositionRef", type = VehicleStoppingPositionRefStructure.class),
-        @XmlElement(name = "VehicleStoppingPosition", type = VehicleStoppingPosition.class)
     })
     protected List<Object> vehicleStoppingPositionRefOrVehicleStoppingPosition;
 

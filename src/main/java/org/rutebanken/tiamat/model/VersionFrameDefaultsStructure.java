@@ -57,22 +57,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class VersionFrameDefaultsStructure {
 
-    @XmlElement(name = "DefaultCodespaceRef")
     protected CodespaceRefStructure defaultCodespaceRef;
-    @XmlElement(name = "DefaultDataSourceRef")
     protected DataSourceRefStructure defaultDataSourceRef;
-    @XmlElement(name = "DefaultResponsibilitySetRef")
     protected ResponsibilitySetRefStructure defaultResponsibilitySetRef;
-    @XmlElement(name = "DefaultLocale")
     protected LocaleStructure defaultLocale;
-    @XmlElement(name = "DefaultLocationSystem")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String defaultLocationSystem;
-    @XmlElement(name = "DefaultSystemOfUnits", defaultValue = "SiMetres")
     @XmlSchemaType(name = "normalizedString")
     protected SystemOfUnits defaultSystemOfUnits;
-    @XmlElement(name = "DefaultCurrency")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String defaultCurrency;

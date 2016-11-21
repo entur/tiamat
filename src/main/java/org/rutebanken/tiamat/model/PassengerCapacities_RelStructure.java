@@ -47,9 +47,6 @@ public class PassengerCapacities_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PassengerCapacityRef", type = PassengerCapacityRefStructure.class),
-        @XmlElement(name = "PassengerCapacity", type = PassengerCapacity.class)
     })
     protected List<Object> passengerCapacityRefOrPassengerCapacity;
 

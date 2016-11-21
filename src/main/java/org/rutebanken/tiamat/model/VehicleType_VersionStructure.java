@@ -72,39 +72,24 @@ public class VehicleType_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ReversingDirection", defaultValue = "true")
     protected Boolean reversingDirection;
-    @XmlElement(name = "SelfPropelled", defaultValue = "true")
     protected Boolean selfPropelled;
-    @XmlElement(name = "TypeOfFuel")
     @XmlSchemaType(name = "normalizedString")
     protected TypeOfFuelEnumeration typeOfFuel;
-    @XmlElement(name = "EuroClass")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String euroClass;
-    @XmlElement(name = "PassengerCapacity")
     protected PassengerCapacityStructure passengerCapacity;
     protected PassengerCapacities_RelStructure capacities;
-    @XmlElement(name = "LowFloor")
     protected Boolean lowFloor;
-    @XmlElement(name = "HasLiftOrRamp")
     protected Boolean hasLiftOrRamp;
-    @XmlElement(name = "HasHoist")
     protected Boolean hasHoist;
-    @XmlElement(name = "Length")
     protected BigDecimal length;
-    @XmlElement(name = "IncludedIn")
     protected VehicleTypeRefStructure includedIn;
-    @XmlElement(name = "ClassifiedAsRef")
     protected VehicleModelRefStructure classifiedAsRef;
     protected ServiceFacilitySets_RelStructure facilities;
     protected PassengerCarryingRequirements_RelStructure canCarry;

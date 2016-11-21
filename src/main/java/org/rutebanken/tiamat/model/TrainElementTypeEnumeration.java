@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TrainElementTypeEnumeration")
-@XmlEnum
 public enum TrainElementTypeEnumeration {
 
-    @XmlEnumValue("buffetCar")
     BUFFET_CAR("buffetCar"),
-    @XmlEnumValue("carriage")
     CARRIAGE("carriage"),
-    @XmlEnumValue("engine")
     ENGINE("engine"),
-    @XmlEnumValue("carTransporter")
     CAR_TRANSPORTER("carTransporter"),
-    @XmlEnumValue("sleeperCarriage")
     SLEEPER_CARRIAGE("sleeperCarriage"),
-    @XmlEnumValue("luggageVan")
     LUGGAGE_VAN("luggageVan"),
-    @XmlEnumValue("restaurantCarriage")
     RESTAURANT_CARRIAGE("restaurantCarriage"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -39,7 +39,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class SchematicMaps {
 
-    @XmlElement(name = "SchematicMap")
     protected SchematicMap schematicMap;
 
     /**

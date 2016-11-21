@@ -57,16 +57,11 @@ public abstract class JourneyTiming_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "TimeDemandTypeRef")
     protected TimeDemandTypeRefStructure timeDemandTypeRef;
-    @XmlElement(name = "TimebandRef")
     protected TimebandRefStructure timebandRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
-    @XmlElement(name = "OperationalContextRef")
     protected OperationalContextRefStructure operationalContextRef;
 
     /**

@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FamilyFacilityEnumeration")
-@XmlEnum
 public enum FamilyFacilityEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("servicesForChildren")
     SERVICES_FOR_CHILDREN("servicesForChildren"),
-    @XmlEnumValue("servicesForArmyFamilies")
     SERVICES_FOR_ARMY_FAMILIES("servicesForArmyFamilies"),
-    @XmlEnumValue("nurseryService")
     NURSERY_SERVICE("nurseryService");
     private final String value;
 

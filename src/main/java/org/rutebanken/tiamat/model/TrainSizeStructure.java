@@ -45,10 +45,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class TrainSizeStructure {
 
-    @XmlElement(name = "NumberOfCars")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfCars;
-    @XmlElement(name = "TrainSizeType", defaultValue = "normal")
     @XmlSchemaType(name = "NMTOKEN")
     protected TrainSizeEnumeration trainSizeType;
 

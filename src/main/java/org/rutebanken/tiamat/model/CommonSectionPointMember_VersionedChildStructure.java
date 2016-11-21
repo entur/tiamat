@@ -55,13 +55,9 @@ public class CommonSectionPointMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {
 
-    @XmlElement(name = "ParentCommonSectionRef")
     protected CommonSectionRefStructure parentCommonSectionRef;
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElementRef(name = "LinkRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkRefStructure> linkRef;
-    @XmlElement(name = "Reverse")
     protected Boolean reverse;
 
     /**

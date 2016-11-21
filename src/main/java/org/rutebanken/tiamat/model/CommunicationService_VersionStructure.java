@@ -51,8 +51,6 @@ public class CommunicationService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "ServiceList", required = true)
     @XmlSchemaType(name = "anySimpleType")
     protected List<CommunicationServiceEnumeration> serviceList;
 

@@ -75,87 +75,48 @@ public class FacilitySet_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "ProvidedByRef")
     protected OrganisationRefStructure providedByRef;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TypeOfFacilityRef")
     protected TypeOfFacilityRefStructure typeOfFacilityRef;
     protected TypesOfEquipment_RelStructure otherFacilities;
-    @XmlList
-    @XmlElement(name = "AccessibilityInfoFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessibilityInfoFacilityEnumeration> accessibilityInfoFacilityList;
-    @XmlList
-    @XmlElement(name = "AssistanceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AssistanceFacilityEnumeration> assistanceFacilityList;
-    @XmlList
-    @XmlElement(name = "AccessibilityToolList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessibilityToolEnumeration> accessibilityToolList;
-    @XmlList
-    @XmlElement(name = "CarServiceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<CarServiceFacilityEnumeration> carServiceFacilityList;
-    @XmlList
-    @XmlElement(name = "CateringFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<CateringFacilityEnumeration> cateringFacilityList;
-    @XmlList
-    @XmlElement(name = "FamilyFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<FamilyFacilityEnumeration> familyFacilityList;
 
-    @XmlElement(name = "GenderLimitation")
     @XmlSchemaType(name = "normalizedString")
     protected GenderLimitationEnumeration genderLimitation;
 
-    @XmlList
-    @XmlElement(name = "MealFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<MealFacilityEnumeration> mealFacilityList;
-    @XmlList
-    @XmlElement(name = "MedicalFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<MedicalFacilityEnumeration> medicalFacilityList;
-    @XmlList
-    @XmlElement(name = "MobilityFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<MobilityFacilityEnumeration> mobilityFacilityList;
-    @XmlList
-    @XmlElement(name = "NuisanceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<NuisanceFacilityEnumeration> nuisanceFacilityList;
-    @XmlList
-    @XmlElement(name = "PassengerCommsFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PassengerCommsFacilityEnumeration> passengerCommsFacilityList;
-    @XmlElement(name = "PassengerInformationEquipmentList")
     @XmlSchemaType(name = "NMTOKEN")
     protected PassengerInformationEquipmentEnumeration passengerInformationEquipmentList;
-    @XmlList
-    @XmlElement(name = "PassengerInformationFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList;
-    @XmlList
-    @XmlElement(name = "RetailFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<RetailFacilityEnumeration> retailFacilityList;
-    @XmlList
-    @XmlElement(name = "SafetyFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<SafetyFacilityEnumeration> safetyFacilityList;
-    @XmlList
-    @XmlElement(name = "SanitaryFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
-    @XmlList
-    @XmlElement(name = "TicketingFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingFacilityEnumeration> ticketingFacilityList;
-    @XmlList
-    @XmlElement(name = "TicketingServiceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingServiceFacilityEnumeration> ticketingServiceFacilityList;
 

@@ -57,31 +57,18 @@ public class SiteFacilitySetStructure
     extends FacilitySet_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "EmergencyServiceList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<EmergencyServiceEnumeration> emergencyServiceList;
-    @XmlList
-    @XmlElement(name = "HireFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<HireFacilityEnumeration> hireFacilityList;
-    @XmlList
-    @XmlElement(name = "LuggageLockerFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<LuggageLockerFacilityEnumeration> luggageLockerFacilityList;
-    @XmlList
-    @XmlElement(name = "LuggageServiceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<LuggageServiceFacilityEnumeration> luggageServiceFacilityList;
-    @XmlList
-    @XmlElement(name = "MoneyFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<MoneyFacilityEnumeration> moneyFacilityList;
-    @XmlList
-    @XmlElement(name = "ParkingFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingFacilityEnumeration> parkingFacilityList;
-    @XmlElement(name = "Staffing")
     @XmlSchemaType(name = "normalizedString")
     protected StaffingEnumeration staffing;
 

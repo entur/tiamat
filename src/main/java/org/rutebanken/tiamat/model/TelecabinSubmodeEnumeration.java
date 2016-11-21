@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TelecabinSubmodeEnumeration")
-@XmlEnum
 public enum TelecabinSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("telecabin")
     TELECABIN("telecabin"),
-    @XmlEnumValue("cableCar")
     CABLE_CAR("cableCar"),
-    @XmlEnumValue("lift")
     LIFT("lift"),
-    @XmlEnumValue("chairLift")
     CHAIR_LIFT("chairLift"),
-    @XmlEnumValue("dragLift")
     DRAG_LIFT("dragLift"),
-    @XmlEnumValue("telecabinLink")
     TELECABIN_LINK("telecabinLink");
     private final String value;
 

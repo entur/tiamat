@@ -45,7 +45,6 @@ public class FlexibleLinkProperties_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "FlexibleLinkProperties", required = true)
     protected List<FlexibleLinkProperties> flexibleLinkProperties;
 
     /**

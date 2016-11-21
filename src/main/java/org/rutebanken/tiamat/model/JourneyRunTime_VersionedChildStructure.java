@@ -50,9 +50,7 @@ public class JourneyRunTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElement(name = "TimingLinkRef")
     protected TimingLinkRefStructure timingLinkRef;
-    @XmlElement(name = "RunTime", required = true)
     protected Duration runTime;
 
     /**

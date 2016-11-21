@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "OperatorActivitiesEnumeration")
-@XmlEnum
 public enum OperatorActivitiesEnumeration {
 
-    @XmlEnumValue("passenger")
     PASSENGER("passenger"),
-    @XmlEnumValue("freight")
     FREIGHT("freight"),
-    @XmlEnumValue("infrastructure")
     INFRASTRUCTURE("infrastructure"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

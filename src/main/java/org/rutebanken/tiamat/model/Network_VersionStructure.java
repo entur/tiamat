@@ -49,7 +49,6 @@ public class Network_VersionStructure
     extends GroupOfLines_VersionStructure
 {
 
-    @XmlElementRef(name = "TransportOrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
     protected GroupsOfLinesInFrame_RelStructure groupsOfLines;
 

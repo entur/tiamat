@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CarServiceFacilityEnumeration")
-@XmlEnum
 public enum CarServiceFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("carWash")
     CAR_WASH("carWash"),
-    @XmlEnumValue("valetPark")
     VALET_PARK("valetPark"),
-    @XmlEnumValue("carValetClean")
     CAR_VALET_CLEAN("carValetClean"),
-    @XmlEnumValue("oilChange")
     OIL_CHANGE("oilChange"),
-    @XmlEnumValue("engineWarming")
     ENGINE_WARMING("engineWarming"),
-    @XmlEnumValue("petrol")
     PETROL("petrol");
     private final String value;
 

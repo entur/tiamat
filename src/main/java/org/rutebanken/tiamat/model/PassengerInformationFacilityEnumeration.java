@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PassengerInformationFacilityEnumeration")
-@XmlEnum
 public enum PassengerInformationFacilityEnumeration {
 
-    @XmlEnumValue("nextStopIndicator")
     NEXT_STOP_INDICATOR("nextStopIndicator"),
-    @XmlEnumValue("stopAnnouncements")
     STOP_ANNOUNCEMENTS("stopAnnouncements"),
-    @XmlEnumValue("passengerInformationDisplay")
     PASSENGER_INFORMATION_DISPLAY("passengerInformationDisplay"),
-    @XmlEnumValue("realTimeConnections")
     REAL_TIME_CONNECTIONS("realTimeConnections"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

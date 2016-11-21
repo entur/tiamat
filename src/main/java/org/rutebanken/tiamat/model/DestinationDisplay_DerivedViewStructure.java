@@ -67,41 +67,32 @@ public class DestinationDisplay_DerivedViewStructure
 //    @Transient
 //    protected KeyListStructure keyList;
 
-    @XmlElement(name = "DestinationDisplayRef")
     @Transient
     protected DestinationDisplayRefStructure destinationDisplayRef;
 
-    @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity name;
 
-    @XmlElement(name = "ShortName")
     @Transient
     protected MultilingualStringEntity shortName;
 
-    @XmlElement(name = "SideText")
     @Transient
     protected MultilingualStringEntity sideText;
 
-    @XmlElement(name = "FrontText")
     @Transient
     protected MultilingualStringEntity frontText;
 
-    @XmlElement(name = "DriverDisplayText")
     @Transient
     protected MultilingualStringEntity driverDisplayText;
 
-    @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortCode;
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
 
-    @XmlElement(name = "PrivateCode")
     @Transient
     protected PrivateCodeStructure privateCode;
 

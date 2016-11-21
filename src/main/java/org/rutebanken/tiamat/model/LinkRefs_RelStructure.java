@@ -48,9 +48,6 @@ public class LinkRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "LinkRefByValue", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "LinkRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> linkRefOrLinkRefByValue;
 

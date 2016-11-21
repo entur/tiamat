@@ -47,13 +47,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Connections {
 
-    @XmlElement(name = "Access")
     protected List<Access> access;
-    @XmlElement(name = "Connection")
     protected List<Connection> connection;
-    @XmlElement(name = "DefaultConnection")
     protected List<DefaultConnection> defaultConnection;
-    @XmlElement(name = "SiteConnection")
     protected List<SiteConnection> siteConnection;
 
     /**

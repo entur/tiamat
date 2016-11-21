@@ -47,9 +47,6 @@ public class Versions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "VersionRef", type = VersionRefStructure.class),
-        @XmlElement(name = "Version", type = Version.class)
     })
     protected List<Object> versionRefOrVersion;
 

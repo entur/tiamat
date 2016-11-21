@@ -52,9 +52,7 @@ public class JourneyLayoverStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElement(name = "Layover", required = true)
     protected Duration layover;
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends PointRefStructure> pointRef;
 
     /**

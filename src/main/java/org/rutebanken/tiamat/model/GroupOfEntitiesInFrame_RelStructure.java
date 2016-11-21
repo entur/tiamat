@@ -45,7 +45,6 @@ public class GroupOfEntitiesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GeneralGroupOfEntities", required = true)
     protected List<GeneralGroupOfEntities> generalGroupOfEntities;
 
     /**

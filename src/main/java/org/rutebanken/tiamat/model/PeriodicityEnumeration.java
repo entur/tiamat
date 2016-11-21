@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PeriodicityEnumeration")
-@XmlEnum
 public enum PeriodicityEnumeration {
 
-    @XmlEnumValue("annual")
     ANNUAL("annual"),
-    @XmlEnumValue("quarterly")
     QUARTERLY("quarterly"),
-    @XmlEnumValue("monthly")
     MONTHLY("monthly"),
-    @XmlEnumValue("weekly")
     WEEKLY("weekly"),
-    @XmlEnumValue("daily")
     DAILY("daily");
     private final String value;
 

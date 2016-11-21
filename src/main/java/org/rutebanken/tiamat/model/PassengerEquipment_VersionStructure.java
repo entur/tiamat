@@ -50,7 +50,6 @@ public abstract class PassengerEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Fixed")
     protected Boolean fixed;
 
     /**

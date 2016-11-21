@@ -47,9 +47,6 @@ public class TrainComponents_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TrainComponentRef", type = TrainComponentRefStructure.class),
-        @XmlElement(name = "TrainComponent", type = TrainComponent.class)
     })
     protected List<Object> trainComponentRefOrTrainComponent;
 

@@ -68,37 +68,23 @@ public class StopPointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
-    @XmlElement(name = "OnwardTimingLinkRef")
     protected TimingLinkRefStructure onwardTimingLinkRef;
-    @XmlElement(name = "IsWaitPoint", defaultValue = "false")
     protected Boolean isWaitPoint;
-    @XmlElement(name = "WaitTime")
     protected Duration waitTime;
     protected JourneyPatternWaitTimes_RelStructure waitTimes;
     protected JourneyPatternHeadways_RelStructure headways;
-    @XmlElement(name = "OnwardServiceLinkRef")
     protected ServiceLinkRefStructure onwardServiceLinkRef;
-    @XmlElement(name = "ForAlighting", defaultValue = "true")
     protected Boolean forAlighting;
-    @XmlElement(name = "ForBoarding", defaultValue = "true")
     protected Boolean forBoarding;
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "DestinationDisplayView")
     protected DestinationDisplayView destinationDisplayView;
     protected Vias_RelStructure vias;
-    @XmlElement(name = "FlexiblePointProperties")
     protected FlexiblePointProperties flexiblePointProperties;
-    @XmlElement(name = "ChangeOfDestinationDisplay")
     protected Boolean changeOfDestinationDisplay;
-    @XmlElement(name = "ChangeOfServiceRequirements")
     protected Boolean changeOfServiceRequirements;
     protected NoticeAssignments noticeAssignments;
-    @XmlElement(name = "RequestStop", defaultValue = "false")
     protected Boolean requestStop;
-    @XmlElement(name = "StopUse")
     @XmlSchemaType(name = "NMTOKEN")
     protected StopUseEnumeration stopUse;
 

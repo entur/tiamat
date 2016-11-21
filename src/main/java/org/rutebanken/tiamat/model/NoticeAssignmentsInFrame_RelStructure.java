@@ -46,7 +46,6 @@ public class NoticeAssignmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "NoticeAssignment_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends DataManagedObjectStructure>> noticeAssignment_;
 
     /**

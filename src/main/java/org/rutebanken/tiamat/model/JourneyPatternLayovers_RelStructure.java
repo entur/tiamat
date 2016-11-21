@@ -45,7 +45,6 @@ public class JourneyPatternLayovers_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "JourneyPatternLayover", required = true)
     protected List<JourneyPatternLayover> journeyPatternLayover;
 
     /**

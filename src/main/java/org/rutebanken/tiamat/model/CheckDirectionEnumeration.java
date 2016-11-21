@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CheckDirectionEnumeration")
-@XmlEnum
 public enum CheckDirectionEnumeration {
 
-    @XmlEnumValue("forwards")
     FORWARDS("forwards"),
-    @XmlEnumValue("backwards")
     BACKWARDS("backwards"),
-    @XmlEnumValue("bothWays")
     BOTH_WAYS("bothWays");
     private final String value;
 

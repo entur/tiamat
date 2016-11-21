@@ -45,7 +45,6 @@ public class FlexiblePointProperties_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "FlexiblePointProperties", required = true)
     protected List<FlexiblePointProperties> flexiblePointProperties;
 
     /**

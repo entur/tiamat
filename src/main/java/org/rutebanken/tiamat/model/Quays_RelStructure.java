@@ -51,9 +51,6 @@ public class Quays_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "QuayRef", type = QuayReference.class),
-        @XmlElement(name = "Quay", type = Quay.class)
     })
     @Column
     @ElementCollection(targetClass = Quay.class)

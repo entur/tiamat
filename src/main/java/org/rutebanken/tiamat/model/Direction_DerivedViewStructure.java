@@ -49,9 +49,7 @@ public class Direction_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
 
     /**

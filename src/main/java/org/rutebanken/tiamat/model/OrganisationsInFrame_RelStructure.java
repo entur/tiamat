@@ -46,7 +46,6 @@ public class OrganisationsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Organisation_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends DataManagedObjectStructure>> organisation_;
 
     /**

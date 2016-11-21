@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FlexibleLinkTypeEnumeration")
-@XmlEnum
 public enum FlexibleLinkTypeEnumeration {
 
-    @XmlEnumValue("hailAndRide")
     HAIL_AND_RIDE("hailAndRide"),
-    @XmlEnumValue("onDemand")
     ON_DEMAND("onDemand"),
-    @XmlEnumValue("fixed")
     FIXED("fixed"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

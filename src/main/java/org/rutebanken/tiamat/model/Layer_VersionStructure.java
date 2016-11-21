@@ -50,7 +50,6 @@ public abstract class Layer_VersionStructure
     extends GroupOfEntities_VersionStructure
 {
 
-    @XmlElement(name = "LocationSystem")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String locationSystem;

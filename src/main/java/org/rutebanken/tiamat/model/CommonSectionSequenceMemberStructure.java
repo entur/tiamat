@@ -47,9 +47,7 @@ public class CommonSectionSequenceMemberStructure
     extends AbstractGroupMember_VersionedChildStructure
 {
 
-    @XmlElement(name = "ParentCommonSectionRef")
     protected CommonSectionRefStructure parentCommonSectionRef;
-    @XmlElementRef(name = "LinkSequenceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends LinkSequenceRefStructure> linkSequenceRef;
 
     /**

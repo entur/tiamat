@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MandatoryEnumeration")
-@XmlEnum
 public enum MandatoryEnumeration {
 
 
@@ -38,21 +37,18 @@ public enum MandatoryEnumeration {
      * Include elements that meet selection criteria (e.g. validity condition).
      * 
      */
-    @XmlEnumValue("required")
     REQUIRED("required"),
 
     /**
      * Include elements that are referenced by primary element. E.g. TYPES OF VALUE, OPERATOR etc.
      * 
      */
-    @XmlEnumValue("optional")
     OPTIONAL("optional"),
 
     /**
      * Include all elements.
      * 
      */
-    @XmlEnumValue("notAllowed")
     NOT_ALLOWED("notAllowed");
     private final String value;
 

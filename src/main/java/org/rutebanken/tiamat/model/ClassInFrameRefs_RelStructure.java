@@ -45,7 +45,6 @@ public class ClassInFrameRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ClassInFrameRef", required = true)
     protected List<ClassInFrameRefStructure> classInFrameRef;
 
     /**

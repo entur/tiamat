@@ -58,32 +58,19 @@ public class AssistanceService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "AssistanceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AssistanceFacilityEnumeration> assistanceFacilityList;
-    @XmlElement(name = "AssistanceAvailability")
     @XmlSchemaType(name = "string")
     protected AssistanceAvailabilityEnumeration assistanceAvailability;
-    @XmlElement(name = "Staffing")
     @XmlSchemaType(name = "normalizedString")
     protected StaffingEnumeration staffing;
-    @XmlList
-    @XmlElement(name = "AccessibilityToolList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessibilityToolEnumeration> accessibilityToolList;
-    @XmlList
-    @XmlElement(name = "Languages")
     @XmlSchemaType(name = "anySimpleType")
     protected List<String> languages;
-    @XmlElement(name = "AccessibilityTrainedStaff")
     protected Boolean accessibilityTrainedStaff;
-    @XmlList
-    @XmlElement(name = "EmergencyServiceList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<EmergencyServiceEnumeration> emergencyServiceList;
-    @XmlList
-    @XmlElement(name = "SafetyFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<SafetyFacilityEnumeration> safetyFacilityList;
 

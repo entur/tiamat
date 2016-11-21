@@ -45,7 +45,6 @@ public class TurnaroundTimeLimitTimes_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TurnaroundTimeLimitTime", required = true)
     protected List<TurnaroundTimeLimitTime> turnaroundTimeLimitTime;
 
     /**

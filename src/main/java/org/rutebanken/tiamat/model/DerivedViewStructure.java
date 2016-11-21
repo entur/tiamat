@@ -77,7 +77,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @MappedSuperclass
 public abstract class DerivedViewStructure {
 
-    @XmlElement(name = "BrandingRef")
     protected BrandingRefStructure brandingRef;
 
     @XmlAttribute(name = "id")

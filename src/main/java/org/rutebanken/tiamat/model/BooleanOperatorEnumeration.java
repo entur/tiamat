@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BooleanOperatorEnumeration")
-@XmlEnum
 public enum BooleanOperatorEnumeration {
 
 

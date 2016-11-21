@@ -61,34 +61,26 @@ public class Level_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity name;
 
-    @XmlElement(name = "ShortName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity shortName;
 
-    @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity description;
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
 
-    @XmlElement(name = "PublicUse")
     protected Boolean publicUse;
 
-    @XmlElement(name = "AccessibilityAssessment")
     @Transient
     protected AccessibilityAssessment_VersionedChildStructure accessibilityAssessment;
 
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
 
-    @XmlElementRef(name = "SiteRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     @Transient
     protected JAXBElement<? extends SiteRefStructure> siteRef;
 

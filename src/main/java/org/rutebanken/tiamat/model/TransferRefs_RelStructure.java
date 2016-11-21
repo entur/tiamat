@@ -46,7 +46,6 @@ public class TransferRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "TransferRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends TransferRefStructure>> transferRef;
 
     /**

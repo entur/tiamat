@@ -45,7 +45,6 @@ public class SiteFacilitySetsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "SiteFacilitySet", required = true)
     protected List<SiteFacilitySet> siteFacilitySet;
 
     /**

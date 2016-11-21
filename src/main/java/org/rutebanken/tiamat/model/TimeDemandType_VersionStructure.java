@@ -56,15 +56,10 @@ public class TimeDemandType_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "TypeOfTimeDemandTypeRef")
     protected TypeOfTimeDemandTypeRefStructure typeOfTimeDemandTypeRef;
-    @XmlElement(name = "Presentation")
     protected PresentationStructure presentation;
     protected JourneyRunTimes_RelStructure runTimes;
     protected JourneyWaitTimes_RelStructure waitTimes;

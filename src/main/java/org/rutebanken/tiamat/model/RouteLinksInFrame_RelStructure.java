@@ -45,7 +45,6 @@ public class RouteLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "RouteLink", required = true)
     protected List<RouteLink> routeLink;
 
     /**

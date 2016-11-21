@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PathHeadingEnumeration")
-@XmlEnum
 public enum PathHeadingEnumeration {
 
-    @XmlEnumValue("left")
     LEFT("left"),
-    @XmlEnumValue("right")
     RIGHT("right"),
-    @XmlEnumValue("forward")
     FORWARD("forward"),
-    @XmlEnumValue("back")
     BACK("back");
     private final String value;
 

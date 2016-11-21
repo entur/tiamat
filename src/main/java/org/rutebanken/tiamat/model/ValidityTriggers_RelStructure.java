@@ -45,7 +45,6 @@ public class ValidityTriggers_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ValidityTrigger", required = true)
     protected List<ValidityTrigger_VersionStructure> validityTrigger;
 
     /**

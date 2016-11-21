@@ -45,7 +45,6 @@ public class OperatingDaysInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "OperatingDay", required = true)
     protected List<OperatingDay> operatingDay;
 
     /**

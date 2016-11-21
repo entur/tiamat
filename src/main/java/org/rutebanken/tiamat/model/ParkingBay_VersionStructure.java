@@ -53,16 +53,11 @@ public class ParkingBay_VersionStructure
     extends ParkingComponent_VersionStructure
 {
 
-    @XmlElement(name = "ParkingVehicleType")
     @XmlSchemaType(name = "string")
     protected ParkingVehicleEnumeration parkingVehicleType;
-    @XmlElement(name = "Length")
     protected BigDecimal length;
-    @XmlElement(name = "Width")
     protected BigDecimal width;
-    @XmlElement(name = "Height")
     protected BigDecimal height;
-    @XmlElement(name = "RechargingAvailable")
     protected Boolean rechargingAvailable;
 
     /**

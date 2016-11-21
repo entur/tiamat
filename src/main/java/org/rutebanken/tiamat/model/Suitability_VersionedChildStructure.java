@@ -48,7 +48,6 @@ public class Suitability_VersionedChildStructure
     extends UserNeed_VersionedChildStructure
 {
 
-    @XmlElement(name = "Suitable", required = true)
     @XmlSchemaType(name = "NMTOKEN")
     protected SuitableEnumeration suitable;
 

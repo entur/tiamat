@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BookingProcessEnumeration")
-@XmlEnum
 public enum BookingProcessEnumeration {
 
-    @XmlEnumValue("productNotAvailable")
     PRODUCT_NOT_AVAILABLE("productNotAvailable"),
-    @XmlEnumValue("productNotBookable")
     PRODUCT_NOT_BOOKABLE("productNotBookable"),
-    @XmlEnumValue("bookableThroughInternationalSystem")
     BOOKABLE_THROUGH_INTERNATIONAL_SYSTEM("bookableThroughInternationalSystem"),
-    @XmlEnumValue("bookableThroughNationalSystem")
     BOOKABLE_THROUGH_NATIONAL_SYSTEM("bookableThroughNationalSystem"),
-    @XmlEnumValue("bookableManuallly")
     BOOKABLE_MANUALLLY("bookableManuallly"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

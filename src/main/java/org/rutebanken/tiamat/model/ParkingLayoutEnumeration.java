@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingLayoutEnumeration")
-@XmlEnum
 public enum ParkingLayoutEnumeration {
 
-    @XmlEnumValue("covered")
     COVERED("covered"),
-    @XmlEnumValue("openSpace")
     OPEN_SPACE("openSpace"),
-    @XmlEnumValue("multistorey")
     MULTISTOREY("multistorey"),
-    @XmlEnumValue("underground")
     UNDERGROUND("underground"),
-    @XmlEnumValue("roadside")
     ROADSIDE("roadside"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("cycleHire")
     CYCLE_HIRE("cycleHire");
     private final String value;
 

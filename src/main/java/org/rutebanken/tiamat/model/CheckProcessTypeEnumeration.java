@@ -61,76 +61,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CheckProcessTypeEnumeration")
-@XmlEnum
 public enum CheckProcessTypeEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("boarding")
     BOARDING("boarding"),
-    @XmlEnumValue("alighting")
     ALIGHTING("alighting"),
-    @XmlEnumValue("ticketPurchase")
     TICKET_PURCHASE("ticketPurchase"),
-    @XmlEnumValue("ticketCollection")
     TICKET_COLLECTION("ticketCollection"),
-    @XmlEnumValue("ticketValidation")
     TICKET_VALIDATION("ticketValidation"),
-    @XmlEnumValue("baggageCheckIn")
     BAGGAGE_CHECK_IN("baggageCheckIn"),
-    @XmlEnumValue("checkout")
     CHECKOUT("checkout"),
-    @XmlEnumValue("oversizeBaggageCheckIn")
     OVERSIZE_BAGGAGE_CHECK_IN("oversizeBaggageCheckIn"),
-    @XmlEnumValue("oversizeBaggageReclaim")
     OVERSIZE_BAGGAGE_RECLAIM("oversizeBaggageReclaim"),
-    @XmlEnumValue("baggageReclaim")
     BAGGAGE_RECLAIM("baggageReclaim"),
-    @XmlEnumValue("leftLuggageDeposit")
     LEFT_LUGGAGE_DEPOSIT("leftLuggageDeposit"),
-    @XmlEnumValue("leftLuggageReclaim")
     LEFT_LUGGAGE_RECLAIM("leftLuggageReclaim"),
-    @XmlEnumValue("firstclassCheckin")
     FIRSTCLASS_CHECKIN("firstclassCheckin"),
-    @XmlEnumValue("specialNeedsCheckin")
     SPECIAL_NEEDS_CHECKIN("specialNeedsCheckin"),
-    @XmlEnumValue("baggageSecurityCheck")
     BAGGAGE_SECURITY_CHECK("baggageSecurityCheck"),
-    @XmlEnumValue("securityCheck")
     SECURITY_CHECK("securityCheck"),
-    @XmlEnumValue("outgoingPassportControl")
     OUTGOING_PASSPORT_CONTROL("outgoingPassportControl"),
-    @XmlEnumValue("incomingPassportControl")
     INCOMING_PASSPORT_CONTROL("incomingPassportControl"),
-    @XmlEnumValue("fasttrackDepartures")
     FASTTRACK_DEPARTURES("fasttrackDepartures"),
-    @XmlEnumValue("fasttrackArrivals")
     FASTTRACK_ARRIVALS("fasttrackArrivals"),
-    @XmlEnumValue("incomingDutyFree")
     INCOMING_DUTY_FREE("incomingDutyFree"),
-    @XmlEnumValue("outgoingDutyFree")
     OUTGOING_DUTY_FREE("outgoingDutyFree"),
-    @XmlEnumValue("taxRefunds")
     TAX_REFUNDS("taxRefunds"),
-    @XmlEnumValue("outgoingCustoms")
     OUTGOING_CUSTOMS("outgoingCustoms"),
-    @XmlEnumValue("incomingCustoms")
     INCOMING_CUSTOMS("incomingCustoms"),
-    @XmlEnumValue("waitForLift")
     WAIT_FOR_LIFT("waitForLift"),
-    @XmlEnumValue("ingress")
     INGRESS("ingress"),
-    @XmlEnumValue("egress")
     EGRESS("egress"),
-    @XmlEnumValue("queue")
     QUEUE("queue"),
-    @XmlEnumValue("vehicleLoading")
     VEHICLE_LOADING("vehicleLoading"),
-    @XmlEnumValue("vehicleUnloading")
     VEHICLE_UNLOADING("vehicleUnloading"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

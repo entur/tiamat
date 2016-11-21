@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BoardingPermissionEnumeration")
-@XmlEnum
 public enum BoardingPermissionEnumeration {
 
-    @XmlEnumValue("normal")
     NORMAL("normal"),
-    @XmlEnumValue("earlyBoardingPossibleBeforeDeparture")
     EARLY_BOARDING_POSSIBLE_BEFORE_DEPARTURE("earlyBoardingPossibleBeforeDeparture"),
-    @XmlEnumValue("lateAlightingPossibleAfterArrival")
     LATE_ALIGHTING_POSSIBLE_AFTER_ARRIVAL("lateAlightingPossibleAfterArrival"),
-    @XmlEnumValue("overnightStayOnboardAllowed")
     OVERNIGHT_STAY_ONBOARD_ALLOWED("overnightStayOnboardAllowed");
     private final String value;
 

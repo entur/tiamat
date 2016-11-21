@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TimingPointStatusEnumeration")
-@XmlEnum
 public enum TimingPointStatusEnumeration {
 
-    @XmlEnumValue("timingPoint")
     TIMING_POINT("timingPoint"),
-    @XmlEnumValue("secondaryTimingPoint")
     SECONDARY_TIMING_POINT("secondaryTimingPoint"),
-    @XmlEnumValue("notTimingPoint")
     NOT_TIMING_POINT("notTimingPoint");
     private final String value;
 

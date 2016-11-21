@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TicketingFacilityEnumeration")
-@XmlEnum
 public enum TicketingFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("ticketMachines")
     TICKET_MACHINES("ticketMachines"),
-    @XmlEnumValue("ticketOffice")
     TICKET_OFFICE("ticketOffice"),
-    @XmlEnumValue("ticketOnDemandMachines")
     TICKET_ON_DEMAND_MACHINES("ticketOnDemandMachines"),
-    @XmlEnumValue("mobileTicketing")
     MOBILE_TICKETING("mobileTicketing");
     private final String value;
 

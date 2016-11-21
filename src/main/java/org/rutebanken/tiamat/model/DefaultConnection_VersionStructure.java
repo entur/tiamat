@@ -51,15 +51,10 @@ public class DefaultConnection_VersionStructure
     extends Transfer_VersionStructure
 {
 
-    @XmlElement(name = "From")
     protected DefaultConnectionEndStructure from;
-    @XmlElement(name = "To")
     protected DefaultConnectionEndStructure to;
-    @XmlElement(name = "TopographicPlaceView")
     protected TopographicPlaceView topographicPlaceView;
-    @XmlElement(name = "StopAreaRef")
     protected StopAreaRefStructure stopAreaRef;
-    @XmlElementRef(name = "SiteElementRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends SiteElementRefStructure> siteElementRef;
 
     /**

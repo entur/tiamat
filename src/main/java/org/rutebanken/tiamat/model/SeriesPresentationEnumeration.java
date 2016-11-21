@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SeriesPresentationEnumeration")
-@XmlEnum
 public enum SeriesPresentationEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("required")
     REQUIRED("required"),
-    @XmlEnumValue("optionalLeft")
     OPTIONAL_LEFT("optionalLeft"),
-    @XmlEnumValue("optionalRight")
     OPTIONAL_RIGHT("optionalRight");
     private final String value;
 

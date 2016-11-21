@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TransferConstraintTypeEnumeration")
-@XmlEnum
 public enum TransferConstraintTypeEnumeration {
 
-    @XmlEnumValue("canTransfer")
     CAN_TRANSFER("canTransfer"),
-    @XmlEnumValue("cannotTransfer")
     CANNOT_TRANSFER("cannotTransfer"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

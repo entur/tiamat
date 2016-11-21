@@ -47,9 +47,6 @@ public class PassengerCarryingRequirements_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PassengerCarryingRequirementRef", type = PassengerCarryingRequirementRefStructure.class),
-        @XmlElement(name = "PassengerCarryingRequirement", type = PassengerCarryingRequirement.class)
     })
     protected List<Object> passengerCarryingRequirementRefOrPassengerCarryingRequirement;
 

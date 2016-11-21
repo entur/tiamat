@@ -39,7 +39,6 @@ import java.util.List;
 @XmlRootElement(name = "stopPlaces")
 public class StopPlaces {
 
-    @XmlElement(name = "StopPlace")
     protected List<StopPlace> stopPlaces;
 
     /**

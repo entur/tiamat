@@ -47,9 +47,6 @@ public class TransportModes_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "OpenTransportModeRef", type = OpenTransportModeRefStructure.class),
-        @XmlElement(name = "TransportMode", type = TransportModeStructure.class)
     })
     protected List<Object> openTransportModeRefOrTransportMode;
 

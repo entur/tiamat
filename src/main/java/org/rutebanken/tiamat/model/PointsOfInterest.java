@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PointsOfInterest {
 
-    @XmlElement(name = "PointOfInterest")
     protected List<PointOfInterest> pointOfInterest;
 
     /**

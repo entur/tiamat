@@ -45,7 +45,6 @@ public class DayTypeAssignments_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DayTypeAssignment", required = true)
     protected List<DayTypeAssignment> dayTypeAssignment;
 
     /**

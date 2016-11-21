@@ -52,15 +52,11 @@ public class PointOfInterestSpace_VersionStructure
     extends PointOfInterestComponent_VersionStructure
 {
 
-    @XmlElement(name = "AccessSpaceType")
     protected AccessSpaceTypeEnumeration accessSpaceType;
-    @XmlElement(name = "PointOfInterestSpaceType")
     @XmlSchemaType(name = "string")
     protected PointOfInterestSpaceTypeEnumeration pointOfInterestSpaceType;
-    @XmlElement(name = "PassageType")
     @XmlSchemaType(name = "string")
     protected PassageTypeEnumeration passageType;
-    @XmlElement(name = "ParentPointOfInterestSpaceRef")
     protected PointOfInterestSpaceRefStructure parentPointOfInterestSpaceRef;
     protected PointOfInterestEntrances_RelStructure entrances;
 

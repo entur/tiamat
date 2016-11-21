@@ -46,7 +46,6 @@ public class ReliefPointsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "ReliefPoint_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends TimingPoint_VersionStructure>> reliefPoint_;
 
     /**

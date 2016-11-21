@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ContainmentEnumeration")
-@XmlEnum
 public enum ContainmentEnumeration {
 
 
@@ -39,18 +38,14 @@ public enum ContainmentEnumeration {
      * This is a definition of a new entity.
      * 
      */
-    @XmlEnumValue("inline")
     INLINE("inline"),
 
     /**
      * This is a deletion of an existing entity.
      * 
      */
-    @XmlEnumValue("byReference")
     BY_REFERENCE("byReference"),
-    @XmlEnumValue("byVersionedReference")
     BY_VERSIONED_REFERENCE("byVersionedReference"),
-    @XmlEnumValue("both")
     BOTH("both");
     private final String value;
 

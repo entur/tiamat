@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "VehicleLoadingEnumeration")
-@XmlEnum
 public enum VehicleLoadingEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("loading")
     LOADING("loading"),
-    @XmlEnumValue("unloading")
     UNLOADING("unloading"),
-    @XmlEnumValue("additionalLoading")
     ADDITIONAL_LOADING("additionalLoading"),
-    @XmlEnumValue("additionaUnloading")
     ADDITIONA_UNLOADING("additionaUnloading"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

@@ -62,41 +62,24 @@ public class ServiceFacilitySet_VersionStructure
     extends FacilitySet_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "AccommodationAccessList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccommodationAccessEnumeration> accommodationAccessList;
-    @XmlList
-    @XmlElement(name = "AccommodationFacilityList", defaultValue = "unknown")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccommodationFacilityEnumeration> accommodationFacilityList;
-    @XmlElement(name = "BoardingPermisssion")
     @XmlSchemaType(name = "NMTOKEN")
     protected BoardingPermissionEnumeration boardingPermisssion;
-    @XmlList
-    @XmlElement(name = "BookingProcessFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<BookingProcessEnumeration> bookingProcessFacilityList;
-    @XmlList
-    @XmlElement(name = "CouchetteFacilityList", defaultValue = "unknown")
     @XmlSchemaType(name = "anySimpleType")
     protected List<CouchetteFacilityEnumeration> couchetteFacilityList;
-    @XmlElement(name = "GroupBookingFacility", defaultValue = "unknown")
     @XmlSchemaType(name = "normalizedString")
     protected GroupBookingEnumeration groupBookingFacility;
-    @XmlList
-    @XmlElement(name = "LuggageCarriageFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<LuggageCarriageEnumeration> luggageCarriageFacilityList;
-    @XmlList
-    @XmlElement(name = "ServiceReservationFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ReservationEnumeration> serviceReservationFacilityList;
-    @XmlList
-    @XmlElement(name = "UicProductCharacteristicList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<UicProductCharacteristicEnumeration> uicProductCharacteristicList;
-    @XmlElement(name = "UicTrainRate")
     @XmlSchemaType(name = "normalizedString")
     protected UicRateTypeEnumeration uicTrainRate;
     protected Accommodations_RelStructure accommodations;

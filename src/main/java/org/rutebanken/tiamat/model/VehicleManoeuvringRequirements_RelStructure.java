@@ -47,9 +47,6 @@ public class VehicleManoeuvringRequirements_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "VehicleManoeuvringRequirementRef", type = VehicleManoeuvringRequirementRefStructure.class),
-        @XmlElement(name = "VehicleManoeuvringRequirement", type = VehicleManoeuvringRequirement.class)
     })
     protected List<Object> vehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement;
 

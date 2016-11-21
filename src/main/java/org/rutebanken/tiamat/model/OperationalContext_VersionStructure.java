@@ -55,18 +55,12 @@ public class OperationalContext_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElementRef(name = "OrganisationPartRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationPartRefStructure> organisationPartRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
-    @XmlElement(name = "TransportSubmode")
     protected TransportSubmodeStructure transportSubmode;
 
     /**

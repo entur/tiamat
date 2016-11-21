@@ -45,11 +45,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class StairEndStructure {
 
-    @XmlElement(name = "ContinuingHandrail")
     protected Boolean continuingHandrail;
-    @XmlElement(name = "TexturedSurface")
     protected Boolean texturedSurface;
-    @XmlElement(name = "VisualContrast")
     protected Boolean visualContrast;
 
     /**

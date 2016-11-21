@@ -45,7 +45,6 @@ public class DirectionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Direction", required = true)
     protected List<Direction> direction;
 
     /**

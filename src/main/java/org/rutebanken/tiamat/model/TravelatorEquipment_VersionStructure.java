@@ -50,11 +50,8 @@ public class TravelatorEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "TactileActuators")
     protected Boolean tactileActuators;
-    @XmlElement(name = "EnergySaving")
     protected Boolean energySaving;
-    @XmlElement(name = "Speed")
     protected BigDecimal speed;
 
     /**

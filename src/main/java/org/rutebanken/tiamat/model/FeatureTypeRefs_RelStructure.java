@@ -45,7 +45,6 @@ public class FeatureTypeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfFeatureRef", required = true)
     protected List<TypeOfFeatureRefStructure> typeOfFeatureRef;
 
     /**

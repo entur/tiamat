@@ -54,14 +54,10 @@ public class TimingPattern_VersionStructure
     extends LinkSequence_VersionStructure
 {
 
-    @XmlElement(name = "RouteRef", required = true)
     protected RouteRefStructure routeRef;
-    @XmlElement(name = "DirectionType", defaultValue = "outbound")
     @XmlSchemaType(name = "normalizedString")
     protected DirectionTypeEnumeration directionType;
-    @XmlElement(name = "TimeDemandTypeRef")
     protected TimeDemandTypeRefStructure timeDemandTypeRef;
-    @XmlElement(name = "TimebandRef")
     protected TimebandRefStructure timebandRef;
     protected TimingPointsInJourneyPattern_RelStructure pointsInSequence;
     protected TimingPoints_RelStructure points;

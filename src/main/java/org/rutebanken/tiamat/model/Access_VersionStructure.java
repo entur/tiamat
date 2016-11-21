@@ -48,9 +48,7 @@ public class Access_VersionStructure
     extends Transfer_VersionStructure
 {
 
-    @XmlElement(name = "From", required = true)
     protected AccessEndStructure from;
-    @XmlElement(name = "To", required = true)
     protected AccessEndStructure to;
 
     /**

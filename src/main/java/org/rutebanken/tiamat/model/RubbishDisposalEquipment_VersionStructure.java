@@ -48,9 +48,7 @@ public class RubbishDisposalEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "SharpsDispsal")
     protected Boolean sharpsDispsal;
-    @XmlElement(name = "Recycling")
     protected Boolean recycling;
 
     /**

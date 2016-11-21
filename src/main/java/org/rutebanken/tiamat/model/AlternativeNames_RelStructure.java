@@ -45,7 +45,6 @@ public class AlternativeNames_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "AlternativeName", required = true)
     protected List<AlternativeName> alternativeName;
 
     /**

@@ -49,9 +49,7 @@ public class ShelterEquipment_VersionStructure
     extends WaitingEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Enclosed", defaultValue = "false")
     protected Boolean enclosed;
-    @XmlElement(name = "DistanceFromNearestKerb")
     protected BigDecimal distanceFromNearestKerb;
 
     /**

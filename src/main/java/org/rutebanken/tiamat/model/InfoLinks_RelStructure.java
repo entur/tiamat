@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class InfoLinks_RelStructure {
 
-    @XmlElement(name = "InfoLink", required = true)
     protected List<InfoLinkStructure> infoLink;
 
     /**

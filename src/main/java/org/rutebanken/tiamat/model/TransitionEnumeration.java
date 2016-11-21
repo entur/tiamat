@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TransitionEnumeration")
-@XmlEnum
 public enum TransitionEnumeration {
 
-    @XmlEnumValue("up")
     UP("up"),
-    @XmlEnumValue("down")
     DOWN("down"),
-    @XmlEnumValue("level")
     LEVEL("level"),
-    @XmlEnumValue("upAndDown")
     UP_AND_DOWN("upAndDown"),
-    @XmlEnumValue("downAndUp")
     DOWN_AND_UP("downAndUp");
     private final String value;
 

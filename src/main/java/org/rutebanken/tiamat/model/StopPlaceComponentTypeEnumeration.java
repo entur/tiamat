@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StopPlaceComponentTypeEnumeration")
-@XmlEnum
 public enum StopPlaceComponentTypeEnumeration {
 
-    @XmlEnumValue("quay")
     QUAY("quay"),
-    @XmlEnumValue("accessSpace")
     ACCESS_SPACE("accessSpace"),
-    @XmlEnumValue("entrance")
     ENTRANCE("entrance"),
-    @XmlEnumValue("boardingPosition")
     BOARDING_POSITION("boardingPosition"),
-    @XmlEnumValue("stoppingPlace")
     STOPPING_PLACE("stoppingPlace");
     private final String value;
 

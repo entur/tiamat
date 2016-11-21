@@ -45,7 +45,6 @@ public class VehicleQuayAlignments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "VehicleQuayAlignment", required = true)
     protected List<VehicleQuayAlignment> vehicleQuayAlignment;
 
     /**

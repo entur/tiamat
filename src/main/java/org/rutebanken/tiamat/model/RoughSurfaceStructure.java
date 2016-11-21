@@ -49,10 +49,8 @@ public class RoughSurfaceStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "SurfaceType", required = true)
     @XmlSchemaType(name = "normalizedString")
     protected SurfaceTypeEnumeration surfaceType;
-    @XmlElement(name = "SuitableForCycles")
     protected Boolean suitableForCycles;
 
     /**

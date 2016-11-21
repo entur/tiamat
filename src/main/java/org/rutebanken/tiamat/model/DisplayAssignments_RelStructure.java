@@ -47,9 +47,6 @@ public class DisplayAssignments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "DisplayAssignmentRef", type = DisplayAssignmentRefStructure.class),
-        @XmlElement(name = "DisplayAssignment", type = DisplayAssignment.class)
     })
     protected List<Object> displayAssignmentRefOrDisplayAssignment;
 

@@ -74,37 +74,24 @@ public class Accommodation_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
 
-    @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
-    @XmlElement(name = "AccommodationFacility", defaultValue = "seating")
     @XmlSchemaType(name = "NMTOKEN")
     protected AccommodationFacilityEnumeration accommodationFacility;
-    @XmlElement(name = "CouchetteFacility", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected CouchetteFacilityEnumeration couchetteFacility;
-    @XmlElement(name = "MaximumNumberOfBerths")
     protected BigInteger maximumNumberOfBerths;
-    @XmlElement(name = "BerthFacility")
     @XmlSchemaType(name = "NMTOKEN")
     protected BerthFacilityEnumeration berthFacility;
-    @XmlElement(name = "ShowerFacility", defaultValue = "none")
     @XmlSchemaType(name = "string")
     protected SanitaryFacilityEnumeration showerFacility;
-    @XmlElement(name = "ToiletFacility", defaultValue = "none")
     @XmlSchemaType(name = "string")
     protected SanitaryFacilityEnumeration toiletFacility;
-    @XmlElement(name = "GenderLimitation")
     @XmlSchemaType(name = "normalizedString")
     protected GenderLimitationEnumeration genderLimitation;
-    @XmlList
-    @XmlElement(name = "NuisanceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<NuisanceFacilityEnumeration> nuisanceFacilityList;
-    @XmlList
-    @XmlElement(name = "PassengerCommsFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PassengerCommsFacilityEnumeration> passengerCommsFacilityList;
 

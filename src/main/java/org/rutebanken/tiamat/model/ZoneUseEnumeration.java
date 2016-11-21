@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ZoneUseEnumeration")
-@XmlEnum
 public enum ZoneUseEnumeration {
 
-    @XmlEnumValue("cannotBoardAndAlightInSameZone")
     CANNOT_BOARD_AND_ALIGHT_IN_SAME_ZONE("cannotBoardAndAlightInSameZone"),
-    @XmlEnumValue("mustAlightInZone")
     MUST_ALIGHT_IN_ZONE("mustAlightInZone"),
-    @XmlEnumValue("cannotAlightInZone")
     CANNOT_ALIGHT_IN_ZONE("cannotAlightInZone"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

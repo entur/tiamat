@@ -49,11 +49,8 @@ public class TimeDemandTypeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "TimeDemandTypeRef")
     protected TimeDemandTypeRefStructure timeDemandTypeRef;
-    @XmlElement(name = "TimebandRef")
     protected TimebandRefStructure timebandRef;
-    @XmlElement(name = "GroupOfTimingLinksRef")
     protected GroupOfTimingLinksRefStructure groupOfTimingLinksRef;
 
     /**

@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "HandrailEnumeration")
-@XmlEnum
 public enum HandrailEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("oneSide")
     ONE_SIDE("oneSide"),
-    @XmlEnumValue("bothSides")
     BOTH_SIDES("bothSides");
     private final String value;
 

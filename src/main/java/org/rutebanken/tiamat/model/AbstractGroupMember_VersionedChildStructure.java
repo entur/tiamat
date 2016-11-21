@@ -55,7 +55,6 @@ public abstract class AbstractGroupMember_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

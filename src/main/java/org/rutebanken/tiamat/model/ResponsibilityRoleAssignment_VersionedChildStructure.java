@@ -57,25 +57,15 @@ public class ResponsibilityRoleAssignment_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "ResponsibilitySetRef")
     protected ResponsibilitySetRefStructure responsibilitySetRef;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlList
-    @XmlElement(name = "DataRoleType")
     @XmlSchemaType(name = "anySimpleType")
     protected List<DataRoleTypeEnumeration> dataRoleType;
-    @XmlList
-    @XmlElement(name = "StakeholderRoleType")
     @XmlSchemaType(name = "anySimpleType")
     protected List<StakeholderRoleTypeEnumeration> stakeholderRoleType;
-    @XmlElement(name = "TypeOfResponsibilityRoleRef")
     protected TypeOfResponsibilityRoleRefStructure typeOfResponsibilityRoleRef;
-    @XmlElement(name = "ResponsibleOrganisationRef")
     protected OrganisationRefStructure responsibleOrganisationRef;
-    @XmlElement(name = "ResponsiblePartRef")
     protected OrganisationPartRefStructure responsiblePartRef;
-    @XmlElement(name = "ResponsibleAreaRef")
     protected VersionOfObjectRefStructure responsibleAreaRef;
 
     /**

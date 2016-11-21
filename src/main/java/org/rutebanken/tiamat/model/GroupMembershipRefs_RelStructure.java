@@ -46,7 +46,6 @@ public class GroupMembershipRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "GroupOfPointsRef_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends GroupOfEntitiesRefStructure>> groupOfPointsRef_;
 
     /**

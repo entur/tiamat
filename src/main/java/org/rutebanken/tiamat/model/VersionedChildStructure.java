@@ -76,7 +76,6 @@ public class VersionedChildStructure
     extends EntityInVersionStructure
 {
 
-    @XmlElement(name = "Extensions")
     @Transient
     protected ExtensionsStructure extensions;
 

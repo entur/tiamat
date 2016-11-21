@@ -45,7 +45,6 @@ public class DestinationDisplaysInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DestinationDisplay", required = true)
     protected List<DestinationDisplay> destinationDisplay;
 
     /**

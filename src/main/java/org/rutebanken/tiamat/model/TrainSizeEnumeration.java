@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TrainSizeEnumeration")
-@XmlEnum
 public enum TrainSizeEnumeration {
 
-    @XmlEnumValue("normal")
     NORMAL("normal"),
-    @XmlEnumValue("short")
     SHORT("short"),
-    @XmlEnumValue("long")
     LONG("long");
     private final String value;
 

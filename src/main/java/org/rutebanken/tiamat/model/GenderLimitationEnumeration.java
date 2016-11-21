@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "GenderLimitationEnumeration")
-@XmlEnum
 public enum GenderLimitationEnumeration {
 
-    @XmlEnumValue("both")
     BOTH("both"),
-    @XmlEnumValue("femaleOnly")
     FEMALE_ONLY("femaleOnly"),
-    @XmlEnumValue("maleOnly")
     MALE_ONLY("maleOnly"),
-    @XmlEnumValue("sameSexOnly")
     SAME_SEX_ONLY("sameSexOnly");
     private final String value;
 

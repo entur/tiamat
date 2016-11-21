@@ -45,7 +45,6 @@ public class AccessesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Access", required = true)
     protected List<Access> access;
 
     /**

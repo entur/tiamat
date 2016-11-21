@@ -49,11 +49,8 @@ public class ActivationAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "EquipmentRef")
     protected ActivatedEquipmentRefStructure equipmentRef;
-    @XmlElement(name = "LinkRef")
     protected ActivationLinkRefStructure linkRef;
-    @XmlElement(name = "PointRef")
     protected ActivationPointRefStructure pointRef;
 
     /**

@@ -46,7 +46,6 @@ public class EntitiesInVersion_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "EntityInVersion", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends EntityInVersionStructure>> entityInVersion;
 
     /**

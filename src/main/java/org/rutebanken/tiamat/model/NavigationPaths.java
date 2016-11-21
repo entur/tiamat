@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class NavigationPaths {
 
-    @XmlElement(name = "NavigationPath", required = true)
     protected List<NavigationPath> navigationPath;
 
     /**

@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SiteTypeEnumeration")
-@XmlEnum
 public enum SiteTypeEnumeration {
 
-    @XmlEnumValue("school")
     SCHOOL("school"),
-    @XmlEnumValue("university")
     UNIVERSITY("university"),
-    @XmlEnumValue("works")
     WORKS("works"),
-    @XmlEnumValue("office")
     OFFICE("office"),
-    @XmlEnumValue("militaryBase")
     MILITARY_BASE("militaryBase"),
-    @XmlEnumValue("retail")
     RETAIL("retail"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

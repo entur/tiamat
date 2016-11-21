@@ -54,15 +54,10 @@ public class FlexibleLinkProperties_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElementRef(name = "LinkRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkRefStructure> linkRef;
-    @XmlElement(name = "MayBeSkipped")
     protected Boolean mayBeSkipped;
-    @XmlElement(name = "OnMainRoute")
     protected Boolean onMainRoute;
-    @XmlElement(name = "UnscheduledPath")
     protected Boolean unscheduledPath;
-    @XmlElement(name = "FlexibleLinkType")
     @XmlSchemaType(name = "string")
     protected FlexibleLinkTypeEnumeration flexibleLinkType;
 

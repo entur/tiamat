@@ -39,32 +39,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LuggageCarriageEnumeration")
-@XmlEnum
 public enum LuggageCarriageEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("noBaggageStorage")
     NO_BAGGAGE_STORAGE("noBaggageStorage"),
-    @XmlEnumValue("baggageStorage")
     BAGGAGE_STORAGE("baggageStorage"),
-    @XmlEnumValue("luggageRacks")
     LUGGAGE_RACKS("luggageRacks"),
-    @XmlEnumValue("extraLargeLuggageRacks")
     EXTRA_LARGE_LUGGAGE_RACKS("extraLargeLuggageRacks"),
-    @XmlEnumValue("baggageVan")
     BAGGAGE_VAN("baggageVan"),
-    @XmlEnumValue("noCycles")
     NO_CYCLES("noCycles"),
-    @XmlEnumValue("cyclesAllowed")
     CYCLES_ALLOWED("cyclesAllowed"),
-    @XmlEnumValue("cyclesAllowedInVan")
     CYCLES_ALLOWED_IN_VAN("cyclesAllowedInVan"),
-    @XmlEnumValue("cyclesAllowedInCarriage")
     CYCLES_ALLOWED_IN_CARRIAGE("cyclesAllowedInCarriage"),
-    @XmlEnumValue("cyclesAllowedWithReservation")
     CYCLES_ALLOWED_WITH_RESERVATION("cyclesAllowedWithReservation"),
-    @XmlEnumValue("vehicleTransport")
     VEHICLE_TRANSPORT("vehicleTransport");
     private final String value;
 

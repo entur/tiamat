@@ -45,7 +45,6 @@ public class ModeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ModeRef", required = true)
     protected List<ModeRefStructure> modeRef;
 
     /**

@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PurchaseMomentEnumeration")
-@XmlEnum
 public enum PurchaseMomentEnumeration {
 
-    @XmlEnumValue("onReservation")
     ON_RESERVATION("onReservation"),
-    @XmlEnumValue("beforeBoarding")
     BEFORE_BOARDING("beforeBoarding"),
-    @XmlEnumValue("onBoarding")
     ON_BOARDING("onBoarding"),
-    @XmlEnumValue("afterBoarding")
     AFTER_BOARDING("afterBoarding"),
-    @XmlEnumValue("onCheckOut")
     ON_CHECK_OUT("onCheckOut"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -52,16 +52,11 @@ public class TransferRestriction_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "TypeOfTransferRef")
     protected TypeOfTransferRefStructure typeOfTransferRef;
-    @XmlElement(name = "BothWays", defaultValue = "true")
     protected Boolean bothWays;
-    @XmlElement(name = "RestrictionType", required = true)
     @XmlSchemaType(name = "string")
     protected TransferConstraintTypeEnumeration restrictionType;
-    @XmlElement(name = "FromPointRef")
     protected ScheduledStopPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef")
     protected ScheduledStopPointRefStructure toPointRef;
 
     /**

@@ -45,7 +45,6 @@ public class TimebandsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Timeband", required = true)
     protected List<Timeband> timeband;
 
     /**

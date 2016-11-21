@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "VersionStatusEnumeration")
-@XmlEnum
 public enum VersionStatusEnumeration {
 
-    @XmlEnumValue("draft")
     DRAFT("draft"),
-    @XmlEnumValue("versioned")
     VERSIONED("versioned"),
-    @XmlEnumValue("deprecated")
     DEPRECATED("deprecated"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

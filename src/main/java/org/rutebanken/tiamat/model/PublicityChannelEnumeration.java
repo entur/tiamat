@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PublicityChannelEnumeration")
-@XmlEnum
 public enum PublicityChannelEnumeration {
 
 
@@ -39,23 +38,19 @@ public enum PublicityChannelEnumeration {
      * INTERCHANGE is considered a possible connection between journeys.
      * 
      */
-    @XmlEnumValue("all")
     ALL("all"),
 
     /**
      * INTERCHANGE is advertised to public as a possible connection between journeys.
      * 
      */
-    @XmlEnumValue("printedMedia")
     PRINTED_MEDIA("printedMedia"),
 
     /**
      * INTERCHANGE is actively managed as a possible connection between journeys and passengers are informed of real-time alterations.
      * 
      */
-    @XmlEnumValue("dynamicMedia")
     DYNAMIC_MEDIA("dynamicMedia"),
-    @XmlEnumValue("none")
     NONE("none");
     private final String value;
 

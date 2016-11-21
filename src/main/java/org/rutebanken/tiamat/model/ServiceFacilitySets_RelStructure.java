@@ -47,9 +47,6 @@ public class ServiceFacilitySets_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ServiceFacilitySetRef", type = ServiceFacilitySetRefStructure.class),
-        @XmlElement(name = "ServiceFacilitySet", type = ServiceFacilitySet.class)
     })
     protected List<Object> serviceFacilitySetRefOrServiceFacilitySet;
 

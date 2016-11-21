@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Parkings {
 
-    @XmlElement(name = "Parking")
     protected List<Parking> parking;
 
     /**

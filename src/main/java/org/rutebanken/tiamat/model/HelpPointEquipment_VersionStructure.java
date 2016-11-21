@@ -55,19 +55,12 @@ public class HelpPointEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
-    @XmlElement(name = "HeightFromGround")
     protected BigDecimal heightFromGround;
-    @XmlElement(name = "Phone")
     protected Boolean phone;
-    @XmlElement(name = "InductionLoop")
     protected Boolean inductionLoop;
-    @XmlElement(name = "InductionLoopSign")
     protected Boolean inductionLoopSign;
-    @XmlElement(name = "StopRequestButton")
     protected Boolean stopRequestButton;
-    @XmlElement(name = "StopRequestTimeout")
     protected Duration stopRequestTimeout;
 
     /**

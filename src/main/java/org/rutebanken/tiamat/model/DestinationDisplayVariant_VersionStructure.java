@@ -55,20 +55,13 @@ public class DestinationDisplayVariant_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "DestinationDisplayVariantMediaType", required = true)
     @XmlSchemaType(name = "normalizedString")
     protected DeliveryVariantTypeEnumeration destinationDisplayVariantMediaType;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "SideText")
     protected MultilingualStringEntity sideText;
-    @XmlElement(name = "FrontText")
     protected MultilingualStringEntity frontText;
-    @XmlElement(name = "DriverDisplayText")
     protected MultilingualStringEntity driverDisplayText;
     protected Vias_RelStructure vias;
 

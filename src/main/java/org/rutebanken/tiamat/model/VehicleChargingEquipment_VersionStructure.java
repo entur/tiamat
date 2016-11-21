@@ -50,11 +50,8 @@ public class VehicleChargingEquipment_VersionStructure
     extends PlaceEquipment_VersionStructure
 {
 
-    @XmlElement(name = "FreeRecharging")
     protected Boolean freeRecharging;
-    @XmlElement(name = "ReservationRequired")
     protected Boolean reservationRequired;
-    @XmlElement(name = "ReservationUrl")
     @XmlSchemaType(name = "anyURI")
     protected String reservationUrl;
 

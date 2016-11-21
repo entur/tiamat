@@ -54,24 +54,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ContactStructure {
 
-    @XmlElement(name = "ContactPerson")
     protected MultilingualStringEntity contactPerson;
-    @XmlElement(name = "Email")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String email;
-    @XmlElement(name = "Phone")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String phone;
-    @XmlElement(name = "Fax")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String fax;
-    @XmlElement(name = "Url")
     @XmlSchemaType(name = "anyURI")
     protected String url;
-    @XmlElement(name = "FurtherDetails")
     protected MultilingualStringEntity furtherDetails;
 
     /**

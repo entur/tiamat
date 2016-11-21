@@ -45,7 +45,6 @@ public class ComplexFeatureMembers_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ComplexFeatureMember", required = true)
     protected List<ComplexFeatureMember_VersionedChildStructure> complexFeatureMember;
 
     /**

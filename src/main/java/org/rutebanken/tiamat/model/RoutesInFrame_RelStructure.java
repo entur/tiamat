@@ -46,7 +46,6 @@ public class RoutesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Route_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends LinkSequence_VersionStructure>> route_;
 
     /**

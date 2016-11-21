@@ -44,10 +44,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class ConnectionEndStructure {
 
-    @XmlElement(name = "TransportMode", defaultValue = "all")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "ScheduledStopPointRef")
     protected ScheduledStopPointRefStructure scheduledStopPointRef;
 
     /**

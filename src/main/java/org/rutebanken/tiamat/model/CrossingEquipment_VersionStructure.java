@@ -55,23 +55,14 @@ public class CrossingEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "CrossingType")
     protected CrossingTypeEnumeration crossingType;
-    @XmlElement(name = "ZebraCrossing")
     protected Boolean zebraCrossing;
-    @XmlElement(name = "PedestrianLights", defaultValue = "false")
     protected Boolean pedestrianLights;
-    @XmlElement(name = "AcousticDeviceSensors", defaultValue = "false")
     protected Boolean acousticDeviceSensors;
-    @XmlElement(name = "AcousticCrossingAids", defaultValue = "false")
     protected Boolean acousticCrossingAids;
-    @XmlElement(name = "TactileGuidanceStrips", defaultValue = "false")
     protected Boolean tactileGuidanceStrips;
-    @XmlElement(name = "VisualGuidanceBands", defaultValue = "false")
     protected Boolean visualGuidanceBands;
-    @XmlElement(name = "DroppedKerb")
     protected Boolean droppedKerb;
-    @XmlElement(name = "SuitableForCycles")
     protected Boolean suitableForCycles;
 
     /**

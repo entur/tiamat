@@ -45,11 +45,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Areas {
 
-    @XmlElements({
-        @XmlElement(name = "FlexibleArea", type = FlexibleArea.class),
-        @XmlElement(name = "FlexibleAreaRef", type = FlexibleAreaRefStructure.class),
-        @XmlElement(name = "HailAndRideArea", type = HailAndRideArea.class),
-        @XmlElement(name = "HailAndRideAreaRef", type = HailAndRideAreaRefStructure.class)
     })
     protected List<Object> flexibleAreaOrFlexibleAreaRefOrHailAndRideArea;
 

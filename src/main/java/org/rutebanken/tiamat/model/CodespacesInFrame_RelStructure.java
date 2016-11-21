@@ -45,7 +45,6 @@ public class CodespacesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Codespace", required = true)
     protected List<Codespace> codespace;
 
     /**

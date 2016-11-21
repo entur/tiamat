@@ -45,7 +45,6 @@ public class ClassificationDescriptors_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ClassificationDescriptor", required = true)
     protected List<ClassificationDescriptor_VersionStructure> classificationDescriptor;
 
     /**

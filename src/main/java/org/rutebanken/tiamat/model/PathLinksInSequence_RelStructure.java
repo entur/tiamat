@@ -49,7 +49,6 @@ public class PathLinksInSequence_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PathLinkInSequence", required = true)
     protected List<PathLinkInSequence> pathLinkInSequence;
 
     /**

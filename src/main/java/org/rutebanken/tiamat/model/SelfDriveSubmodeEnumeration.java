@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SelfDriveSubmodeEnumeration")
-@XmlEnum
 public enum SelfDriveSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("hireCar")
     HIRE_CAR("hireCar"),
-    @XmlEnumValue("hireVan")
     HIRE_VAN("hireVan"),
-    @XmlEnumValue("hireMotorbike")
     HIRE_MOTORBIKE("hireMotorbike"),
-    @XmlEnumValue("hireCycle")
     HIRE_CYCLE("hireCycle"),
-    @XmlEnumValue("allHireVehicles")
     ALL_HIRE_VEHICLES("allHireVehicles");
     private final String value;
 

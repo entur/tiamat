@@ -66,19 +66,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class LocaleStructure {
 
-    @XmlElement(name = "TimeZoneOffset")
     protected BigDecimal timeZoneOffset;
-    @XmlElement(name = "TimeZone")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String timeZone;
-    @XmlElement(name = "SummerTimeZoneOffset")
     protected BigDecimal summerTimeZoneOffset;
-    @XmlElement(name = "SummerTimeZone")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String summerTimeZone;
-    @XmlElement(name = "DefaultLanguage")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "language")
     protected String defaultLanguage;

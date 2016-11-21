@@ -87,70 +87,43 @@ public class Parking_VersionStructure
     protected PathJunctions_RelStructure pathJunctions;
     protected Accesses_RelStructure accesses;
     protected NavigationPaths_RelStructure navigationPaths;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "ParkingType")
     @XmlSchemaType(name = "string")
     protected ParkingTypeEnumeration parkingType;
-    @XmlList
-    @XmlElement(name = "ParkingVehicleTypes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
-    @XmlElement(name = "ParkingLayout")
     @XmlSchemaType(name = "string")
     protected ParkingLayoutEnumeration parkingLayout;
-    @XmlElement(name = "NumberOfParkingLevels")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfParkingLevels;
-    @XmlElement(name = "PrincipalCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger principalCapacity;
-    @XmlElement(name = "TotalCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger totalCapacity;
-    @XmlElement(name = "OvernightParkingPermitted")
     protected Boolean overnightParkingPermitted;
-    @XmlElement(name = "ProhibitedForHazardousMaterials", defaultValue = "true")
     protected Boolean prohibitedForHazardousMaterials;
-    @XmlElement(name = "RechargingAvailable")
     protected Boolean rechargingAvailable;
-    @XmlElement(name = "Secure")
     protected Boolean secure;
-    @XmlElement(name = "RealTimeOccupancyAvailable")
     protected Boolean realTimeOccupancyAvailable;
-    @XmlList
-    @XmlElement(name = "ParkingPaymentProcess")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
-    @XmlList
-    @XmlElement(name = "PaymentMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PaymentMethodEnumeration> paymentMethods;
-    @XmlElement(name = "DefaultCurrency")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String defaultCurrency;
-    @XmlList
-    @XmlElement(name = "CurrenciesAccepted")
     @XmlSchemaType(name = "anySimpleType")
     protected List<String> currenciesAccepted;
-    @XmlList
-    @XmlElement(name = "CardsAccepted")
     @XmlSchemaType(name = "NMTOKENS")
     protected List<String> cardsAccepted;
-    @XmlElement(name = "ParkingReservation")
     @XmlSchemaType(name = "string")
     protected ParkingReservationEnumeration parkingReservation;
-    @XmlElement(name = "BookingUrl")
     @XmlSchemaType(name = "anyURI")
     protected String bookingUrl;
-    @XmlElement(name = "PaymentByMobile")
     protected PaymentByMobileStructure paymentByMobile;
-    @XmlElement(name = "FreeParkingOutOfHours", defaultValue = "true")
     protected Boolean freeParkingOutOfHours;
     protected ParkingProperties_RelStructure parkingProperties;
     protected ParkingAreas_RelStructure parkingAreas;

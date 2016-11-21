@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CycleStorageEnumeration")
-@XmlEnum
 public enum CycleStorageEnumeration {
 
-    @XmlEnumValue("racks")
     RACKS("racks"),
-    @XmlEnumValue("bars")
     BARS("bars"),
-    @XmlEnumValue("railings")
     RAILINGS("railings"),
-    @XmlEnumValue("cycleScheme")
     CYCLE_SCHEME("cycleScheme"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

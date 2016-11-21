@@ -57,20 +57,14 @@ public class UserNeed_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "MobilityNeed")
     @XmlSchemaType(name = "NMTOKEN")
     protected MobilityEnumeration mobilityNeed;
-    @XmlElement(name = "PsychosensoryNeed")
     @XmlSchemaType(name = "NMTOKEN")
     protected PyschosensoryNeedEnumeration psychosensoryNeed;
-    @XmlElement(name = "MedicalNeed")
     protected MedicalNeedEnumeration medicalNeed;
-    @XmlElement(name = "EncumbranceNeed")
     @XmlSchemaType(name = "NMTOKEN")
     protected EncumbranceEnumeration encumbranceNeed;
-    @XmlElement(name = "Excluded")
     protected Boolean excluded;
-    @XmlElement(name = "NeedRanking")
     protected BigInteger needRanking;
 
     /**

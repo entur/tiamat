@@ -51,9 +51,6 @@ public class CheckConstraintThroughputs_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "CheckConstraintThroughputRef", type = CheckConstraintThroughputRefStructure.class),
-        @XmlElement(name = "CheckConstraintThroughput", type = CheckConstraintThroughput.class)
     })
     protected List<Object> checkConstraintThroughputRefOrCheckConstraintThroughput;
 

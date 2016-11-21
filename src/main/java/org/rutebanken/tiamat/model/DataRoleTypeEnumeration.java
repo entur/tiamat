@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DataRoleTypeEnumeration")
-@XmlEnum
 public enum DataRoleTypeEnumeration {
 
-    @XmlEnumValue("all")
     ALL("all"),
-    @XmlEnumValue("collects")
     COLLECTS("collects"),
-    @XmlEnumValue("validates")
     VALIDATES("validates"),
-    @XmlEnumValue("aggregates")
     AGGREGATES("aggregates"),
-    @XmlEnumValue("distributes")
     DISTRIBUTES("distributes"),
-    @XmlEnumValue("redistributes")
     REDISTRIBUTES("redistributes"),
-    @XmlEnumValue("creates")
     CREATES("creates");
     private final String value;
 

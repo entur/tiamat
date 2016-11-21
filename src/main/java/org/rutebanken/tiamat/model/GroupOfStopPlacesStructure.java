@@ -52,7 +52,6 @@ public class GroupOfStopPlacesStructure
     extends GroupOfEntities_VersionStructure
 {
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String publicCode;

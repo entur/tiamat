@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LanguageUseEnumeration")
-@XmlEnum
 public enum LanguageUseEnumeration {
 
-    @XmlEnumValue("normallyUsed")
     NORMALLY_USED("normallyUsed"),
-    @XmlEnumValue("understood")
     UNDERSTOOD("understood"),
-    @XmlEnumValue("native")
     NATIVE("native"),
-    @XmlEnumValue("spoken")
     SPOKEN("spoken"),
-    @XmlEnumValue("written")
     WRITTEN("written"),
-    @XmlEnumValue("read")
     READ("read"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("allUses")
     ALL_USES("allUses");
     private final String value;
 

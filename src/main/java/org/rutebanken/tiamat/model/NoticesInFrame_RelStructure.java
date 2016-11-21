@@ -45,7 +45,6 @@ public class NoticesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Notice", required = true)
     protected List<Notice> notice;
 
     /**

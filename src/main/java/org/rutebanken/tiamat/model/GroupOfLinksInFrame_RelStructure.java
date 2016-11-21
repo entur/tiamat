@@ -45,7 +45,6 @@ public class GroupOfLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfLinks", required = true)
     protected List<GroupOfLinks> groupOfLinks;
 
     /**

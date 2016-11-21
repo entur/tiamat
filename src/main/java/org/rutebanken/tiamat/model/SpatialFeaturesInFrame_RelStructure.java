@@ -47,9 +47,6 @@ public class SpatialFeaturesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "SimpleFeature", type = SimpleFeature.class),
-        @XmlElement(name = "ComplexFeature", type = ComplexFeature.class)
     })
     protected List<GroupOfPoints_VersionStructure> simpleFeatureOrComplexFeature;
 

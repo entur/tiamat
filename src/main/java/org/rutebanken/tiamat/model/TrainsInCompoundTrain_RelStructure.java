@@ -45,7 +45,6 @@ public class TrainsInCompoundTrain_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TrainInCompoundTrain", required = true)
     protected List<TrainInCompoundTrain_VersionedChildStructure> trainInCompoundTrain;
 
     /**

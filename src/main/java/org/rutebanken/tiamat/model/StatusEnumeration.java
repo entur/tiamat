@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StatusEnumeration")
-@XmlEnum
 public enum StatusEnumeration {
 
 
@@ -38,21 +37,18 @@ public enum StatusEnumeration {
      * Entity is active.
      * 
      */
-    @XmlEnumValue("active")
     ACTIVE("active"),
 
     /**
      * Entity is inactive.
      * 
      */
-    @XmlEnumValue("inactive")
     INACTIVE("inactive"),
 
     /**
      * Entity is still active but is in the process of being made inactive.
      * 
      */
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

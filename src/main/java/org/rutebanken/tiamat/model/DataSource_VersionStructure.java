@@ -48,7 +48,6 @@ public class DataSource_VersionStructure
     extends TypeOfValue_VersionStructure
 {
 
-    @XmlElement(name = "Email")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String email;

@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RelativeDirectionEnumeration")
-@XmlEnum
 public enum RelativeDirectionEnumeration {
 
-    @XmlEnumValue("both")
     BOTH("both"),
-    @XmlEnumValue("forwards")
     FORWARDS("forwards"),
-    @XmlEnumValue("backwards")
     BACKWARDS("backwards");
     private final String value;
 

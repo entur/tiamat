@@ -50,13 +50,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class DeltaStructure {
 
-    @XmlElement(name = "SimpleObjectRef")
     protected SimpleObjectRefStructure simpleObjectRef;
-    @XmlElement(name = "FromVersionRef")
     protected FromVersionRef fromVersionRef;
-    @XmlElement(name = "ToVersionRef", required = true)
     protected ToVersionRef toVersionRef;
-    @XmlElement(name = "Modification", defaultValue = "revise")
     @XmlSchemaType(name = "NMTOKEN")
     protected ModificationEnumeration modification;
     protected DeltaValues_RelStructure deltaValues;

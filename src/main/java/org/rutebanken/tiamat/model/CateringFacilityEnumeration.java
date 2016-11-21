@@ -46,7 +46,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CateringFacilityEnumeration")
-@XmlEnum
 public enum CateringFacilityEnumeration {
 
 
@@ -54,78 +53,59 @@ public enum CateringFacilityEnumeration {
      * pti23_18
      * 
      */
-    @XmlEnumValue("bar")
     BAR("bar"),
 
     /**
      * pti23_26
      * 
      */
-    @XmlEnumValue("bistro")
     BISTRO("bistro"),
-    @XmlEnumValue("buffet")
     BUFFET("buffet"),
 
     /**
      * pti23_19
      * 
      */
-    @XmlEnumValue("noFoodAvailableAvailable")
     NO_FOOD_AVAILABLE_AVAILABLE("noFoodAvailableAvailable"),
 
     /**
      * pti23_20
      * 
      */
-    @XmlEnumValue("noBeveragesAvailable")
     NO_BEVERAGES_AVAILABLE("noBeveragesAvailable"),
 
     /**
      * pti23_1
      * 
      */
-    @XmlEnumValue("restaurant")
     RESTAURANT("restaurant"),
-    @XmlEnumValue("firstClassRestaurant")
     FIRST_CLASS_RESTAURANT("firstClassRestaurant"),
 
     /**
      * pti23_23
      * 
      */
-    @XmlEnumValue("trolley")
     TROLLEY("trolley"),
-    @XmlEnumValue("coffeeSohp")
     COFFEE_SOHP("coffeeSohp"),
-    @XmlEnumValue("hotFoodService")
     HOT_FOOD_SERVICE("hotFoodService"),
-    @XmlEnumValue("selfService")
     SELF_SERVICE("selfService"),
 
     /**
      * pti23_2
      * 
      */
-    @XmlEnumValue("snacks")
     SNACKS("snacks"),
-    @XmlEnumValue("foodVendingMachine")
     FOOD_VENDING_MACHINE("foodVendingMachine"),
-    @XmlEnumValue("beverageVendingMachine")
     BEVERAGE_VENDING_MACHINE("beverageVendingMachine"),
 
     /**
      * pti23_18_1
      * 
      */
-    @XmlEnumValue("miniBar")
     MINI_BAR("miniBar"),
-    @XmlEnumValue("breakfastInCar")
     BREAKFAST_IN_CAR("breakfastInCar"),
-    @XmlEnumValue("mealAtSeat")
     MEAL_AT_SEAT("mealAtSeat"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

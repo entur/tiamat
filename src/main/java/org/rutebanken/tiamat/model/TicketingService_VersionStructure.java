@@ -61,28 +61,16 @@ public class TicketingService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "VehicleModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<VehicleModeEnumeration> vehicleModes;
-    @XmlList
-    @XmlElement(name = "TicketingServiceList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingServiceFacilityEnumeration> ticketingServiceList;
-    @XmlElementRef(name = "TicketTypeList", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected List<JAXBElement<List<TicketTypeEnumeration>>> ticketTypeList;
-    @XmlElement(name = "TicketCounterService")
     protected Boolean ticketCounterService;
-    @XmlElement(name = "OnlinePurchaseForCollection")
     protected Boolean onlinePurchaseForCollection;
-    @XmlElement(name = "OnlinePurchaseForETicket")
     protected Boolean onlinePurchaseForETicket;
-    @XmlElement(name = "OnlinePurchaseForSelfPrintTicket")
     protected Boolean onlinePurchaseForSelfPrintTicket;
-    @XmlElement(name = "MobileDeviceTickets")
     protected Boolean mobileDeviceTickets;
-    @XmlList
-    @XmlElement(name = "PaymentMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PaymentMethodEnumeration> paymentMethods;
 

@@ -48,9 +48,7 @@ public class AccessZone_VersionStructure
     extends Zone_VersionStructure
 {
 
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment_VersionedChildStructure accessibilityAssessment;
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
 
     /**

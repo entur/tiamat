@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SectionTypeEnumeration")
-@XmlEnum
 public enum SectionTypeEnumeration {
 
-    @XmlEnumValue("trunk")
     TRUNK("trunk"),
-    @XmlEnumValue("branch")
     BRANCH("branch"),
-    @XmlEnumValue("endLoop")
     END_LOOP("endLoop"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

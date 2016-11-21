@@ -46,7 +46,6 @@ public class TransfersInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "Transfer", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends Transfer_VersionStructure>> transfer;
 
     /**

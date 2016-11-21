@@ -47,9 +47,6 @@ public class AccessZones_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AccessZoneRef", type = AccessZoneRefStructure.class),
-        @XmlElement(name = "AccessZone", type = AccessZone.class)
     })
     protected List<Object> accessZoneRefOrAccessZone;
 

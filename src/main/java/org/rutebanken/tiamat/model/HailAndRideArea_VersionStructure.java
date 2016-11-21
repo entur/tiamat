@@ -52,14 +52,10 @@ public class HailAndRideArea_VersionStructure
     extends FlexibleQuay_VersionStructure
 {
 
-    @XmlElement(name = "BearingCompass")
     protected String bearingCompass;
-    @XmlElement(name = "BearingDegrees")
     protected BigInteger bearingDegrees;
     protected DestinationDisplayViews_RelStructure destinations;
-    @XmlElement(name = "StartPointRef", required = true)
     protected PointRefStructure startPointRef;
-    @XmlElement(name = "EndPointRef", required = true)
     protected PointRefStructure endPointRef;
 
     /**

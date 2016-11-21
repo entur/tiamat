@@ -45,7 +45,6 @@ public class StopPointsInJourneyPattern_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "StopPointInJourneyPattern", required = true)
     protected List<StopPointInJourneyPattern> stopPointInJourneyPattern;
 
     /**

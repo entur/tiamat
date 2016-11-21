@@ -44,10 +44,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class DefaultConnectionEndStructure {
 
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
-    @XmlElement(name = "OperatorView")
     protected OperatorView operatorView;
 
     /**

@@ -29,12 +29,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "VersionTypeEnumeration")
-@XmlEnum
 public enum VersionTypeEnumeration {
 
-    @XmlEnumValue("point")
     POINT("point"),
-    @XmlEnumValue("baseline")
     BASELINE("baseline");
     private final String value;
 

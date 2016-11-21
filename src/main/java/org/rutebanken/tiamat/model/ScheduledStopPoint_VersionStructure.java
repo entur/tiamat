@@ -73,51 +73,31 @@ public class ScheduledStopPoint_VersionStructure
 {
 
     protected StopAreaRefs_RelStructure stopAreas;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "ShortStopCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortStopCode;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ExternalStopPointRef")
     protected ExternalObjectRefStructure externalStopPointRef;
-    @XmlElement(name = "Url")
     @XmlSchemaType(name = "anyURI")
     protected String url;
-    @XmlElement(name = "StopType")
     @XmlSchemaType(name = "string")
     protected StopTypeEnumeration stopType;
-    @XmlElement(name = "CompassBearing")
     protected Float compassBearing;
-    @XmlElement(name = "Presentation")
     protected PresentationStructure presentation;
-    @XmlList
-    @XmlElement(name = "VehicleModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<VehicleModeEnumeration> vehicleModes;
-    @XmlElement(name = "ForAlighting")
     protected Boolean forAlighting;
-    @XmlElement(name = "ForBoarding")
     protected Boolean forBoarding;
-    @XmlElement(name = "RequestStop", defaultValue = "false")
     protected Boolean requestStop;
-    @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
-    @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
-    @XmlElement(name = "TopographicPlaceView")
     protected TopographicPlaceView topographicPlaceView;
-    @XmlElement(name = "AtCentre", defaultValue = "false")
     protected Boolean atCentre;
 
     /**

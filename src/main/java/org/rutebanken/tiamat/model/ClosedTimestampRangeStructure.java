@@ -45,10 +45,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class ClosedTimestampRangeStructure {
 
-    @XmlElement(name = "StartTime", required = true)
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar startTime;
-    @XmlElement(name = "EndTime", required = true)
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar endTime;
 

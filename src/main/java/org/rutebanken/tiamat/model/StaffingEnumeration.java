@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StaffingEnumeration")
-@XmlEnum
 public enum StaffingEnumeration {
 
-    @XmlEnumValue("fullTime")
     FULL_TIME("fullTime"),
-    @XmlEnumValue("partTime")
     PART_TIME("partTime"),
-    @XmlEnumValue("unmanned")
     UNMANNED("unmanned");
     private final String value;
 

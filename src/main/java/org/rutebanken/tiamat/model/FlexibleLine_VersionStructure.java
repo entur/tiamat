@@ -62,34 +62,22 @@ public class FlexibleLine_VersionStructure
     extends Line_VersionStructure
 {
 
-    @XmlElement(name = "FlexibleLineType")
     @XmlSchemaType(name = "string")
     protected FlexibleLineTypeEnumeration flexibleLineType;
-    @XmlElement(name = "BookingContact")
     protected ContactStructure bookingContact;
-    @XmlList
-    @XmlElement(name = "BookingMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<BookingMethodEnumeration> bookingMethods;
-    @XmlElement(name = "BookingAccess")
     @XmlSchemaType(name = "string")
     protected BookingAccessEnumeration bookingAccess;
-    @XmlElement(name = "BookWhen")
     @XmlSchemaType(name = "normalizedString")
     protected PurchaseWhenEnumeration bookWhen;
-    @XmlList
-    @XmlElement(name = "BuyWhen")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PurchaseMomentEnumeration> buyWhen;
-    @XmlElement(name = "LatestBookingTime")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar latestBookingTime;
-    @XmlElement(name = "MinimumBookingPeriod")
     protected Duration minimumBookingPeriod;
-    @XmlElement(name = "BookingUrl")
     @XmlSchemaType(name = "anyURI")
     protected String bookingUrl;
-    @XmlElement(name = "BookingNote")
     protected MultilingualStringEntity bookingNote;
 
     /**

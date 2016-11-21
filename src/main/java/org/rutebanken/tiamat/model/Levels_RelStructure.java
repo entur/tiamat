@@ -47,9 +47,6 @@ public class Levels_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "LevelRef", type = LevelRefStructure.class),
-        @XmlElement(name = "Level", type = Level.class)
     })
     protected List<Object> levelRefOrLevel;
 

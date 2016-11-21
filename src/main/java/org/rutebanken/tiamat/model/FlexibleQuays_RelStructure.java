@@ -48,9 +48,6 @@ public class FlexibleQuays_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "FlexibleQuayRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "FlexibleQuay", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> flexibleQuayRefOrFlexibleQuay;
 

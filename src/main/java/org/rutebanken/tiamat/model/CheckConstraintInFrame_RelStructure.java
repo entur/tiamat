@@ -45,7 +45,6 @@ public class CheckConstraintInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CheckConstraint", required = true)
     protected List<CheckConstraint> checkConstraint;
 
     /**

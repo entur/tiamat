@@ -53,11 +53,9 @@ public abstract class Assignment_VersionStructure_
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity name;
 
-    @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity description;
 

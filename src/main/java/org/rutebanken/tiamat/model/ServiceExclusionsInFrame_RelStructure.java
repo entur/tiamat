@@ -45,7 +45,6 @@ public class ServiceExclusionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ServiceExclusion", required = true)
     protected List<ServiceExclusion> serviceExclusion;
 
     /**

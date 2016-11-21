@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TicketValidatorEnumeration")
-@XmlEnum
 public enum TicketValidatorEnumeration {
 
-    @XmlEnumValue("paperStamp")
     PAPER_STAMP("paperStamp"),
-    @XmlEnumValue("contactLess")
     CONTACT_LESS("contactLess"),
-    @XmlEnumValue("magnetic")
     MAGNETIC("magnetic"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

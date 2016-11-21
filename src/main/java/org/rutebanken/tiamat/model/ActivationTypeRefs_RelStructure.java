@@ -45,7 +45,6 @@ public class ActivationTypeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfActivationRef", required = true)
     protected List<TypeOfActivationRefStructure> typeOfActivationRef;
 
     /**

@@ -44,12 +44,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RailSubmodeEnumeration")
-@XmlEnum
 public enum RailSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("local")
     LOCAL("local"),
 
     /**
@@ -58,7 +55,6 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("highSpeedRail")
     HIGH_SPEED_RAIL("highSpeedRail"),
 
     /**
@@ -69,7 +65,6 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("suburbanRailway")
     SUBURBAN_RAILWAY("suburbanRailway"),
 
     /**
@@ -78,7 +73,6 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("regionalRail")
     REGIONAL_RAIL("regionalRail"),
 
     /**
@@ -87,7 +81,6 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("interregionalRail")
     INTERREGIONAL_RAIL("interregionalRail"),
 
     /**
@@ -96,13 +89,9 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("longDistance")
     LONG_DISTANCE("longDistance"),
-    @XmlEnumValue("intermational")
     INTERMATIONAL("intermational"),
-    @XmlEnumValue("sleeperRailService")
     SLEEPER_RAIL_SERVICE("sleeperRailService"),
-    @XmlEnumValue("nightRail")
     NIGHT_RAIL("nightRail"),
 
     /**
@@ -113,22 +102,16 @@ public enum RailSubmodeEnumeration {
      * 
      * 
      */
-    @XmlEnumValue("carTransportRailService")
     CAR_TRANSPORT_RAIL_SERVICE("carTransportRailService"),
 
     /**
      * See ERA B.4.7009 - Name: Item description code: (16 Historic train).
      * 
      */
-    @XmlEnumValue("touristRailway")
     TOURIST_RAILWAY("touristRailway"),
-    @XmlEnumValue("railShuttle")
     RAIL_SHUTTLE("railShuttle"),
-    @XmlEnumValue("replacementRailService")
     REPLACEMENT_RAIL_SERVICE("replacementRailService"),
-    @XmlEnumValue("specialTrain")
     SPECIAL_TRAIN("specialTrain"),
-    @XmlEnumValue("crossCountryRail")
     CROSS_COUNTRY_RAIL("crossCountryRail"),
 
     /**
@@ -136,7 +119,6 @@ public enum RailSubmodeEnumeration {
      * Local train adapted for running in mountain railway lines.
      * 
      */
-    @XmlEnumValue("rackAndPinionRailway")
     RACK_AND_PINION_RAILWAY("rackAndPinionRailway");
     private final String value;
 

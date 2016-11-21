@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DirectionOfUseEnumeration")
-@XmlEnum
 public enum DirectionOfUseEnumeration {
 
-    @XmlEnumValue("up")
     UP("up"),
-    @XmlEnumValue("down")
     DOWN("down"),
-    @XmlEnumValue("both")
     BOTH("both");
     private final String value;
 

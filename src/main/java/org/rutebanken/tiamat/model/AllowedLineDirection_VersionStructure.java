@@ -50,9 +50,7 @@ public class AllowedLineDirection_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "DirectionRef", required = true)
     protected DirectionRefStructure directionRef;
 
     /**

@@ -53,15 +53,10 @@ public class Operator_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "OperatorRef")
     protected OperatorRefStructure operatorRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "LegalName")
     protected MultilingualStringEntity legalName;
-    @XmlElement(name = "TradingName")
     protected MultilingualStringEntity tradingName;
     protected AlternativeNames_RelStructure alternativeNames;
 

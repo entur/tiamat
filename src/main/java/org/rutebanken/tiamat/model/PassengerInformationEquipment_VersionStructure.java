@@ -58,20 +58,12 @@ public class PassengerInformationEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "LogicalDisplayRef")
     protected LogicalDisplayRefStructure logicalDisplayRef;
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElementRef(name = "SiteComponentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends SiteComponentRefStructure> siteComponentRef;
-    @XmlElement(name = "TypeOfPassengerInformationEquipmentRef")
     protected TypeOfPassengerInformationEquipmentRefStructure typeOfPassengerInformationEquipmentRef;
-    @XmlList
-    @XmlElement(name = "PassengerInformationFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList;
-    @XmlList
-    @XmlElement(name = "AccessibilityInfoFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessibilityInfoFacilityEnumeration> accessibilityInfoFacilityList;
 

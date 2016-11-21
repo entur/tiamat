@@ -49,10 +49,8 @@ public class MeetingPointService_VersionStructure
     extends CustomerService_VersionStructure
 {
 
-    @XmlElement(name = "MeetingPointServiceType", required = true)
     @XmlSchemaType(name = "NMTOKEN")
     protected MeetingPointEnumeration meetingPointServiceType;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
 
     /**

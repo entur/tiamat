@@ -58,23 +58,15 @@ public class OperatingDay_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "CalendarDate", required = true)
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar calendarDate;
-    @XmlElement(name = "ServiceCalendarRef")
     protected ServiceCalendarRefStructure serviceCalendarRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "DayNumber")
     protected BigInteger dayNumber;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "EarliestTime")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar earliestTime;
-    @XmlElement(name = "DayLength")
     protected Duration dayLength;
 
     /**

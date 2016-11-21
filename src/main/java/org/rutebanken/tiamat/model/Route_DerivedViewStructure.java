@@ -56,20 +56,13 @@ public class Route_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "RouteRef")
     protected RouteRefStructure routeRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration vehicleMode;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "LineView")
     protected LineView lineView;
-    @XmlElement(name = "DirectionView")
     protected DirectionView directionView;
-    @XmlElement(name = "LinkSequenceProjectionRef")
     protected LinkSequenceProjectionRefStructure linkSequenceProjectionRef;
 
     /**

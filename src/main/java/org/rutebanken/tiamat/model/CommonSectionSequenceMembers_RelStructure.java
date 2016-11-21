@@ -45,7 +45,6 @@ public class CommonSectionSequenceMembers_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CommonSectionSequenceMember", required = true)
     protected List<CommonSectionSequenceMemberStructure> commonSectionSequenceMember;
 
     /**

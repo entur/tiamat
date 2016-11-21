@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AssistedBoardingLocationEnumeration")
-@XmlEnum
 public enum AssistedBoardingLocationEnumeration {
 
-    @XmlEnumValue("boardAtAnyDoor")
     BOARD_AT_ANY_DOOR("boardAtAnyDoor"),
-    @XmlEnumValue("boardOnlyAtSpecifiedPositions")
     BOARD_ONLY_AT_SPECIFIED_POSITIONS("boardOnlyAtSpecifiedPositions"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

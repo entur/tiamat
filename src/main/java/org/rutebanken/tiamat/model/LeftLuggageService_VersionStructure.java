@@ -54,19 +54,12 @@ public class LeftLuggageService_VersionStructure
     extends CustomerService_VersionStructure
 {
 
-    @XmlElement(name = "CounterService")
     protected Boolean counterService;
-    @XmlElement(name = "SelfServiceLockers")
     protected Boolean selfServiceLockers;
-    @XmlElement(name = "FeePerBag")
     protected Boolean feePerBag;
-    @XmlElement(name = "LockerFee")
     protected Boolean lockerFee;
-    @XmlElement(name = "MaximumBagWidth")
     protected BigDecimal maximumBagWidth;
-    @XmlElement(name = "MaximumBagHeight")
     protected BigDecimal maximumBagHeight;
-    @XmlElement(name = "MaximumBagDepth")
     protected BigDecimal maximumBagDepth;
 
     /**

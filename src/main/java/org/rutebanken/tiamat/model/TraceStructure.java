@@ -54,20 +54,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class TraceStructure {
 
-    @XmlElement(name = "ObjectRef")
     protected VersionOfObjectRefStructure objectRef;
-    @XmlElement(name = "ChangedAt", required = true)
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar changedAt;
-    @XmlElement(name = "ChangedBy")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String changedBy;
-    @XmlElement(name = "Description")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String description;
-    @XmlElement(name = "Delta")
     protected DeltaStructure delta;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)

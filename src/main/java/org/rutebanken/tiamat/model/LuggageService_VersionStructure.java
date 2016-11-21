@@ -58,21 +58,13 @@ public class LuggageService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "LuggageServiceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<LuggageServiceFacilityEnumeration> luggageServiceFacilityList;
-    @XmlElement(name = "LuggageTrolleys")
     protected Boolean luggageTrolleys;
-    @XmlElement(name = "WheelchairLuggageTrolleys")
     protected Boolean wheelchairLuggageTrolleys;
-    @XmlElement(name = "FreeToUse")
     protected Boolean freeToUse;
-    @XmlElement(name = "MaximumBagWidth")
     protected BigDecimal maximumBagWidth;
-    @XmlElement(name = "MaximumBagHeight")
     protected BigDecimal maximumBagHeight;
-    @XmlElement(name = "MaximumBagDepth")
     protected BigDecimal maximumBagDepth;
 
     /**

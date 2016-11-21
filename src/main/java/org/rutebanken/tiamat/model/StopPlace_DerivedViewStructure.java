@@ -62,21 +62,15 @@ public class StopPlace_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
     protected TypeOfPlaceRefs_RelStructure placeTypes;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "StopPlaceType")
     @XmlSchemaType(name = "string")
     protected StopTypeEnumeration stopPlaceType;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
 

@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LimitationStatusEnumeration")
-@XmlEnum
 public enum LimitationStatusEnumeration {
 
 
@@ -39,28 +38,24 @@ public enum LimitationStatusEnumeration {
      * All of PLACE is accessible for criteria.
      * 
      */
-    @XmlEnumValue("true")
     TRUE("true"),
 
     /**
      * PLACE is not considered to meet accessibility criteria.
      * 
      */
-    @XmlEnumValue("false")
     FALSE("false"),
 
     /**
      * It is not known whether PLACE meets accessibility  criteria.
      * 
      */
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
 
     /**
      * Some areas of PLACE are not considered to meet accessibility criteria.
      * 
      */
-    @XmlEnumValue("partial")
     PARTIAL("partial");
     private final String value;
 

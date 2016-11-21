@@ -45,7 +45,6 @@ public class DataSourcesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DataSource", required = true)
     protected List<DataSource> dataSource;
 
     /**

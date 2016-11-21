@@ -45,7 +45,6 @@ public class ControlCentresInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ControlCentre", required = true)
     protected List<ControlCentre> controlCentre;
 
     /**

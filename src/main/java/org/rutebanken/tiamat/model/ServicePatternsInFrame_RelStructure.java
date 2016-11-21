@@ -47,9 +47,6 @@ public class ServicePatternsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ServicePattern", type = ServicePattern.class),
-        @XmlElement(name = "JourneyPatternView", type = JourneyPattern_DerivedViewStructure.class)
     })
     protected List<Object> servicePatternOrJourneyPatternView;
 

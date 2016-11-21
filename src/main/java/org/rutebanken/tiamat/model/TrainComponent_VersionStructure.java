@@ -53,15 +53,10 @@ public class TrainComponent_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TrainRef")
     protected TrainRefStructure trainRef;
-    @XmlElement(name = "TrainElementRef")
     protected TrainElementRefStructure trainElementRef;
-    @XmlElement(name = "TrainElement")
     protected TrainElement trainElement;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

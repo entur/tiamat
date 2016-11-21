@@ -64,24 +64,16 @@ public class OrganisationPart_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ContactDetails")
     protected ContactStructure contactDetails;
 
-    @XmlElementRef(name = "OrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
-    @XmlElement(name = "TypeOfOrganisationPartRef")
     protected TypeOfOrganisationPartRef typeOfOrganisationPartRef;
     protected AdministrativeZones_RelStructure administrativeZones;
 

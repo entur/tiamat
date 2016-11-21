@@ -45,7 +45,6 @@ public class DayTypeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "DayTypeRef", required = true)
     protected List<DayTypeRefStructure> dayTypeRef;
 
     /**

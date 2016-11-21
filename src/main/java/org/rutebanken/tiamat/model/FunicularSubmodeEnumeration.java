@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FunicularSubmodeEnumeration")
-@XmlEnum
 public enum FunicularSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("funicular")
     FUNICULAR("funicular"),
-    @XmlEnumValue("streetCableCar")
     STREET_CABLE_CAR("streetCableCar"),
-    @XmlEnumValue("allFunicularServices")
     ALL_FUNICULAR_SERVICES("allFunicularServices"),
-    @XmlEnumValue("undefinedFunicular")
     UNDEFINED_FUNICULAR("undefinedFunicular");
     private final String value;
 

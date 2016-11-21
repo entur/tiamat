@@ -51,11 +51,8 @@ public class Point_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-//    @XmlElement(name = "Location")
 //    protected LocationStructure location;
-    @XmlElement(name = "PointNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String pointNumber;

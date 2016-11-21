@@ -47,9 +47,6 @@ public class CheckConstraints_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "CheckConstraintRef", type = CheckConstraintRefStructure.class),
-        @XmlElement(name = "CheckConstraint", type = CheckConstraint.class)
     })
     protected List<Object> checkConstraintRefOrCheckConstraint;
 

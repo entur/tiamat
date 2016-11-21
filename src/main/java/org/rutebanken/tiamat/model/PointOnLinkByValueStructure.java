@@ -42,7 +42,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PointOnLinkByValueStructure {
 
-    @XmlElement(name = "DistanceFromStart")
     protected BigDecimal distanceFromStart;
 
     /**

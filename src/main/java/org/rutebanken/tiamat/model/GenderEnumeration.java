@@ -29,12 +29,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "GenderEnumeration")
-@XmlEnum
 public enum GenderEnumeration {
 
-    @XmlEnumValue("female")
     FEMALE("female"),
-    @XmlEnumValue("male")
     MALE("male");
     private final String value;
 

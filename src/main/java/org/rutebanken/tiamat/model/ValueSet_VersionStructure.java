@@ -52,7 +52,6 @@ public class ValueSet_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
     protected TypesOfValueStructure values;
     @XmlAttribute(name = "classOfValues")

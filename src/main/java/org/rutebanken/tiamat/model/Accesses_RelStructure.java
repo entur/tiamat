@@ -51,9 +51,6 @@ public class Accesses_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AccessRef", type = AccessRefStructure.class),
-        @XmlElement(name = "Access", type = Access.class)
     })
     @Column
     @ElementCollection(targetClass=AccessRefStructure.class)

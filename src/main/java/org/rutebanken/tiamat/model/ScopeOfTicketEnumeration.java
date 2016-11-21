@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ScopeOfTicketEnumeration")
-@XmlEnum
 public enum ScopeOfTicketEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("localTicket")
     LOCAL_TICKET("localTicket"),
-    @XmlEnumValue("nationalTicket")
     NATIONAL_TICKET("nationalTicket"),
-    @XmlEnumValue("internationalTicket")
     INTERNATIONAL_TICKET("internationalTicket");
     private final String value;
 

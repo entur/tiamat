@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "QueueManagementEnumeration")
-@XmlEnum
 public enum QueueManagementEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("maze")
     MAZE("maze"),
-    @XmlEnumValue("separateLines")
     SEPARATE_LINES("separateLines"),
-    @XmlEnumValue("ticketed")
     TICKETED("ticketed"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

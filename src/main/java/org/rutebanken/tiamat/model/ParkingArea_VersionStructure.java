@@ -52,10 +52,8 @@ public class ParkingArea_VersionStructure
     extends ParkingComponent_VersionStructure
 {
 
-    @XmlElement(name = "TotalCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger totalCapacity;
-    @XmlElement(name = "ParkingProperties")
     protected ParkingProperties parkingProperties;
     protected ParkingBays_RelStructure bays;
     protected EntranceRefs_RelStructure entrances;

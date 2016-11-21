@@ -50,9 +50,6 @@ public class PathJunctions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PathJunctionRef", type = PathJunctionRefStructure.class),
-        @XmlElement(name = "PathJunction", type = PathJunction.class)
     })
     @ElementCollection(targetClass=PathJunctionRefStructure.class)
 

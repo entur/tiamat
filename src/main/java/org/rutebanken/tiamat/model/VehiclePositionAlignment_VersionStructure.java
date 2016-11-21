@@ -49,11 +49,8 @@ public class VehiclePositionAlignment_VersionStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "VehicleStoppingPositionRef")
     protected VehicleStoppingPositionRefStructure vehicleStoppingPositionRef;
-    @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
-    @XmlElement(name = "BoardingPositionEntranceRef")
     protected StopPlaceEntranceRefStructure boardingPositionEntranceRef;
 
     /**

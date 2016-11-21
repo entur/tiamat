@@ -63,19 +63,13 @@ public abstract class TypeOfValue_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Image")
     @XmlSchemaType(name = "anyURI")
     protected String image;
-    @XmlElement(name = "Url")
     @XmlSchemaType(name = "anyURI")
     protected String url;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
 
     /**

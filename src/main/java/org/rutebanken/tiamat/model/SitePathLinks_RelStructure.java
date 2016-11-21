@@ -50,9 +50,6 @@ public class SitePathLinks_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PathLinkRef", type = PathLinkRefStructure.class),
-        @XmlElement(name = "SitePathLink", type = SitePathLink.class)
     })
     @ElementCollection(targetClass = PathLinkRefStructure.class)
     protected List<PathLinkRefStructure> pathLinkRefOrSitePathLink;

@@ -52,15 +52,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ClassRelationshipInFrameStructure {
 
-    @XmlElement(name = "RelationshipRef", required = true)
     protected RelationshipRefStructure relationshipRef;
-    @XmlElement(name = "Mandatory", defaultValue = "optional")
     @XmlSchemaType(name = "normalizedString")
     protected MandatoryEnumeration mandatory;
-    @XmlElement(name = "Containment", defaultValue = "both")
     @XmlSchemaType(name = "NMTOKEN")
     protected ContainmentEnumeration containment;
-    @XmlElement(name = "ModificationSet")
     @XmlSchemaType(name = "NMTOKEN")
     protected ModificationSetEnumeration modificationSet;
     @XmlAttribute(name = "name")

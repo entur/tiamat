@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RoadVehicleModeEnumeration")
-@XmlEnum
 public enum RoadVehicleModeEnumeration {
 
-    @XmlEnumValue("bus")
     BUS("bus"),
-    @XmlEnumValue("coach")
     COACH("coach"),
-    @XmlEnumValue("trolleyBus")
     TROLLEY_BUS("trolleyBus"),
-    @XmlEnumValue("tram")
     TRAM("tram");
     private final String value;
 

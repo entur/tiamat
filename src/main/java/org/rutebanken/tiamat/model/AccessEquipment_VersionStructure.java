@@ -61,14 +61,10 @@ public abstract class AccessEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Width")
     protected BigDecimal width;
-    @XmlElement(name = "DirectionOfUse", defaultValue = "both")
     @XmlSchemaType(name = "string")
     protected DirectionOfUseEnumeration directionOfUse;
-    @XmlElement(name = "PassengersPerMinute")
     protected BigInteger passengersPerMinute;
-    @XmlElement(name = "RelativeWeighting")
     protected BigInteger relativeWeighting;
 
     /**

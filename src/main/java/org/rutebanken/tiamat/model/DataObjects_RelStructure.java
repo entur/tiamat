@@ -45,9 +45,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class DataObjects_RelStructure {
 
-    @XmlElements({
-        @XmlElement(name = "CompositeFrame", type = CompositeFrame.class),
-        @XmlElement(name = "CommonFrame")
     })
     protected List<Common_VersionFrameStructure> compositeFrameOrCommonFrame;
 

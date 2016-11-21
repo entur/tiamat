@@ -45,7 +45,6 @@ public class ActivatedEquipmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ActivatedEquipment", required = true)
     protected List<ActivatedEquipment> activatedEquipment;
 
     /**

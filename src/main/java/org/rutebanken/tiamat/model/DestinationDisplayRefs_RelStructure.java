@@ -45,7 +45,6 @@ public class DestinationDisplayRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "DestinationDisplayRef", required = true)
     protected List<DestinationDisplayRefStructure> destinationDisplayRef;
 
     /**

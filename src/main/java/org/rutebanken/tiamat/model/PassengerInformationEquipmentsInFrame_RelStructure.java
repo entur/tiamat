@@ -45,7 +45,6 @@ public class PassengerInformationEquipmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PassengerInformationEquipment", required = true)
     protected List<PassengerInformationEquipment> passengerInformationEquipment;
 
     /**

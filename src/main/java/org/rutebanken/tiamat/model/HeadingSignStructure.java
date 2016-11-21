@@ -62,27 +62,17 @@ public class HeadingSignStructure
     extends SignEquipment_VersionStructure
 {
 
-    @XmlElement(name = "PlaceName", required = true)
     protected MultilingualStringEntity placeName;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "LineName")
     protected MultilingualStringEntity lineName;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected VehicleModeEnumeration transportMode;
-    @XmlElement(name = "TransportSubmode")
     protected TransportSubmodeStructure transportSubmode;
-    @XmlElement(name = "LineMap")
     @XmlSchemaType(name = "anyURI")
     protected String lineMap;
-    @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
-    @XmlElement(name = "DirectionName")
     protected MultilingualStringEntity directionName;
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "LinePublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String linePublicCode;

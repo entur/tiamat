@@ -51,9 +51,6 @@ public class TrainStopAssignments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TrainStopAssignmentRef", type = TrainStopAssignmentRefStructure.class),
-        @XmlElement(name = "TrainStopAssignment", type = TrainStopAssignment.class)
     })
     protected List<Object> trainStopAssignmentRefOrTrainStopAssignment;
 

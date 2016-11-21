@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "GradientEnumeration")
-@XmlEnum
 public enum GradientEnumeration {
 
-    @XmlEnumValue("verySteep")
     VERY_STEEP("verySteep"),
-    @XmlEnumValue("steep")
     STEEP("steep"),
-    @XmlEnumValue("medium")
     MEDIUM("medium"),
-    @XmlEnumValue("gentle")
     GENTLE("gentle"),
-    @XmlEnumValue("level")
     LEVEL("level");
     private final String value;
 

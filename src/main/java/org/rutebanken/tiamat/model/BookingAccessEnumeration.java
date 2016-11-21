@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BookingAccessEnumeration")
-@XmlEnum
 public enum BookingAccessEnumeration {
 
-    @XmlEnumValue("public")
     PUBLIC("public"),
-    @XmlEnumValue("authorisedPublic")
     AUTHORISED_PUBLIC("authorisedPublic"),
-    @XmlEnumValue("staff")
     STAFF("staff"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

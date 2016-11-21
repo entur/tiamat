@@ -48,9 +48,6 @@ public class SiteEntrances_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "EntranceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Entrance", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> entranceRefOrEntrance;
 

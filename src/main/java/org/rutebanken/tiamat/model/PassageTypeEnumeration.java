@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PassageTypeEnumeration")
-@XmlEnum
 public enum PassageTypeEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("pathway")
     PATHWAY("pathway"),
-    @XmlEnumValue("corridor")
     CORRIDOR("corridor"),
-    @XmlEnumValue("overpass")
     OVERPASS("overpass"),
-    @XmlEnumValue("underpass")
     UNDERPASS("underpass"),
-    @XmlEnumValue("tunnel")
     TUNNEL("tunnel"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

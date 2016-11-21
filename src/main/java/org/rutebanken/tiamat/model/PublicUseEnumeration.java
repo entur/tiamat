@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PublicUseEnumeration")
-@XmlEnum
 public enum PublicUseEnumeration {
 
-    @XmlEnumValue("all")
     ALL("all"),
-    @XmlEnumValue("disabledPublicOnly")
     DISABLED_PUBLIC_ONLY("disabledPublicOnly"),
-    @XmlEnumValue("authorisedPublicOnly")
     AUTHORISED_PUBLIC_ONLY("authorisedPublicOnly"),
-    @XmlEnumValue("staffOnly")
     STAFF_ONLY("staffOnly"),
-    @XmlEnumValue("publicOnly")
     PUBLIC_ONLY("publicOnly");
     private final String value;
 

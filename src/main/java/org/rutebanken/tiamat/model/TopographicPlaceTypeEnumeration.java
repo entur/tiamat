@@ -45,94 +45,75 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TopographicPlaceTypeEnumeration")
-@XmlEnum
 public enum TopographicPlaceTypeEnumeration {
 
-    @XmlEnumValue("state")
     STATE("state"),
 
     /**
      * Country, province, principality - e.g. E.g. England, Wales.
      * 
      */
-    @XmlEnumValue("province")
     PROVINCE("province"),
-    @XmlEnumValue("region")
     REGION("region"),
-    @XmlEnumValue("county")
     COUNTY("county"),
-    @XmlEnumValue("area")
     AREA("area"),
-    @XmlEnumValue("conurbation")
     CONURBATION("conurbation"),
 
     /**
      * Locality is a city.
      * 
      */
-    @XmlEnumValue("city")
     CITY("city"),
-    @XmlEnumValue("quarter")
     QUARTER("quarter"),
 
     /**
      * Locality is an urban sub-area.
      * 
      */
-    @XmlEnumValue("suburb")
     SUBURB("suburb"),
 
     /**
      * Locality is a town.
      * 
      */
-    @XmlEnumValue("town")
     TOWN("town"),
 
     /**
      * Locality is a City Centre or Town Centre ZONE of another town or city locality.
      * 
      */
-    @XmlEnumValue("urbanCentre")
     URBAN_CENTRE("urbanCentre"),
-    @XmlEnumValue("district")
     DISTRICT("district"),
-    @XmlEnumValue("parish")
     PARISH("parish"),
 
     /**
      * Locality is a village.
      * 
      */
-    @XmlEnumValue("village")
     VILLAGE("village"),
 
     /**
      * Locality is a hamlet.
      * 
      */
-    @XmlEnumValue("hamlet")
     HAMLET("hamlet"),
 
     /**
      * Locality is a place of interest whose name is distinct from another locality.
      * 
      */
-    @XmlEnumValue("placeOfInterest")
     PLACE_OF_INTEREST("placeOfInterest"),
 
     /**
      * Locality is none of the other types.
      * 
      */
-    @XmlEnumValue("other")
     OTHER("other"),
 
     /**
      * Locality type is not yet specified.
      * 
      */
-    @XmlEnumValue("unrecorded")
     UNRECORDED("unrecorded");
     private final String value;
 

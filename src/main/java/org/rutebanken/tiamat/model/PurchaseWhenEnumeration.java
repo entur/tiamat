@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PurchaseWhenEnumeration")
-@XmlEnum
 public enum PurchaseWhenEnumeration {
 
-    @XmlEnumValue("timeOfTravelOnly")
     TIME_OF_TRAVEL_ONLY("timeOfTravelOnly"),
-    @XmlEnumValue("dayOfTravelOnly")
     DAY_OF_TRAVEL_ONLY("dayOfTravelOnly"),
-    @XmlEnumValue("untilPreviousDay")
     UNTIL_PREVIOUS_DAY("untilPreviousDay"),
-    @XmlEnumValue("advanceOnly")
     ADVANCE_ONLY("advanceOnly"),
-    @XmlEnumValue("advanceAndDayOfTravel")
     ADVANCE_AND_DAY_OF_TRAVEL("advanceAndDayOfTravel"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

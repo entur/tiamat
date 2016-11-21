@@ -59,12 +59,9 @@ public abstract class Link_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
     protected LinkTypeRefs_RelStructure types;
-    @XmlElement(name = "LineString", namespace = "http://www.opengis.net/gml/3.2")
     protected LineStringType lineString;
     protected Projections_RelStructure projections;
     protected PointsOnLink_RelStructure passingThrough;

@@ -64,15 +64,10 @@ public class PassengerStopAssignment_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "PassengerStopAssignmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PassengerStopAssignmentRefStructure> passengerStopAssignmentRef;
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElement(name = "QuayRef")
     protected QuayReference quayRef;
-    @XmlElement(name = "QuayName")
     protected MultilingualStringEntity quayName;
-    @XmlElement(name = "Label")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String label;

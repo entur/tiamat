@@ -48,7 +48,6 @@ public class SimpleFeature_VersionStructure
     extends GroupOfPoints_VersionStructure
 {
 
-    @XmlElementRef(name = "ZoneRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ZoneRefStructure> zoneRef;
 
     /**

@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccessModeEnumeration")
-@XmlEnum
 public enum AccessModeEnumeration {
 
-    @XmlEnumValue("foot")
     FOOT("foot"),
-    @XmlEnumValue("bicycle")
     BICYCLE("bicycle"),
-    @XmlEnumValue("boat")
     BOAT("boat"),
-    @XmlEnumValue("car")
     CAR("car"),
-    @XmlEnumValue("taxi")
     TAXI("taxi"),
-    @XmlEnumValue("shuttle")
     SHUTTLE("shuttle");
     private final String value;
 

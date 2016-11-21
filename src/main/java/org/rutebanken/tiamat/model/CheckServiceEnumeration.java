@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CheckServiceEnumeration")
-@XmlEnum
 public enum CheckServiceEnumeration {
 
-    @XmlEnumValue("selfService")
     SELF_SERVICE("selfService"),
-    @XmlEnumValue("counterService")
     COUNTER_SERVICE("counterService"),
-    @XmlEnumValue("anyService")
     ANY_SERVICE("anyService"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -58,23 +58,15 @@ public class AssistanceBookingService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlElement(name = "AssistanceAvailability", defaultValue = "available")
     @XmlSchemaType(name = "string")
     protected AssistanceAvailabilityEnumeration assistanceAvailability;
-    @XmlElement(name = "WheelchairBookingRequired")
     protected Boolean wheelchairBookingRequired;
-    @XmlElement(name = "BookingContact")
     protected ContactStructure bookingContact;
-    @XmlElement(name = "BookingArrangements")
     protected BookingArrangementsStructure bookingArrangements;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
-    @XmlElementRef(name = "TransportOrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "BookedObjectRef")
     protected VersionOfObjectRefStructure bookedObjectRef;
     protected NoticeAssignments_RelStructure noticeAssignmenrts;
 

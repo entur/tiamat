@@ -47,9 +47,6 @@ public class Timebands_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TimebandRef", type = TimebandRefStructure.class),
-        @XmlElement(name = "Timeband", type = Timeband_VersionedChildStructure.class)
     })
     protected List<Object> timebandRefOrTimeband;
 

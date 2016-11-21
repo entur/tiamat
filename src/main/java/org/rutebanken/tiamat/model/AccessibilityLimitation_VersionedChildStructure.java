@@ -58,32 +58,26 @@ public class AccessibilityLimitation_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "WheelchairAccess", required = true, defaultValue = "false")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration wheelchairAccess;
 
-    @XmlElement(name = "StepFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration stepFreeAccess;
 
-    @XmlElement(name = "EscalatorFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration escalatorFreeAccess;
 
-    @XmlElement(name = "LiftFreeAccess", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration liftFreeAccess;
 
-    @XmlElement(name = "AudibleSignalsAvailable", defaultValue = "false")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration audibleSignalsAvailable;
 
-    @XmlElement(name = "VisualSignsAvailable", defaultValue = "unknown")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration visualSignsAvailable;

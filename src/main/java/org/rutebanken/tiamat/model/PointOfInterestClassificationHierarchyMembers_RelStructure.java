@@ -45,7 +45,6 @@ public class PointOfInterestClassificationHierarchyMembers_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ClassificationHierarchyMember", required = true)
     protected List<PointOfInterestClassificationHierarchyMemberStructure> classificationHierarchyMember;
 
     /**

@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EmergencyServiceEnumeration")
-@XmlEnum
 public enum EmergencyServiceEnumeration {
 
-    @XmlEnumValue("police")
     POLICE("police"),
-    @XmlEnumValue("fire")
     FIRE("fire"),
-    @XmlEnumValue("firstAid")
     FIRST_AID("firstAid"),
-    @XmlEnumValue("sosPoint")
     SOS_POINT("sosPoint"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

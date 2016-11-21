@@ -47,9 +47,6 @@ public class Notices_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "NoticeRef", type = NoticeRefStructure.class),
-        @XmlElement(name = "Notice", type = Notice.class)
     })
     protected List<Object> noticeRefOrNotice;
 

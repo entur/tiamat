@@ -46,7 +46,6 @@ public class VersionFrameRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "VersionFrameRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends VersionFrameRefStructure>> versionFrameRef;
 
     /**

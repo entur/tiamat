@@ -47,9 +47,6 @@ public class VehiclesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TrainElement", type = TrainElement.class),
-        @XmlElement(name = "Vehicle", type = Vehicle.class)
     })
     protected List<DataManagedObjectStructure> trainElementOrVehicle;
 

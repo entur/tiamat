@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ContinuousModeEnumeration")
-@XmlEnum
 public enum ContinuousModeEnumeration {
 
-    @XmlEnumValue("walk")
     WALK("walk"),
-    @XmlEnumValue("car")
     CAR("car"),
-    @XmlEnumValue("taxi")
     TAXI("taxi"),
-    @XmlEnumValue("cycle")
     CYCLE("cycle"),
-    @XmlEnumValue("drt")
     DRT("drt"),
-    @XmlEnumValue("movingWalkway")
     MOVING_WALKWAY("movingWalkway"),
-    @XmlEnumValue("through")
     THROUGH("through");
     private final String value;
 

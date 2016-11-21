@@ -53,40 +53,28 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class TransportModeStructure {
 
-    @XmlElement(name = "TransportMode", required = true)
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration transportMode;
-    @XmlElement(name = "AirSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected AirSubmodeEnumeration airSubmode;
-    @XmlElement(name = "BusSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected BusSubmodeEnumeration busSubmode;
-    @XmlElement(name = "CoachSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected CoachSubmodeEnumeration coachSubmode;
-    @XmlElement(name = "FunicularSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected FunicularSubmodeEnumeration funicularSubmode;
-    @XmlElement(name = "MetroSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected MetroSubmodeEnumeration metroSubmode;
-    @XmlElement(name = "TramSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected TramSubmodeEnumeration tramSubmode;
-    @XmlElement(name = "TelecabinSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected TelecabinSubmodeEnumeration telecabinSubmode;
-    @XmlElement(name = "RailSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected RailSubmodeEnumeration railSubmode;
-    @XmlElement(name = "WaterSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected WaterSubmodeEnumeration waterSubmode;
-    @XmlElement(name = "TaxiSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected TaxiSubmodeEnumeration taxiSubmode;
-    @XmlElement(name = "SelfDriveSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     protected SelfDriveSubmodeEnumeration selfDriveSubmode;
 

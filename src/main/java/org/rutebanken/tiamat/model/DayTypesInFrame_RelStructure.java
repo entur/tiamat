@@ -46,7 +46,6 @@ public class DayTypesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "DayType_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends DataManagedObjectStructure>> dayType_;
 
     /**

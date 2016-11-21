@@ -49,9 +49,7 @@ public class JourneyPatternHeadway_VersionedChildStructure
     extends JourneyHeadway_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "JourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends JourneyPatternRefStructure> journeyPatternRef;
-    @XmlElementRef(name = "TimingPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends TimingPointRefStructure> timingPointRef;
 
     /**

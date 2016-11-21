@@ -45,7 +45,6 @@ public class StopPlacesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "StopPlace", required = true)
     protected List<StopPlace> stopPlace;
 
     /**

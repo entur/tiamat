@@ -51,13 +51,9 @@ public class VehicleManoeuvringRequirement_VersionStructure
     extends VehicleRequirement_VersionStructure
 {
 
-    @XmlElement(name = "Reversible", defaultValue = "true")
     protected Boolean reversible;
-    @XmlElement(name = "MinimumTurningCircle")
     protected BigDecimal minimumTurningCircle;
-    @XmlElement(name = "MinimumOvertakingWidth")
     protected BigDecimal minimumOvertakingWidth;
-    @XmlElement(name = "MinimumLength")
     protected BigDecimal minimumLength;
 
     /**

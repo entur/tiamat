@@ -49,11 +49,8 @@ public class Zone_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "ZoneRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ZoneRefStructure> zoneRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "TypeOfZoneRef")
     protected TypeOfZoneRefStructure typeOfZoneRef;
 
     /**

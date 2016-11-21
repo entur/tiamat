@@ -68,50 +68,28 @@ public class TicketingEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "VehicleModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<VehicleModeEnumeration> vehicleModes;
-    @XmlElement(name = "TicketMachines")
     protected Boolean ticketMachines;
-    @XmlElement(name = "NumberOfMachines")
     protected BigInteger numberOfMachines;
-    @XmlElement(name = "HeightOfMachineInterface")
     protected BigDecimal heightOfMachineInterface;
-    @XmlList
-    @XmlElement(name = "TicketingFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingFacilityEnumeration> ticketingFacilityList;
-    @XmlList
-    @XmlElement(name = "TicketingServiceFacilityList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingServiceFacilityEnumeration> ticketingServiceFacilityList;
-    @XmlElement(name = "TicketOffice")
     protected Boolean ticketOffice;
-    @XmlElement(name = "TicketCounter")
     protected Boolean ticketCounter;
-    @XmlElement(name = "NumberOfTills")
     protected BigInteger numberOfTills;
-    @XmlElement(name = "QueueManagement")
     @XmlSchemaType(name = "normalizedString")
     protected QueueManagementEnumeration queueManagement;
-    @XmlList
-    @XmlElement(name = "PaymentMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PaymentMethodEnumeration> paymentMethods;
-    @XmlList
-    @XmlElement(name = "TicketTypesAvailable")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketTypeEnumeration> ticketTypesAvailable;
-    @XmlList
-    @XmlElement(name = "ScopeOfTicketsAvailable")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketingFacilityEnumeration> scopeOfTicketsAvailable;
-    @XmlElement(name = "LowCounterAccess")
     protected Boolean lowCounterAccess;
-    @XmlElement(name = "HeightOfLowCounter")
     protected BigDecimal heightOfLowCounter;
-    @XmlElement(name = "InductionLoops")
     protected Boolean inductionLoops;
 
     /**

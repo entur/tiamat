@@ -48,9 +48,6 @@ public class TypesOfValueInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "ValueSet", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "TypeOfValue", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<? extends DataManagedObjectStructure>> valueSetOrTypeOfValue;
 

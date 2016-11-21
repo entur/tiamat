@@ -53,17 +53,13 @@ public class TypeOfFrame_ValueStructure
     extends TypeOfEntity_VersionStructure
 {
 
-    @XmlElement(name = "TypeOfValidityRef")
     protected TypeOfValidityRefStructure typeOfValidityRef;
-    @XmlElement(name = "FrameClassRef")
     protected ClassRefStructure frameClassRef;
     protected ClassesInRepository_RelStructure classes;
     protected TypesOfFrame_RelStructure includes;
-    @XmlElement(name = "LocatingSystemRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String locatingSystemRef;
-    @XmlElement(name = "ModificationSet")
     @XmlSchemaType(name = "NMTOKEN")
     protected ModificationSetEnumeration modificationSet;
 

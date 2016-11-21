@@ -48,13 +48,9 @@ public class BorderPoint_ValueStructure
     extends TimingPoint_VersionStructure
 {
 
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "GroupOfOperatorsRef")
     protected GroupOfOperatorsRefStructure groupOfOperatorsRef;
-    @XmlElement(name = "GroupOfOperators")
     protected GroupOfOperators groupOfOperators;
 
     /**

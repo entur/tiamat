@@ -45,7 +45,6 @@ public class AllowedLineDirectionRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "AllowedLineDirectionRef", required = true)
     protected List<AllowedLineDirectionRefStructure> allowedLineDirectionRef;
 
     /**

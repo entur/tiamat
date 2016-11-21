@@ -46,7 +46,6 @@ public class NetworkRestrictionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "NetworkRestriction", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends NetworkRestriction_VersionStructure>> networkRestriction;
 
     /**

@@ -69,48 +69,27 @@ public class LiftEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Depth")
     protected BigDecimal depth;
-    @XmlElement(name = "MaximumLoad")
     protected BigDecimal maximumLoad;
-    @XmlElement(name = "WheelchairPasssable")
     protected Boolean wheelchairPasssable;
-    @XmlElement(name = "WheelchairTurningCircle")
     protected BigDecimal wheelchairTurningCircle;
-    @XmlElement(name = "InternalWidth")
     protected BigDecimal internalWidth;
-    @XmlElement(name = "HandrailType")
     @XmlSchemaType(name = "string")
     protected HandrailEnumeration handrailType;
-    @XmlElement(name = "HandrailHeight")
     protected BigDecimal handrailHeight;
-    @XmlElement(name = "LowerHandrailHeight")
     protected BigDecimal lowerHandrailHeight;
-    @XmlElement(name = "CallButtonHeight")
     protected BigDecimal callButtonHeight;
-    @XmlElement(name = "DirectionButtonHeight")
     protected BigDecimal directionButtonHeight;
-    @XmlElement(name = "RaisedButtons")
     protected Boolean raisedButtons;
-    @XmlElement(name = "BrailleButtons")
     protected Boolean brailleButtons;
-    @XmlElement(name = "ThroughLoader")
     protected Boolean throughLoader;
-    @XmlElement(name = "MirrorOnOppositeSide")
     protected Boolean mirrorOnOppositeSide;
-    @XmlElement(name = "Attendant")
     protected Boolean attendant;
-    @XmlElement(name = "Automatic")
     protected Boolean automatic;
-    @XmlElement(name = "AlarmButton")
     protected Boolean alarmButton;
-    @XmlElement(name = "TactileActuators")
     protected Boolean tactileActuators;
-    @XmlElement(name = "AccousticAnnouncements")
     protected Boolean accousticAnnouncements;
-    @XmlElement(name = "SignageToLift")
     protected Boolean signageToLift;
-    @XmlElement(name = "SuitableForCycles")
     protected Boolean suitableForCycles;
 
     /**

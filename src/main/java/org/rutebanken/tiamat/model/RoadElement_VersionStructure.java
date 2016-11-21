@@ -48,9 +48,7 @@ public class RoadElement_VersionStructure
     extends InfrastructureLink_VersionStructure
 {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected RoadPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected RoadPointRefStructure toPointRef;
 
     /**

@@ -41,36 +41,21 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StopTypeEnumeration")
-@XmlEnum
 public enum StopTypeEnumeration {
 
-    @XmlEnumValue("onstreetBus")
     ONSTREET_BUS("onstreetBus"),
-    @XmlEnumValue("onstreetTram")
     ONSTREET_TRAM("onstreetTram"),
-    @XmlEnumValue("airport")
     AIRPORT("airport"),
-    @XmlEnumValue("railStation")
     RAIL_STATION("railStation"),
-    @XmlEnumValue("metroStation")
     METRO_STATION("metroStation"),
-    @XmlEnumValue("busStation")
     BUS_STATION("busStation"),
-    @XmlEnumValue("coachStation")
     COACH_STATION("coachStation"),
-    @XmlEnumValue("tramStation")
     TRAM_STATION("tramStation"),
-    @XmlEnumValue("harbourPort")
     HARBOUR_PORT("harbourPort"),
-    @XmlEnumValue("ferryPort")
     FERRY_PORT("ferryPort"),
-    @XmlEnumValue("ferryStop")
     FERRY_STOP("ferryStop"),
-    @XmlEnumValue("liftStation")
     LIFT_STATION("liftStation"),
-    @XmlEnumValue("vehicleRailInterchange")
     VEHICLE_RAIL_INTERCHANGE("vehicleRailInterchange"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

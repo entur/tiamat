@@ -54,13 +54,9 @@ public class PointProjection_VersionStructure
     extends Projection_VersionStructure
 {
 
-    @XmlElement(name = "ProjectedPointRef")
     protected PointRefStructure projectedPointRef;
-    @XmlElement(name = "ProjectToPointRef")
     protected PointRefStructure projectToPointRef;
-    @XmlElement(name = "ProjectToLinkRef")
     protected LinkRefStructure projectToLinkRef;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
 
     /**

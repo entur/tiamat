@@ -52,9 +52,6 @@ public class NoticeAssignments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "NoticeAssignment_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "NoticeAssignmentView", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<JAXBElement<?>> noticeAssignment_OrNoticeAssignmentView;
 

@@ -53,12 +53,10 @@ public class RoutingConstraintZone_VersionStructure
     extends Zone_VersionStructure
 {
 
-    @XmlElement(name = "ZoneUse")
     @XmlSchemaType(name = "string")
     protected ZoneUseEnumeration zoneUse;
     protected PointsInJourneyPattern_RelStructure pointsInPattern;
     protected LineRefs_RelStructure lines;
-    @XmlElementRef(name = "GroupOfLinesRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends GroupOfLinesRefStructure> groupOfLinesRef;
 
     /**

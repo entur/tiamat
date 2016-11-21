@@ -47,9 +47,6 @@ public class Routes_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "RouteRef", type = RouteRefStructure.class),
-        @XmlElement(name = "Route", type = Route.class)
     })
     protected List<Object> routeRefOrRoute;
 

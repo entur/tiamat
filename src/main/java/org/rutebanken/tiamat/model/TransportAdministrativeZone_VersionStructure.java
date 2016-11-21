@@ -51,8 +51,6 @@ public class TransportAdministrativeZone_VersionStructure
     extends AdministrativeZone_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "VehicleModes", defaultValue = "all")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AllVehicleModesOfTransportEnumeration> vehicleModes;
 

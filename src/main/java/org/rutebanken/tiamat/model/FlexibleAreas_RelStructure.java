@@ -47,9 +47,6 @@ public class FlexibleAreas_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "FlexibleAreaRef", type = FlexibleAreaRefStructure.class),
-        @XmlElement(name = "FlexibleArea", type = FlexibleArea.class)
     })
     protected List<Object> flexibleAreaRefOrFlexibleArea;
 

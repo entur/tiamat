@@ -52,9 +52,7 @@ public class JourneyWaitTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "TimingPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends TimingPointRefStructure> timingPointRef;
-    @XmlElement(name = "WaitTime", required = true)
     protected Duration waitTime;
 
     /**

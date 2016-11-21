@@ -60,25 +60,16 @@ public abstract class StairEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Depth")
     protected BigDecimal depth;
-    @XmlElement(name = "NumberOfSteps")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger numberOfSteps;
-    @XmlElement(name = "StepHeight")
     protected BigDecimal stepHeight;
-    @XmlElement(name = "StepColourContrast")
     protected Boolean stepColourContrast;
-    @XmlElement(name = "HandrailType")
     @XmlSchemaType(name = "string")
     protected HandrailEnumeration handrailType;
-    @XmlElement(name = "HandrailHeight")
     protected BigDecimal handrailHeight;
-    @XmlElement(name = "LowerHandrailHeight")
     protected BigDecimal lowerHandrailHeight;
-    @XmlElement(name = "TopEnd")
     protected StairEndStructure topEnd;
-    @XmlElement(name = "BottomEnd")
     protected StairEndStructure bottomEnd;
 
     /**

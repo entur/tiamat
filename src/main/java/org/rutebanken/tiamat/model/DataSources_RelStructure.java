@@ -47,9 +47,6 @@ public class DataSources_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "DataSourceRef", type = DataSourceRefStructure.class),
-        @XmlElement(name = "DataSource", type = DataSource.class)
     })
     protected List<Object> dataSourceRefOrDataSource;
 

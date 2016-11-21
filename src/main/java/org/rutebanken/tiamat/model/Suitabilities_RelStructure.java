@@ -45,7 +45,6 @@ public class Suitabilities_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Suitability", required = true)
     protected List<Suitability> suitability;
 
     /**

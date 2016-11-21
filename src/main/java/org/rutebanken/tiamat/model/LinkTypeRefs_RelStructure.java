@@ -45,7 +45,6 @@ public class LinkTypeRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfLinkRef", required = true)
     protected List<TypeOfLinkRefStructure> typeOfLinkRef;
 
     /**

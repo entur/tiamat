@@ -51,9 +51,6 @@ public class CheckConstraintDelays_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "CheckConstraintDelayRef", type = CheckConstraintDelayRefStructure.class),
-        @XmlElement(name = "CheckConstraintDelay", type = CheckConstraintDelay.class)
     })
     protected List<Object> checkConstraintDelayRefOrCheckConstraintDelay;
 

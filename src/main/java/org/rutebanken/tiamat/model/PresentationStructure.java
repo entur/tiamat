@@ -70,27 +70,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class PresentationStructure {
 
-    @XmlElement(name = "Colour", type = String.class)
     @XmlJavaTypeAdapter(HexBinaryAdapter.class)
     @XmlSchemaType(name = "hexBinary")
     protected byte[] colour;
-    @XmlElement(name = "ColourName")
     protected String colourName;
-    @XmlElement(name = "TextColour", type = String.class)
     @XmlJavaTypeAdapter(HexBinaryAdapter.class)
     @XmlSchemaType(name = "hexBinary")
     protected byte[] textColour;
-    @XmlElement(name = "TextColourName")
     protected String textColourName;
-    @XmlElement(name = "TextFont")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String textFont;
-    @XmlElement(name = "TextFontName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String textFontName;
-    @XmlElement(name = "TextLanguage")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "language")
     protected String textLanguage;

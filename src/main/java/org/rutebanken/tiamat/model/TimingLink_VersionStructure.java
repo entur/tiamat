@@ -51,14 +51,10 @@ public class TimingLink_VersionStructure
     extends Link_VersionStructure
 {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected TimingPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected TimingPointRefStructure toPointRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
-    @XmlElement(name = "OperationalContextRef")
     protected OperationalContextRefStructure operationalContextRef;
 
     /**

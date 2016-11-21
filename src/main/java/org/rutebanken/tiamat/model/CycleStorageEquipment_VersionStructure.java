@@ -52,14 +52,10 @@ public class CycleStorageEquipment_VersionStructure
     extends PlaceEquipment_VersionStructure
 {
 
-    @XmlElement(name = "NumberOfSpaces")
     protected BigInteger numberOfSpaces;
-    @XmlElement(name = "CycleStorageType")
     @XmlSchemaType(name = "normalizedString")
     protected CycleStorageEnumeration cycleStorageType;
-    @XmlElement(name = "Cage")
     protected Boolean cage;
-    @XmlElement(name = "Covered")
     protected Boolean covered;
 
     /**

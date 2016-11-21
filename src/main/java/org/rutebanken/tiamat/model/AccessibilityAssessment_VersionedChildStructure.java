@@ -54,7 +54,6 @@ public class AccessibilityAssessment_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "MobilityImpairedAccess", required = true)
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess;
@@ -65,7 +64,6 @@ public class AccessibilityAssessment_VersionedChildStructure
     @Transient
     protected Suitabilities_RelStructure suitabilities;
 
-    @XmlElement(name = "Comment")
     @Transient
     protected MultilingualStringEntity comment;
 

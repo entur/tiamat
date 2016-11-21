@@ -47,9 +47,6 @@ public class Accommodations_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AccommodationRef", type = AccommodationRefStructure.class),
-        @XmlElement(name = "Accommodation", type = Accommodation.class)
     })
     protected List<Object> accommodationRefOrAccommodation;
 

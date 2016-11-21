@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "GatedEnumeration")
-@XmlEnum
 public enum GatedEnumeration {
 
-    @XmlEnumValue("gatedArea")
     GATED_AREA("gatedArea"),
-    @XmlEnumValue("openArea")
     OPEN_AREA("openArea"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

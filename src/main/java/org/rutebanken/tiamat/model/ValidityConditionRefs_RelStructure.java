@@ -46,7 +46,6 @@ public class ValidityConditionRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "ValidityConditionRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends ValidityConditionRefStructure>> validityConditionRef;
 
     /**

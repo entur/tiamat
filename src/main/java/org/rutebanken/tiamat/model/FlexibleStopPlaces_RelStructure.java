@@ -47,9 +47,6 @@ public class FlexibleStopPlaces_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "FlexibleStopPlaceRef", type = FlexibleStopPlaceRefStructure.class),
-        @XmlElement(name = "FlexibleStopPlace", type = FlexibleStopPlace.class)
     })
     protected List<Object> flexibleStopPlaceRefOrFlexibleStopPlace;
 

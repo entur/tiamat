@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "GroupBookingEnumeration")
-@XmlEnum
 public enum GroupBookingEnumeration {
 
-    @XmlEnumValue("groupsAllowed")
     GROUPS_ALLOWED("groupsAllowed"),
-    @XmlEnumValue("groupsNotAllowed")
     GROUPS_NOT_ALLOWED("groupsNotAllowed"),
-    @XmlEnumValue("groupsAllowedWithReservation")
     GROUPS_ALLOWED_WITH_RESERVATION("groupsAllowedWithReservation"),
-    @XmlEnumValue("groupBookingsRestricted")
     GROUP_BOOKINGS_RESTRICTED("groupBookingsRestricted"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

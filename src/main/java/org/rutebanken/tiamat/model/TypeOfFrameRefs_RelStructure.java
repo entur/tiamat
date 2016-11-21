@@ -45,7 +45,6 @@ public class TypeOfFrameRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfFrameRef", required = true)
     protected List<TypeOfFrameRefStructure> typeOfFrameRef;
 
     /**

@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LineSectionPointTypeEnumeration")
-@XmlEnum
 public enum LineSectionPointTypeEnumeration {
 
-    @XmlEnumValue("normal")
     NORMAL("normal"),
-    @XmlEnumValue("interchange")
     INTERCHANGE("interchange"),
-    @XmlEnumValue("majorInterchange")
     MAJOR_INTERCHANGE("majorInterchange"),
-    @XmlEnumValue("terminus")
     TERMINUS("terminus"),
-    @XmlEnumValue("majorTerminus")
     MAJOR_TERMINUS("majorTerminus"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

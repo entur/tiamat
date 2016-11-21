@@ -50,21 +50,17 @@ import java.math.BigDecimal;
 @MappedSuperclass
 public class EquipmentPositionStructure extends DataManagedObjectStructure
 {
-    @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 
-    @XmlElement(name = "Description")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity description;
 
     @Embedded
     protected PointRefStructure referencePointRef;
 
-    @XmlElement(name = "XOffset")
     protected BigDecimal xOffset;
 
-    @XmlElement(name = "YOffset")
     protected BigDecimal yOffset;
 
     /**

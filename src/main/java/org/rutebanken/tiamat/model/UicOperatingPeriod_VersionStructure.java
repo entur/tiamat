@@ -54,12 +54,9 @@ public class UicOperatingPeriod_VersionStructure
     extends OperatingPeriod_VersionStructure
 {
 
-    @XmlElement(name = "ValidDayBits", required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String validDayBits;
-    @XmlList
-    @XmlElement(name = "DaysOfWeek")
     @XmlSchemaType(name = "anySimpleType")
     protected List<DayOfWeekEnumeration> daysOfWeek;
 

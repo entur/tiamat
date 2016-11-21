@@ -45,7 +45,6 @@ public class JourneyHeadways_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "JourneyHeadway", required = true)
     protected List<JourneyHeadway> journeyHeadway;
 
     /**

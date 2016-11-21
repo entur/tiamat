@@ -49,9 +49,7 @@ public class ActivatedEquipment_VersionStructure
     extends Equipment_VersionStructure
 {
 
-    @XmlElement(name = "TrafficControlPointRef")
     protected TrafficControlPointRefStructure trafficControlPointRef;
-    @XmlElement(name = "TypeOfActivationRef")
     protected TypeOfActivationRefStructure typeOfActivationRef;
     protected ActivationAssignments_RelStructure assignments;
 

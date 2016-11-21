@@ -64,39 +64,25 @@ public class ScheduledStopPoint_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "TypeOfPointRef")
     protected TypeOfPointRefStructure typeOfPointRef;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "ShortStopCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortStopCode;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ExternalStopPointRef")
     protected ExternalObjectRefStructure externalStopPointRef;
-    @XmlElement(name = "Url")
     @XmlSchemaType(name = "anyURI")
     protected String url;
-    @XmlElement(name = "StopType")
     @XmlSchemaType(name = "string")
     protected StopTypeEnumeration stopType;
-    @XmlElement(name = "CompassBearing")
     protected Float compassBearing;
-    @XmlElement(name = "Presentation")
     protected PresentationStructure presentation;
 
     /**

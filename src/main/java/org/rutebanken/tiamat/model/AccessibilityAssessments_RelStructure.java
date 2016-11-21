@@ -45,7 +45,6 @@ public class AccessibilityAssessments_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "AccessibilityAssessment", required = true)
     protected List<AccessibilityAssessment> accessibilityAssessment;
 
     /**

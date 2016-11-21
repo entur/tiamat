@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ServicedOrganisationTypeEnumeration")
-@XmlEnum
 public enum ServicedOrganisationTypeEnumeration {
 
-    @XmlEnumValue("school")
     SCHOOL("school"),
-    @XmlEnumValue("college")
     COLLEGE("college"),
-    @XmlEnumValue("university")
     UNIVERSITY("university"),
-    @XmlEnumValue("militaryBase")
     MILITARY_BASE("militaryBase"),
-    @XmlEnumValue("works")
     WORKS("works"),
-    @XmlEnumValue("retaiilCentre")
     RETAIIL_CENTRE("retaiilCentre"),
-    @XmlEnumValue("hospital")
     HOSPITAL("hospital"),
-    @XmlEnumValue("governmentOffice")
     GOVERNMENT_OFFICE("governmentOffice"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

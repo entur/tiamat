@@ -46,7 +46,6 @@ public class ResponsibilitySet_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
     protected ResponsibilityRoleAssignments_RelStructure roles;
 

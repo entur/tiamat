@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "VehicleOrientationEnumeration")
-@XmlEnum
 public enum VehicleOrientationEnumeration {
 
-    @XmlEnumValue("forwards")
     FORWARDS("forwards"),
-    @XmlEnumValue("backwards")
     BACKWARDS("backwards"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

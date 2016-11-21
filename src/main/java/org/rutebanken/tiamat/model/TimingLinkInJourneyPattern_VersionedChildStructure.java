@@ -48,7 +48,6 @@ public class TimingLinkInJourneyPattern_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElement(name = "TimingLinkRef", required = true)
     protected TimingLinkRefStructure timingLinkRef;
     protected JourneyRunTimes_RelStructure runTimes;
 

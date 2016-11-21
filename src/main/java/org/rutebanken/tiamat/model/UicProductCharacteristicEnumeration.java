@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "UicProductCharacteristicEnumeration")
-@XmlEnum
 public enum UicProductCharacteristicEnumeration {
 
-    @XmlEnumValue("tariffCommunVoyageurs")
     TARIFF_COMMUN_VOYAGEURS("tariffCommunVoyageurs"),
-    @XmlEnumValue("allIInclusivePrice")
     ALL_I_INCLUSIVE_PRICE("allIInclusivePrice"),
-    @XmlEnumValue("eastWestTariff")
     EAST_WEST_TARIFF("eastWestTariff"),
-    @XmlEnumValue("trainWithTcvAndMarketPrice")
     TRAIN_WITH_TCV_AND_MARKET_PRICE("trainWithTcvAndMarketPrice"),
-    @XmlEnumValue("noPublishedTariff")
     NO_PUBLISHED_TARIFF("noPublishedTariff");
     private final String value;
 

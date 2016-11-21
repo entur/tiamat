@@ -45,7 +45,6 @@ public class GroupOfLinks_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfLinks", required = true)
     protected List<GroupOfLinks> groupOfLinks;
 
     /**

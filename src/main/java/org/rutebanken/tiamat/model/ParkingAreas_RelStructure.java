@@ -47,9 +47,6 @@ public class ParkingAreas_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ParkingAreaRef", type = ParkingAreaRefStructure.class),
-        @XmlElement(name = "ParkingArea", type = ParkingArea.class)
     })
     protected List<Object> parkingAreaRefOrParkingArea;
 

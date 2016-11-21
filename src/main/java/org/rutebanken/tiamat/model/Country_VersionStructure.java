@@ -49,9 +49,7 @@ public class Country_VersionStructure
     extends Place_VersionStructure
 {
 
-    @XmlElement(name = "UicCode")
     protected PrivateCodeStructure uicCode;
-    @XmlElement(name = "CountryName")
     protected MultilingualStringEntity countryName;
     protected AlternativeNames_RelStructure alternativeNames;
 

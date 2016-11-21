@@ -45,7 +45,6 @@ public class SchematicMapMembers_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "SchematicMapMember", required = true)
     protected List<SchematicMapMember_VersionedChildStructure> schematicMapMember;
 
     /**

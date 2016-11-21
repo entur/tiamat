@@ -45,11 +45,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class TelephoneContactStructure {
 
-    @XmlElement(name = "TelNationalNumber", required = true)
     protected String telNationalNumber;
-    @XmlElement(name = "TelExtensionNumber")
     protected String telExtensionNumber;
-    @XmlElement(name = "TelCountryCode")
     protected String telCountryCode;
 
     /**

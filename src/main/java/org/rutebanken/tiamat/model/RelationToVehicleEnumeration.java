@@ -33,18 +33,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RelationToVehicleEnumeration")
-@XmlEnum
 public enum RelationToVehicleEnumeration {
 
-    @XmlEnumValue("frontLeft")
     FRONT_LEFT("frontLeft"),
-    @XmlEnumValue("frontRight")
     FRONT_RIGHT("frontRight"),
-    @XmlEnumValue("backRight")
     BACK_RIGHT("backRight"),
-    @XmlEnumValue("driverLeft")
     DRIVER_LEFT("driverLeft"),
-    @XmlEnumValue("driverRight")
     DRIVER_RIGHT("driverRight");
     private final String value;
 

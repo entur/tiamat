@@ -50,13 +50,10 @@ public class AccessSpace_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {
 
-    @XmlElement(name = "AccessSpaceType")
     @XmlSchemaType(name = "string")
     protected AccessSpaceTypeEnumeration accessSpaceType;
-    @XmlElement(name = "PassageType")
     @XmlSchemaType(name = "string")
     protected PassageTypeEnumeration passageType;
-    @XmlElement(name = "ParentAccessSpaceRef")
     protected AccessSpaceRefStructure parentAccessSpaceRef;
 
     /**

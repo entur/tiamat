@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TypeOfFuelEnumeration")
-@XmlEnum
 public enum TypeOfFuelEnumeration {
 
-    @XmlEnumValue("petrol")
     PETROL("petrol"),
-    @XmlEnumValue("diesel")
     DIESEL("diesel"),
-    @XmlEnumValue("naturalGas")
     NATURAL_GAS("naturalGas"),
-    @XmlEnumValue("biodiesel")
     BIODIESEL("biodiesel"),
-    @XmlEnumValue("electricity")
     ELECTRICITY("electricity"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

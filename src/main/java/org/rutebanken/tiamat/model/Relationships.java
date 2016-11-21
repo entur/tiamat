@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Relationships {
 
-    @XmlElement(name = "ClassRelationshipInFrame", required = true)
     protected List<ClassRelationshipInFrameStructure> classRelationshipInFrame;
 
     /**

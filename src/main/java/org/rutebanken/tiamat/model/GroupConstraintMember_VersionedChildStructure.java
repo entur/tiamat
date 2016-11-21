@@ -47,11 +47,8 @@ public class GroupConstraintMember_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "PurposeOfGroupingRef")
     protected PurposeOfGroupingRefStructure purposeOfGroupingRef;
-    @XmlElement(name = "MemberClassRef", required = true)
     protected ClassRefStructure memberClassRef;
-    @XmlElement(name = "MemberTypeOfValueRef")
     protected TypeOfValueRefStructure memberTypeOfValueRef;
 
     /**

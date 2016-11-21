@@ -58,29 +58,20 @@ public class PathJunction_VersionStructure
     extends Point_VersionStructure
 {
 
-    @XmlElement(name = "ParentZoneRef")
     protected ZoneRefStructure parentZoneRef;
-    @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
     protected PublicUseEnumeration publicUse;
-    @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
     protected CoveredEnumeration covered;
-    @XmlElement(name = "Gated")
     @XmlSchemaType(name = "string")
     protected GatedEnumeration gated;
-    @XmlElement(name = "Lighting", defaultValue = "wellLit")
     @XmlSchemaType(name = "normalizedString")
     protected LightingEnumeration lighting;
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
-    @XmlElement(name = "PersonCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger personCapacity;
     protected SiteFacilitySets_RelStructure facilities;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "SiteComponentRef")
     protected SiteComponentRefStructure siteComponentRef;
 
     /**

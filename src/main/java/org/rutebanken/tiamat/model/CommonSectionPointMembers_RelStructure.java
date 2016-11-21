@@ -46,7 +46,6 @@ public class CommonSectionPointMembers_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "CommonSectionPointMember", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends CommonSectionPointMember_VersionedChildStructure>> commonSectionPointMember;
 
     /**

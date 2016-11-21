@@ -50,12 +50,9 @@ public class Direction_ValueStructure
     extends TypeOfValue_VersionStructure
 {
 
-    @XmlElement(name = "ExternalDirectionRef")
     protected ExternalObjectRefStructure externalDirectionRef;
-    @XmlElement(name = "DirectionType", defaultValue = "outbound")
     @XmlSchemaType(name = "normalizedString")
     protected DirectionTypeEnumeration directionType;
-    @XmlElement(name = "OppositeDIrectionRef")
     protected DirectionRefStructure oppositeDIrectionRef;
 
     /**

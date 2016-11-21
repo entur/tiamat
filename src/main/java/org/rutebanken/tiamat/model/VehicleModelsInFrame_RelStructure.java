@@ -45,7 +45,6 @@ public class VehicleModelsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "VehicleModel", required = true)
     protected List<VehicleModel> vehicleModel;
 
     /**

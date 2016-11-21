@@ -45,11 +45,8 @@ public class PointOfInterestClassificationHierarchyMemberStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "PointOfInterestHierarchyRef")
     protected PointOfInterestHierarchyRefStructure pointOfInterestHierarchyRef;
-    @XmlElement(name = "ParentClassificationRef", required = true)
     protected PointOfInterestClassificationRefStructure parentClassificationRef;
-    @XmlElement(name = "PointOfInterestClassificationRef", required = true)
     protected PointOfInterestClassificationRefStructure pointOfInterestClassificationRef;
 
     /**

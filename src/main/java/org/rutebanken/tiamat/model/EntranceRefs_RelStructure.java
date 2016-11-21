@@ -46,7 +46,6 @@ public class EntranceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "EntranceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends EntranceRefStructure>> entranceRef;
 
     /**

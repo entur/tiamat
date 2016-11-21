@@ -47,7 +47,6 @@ public class OrganisationalUnit_VersionStructure
     extends OrganisationPart_VersionStructure
 {
 
-    @XmlElement(name = "DepartmentRef")
     protected DepartmentRefStructure departmentRef;
 
     /**

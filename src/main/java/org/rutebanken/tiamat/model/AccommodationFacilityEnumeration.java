@@ -44,42 +44,24 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccommodationFacilityEnumeration")
-@XmlEnum
 public enum AccommodationFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("seating")
     SEATING("seating"),
-    @XmlEnumValue("sleeper")
     SLEEPER("sleeper"),
-    @XmlEnumValue("singleSleeper")
     SINGLE_SLEEPER("singleSleeper"),
-    @XmlEnumValue("doubleSleeper")
     DOUBLE_SLEEPER("doubleSleeper"),
-    @XmlEnumValue("specialSleeper")
     SPECIAL_SLEEPER("specialSleeper"),
-    @XmlEnumValue("couchette")
     COUCHETTE("couchette"),
-    @XmlEnumValue("singleCouchette")
     SINGLE_COUCHETTE("singleCouchette"),
-    @XmlEnumValue("doubleCouchette")
     DOUBLE_COUCHETTE("doubleCouchette"),
-    @XmlEnumValue("specialSeating")
     SPECIAL_SEATING("specialSeating"),
-    @XmlEnumValue("recliningSeats")
     RECLINING_SEATS("recliningSeats"),
-    @XmlEnumValue("babyCompartment")
     BABY_COMPARTMENT("babyCompartment"),
-    @XmlEnumValue("familyCarriage")
     FAMILY_CARRIAGE("familyCarriage"),
-    @XmlEnumValue("recreationArea")
     RECREATION_AREA("recreationArea"),
-    @XmlEnumValue("panoramaCoach")
     PANORAMA_COACH("panoramaCoach"),
-    @XmlEnumValue("pullmanCoach")
     PULLMAN_COACH("pullmanCoach"),
-    @XmlEnumValue("standing")
     STANDING("standing");
     private final String value;
 

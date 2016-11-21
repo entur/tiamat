@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EquipmentStatusEnumeration")
-@XmlEnum
 public enum EquipmentStatusEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("available")
     AVAILABLE("available"),
-    @XmlEnumValue("notAvailable")
     NOT_AVAILABLE("notAvailable");
     private final String value;
 

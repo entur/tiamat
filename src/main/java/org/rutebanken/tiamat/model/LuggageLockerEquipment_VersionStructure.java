@@ -54,15 +54,10 @@ public class LuggageLockerEquipment_VersionStructure
     extends SiteEquipment_VersionStructure
 {
 
-    @XmlElement(name = "NumberOfLockers")
     protected BigInteger numberOfLockers;
-    @XmlElement(name = "LockerWidth")
     protected BigDecimal lockerWidth;
-    @XmlElement(name = "LockerHeight")
     protected BigDecimal lockerHeight;
-    @XmlElement(name = "LockerDepth")
     protected BigDecimal lockerDepth;
-    @XmlElement(name = "LockerType")
     @XmlSchemaType(name = "normalizedString")
     protected LockerTypeEnumeration lockerType;
 

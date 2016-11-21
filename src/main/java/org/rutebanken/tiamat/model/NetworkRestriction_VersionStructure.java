@@ -49,7 +49,6 @@ public abstract class NetworkRestriction_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "Restricted", defaultValue = "true")
     protected boolean restricted;
 
     /**

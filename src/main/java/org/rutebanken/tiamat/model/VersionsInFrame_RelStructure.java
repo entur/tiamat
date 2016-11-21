@@ -45,7 +45,6 @@ public class VersionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Version", required = true)
     protected List<Version> version;
 
     /**

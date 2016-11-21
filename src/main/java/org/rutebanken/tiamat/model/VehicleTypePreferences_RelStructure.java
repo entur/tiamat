@@ -45,7 +45,6 @@ public class VehicleTypePreferences_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "VehicleTypePreference", required = true)
     protected List<VehicleTypePreference> vehicleTypePreference;
 
     /**

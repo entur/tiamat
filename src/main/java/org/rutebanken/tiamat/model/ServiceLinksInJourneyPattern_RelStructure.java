@@ -45,7 +45,6 @@ public class ServiceLinksInJourneyPattern_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ServiceLinkInJourneyPattern", required = true)
     protected List<ServiceLinkInJourneyPattern_VersionedChildStructure> serviceLinkInJourneyPattern;
 
     /**

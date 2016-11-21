@@ -45,7 +45,6 @@ public class TimingLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimingLink", required = true)
     protected List<TimingLink> timingLink;
 
     /**

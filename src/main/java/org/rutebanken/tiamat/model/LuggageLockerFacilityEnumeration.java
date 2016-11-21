@@ -33,25 +33,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LuggageLockerFacilityEnumeration")
-@XmlEnum
 public enum LuggageLockerFacilityEnumeration {
 
-    @XmlEnumValue("other")
     OTHER("other"),
 
     /**
      * pti23_17
      * 
      */
-    @XmlEnumValue("lockers")
     LOCKERS("lockers"),
-    @XmlEnumValue("oversizeLockers")
     OVERSIZE_LOCKERS("oversizeLockers"),
-    @XmlEnumValue("leftLuggageCounter")
     LEFT_LUGGAGE_COUNTER("leftLuggageCounter"),
-    @XmlEnumValue("bikeRack")
     BIKE_RACK("bikeRack"),
-    @XmlEnumValue("cloakroom")
     CLOAKROOM("cloakroom");
     private final String value;
 

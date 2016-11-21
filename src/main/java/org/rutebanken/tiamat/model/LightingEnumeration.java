@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LightingEnumeration")
-@XmlEnum
 public enum LightingEnumeration {
 
-    @XmlEnumValue("wellLit")
     WELL_LIT("wellLit"),
-    @XmlEnumValue("poorlyLit")
     POORLY_LIT("poorlyLit"),
-    @XmlEnumValue("unlit")
     UNLIT("unlit"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

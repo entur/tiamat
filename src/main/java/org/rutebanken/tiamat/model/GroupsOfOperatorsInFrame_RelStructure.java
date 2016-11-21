@@ -45,7 +45,6 @@ public class GroupsOfOperatorsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfOperators", required = true)
     protected List<GroupOfOperators> groupOfOperators;
 
     /**

@@ -47,9 +47,6 @@ public class PathLinkRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PathLinkRef", type = PathLinkRefStructure.class),
-        @XmlElement(name = "PathLinkRefByValue", type = PathLinkRefByValueStructure.class)
     })
     protected List<Object> pathLinkRefOrPathLinkRefByValue;
 

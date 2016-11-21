@@ -45,7 +45,6 @@ public class DepartmentRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "DepartmentRef", required = true)
     protected List<DepartmentRefStructure> departmentRef;
 
     /**

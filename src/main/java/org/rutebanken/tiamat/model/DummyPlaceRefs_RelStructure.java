@@ -46,7 +46,6 @@ public class DummyPlaceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "PlaceRef_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends VersionOfObjectRefStructure>> placeRef_;
 
     /**

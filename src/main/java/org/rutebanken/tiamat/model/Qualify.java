@@ -41,9 +41,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Qualify {
 
-    @XmlElement(name = "QualifierName", required = true)
     protected MultilingualStringEntity qualifierName;
-    @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
 
     /**

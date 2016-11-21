@@ -59,31 +59,24 @@ public class RoadAddress_VersionStructure
     extends Address_VersionStructure
 {
 
-    @XmlElement(name = "GisFeatureRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String gisFeatureRef;
 
-    @XmlElement(name = "RoadNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String roadNumber;
 
-    @XmlElement(name = "RoadName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity roadName;
 
-    @XmlElement(name = "BearingCompass")
     protected String bearingCompass;
 
-    @XmlElement(name = "BearingDegrees")
     protected BigInteger bearingDegrees;
 
-    @XmlElement(name = "OddNumberRange")
     @Transient
     protected RoadNumberRangeStructure oddNumberRange;
 
-    @XmlElement(name = "EvenNumberRange")
     @Transient
     protected RoadNumberRangeStructure evenNumberRange;
 

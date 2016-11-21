@@ -48,7 +48,6 @@ public class DynamicStopAssignment_VersionStructure
     extends PassengerStopAssignment_VersionStructure
 {
 
-    @XmlElementRef(name = "PassengerStopAssignmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PassengerStopAssignmentRefStructure> passengerStopAssignmentRef;
 
     /**

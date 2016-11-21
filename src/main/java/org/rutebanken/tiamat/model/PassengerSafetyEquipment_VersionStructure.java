@@ -55,20 +55,13 @@ public class PassengerSafetyEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Cctv")
     protected Boolean cctv;
-    @XmlElement(name = "MobilePhoneCoverage")
     protected Boolean mobilePhoneCoverage;
-    @XmlElement(name = "PanicButton")
     protected Boolean panicButton;
-    @XmlElement(name = "SosPhones")
     protected Boolean sosPhones;
-    @XmlElement(name = "HeightOfSosPanel")
     protected BigDecimal heightOfSosPanel;
-    @XmlElement(name = "Lighting")
     @XmlSchemaType(name = "normalizedString")
     protected LightingEnumeration lighting;
-    @XmlElement(name = "AcousticAnnouncements")
     protected Boolean acousticAnnouncements;
 
     /**

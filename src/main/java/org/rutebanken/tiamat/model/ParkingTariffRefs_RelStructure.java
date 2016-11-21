@@ -45,7 +45,6 @@ public class ParkingTariffRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ParkingTariffRef_", required = true)
     protected List<VersionOfObjectRefStructure> parkingTariffRef_;
 
     /**

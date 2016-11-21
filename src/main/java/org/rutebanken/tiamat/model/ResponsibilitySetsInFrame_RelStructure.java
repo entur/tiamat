@@ -45,7 +45,6 @@ public class ResponsibilitySetsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ResponsibilitySet", required = true)
     protected List<ResponsibilitySet> responsibilitySet;
 
     /**

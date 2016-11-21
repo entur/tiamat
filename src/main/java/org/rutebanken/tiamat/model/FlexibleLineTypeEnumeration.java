@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FlexibleLineTypeEnumeration")
-@XmlEnum
 public enum FlexibleLineTypeEnumeration {
 
-    @XmlEnumValue("corridorService")
     CORRIDOR_SERVICE("corridorService"),
-    @XmlEnumValue("mainRouteWithFlexibleEnds")
     MAIN_ROUTE_WITH_FLEXIBLE_ENDS("mainRouteWithFlexibleEnds"),
-    @XmlEnumValue("flexibleAreasOnly")
     FLEXIBLE_AREAS_ONLY("flexibleAreasOnly"),
-    @XmlEnumValue("hailAndRideSections")
     HAIL_AND_RIDE_SECTIONS("hailAndRideSections"),
-    @XmlEnumValue("fixedStopAreaWide")
     FIXED_STOP_AREA_WIDE("fixedStopAreaWide"),
-    @XmlEnumValue("freeAreaAreaWide")
     FREE_AREA_AREA_WIDE("freeAreaAreaWide"),
-    @XmlEnumValue("mixedFlexible")
     MIXED_FLEXIBLE("mixedFlexible"),
-    @XmlEnumValue("mixedFlexibleAndFixed")
     MIXED_FLEXIBLE_AND_FIXED("mixedFlexibleAndFixed"),
-    @XmlEnumValue("fixed")
     FIXED("fixed"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

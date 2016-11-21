@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TideEnumeration")
-@XmlEnum
 public enum TideEnumeration {
 
-    @XmlEnumValue("HighTide")
     HIGH_TIDE("HighTide"),
-    @XmlEnumValue("LowTide")
     LOW_TIDE("LowTide"),
-    @XmlEnumValue("NeapTide")
     NEAP_TIDE("NeapTide"),
-    @XmlEnumValue("AllTides")
     ALL_TIDES("AllTides");
     private final String value;
 

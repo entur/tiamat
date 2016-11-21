@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RetailServiceEnumeration")
-@XmlEnum
 public enum RetailServiceEnumeration {
 
-    @XmlEnumValue("food")
     FOOD("food"),
-    @XmlEnumValue("healthHygieneBeauty")
     HEALTH_HYGIENE_BEAUTY("healthHygieneBeauty"),
-    @XmlEnumValue("newspaperTobacco")
     NEWSPAPER_TOBACCO("newspaperTobacco"),
-    @XmlEnumValue("fashionAccessories")
     FASHION_ACCESSORIES("fashionAccessories"),
-    @XmlEnumValue("bankFinanceInsurance")
     BANK_FINANCE_INSURANCE("bankFinanceInsurance"),
-    @XmlEnumValue("tourism")
     TOURISM("tourism"),
-    @XmlEnumValue("photoBooth")
     PHOTO_BOOTH("photoBooth");
     private final String value;
 

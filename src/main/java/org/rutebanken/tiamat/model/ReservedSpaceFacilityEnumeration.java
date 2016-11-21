@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ReservedSpaceFacilityEnumeration")
-@XmlEnum
 public enum ReservedSpaceFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("lounge")
     LOUNGE("lounge"),
-    @XmlEnumValue("hall")
     HALL("hall"),
-    @XmlEnumValue("meetingPoint")
     MEETING_POINT("meetingPoint"),
-    @XmlEnumValue("groupPoint")
     GROUP_POINT("groupPoint"),
-    @XmlEnumValue("reception")
     RECEPTION("reception"),
-    @XmlEnumValue("shelter")
     SHELTER("shelter"),
-    @XmlEnumValue("seats")
     SEATS("seats");
     private final String value;
 

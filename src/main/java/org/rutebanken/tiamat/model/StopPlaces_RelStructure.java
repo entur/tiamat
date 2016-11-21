@@ -45,9 +45,7 @@ public class StopPlaces_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElement(name = "StopPlace")
     protected StopPlace stopPlace;
 
     /**

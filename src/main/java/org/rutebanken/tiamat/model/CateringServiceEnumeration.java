@@ -40,34 +40,20 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CateringServiceEnumeration")
-@XmlEnum
 public enum CateringServiceEnumeration {
 
-    @XmlEnumValue("bar")
     BAR("bar"),
-    @XmlEnumValue("beverageVendingMachine")
     BEVERAGE_VENDING_MACHINE("beverageVendingMachine"),
-    @XmlEnumValue("buffet")
     BUFFET("buffet"),
-    @XmlEnumValue("coffeeShop")
     COFFEE_SHOP("coffeeShop"),
-    @XmlEnumValue("firstClassRestaurant")
     FIRST_CLASS_RESTAURANT("firstClassRestaurant"),
-    @XmlEnumValue("foodVendingMachine")
     FOOD_VENDING_MACHINE("foodVendingMachine"),
-    @XmlEnumValue("hotFoodService")
     HOT_FOOD_SERVICE("hotFoodService"),
-    @XmlEnumValue("restaurant")
     RESTAURANT("restaurant"),
-    @XmlEnumValue("snacks")
     SNACKS("snacks"),
-    @XmlEnumValue("trolleyService")
     TROLLEY_SERVICE("trolleyService"),
-    @XmlEnumValue("noBeveragesAvailable")
     NO_BEVERAGES_AVAILABLE("noBeveragesAvailable"),
-    @XmlEnumValue("noFoodServiceAvailable")
     NO_FOOD_SERVICE_AVAILABLE("noFoodServiceAvailable"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

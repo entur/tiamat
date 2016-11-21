@@ -47,9 +47,6 @@ public class TypesOfFacility_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TypeOfFacilityRef", type = TypeOfFacilityRefStructure.class),
-        @XmlElement(name = "TypeOfFacility", type = TypeOfFacility.class)
     })
     protected List<Object> typeOfFacilityRefOrTypeOfFacility;
 

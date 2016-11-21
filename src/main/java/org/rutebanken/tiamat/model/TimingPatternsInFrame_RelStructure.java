@@ -45,7 +45,6 @@ public class TimingPatternsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimingPattern", required = true)
     protected List<TimingPattern> timingPattern;
 
     /**

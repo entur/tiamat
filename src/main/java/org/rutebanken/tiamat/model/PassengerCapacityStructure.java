@@ -54,22 +54,16 @@ import javax.xml.bind.annotation.XmlType;
 public class PassengerCapacityStructure
     extends DataManagedObjectStructure
 {
-    @XmlElement(name = "TotalCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger totalCapacity;
-    @XmlElement(name = "SeatingCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger seatingCapacity;
-    @XmlElement(name = "StandingCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger standingCapacity;
-    @XmlElement(name = "SpecialPlaceCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger specialPlaceCapacity;
-    @XmlElement(name = "PushchairCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger pushchairCapacity;
-    @XmlElement(name = "WheelchairPlaceCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger wheelchairPlaceCapacity;
 

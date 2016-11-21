@@ -45,7 +45,6 @@ public class TimingLinks_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimingLink", required = true)
     protected List<TimingLink> timingLink;
 
     /**

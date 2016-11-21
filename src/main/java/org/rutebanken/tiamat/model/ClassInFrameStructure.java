@@ -51,14 +51,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ClassInFrameStructure {
 
-    @XmlElement(name = "ClassRefType", defaultValue = "members")
     @XmlSchemaType(name = "normalizedString")
     protected ClassRefTypeEnumeration classRefType;
-    @XmlElement(name = "TypeOfFrameRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String typeOfFrameRef;
-    @XmlElement(name = "Mandatory", defaultValue = "optional")
     @XmlSchemaType(name = "normalizedString")
     protected MandatoryEnumeration mandatory;
     protected Attributes attributes;

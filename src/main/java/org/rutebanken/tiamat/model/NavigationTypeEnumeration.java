@@ -40,34 +40,20 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "NavigationTypeEnumeration")
-@XmlEnum
 public enum NavigationTypeEnumeration {
 
-    @XmlEnumValue("hallToQuay")
     HALL_TO_QUAY("hallToQuay"),
-    @XmlEnumValue("hallToStreet")
     HALL_TO_STREET("hallToStreet"),
-    @XmlEnumValue("quayToHall")
     QUAY_TO_HALL("quayToHall"),
-    @XmlEnumValue("quayToQuay")
     QUAY_TO_QUAY("quayToQuay"),
-    @XmlEnumValue("quayToStreet")
     QUAY_TO_STREET("quayToStreet"),
-    @XmlEnumValue("streetToHall")
     STREET_TO_HALL("streetToHall"),
-    @XmlEnumValue("streetToQuay")
     STREET_TO_QUAY("streetToQuay"),
-    @XmlEnumValue("streetToSpace")
     STREET_TO_SPACE("streetToSpace"),
-    @XmlEnumValue("spaceToStreet")
     SPACE_TO_STREET("spaceToStreet"),
-    @XmlEnumValue("spaceToHall")
     SPACE_TO_HALL("spaceToHall"),
-    @XmlEnumValue("hallToSpace")
     HALL_TO_SPACE("hallToSpace"),
-    @XmlEnumValue("spaceToSpace")
     SPACE_TO_SPACE("spaceToSpace"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

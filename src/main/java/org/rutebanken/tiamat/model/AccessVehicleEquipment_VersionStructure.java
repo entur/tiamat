@@ -68,42 +68,25 @@ public class AccessVehicleEquipment_VersionStructure
     extends ActualVehicleEquipment_VersionStructure
 {
 
-    @XmlElement(name = "LowFloor")
     protected Boolean lowFloor;
-    @XmlElement(name = "HighFloor")
     protected Boolean highFloor;
-    @XmlElement(name = "Hoist")
     protected Boolean hoist;
-    @XmlElement(name = "HoistOperatingRadius")
     protected BigDecimal hoistOperatingRadius;
-    @XmlElement(name = "Ramp")
     protected Boolean ramp;
-    @XmlElement(name = "RampBearingCapacity")
     protected BigDecimal rampBearingCapacity;
-    @XmlElement(name = "NumberOfSteps")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfSteps;
-    @XmlElement(name = "BoardingHeight")
     protected TypeOfEntity_VersionStructure boardingHeight;
-    @XmlElement(name = "GapToPlatform")
     protected TypeOfEntity_VersionStructure gapToPlatform;
-    @XmlElement(name = "WidthOfAccessArea")
     protected BigDecimal widthOfAccessArea;
-    @XmlElement(name = "HeightOfAccessArea")
     protected BigDecimal heightOfAccessArea;
-    @XmlElement(name = "AutomaticDoors")
     protected Boolean automaticDoors;
-    @XmlList
-    @XmlElement(name = "SuitableFor")
     @XmlSchemaType(name = "anySimpleType")
     protected List<MobilityEnumeration> suitableFor;
-    @XmlElement(name = "AssistanceNeeded")
     @XmlSchemaType(name = "normalizedString")
     protected AssistanceNeededEnumeration assistanceNeeded;
-    @XmlElement(name = "AssistedBoardingLocation")
     @XmlSchemaType(name = "normalizedString")
     protected AssistedBoardingLocationEnumeration assistedBoardingLocation;
-    @XmlElement(name = "GuideDogsAllowed", defaultValue = "true")
     protected Boolean guideDogsAllowed;
 
     /**

@@ -39,32 +39,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingUserEnumeration")
-@XmlEnum
 public enum ParkingUserEnumeration {
 
-    @XmlEnumValue("allUsers")
     ALL_USERS("allUsers"),
-    @XmlEnumValue("staff")
     STAFF("staff"),
-    @XmlEnumValue("visitors")
     VISITORS("visitors"),
-    @XmlEnumValue("registeredDisabled")
     REGISTERED_DISABLED("registeredDisabled"),
-    @XmlEnumValue("registered")
     REGISTERED("registered"),
-    @XmlEnumValue("rental")
     RENTAL("rental"),
-    @XmlEnumValue("doctors")
     DOCTORS("doctors"),
-    @XmlEnumValue("residentsWithPermits")
     RESIDENTS_WITH_PERMITS("residentsWithPermits"),
-    @XmlEnumValue("reservationHolders")
     RESERVATION_HOLDERS("reservationHolders"),
-    @XmlEnumValue("emergencyServices")
     EMERGENCY_SERVICES("emergencyServices"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

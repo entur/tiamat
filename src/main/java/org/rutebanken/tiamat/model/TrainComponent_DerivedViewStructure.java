@@ -56,16 +56,11 @@ public class TrainComponent_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "TrainComponentRef")
     protected TrainComponentRefStructure trainComponentRef;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TrainElementRef")
     protected TrainElementRefStructure trainElementRef;
 
-    @XmlElement(name = "TrainElementType")
     @XmlSchemaType(name = "NMTOKEN")
     protected TrainElementTypeEnumeration trainElementType;
     @XmlAttribute(name = "order")

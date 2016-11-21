@@ -45,7 +45,6 @@ public class TrafficControlPointsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TrafficControlPoint", required = true)
     protected List<TrafficControlPoint> trafficControlPoint;
 
     /**

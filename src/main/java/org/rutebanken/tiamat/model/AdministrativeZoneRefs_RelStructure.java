@@ -45,7 +45,6 @@ public class AdministrativeZoneRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "AdministrativeZoneRef", required = true)
     protected List<AdministrativeZoneRef> administrativeZoneRef;
 
     /**

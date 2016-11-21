@@ -49,52 +49,29 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "WaterSubmodeEnumeration")
-@XmlEnum
 public enum WaterSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("internationalCarFerry")
     INTERNATIONAL_CAR_FERRY("internationalCarFerry"),
-    @XmlEnumValue("nationalCarFerry")
     NATIONAL_CAR_FERRY("nationalCarFerry"),
-    @XmlEnumValue("regionalCarFerry")
     REGIONAL_CAR_FERRY("regionalCarFerry"),
-    @XmlEnumValue("localCarFerry")
     LOCAL_CAR_FERRY("localCarFerry"),
-    @XmlEnumValue("internationalPassengerFerry")
     INTERNATIONAL_PASSENGER_FERRY("internationalPassengerFerry"),
-    @XmlEnumValue("nationalPassengerFerry")
     NATIONAL_PASSENGER_FERRY("nationalPassengerFerry"),
-    @XmlEnumValue("regionalPassengerFerry")
     REGIONAL_PASSENGER_FERRY("regionalPassengerFerry"),
-    @XmlEnumValue("localPassengerFerry")
     LOCAL_PASSENGER_FERRY("localPassengerFerry"),
-    @XmlEnumValue("postBoat")
     POST_BOAT("postBoat"),
-    @XmlEnumValue("trainFerry")
     TRAIN_FERRY("trainFerry"),
-    @XmlEnumValue("roadFerryLink")
     ROAD_FERRY_LINK("roadFerryLink"),
-    @XmlEnumValue("airportBoatLink")
     AIRPORT_BOAT_LINK("airportBoatLink"),
-    @XmlEnumValue("highSpeedVehicleService")
     HIGH_SPEED_VEHICLE_SERVICE("highSpeedVehicleService"),
-    @XmlEnumValue("highSpeedPassengerService")
     HIGH_SPEED_PASSENGER_SERVICE("highSpeedPassengerService"),
-    @XmlEnumValue("sightseeingService")
     SIGHTSEEING_SERVICE("sightseeingService"),
-    @XmlEnumValue("schoolBoat")
     SCHOOL_BOAT("schoolBoat"),
-    @XmlEnumValue("cableFerry")
     CABLE_FERRY("cableFerry"),
-    @XmlEnumValue("riverBus")
     RIVER_BUS("riverBus"),
-    @XmlEnumValue("scheduledFerry")
     SCHEDULED_FERRY("scheduledFerry"),
-    @XmlEnumValue("shuttleFerryService")
     SHUTTLE_FERRY_SERVICE("shuttleFerryService");
     private final String value;
 

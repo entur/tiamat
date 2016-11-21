@@ -58,18 +58,12 @@ public class DayType_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "EarliestTime")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar earliestTime;
-    @XmlElement(name = "DayLength")
     protected Duration dayLength;
     protected PropertiesOfDay_RelStructure properties;
     protected Timebands_RelStructure timebands;

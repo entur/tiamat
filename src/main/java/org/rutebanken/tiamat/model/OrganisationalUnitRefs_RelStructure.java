@@ -45,7 +45,6 @@ public class OrganisationalUnitRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "OrganisationalUnitRef", required = true)
     protected List<OrganisationalUnitRefStructure> organisationalUnitRef;
 
     /**

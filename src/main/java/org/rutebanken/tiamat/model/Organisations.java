@@ -42,7 +42,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Organisations {
 
-    @XmlElementRef(name = "Organisation_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected List<JAXBElement<? extends DataManagedObjectStructure>> organisation_;
 
     /**

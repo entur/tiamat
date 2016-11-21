@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class StopAssignments {
 
-    @XmlElement(name = "PassengerStopAssignment", required = true)
     protected List<PassengerStopAssignment> passengerStopAssignment;
 
     /**

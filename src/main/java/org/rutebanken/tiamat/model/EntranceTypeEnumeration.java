@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EntranceTypeEnumeration")
-@XmlEnum
 public enum EntranceTypeEnumeration {
 
-    @XmlEnumValue("door")
     DOOR("door"),
-    @XmlEnumValue("doorway")
     DOORWAY("doorway"),
-    @XmlEnumValue("revolvingDoor")
     REVOLVING_DOOR("revolvingDoor"),
-    @XmlEnumValue("slidingDoors")
     SLIDING_DOORS("slidingDoors"),
-    @XmlEnumValue("barrier")
     BARRIER("barrier"),
-    @XmlEnumValue("ticketBarrier")
     TICKET_BARRIER("ticketBarrier"),
-    @XmlEnumValue("idBarrier")
     ID_BARRIER("idBarrier"),
-    @XmlEnumValue("gate")
     GATE("gate"),
-    @XmlEnumValue("style")
     STYLE("style"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

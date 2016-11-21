@@ -56,17 +56,12 @@ public class Timeband_VersionedChildStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "StartTime", required = true)
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar startTime;
-    @XmlElement(name = "EndTime")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar endTime;
-    @XmlElement(name = "DayOffset", defaultValue = "0")
     protected BigInteger dayOffset;
-    @XmlElement(name = "Duration")
     protected Duration duration;
 
     /**

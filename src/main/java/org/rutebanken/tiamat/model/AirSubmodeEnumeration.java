@@ -44,42 +44,24 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AirSubmodeEnumeration")
-@XmlEnum
 public enum AirSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("internationalFlight")
     INTERNATIONAL_FLIGHT("internationalFlight"),
-    @XmlEnumValue("domesticFlight")
     DOMESTIC_FLIGHT("domesticFlight"),
-    @XmlEnumValue("intercontinentalFlight")
     INTERCONTINENTAL_FLIGHT("intercontinentalFlight"),
-    @XmlEnumValue("domesticScheduledFlight")
     DOMESTIC_SCHEDULED_FLIGHT("domesticScheduledFlight"),
-    @XmlEnumValue("shuttleFlight")
     SHUTTLE_FLIGHT("shuttleFlight"),
-    @XmlEnumValue("intercontinentalCharterFlight")
     INTERCONTINENTAL_CHARTER_FLIGHT("intercontinentalCharterFlight"),
-    @XmlEnumValue("internationalCharterFlight")
     INTERNATIONAL_CHARTER_FLIGHT("internationalCharterFlight"),
-    @XmlEnumValue("roundTripCharterFlight")
     ROUND_TRIP_CHARTER_FLIGHT("roundTripCharterFlight"),
-    @XmlEnumValue("sightseeingFlight")
     SIGHTSEEING_FLIGHT("sightseeingFlight"),
-    @XmlEnumValue("helicopterService")
     HELICOPTER_SERVICE("helicopterService"),
-    @XmlEnumValue("domesticCharterFlight")
     DOMESTIC_CHARTER_FLIGHT("domesticCharterFlight"),
-    @XmlEnumValue("SchengenAreaFlight")
     SCHENGEN_AREA_FLIGHT("SchengenAreaFlight"),
-    @XmlEnumValue("airshipService")
     AIRSHIP_SERVICE("airshipService"),
-    @XmlEnumValue("shortHaulInternationalFlight")
     SHORT_HAUL_INTERNATIONAL_FLIGHT("shortHaulInternationalFlight"),
-    @XmlEnumValue("canalBarge")
     CANAL_BARGE("canalBarge");
     private final String value;
 

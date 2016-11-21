@@ -45,7 +45,6 @@ public class BorderPointsInFrame_RelStructure
     extends FrameContainmentStructure
 {
 
-    @XmlElement(name = "BorderPoint", required = true)
     protected List<BorderPoint> borderPoint;
 
     /**

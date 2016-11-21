@@ -45,7 +45,6 @@ public class ParkingsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Parking", required = true)
     protected List<Parking> parking;
 
     /**

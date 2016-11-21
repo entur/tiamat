@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Suitabilities {
 
-    @XmlElement(name = "Suitability")
     protected List<Suitability> suitability;
 
     /**

@@ -45,7 +45,6 @@ public class PointsOfInterestInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PointOfInterest", required = true)
     protected List<PointOfInterest> pointOfInterest;
 
     /**

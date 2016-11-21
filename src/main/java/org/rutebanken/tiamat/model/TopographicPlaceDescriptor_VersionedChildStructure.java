@@ -58,11 +58,8 @@ public class TopographicPlaceDescriptor_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Name", required = true)
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "Qualify")
     protected Qualify qualify;
 
     /**

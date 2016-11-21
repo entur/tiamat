@@ -45,7 +45,6 @@ public class PlaceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "PlaceRef", required = true)
     protected List<PlaceRef> placeRef;
 
     /**

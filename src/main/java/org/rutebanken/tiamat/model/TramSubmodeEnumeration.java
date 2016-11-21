@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "TramSubmodeEnumeration")
-@XmlEnum
 public enum TramSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("cityTram")
     CITY_TRAM("cityTram"),
-    @XmlEnumValue("localTram")
     LOCAL_TRAM("localTram"),
-    @XmlEnumValue("regionalTram")
     REGIONAL_TRAM("regionalTram"),
-    @XmlEnumValue("sightseeingTram")
     SIGHTSEEING_TRAM("sightseeingTram"),
-    @XmlEnumValue("shuttleTram")
     SHUTTLE_TRAM("shuttleTram"),
-    @XmlEnumValue("trainTram")
     TRAIN_TRAM("trainTram");
     private final String value;
 

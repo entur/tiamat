@@ -47,9 +47,6 @@ public class OperatingDays_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "OperatingDayRef", type = OperatingDayRefStructure.class),
-        @XmlElement(name = "OperatingDay", type = OperatingDay.class)
     })
     protected List<Object> operatingDayRefOrOperatingDay;
 

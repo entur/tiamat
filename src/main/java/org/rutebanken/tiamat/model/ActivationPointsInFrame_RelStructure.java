@@ -46,7 +46,6 @@ public class ActivationPointsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "ActivationPoint_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends Point_VersionStructure>> activationPoint_;
 
     /**

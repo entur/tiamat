@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingStayEnumeration")
-@XmlEnum
 public enum ParkingStayEnumeration {
 
-    @XmlEnumValue("shortStay")
     SHORT_STAY("shortStay"),
-    @XmlEnumValue("midTerm")
     MID_TERM("midTerm"),
-    @XmlEnumValue("longTerm")
     LONG_TERM("longTerm"),
-    @XmlEnumValue("dropoff")
     DROPOFF("dropoff"),
-    @XmlEnumValue("unlimited")
     UNLIMITED("unlimited"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

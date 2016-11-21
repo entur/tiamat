@@ -45,7 +45,6 @@ public class PurposesOfGroupingInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PurposeOfGrouping", required = true)
     protected List<PurposeOfGrouping> purposeOfGrouping;
 
     /**

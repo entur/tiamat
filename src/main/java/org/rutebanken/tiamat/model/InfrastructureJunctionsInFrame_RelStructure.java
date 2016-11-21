@@ -48,10 +48,6 @@ public class InfrastructureJunctionsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "RailwayJunction", type = RailwayJunction.class),
-        @XmlElement(name = "RoadJunction", type = RoadJunction.class),
-        @XmlElement(name = "WireJunction", type = WireJunction.class)
     })
     protected List<InfrastructurePoint_VersionStructure> railwayJunctionOrRoadJunctionOrWireJunction;
 

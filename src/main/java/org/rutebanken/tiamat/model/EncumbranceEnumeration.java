@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EncumbranceEnumeration")
-@XmlEnum
 public enum EncumbranceEnumeration {
 
-    @XmlEnumValue("luggageEncumbered")
     LUGGAGE_ENCUMBERED("luggageEncumbered"),
-    @XmlEnumValue("pushchair")
     PUSHCHAIR("pushchair"),
-    @XmlEnumValue("baggageTrolley")
     BAGGAGE_TROLLEY("baggageTrolley"),
-    @XmlEnumValue("oversizeBaggage")
     OVERSIZE_BAGGAGE("oversizeBaggage"),
-    @XmlEnumValue("guideDog")
     GUIDE_DOG("guideDog"),
-    @XmlEnumValue("otherAnimal")
     OTHER_ANIMAL("otherAnimal"),
-    @XmlEnumValue("otherEncumbranceNeed")
     OTHER_ENCUMBRANCE_NEED("otherEncumbranceNeed");
     private final String value;
 

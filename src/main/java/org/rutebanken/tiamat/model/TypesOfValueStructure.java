@@ -46,7 +46,6 @@ public class TypesOfValueStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "TypeOfValue", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends TypeOfValue_VersionStructure>> typeOfValue;
 
     /**

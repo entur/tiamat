@@ -45,7 +45,6 @@ public class DeliveryVariants_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DeliveryVariant", required = true)
     protected List<DeliveryVariant> deliveryVariant;
 
     /**

@@ -55,15 +55,10 @@ public class TopographicPlace_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "TopographicPlaceRef")
     protected TopographicPlaceRefStructure topographicPlaceRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "QualifierName")
     protected MultilingualStringEntity qualifierName;
-    @XmlElement(name = "CountryRef")
     protected CountryRef countryRef;
 
     /**

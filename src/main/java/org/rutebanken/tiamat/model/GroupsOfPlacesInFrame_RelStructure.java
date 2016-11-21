@@ -45,7 +45,6 @@ public class GroupsOfPlacesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfPlaces", required = true)
     protected List<GroupOfPlaces> groupOfPlaces;
 
     /**

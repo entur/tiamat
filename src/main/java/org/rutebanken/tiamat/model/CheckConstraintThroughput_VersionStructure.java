@@ -53,15 +53,10 @@ public class CheckConstraintThroughput_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "CheckConstraintRef")
     protected CheckConstraintRefStructure checkConstraintRef;
-    @XmlElement(name = "Period")
     protected Duration period;
-    @XmlElement(name = "MaximumPassengers")
     protected BigInteger maximumPassengers;
-    @XmlElement(name = "AveragePassengers")
     protected BigInteger averagePassengers;
-    @XmlElement(name = "WheelchairPassengers")
     protected BigInteger wheelchairPassengers;
 
     /**

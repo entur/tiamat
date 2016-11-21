@@ -45,7 +45,6 @@ public class FlexibleLineRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "FlexibleLineRef", required = true)
     protected List<FlexibleLineRefStructure> flexibleLineRef;
 
     /**

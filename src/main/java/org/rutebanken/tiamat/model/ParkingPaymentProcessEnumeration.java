@@ -36,26 +36,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingPaymentProcessEnumeration")
-@XmlEnum
 public enum ParkingPaymentProcessEnumeration {
 
-    @XmlEnumValue("free")
     FREE("free"),
-    @XmlEnumValue("payAtBay")
     PAY_AT_BAY("payAtBay"),
-    @XmlEnumValue("payAndDisplay")
     PAY_AND_DISPLAY("payAndDisplay"),
-    @XmlEnumValue("payAtExitBoothManualCollection")
     PAY_AT_EXIT_BOOTH_MANUAL_COLLECTION("payAtExitBoothManualCollection"),
-    @XmlEnumValue("payAtMachineOnFootPriorToExit")
     PAY_AT_MACHINE_ON_FOOT_PRIOR_TO_EXIT("payAtMachineOnFootPriorToExit"),
-    @XmlEnumValue("payByPrepaidToken")
     PAY_BY_PREPAID_TOKEN("payByPrepaidToken"),
-    @XmlEnumValue("payByMobileDevice")
     PAY_BY_MOBILE_DEVICE("payByMobileDevice"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -46,7 +46,6 @@ public class TopographicPlaceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TopographicPlaceRef", required = true)
     @OneToMany(targetEntity = TopographicPlaceRefStructure.class)
     protected List<TopographicPlaceRefStructure> topographicPlaceRef;
 

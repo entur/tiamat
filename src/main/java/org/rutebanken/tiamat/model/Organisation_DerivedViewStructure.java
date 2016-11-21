@@ -57,18 +57,12 @@ public class Organisation_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "OrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "LegalName")
     protected MultilingualStringEntity legalName;
-    @XmlElement(name = "TradingName")
     protected MultilingualStringEntity tradingName;
     protected AlternativeNames_RelStructure alternativeNames;
-    @XmlElement(name = "ContactDetails")
     protected ContactStructure contactDetails;
 
     /**

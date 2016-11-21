@@ -53,18 +53,13 @@ public class ParkingCapacity_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "ParentRef")
     protected SiteElementRefStructure parentRef;
-    @XmlElement(name = "ParkingUserType")
     @XmlSchemaType(name = "string")
     protected ParkingUserEnumeration parkingUserType;
-    @XmlElement(name = "ParkingVehicleType")
     @XmlSchemaType(name = "string")
     protected ParkingVehicleEnumeration parkingVehicleType;
-    @XmlElement(name = "ParkingStayType")
     @XmlSchemaType(name = "string")
     protected ParkingStayEnumeration parkingStayType;
-    @XmlElement(name = "NumberOfSpaces")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfSpaces;
 

@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DisplayAssignmentTypeEnumeration")
-@XmlEnum
 public enum DisplayAssignmentTypeEnumeration {
 
-    @XmlEnumValue("arrivals")
     ARRIVALS("arrivals"),
-    @XmlEnumValue("departures")
     DEPARTURES("departures"),
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

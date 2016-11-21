@@ -60,20 +60,14 @@ public class ServiceCalendar_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "FromDate")
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar fromDate;
-    @XmlElement(name = "ToDate")
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar toDate;
-    @XmlElement(name = "EarliestTime", defaultValue = "00:00:00")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar earliestTime;
-    @XmlElement(name = "DayLength", defaultValue = "PT24H")
     protected Duration dayLength;
     protected DayTypes_RelStructure dayTypes;
     protected Timebands_RelStructure timebands;

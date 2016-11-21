@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CrossingTypeEnumeration")
-@XmlEnum
 public enum CrossingTypeEnumeration {
 
-    @XmlEnumValue("levelCrossing")
     LEVEL_CROSSING("levelCrossing"),
-    @XmlEnumValue("barrowCrossing")
     BARROW_CROSSING("barrowCrossing"),
-    @XmlEnumValue("roadCrossing")
     ROAD_CROSSING("roadCrossing"),
-    @XmlEnumValue("roadCrossingWithIsland")
     ROAD_CROSSING_WITH_ISLAND("roadCrossingWithIsland"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

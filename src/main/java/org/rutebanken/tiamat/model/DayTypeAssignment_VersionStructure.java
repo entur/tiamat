@@ -57,20 +57,13 @@ public class DayTypeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "ServiceCalendarRef")
     protected ServiceCalendarRefStructure serviceCalendarRef;
-    @XmlElement(name = "OperatingPeriodRef")
     protected OperatingPeriodRefStructure operatingPeriodRef;
-    @XmlElement(name = "OperatingDayRef")
     protected OperatingDayRefStructure operatingDayRef;
-    @XmlElement(name = "Date")
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar date;
-    @XmlElement(name = "DayTypeRef", required = true)
     protected DayTypeRefStructure dayTypeRef;
-    @XmlElement(name = "TimebandRef")
     protected List<TimebandRefStructure> timebandRef;
-    @XmlElement(defaultValue = "true")
     protected Boolean isAvailable;
 
     /**

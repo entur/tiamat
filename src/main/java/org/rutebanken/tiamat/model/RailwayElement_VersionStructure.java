@@ -48,9 +48,7 @@ public class RailwayElement_VersionStructure
     extends InfrastructureLink_VersionStructure
 {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected RailwayPointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected RailwayPointRefStructure toPointRef;
 
     /**

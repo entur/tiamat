@@ -48,9 +48,7 @@ public class VehicleTypeAtPoint_VersionStructure
     extends NetworkRestriction_VersionStructure
 {
 
-    @XmlElement(name = "ForVehicleTypeRef", required = true)
     protected VehicleTypeRefStructure forVehicleTypeRef;
-    @XmlElement(name = "Capacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger capacity;
 

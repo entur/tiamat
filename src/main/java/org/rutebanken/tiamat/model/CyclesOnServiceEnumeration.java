@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CyclesOnServiceEnumeration")
-@XmlEnum
 public enum CyclesOnServiceEnumeration {
 
-    @XmlEnumValue("notAllowed")
     NOT_ALLOWED("notAllowed"),
-    @XmlEnumValue("onlyFoldingAllowed")
     ONLY_FOLDING_ALLOWED("onlyFoldingAllowed"),
-    @XmlEnumValue("allowedSubjectToRestrictions")
     ALLOWED_SUBJECT_TO_RESTRICTIONS("allowedSubjectToRestrictions"),
-    @XmlEnumValue("mustBook")
     MUST_BOOK("mustBook"),
-    @XmlEnumValue("allowedAtAllTimes")
     ALLOWED_AT_ALL_TIMES("allowedAtAllTimes");
     private final String value;
 

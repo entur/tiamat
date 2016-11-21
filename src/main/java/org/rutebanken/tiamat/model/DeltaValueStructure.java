@@ -48,20 +48,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class DeltaValueStructure {
 
-    @XmlElement(name = "DeltaRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String deltaRef;
-    @XmlElement(name = "Modification", defaultValue = "revise")
     @XmlSchemaType(name = "NMTOKEN")
     protected ModificationEnumeration modification;
-    @XmlElement(name = "ValueName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String valueName;
-    @XmlElement(name = "OldValue")
     protected Object oldValue;
-    @XmlElement(name = "NewValue")
     protected Object newValue;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)

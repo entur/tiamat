@@ -51,13 +51,9 @@ public class PassengerCarryingRequirement_VersionStructure
     extends VehicleRequirement_VersionStructure
 {
 
-    @XmlElement(name = "PassengerCapacity")
     protected PassengerCapacity passengerCapacity;
-    @XmlElement(name = "LowFloor")
     protected Boolean lowFloor;
-    @XmlElement(name = "HasLiftOrRamp")
     protected Boolean hasLiftOrRamp;
-    @XmlElement(name = "HasHoist")
     protected Boolean hasHoist;
 
     /**

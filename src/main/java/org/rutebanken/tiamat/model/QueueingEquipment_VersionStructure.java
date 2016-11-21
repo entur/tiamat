@@ -51,12 +51,9 @@ public class QueueingEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "NumberOfServers")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger numberOfServers;
-    @XmlElement(name = "RailedQueue")
     protected Boolean railedQueue;
-    @XmlElement(name = "TicketedQueue")
     protected Boolean ticketedQueue;
 
     /**

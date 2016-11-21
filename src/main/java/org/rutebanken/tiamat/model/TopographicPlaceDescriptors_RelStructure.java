@@ -49,7 +49,6 @@ public class TopographicPlaceDescriptors_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TopographicPlaceDescriptor", required = true)
     protected List<TopographicPlaceDescriptor_VersionedChildStructure> topographicPlaceDescriptor;
 
     /**

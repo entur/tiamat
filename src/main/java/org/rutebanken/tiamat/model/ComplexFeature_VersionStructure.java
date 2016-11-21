@@ -48,7 +48,6 @@ public class ComplexFeature_VersionStructure
     extends GroupOfPoints_VersionStructure
 {
 
-    @XmlElement(name = "GroupOfEntitiesRef")
     protected GroupOfEntitiesRef groupOfEntitiesRef;
     protected ComplexFeatureMembers_RelStructure featureMembers;
 

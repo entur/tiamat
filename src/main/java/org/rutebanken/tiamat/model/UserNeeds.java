@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class UserNeeds {
 
-    @XmlElement(name = "UserNeed")
     protected List<UserNeed> userNeed;
 
     /**

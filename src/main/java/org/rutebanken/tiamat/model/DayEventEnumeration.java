@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DayEventEnumeration")
-@XmlEnum
 public enum DayEventEnumeration {
 
-    @XmlEnumValue("anyDay")
     ANY_DAY("anyDay"),
-    @XmlEnumValue("normalDay")
     NORMAL_DAY("normalDay"),
-    @XmlEnumValue("marketDay")
     MARKET_DAY("marketDay"),
-    @XmlEnumValue("matchDay")
     MATCH_DAY("matchDay"),
-    @XmlEnumValue("eventDay")
     EVENT_DAY("eventDay");
     private final String value;
 

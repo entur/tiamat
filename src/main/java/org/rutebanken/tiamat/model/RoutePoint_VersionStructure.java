@@ -48,9 +48,7 @@ public class RoutePoint_VersionStructure
     extends Point_VersionStructure
 {
 
-    @XmlElement(name = "ViaFlag", defaultValue = "false")
     protected Boolean viaFlag;
-    @XmlElement(name = "BorderCrossing", defaultValue = "false")
     protected Boolean borderCrossing;
 
     /**

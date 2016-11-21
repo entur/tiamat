@@ -57,19 +57,12 @@ public class ParkingProperties_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlList
-    @XmlElement(name = "ParkingUserTypes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingUserEnumeration> parkingUserTypes;
-    @XmlList
-    @XmlElement(name = "ParkingVehicleTypes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
-    @XmlList
-    @XmlElement(name = "ParkingStayList")
     @XmlSchemaType(name = "anySimpleType")
     protected List<ParkingStayEnumeration> parkingStayList;
-    @XmlElement(name = "MaximumStay")
     protected Duration maximumStay;
     protected ParkingCapacities_RelStructure spaces;
     protected ParkingTariffRefs_RelStructure charges;

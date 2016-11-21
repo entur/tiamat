@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CommunicationServiceEnumeration")
-@XmlEnum
 public enum CommunicationServiceEnumeration {
 
-    @XmlEnumValue("freeWifi")
     FREE_WIFI("freeWifi"),
-    @XmlEnumValue("publicWifi")
     PUBLIC_WIFI("publicWifi"),
-    @XmlEnumValue("phone")
     PHONE("phone"),
-    @XmlEnumValue("internet")
     INTERNET("internet"),
-    @XmlEnumValue("mobileCoverage")
     MOBILE_COVERAGE("mobileCoverage"),
-    @XmlEnumValue("videoEntertainment")
     VIDEO_ENTERTAINMENT("videoEntertainment"),
-    @XmlEnumValue("audioEntertainment")
     AUDIO_ENTERTAINMENT("audioEntertainment"),
-    @XmlEnumValue("postbox")
     POSTBOX("postbox"),
-    @XmlEnumValue("postOffice")
     POST_OFFICE("postOffice"),
-    @XmlEnumValue("businessServices")
     BUSINESS_SERVICES("businessServices");
     private final String value;
 

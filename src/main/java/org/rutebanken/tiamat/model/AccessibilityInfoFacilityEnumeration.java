@@ -33,20 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccessibilityInfoFacilityEnumeration")
-@XmlEnum
 public enum AccessibilityInfoFacilityEnumeration {
 
-    @XmlEnumValue("audioInformation")
     AUDIO_INFORMATION("audioInformation"),
-    @XmlEnumValue("audioForHearingImpaired")
     AUDIO_FOR_HEARING_IMPAIRED("audioForHearingImpaired"),
-    @XmlEnumValue("visualDisplays")
     VISUAL_DISPLAYS("visualDisplays"),
-    @XmlEnumValue("displaysForVisuallyImpaired")
     DISPLAYS_FOR_VISUALLY_IMPAIRED("displaysForVisuallyImpaired"),
-    @XmlEnumValue("largePrintTimetables")
     LARGE_PRINT_TIMETABLES("largePrintTimetables"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -46,13 +46,9 @@ public class PassengerCarryingPassengerCarrying_ViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "PassengerCapacity")
     protected PassengerCapacity passengerCapacity;
-    @XmlElement(name = "LowFloor")
     protected Boolean lowFloor;
-    @XmlElement(name = "HasLiftOrRamp")
     protected Boolean hasLiftOrRamp;
-    @XmlElement(name = "HasHoist")
     protected Boolean hasHoist;
 
     /**

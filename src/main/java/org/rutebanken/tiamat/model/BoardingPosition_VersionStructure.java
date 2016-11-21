@@ -57,12 +57,10 @@ public class BoardingPosition_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {
 
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
 
-    @XmlElement(name = "BoardingPositionType")
     @XmlSchemaType(name = "string")
     @Enumerated(EnumType.STRING)
     protected BoardingPositionTypeEnumeration boardingPositionType;

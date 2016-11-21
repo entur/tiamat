@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MedicalFacilityEnumeration")
-@XmlEnum
 public enum MedicalFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("defibrillator")
     DEFIBRILLATOR("defibrillator"),
-    @XmlEnumValue("alcoholTest")
     ALCOHOL_TEST("alcoholTest");
     private final String value;
 

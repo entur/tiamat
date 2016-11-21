@@ -49,11 +49,8 @@ public class EscalatorEquipment_VersionStructure
     extends StairEquipment_VersionStructure
 {
 
-    @XmlElement(name = "TactileActuators")
     protected Boolean tactileActuators;
-    @XmlElement(name = "EnergySaving")
     protected Boolean energySaving;
-    @XmlElement(name = "DogsMustBeCarried")
     protected Boolean dogsMustBeCarried;
 
     /**

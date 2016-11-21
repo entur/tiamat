@@ -47,9 +47,6 @@ public class ResponsibilitySets_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "ResponsibilitySetRef", type = ResponsibilitySetRefStructure.class),
-        @XmlElement(name = "ResponsibilitySet", type = ResponsibilitySet.class)
     })
     protected List<Object> responsibilitySetRefOrResponsibilitySet;
 

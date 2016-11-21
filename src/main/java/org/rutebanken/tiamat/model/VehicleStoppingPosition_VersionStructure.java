@@ -51,11 +51,8 @@ public class VehicleStoppingPosition_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "StoppingPositionName")
     protected MultilingualStringEntity stoppingPositionName;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "Bearing")
     protected BigInteger bearing;
     protected VehiclePositionAlignments_RelStructure vehiclePositionAlignments;
 

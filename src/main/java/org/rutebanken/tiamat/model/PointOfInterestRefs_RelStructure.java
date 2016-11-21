@@ -45,7 +45,6 @@ public class PointOfInterestRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "PointOfInterestRef", required = true)
     protected List<PointOfInterestRefStructure> pointOfInterestRef;
 
     /**

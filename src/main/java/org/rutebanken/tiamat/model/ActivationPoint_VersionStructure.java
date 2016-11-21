@@ -54,15 +54,11 @@ public class ActivationPoint_VersionStructure
     extends Point_VersionStructure
 {
 
-    @XmlElement(name = "ActivationPointNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String activationPointNumber;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "TypeOfActivationRef")
     protected TypeOfActivationRefStructure typeOfActivationRef;
 
     /**

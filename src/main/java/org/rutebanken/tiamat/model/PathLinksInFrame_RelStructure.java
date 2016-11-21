@@ -45,7 +45,6 @@ public class PathLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PathLink", required = true)
     protected List<PathLink> pathLink;
 
     /**

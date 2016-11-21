@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CongestionEnumeration")
-@XmlEnum
 public enum CongestionEnumeration {
 
-    @XmlEnumValue("noWaiting")
     NO_WAITING("noWaiting"),
-    @XmlEnumValue("queue")
     QUEUE("queue"),
-    @XmlEnumValue("crowding")
     CROWDING("crowding"),
-    @XmlEnumValue("full")
     FULL("full");
     private final String value;
 

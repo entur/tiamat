@@ -53,11 +53,8 @@ public class ZoneProjection_VersionStructure
     extends Projection_VersionStructure
 {
 
-    @XmlElement(name = "ProjectedZoneRef", required = true)
     protected ZoneRefStructure projectedZoneRef;
-    @XmlElement(name = "ProjectToZoneRef")
     protected ZoneRefStructure projectToZoneRef;
-    @XmlElement(name = "ProjectToPointRef")
     protected PointRefStructure projectToPointRef;
     protected PointRefs_RelStructure points;
 

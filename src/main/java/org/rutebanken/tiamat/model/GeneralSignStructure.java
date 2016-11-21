@@ -49,9 +49,7 @@ public class GeneralSignStructure
     extends SignEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Content")
     protected MultilingualStringEntity content;
-    @XmlElement(name = "SignContentType")
     @XmlSchemaType(name = "string")
     protected SignContentEnumeration signContentType;
 

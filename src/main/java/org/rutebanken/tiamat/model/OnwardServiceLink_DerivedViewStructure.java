@@ -57,15 +57,10 @@ public class OnwardServiceLink_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "ServiceLinkInJourneyPattern")
     protected ServiceLinkInJourneyPattern_VersionedChildStructure serviceLinkInJourneyPattern;
-    @XmlElement(name = "ServiceLinkRef")
     protected ServiceLinkRefStructure serviceLinkRef;
-    @XmlElement(name = "ToPointRef")
     protected ScheduledStopPointRefStructure toPointRef;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
-    @XmlElement(name = "RunTime")
     protected Duration runTime;
 
     /**

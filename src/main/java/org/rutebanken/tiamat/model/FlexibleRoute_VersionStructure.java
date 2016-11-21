@@ -48,7 +48,6 @@ public class FlexibleRoute_VersionStructure
     extends Route_VersionStructure
 {
 
-    @XmlElement(name = "FlexibleRouteType")
     @XmlSchemaType(name = "string")
     protected FlexibleRouteTypeEnumeration flexibleRouteType;
 

@@ -68,36 +68,28 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class AlternativeName_VersionedChildStructure
         extends VersionedChildStructure {
 
-    @XmlElement(name = "NamedObjectRef")
     protected VersionOfObjectRefStructure namedObjectRef;
 
-    @XmlElement(name = "Lang")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "language")
     protected String lang;
 
-    @XmlElement(name = "NameType", defaultValue = "alias")
     @XmlSchemaType(name = "string")
     protected NameTypeEnumeration nameType;
 
-    @XmlElement(name = "TypeOfName")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String typeOfName;
 
-    @XmlElement(name = "Name", required = true)
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity name;
 
-    @XmlElement(name = "ShortName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity shortName;
 
-    @XmlElement(name = "Abbreviation")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity abbreviation;
 
-    @XmlElement(name = "QualifierName")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity qualifierName;
 

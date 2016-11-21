@@ -50,7 +50,6 @@ public class HireService_VersionStructure
     extends LocalService_VersionStructure
 {
 
-    @XmlElementRef(name = "ServiceList", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<List<HireServiceEnumeration>>> serviceList;
 
     /**

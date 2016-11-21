@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "OrganisationTypeEnumeration")
-@XmlEnum
 public enum OrganisationTypeEnumeration {
 
-    @XmlEnumValue("authority")
     AUTHORITY("authority"),
-    @XmlEnumValue("operator")
     OPERATOR("operator"),
-    @XmlEnumValue("railOperator")
     RAIL_OPERATOR("railOperator"),
-    @XmlEnumValue("railFreightOperator")
     RAIL_FREIGHT_OPERATOR("railFreightOperator"),
-    @XmlEnumValue("statutoryBody")
     STATUTORY_BODY("statutoryBody"),
-    @XmlEnumValue("facilityOperator")
     FACILITY_OPERATOR("facilityOperator"),
-    @XmlEnumValue("travelAgent")
     TRAVEL_AGENT("travelAgent"),
-    @XmlEnumValue("servicedOrganisation")
     SERVICED_ORGANISATION("servicedOrganisation"),
-    @XmlEnumValue("retailConsortium")
     RETAIL_CONSORTIUM("retailConsortium"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

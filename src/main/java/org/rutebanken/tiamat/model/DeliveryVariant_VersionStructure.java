@@ -54,14 +54,10 @@ public class DeliveryVariant_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "ParentRef")
     protected VersionOfObjectRefStructure parentRef;
-    @XmlElement(name = "DeliveryVariantMediaType", defaultValue = "other")
     @XmlSchemaType(name = "normalizedString")
     protected DeliveryVariantTypeEnumeration deliveryVariantMediaType;
-    @XmlElement(name = "TypeOfDeliveryVariantRef")
     protected TypeOfDeliveryVariantRefStructure typeOfDeliveryVariantRef;
-    @XmlElement(name = "VariantText")
     protected MultilingualStringEntity variantText;
     @XmlAttribute(name = "order")
     protected BigInteger order;

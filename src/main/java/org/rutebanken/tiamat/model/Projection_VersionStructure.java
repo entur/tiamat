@@ -59,11 +59,8 @@ public class Projection_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "TypeOfProjectionRef")
     protected TypeOfProjectionRefStructure typeOfProjectionRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElementRef(name = "SpatialFeatureRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends GroupOfPointsRefStructure> spatialFeatureRef;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

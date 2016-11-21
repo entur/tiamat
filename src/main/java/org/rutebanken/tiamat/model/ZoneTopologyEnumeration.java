@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ZoneTopologyEnumeration")
-@XmlEnum
 public enum ZoneTopologyEnumeration {
 
-    @XmlEnumValue("overlapping")
     OVERLAPPING("overlapping"),
-    @XmlEnumValue("honeycomb")
     HONEYCOMB("honeycomb"),
-    @XmlEnumValue("ring")
     RING("ring"),
-    @XmlEnumValue("nested")
     NESTED("nested"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -45,7 +45,6 @@ public class TimeDemandTypesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimeDemandType", required = true)
     protected List<TimeDemandType> timeDemandType;
 
     /**

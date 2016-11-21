@@ -47,9 +47,6 @@ public class AssistanceBookingServices_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AssistanceBookingServiceRef", type = AssistanceBookingServiceRefStructure.class),
-        @XmlElement(name = "AssistanceBookingService", type = AssistanceBookingService.class)
     })
     protected List<Object> assistanceBookingServiceRefOrAssistanceBookingService;
 

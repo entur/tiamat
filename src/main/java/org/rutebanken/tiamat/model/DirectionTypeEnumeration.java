@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DirectionTypeEnumeration")
-@XmlEnum
 public enum DirectionTypeEnumeration {
 
-    @XmlEnumValue("inbound")
     INBOUND("inbound"),
-    @XmlEnumValue("outbound")
     OUTBOUND("outbound"),
-    @XmlEnumValue("clockwise")
     CLOCKWISE("clockwise"),
-    @XmlEnumValue("anticlockwise")
     ANTICLOCKWISE("anticlockwise");
     private final String value;
 

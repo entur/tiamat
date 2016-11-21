@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "StopUseEnumeration")
-@XmlEnum
 public enum StopUseEnumeration {
 
 
@@ -39,23 +38,19 @@ public enum StopUseEnumeration {
      * Stop May be used to access transport system.
      * 
      */
-    @XmlEnumValue("access")
     ACCESS("access"),
 
     /**
      * Stop may only be used for interchange. Passengers may not enter or exit the station.
      * 
      */
-    @XmlEnumValue("interchangeOnly")
     INTERCHANGE_ONLY("interchangeOnly"),
 
     /**
      * Vehicle passes through without stopping.
      * 
      */
-    @XmlEnumValue("passthrough")
     PASSTHROUGH("passthrough"),
-    @XmlEnumValue("noBoardingOrAlighting")
     NO_BOARDING_OR_ALIGHTING("noBoardingOrAlighting");
     private final String value;
 

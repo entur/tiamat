@@ -51,13 +51,10 @@ public class AccessSummary_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "AccessFeatureType", required = true)
     @XmlSchemaType(name = "string")
     protected AccessFeatureEnumeration accessFeatureType;
-    @XmlElement(name = "Count", required = true)
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger count;
-    @XmlElement(name = "Transition")
     @XmlSchemaType(name = "NMTOKEN")
     protected TransitionEnumeration transition;
 

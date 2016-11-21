@@ -45,7 +45,6 @@ public class ContainedAvailabilityConditions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "AvailabilityCondition", required = true)
     protected List<AvailabilityCondition> availabilityCondition;
 
     /**

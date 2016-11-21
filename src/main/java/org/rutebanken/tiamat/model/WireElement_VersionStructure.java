@@ -48,9 +48,7 @@ public class WireElement_VersionStructure
     extends InfrastructureLink_VersionStructure
 {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected WirePointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected WirePointRefStructure toPointRef;
 
     /**

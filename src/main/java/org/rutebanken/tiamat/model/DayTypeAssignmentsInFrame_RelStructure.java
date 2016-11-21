@@ -45,7 +45,6 @@ public class DayTypeAssignmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DayTypeAssignment", required = true)
     protected List<DayTypeAssignment> dayTypeAssignment;
 
     /**

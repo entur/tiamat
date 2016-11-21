@@ -45,7 +45,6 @@ public class CountryRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "CountryRef", required = true)
     protected List<CountryRef> countryRef;
 
     /**

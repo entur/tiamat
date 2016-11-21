@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class ResponsibilitySets {
 
-    @XmlElement(name = "ResponsibilitySet", required = true)
     protected List<ResponsibilitySet> responsibilitySet;
 
     /**

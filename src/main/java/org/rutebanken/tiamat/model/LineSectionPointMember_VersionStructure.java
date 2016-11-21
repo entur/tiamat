@@ -53,13 +53,9 @@ public class LineSectionPointMember_VersionStructure
     extends CommonSectionPointMember_VersionedChildStructure
 {
 
-    @XmlElement(name = "LineSectionPointType")
     @XmlSchemaType(name = "normalizedString")
     protected LineSectionPointTypeEnumeration lineSectionPointType;
-    @XmlElement(name = "ShowAsAccessible", defaultValue = "true")
     protected Boolean showAsAccessible;
-    @XmlList
-    @XmlElement(name = "ConnectingVehicleModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<VehicleModeEnumeration> connectingVehicleModes;
 

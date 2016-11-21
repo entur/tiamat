@@ -49,7 +49,6 @@ public class Department_VersionStructure
     extends OrganisationPart_VersionStructure
 {
 
-    @XmlElement(name = "TypeOfOperationRef")
     protected TypeOfOperationRefStructure typeOfOperationRef;
     protected OrganisationalUnitRefs_RelStructure units;
 

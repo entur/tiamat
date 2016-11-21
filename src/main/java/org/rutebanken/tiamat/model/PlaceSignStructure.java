@@ -49,9 +49,7 @@ public class PlaceSignStructure
     extends SignEquipment_VersionStructure
 {
 
-    @XmlElement(name = "PlaceName", required = true)
     protected MultilingualStringEntity placeName;
-    @XmlElement(name = "PlaceRef")
     protected PlaceRef placeRef;
 
     /**

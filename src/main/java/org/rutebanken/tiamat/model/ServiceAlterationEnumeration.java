@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ServiceAlterationEnumeration")
-@XmlEnum
 public enum ServiceAlterationEnumeration {
 
-    @XmlEnumValue("extraJourney")
     EXTRA_JOURNEY("extraJourney"),
-    @XmlEnumValue("cancellation")
     CANCELLATION("cancellation"),
-    @XmlEnumValue("planned")
     PLANNED("planned");
     private final String value;
 

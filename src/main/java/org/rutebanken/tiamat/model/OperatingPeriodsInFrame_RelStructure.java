@@ -47,9 +47,6 @@ public class OperatingPeriodsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "OperatingPeriod", type = OperatingPeriod.class),
-        @XmlElement(name = "UicOperatingPeriod", type = UicOperatingPeriod.class)
     })
     protected List<OperatingPeriod_VersionStructure> operatingPeriodOrUicOperatingPeriod;
 

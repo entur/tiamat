@@ -52,19 +52,13 @@ public class SchematicMapMember_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElementRef(name = "VersionOfObjectRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends VersionOfObjectRefStructure> versionOfObjectRef;
-    @XmlElement(name = "Hide")
     protected Boolean hide;
-    @XmlElement(name = "DisplayAsIcon")
     protected Boolean displayAsIcon;
-    @XmlElement(name = "InfoLink")
     protected InfoLinkStructure infoLink;
     protected Float x;
     protected Float y;
-    @XmlElementRef(name = "Projection", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends Projection_VersionStructure> projection;
 
     /**

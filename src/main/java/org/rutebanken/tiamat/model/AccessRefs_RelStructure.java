@@ -45,7 +45,6 @@ public class AccessRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "AccessRef", required = true)
     protected List<AccessRefStructure> accessRef;
 
     /**

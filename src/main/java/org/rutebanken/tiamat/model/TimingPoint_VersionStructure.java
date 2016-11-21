@@ -53,10 +53,8 @@ public class TimingPoint_VersionStructure
     extends Point_VersionStructure
 {
 
-    @XmlElement(name = "TimingPointStatus")
     @XmlSchemaType(name = "normalizedString")
     protected TimingPointStatusEnumeration timingPointStatus;
-    @XmlElement(name = "AllowedForWaitTime")
     protected Duration allowedForWaitTime;
 
     /**

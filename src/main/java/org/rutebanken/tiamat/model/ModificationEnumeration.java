@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ModificationEnumeration")
-@XmlEnum
 public enum ModificationEnumeration {
 
 
@@ -39,23 +38,19 @@ public enum ModificationEnumeration {
      * This is a definition of a new entity.
      * 
      */
-    @XmlEnumValue("new")
     NEW("new"),
 
     /**
      * This is a deletion of an existing entity.
      * 
      */
-    @XmlEnumValue("delete")
     DELETE("delete"),
 
     /**
      * This is a revision to an existing entity. All values are replaced.
      * 
      */
-    @XmlEnumValue("revise")
     REVISE("revise"),
-    @XmlEnumValue("delta")
     DELTA("delta");
     private final String value;
 

@@ -54,13 +54,9 @@ public abstract class ActualVehicleEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Units")
     protected BigInteger units;
-    @XmlElementRef(name = "VehicleTypeRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends VehicleTypeRefStructure> vehicleTypeRef;
-    @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
 
     /**

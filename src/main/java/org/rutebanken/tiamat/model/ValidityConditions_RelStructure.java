@@ -49,10 +49,6 @@ public class ValidityConditions_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "ValidityConditionRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "ValidityCondition_", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "ValidBetween", namespace = "http://www.netex.org.uk/netex", type = ValidBetween.class, required = false)
     })
     protected List<Object> validityConditionRefOrValidBetweenOrValidityCondition_;
 

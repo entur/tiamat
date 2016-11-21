@@ -37,7 +37,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MobilityFacilityEnumeration")
-@XmlEnum
 public enum MobilityFacilityEnumeration {
 
 
@@ -45,45 +44,35 @@ public enum MobilityFacilityEnumeration {
      * pti255_4
      * 
      */
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
 
     /**
      * pti23_16_1
      * 
      */
-    @XmlEnumValue("lowFloor")
     LOW_FLOOR("lowFloor"),
 
     /**
      * pti23_16_3
      * 
      */
-    @XmlEnumValue("stepFreeAccess")
     STEP_FREE_ACCESS("stepFreeAccess"),
 
     /**
      * pti23_16_1
      * 
      */
-    @XmlEnumValue("suitableForWheelchairs")
     SUITABLE_FOR_WHEELCHAIRS("suitableForWheelchairs"),
-    @XmlEnumValue("suitableForHeaviliyDisabled")
     SUITABLE_FOR_HEAVILIY_DISABLED("suitableForHeaviliyDisabled"),
 
     /**
      * pti23_16_2
      * 
      */
-    @XmlEnumValue("boardingAssistance")
     BOARDING_ASSISTANCE("boardingAssistance"),
-    @XmlEnumValue("onboardAssistance")
     ONBOARD_ASSISTANCE("onboardAssistance"),
-    @XmlEnumValue("unaccompaniedMinorAssistance")
     UNACCOMPANIED_MINOR_ASSISTANCE("unaccompaniedMinorAssistance"),
-    @XmlEnumValue("tactilePatformEdges")
     TACTILE_PATFORM_EDGES("tactilePatformEdges"),
-    @XmlEnumValue("tactileGuidingStrips")
     TACTILE_GUIDING_STRIPS("tactileGuidingStrips");
     private final String value;
 

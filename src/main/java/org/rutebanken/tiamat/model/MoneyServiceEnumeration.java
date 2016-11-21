@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "MoneyServiceEnumeration")
-@XmlEnum
 public enum MoneyServiceEnumeration {
 
-    @XmlEnumValue("cashMachine")
     CASH_MACHINE("cashMachine"),
-    @XmlEnumValue("bank")
     BANK("bank"),
-    @XmlEnumValue("insurance")
     INSURANCE("insurance"),
-    @XmlEnumValue("bureauDeChange")
     BUREAU_DE_CHANGE("bureauDeChange"),
-    @XmlEnumValue("customsOffice")
     CUSTOMS_OFFICE("customsOffice");
     private final String value;
 

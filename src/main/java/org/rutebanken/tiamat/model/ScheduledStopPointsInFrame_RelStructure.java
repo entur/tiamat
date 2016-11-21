@@ -45,7 +45,6 @@ public class ScheduledStopPointsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ScheduledStopPoint", required = true)
     protected List<ScheduledStopPoint> scheduledStopPoint;
 
     /**

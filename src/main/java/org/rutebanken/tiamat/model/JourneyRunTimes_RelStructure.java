@@ -45,7 +45,6 @@ public class JourneyRunTimes_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "JourneyRunTime", required = true)
     protected List<JourneyRunTime> journeyRunTime;
 
     /**

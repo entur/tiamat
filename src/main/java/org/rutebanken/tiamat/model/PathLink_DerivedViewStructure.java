@@ -55,15 +55,10 @@ public class PathLink_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "HideLink")
     protected Boolean hideLink;
-    @XmlElement(name = "HideDestination")
     protected Boolean hideDestination;
-    @XmlElement(name = "ShowEntranceSeparately")
     protected Boolean showEntranceSeparately;
-    @XmlElement(name = "ShowExitSeparately")
     protected Boolean showExitSeparately;
-    @XmlElement(name = "ShowHeadingSeparately")
     protected Boolean showHeadingSeparately;
 
     /**

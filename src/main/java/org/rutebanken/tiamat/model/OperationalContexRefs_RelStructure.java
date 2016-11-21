@@ -45,7 +45,6 @@ public class OperationalContexRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "OperationalContextRef", required = true)
     protected List<OperationalContextRefStructure> operationalContextRef;
 
     /**

@@ -31,21 +31,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccommodationAccessEnumeration")
-@XmlEnum
 public enum AccommodationAccessEnumeration {
 
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("freeSeating")
     FREE_SEATING("freeSeating"),
 
     /**
      * pti23_3
      * 
      */
-    @XmlEnumValue("reservation")
     RESERVATION("reservation"),
-    @XmlEnumValue("standing")
     STANDING("standing");
     private final String value;
 

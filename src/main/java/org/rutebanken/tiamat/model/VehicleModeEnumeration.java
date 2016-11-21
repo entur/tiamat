@@ -40,34 +40,20 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "VehicleModeEnumeration")
-@XmlEnum
 public enum VehicleModeEnumeration {
 
-    @XmlEnumValue("air")
     AIR("air"),
-    @XmlEnumValue("bus")
     BUS("bus"),
-    @XmlEnumValue("coach")
     COACH("coach"),
-    @XmlEnumValue("ferry")
     FERRY("ferry"),
-    @XmlEnumValue("metro")
     METRO("metro"),
-    @XmlEnumValue("rail")
     RAIL("rail"),
-    @XmlEnumValue("trolleyBus")
     TROLLEY_BUS("trolleyBus"),
-    @XmlEnumValue("tram")
     TRAM("tram"),
-    @XmlEnumValue("water")
     WATER("water"),
-    @XmlEnumValue("cableway")
     CABLEWAY("cableway"),
-    @XmlEnumValue("funicular")
     FUNICULAR("funicular"),
-    @XmlEnumValue("lift")
     LIFT("lift"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

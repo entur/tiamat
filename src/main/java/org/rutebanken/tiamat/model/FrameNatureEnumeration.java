@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "FrameNatureEnumeration")
-@XmlEnum
 public enum FrameNatureEnumeration {
 
-    @XmlEnumValue("planned")
     PLANNED("planned"),
-    @XmlEnumValue("operational")
     OPERATIONAL("operational"),
-    @XmlEnumValue("contingencyPlan")
     CONTINGENCY_PLAN("contingencyPlan"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

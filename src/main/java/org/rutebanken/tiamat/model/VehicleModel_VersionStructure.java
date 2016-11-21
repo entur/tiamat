@@ -50,13 +50,9 @@ public class VehicleModel_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Manufacturer")
     protected MultilingualStringEntity manufacturer;
-    @XmlElementRef(name = "VehicleTypeRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends VehicleTypeRefStructure> vehicleTypeRef;
 
     /**

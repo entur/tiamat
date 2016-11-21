@@ -64,78 +64,42 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ParkingVehicleEnumeration")
-@XmlEnum
 public enum ParkingVehicleEnumeration {
 
-    @XmlEnumValue("pedalCycle")
     PEDAL_CYCLE("pedalCycle"),
-    @XmlEnumValue("moped")
     MOPED("moped"),
-    @XmlEnumValue("motorcycle")
     MOTORCYCLE("motorcycle"),
-    @XmlEnumValue("motorcycleWithSidecar")
     MOTORCYCLE_WITH_SIDECAR("motorcycleWithSidecar"),
-    @XmlEnumValue("motorScooter")
     MOTOR_SCOOTER("motorScooter"),
-    @XmlEnumValue("twoWheeledVehicle")
     TWO_WHEELED_VEHICLE("twoWheeledVehicle"),
-    @XmlEnumValue("threeWheeledVehicle")
     THREE_WHEELED_VEHICLE("threeWheeledVehicle"),
-    @XmlEnumValue("car")
     CAR("car"),
-    @XmlEnumValue("smallCar")
     SMALL_CAR("smallCar"),
-    @XmlEnumValue("passengerCar")
     PASSENGER_CAR("passengerCar"),
-    @XmlEnumValue("largeCar")
     LARGE_CAR("largeCar"),
-    @XmlEnumValue("fourWheelDrive")
     FOUR_WHEEL_DRIVE("fourWheelDrive"),
-    @XmlEnumValue("taxi")
     TAXI("taxi"),
-    @XmlEnumValue("camperCar")
     CAMPER_CAR("camperCar"),
-    @XmlEnumValue("carWithTrailer")
     CAR_WITH_TRAILER("carWithTrailer"),
-    @XmlEnumValue("carWithCaravan")
     CAR_WITH_CARAVAN("carWithCaravan"),
-    @XmlEnumValue("minibus")
     MINIBUS("minibus"),
-    @XmlEnumValue("bus")
     BUS("bus"),
-    @XmlEnumValue("van")
     VAN("van"),
-    @XmlEnumValue("largeVan")
     LARGE_VAN("largeVan"),
-    @XmlEnumValue("highSidedVehicle")
     HIGH_SIDED_VEHICLE("highSidedVehicle"),
-    @XmlEnumValue("lightGoodsVehicle")
     LIGHT_GOODS_VEHICLE("lightGoodsVehicle"),
-    @XmlEnumValue("heavyGoodsVehicle")
     HEAVY_GOODS_VEHICLE("heavyGoodsVehicle"),
-    @XmlEnumValue("truck")
     TRUCK("truck"),
-    @XmlEnumValue("agriculturalVehicle")
     AGRICULTURAL_VEHICLE("agriculturalVehicle"),
-    @XmlEnumValue("tanker")
     TANKER("tanker"),
-    @XmlEnumValue("tram")
     TRAM("tram"),
-    @XmlEnumValue("articulatedVehicle")
     ARTICULATED_VEHICLE("articulatedVehicle"),
-    @XmlEnumValue("vehicleWithTrailer")
     VEHICLE_WITH_TRAILER("vehicleWithTrailer"),
-    @XmlEnumValue("lightGoodsVehicleWithTrailer")
     LIGHT_GOODS_VEHICLE_WITH_TRAILER("lightGoodsVehicleWithTrailer"),
-    @XmlEnumValue("heavyGoodsVehicleWithTrailer")
     HEAVY_GOODS_VEHICLE_WITH_TRAILER("heavyGoodsVehicleWithTrailer"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("allPassengerVehicles")
     ALL_PASSENGER_VEHICLES("allPassengerVehicles"),
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

@@ -45,7 +45,6 @@ public class PointsOnRoute_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PointOnRoute", required = true)
     protected List<PointOnRoute> pointOnRoute;
 
     /**

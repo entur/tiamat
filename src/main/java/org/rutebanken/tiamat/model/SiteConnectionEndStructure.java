@@ -70,40 +70,23 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class SiteConnectionEndStructure {
 
-    @XmlElement(name = "TransportMode", defaultValue = "all")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "StopAreaRef")
     protected StopAreaRefStructure stopAreaRef;
-    @XmlElement(name = "ScheduledStopPointRef")
     protected ScheduledStopPointRefStructure scheduledStopPointRef;
-    @XmlElement(name = "StopPlaceRef")
     protected StopPlaceReference stopPlaceRef;
-    @XmlElement(name = "AccessSpaceRef")
     protected AccessSpaceRefStructure accessSpaceRef;
-    @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
-    @XmlElement(name = "QuayRef")
     protected QuayReference quayRef;
-    @XmlElement(name = "StopPlaceEntranceRef")
     protected StopPlaceEntranceRefStructure stopPlaceEntranceRef;
-    @XmlElement(name = "PointOfInterestRef")
     protected PointOfInterestRefStructure pointOfInterestRef;
-    @XmlElement(name = "PointOfInterestSpaceRef")
     protected PointOfInterestSpaceRefStructure pointOfInterestSpaceRef;
-    @XmlElement(name = "PointOfInterestEntranceRef")
     protected PointOfInterestEntranceRefStructure pointOfInterestEntranceRef;
-    @XmlElement(name = "ParkingRef")
     protected ParkingRefStructure parkingRef;
-    @XmlElement(name = "ParkingAreaRef")
     protected ParkingAreaRefStructure parkingAreaRef;
-    @XmlElement(name = "ParkingEntranceRef")
     protected ParkingEntranceRefStructure parkingEntranceRef;
-    @XmlElement(name = "OperatorRef")
     protected OperatorRefStructure operatorRef;
-    @XmlElement(name = "OperatorView")
     protected OperatorView operatorView;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
 
     /**

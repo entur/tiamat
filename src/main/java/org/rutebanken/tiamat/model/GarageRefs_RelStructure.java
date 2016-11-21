@@ -45,7 +45,6 @@ public class GarageRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "GarageRef", required = true)
     protected List<GarageRefStructure> garageRef;
 
     /**

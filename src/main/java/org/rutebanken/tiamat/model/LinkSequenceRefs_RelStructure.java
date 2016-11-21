@@ -46,7 +46,6 @@ public class LinkSequenceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "LinkSequenceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends LinkSequenceRefStructure>> linkSequenceRef;
 
     /**

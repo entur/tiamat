@@ -48,13 +48,9 @@ import javax.xml.datatype.Duration;
 })
 public class TransferDurationStructure {
 
-    @XmlElement(name = "DefaultDuration")
     protected Duration defaultDuration;
-    @XmlElement(name = "FrequentTravellerDuration")
     protected Duration frequentTravellerDuration;
-    @XmlElement(name = "OccasionalTravellerDuration")
     protected Duration occasionalTravellerDuration;
-    @XmlElement(name = "MobilityRestrictedTravellerDuration")
     protected Duration mobilityRestrictedTravellerDuration;
 
     /**

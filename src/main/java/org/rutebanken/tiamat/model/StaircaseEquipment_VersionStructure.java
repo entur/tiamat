@@ -49,11 +49,8 @@ public class StaircaseEquipment_VersionStructure
     extends StairEquipment_VersionStructure
 {
 
-    @XmlElement(name = "ContinuousHandrail")
     protected Boolean continuousHandrail;
-    @XmlElement(name = "SpiralStair")
     protected Boolean spiralStair;
-    @XmlElement(name = "NumberOfFlights")
     protected BigInteger numberOfFlights;
     protected StairFlights_RelStructure flights;
 

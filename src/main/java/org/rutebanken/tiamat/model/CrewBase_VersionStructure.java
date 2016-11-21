@@ -47,7 +47,6 @@ public class CrewBase_VersionStructure
     extends GroupOfEntities_VersionStructure
 {
 
-    @XmlElementRef(name = "ReliefPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends ReliefPointRefStructure> reliefPointRef;
     protected GarageRefs_RelStructure garages;
 

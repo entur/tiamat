@@ -58,19 +58,13 @@ public class ParkingComponent_VersionStructure
     extends SiteComponent_VersionStructure
 {
 
-    @XmlElement(name = "ParkingPaymentCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String parkingPaymentCode;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
-    @XmlElement(name = "MaximumLength")
     protected BigDecimal maximumLength;
-    @XmlElement(name = "MaximumWidth")
     protected BigDecimal maximumWidth;
-    @XmlElement(name = "MaximumHeight")
     protected BigDecimal maximumHeight;
-    @XmlElement(name = "MaximumWeight")
     protected BigDecimal maximumWeight;
 
     /**

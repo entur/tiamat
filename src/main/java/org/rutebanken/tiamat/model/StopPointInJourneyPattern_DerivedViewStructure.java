@@ -66,37 +66,22 @@ public class StopPointInJourneyPattern_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "PointInJourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PointInJourneyPatternRefStructure> pointInJourneyPatternRef;
-    @XmlElement(name = "VisitNumber", defaultValue = "1")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger visitNumber;
-    @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
-    @XmlElement(name = "ScheduledStopPointView")
     protected ScheduledStopPoint_DerivedViewStructure scheduledStopPointView;
-    @XmlElement(name = "OnwardTimingLinkView")
     protected OnwardTimingLinkView onwardTimingLinkView;
-    @XmlElement(name = "OnwardServiceLinkRef")
     protected ServiceLinkRefStructure onwardServiceLinkRef;
-    @XmlElement(name = "OnwardServiceLinkView")
     protected OnwardServiceLinkView onwardServiceLinkView;
-    @XmlElement(name = "TimingPointStatus")
     @XmlSchemaType(name = "normalizedString")
     protected TimingPointStatusEnumeration timingPointStatus;
-    @XmlElement(name = "IsWaitPoint", defaultValue = "false")
     protected Boolean isWaitPoint;
-    @XmlElement(name = "TimeDemandTypeRef")
     protected TimeDemandTypeRefStructure timeDemandTypeRef;
-    @XmlElement(name = "TimebandRef")
     protected TimebandRefStructure timebandRef;
-    @XmlElement(name = "WaitTime")
     protected Duration waitTime;
-    @XmlElement(name = "ScheduledHeadwayInterval")
     protected Duration scheduledHeadwayInterval;
-    @XmlElement(name = "MinimumHeadwayInterval")
     protected Duration minimumHeadwayInterval;
-    @XmlElement(name = "MaximumHeadwayInterval")
     protected Duration maximumHeadwayInterval;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

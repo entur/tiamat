@@ -45,7 +45,6 @@ public class ParkingProperties_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ParkingProperties", required = true)
     protected List<ParkingProperties> parkingProperties;
 
     /**

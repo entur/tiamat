@@ -29,12 +29,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SuitableEnumeration")
-@XmlEnum
 public enum SuitableEnumeration {
 
-    @XmlEnumValue("suitable")
     SUITABLE("suitable"),
-    @XmlEnumValue("notSuitable")
     NOT_SUITABLE("notSuitable");
     private final String value;
 

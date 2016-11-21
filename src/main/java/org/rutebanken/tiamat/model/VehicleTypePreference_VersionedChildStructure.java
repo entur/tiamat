@@ -51,12 +51,9 @@ public class VehicleTypePreference_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElement(name = "Rank")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger rank;
-    @XmlElement(name = "DayTypeRef")
     protected DayTypeRefStructure dayTypeRef;
-    @XmlElement(name = "VehicleTypePreferenceRef")
     protected VehicleTypePreferenceRef vehicleTypePreferenceRef;
 
     /**

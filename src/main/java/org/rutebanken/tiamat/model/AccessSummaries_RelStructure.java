@@ -45,7 +45,6 @@ public class AccessSummaries_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "AccessSummary", required = true)
     protected List<AccessSummary> accessSummary;
 
     /**

@@ -64,48 +64,38 @@ public class CheckConstraint_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "PlaceRef")
     @Transient
     protected PlaceRef placeRef;
 
-    @XmlElement(name = "CheckDirection")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected CheckDirectionEnumeration checkDirection;
 
-    @XmlElement(name = "CheckProcess")
     @XmlSchemaType(name = "string")
     @Transient
     protected CheckProcessTypeEnumeration checkProcess;
 
-    @XmlElement(name = "CheckService")
     @XmlSchemaType(name = "string")
     @Transient
     protected CheckServiceEnumeration checkService;
 
-    @XmlElement(name = "AccessFeatureType")
     @XmlSchemaType(name = "string")
     @Transient
     protected AccessFeatureEnumeration accessFeatureType;
 
-    @XmlElement(name = "Congestion")
     @XmlSchemaType(name = "string")
     @Transient
     protected CongestionEnumeration congestion;
 
-    @XmlElement(name = "ClassOfUseRef")
     @Transient
     protected ClassOfUseRef classOfUseRef;
 
-    @XmlElement(name = "TypeOfEquipmentRef")
     @Transient
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
 
-    @XmlElement(name = "FacilityRef")
     @Transient
     protected FacilityRefStructure facilityRef;
 
-    @XmlElementRef(name = "EquipmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 

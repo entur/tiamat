@@ -48,7 +48,6 @@ public class ServiceJourneyPattern_VersionStructure
     extends JourneyPattern_VersionStructure
 {
 
-    @XmlElement(name = "ServiceJourneyPatternType")
     @XmlSchemaType(name = "NMTOKEN")
     protected ServiceJourneyPatternTypeEnumeration serviceJourneyPatternType;
 

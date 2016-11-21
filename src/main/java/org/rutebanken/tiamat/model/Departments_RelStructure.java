@@ -47,9 +47,6 @@ public class Departments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "DepartmentRef", type = DepartmentRefStructure.class),
-        @XmlElement(name = "Department", type = Department.class)
     })
     protected List<Object> departmentRefOrDepartment;
 

@@ -32,7 +32,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "RelativeOperatorEnumeration")
-@XmlEnum
 public enum RelativeOperatorEnumeration {
 
 

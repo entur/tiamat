@@ -44,7 +44,6 @@ public class ScheduledStopPointRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
 
     /**

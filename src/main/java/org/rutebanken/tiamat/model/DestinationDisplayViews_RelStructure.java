@@ -47,9 +47,6 @@ public class DestinationDisplayViews_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "DestinationDisplayRef", type = DestinationDisplayRefStructure.class),
-        @XmlElement(name = "DestinationDisplayView", type = DestinationDisplayView.class)
     })
     protected List<Object> destinationDisplayRefOrDestinationDisplayView;
 

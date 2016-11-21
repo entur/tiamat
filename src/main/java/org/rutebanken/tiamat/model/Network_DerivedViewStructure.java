@@ -52,11 +52,8 @@ public class Network_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "NetworkRef")
     protected NetworkRefStructure networkRef;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
 

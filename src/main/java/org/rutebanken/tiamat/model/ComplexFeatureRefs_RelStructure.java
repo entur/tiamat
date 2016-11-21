@@ -43,7 +43,6 @@ public class ComplexFeatureRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ComplexFeatureRef", required = true)
     protected ComplexFeatureRefStructure complexFeatureRef;
 
     /**

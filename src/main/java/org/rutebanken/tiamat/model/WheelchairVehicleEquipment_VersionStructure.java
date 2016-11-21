@@ -56,20 +56,13 @@ public class WheelchairVehicleEquipment_VersionStructure
     extends ActualVehicleEquipment_VersionStructure
 {
 
-    @XmlElement(name = "HasWheelChairSpaces")
     protected Boolean hasWheelChairSpaces;
-    @XmlElement(name = "NumberOfWheelchairAreas")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfWheelchairAreas;
-    @XmlElement(name = "WidthOfAccessArea")
     protected BigDecimal widthOfAccessArea;
-    @XmlElement(name = "LengthOfAccessArea")
     protected BigDecimal lengthOfAccessArea;
-    @XmlElement(name = "HeightOfAccessArea")
     protected BigDecimal heightOfAccessArea;
-    @XmlElement(name = "WheelchairTurningCircle")
     protected BigDecimal wheelchairTurningCircle;
-    @XmlElement(name = "CompanionSeat")
     protected Boolean companionSeat;
 
     /**

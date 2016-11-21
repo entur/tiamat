@@ -35,24 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PyschosensoryNeedEnumeration")
-@XmlEnum
 public enum PyschosensoryNeedEnumeration {
 
-    @XmlEnumValue("visualImpairment")
     VISUAL_IMPAIRMENT("visualImpairment"),
-    @XmlEnumValue("auditoryImpairment")
     AUDITORY_IMPAIRMENT("auditoryImpairment"),
-    @XmlEnumValue("cognitiveInputImpairment")
     COGNITIVE_INPUT_IMPAIRMENT("cognitiveInputImpairment"),
-    @XmlEnumValue("averseToLifts")
     AVERSE_TO_LIFTS("averseToLifts"),
-    @XmlEnumValue("averseToEscalators")
     AVERSE_TO_ESCALATORS("averseToEscalators"),
-    @XmlEnumValue("averseToConfinedSpaces")
     AVERSE_TO_CONFINED_SPACES("averseToConfinedSpaces"),
-    @XmlEnumValue("averseToCrowds")
     AVERSE_TO_CROWDS("averseToCrowds"),
-    @XmlEnumValue("otherPsychosensoryNeed")
     OTHER_PSYCHOSENSORY_NEED("otherPsychosensoryNeed");
     private final String value;
 

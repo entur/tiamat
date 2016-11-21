@@ -47,9 +47,6 @@ public class VehicleEquipments_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AccessVehicleEquipment", type = AccessVehicleEquipment.class),
-        @XmlElement(name = "WheelchairVehicleEquipment", type = WheelchairVehicleEquipment.class)
     })
     protected List<ActualVehicleEquipment_VersionStructure> accessVehicleEquipmentOrWheelchairVehicleEquipment;
 

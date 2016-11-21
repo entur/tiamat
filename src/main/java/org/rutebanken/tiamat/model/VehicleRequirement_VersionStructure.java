@@ -49,7 +49,6 @@ public abstract class VehicleRequirement_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
 
     /**

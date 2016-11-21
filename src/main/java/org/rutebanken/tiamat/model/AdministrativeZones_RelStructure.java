@@ -47,9 +47,6 @@ public class AdministrativeZones_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AdministrativeZoneRef", type = AdministrativeZoneRef.class),
-        @XmlElement(name = "AdministrativeZone", type = AdministrativeZone.class)
     })
     protected List<Object> administrativeZoneRefOrAdministrativeZone;
 

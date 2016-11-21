@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SafetyFacilityEnumeration")
-@XmlEnum
 public enum SafetyFacilityEnumeration {
 
-    @XmlEnumValue("ccTv")
     CC_TV("ccTv"),
-    @XmlEnumValue("mobileCoverage")
     MOBILE_COVERAGE("mobileCoverage"),
-    @XmlEnumValue("sosPoints")
     SOS_POINTS("sosPoints"),
-    @XmlEnumValue("staffed")
     STAFFED("staffed");
     private final String value;
 

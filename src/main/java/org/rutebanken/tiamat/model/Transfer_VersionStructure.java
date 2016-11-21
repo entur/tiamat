@@ -57,19 +57,12 @@ public abstract class Transfer_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "TypeOfTransferRef")
     protected TypeOfTransferRefStructure typeOfTransferRef;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
-    @XmlElement(name = "TransferDuration")
     protected TransferDurationStructure transferDuration;
-    @XmlElement(name = "WalkTransferDuration")
     protected TransferDurationStructure walkTransferDuration;
-    @XmlElement(name = "BothWays", defaultValue = "true")
     protected Boolean bothWays;
 
     /**

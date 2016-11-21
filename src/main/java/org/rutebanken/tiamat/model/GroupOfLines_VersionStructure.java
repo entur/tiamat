@@ -52,9 +52,7 @@ public class GroupOfLines_VersionStructure
 {
 
     protected LineRefs_RelStructure members;
-    @XmlElement(name = "MainLineRef")
     protected LineRefStructure mainLineRef;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
 

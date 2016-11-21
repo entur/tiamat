@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CateringRightsEnumeration")
-@XmlEnum
 public enum CateringRightsEnumeration {
 
-    @XmlEnumValue("mealIncluded")
     MEAL_INCLUDED("mealIncluded"),
-    @XmlEnumValue("mealIncludedForFirstClassPassengers")
     MEAL_INCLUDED_FOR_FIRST_CLASS_PASSENGERS("mealIncludedForFirstClassPassengers"),
-    @XmlEnumValue("noMealIncluded")
     NO_MEAL_INCLUDED("noMealIncluded");
     private final String value;
 

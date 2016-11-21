@@ -45,7 +45,6 @@ public class NavigationPathRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "NavigationPathRef", required = true)
     protected List<NavigationPathRefStructure> navigationPathRef;
 
     /**

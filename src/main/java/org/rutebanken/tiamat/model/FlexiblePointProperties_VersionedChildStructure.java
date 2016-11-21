@@ -54,17 +54,11 @@ public class FlexiblePointProperties_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "PointOnRouteRef")
     protected PointOnRouteRefStructure pointOnRouteRef;
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElement(name = "MayBeSkipped")
     protected Boolean mayBeSkipped;
-    @XmlElement(name = "OnMainRoute")
     protected Boolean onMainRoute;
-    @XmlElement(name = "PointStandingForAZone")
     protected Boolean pointStandingForAZone;
-    @XmlElement(name = "ZoneContainingStops")
     protected Boolean zoneContainingStops;
 
     /**

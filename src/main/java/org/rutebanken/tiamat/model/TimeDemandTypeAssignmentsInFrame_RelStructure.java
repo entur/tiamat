@@ -45,7 +45,6 @@ public class TimeDemandTypeAssignmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TimeDemandTypeAssignment", required = true)
     protected List<TimeDemandTypeAssignment> timeDemandTypeAssignment;
 
     /**

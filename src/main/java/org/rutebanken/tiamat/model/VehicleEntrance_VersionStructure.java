@@ -48,7 +48,6 @@ public class VehicleEntrance_VersionStructure
     extends SiteEntrance_VersionStructure
 {
 
-    @XmlElement(name = "Public")
     protected Boolean _public;
 
     /**

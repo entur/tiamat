@@ -46,15 +46,10 @@ public class Via_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "DestinationDisplayView")
     protected DestinationDisplayView destinationDisplayView;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "RoutePointRef")
     protected RoutePointRefStructure routePointRef;
-    @XmlElement(name = "ViaType")
     @XmlSchemaType(name = "string")
     protected ViaTypeEnumeration viaType;
 

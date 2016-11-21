@@ -59,26 +59,17 @@ public class DisplayAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "LogicalDisplayRef")
     protected LogicalDisplayRefStructure logicalDisplayRef;
-    @XmlElementRef(name = "ScheduledStopPointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected JAXBElement<? extends ScheduledStopPointRefStructure> scheduledStopPointRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
-    @XmlElementRef(name = "JourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends JourneyPatternRefStructure> journeyPatternRef;
-    @XmlElement(name = "DisplayAssignmentType", defaultValue = "all")
     @XmlSchemaType(name = "normalizedString")
     protected DisplayAssignmentTypeEnumeration displayAssignmentType;
-    @XmlElement(name = "NumberOfJourneysToShow")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfJourneysToShow;
-    @XmlElement(name = "DisplayPriority")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger displayPriority;
 

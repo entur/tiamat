@@ -45,7 +45,6 @@ public class ValidityRuleParameters_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ValidityRuleParameter", required = true)
     protected List<ValidityRuleParameter_VersionStructure> validityRuleParameter;
 
     /**

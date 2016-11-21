@@ -47,9 +47,6 @@ public class PointOfInterestSpaces_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PointOfInterestSpaceRef", type = SiteComponentRefStructure.class),
-        @XmlElement(name = "PointOfInterestSpace", type = PointOfInterestSpace.class)
     })
     protected List<Object> pointOfInterestSpaceRefOrPointOfInterestSpace;
 

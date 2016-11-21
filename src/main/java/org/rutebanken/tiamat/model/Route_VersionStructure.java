@@ -55,15 +55,11 @@ public class Route_VersionStructure
     extends LinkSequence_VersionStructure
 {
 
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "DirectionType", defaultValue = "outbound")
     @XmlSchemaType(name = "normalizedString")
     protected DirectionTypeEnumeration directionType;
-    @XmlElement(name = "DirectionRef")
     protected DirectionRefStructure directionRef;
     protected PointsOnRoute_RelStructure pointsInSequence;
-    @XmlElement(name = "InverseRouteRef")
     protected RouteRefStructure inverseRouteRef;
 
     /**

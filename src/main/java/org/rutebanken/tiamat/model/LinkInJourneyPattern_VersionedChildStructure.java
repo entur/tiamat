@@ -48,9 +48,7 @@ public class LinkInJourneyPattern_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElement(name = "ServiceLinkRef")
     protected ServiceLinkRefStructure serviceLinkRef;
-    @XmlElement(name = "TimingLinkRef")
     protected TimingLinkRefStructure timingLinkRef;
 
     /**

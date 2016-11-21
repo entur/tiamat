@@ -45,7 +45,6 @@ public class Frames_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CommonFrame", required = true)
     protected List<Common_VersionFrameStructure> commonFrame;
 
     /**

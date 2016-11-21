@@ -57,22 +57,14 @@ public abstract class Equipment_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "PublicCode")
     protected PrivateCodeStructure publicCode;
-    @XmlElement(name = "Image")
     @XmlSchemaType(name = "anyURI")
     protected String image;
-    @XmlElement(name = "TypeOfEquipmentRef")
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "Note", defaultValue = "false.")
     protected MultilingualStringEntity note;
-    @XmlElement(name = "OutOfService")
     protected Boolean outOfService;
 
     /**

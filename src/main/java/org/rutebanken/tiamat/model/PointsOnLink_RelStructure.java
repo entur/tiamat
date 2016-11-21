@@ -48,9 +48,7 @@ public class PointsOnLink_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PointOnLink", required = true)
     protected List<PointOnLink> pointOnLink;
-    @XmlElement(name = "LineString")
     protected LineStringType lineString;
 
     /**

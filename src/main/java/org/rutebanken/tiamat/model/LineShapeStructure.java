@@ -59,15 +59,11 @@ public class LineShapeStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Formula")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "Name")
     protected String formula;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElementRef(name = "LinkRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LinkRefStructure> linkRef;
-    @XmlElement(name = "LocatingSystemRef")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String locatingSystemRef;

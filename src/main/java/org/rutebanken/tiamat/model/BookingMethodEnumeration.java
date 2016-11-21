@@ -34,22 +34,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BookingMethodEnumeration")
-@XmlEnum
 public enum BookingMethodEnumeration {
 
-    @XmlEnumValue("callDriver")
     CALL_DRIVER("callDriver"),
-    @XmlEnumValue("callOffice")
     CALL_OFFICE("callOffice"),
-    @XmlEnumValue("online")
     ONLINE("online"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("phoneAtStop")
     PHONE_AT_STOP("phoneAtStop"),
-    @XmlEnumValue("text")
     TEXT("text"),
-    @XmlEnumValue("none")
     NONE("none");
     private final String value;
 

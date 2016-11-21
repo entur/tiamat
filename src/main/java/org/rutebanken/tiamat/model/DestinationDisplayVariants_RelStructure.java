@@ -49,7 +49,6 @@ public class DestinationDisplayVariants_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DestinationDisplayVariant", required = true)
     protected List<DestinationDisplayVariant> destinationDisplayVariant;
 
     /**

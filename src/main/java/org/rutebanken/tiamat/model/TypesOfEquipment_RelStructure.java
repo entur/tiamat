@@ -47,9 +47,6 @@ public class TypesOfEquipment_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "TypeOfEquipmentRef", type = TypeOfEquipmentRefStructure.class),
-        @XmlElement(name = "TypeOfEquipment", type = TypeOfEquipment.class)
     })
     protected List<Object> typeOfEquipmentRefOrTypeOfEquipment;
 

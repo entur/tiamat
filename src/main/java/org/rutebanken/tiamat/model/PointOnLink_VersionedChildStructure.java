@@ -58,15 +58,10 @@ public class PointOnLink_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "LinkRef")
     protected LinkRefStructure linkRef;
-    @XmlElement(name = "DistanceFromStart")
     protected BigDecimal distanceFromStart;
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElementRef(name = "Point", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends Point_VersionStructure> point;
     @XmlAttribute(name = "order")
     @XmlSchemaType(name = "positiveInteger")

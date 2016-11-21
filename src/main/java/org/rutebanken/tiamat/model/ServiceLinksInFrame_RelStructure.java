@@ -45,7 +45,6 @@ public class ServiceLinksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ServiceLink", required = true)
     protected List<ServiceLink> serviceLink;
 
     /**

@@ -47,9 +47,6 @@ public class AllowedLineDirections_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "AllowedLineDirectionRef", type = AllowedLineDirectionRefStructure.class),
-        @XmlElement(name = "AllowedLineDirection", type = AllowedLineDirection.class)
     })
     protected List<Object> allowedLineDirectionRefOrAllowedLineDirection;
 

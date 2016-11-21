@@ -45,7 +45,6 @@ public class StopPlaceRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "StopPlaceRef", required = true)
     protected List<StopPlaceReference> stopPlaceRef;
 
     /**

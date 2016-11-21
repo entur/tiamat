@@ -63,58 +63,46 @@ public abstract class StopPlaceComponent_VersionStructure
     extends SiteComponent_VersionStructure
 {
 
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected VehicleModeEnumeration transportMode;
 
-    @XmlElement(name = "AirSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected AirSubmodeEnumeration airSubmode;
 
-    @XmlElement(name = "BusSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected BusSubmodeEnumeration busSubmode;
 
-    @XmlElement(name = "CoachSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected CoachSubmodeEnumeration coachSubmode;
 
-    @XmlElement(name = "FunicularSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected FunicularSubmodeEnumeration funicularSubmode;
 
-    @XmlElement(name = "MetroSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected MetroSubmodeEnumeration metroSubmode;
 
-    @XmlElement(name = "TramSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected TramSubmodeEnumeration tramSubmode;
 
-    @XmlElement(name = "TelecabinSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected TelecabinSubmodeEnumeration telecabinSubmode;
 
-    @XmlElement(name = "RailSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected RailSubmodeEnumeration railSubmode;
 
-    @XmlElement(name = "WaterSubmode", defaultValue = "unknown")
     @XmlSchemaType(name = "NMTOKEN")
     @Transient
     protected WaterSubmodeEnumeration waterSubmode;
 
-    @XmlList
-    @XmlElement(name = "OtherTransportModes")
     @XmlSchemaType(name = "anySimpleType")
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;

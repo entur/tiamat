@@ -46,7 +46,6 @@ public class ClassRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElementRef(name = "ClassRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends ClassRefStructure>> classRef;
 
     /**

@@ -54,11 +54,8 @@ public class ComplexFeatureProjection_VersionStructure
     extends Projection_VersionStructure
 {
 
-    @XmlElement(name = "ProjectedFeartureRef")
     protected ComplexFeatureRefStructure projectedFeartureRef;
-    @XmlElement(name = "OntoFeatureRef")
     protected ComplexFeatureRefStructure ontoFeatureRef;
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected List<JAXBElement<? extends PointRefStructure>> pointRef;
     protected ComplexFeatureRefs_RelStructure features;
 

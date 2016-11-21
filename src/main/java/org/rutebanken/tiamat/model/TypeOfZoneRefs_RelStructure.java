@@ -45,7 +45,6 @@ public class TypeOfZoneRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfZoneRef")
     protected List<TypeOfZoneRefStructure> typeOfZoneRef;
 
     /**

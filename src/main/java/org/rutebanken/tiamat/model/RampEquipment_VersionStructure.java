@@ -59,28 +59,18 @@ public class RampEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Length")
     protected BigDecimal length;
-    @XmlElement(name = "Gradient")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger gradient;
-    @XmlElement(name = "GradientType")
     @XmlSchemaType(name = "string")
     protected GradientEnumeration gradientType;
-    @XmlElement(name = "Pedestal")
     protected Boolean pedestal;
-    @XmlElement(name = "HandrailHeight")
     protected BigDecimal handrailHeight;
-    @XmlElement(name = "HandrailType")
     @XmlSchemaType(name = "string")
     protected HandrailEnumeration handrailType;
-    @XmlElement(name = "TactileGuidanceStrips")
     protected Boolean tactileGuidanceStrips;
-    @XmlElement(name = "VisualGuidanceBands")
     protected Boolean visualGuidanceBands;
-    @XmlElement(name = "Temporary")
     protected Boolean temporary;
-    @XmlElement(name = "SuitableForCycles")
     protected Boolean suitableForCycles;
 
     /**

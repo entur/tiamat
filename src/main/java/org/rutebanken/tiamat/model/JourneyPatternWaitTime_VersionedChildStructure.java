@@ -48,7 +48,6 @@ public class JourneyPatternWaitTime_VersionedChildStructure
     extends JourneyWaitTime_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "JourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends JourneyPatternRefStructure> journeyPatternRef;
 
     /**

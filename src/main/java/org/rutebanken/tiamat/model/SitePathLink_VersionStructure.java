@@ -55,17 +55,13 @@ public class SitePathLink_VersionStructure
     extends PathLink_VersionStructure
 {
 
-    @XmlElement(name = "SiteRef")
     protected SiteRefStructure siteRef;
-    @XmlElement(name = "LevelRef")
     protected LevelRefStructure levelRef;
-    @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
     protected CheckConstraints_RelStructure checkConstraints;
     protected EquipmentPlaces_RelStructure equipmentPlaces;
     protected PlaceEquipments_RelStructure placeEquipments;
     protected LocalServices_RelStructure localServices;
-    @XmlElement(name = "Label")
     protected MultilingualStringEntity label;
 
     /**

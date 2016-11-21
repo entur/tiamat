@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "NuisanceFacilityEnumeration")
-@XmlEnum
 public enum NuisanceFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("smoking")
     SMOKING("smoking"),
-    @XmlEnumValue("noSmoking")
     NO_SMOKING("noSmoking"),
-    @XmlEnumValue("mobilePhoneUseZone")
     MOBILE_PHONE_USE_ZONE("mobilePhoneUseZone"),
-    @XmlEnumValue("mobilePhoneFreeZone")
     MOBILE_PHONE_FREE_ZONE("mobilePhoneFreeZone");
     private final String value;
 

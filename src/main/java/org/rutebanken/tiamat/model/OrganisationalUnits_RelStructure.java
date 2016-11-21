@@ -47,9 +47,6 @@ public class OrganisationalUnits_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "OrganisationalUnitRef", type = OrganisationalUnitRefStructure.class),
-        @XmlElement(name = "OrganisationalUnit", type = OrganisationalUnit.class)
     })
     protected List<Object> organisationalUnitRefOrOrganisationalUnit;
 

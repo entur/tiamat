@@ -47,9 +47,6 @@ public class PointOfInterestClassificationsViews_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "PointOfInterestClassificationRef", type = PointOfInterestClassificationRefStructure.class),
-        @XmlElement(name = "PointOfInterestClassificationView", type = PointOfInterestClassification_DerivedViewStructure.class)
     })
     protected List<Object> pointOfInterestClassificationRefOrPointOfInterestClassificationView;
 

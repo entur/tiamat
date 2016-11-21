@@ -45,10 +45,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class HalfOpenTimeRangeStructure {
 
-    @XmlElement(name = "StartTime", required = true)
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar startTime;
-    @XmlElement(name = "EndTime")
     @XmlSchemaType(name = "time")
     protected XMLGregorianCalendar endTime;
 

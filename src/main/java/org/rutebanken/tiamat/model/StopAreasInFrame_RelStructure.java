@@ -45,7 +45,6 @@ public class StopAreasInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "StopArea", required = true)
     protected List<StopArea> stopArea;
 
     /**

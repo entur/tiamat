@@ -39,32 +39,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "HolidayTypeEnumeration")
-@XmlEnum
 public enum HolidayTypeEnumeration {
 
-    @XmlEnumValue("AnyDay")
     ANY_DAY("AnyDay"),
-    @XmlEnumValue("WorkingDay")
     WORKING_DAY("WorkingDay"),
-    @XmlEnumValue("SchoolDay")
     SCHOOL_DAY("SchoolDay"),
-    @XmlEnumValue("NotHoliday")
     NOT_HOLIDAY("NotHoliday"),
-    @XmlEnumValue("NotWorkingDay")
     NOT_WORKING_DAY("NotWorkingDay"),
-    @XmlEnumValue("NotSchoolDay")
     NOT_SCHOOL_DAY("NotSchoolDay"),
-    @XmlEnumValue("AnyHoliday")
     ANY_HOLIDAY("AnyHoliday"),
-    @XmlEnumValue("LocalHoliday")
     LOCAL_HOLIDAY("LocalHoliday"),
-    @XmlEnumValue("RegionalHoliday")
     REGIONAL_HOLIDAY("RegionalHoliday"),
-    @XmlEnumValue("NationalHoliday")
     NATIONAL_HOLIDAY("NationalHoliday"),
-    @XmlEnumValue("HolidayDisplacementDay")
     HOLIDAY_DISPLACEMENT_DAY("HolidayDisplacementDay"),
-    @XmlEnumValue("EveOfHoliday")
     EVE_OF_HOLIDAY("EveOfHoliday");
     private final String value;
 

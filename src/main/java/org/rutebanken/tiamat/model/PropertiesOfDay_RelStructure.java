@@ -45,7 +45,6 @@ public class PropertiesOfDay_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PropertyOfDay", required = true)
     protected List<PropertyOfDay> propertyOfDay;
 
     /**

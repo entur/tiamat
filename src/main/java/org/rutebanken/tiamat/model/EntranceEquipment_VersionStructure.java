@@ -64,39 +64,23 @@ public class EntranceEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Door")
     protected Boolean door;
-    @XmlElement(name = "KeptOpen")
     protected Boolean keptOpen;
-    @XmlElement(name = "RevolvingDoor")
     protected Boolean revolvingDoor;
-    @XmlElement(name = "Barrier")
     protected Boolean barrier;
-    @XmlElement(name = "NumberOfGates")
     protected BigInteger numberOfGates;
-    @XmlElement(name = "Staffing")
     @XmlSchemaType(name = "normalizedString")
     protected StaffingEnumeration staffing;
-    @XmlElement(name = "EntranceRequiresStaffing")
     protected Boolean entranceRequiresStaffing;
-    @XmlElement(name = "EntranceRequiresTicket")
     protected Boolean entranceRequiresTicket;
-    @XmlElement(name = "EntranceRequiresPassport")
     protected Boolean entranceRequiresPassport;
-    @XmlElement(name = "AcousticSensor")
     protected Boolean acousticSensor;
-    @XmlElement(name = "AutomaticDoor")
     protected Boolean automaticDoor;
-    @XmlElement(name = "GlassDoor")
     protected Boolean glassDoor;
-    @XmlElement(name = "WheelchairPassable")
     protected Boolean wheelchairPassable;
-    @XmlElement(name = "WheechairUnaided")
     protected Boolean wheechairUnaided;
-    @XmlElement(name = "EntranceAttention")
     @XmlSchemaType(name = "string")
     protected EntranceAttentionEnumeration entranceAttention;
-    @XmlElement(name = "SuitableForCycles")
     protected Boolean suitableForCycles;
 
     /**

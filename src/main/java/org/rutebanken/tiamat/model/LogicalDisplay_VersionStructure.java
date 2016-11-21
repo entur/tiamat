@@ -49,9 +49,7 @@ public class LogicalDisplay_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
     protected DisplayAssignments_RelStructure displayAssignments;
 

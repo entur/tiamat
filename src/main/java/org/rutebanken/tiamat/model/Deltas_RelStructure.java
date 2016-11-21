@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Deltas_RelStructure {
 
-    @XmlElement(name = "Delta", required = true)
     protected List<DeltaStructure> delta;
 
     /**

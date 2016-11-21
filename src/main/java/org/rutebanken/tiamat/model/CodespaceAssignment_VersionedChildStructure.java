@@ -52,15 +52,6 @@ public class CodespaceAssignment_VersionedChildStructure
     extends VersionedChildStructure
 {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "Description", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "StartDate", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "AdministrativeZoneRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "Codespace", namespace = "http://www.netex.org.uk/netex", type = Codespace.class, required = false),
-        @XmlElementRef(name = "CodespaceRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "EndDate", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "NameOfClass", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "CodePrefix", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     })
     protected List<Object> rest;
 

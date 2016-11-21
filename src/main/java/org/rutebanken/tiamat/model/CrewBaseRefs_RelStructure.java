@@ -45,7 +45,6 @@ public class CrewBaseRefs_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CrewBaseRef", required = true)
     protected List<CrewBaseRefStructure> crewBaseRef;
 
     /**

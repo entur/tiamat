@@ -45,7 +45,6 @@ public class GroupOfPoints_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "GroupOfPoints", required = true)
     protected List<GroupOfPoints> groupOfPoints;
 
     /**

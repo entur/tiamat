@@ -37,33 +37,22 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CouchetteFacilityEnumeration")
-@XmlEnum
 public enum CouchetteFacilityEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("T2")
     T_2("T2"),
-    @XmlEnumValue("T3")
     T_3("T3"),
-    @XmlEnumValue("C1")
     C_1("C1"),
-    @XmlEnumValue("C2")
     C_2("C2"),
-    @XmlEnumValue("C4")
     C_4("C4"),
 
     /**
      * pti23_4_1
      * 
      */
-    @XmlEnumValue("C5")
     C_5("C5"),
-    @XmlEnumValue("C6")
     C_6("C6"),
-    @XmlEnumValue("wheelchair")
     WHEELCHAIR("wheelchair"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

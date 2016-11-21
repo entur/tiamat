@@ -45,10 +45,8 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class RoadNumberRangeStructure {
 
-    @XmlElement(name = "FromNumber")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger fromNumber;
-    @XmlElement(name = "ToNumber")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger toNumber;
 

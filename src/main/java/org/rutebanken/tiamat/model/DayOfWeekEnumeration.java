@@ -38,30 +38,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "DayOfWeekEnumeration")
-@XmlEnum
 public enum DayOfWeekEnumeration {
 
-    @XmlEnumValue("Monday")
     MONDAY("Monday"),
-    @XmlEnumValue("Tuesday")
     TUESDAY("Tuesday"),
-    @XmlEnumValue("Wednesday")
     WEDNESDAY("Wednesday"),
-    @XmlEnumValue("Thursday")
     THURSDAY("Thursday"),
-    @XmlEnumValue("Friday")
     FRIDAY("Friday"),
-    @XmlEnumValue("Saturday")
     SATURDAY("Saturday"),
-    @XmlEnumValue("Sunday")
     SUNDAY("Sunday"),
-    @XmlEnumValue("Everyday")
     EVERYDAY("Everyday"),
-    @XmlEnumValue("Weekdays")
     WEEKDAYS("Weekdays"),
-    @XmlEnumValue("Weekend")
     WEEKEND("Weekend"),
-    @XmlEnumValue("none")
     NONE("none");
     private final String value;
 

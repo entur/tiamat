@@ -57,20 +57,13 @@ public class TrainStopAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {
 
-    @XmlElementRef(name = "PassengerStopAssignmentRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PassengerStopAssignmentRefStructure> passengerStopAssignmentRef;
-    @XmlElement(name = "TrainRef")
     protected TrainRefStructure trainRef;
-    @XmlElement(name = "TrainComponentRef")
     protected TrainComponentRefStructure trainComponentRef;
-    @XmlElement(name = "TrainComponentView")
     protected TrainComponentView trainComponentView;
-    @XmlElement(name = "PositionOfTrainElement")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger positionOfTrainElement;
-    @XmlElement(name = "BoardingPositionRef")
     protected BoardingPositionRefStructure boardingPositionRef;
-    @XmlElement(name = "EntranceToVehicle")
     protected MultilingualStringEntity entranceToVehicle;
 
     /**

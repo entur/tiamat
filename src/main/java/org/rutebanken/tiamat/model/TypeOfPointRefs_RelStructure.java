@@ -45,7 +45,6 @@ public class TypeOfPointRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TypeOfPointRef")
     protected List<TypeOfPointRefStructure> typeOfPointRef;
 
     /**

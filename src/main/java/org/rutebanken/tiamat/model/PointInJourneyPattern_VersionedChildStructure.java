@@ -56,18 +56,12 @@ public class PointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "PointRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    @XmlElement(name = "DestinationDisplayRef")
     protected DestinationDisplayRefStructure destinationDisplayRef;
-    @XmlElement(name = "DestinationDisplayView")
     protected DestinationDisplayView destinationDisplayView;
     protected Vias_RelStructure vias;
-    @XmlElement(name = "FlexiblePointProperties")
     protected FlexiblePointProperties flexiblePointProperties;
-    @XmlElement(name = "ChangeOfDestinationDisplay")
     protected Boolean changeOfDestinationDisplay;
-    @XmlElement(name = "ChangeOfServiceRequirements")
     protected Boolean changeOfServiceRequirements;
     protected NoticeAssignments noticeAssignments;
 

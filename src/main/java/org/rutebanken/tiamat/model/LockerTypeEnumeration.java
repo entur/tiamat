@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LockerTypeEnumeration")
-@XmlEnum
 public enum LockerTypeEnumeration {
 
-    @XmlEnumValue("leftLuggageOffice")
     LEFT_LUGGAGE_OFFICE("leftLuggageOffice"),
-    @XmlEnumValue("lockers")
     LOCKERS("lockers"),
-    @XmlEnumValue("bikeRack")
     BIKE_RACK("bikeRack"),
-    @XmlEnumValue("bikeCarriage")
     BIKE_CARRIAGE("bikeCarriage"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

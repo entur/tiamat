@@ -45,7 +45,6 @@ public class PlacesInSequence_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "PlaceInSequence", required = true)
     protected List<PlaceInSequence> placeInSequence;
 
     /**

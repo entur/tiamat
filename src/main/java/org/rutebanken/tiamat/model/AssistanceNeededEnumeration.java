@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AssistanceNeededEnumeration")
-@XmlEnum
 public enum AssistanceNeededEnumeration {
 
-    @XmlEnumValue("levelAccess")
     LEVEL_ACCESS("levelAccess"),
-    @XmlEnumValue("stepNegotiation")
     STEP_NEGOTIATION("stepNegotiation"),
-    @XmlEnumValue("rampRequired")
     RAMP_REQUIRED("rampRequired"),
-    @XmlEnumValue("hoistRequired")
     HOIST_REQUIRED("hoistRequired"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

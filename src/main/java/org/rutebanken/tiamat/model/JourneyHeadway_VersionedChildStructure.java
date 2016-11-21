@@ -51,11 +51,8 @@ public class JourneyHeadway_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
 
-    @XmlElement(name = "ScheduledHeadwayInterval")
     protected Duration scheduledHeadwayInterval;
-    @XmlElement(name = "MinimumHeadwayInterval")
     protected Duration minimumHeadwayInterval;
-    @XmlElement(name = "MaximumHeadwayInterval")
     protected Duration maximumHeadwayInterval;
 
     /**

@@ -49,9 +49,7 @@ public class TypeOfValidity_ValueStructure
     extends TypeOfValue_VersionStructure
 {
 
-    @XmlElement(name = "Periodicity")
     protected Duration periodicity;
-    @XmlElement(name = "Nature")
     @XmlSchemaType(name = "normalizedString")
     protected FrameNatureEnumeration nature;
     protected ClassRefs_RelStructure classes;

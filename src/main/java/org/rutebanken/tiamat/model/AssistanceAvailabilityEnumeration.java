@@ -32,7 +32,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AssistanceAvailabilityEnumeration")
-@XmlEnum
 public enum AssistanceAvailabilityEnumeration {
 
 
@@ -40,35 +39,30 @@ public enum AssistanceAvailabilityEnumeration {
      * Assistance is not  available.
      * 
      */
-    @XmlEnumValue("none")
     NONE("none"),
 
     /**
      * Assistance is nornally available.
      * 
      */
-    @XmlEnumValue("available")
     AVAILABLE("available"),
 
     /**
      * Assistance is  available if booked.
      * 
      */
-    @XmlEnumValue("availableIfBooked")
     AVAILABLE_IF_BOOKED("availableIfBooked"),
 
     /**
      * Assistance is   available at certain times.
      * 
      */
-    @XmlEnumValue("availableAtCertainTimes")
     AVAILABLE_AT_CERTAIN_TIMES("availableAtCertainTimes"),
 
     /**
      * Not known if assistance is available.
      * 
      */
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown");
     private final String value;
 

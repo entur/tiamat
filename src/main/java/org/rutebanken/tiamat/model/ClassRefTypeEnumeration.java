@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "ClassRefTypeEnumeration")
-@XmlEnum
 public enum ClassRefTypeEnumeration {
 
 
@@ -38,21 +37,18 @@ public enum ClassRefTypeEnumeration {
      * Include elements that meet selection criteria (e.g. validity condition).
      * 
      */
-    @XmlEnumValue("members")
     MEMBERS("members"),
 
     /**
      * Include elements that are referenced by primary element. E.g. TYPES OF VALUE, OPERATOR etc.
      * 
      */
-    @XmlEnumValue("memberReferences")
     MEMBER_REFERENCES("memberReferences"),
 
     /**
      * Include all elements.
      * 
      */
-    @XmlEnumValue("all")
     ALL("all");
     private final String value;
 

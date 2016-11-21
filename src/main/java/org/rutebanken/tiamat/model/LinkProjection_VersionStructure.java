@@ -52,17 +52,11 @@ public class LinkProjection_VersionStructure
     extends Projection_VersionStructure
 {
 
-    @XmlElement(name = "ProjectedLinkRef")
     protected LinkRefStructure projectedLinkRef;
-    @XmlElement(name = "ProjectToLinkRef")
     protected LinkRefStructure projectToLinkRef;
-    @XmlElement(name = "StartPointOnLinkRef")
     protected PointOnLinkRefStructure startPointOnLinkRef;
-    @XmlElement(name = "StartPointOnLinkByValue")
     protected PointOnLinkByValueStructure startPointOnLinkByValue;
-    @XmlElement(name = "EndPointOnLinkRef")
     protected PointOnLinkRefStructure endPointOnLinkRef;
-    @XmlElement(name = "EndPointOnLinkByValue")
     protected PointOnLinkByValueStructure endPointOnLinkByValue;
 
     /**

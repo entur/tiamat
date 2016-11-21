@@ -67,24 +67,16 @@ public class Line_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "TransportMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "TransportSubmode")
     protected TransportSubmodeStructure transportSubmode;
-    @XmlElement(name = "OperatorRef")
     protected OperatorRefStructure operatorRef;
-    @XmlElement(name = "TypeOfLineRef")
     protected TypeOfLineRefStructure typeOfLineRef;
 
     /**

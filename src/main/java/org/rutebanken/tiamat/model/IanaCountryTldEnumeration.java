@@ -275,7 +275,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "IanaCountryTldEnumeration")
-@XmlEnum
 public enum IanaCountryTldEnumeration {
 
 
@@ -283,1736 +282,1488 @@ public enum IanaCountryTldEnumeration {
      * Ascension Island.
      * 
      */
-    @XmlEnumValue("ac")
     AC("ac"),
 
     /**
      * Andorra.
      * 
      */
-    @XmlEnumValue("ad")
     AD("ad"),
 
     /**
      * United Arab Emirates.
      * 
      */
-    @XmlEnumValue("ae")
     AE("ae"),
 
     /**
      * Afghanistan.
      * 
      */
-    @XmlEnumValue("af")
     AF("af"),
 
     /**
      * Antigua and Barbuda.
      * 
      */
-    @XmlEnumValue("ag")
     AG("ag"),
 
     /**
      * Anguilla.
      * 
      */
-    @XmlEnumValue("ai")
     AI("ai"),
 
     /**
      * Albania.
      * 
      */
-    @XmlEnumValue("al")
     AL("al"),
 
     /**
      * Armenia.
      * 
      */
-    @XmlEnumValue("am")
     AM("am"),
 
     /**
      * Netherlands Antilles.
      * 
      */
-    @XmlEnumValue("an")
     AN("an"),
 
     /**
      * Angola.
      * 
      */
-    @XmlEnumValue("ao")
     AO("ao"),
 
     /**
      * Antarctica.
      * 
      */
-    @XmlEnumValue("aq")
     AQ("aq"),
 
     /**
      * Argentina.
      * 
      */
-    @XmlEnumValue("ar")
     AR("ar"),
 
     /**
      * American Samoa.
      * 
      */
-    @XmlEnumValue("as")
     AS("as"),
 
     /**
      * Austria.
      * 
      */
-    @XmlEnumValue("at")
     AT("at"),
 
     /**
      * Australia.
      * 
      */
-    @XmlEnumValue("au")
     AU("au"),
 
     /**
      * Aruba.
      * 
      */
-    @XmlEnumValue("aw")
     AW("aw"),
 
     /**
      * Azerbaijan.
      * 
      */
-    @XmlEnumValue("az")
     AZ("az"),
 
     /**
      * Aland Islands.
      * 
      */
-    @XmlEnumValue("ax")
     AX("ax"),
 
     /**
      * Bosnia and Herzegovina.
      * 
      */
-    @XmlEnumValue("ba")
     BA("ba"),
 
     /**
      * Barbados.
      * 
      */
-    @XmlEnumValue("bb")
     BB("bb"),
 
     /**
      * Bangladesh.
      * 
      */
-    @XmlEnumValue("bd")
     BD("bd"),
 
     /**
      * Belgium.
      * 
      */
-    @XmlEnumValue("be")
     BE("be"),
 
     /**
      * Burkina Faso.
      * 
      */
-    @XmlEnumValue("bf")
     BF("bf"),
 
     /**
      * Bulgaria.
      * 
      */
-    @XmlEnumValue("bg")
     BG("bg"),
 
     /**
      * Bahrain.
      * 
      */
-    @XmlEnumValue("bh")
     BH("bh"),
 
     /**
      * Burundi.
      * 
      */
-    @XmlEnumValue("bi")
     BI("bi"),
 
     /**
      * Benin.
      * 
      */
-    @XmlEnumValue("bj")
     BJ("bj"),
 
     /**
      * Bermuda.
      * 
      */
-    @XmlEnumValue("bm")
     BM("bm"),
 
     /**
      * Brunei Darussalam.
      * 
      */
-    @XmlEnumValue("bn")
     BN("bn"),
 
     /**
      * Bolivia.
      * 
      */
-    @XmlEnumValue("bo")
     BO("bo"),
 
     /**
      * Brazil.
      * 
      */
-    @XmlEnumValue("br")
     BR("br"),
 
     /**
      * Bahamas.
      * 
      */
-    @XmlEnumValue("bs")
     BS("bs"),
 
     /**
      * Bhutan.
      * 
      */
-    @XmlEnumValue("bt")
     BT("bt"),
 
     /**
      * Bouvet Island.
      * 
      */
-    @XmlEnumValue("bv")
     BV("bv"),
 
     /**
      * Botswana.
      * 
      */
-    @XmlEnumValue("bw")
     BW("bw"),
 
     /**
      * Belarus.
      * 
      */
-    @XmlEnumValue("by")
     BY("by"),
 
     /**
      * Belize.
      * 
      */
-    @XmlEnumValue("bz")
     BZ("bz"),
 
     /**
      * Canada.
      * 
      */
-    @XmlEnumValue("ca")
     CA("ca"),
 
     /**
      * Cocos (Keeling) Islands.
      * 
      */
-    @XmlEnumValue("cc")
     CC("cc"),
 
     /**
      * Congo, The Democratic Republic of the.
      * 
      */
-    @XmlEnumValue("cd")
     CD("cd"),
 
     /**
      * CEN tral African Republic.
      * 
      */
-    @XmlEnumValue("cf")
     CF("cf"),
 
     /**
      * Congo, Republic of.
      * 
      */
-    @XmlEnumValue("cg")
     CG("cg"),
 
     /**
      * Switzerland.
      * 
      */
-    @XmlEnumValue("ch")
     CH("ch"),
 
     /**
      * Cote d'Ivoire.
      * 
      */
-    @XmlEnumValue("ci")
     CI("ci"),
 
     /**
      * Cook Islands.
      * 
      */
-    @XmlEnumValue("ck")
     CK("ck"),
 
     /**
      * Chile.
      * 
      */
-    @XmlEnumValue("cl")
     CL("cl"),
 
     /**
      * Cameroon.
      * 
      */
-    @XmlEnumValue("cm")
     CM("cm"),
 
     /**
      * China.
      * 
      */
-    @XmlEnumValue("cn")
     CN("cn"),
 
     /**
      * Colombia.
      * 
      */
-    @XmlEnumValue("co")
     CO("co"),
 
     /**
      * Costa Rica.
      * 
      */
-    @XmlEnumValue("cr")
     CR("cr"),
 
     /**
      * Serbia and Montenegro.
      * 
      */
-    @XmlEnumValue("cs")
     CS("cs"),
 
     /**
      * Cuba.
      * 
      */
-    @XmlEnumValue("cu")
     CU("cu"),
 
     /**
      * Cape Verde.
      * 
      */
-    @XmlEnumValue("cv")
     CV("cv"),
 
     /**
      * Christmas Island.
      * 
      */
-    @XmlEnumValue("cx")
     CX("cx"),
 
     /**
      * Cyprus.
      * 
      */
-    @XmlEnumValue("cy")
     CY("cy"),
 
     /**
      * Czech Republic.
      * 
      */
-    @XmlEnumValue("cz")
     CZ("cz"),
 
     /**
      * Germany.
      * 
      */
-    @XmlEnumValue("de")
     DE("de"),
 
     /**
      * Djibouti.
      * 
      */
-    @XmlEnumValue("dj")
     DJ("dj"),
 
     /**
      * DenmarK.
      * 
      */
-    @XmlEnumValue("dk")
     DK("dk"),
 
     /**
      * Dominica.
      * 
      */
-    @XmlEnumValue("dm")
     DM("dm"),
 
     /**
      * Dominican Republic.
      * 
      */
-    @XmlEnumValue("do")
     DO("do"),
 
     /**
      * Algeria.
      * 
      */
-    @XmlEnumValue("dz")
     DZ("dz"),
 
     /**
      * Ecuador.
      * 
      */
-    @XmlEnumValue("ec")
     EC("ec"),
 
     /**
      * Estonia.
      * 
      */
-    @XmlEnumValue("ee")
     EE("ee"),
 
     /**
      * Egypt.
      * 
      */
-    @XmlEnumValue("eg")
     EG("eg"),
 
     /**
      * Western Sahara.
      * 
      */
-    @XmlEnumValue("eh")
     EH("eh"),
 
     /**
      * Eritrea.
      * 
      */
-    @XmlEnumValue("er")
     ER("er"),
 
     /**
      * Spain.
      * 
      */
-    @XmlEnumValue("es")
     ES("es"),
 
     /**
      * Ethiopia.
      * 
      */
-    @XmlEnumValue("et")
     ET("et"),
 
     /**
      * European Union.
      * 
      */
-    @XmlEnumValue("eu")
     EU("eu"),
 
     /**
      * Finland.
      * 
      */
-    @XmlEnumValue("fi")
     FI("fi"),
 
     /**
      * Fiji.
      * 
      */
-    @XmlEnumValue("fj")
     FJ("fj"),
 
     /**
      * Falkland Islands (Malvinas).
      * 
      */
-    @XmlEnumValue("fk")
     FK("fk"),
 
     /**
      * Micronesia, Federal State of.
      * 
      */
-    @XmlEnumValue("fm")
     FM("fm"),
 
     /**
      * Faroe Islands.
      * 
      */
-    @XmlEnumValue("fo")
     FO("fo"),
 
     /**
      * France.
      * 
      */
-    @XmlEnumValue("fr")
     FR("fr"),
 
     /**
      * Gabon.
      * 
      */
-    @XmlEnumValue("ga")
     GA("ga"),
 
     /**
      * United Kingdom.
      * 
      */
-    @XmlEnumValue("gb")
     GB("gb"),
 
     /**
      * Grenada.
      * 
      */
-    @XmlEnumValue("gd")
     GD("gd"),
 
     /**
      * Georgia.
      * 
      */
-    @XmlEnumValue("ge")
     GE("ge"),
 
     /**
      * French Guiana.
      * 
      */
-    @XmlEnumValue("gf")
     GF("gf"),
 
     /**
      * Guernsey.
      * 
      */
-    @XmlEnumValue("gg")
     GG("gg"),
 
     /**
      * Ghana.
      * 
      */
-    @XmlEnumValue("gh")
     GH("gh"),
 
     /**
      * Gibraltar.
      * 
      */
-    @XmlEnumValue("gi")
     GI("gi"),
 
     /**
      * Greenland.
      * 
      */
-    @XmlEnumValue("gl")
     GL("gl"),
 
     /**
      * Gambia.
      * 
      */
-    @XmlEnumValue("gm")
     GM("gm"),
 
     /**
      * Guinea.
      * 
      */
-    @XmlEnumValue("gn")
     GN("gn"),
 
     /**
      * Guadeloupe.
      * 
      */
-    @XmlEnumValue("gp")
     GP("gp"),
 
     /**
      * Equatorial Guinea.
      * 
      */
-    @XmlEnumValue("gq")
     GQ("gq"),
 
     /**
      * Greece.
      * 
      */
-    @XmlEnumValue("gr")
     GR("gr"),
 
     /**
      * South Georgia and the South Sandwich Islands.
      * 
      */
-    @XmlEnumValue("gs")
     GS("gs"),
 
     /**
      * Guatemala.
      * 
      */
-    @XmlEnumValue("gt")
     GT("gt"),
 
     /**
      * Guam.
      * 
      */
-    @XmlEnumValue("gu")
     GU("gu"),
 
     /**
      * Guinea-Bissau.
      * 
      */
-    @XmlEnumValue("gw")
     GW("gw"),
 
     /**
      * Guyana.
      * 
      */
-    @XmlEnumValue("gy")
     GY("gy"),
 
     /**
      * Hong Kong.
      * 
      */
-    @XmlEnumValue("hk")
     HK("hk"),
 
     /**
      * Heard and McDonald Islands.
      * 
      */
-    @XmlEnumValue("hm")
     HM("hm"),
 
     /**
      * Honduras.
      * 
      */
-    @XmlEnumValue("hn")
     HN("hn"),
 
     /**
      * Croatia/Hrvatska.
      * 
      */
-    @XmlEnumValue("hr")
     HR("hr"),
 
     /**
      * Haiti.
      * 
      */
-    @XmlEnumValue("ht")
     HT("ht"),
 
     /**
      * Hungary.
      * 
      */
-    @XmlEnumValue("hu")
     HU("hu"),
 
     /**
      * Indonesia.
      * 
      */
-    @XmlEnumValue("id")
     ID("id"),
 
     /**
      * Ireland.
      * 
      */
-    @XmlEnumValue("ie")
     IE("ie"),
 
     /**
      * Israel.
      * 
      */
-    @XmlEnumValue("il")
     IL("il"),
 
     /**
      * Isle of Man.
      * 
      */
-    @XmlEnumValue("im")
     IM("im"),
 
     /**
      * India.
      * 
      */
-    @XmlEnumValue("in")
     IN("in"),
 
     /**
      * British Indian Ocean Territory.
      * 
      */
-    @XmlEnumValue("io")
     IO("io"),
 
     /**
      * Iraq.
      * 
      */
-    @XmlEnumValue("iq")
     IQ("iq"),
 
     /**
      * Iran, Islamic Republic of.
      * 
      */
-    @XmlEnumValue("ir")
     IR("ir"),
 
     /**
      * Iceland.
      * 
      */
-    @XmlEnumValue("is")
     IS("is"),
 
     /**
      * Italy.
      * 
      */
-    @XmlEnumValue("it")
     IT("it"),
 
     /**
      * Jersey.
      * 
      */
-    @XmlEnumValue("je")
     JE("je"),
 
     /**
      * Jamaica.
      * 
      */
-    @XmlEnumValue("jm")
     JM("jm"),
 
     /**
      * Jordan.
      * 
      */
-    @XmlEnumValue("jo")
     JO("jo"),
 
     /**
      * Japan.
      * 
      */
-    @XmlEnumValue("jp")
     JP("jp"),
 
     /**
      * Kenya.
      * 
      */
-    @XmlEnumValue("ke")
     KE("ke"),
 
     /**
      * Kyrgyzstan.
      * 
      */
-    @XmlEnumValue("kg")
     KG("kg"),
 
     /**
      * Cambodia.
      * 
      */
-    @XmlEnumValue("kh")
     KH("kh"),
 
     /**
      * Kiribati.
      * 
      */
-    @XmlEnumValue("ki")
     KI("ki"),
 
     /**
      * Comoros.
      * 
      */
-    @XmlEnumValue("km")
     KM("km"),
 
     /**
      * Saint Kitts and Nevis.
      * 
      */
-    @XmlEnumValue("kn")
     KN("kn"),
 
     /**
      * Korea, Democratic People's Republic.
      * 
      */
-    @XmlEnumValue("kp")
     KP("kp"),
 
     /**
      * Korea, Republic of.
      * 
      */
-    @XmlEnumValue("kr")
     KR("kr"),
 
     /**
      * Kuwait.
      * 
      */
-    @XmlEnumValue("kw")
     KW("kw"),
 
     /**
      * Cayman Islands.
      * 
      */
-    @XmlEnumValue("ky")
     KY("ky"),
 
     /**
      * Kazakhstan.
      * 
      */
-    @XmlEnumValue("kz")
     KZ("kz"),
 
     /**
      * Lao People's Democratic Republic.
      * 
      */
-    @XmlEnumValue("la")
     LA("la"),
 
     /**
      * Lebanon.
      * 
      */
-    @XmlEnumValue("lb")
     LB("lb"),
 
     /**
      * Saint Lucia.
      * 
      */
-    @XmlEnumValue("lc")
     LC("lc"),
 
     /**
      * Liechtenstein.
      * 
      */
-    @XmlEnumValue("li")
     LI("li"),
 
     /**
      * Sri Lanka.
      * 
      */
-    @XmlEnumValue("lk")
     LK("lk"),
 
     /**
      * Liberia.
      * 
      */
-    @XmlEnumValue("lr")
     LR("lr"),
 
     /**
      * Lesotho.
      * 
      */
-    @XmlEnumValue("ls")
     LS("ls"),
 
     /**
      * Lithuania.
      * 
      */
-    @XmlEnumValue("lt")
     LT("lt"),
 
     /**
      * Luxembourg.
      * 
      */
-    @XmlEnumValue("lu")
     LU("lu"),
 
     /**
      * Latvia.
      * 
      */
-    @XmlEnumValue("lv")
     LV("lv"),
 
     /**
      * Libyan Arab Jamahiriya.
      * 
      */
-    @XmlEnumValue("ly")
     LY("ly"),
 
     /**
      * Morocco.
      * 
      */
-    @XmlEnumValue("ma")
     MA("ma"),
 
     /**
      * Monaco.
      * 
      */
-    @XmlEnumValue("mc")
     MC("mc"),
 
     /**
      * Moldova, Republic of.
      * 
      */
-    @XmlEnumValue("md")
     MD("md"),
 
     /**
      * Madagascar.
      * 
      */
-    @XmlEnumValue("mg")
     MG("mg"),
 
     /**
      * Marshall Islands.
      * 
      */
-    @XmlEnumValue("mh")
     MH("mh"),
 
     /**
      * Macedonia, The Former Yugoslav Republic of.
      * 
      */
-    @XmlEnumValue("mk")
     MK("mk"),
 
     /**
      * Mali.
      * 
      */
-    @XmlEnumValue("ml")
     ML("ml"),
 
     /**
      * Myanmar.
      * 
      */
-    @XmlEnumValue("mm")
     MM("mm"),
 
     /**
      * Mongolia.
      * 
      */
-    @XmlEnumValue("mn")
     MN("mn"),
 
     /**
      * Macau.
      * 
      */
-    @XmlEnumValue("mo")
     MO("mo"),
 
     /**
      * Northern Mariana Islands.
      * 
      */
-    @XmlEnumValue("mp")
     MP("mp"),
 
     /**
      * Martinique.
      * 
      */
-    @XmlEnumValue("mq")
     MQ("mq"),
 
     /**
      * Mauritania.
      * 
      */
-    @XmlEnumValue("mr")
     MR("mr"),
 
     /**
      * Montserrat.
      * 
      */
-    @XmlEnumValue("ms")
     MS("ms"),
 
     /**
      * Malta.
      * 
      */
-    @XmlEnumValue("mt")
     MT("mt"),
 
     /**
      * Mauritius.
      * 
      */
-    @XmlEnumValue("mu")
     MU("mu"),
 
     /**
      * Maldives.
      * 
      */
-    @XmlEnumValue("mv")
     MV("mv"),
 
     /**
      * Malawi.
      * 
      */
-    @XmlEnumValue("mw")
     MW("mw"),
 
     /**
      * Mexico.
      * 
      */
-    @XmlEnumValue("mx")
     MX("mx"),
 
     /**
      * Malaysia.
      * 
      */
-    @XmlEnumValue("my")
     MY("my"),
 
     /**
      * Mozambique.
      * 
      */
-    @XmlEnumValue("mz")
     MZ("mz"),
 
     /**
      * Namibia.
      * 
      */
-    @XmlEnumValue("na")
     NA("na"),
 
     /**
      * New Caledonia.
      * 
      */
-    @XmlEnumValue("nc")
     NC("nc"),
 
     /**
      * Niger.
      * 
      */
-    @XmlEnumValue("ne")
     NE("ne"),
 
     /**
      * Norfolk Island.
      * 
      */
-    @XmlEnumValue("nf")
     NF("nf"),
 
     /**
      * Nigeria.
      * 
      */
-    @XmlEnumValue("ng")
     NG("ng"),
 
     /**
      * Nicaragua.
      * 
      */
-    @XmlEnumValue("ni")
     NI("ni"),
 
     /**
      * Netherlands.
      * 
      */
-    @XmlEnumValue("nl")
     NL("nl"),
 
     /**
      * Norway.
      * 
      */
-    @XmlEnumValue("no")
     NO("no"),
 
     /**
      * Nepal.
      * 
      */
-    @XmlEnumValue("np")
     NP("np"),
 
     /**
      * Nauru.
      * 
      */
-    @XmlEnumValue("nr")
     NR("nr"),
 
     /**
      * Niue.
      * 
      */
-    @XmlEnumValue("nu")
     NU("nu"),
 
     /**
      * New Zealand.
      * 
      */
-    @XmlEnumValue("nz")
     NZ("nz"),
 
     /**
      * Oman.
      * 
      */
-    @XmlEnumValue("om")
     OM("om"),
 
     /**
      * Panama.
      * 
      */
-    @XmlEnumValue("pa")
     PA("pa"),
 
     /**
      * Peru.
      * 
      */
-    @XmlEnumValue("pe")
     PE("pe"),
 
     /**
      * French Polynesia.
      * 
      */
-    @XmlEnumValue("pf")
     PF("pf"),
 
     /**
      * Papua New Guinea.
      * 
      */
-    @XmlEnumValue("pg")
     PG("pg"),
 
     /**
      * Philippines.
      * 
      */
-    @XmlEnumValue("ph")
     PH("ph"),
 
     /**
      * Pakistan.
      * 
      */
-    @XmlEnumValue("pk")
     PK("pk"),
 
     /**
      * Poland.
      * 
      */
-    @XmlEnumValue("pl")
     PL("pl"),
 
     /**
      * Saint Pierre and Miquelon.
      * 
      */
-    @XmlEnumValue("pm")
     PM("pm"),
 
     /**
      * Pitcairn Island.
      * 
      */
-    @XmlEnumValue("pn")
     PN("pn"),
 
     /**
      * Puerto Rico.
      * 
      */
-    @XmlEnumValue("pr")
     PR("pr"),
 
     /**
      * Palestinian Territories.
      * 
      */
-    @XmlEnumValue("ps")
     PS("ps"),
 
     /**
      * Portugal.
      * 
      */
-    @XmlEnumValue("pt")
     PT("pt"),
 
     /**
      * Palau.
      * 
      */
-    @XmlEnumValue("pw")
     PW("pw"),
 
     /**
      * Paraguay.
      * 
      */
-    @XmlEnumValue("py")
     PY("py"),
 
     /**
      * Qatar.
      * 
      */
-    @XmlEnumValue("qa")
     QA("qa"),
 
     /**
      * Reunion Island.
      * 
      */
-    @XmlEnumValue("re")
     RE("re"),
 
     /**
      * Romania.
      * 
      */
-    @XmlEnumValue("ro")
     RO("ro"),
 
     /**
      * Russian Federation.
      * 
      */
-    @XmlEnumValue("ru")
     RU("ru"),
 
     /**
      * Rwanda.
      * 
      */
-    @XmlEnumValue("rw")
     RW("rw"),
 
     /**
      * Saudi Arabia.
      * 
      */
-    @XmlEnumValue("sa")
     SA("sa"),
 
     /**
      * Solomon Islands.
      * 
      */
-    @XmlEnumValue("sb")
     SB("sb"),
 
     /**
      * Seychelles.
      * 
      */
-    @XmlEnumValue("sc")
     SC("sc"),
 
     /**
      * Sudan.
      * 
      */
-    @XmlEnumValue("sd")
     SD("sd"),
 
     /**
      * Sweden.
      * 
      */
-    @XmlEnumValue("se")
     SE("se"),
 
     /**
      * Singapore.
      * 
      */
-    @XmlEnumValue("sg")
     SG("sg"),
 
     /**
      * Saint Helena.
      * 
      */
-    @XmlEnumValue("sh")
     SH("sh"),
 
     /**
      * Slovenia.
      * 
      */
-    @XmlEnumValue("si")
     SI("si"),
 
     /**
      * Svalbard and Jan Mayen Islands.
      * 
      */
-    @XmlEnumValue("sj")
     SJ("sj"),
 
     /**
      * Slovak Republic.
      * 
      */
-    @XmlEnumValue("sk")
     SK("sk"),
 
     /**
      * Sierra Leone.
      * 
      */
-    @XmlEnumValue("sl")
     SL("sl"),
 
     /**
      * San Marino.
      * 
      */
-    @XmlEnumValue("sm")
     SM("sm"),
 
     /**
      * Senegal.
      * 
      */
-    @XmlEnumValue("sn")
     SN("sn"),
 
     /**
      * Somalia.
      * 
      */
-    @XmlEnumValue("so")
     SO("so"),
 
     /**
      * Suriname.
      * 
      */
-    @XmlEnumValue("sr")
     SR("sr"),
 
     /**
      * Sao Tome and Principe.
      * 
      */
-    @XmlEnumValue("st")
     ST("st"),
 
     /**
      * El Salvador.
      * 
      */
-    @XmlEnumValue("sv")
     SV("sv"),
 
     /**
      * Syrian Arab Republic.
      * 
      */
-    @XmlEnumValue("sy")
     SY("sy"),
 
     /**
      * Swaziland.
      * 
      */
-    @XmlEnumValue("sz")
     SZ("sz"),
 
     /**
      * Turks and Caicos Islands.
      * 
      */
-    @XmlEnumValue("tc")
     TC("tc"),
 
     /**
      * Chad.
      * 
      */
-    @XmlEnumValue("td")
     TD("td"),
 
     /**
      * French Southern Territories.
      * 
      */
-    @XmlEnumValue("tf")
     TF("tf"),
 
     /**
      * Togo.
      * 
      */
-    @XmlEnumValue("tg")
     TG("tg"),
 
     /**
      * Thailand.
      * 
      */
-    @XmlEnumValue("th")
     TH("th"),
 
     /**
      * Tajikistan.
      * 
      */
-    @XmlEnumValue("tj")
     TJ("tj"),
 
     /**
      * Tokelau.
      * 
      */
-    @XmlEnumValue("tk")
     TK("tk"),
 
     /**
      * Timor-Leste.
      * 
      */
-    @XmlEnumValue("tl")
     TL("tl"),
 
     /**
      * Turkmenistan.
      * 
      */
-    @XmlEnumValue("tm")
     TM("tm"),
 
     /**
      * Tunisia.
      * 
      */
-    @XmlEnumValue("tn")
     TN("tn"),
 
     /**
      * Tonga.
      * 
      */
-    @XmlEnumValue("to")
     TO("to"),
 
     /**
      * East Timor.
      * 
      */
-    @XmlEnumValue("tp")
     TP("tp"),
 
     /**
      * Turkey.
      * 
      */
-    @XmlEnumValue("tr")
     TR("tr"),
 
     /**
      * Trinidad and Tobago.
      * 
      */
-    @XmlEnumValue("tt")
     TT("tt"),
 
     /**
      * Tuvalu.
      * 
      */
-    @XmlEnumValue("tv")
     TV("tv"),
 
     /**
      * Taiwan.
      * 
      */
-    @XmlEnumValue("tw")
     TW("tw"),
 
     /**
      * Tanzania.
      * 
      */
-    @XmlEnumValue("tz")
     TZ("tz"),
 
     /**
      * Ukraine.
      * 
      */
-    @XmlEnumValue("ua")
     UA("ua"),
 
     /**
      * Uganda.
      * 
      */
-    @XmlEnumValue("ug")
     UG("ug"),
 
     /**
      * United Kingdom.
      * 
      */
-    @XmlEnumValue("uk")
     UK("uk"),
 
     /**
      * United States Minor Outlying Islands.
      * 
      */
-    @XmlEnumValue("um")
     UM("um"),
 
     /**
      * United States.
      * 
      */
-    @XmlEnumValue("us")
     US("us"),
 
     /**
      * Uruguay.
      * 
      */
-    @XmlEnumValue("uy")
     UY("uy"),
 
     /**
      * Uzbekistan.
      * 
      */
-    @XmlEnumValue("uz")
     UZ("uz"),
 
     /**
      * Holy See (Vatican City State).
      * 
      */
-    @XmlEnumValue("va")
     VA("va"),
 
     /**
      * Saint Vincent and the Grenadines.
      * 
      */
-    @XmlEnumValue("vc")
     VC("vc"),
 
     /**
      * Venezuela.
      * 
      */
-    @XmlEnumValue("ve")
     VE("ve"),
 
     /**
      * Virgin Islands, British.
      * 
      */
-    @XmlEnumValue("vg")
     VG("vg"),
 
     /**
      * Virgin Islands, US.
      * 
      */
-    @XmlEnumValue("vi")
     VI("vi"),
 
     /**
      * Vietnam.
      * 
      */
-    @XmlEnumValue("vn")
     VN("vn"),
 
     /**
      * Vanuatu.
      * 
      */
-    @XmlEnumValue("vu")
     VU("vu"),
 
     /**
      * Wallis and Futuna Islands.
      * 
      */
-    @XmlEnumValue("wf")
     WF("wf"),
 
     /**
      * Samoa.
      * 
      */
-    @XmlEnumValue("ws")
     WS("ws"),
 
     /**
      * Yemen.
      * 
      */
-    @XmlEnumValue("ye")
     YE("ye"),
 
     /**
      * Mayotte.
      * 
      */
-    @XmlEnumValue("yt")
     YT("yt"),
 
     /**
      * Yugoslavia.
      * 
      */
-    @XmlEnumValue("yu")
     YU("yu"),
 
     /**
      * South Africa.
      * 
      */
-    @XmlEnumValue("za")
     ZA("za"),
 
     /**
      * Zambia.
      * 
      */
-    @XmlEnumValue("zm")
     ZM("zm"),
 
     /**
      * Zimbabwe.
      * 
      */
-    @XmlEnumValue("zw")
     ZW("zw");
     private final String value;
 

@@ -29,12 +29,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PathDirectionEnumeration")
-@XmlEnum
 public enum PathDirectionEnumeration {
 
-    @XmlEnumValue("oneWay")
     ONE_WAY("oneWay"),
-    @XmlEnumValue("twoWay")
     TWO_WAY("twoWay");
     private final String value;
 

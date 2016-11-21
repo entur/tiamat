@@ -45,7 +45,6 @@ public class TopographicPlacesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "TopographicPlace", required = true)
     protected List<TopographicPlace> topographicPlace;
 
     /**

@@ -49,10 +49,8 @@ public class PlaceLighting_VersionStructure
     extends AccessEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Lighting")
     @XmlSchemaType(name = "normalizedString")
     protected LightingEnumeration lighting;
-    @XmlElement(name = "AlwaysLit")
     protected Boolean alwaysLit;
 
     /**

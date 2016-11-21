@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "UicRateTypeEnumeration")
-@XmlEnum
 public enum UicRateTypeEnumeration {
 
-    @XmlEnumValue("normal")
     NORMAL("normal"),
-    @XmlEnumValue("discountInTrainOtherThanTGV")
     DISCOUNT_IN_TRAIN_OTHER_THAN_TGV("discountInTrainOtherThanTGV"),
-    @XmlEnumValue("specialFare")
     SPECIAL_FARE("specialFare"),
-    @XmlEnumValue("supplement")
     SUPPLEMENT("supplement"),
-    @XmlEnumValue("noPublishedTariff")
     NO_PUBLISHED_TARIFF("noPublishedTariff");
     private final String value;
 

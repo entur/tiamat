@@ -59,25 +59,17 @@ public class DestinationDisplay_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "SideText")
     protected MultilingualStringEntity sideText;
-    @XmlElement(name = "FrontText")
     protected MultilingualStringEntity frontText;
-    @XmlElement(name = "DriverDisplayText")
     protected MultilingualStringEntity driverDisplayText;
-    @XmlElement(name = "ShortCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String shortCode;
-    @XmlElement(name = "PublicCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String publicCode;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
     protected Vias_RelStructure vias;
     protected Variants variants;

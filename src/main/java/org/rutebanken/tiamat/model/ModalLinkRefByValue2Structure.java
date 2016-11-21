@@ -57,13 +57,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class ModalLinkRefByValue2Structure {
 
-    @XmlElement(name = "FromPointRef", required = true)
     protected PointRefStructure fromPointRef;
-    @XmlElement(name = "ToPointRef", required = true)
     protected PointRefStructure toPointRef;
-    @XmlElement(name = "TypeOfLinkRef")
     protected TypeOfLinkRefStructure typeOfLinkRef;
-    @XmlElement(name = "VehicleMode")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllModesEnumeration vehicleMode;
     @XmlAttribute(name = "nameOfClass")

@@ -45,9 +45,7 @@ public class GroupMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {
 
-    @XmlElement(name = "GroupRef")
     protected VersionOfObjectRefStructure groupRef;
-    @XmlElement(name = "MemberObjectRef", required = true)
     protected VersionOfObjectRefStructure memberObjectRef;
 
     /**

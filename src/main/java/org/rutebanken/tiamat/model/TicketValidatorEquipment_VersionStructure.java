@@ -51,8 +51,6 @@ public class TicketValidatorEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {
 
-    @XmlList
-    @XmlElement(name = "TicketValidatorType")
     @XmlSchemaType(name = "anySimpleType")
     protected List<TicketValidatorEnumeration> ticketValidatorType;
 

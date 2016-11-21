@@ -57,21 +57,14 @@ public abstract class SignEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {
 
-    @XmlElement(name = "Height")
     protected BigDecimal height;
-    @XmlElement(name = "Width")
     protected BigDecimal width;
-    @XmlElement(name = "HeightFromFloor")
     protected BigDecimal heightFromFloor;
-    @XmlElement(name = "Placement")
     protected MultilingualStringEntity placement;
-    @XmlElement(name = "BrandGraphic")
     @XmlSchemaType(name = "anyURI")
     protected String brandGraphic;
-    @XmlElement(name = "SignGraphic")
     @XmlSchemaType(name = "anyURI")
     protected String signGraphic;
-    @XmlElement(name = "MachineReadable")
     protected Boolean machineReadable;
 
     /**

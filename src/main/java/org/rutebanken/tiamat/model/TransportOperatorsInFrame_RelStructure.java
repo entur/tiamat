@@ -47,9 +47,6 @@ public class TransportOperatorsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "Authority", type = Authority.class),
-        @XmlElement(name = "Operator", type = Operator.class)
     })
     protected List<Organisation_VersionStructure> authorityOrOperator;
 

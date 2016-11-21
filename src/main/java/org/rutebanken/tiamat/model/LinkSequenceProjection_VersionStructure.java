@@ -54,12 +54,9 @@ public class LinkSequenceProjection_VersionStructure
     extends Projection_VersionStructure
 {
 
-    @XmlElement(name = "ProjectedLinkSequenceRef")
     protected LinkSequenceRefStructure projectedLinkSequenceRef;
-    @XmlElement(name = "Distance")
     protected BigDecimal distance;
     protected PointRefs_RelStructure points;
-    @XmlElement(name = "LineString", namespace = "http://www.opengis.net/gml/3.2")
     protected LineStringType lineString;
 
     /**

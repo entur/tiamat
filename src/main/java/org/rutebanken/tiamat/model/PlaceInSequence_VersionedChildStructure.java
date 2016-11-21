@@ -53,13 +53,10 @@ public class PlaceInSequence_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {
 
-    @XmlElement(name = "PlaceRef")
     protected PlaceRefStructure placeRef;
-    @XmlElement(name = "BranchLevel")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String branchLevel;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
     protected OnwardLinks onwardLinks;
 

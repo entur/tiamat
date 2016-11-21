@@ -55,16 +55,11 @@ public class VersionFrame_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "TypeOfFrameRef")
     protected TypeOfFrameRefStructure typeOfFrameRef;
-    @XmlElement(name = "BaselineVersionFrameRef")
     protected VersionRefStructure baselineVersionFrameRef;
     protected Codespaces_RelStructure codespaces;
-    @XmlElement(name = "FrameDefaults")
     protected VersionFrameDefaultsStructure frameDefaults;
     protected Versions_RelStructure versions;
     protected Traces_RelStructure traces;

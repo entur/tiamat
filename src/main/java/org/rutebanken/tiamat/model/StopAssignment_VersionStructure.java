@@ -52,13 +52,9 @@ public class StopAssignment_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "BoardingUse", defaultValue = "true")
     protected Boolean boardingUse;
-    @XmlElement(name = "AlightingUse", defaultValue = "true")
     protected Boolean alightingUse;
-    @XmlElement(name = "PrivateCode")
     protected PrivateCodeStructure privateCode;
-    @XmlElement(name = "ScheduledStopPointRef")
     protected ScheduledStopPointRefStructure scheduledStopPointRef;
 
     /**

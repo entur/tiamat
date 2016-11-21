@@ -54,12 +54,9 @@ public class LineSection_VersionStructure
 {
 
     protected CommonSectionPointMembers_RelStructure reverseMembers;
-    @XmlElement(name = "SectionType", defaultValue = "trunk")
     @XmlSchemaType(name = "normalizedString")
     protected SectionTypeEnumeration sectionType;
-    @XmlElementRef(name = "LineRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends LineRefStructure> lineRef;
-    @XmlElementRef(name = "TransportOrganisationRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
 
     /**

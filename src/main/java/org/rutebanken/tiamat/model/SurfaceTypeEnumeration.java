@@ -37,28 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SurfaceTypeEnumeration")
-@XmlEnum
 public enum SurfaceTypeEnumeration {
 
-    @XmlEnumValue("asphalt")
     ASPHALT("asphalt"),
-    @XmlEnumValue("bricks")
     BRICKS("bricks"),
-    @XmlEnumValue("cobbles")
     COBBLES("cobbles"),
-    @XmlEnumValue("earth")
     EARTH("earth"),
-    @XmlEnumValue("grass")
     GRASS("grass"),
-    @XmlEnumValue("looseSurface")
     LOOSE_SURFACE("looseSurface"),
-    @XmlEnumValue("pavingStones")
     PAVING_STONES("pavingStones"),
-    @XmlEnumValue("roughSurface")
     ROUGH_SURFACE("roughSurface"),
-    @XmlEnumValue("smooth")
     SMOOTH("smooth"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

@@ -40,34 +40,20 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BoardingPositionTypeEnumeration")
-@XmlEnum
 public enum BoardingPositionTypeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("doorFromAirlineGate")
     DOOR_FROM_AIRLINE_GATE("doorFromAirlineGate"),
-    @XmlEnumValue("positionOnRailPlatform")
     POSITION_ON_RAIL_PLATFORM("positionOnRailPlatform"),
-    @XmlEnumValue("positionOnMetroPlatform")
     POSITION_ON_METRO_PLATFORM("positionOnMetroPlatform"),
-    @XmlEnumValue("positionAtCoachStop")
     POSITION_AT_COACH_STOP("positionAtCoachStop"),
-    @XmlEnumValue("positionAtBusStop")
     POSITION_AT_BUS_STOP("positionAtBusStop"),
-    @XmlEnumValue("boatGangway")
     BOAT_GANGWAY("boatGangway"),
-    @XmlEnumValue("ferryGangway")
     FERRY_GANGWAY("ferryGangway"),
-    @XmlEnumValue("telecabineplatform")
     TELECABINEPLATFORM("telecabineplatform"),
-    @XmlEnumValue("setDownPoint")
     SET_DOWN_POINT("setDownPoint"),
-    @XmlEnumValue("taxiBay")
     TAXI_BAY("taxiBay"),
-    @XmlEnumValue("vehicleLoadingRamp")
     VEHICLE_LOADING_RAMP("vehicleLoadingRamp"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

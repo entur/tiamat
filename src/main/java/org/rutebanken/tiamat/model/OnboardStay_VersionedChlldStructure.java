@@ -52,10 +52,8 @@ import javax.xml.datatype.Duration;
 public class OnboardStay_VersionedChlldStructure
     extends VersionedChildStructure
 {
-    @XmlElement(name = "BoardingPermisssion")
     @XmlSchemaType(name = "NMTOKEN")
     protected BoardingPermissionEnumeration boardingPermisssion;
-    @XmlElement(name = "Period")
     protected Duration period;
 
     /**

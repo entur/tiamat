@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "InterchangeWeightingEnumeration")
-@XmlEnum
 public enum InterchangeWeightingEnumeration {
 
-    @XmlEnumValue("noInterchange")
     NO_INTERCHANGE("noInterchange"),
-    @XmlEnumValue("interchangeAllowed")
     INTERCHANGE_ALLOWED("interchangeAllowed"),
-    @XmlEnumValue("recommendedInterchange")
     RECOMMENDED_INTERCHANGE("recommendedInterchange"),
-    @XmlEnumValue("preferredInterchange")
     PREFERRED_INTERCHANGE("preferredInterchange");
     private final String value;
 

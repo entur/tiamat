@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "SystemOfUnits")
-@XmlEnum
 public enum SystemOfUnits {
 
 
@@ -42,7 +41,6 @@ public enum SystemOfUnits {
      * Speed = Metres per second.
      * 
      */
-    @XmlEnumValue("SiMetres")
     SI_METRES("SiMetres"),
 
     /**
@@ -53,9 +51,7 @@ public enum SystemOfUnits {
      * Speed = Metres per second.
      * 
      */
-    @XmlEnumValue("SiKilometersAndMetres")
     SI_KILOMETERS_AND_METRES("SiKilometersAndMetres"),
-    @XmlEnumValue("Other")
     OTHER("Other");
     private final String value;
 

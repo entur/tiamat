@@ -45,7 +45,6 @@ public class TimebandRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "TimebandRef", required = true)
     protected List<TimebandRefStructure> timebandRef;
 
     /**

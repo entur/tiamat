@@ -62,37 +62,25 @@ public class PostalAddress_VersionStructure
     extends Address_VersionStructure
 {
 
-    @XmlElement(name = "HouseNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String houseNumber;
-    @XmlElement(name = "BuildingName")
     protected MultilingualStringEntity buildingName;
-    @XmlElement(name = "AddressLine1")
     protected MultilingualStringEntity addressLine1;
-    @XmlElement(name = "AddressLine2")
     protected MultilingualStringEntity addressLine2;
-    @XmlElement(name = "Street")
     protected MultilingualStringEntity street;
-    @XmlElement(name = "Town")
     protected MultilingualStringEntity town;
-    @XmlElement(name = "Suburb")
     protected MultilingualStringEntity suburb;
-    @XmlElement(name = "PostCode")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String postCode;
-    @XmlElement(name = "PostCodeExtension")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String postCodeExtension;
-    @XmlElement(name = "PostalRegion")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String postalRegion;
-    @XmlElement(name = "Province")
     protected MultilingualStringEntity province;
-    @XmlElement(name = "RoadAddressRef")
     protected AddressRefStructure roadAddressRef;
 
     /**

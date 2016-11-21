@@ -45,7 +45,6 @@ public class LineNetworksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "LineNetwork", required = true)
     protected List<LineNetwork> lineNetwork;
 
     /**

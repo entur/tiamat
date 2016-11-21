@@ -39,7 +39,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Views {
 
-    @XmlElement(name = "PathLinkView", required = true)
     protected PathLinkView pathLinkView;
 
     /**

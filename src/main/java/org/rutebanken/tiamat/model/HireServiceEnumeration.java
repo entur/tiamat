@@ -31,16 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "HireServiceEnumeration")
-@XmlEnum
 public enum HireServiceEnumeration {
 
-    @XmlEnumValue("cycleHire")
     CYCLE_HIRE("cycleHire"),
-    @XmlEnumValue("motorcycleHire")
     MOTORCYCLE_HIRE("motorcycleHire"),
-    @XmlEnumValue("carHire")
     CAR_HIRE("carHire"),
-    @XmlEnumValue("recreationalDeviceHire")
     RECREATIONAL_DEVICE_HIRE("recreationalDeviceHire");
     private final String value;
 

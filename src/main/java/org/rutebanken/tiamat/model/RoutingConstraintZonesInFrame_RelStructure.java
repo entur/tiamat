@@ -45,7 +45,6 @@ public class RoutingConstraintZonesInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "RoutingConstraintZone", required = true)
     protected List<RoutingConstraintZone> routingConstraintZone;
 
     /**

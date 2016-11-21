@@ -45,7 +45,6 @@ public class StairFlights_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "StairFlight", required = true)
     protected List<StairFlight> stairFlight;
 
     /**

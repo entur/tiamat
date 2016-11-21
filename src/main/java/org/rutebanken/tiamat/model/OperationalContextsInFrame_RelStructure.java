@@ -45,7 +45,6 @@ public class OperationalContextsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "OperationalContext", required = true)
     protected List<OperationalContext> operationalContext;
 
     /**

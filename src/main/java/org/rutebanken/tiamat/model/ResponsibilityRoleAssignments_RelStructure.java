@@ -45,7 +45,6 @@ public class ResponsibilityRoleAssignments_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "ResponsibilityRoleAssignment", required = true)
     protected List<ResponsibilityRoleAssignment_VersionedChildStructure> responsibilityRoleAssignment;
 
     /**

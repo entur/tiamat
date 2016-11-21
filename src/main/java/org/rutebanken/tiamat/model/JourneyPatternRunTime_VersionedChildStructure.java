@@ -46,7 +46,6 @@ public class JourneyPatternRunTime_VersionedChildStructure
     extends JourneyRunTime_VersionedChildStructure
 {
 
-    @XmlElementRef(name = "JourneyPatternRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends JourneyPatternRefStructure> journeyPatternRef;
 
     /**

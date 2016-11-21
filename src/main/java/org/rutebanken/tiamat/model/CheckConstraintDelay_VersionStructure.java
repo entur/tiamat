@@ -52,15 +52,10 @@ public class CheckConstraintDelay_VersionStructure
     extends Assignment_VersionStructure
 {
 
-    @XmlElement(name = "CheckConstraintRef")
     protected CheckConstraintRefStructure checkConstraintRef;
-    @XmlElement(name = "ClassOfUseRef")
     protected ClassOfUseRef classOfUseRef;
-    @XmlElement(name = "MinimumLikelyDelay")
     protected Duration minimumLikelyDelay;
-    @XmlElement(name = "AverageDelay")
     protected Duration averageDelay;
-    @XmlElement(name = "MaximumLikelyDelay")
     protected Duration maximumLikelyDelay;
 
     /**

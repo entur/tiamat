@@ -45,7 +45,6 @@ public class ValidityRuleParameterRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "ValidityRuleParameterRef", required = true)
     protected List<ValidityRuleParameterRefStructure> validityRuleParameterRef;
 
     /**

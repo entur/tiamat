@@ -51,11 +51,8 @@ public class NavigationPathAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {
 
-    @XmlElementRef(name = "ConnectionRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends ConnectionRefStructure> connectionRef;
-    @XmlElementRef(name = "SiteRef", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class, required = false)
     protected JAXBElement<? extends SiteRefStructure> siteRef;
-    @XmlElement(name = "NavigationPathRef")
     protected NavigationPathRefStructure navigationPathRef;
 
     /**

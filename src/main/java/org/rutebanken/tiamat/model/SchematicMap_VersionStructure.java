@@ -52,14 +52,10 @@ public class SchematicMap_VersionStructure
     extends DataManagedObjectStructure
 {
 
-    @XmlElement(name = "Name")
     protected MultilingualStringEntity name;
-    @XmlElement(name = "ShortName")
     protected MultilingualStringEntity shortName;
-    @XmlElement(name = "ImageUri")
     @XmlSchemaType(name = "anyURI")
     protected String imageUri;
-    @XmlElement(name = "DepictedObjectRef")
     protected VersionOfObjectRefStructure depictedObjectRef;
     protected SchematicMapMembers_RelStructure members;
 

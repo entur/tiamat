@@ -45,7 +45,6 @@ public class RouteRefs_RelStructure
     extends OneToManyRelationshipStructure
 {
 
-    @XmlElement(name = "RouteRef", required = true)
     protected List<RouteRefStructure> routeRef;
 
     /**

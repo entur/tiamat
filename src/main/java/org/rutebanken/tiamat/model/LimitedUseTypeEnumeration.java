@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "LimitedUseTypeEnumeration")
-@XmlEnum
 public enum LimitedUseTypeEnumeration {
 
 
@@ -41,37 +40,31 @@ public enum LimitedUseTypeEnumeration {
      * Stop may only be used for interchange, not for entrance or exit.
      * 
      */
-    @XmlEnumValue("interchangeOnly")
     INTERCHANGE_ONLY("interchangeOnly"),
 
     /**
      * Stop may not be reached from Road by a paved path.
      * 
      */
-    @XmlEnumValue("noDirectRoadAccess")
     NO_DIRECT_ROAD_ACCESS("noDirectRoadAccess"),
 
     /**
      * Stop may only be accessed by a long (>200m) walk from road.
      * 
      */
-    @XmlEnumValue("longWalkToAccess")
     LONG_WALK_TO_ACCESS("longWalkToAccess"),
 
     /**
      * Stop is an island or ferry stop that does not connect to rad network.
      * 
      */
-    @XmlEnumValue("isolated")
     ISOLATED("isolated"),
 
     /**
      * Stop has a very limited service.
      * 
      */
-    @XmlEnumValue("limitedService")
     LIMITED_SERVICE("limitedService"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

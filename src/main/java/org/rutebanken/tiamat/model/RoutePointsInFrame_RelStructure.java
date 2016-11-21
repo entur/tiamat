@@ -45,7 +45,6 @@ public class RoutePointsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "RoutePoint", required = true)
     protected List<RoutePoint> routePoint;
 
     /**

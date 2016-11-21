@@ -45,7 +45,6 @@ public class DisplayAssignmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "DisplayAssignment", required = true)
     protected List<DisplayAssignment> displayAssignment;
 
     /**

@@ -50,54 +50,30 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "AccessFeatureEnumeration")
-@XmlEnum
 public enum AccessFeatureEnumeration {
 
-    @XmlEnumValue("lift")
     LIFT("lift"),
-    @XmlEnumValue("escalator")
     ESCALATOR("escalator"),
-    @XmlEnumValue("freightElevator")
     FREIGHT_ELEVATOR("freightElevator"),
-    @XmlEnumValue("travelator")
     TRAVELATOR("travelator"),
-    @XmlEnumValue("ramp")
     RAMP("ramp"),
-    @XmlEnumValue("stairs")
     STAIRS("stairs"),
-    @XmlEnumValue("seriesOfStairs")
     SERIES_OF_STAIRS("seriesOfStairs"),
-    @XmlEnumValue("shuttle")
     SHUTTLE("shuttle"),
-    @XmlEnumValue("crossing")
     CROSSING("crossing"),
-    @XmlEnumValue("barrier")
     BARRIER("barrier"),
-    @XmlEnumValue("narrowEntrance")
     NARROW_ENTRANCE("narrowEntrance"),
-    @XmlEnumValue("hall")
     HALL("hall"),
-    @XmlEnumValue("concourse")
     CONCOURSE("concourse"),
-    @XmlEnumValue("confinedSpace")
     CONFINED_SPACE("confinedSpace"),
-    @XmlEnumValue("queueManagement")
     QUEUE_MANAGEMENT("queueManagement"),
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("other")
     OTHER("other"),
-    @XmlEnumValue("openSpace")
     OPEN_SPACE("openSpace"),
-    @XmlEnumValue("street")
     STREET("street"),
-    @XmlEnumValue("pavement")
     PAVEMENT("pavement"),
-    @XmlEnumValue("footpath")
     FOOTPATH("footpath"),
-    @XmlEnumValue("passage")
     PASSAGE("passage");
     private final String value;
 

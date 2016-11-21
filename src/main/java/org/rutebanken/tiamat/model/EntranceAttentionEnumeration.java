@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "EntranceAttentionEnumeration")
-@XmlEnum
 public enum EntranceAttentionEnumeration {
 
-    @XmlEnumValue("none")
     NONE("none"),
-    @XmlEnumValue("doorbell")
     DOORBELL("doorbell"),
-    @XmlEnumValue("helpPoint")
     HELP_POINT("helpPoint"),
-    @XmlEnumValue("intercom")
     INTERCOM("intercom"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

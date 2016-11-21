@@ -15,7 +15,6 @@ public abstract class SiteComponent_VersionStructure
     @Embedded
     protected LevelRefStructure levelRef;
 
-    @XmlElement(name = "ClassOfUseRef")
     @Transient
     protected ClassOfUseRef classOfUseRef;
 

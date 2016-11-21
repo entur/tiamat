@@ -46,7 +46,6 @@ public class StopAssignmentsInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElementRef(name = "StopAssignment", namespace = "http://www.netex.org.uk/netex", type = JAXBElement.class)
     protected List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment;
 
     /**

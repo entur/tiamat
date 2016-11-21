@@ -45,7 +45,6 @@ public class NetworksInFrame_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElement(name = "Network", required = true)
     protected List<Network> network;
 
     /**

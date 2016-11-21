@@ -47,48 +47,27 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "PaymentMethodEnumeration")
-@XmlEnum
 public enum PaymentMethodEnumeration {
 
-    @XmlEnumValue("cash")
     CASH("cash"),
-    @XmlEnumValue("cashAndCard")
     CASH_AND_CARD("cashAndCard"),
-    @XmlEnumValue("coin")
     COIN("coin"),
-    @XmlEnumValue("banknote")
     BANKNOTE("banknote"),
-    @XmlEnumValue("cheque")
     CHEQUE("cheque"),
-    @XmlEnumValue("travellersCheque")
     TRAVELLERS_CHEQUE("travellersCheque"),
-    @XmlEnumValue("postalOrder")
     POSTAL_ORDER("postalOrder"),
-    @XmlEnumValue("companyCheque")
     COMPANY_CHEQUE("companyCheque"),
-    @XmlEnumValue("creditCard")
     CREDIT_CARD("creditCard"),
-    @XmlEnumValue("debitCard")
     DEBIT_CARD("debitCard"),
-    @XmlEnumValue("cardsOnly")
     CARDS_ONLY("cardsOnly"),
-    @XmlEnumValue("travelCard")
     TRAVEL_CARD("travelCard"),
-    @XmlEnumValue("contactlessPaymentCard")
     CONTACTLESS_PAYMENT_CARD("contactlessPaymentCard"),
-    @XmlEnumValue("contactlessTravelCard")
     CONTACTLESS_TRAVEL_CARD("contactlessTravelCard"),
-    @XmlEnumValue("sms")
     SMS("sms"),
-    @XmlEnumValue("mobilePhone")
     MOBILE_PHONE("mobilePhone"),
-    @XmlEnumValue("voucher")
     VOUCHER("voucher"),
-    @XmlEnumValue("token")
     TOKEN("token"),
-    @XmlEnumValue("warrant")
     WARRANT("warrant"),
-    @XmlEnumValue("other")
     OTHER("other");
     private final String value;
 

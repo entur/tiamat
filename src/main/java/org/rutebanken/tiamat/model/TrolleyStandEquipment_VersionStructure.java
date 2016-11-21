@@ -57,16 +57,11 @@ public class TrolleyStandEquipment_VersionStructure
     extends SiteEquipment_VersionStructure
 {
 
-    @XmlElement(name = "FreeToUse")
     protected Boolean freeToUse;
-    @XmlElement(name = "Charge")
     protected BigDecimal charge;
-    @XmlElement(name = "Currency")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
     protected String currency;
-    @XmlList
-    @XmlElement(name = "PaymentMethods")
     @XmlSchemaType(name = "anySimpleType")
     protected List<PaymentMethodEnumeration> paymentMethods;
 

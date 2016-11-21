@@ -45,7 +45,6 @@ public class CodespaceAssignments_RelStructure
     extends StrictContainmentAggregationStructure
 {
 
-    @XmlElement(name = "CodespaceAssignment", required = true)
     protected List<CodespaceAssignment_VersionedChildStructure> codespaceAssignment;
 
     /**

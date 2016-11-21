@@ -47,9 +47,6 @@ public class VehicleEntrances_RelStructure
     extends ContainmentAggregationStructure
 {
 
-    @XmlElements({
-        @XmlElement(name = "VehicleEntranceRef", type = VehicleEntranceRefStructure.class),
-        @XmlElement(name = "VehicleEntrance", type = VehicleEntrance.class)
     })
     protected List<Object> vehicleEntranceRefOrVehicleEntrance;
 

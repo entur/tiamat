@@ -50,18 +50,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class PaymentByMobileStructure {
 
-    @XmlElement(name = "PhoneNumberToPay")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String phoneNumberToPay;
-    @XmlElement(name = "SupportPhoneNumber")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String supportPhoneNumber;
-    @XmlElement(name = "PaymentUrl")
     @XmlSchemaType(name = "anyURI")
     protected String paymentUrl;
-    @XmlElement(name = "PaymentAanyURLppDOownloadUrl")
     @XmlSchemaType(name = "anyURI")
     protected String paymentAanyURLppDOownloadUrl;
 

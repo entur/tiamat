@@ -54,13 +54,9 @@ public class OnwardTimingLink_DerivedViewStructure
     extends DerivedViewStructure
 {
 
-    @XmlElement(name = "TimingLinkInJourneyPatternRef")
     protected TimingLinkInJourneyPatternRefStructure timingLinkInJourneyPatternRef;
-    @XmlElement(name = "TimingLinkRef")
     protected TimingLinkRefStructure timingLinkRef;
-    @XmlElement(name = "ToPointRef")
     protected TimingPointRefStructure toPointRef;
-    @XmlElement(name = "RunTime")
     protected Duration runTime;
 
     /**

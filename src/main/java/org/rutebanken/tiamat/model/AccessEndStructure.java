@@ -46,12 +46,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class AccessEndStructure {
 
-    @XmlElement(name = "TransportMode", defaultValue = "all")
     @XmlSchemaType(name = "NMTOKEN")
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    @XmlElement(name = "PlaceRef")
     protected PlaceRefStructure placeRef;
-    @XmlElement(name = "PointRef")
     protected PointRefStructure pointRef;
 
     /**

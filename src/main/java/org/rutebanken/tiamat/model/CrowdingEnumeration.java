@@ -32,18 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CrowdingEnumeration")
-@XmlEnum
 public enum CrowdingEnumeration {
 
-    @XmlEnumValue("veryQuiet")
     VERY_QUIET("veryQuiet"),
-    @XmlEnumValue("quiet")
     QUIET("quiet"),
-    @XmlEnumValue("normal")
     NORMAL("normal"),
-    @XmlEnumValue("busy")
     BUSY("busy"),
-    @XmlEnumValue("veryBusy")
     VERY_BUSY("veryBusy");
     private final String value;
 

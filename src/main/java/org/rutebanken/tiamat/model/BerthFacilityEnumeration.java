@@ -30,14 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "BerthFacilityEnumeration")
-@XmlEnum
 public enum BerthFacilityEnumeration {
 
-    @XmlEnumValue("upper")
     UPPER("upper"),
-    @XmlEnumValue("lower")
     LOWER("lower"),
-    @XmlEnumValue("both")
     BOTH("both");
     private final String value;
 

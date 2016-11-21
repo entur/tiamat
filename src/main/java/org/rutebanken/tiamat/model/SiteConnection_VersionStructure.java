@@ -49,9 +49,7 @@ public class SiteConnection_VersionStructure
     extends Transfer_VersionStructure
 {
 
-    @XmlElement(name = "From")
     protected SiteConnectionEndStructure from;
-    @XmlElement(name = "To")
     protected SiteConnectionEndStructure to;
     protected NavigationPaths_RelStructure navigationPaths;
 

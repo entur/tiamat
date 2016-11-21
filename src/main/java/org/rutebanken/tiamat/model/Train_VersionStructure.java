@@ -46,7 +46,6 @@ public class Train_VersionStructure
     extends VehicleType_VersionStructure
 {
 
-    @XmlElement(name = "TrainSize")
     protected TrainSizeStructure trainSize;
     protected TrainComponents_RelStructure components;
 

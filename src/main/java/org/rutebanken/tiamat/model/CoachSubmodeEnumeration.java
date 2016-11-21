@@ -38,30 +38,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlType(name = "CoachSubmodeEnumeration")
-@XmlEnum
 public enum CoachSubmodeEnumeration {
 
-    @XmlEnumValue("unknown")
     UNKNOWN("unknown"),
-    @XmlEnumValue("undefined")
     UNDEFINED("undefined"),
-    @XmlEnumValue("internationalCoach")
     INTERNATIONAL_COACH("internationalCoach"),
-    @XmlEnumValue("nationalCoach")
     NATIONAL_COACH("nationalCoach"),
-    @XmlEnumValue("shuttleCoach")
     SHUTTLE_COACH("shuttleCoach"),
-    @XmlEnumValue("regionalCoach")
     REGIONAL_COACH("regionalCoach"),
-    @XmlEnumValue("specialCoach")
     SPECIAL_COACH("specialCoach"),
-    @XmlEnumValue("schoolCoach")
     SCHOOL_COACH("schoolCoach"),
-    @XmlEnumValue("sightseeingCoach")
     SIGHTSEEING_COACH("sightseeingCoach"),
-    @XmlEnumValue("touristCoach")
     TOURIST_COACH("touristCoach"),
-    @XmlEnumValue("commuterCoach")
     COMMUTER_COACH("commuterCoach");
     private final String value;
 

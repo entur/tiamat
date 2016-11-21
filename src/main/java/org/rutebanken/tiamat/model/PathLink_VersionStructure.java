@@ -74,61 +74,39 @@ public abstract class PathLink_VersionStructure
     extends Link_VersionStructure
 {
 
-    @XmlElement(name = "From", required = true)
     protected PathLinkEndStructure from;
-    @XmlElement(name = "To", required = true)
     protected PathLinkEndStructure to;
-    @XmlElement(name = "Description")
     protected MultilingualStringEntity description;
-    @XmlElement(name = "AccessibilityAssessmentRef")
     protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
-    @XmlElement(name = "AccessibilityAssessment")
     protected AccessibilityAssessment accessibilityAssessment;
-    @XmlList
-    @XmlElement(name = "AccessModes")
     @XmlSchemaType(name = "anySimpleType")
     protected List<AccessModeEnumeration> accessModes;
-    @XmlElement(name = "PublicUse", defaultValue = "all")
     @XmlSchemaType(name = "string")
     protected PublicUseEnumeration publicUse;
-    @XmlElement(name = "Covered", defaultValue = "indoors")
     @XmlSchemaType(name = "string")
     protected CoveredEnumeration covered;
-    @XmlElement(name = "Gated")
     @XmlSchemaType(name = "string")
     protected GatedEnumeration gated;
-    @XmlElement(name = "Lighting", defaultValue = "wellLit")
     @XmlSchemaType(name = "normalizedString")
     protected LightingEnumeration lighting;
-    @XmlElement(name = "AllAreasWheelchairAccessible", defaultValue = "true")
     protected Boolean allAreasWheelchairAccessible;
-    @XmlElement(name = "PersonCapacity")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger personCapacity;
     protected SiteFacilitySets_RelStructure facilities;
-    @XmlElement(name = "Towards")
     protected MultilingualStringEntity towards;
-    @XmlElement(name = "Back")
     protected MultilingualStringEntity back;
-    @XmlElement(name = "NumberOfSteps")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger numberOfSteps;
-    @XmlElement(name = "AllowedUse")
     @XmlSchemaType(name = "NMTOKEN")
     protected PathDirectionEnumeration allowedUse;
-    @XmlElement(name = "Transition")
     @XmlSchemaType(name = "NMTOKEN")
     protected TransitionEnumeration transition;
-    @XmlElement(name = "AccessFeatureType")
     @XmlSchemaType(name = "string")
     protected AccessFeatureEnumeration accessFeatureType;
-    @XmlElement(name = "PassageType")
     @XmlSchemaType(name = "string")
     protected PassageTypeEnumeration passageType;
-    @XmlElement(name = "MaximumFlowPerMinute")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger maximumFlowPerMinute;
-    @XmlElement(name = "TransferDuration")
     protected TransferDurationStructure transferDuration;
 
     /**
