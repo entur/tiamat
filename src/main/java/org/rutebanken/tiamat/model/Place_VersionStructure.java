@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.XmlType;
     EquipmentPlace_VersionStructure.class,
     Address_VersionStructure.class,
     FlexibleStopPlace_VersionStructure.class,
-    TopographicPlace_VersionStructure.class,
+    TopographicPlace.class,
     FlexibleQuay_VersionStructure.class,
     AddressablePlace_VersionStructure.class,
     Country_VersionStructure.class
