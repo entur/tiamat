@@ -8,9 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pointOfInterestRef",
-    "name",
-    "placeTypes",
 public class PointOfInterest_DerivedViewStructure
     extends DerivedViewStructure
 {

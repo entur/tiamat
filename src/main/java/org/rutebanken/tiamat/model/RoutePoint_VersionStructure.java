@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "viaFlag",
 public class RoutePoint_VersionStructure
     extends Point_VersionStructure
 {

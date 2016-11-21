@@ -12,10 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "linkRef",
-    "mayBeSkipped",
-    "onMainRoute",
-    "unscheduledPath",
 public class FlexibleLinkProperties_VersionedChildStructure
     extends VersionedChildStructure
 {

@@ -14,15 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "placeName",
-    "lineRef",
-    "lineName",
-    "transportMode",
-    "transportSubmode",
-    "lineMap",
-    "directionRef",
-    "directionName",
-    "destinationDisplayRef",
 public class HeadingSignStructure
     extends SignEquipment_VersionStructure
 {

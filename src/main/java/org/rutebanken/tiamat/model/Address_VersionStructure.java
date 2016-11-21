@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "countryRef",
 public class Address_VersionStructure
     extends Place_VersionStructure
 {

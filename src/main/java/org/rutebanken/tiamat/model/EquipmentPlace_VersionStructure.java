@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 
-    "equipmentPositions",
 @MappedSuperclass
 public class EquipmentPlace_VersionStructure extends Place_VersionStructure
 {

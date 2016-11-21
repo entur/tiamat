@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pointOfInterestHierarchyRef",
-    "parentClassificationRef",
 public class PointOfInterestClassificationHierarchyMemberStructure
     extends VersionedChildStructure
 {

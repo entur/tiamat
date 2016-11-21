@@ -12,11 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "typeOfValidityRef",
-    "frameClassRef",
-    "classes",
-    "includes",
-    "locatingSystemRef",
 public class TypeOfFrame_ValueStructure
     extends TypeOfEntity_VersionStructure
 {

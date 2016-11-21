@@ -12,10 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "lineRef",
-    "directionType",
-    "directionRef",
-    "pointsInSequence",
 public class Route_VersionStructure
     extends LinkSequence_VersionStructure
 {

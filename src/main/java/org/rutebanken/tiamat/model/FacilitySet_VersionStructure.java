@@ -13,29 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "providedByRef",
-    "description",
-    "typeOfFacilityRef",
-    "otherFacilities",
-    "accessibilityInfoFacilityList",
-    "assistanceFacilityList",
-    "accessibilityToolList",
-    "carServiceFacilityList",
-    "cateringFacilityList",
-    "familyFacilityList",
-    "fareClasses",
-    "genderLimitation",
-    "mealFacilityList",
-    "medicalFacilityList",
-    "mobilityFacilityList",
-    "nuisanceFacilityList",
-    "passengerCommsFacilityList",
-    "passengerInformationEquipmentList",
-    "passengerInformationFacilityList",
-    "retailFacilityList",
-    "safetyFacilityList",
-    "sanitaryFacilityList",
-    "ticketingFacilityList",
 public class FacilitySet_VersionStructure
     extends DataManagedObjectStructure
 {

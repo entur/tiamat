@@ -16,8 +16,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "publicCode",
-    "boardingPositionType",
 @MappedSuperclass
 public class BoardingPosition_VersionStructure
     extends StopPlaceSpace_VersionStructure

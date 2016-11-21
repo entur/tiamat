@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "groupRef",
 public class GroupMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {

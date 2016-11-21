@@ -10,11 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "shortName",
-    "description",
-    "image",
-    "url",
 public abstract class TypeOfValue_VersionStructure
     extends DataManagedObjectStructure
 {

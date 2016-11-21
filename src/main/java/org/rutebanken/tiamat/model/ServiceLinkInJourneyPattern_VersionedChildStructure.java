@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "timingLinkRef",
-    "runTimes",
 public class ServiceLinkInJourneyPattern_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {

@@ -10,12 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pathLinkRef",
-    "description",
-    "reverse",
-    "heading",
-    "transition",
-    "label",
 public class PathLinkInSequence_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {

@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
 @MappedSuperclass
 public abstract class Assignment_VersionStructure_
     extends DataManagedObjectStructure

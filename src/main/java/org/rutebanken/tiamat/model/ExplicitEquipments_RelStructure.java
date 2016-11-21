@@ -23,12 +23,10 @@ public class ExplicitEquipments_RelStructure
 
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(
-            idType = "integer", metaType = "string",
             metaValues = {
             }
     )
     @JoinTable(
-            name = "installedEquipment",
             joinColumns = @JoinColumn( name = "id" ),
             inverseJoinColumns = @JoinColumn( name = "equipment_id" )
     )

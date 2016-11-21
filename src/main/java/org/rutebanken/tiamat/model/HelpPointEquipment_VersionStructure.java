@@ -11,12 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "accessibilityAssessment",
-    "heightFromGround",
-    "phone",
-    "inductionLoop",
-    "inductionLoopSign",
-    "stopRequestButton",
 public class HelpPointEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

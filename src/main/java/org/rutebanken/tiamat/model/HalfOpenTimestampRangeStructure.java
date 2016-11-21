@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "startTime",
 public class HalfOpenTimestampRangeStructure {
 
     protected XMLGregorianCalendar startTime;

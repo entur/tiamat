@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
-    "placeRef",
 public class AccessEndStructure {
 
     protected AllVehicleModesOfTransportEnumeration transportMode;

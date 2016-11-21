@@ -10,13 +10,6 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "versionOfObjectRef",
-    "hide",
-    "displayAsIcon",
-    "infoLink",
-    "x",
-    "y",
 public class SchematicMapMember_VersionedChildStructure
     extends VersionedChildStructure
 {

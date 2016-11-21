@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "meetingPointServiceType",
 public class MeetingPointService_VersionStructure
     extends CustomerService_VersionStructure
 {

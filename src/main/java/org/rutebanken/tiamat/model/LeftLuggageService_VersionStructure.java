@@ -10,12 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "counterService",
-    "selfServiceLockers",
-    "feePerBag",
-    "lockerFee",
-    "maximumBagWidth",
-    "maximumBagHeight",
 public class LeftLuggageService_VersionStructure
     extends CustomerService_VersionStructure
 {

@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "reliefPointRef",
 public class CrewBase_VersionStructure
     extends GroupOfEntities_VersionStructure
 {

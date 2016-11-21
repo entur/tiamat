@@ -15,21 +15,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "lowFloor",
-    "highFloor",
-    "hoist",
-    "hoistOperatingRadius",
-    "ramp",
-    "rampBearingCapacity",
-    "numberOfSteps",
-    "boardingHeight",
-    "gapToPlatform",
-    "widthOfAccessArea",
-    "heightOfAccessArea",
-    "automaticDoors",
-    "suitableFor",
-    "assistanceNeeded",
-    "assistedBoardingLocation",
 public class AccessVehicleEquipment_VersionStructure
     extends ActualVehicleEquipment_VersionStructure
 {

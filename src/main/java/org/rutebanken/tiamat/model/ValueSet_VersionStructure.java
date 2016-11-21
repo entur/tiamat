@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
 public class ValueSet_VersionStructure
     extends DataManagedObjectStructure
 {

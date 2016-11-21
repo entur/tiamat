@@ -13,10 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "classRefType",
-    "typeOfFrameRef",
-    "mandatory",
-    "attributes",
 public class ClassInFrameStructure {
 
     protected ClassRefTypeEnumeration classRefType;

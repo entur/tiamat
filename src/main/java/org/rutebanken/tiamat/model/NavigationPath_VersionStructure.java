@@ -14,23 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "from",
-    "to",
-    "accessibilityAssessment",
-    "accessModes",
-    "summaries",
-    "transferDuration",
-    "publicUse",
-    "covered",
-    "gated",
-    "lighting",
-    "allAreasWheelchairAccessible",
-    "personCapacity",
-    "facilities",
-    "accessFeatureList",
-    "navigationType",
-    "placesInSequence",
-    "pathLinksInSequence",
 public class NavigationPath_VersionStructure
     extends LinkSequence_VersionStructure
 {

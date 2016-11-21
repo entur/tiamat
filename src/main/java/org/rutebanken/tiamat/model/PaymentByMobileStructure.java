@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "phoneNumberToPay",
-    "supportPhoneNumber",
-    "paymentUrl",
 public class PaymentByMobileStructure {
 
     protected String phoneNumberToPay;

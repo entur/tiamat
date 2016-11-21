@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "externalDirectionRef",
-    "directionType",
 public class Direction_ValueStructure
     extends TypeOfValue_VersionStructure
 {

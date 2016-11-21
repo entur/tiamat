@@ -14,15 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "description",
-    "publicCode",
-    "privateCode",
-    "contactDetails",
-    "location",
-    "organisationRef",
-    "typeOfOrganisationPartRef",
 public class OrganisationPart_VersionStructure
     extends DataManagedObjectStructure
 {

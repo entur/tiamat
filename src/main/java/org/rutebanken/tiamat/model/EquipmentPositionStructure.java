@@ -6,11 +6,6 @@ import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
 
 
-    "equipmentRef",
-    "description",
-    "location",
-    "referencePointRef",
-    "xOffset",
 @MappedSuperclass
 public class EquipmentPositionStructure extends DataManagedObjectStructure
 {

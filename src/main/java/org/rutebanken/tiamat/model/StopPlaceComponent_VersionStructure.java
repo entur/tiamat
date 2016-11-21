@@ -13,16 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
-    "airSubmode",
-    "busSubmode",
-    "coachSubmode",
-    "funicularSubmode",
-    "metroSubmode",
-    "tramSubmode",
-    "telecabinSubmode",
-    "railSubmode",
-    "waterSubmode",
 @MappedSuperclass
 public abstract class StopPlaceComponent_VersionStructure
     extends SiteComponent_VersionStructure

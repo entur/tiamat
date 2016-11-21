@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "bearingCompass",
-    "bearingDegrees",
-    "destinations",
-    "startPointRef",
 public class HailAndRideArea_VersionStructure
     extends FlexibleQuay_VersionStructure
 {

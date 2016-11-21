@@ -14,17 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "placeRef",
-    "checkDirection",
-    "checkProcess",
-    "checkService",
-    "accessFeatureType",
-    "congestion",
-    "classOfUseRef",
-    "typeOfEquipmentRef",
-    "facilityRef",
-    "equipmentRef",
-    "delays",
 @MappedSuperclass
 public class CheckConstraint_VersionStructure
     extends Assignment_VersionStructure

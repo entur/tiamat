@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "trafficControlPointRef",
-    "typeOfActivationRef",
 public class ActivatedEquipment_VersionStructure
     extends Equipment_VersionStructure
 {

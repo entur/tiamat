@@ -12,16 +12,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "name",
-    "shortName",
-    "fromDate",
-    "toDate",
-    "earliestTime",
-    "dayLength",
-    "dayTypes",
-    "timebands",
-    "operatingDays",
-    "operatingPeriods",
 public class ServiceCalendar_VersionStructure
     extends DataManagedObjectStructure
 {

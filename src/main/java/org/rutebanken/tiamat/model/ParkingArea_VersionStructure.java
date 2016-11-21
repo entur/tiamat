@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "totalCapacity",
-    "parkingProperties",
-    "bays",
 public class ParkingArea_VersionStructure
     extends ParkingComponent_VersionStructure
 {

@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "equipmentRef",
-    "linkRef",
 public class ActivationAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

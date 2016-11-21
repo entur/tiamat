@@ -9,11 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "projectedLinkRef",
-    "projectToLinkRef",
-    "startPointOnLinkRef",
-    "startPointOnLinkByValue",
-    "endPointOnLinkRef",
 public class LinkProjection_VersionStructure
     extends Projection_VersionStructure
 {

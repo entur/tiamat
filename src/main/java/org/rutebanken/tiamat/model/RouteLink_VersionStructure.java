@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromPointRef",
-    "toPointRef",
 public class RouteLink_VersionStructure
     extends Link_VersionStructure
 {

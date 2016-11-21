@@ -11,11 +11,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "description",
-    "compoundTrainRef",
-    "trainRef",
-    "train",
-    "reversedOrientation",
 public class TrainInCompoundTrain_VersionedChildStructure
     extends VersionedChildStructure
 {

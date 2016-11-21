@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "numberOfSpaces",
-    "cycleStorageType",
-    "cage",
 public class CycleStorageEquipment_VersionStructure
     extends PlaceEquipment_VersionStructure
 {

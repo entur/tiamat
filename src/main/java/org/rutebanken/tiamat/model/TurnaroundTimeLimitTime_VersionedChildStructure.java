@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "minimumDuration",
 public class TurnaroundTimeLimitTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {

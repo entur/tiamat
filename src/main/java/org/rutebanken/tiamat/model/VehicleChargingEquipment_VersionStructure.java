@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "freeRecharging",
-    "reservationRequired",
 public class VehicleChargingEquipment_VersionStructure
     extends PlaceEquipment_VersionStructure
 {

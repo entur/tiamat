@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "usedIn",
 public class CommonSection_VersionStructure
     extends GroupOfEntities_VersionStructure
 {

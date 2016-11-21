@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "shortName",
-    "distance",
 public abstract class LinkSequence_VersionStructure
     extends DataManagedObjectStructure
 {

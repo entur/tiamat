@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "shortName",
-    "imageUri",
-    "depictedObjectRef",
 public class SchematicMap_VersionStructure
     extends DataManagedObjectStructure
 {

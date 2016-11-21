@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "placeRef",
-    "branchLevel",
-    "description",
 public class PlaceInSequence_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {

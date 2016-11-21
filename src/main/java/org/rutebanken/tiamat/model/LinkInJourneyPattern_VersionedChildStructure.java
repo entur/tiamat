@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "serviceLinkRef",
 public class LinkInJourneyPattern_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {

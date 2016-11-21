@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "from",
-    "to",
 public class SiteConnection_VersionStructure
     extends Transfer_VersionStructure
 {

@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "trainSize",
 public class Train_VersionStructure
     extends VehicleType_VersionStructure
 {

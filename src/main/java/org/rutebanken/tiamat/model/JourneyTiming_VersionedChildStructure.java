@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "timeDemandTypeRef",
-    "timebandRef",
-    "vehicleMode",
 public abstract class JourneyTiming_VersionedChildStructure
     extends VersionedChildStructure
 {

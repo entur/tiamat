@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "defaultCodespaceRef",
-    "defaultDataSourceRef",
-    "defaultResponsibilitySetRef",
-    "defaultLocale",
-    "defaultLocationSystem",
-    "defaultSystemOfUnits",
 public class VersionFrameDefaultsStructure {
 
     protected CodespaceRefStructure defaultCodespaceRef;

@@ -12,15 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "sideText",
-    "frontText",
-    "driverDisplayText",
-    "shortCode",
-    "publicCode",
-    "privateCode",
-    "vias",
 public class DestinationDisplay_VersionStructure
     extends DataManagedObjectStructure
 {

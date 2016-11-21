@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "typeOfTransferRef",
-    "bothWays",
-    "restrictionType",
-    "fromPointRef",
 public class TransferRestriction_VersionStructure
     extends Assignment_VersionStructure
 {

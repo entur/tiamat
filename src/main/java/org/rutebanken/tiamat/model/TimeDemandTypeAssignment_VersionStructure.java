@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "timeDemandTypeRef",
-    "timebandRef",
 public class TimeDemandTypeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

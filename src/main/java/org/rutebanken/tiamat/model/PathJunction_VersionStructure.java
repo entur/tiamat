@@ -11,15 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parentZoneRef",
-    "publicUse",
-    "covered",
-    "gated",
-    "lighting",
-    "allAreasWheelchairAccessible",
-    "personCapacity",
-    "facilities",
-    "label",
 public class PathJunction_VersionStructure
     extends Point_VersionStructure
 {

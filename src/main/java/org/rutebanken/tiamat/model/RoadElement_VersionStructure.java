@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromPointRef",
 public class RoadElement_VersionStructure
     extends InfrastructureLink_VersionStructure
 {

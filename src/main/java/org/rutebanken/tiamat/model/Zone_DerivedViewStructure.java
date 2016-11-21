@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "zoneRef",
-    "name",
 public class Zone_DerivedViewStructure
     extends DerivedViewStructure
 {

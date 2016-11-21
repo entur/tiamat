@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parkingVehicleType",
-    "length",
-    "width",
-    "height",
 public class ParkingBay_VersionStructure
     extends ParkingComponent_VersionStructure
 {

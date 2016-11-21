@@ -18,17 +18,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "accessibilityAssessment",
-    "gender",
-    "sanitaryFacilityList",
-    "numberOfToilets",
-    "freeToUse",
-    "charge",
-    "currency",
-    "paymentMethods",
-    "wheelchairTurningCircle",
-    "sharpsDisposal",
-    "staffing",
 public class SanitaryEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

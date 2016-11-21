@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromLinkRef",
 public abstract class InfrastructureLinkRestriction_VersionStructure
     extends NetworkRestriction_VersionStructure
 {

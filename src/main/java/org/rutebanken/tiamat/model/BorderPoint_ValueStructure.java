@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "shortName",
-    "description",
-    "groupOfOperatorsRef",
 public class BorderPoint_ValueStructure
     extends TimingPoint_VersionStructure
 {

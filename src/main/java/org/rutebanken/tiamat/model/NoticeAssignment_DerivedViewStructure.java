@@ -14,17 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "noticeRef",
-    "mark",
-    "markUrl",
-    "publicityChannel",
-    "advertised",
-    "text",
-    "publicCode",
-    "shortCode",
-    "privateCode",
-    "typeOfNoticeRef",
 public class NoticeAssignment_DerivedViewStructure
     extends DerivedViewStructure
 {

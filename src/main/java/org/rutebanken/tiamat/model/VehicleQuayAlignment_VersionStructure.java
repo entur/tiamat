@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "vehicleStoppingPlaceRef",
 public class VehicleQuayAlignment_VersionStructure
     extends VersionedChildStructure
 {

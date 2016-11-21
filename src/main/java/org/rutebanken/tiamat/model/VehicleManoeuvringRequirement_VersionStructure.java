@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "reversible",
-    "minimumTurningCircle",
-    "minimumOvertakingWidth",
 public class VehicleManoeuvringRequirement_VersionStructure
     extends VehicleRequirement_VersionStructure
 {

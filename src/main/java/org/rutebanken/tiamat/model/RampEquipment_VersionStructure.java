@@ -12,15 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "length",
-    "gradient",
-    "gradientType",
-    "pedestal",
-    "handrailHeight",
-    "handrailType",
-    "tactileGuidanceStrips",
-    "visualGuidanceBands",
-    "temporary",
 public class RampEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

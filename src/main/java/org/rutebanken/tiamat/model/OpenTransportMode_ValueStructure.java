@@ -10,18 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
-    "airSubmode",
-    "busSubmode",
-    "coachSubmode",
-    "funicularSubmode",
-    "metroSubmode",
-    "tramSubmode",
-    "telecabinSubmode",
-    "railSubmode",
-    "waterSubmode",
-    "taxiSubmode",
-    "selfDriveSubmode",
 public class OpenTransportMode_ValueStructure
     extends TypeOfValue_VersionStructure
 {

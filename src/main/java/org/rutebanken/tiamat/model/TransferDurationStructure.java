@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "defaultDuration",
-    "frequentTravellerDuration",
-    "occasionalTravellerDuration",
 public class TransferDurationStructure {
 
     protected Duration defaultDuration;

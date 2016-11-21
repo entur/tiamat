@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "relationToVehicle",
-    "infrastructureElementRef",
-    "vehicleStoppingPositions",
 public class VehicleStoppingPlace_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {

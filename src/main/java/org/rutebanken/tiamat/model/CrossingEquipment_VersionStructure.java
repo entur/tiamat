@@ -9,14 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "crossingType",
-    "zebraCrossing",
-    "pedestrianLights",
-    "acousticDeviceSensors",
-    "acousticCrossingAids",
-    "tactileGuidanceStrips",
-    "visualGuidanceBands",
-    "droppedKerb",
 public class CrossingEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
 public class ConnectionEndStructure {
 
     protected AllVehicleModesOfTransportEnumeration transportMode;

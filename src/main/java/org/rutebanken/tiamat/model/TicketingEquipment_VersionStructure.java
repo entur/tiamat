@@ -15,21 +15,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "vehicleModes",
-    "ticketMachines",
-    "numberOfMachines",
-    "heightOfMachineInterface",
-    "ticketingFacilityList",
-    "ticketingServiceFacilityList",
-    "ticketOffice",
-    "ticketCounter",
-    "numberOfTills",
-    "queueManagement",
-    "paymentMethods",
-    "ticketTypesAvailable",
-    "scopeOfTicketsAvailable",
-    "lowCounterAccess",
-    "heightOfLowCounter",
 public class TicketingEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {

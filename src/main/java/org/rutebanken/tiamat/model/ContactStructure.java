@@ -11,11 +11,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "contactPerson",
-    "email",
-    "phone",
-    "fax",
-    "url",
 public class ContactStructure {
 
     protected MultilingualStringEntity contactPerson;

@@ -15,11 +15,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "logicalDisplayRef",
-    "stopPlaceRef",
-    "siteComponentRef",
-    "typeOfPassengerInformationEquipmentRef",
-    "passengerInformationFacilityList",
 public class PassengerInformationEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "timingPointRef",
-    "onwardTimingLinkRef",
-    "isWaitPoint",
-    "waitTime",
-    "waitTimes",
-    "headways",
 public class TimingPointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {

@@ -7,18 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-    "accessibilityAssessment",
-    "accessModes",
-    "nameSuffix",
-    "alternativeNames",
-    "crossRoad",
-    "landmark",
-    "publicUse",
-    "covered",
-    "gated",
-    "lighting",
-    "allAreasWheelchairAccessible",
-    "personCapacity",
 @MappedSuperclass
 public abstract class SiteElement_VersionStructure
     extends AddressablePlace_VersionStructure

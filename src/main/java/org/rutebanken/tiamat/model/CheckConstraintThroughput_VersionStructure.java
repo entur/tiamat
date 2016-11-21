@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "checkConstraintRef",
-    "period",
-    "maximumPassengers",
-    "averagePassengers",
 public class CheckConstraintThroughput_VersionStructure
     extends Assignment_VersionStructure
 {

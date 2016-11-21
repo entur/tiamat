@@ -12,15 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "keyList",
-    "destinationDisplayRef",
-    "name",
-    "shortName",
-    "sideText",
-    "frontText",
-    "driverDisplayText",
-    "shortCode",
-    "publicCode",
 @MappedSuperclass
 public class DestinationDisplay_DerivedViewStructure
     extends DerivedViewStructure

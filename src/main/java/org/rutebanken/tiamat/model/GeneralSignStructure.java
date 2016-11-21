@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "content",
 public class GeneralSignStructure
     extends SignEquipment_VersionStructure
 {

@@ -13,14 +13,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "serviceCalendarRef",
-    "name",
-    "shortName",
-    "fromOperatingDayRef",
-    "fromDate",
-    "toOperatingDayRef",
-    "toDate",
-    "holidayType",
 public class OperatingPeriod_VersionStructure
     extends DataManagedObjectStructure
 {

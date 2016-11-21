@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "boardingUse",
-    "alightingUse",
-    "privateCode",
 public class StopAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

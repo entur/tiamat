@@ -12,8 +12,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "publicCode",
-    "members",
 public class GroupOfStopPlacesStructure
     extends GroupOfEntities_VersionStructure
 {

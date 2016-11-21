@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "timingPointRef",
 public class JourneyWaitTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {

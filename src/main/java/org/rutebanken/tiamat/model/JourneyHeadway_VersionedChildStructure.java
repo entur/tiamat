@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "scheduledHeadwayInterval",
-    "minimumHeadwayInterval",
 public class JourneyHeadway_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {

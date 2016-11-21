@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "layover",
 public class JourneyLayoverStructure
     extends JourneyTiming_VersionedChildStructure
 {

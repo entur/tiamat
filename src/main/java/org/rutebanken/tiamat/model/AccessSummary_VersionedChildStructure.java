@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "accessFeatureType",
-    "count",
 public class AccessSummary_VersionedChildStructure
     extends VersionedChildStructure
 {

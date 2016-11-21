@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "activationPointNumber",
-    "shortName",
-    "privateCode",
 public class ActivationPoint_VersionStructure
     extends Point_VersionStructure
 {

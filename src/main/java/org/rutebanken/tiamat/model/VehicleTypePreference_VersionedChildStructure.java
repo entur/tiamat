@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "rank",
-    "dayTypeRef",
 public class VehicleTypePreference_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {

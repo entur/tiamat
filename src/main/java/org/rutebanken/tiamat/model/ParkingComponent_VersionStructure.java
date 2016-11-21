@@ -13,11 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "parkingPaymentCode",
-    "label",
-    "maximumLength",
-    "maximumWidth",
-    "maximumHeight",
 public class ParkingComponent_VersionStructure
     extends SiteComponent_VersionStructure
 {

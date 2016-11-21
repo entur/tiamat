@@ -11,14 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
-    "trainElementType",
-    "fareClasses",
-    "passengerCapacity",
-    "capacities",
-    "length",
-    "facilities",
 public class TrainElement_VersionStructure
     extends DataManagedObjectStructure
 {

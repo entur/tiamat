@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "connectionRef",
-    "siteRef",
 public class NavigationPathAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {

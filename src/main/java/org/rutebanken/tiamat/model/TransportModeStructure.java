@@ -9,17 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
-    "airSubmode",
-    "busSubmode",
-    "coachSubmode",
-    "funicularSubmode",
-    "metroSubmode",
-    "tramSubmode",
-    "telecabinSubmode",
-    "railSubmode",
-    "waterSubmode",
-    "taxiSubmode",
 public class TransportModeStructure {
 
     protected AllModesEnumeration transportMode;

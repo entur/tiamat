@@ -12,11 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "nameSuffix",
-    "alternativeNames",
-    "transportMode",
-    "publicCode",
-    "areas",
 public class FlexibleStopPlace_VersionStructure
     extends Place_VersionStructure
 {

@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "networkRef",
-    "name",
 public class Network_DerivedViewStructure
     extends DerivedViewStructure
 {

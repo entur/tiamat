@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "zoneUse",
-    "pointsInPattern",
-    "lines",
 public class RoutingConstraintZone_VersionStructure
     extends Zone_VersionStructure
 {

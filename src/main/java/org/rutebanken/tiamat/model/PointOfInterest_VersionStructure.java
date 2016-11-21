@@ -8,12 +8,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "classifications",
-    "spaces",
-    "nearTopographicPlaces",
-    "pathLinks",
-    "pathJunctions",
-    "accesses",
 public class PointOfInterest_VersionStructure
     extends Site_VersionStructure
 {

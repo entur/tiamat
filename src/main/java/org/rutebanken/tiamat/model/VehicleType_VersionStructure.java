@@ -13,25 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "description",
-    "privateCode",
-    "reversingDirection",
-    "selfPropelled",
-    "typeOfFuel",
-    "euroClass",
-    "passengerCapacity",
-    "capacities",
-    "lowFloor",
-    "hasLiftOrRamp",
-    "hasHoist",
-    "length",
-    "includedIn",
-    "classifiedAsRef",
-    "facilities",
-    "canCarry",
-    "canManoeuvre",
 public class VehicleType_VersionStructure
     extends DataManagedObjectStructure
 {

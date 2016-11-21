@@ -15,9 +15,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "formula",
-    "name",
-    "linkRef",
 public class LineShapeStructure
     extends DataManagedObjectStructure
 {

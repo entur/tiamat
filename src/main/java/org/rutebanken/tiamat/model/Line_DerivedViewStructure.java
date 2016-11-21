@@ -14,13 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "lineRef",
-    "publicCode",
-    "name",
-    "shortName",
-    "transportMode",
-    "transportSubmode",
-    "operatorRef",
 public class Line_DerivedViewStructure
     extends DerivedViewStructure
 {

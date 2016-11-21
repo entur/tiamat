@@ -12,29 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "description",
-    "transportMode",
-    "transportSubmode",
-    "url",
-    "publicCode",
-    "privateCode",
-    "externalLineRef",
-    "authorityRef",
-    "operatorRef",
-    "additionalOperators",
-    "otherModes",
-    "operationalContextRef",
-    "typeOfLineRef",
-    "externalProductCategoryRef",
-    "monitored",
-    "routes",
-    "representedByGroupRef",
-    "presentation",
-    "alternativePresentation",
-    "accessibilityAssessment",
-    "allowedDirections",
 public class Line_VersionStructure
     extends DataManagedObjectStructure
 {

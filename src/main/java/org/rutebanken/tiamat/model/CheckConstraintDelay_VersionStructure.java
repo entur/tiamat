@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "checkConstraintRef",
-    "classOfUseRef",
-    "minimumLikelyDelay",
-    "averageDelay",
 public class CheckConstraintDelay_VersionStructure
     extends Assignment_VersionStructure
 {

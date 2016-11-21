@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "uicCode",
-    "countryName",
 public class Country_VersionStructure
     extends Place_VersionStructure
 {

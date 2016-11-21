@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "garagePoints",
 public class Garage_VersionStructure
     extends AddressablePlace_VersionStructure
 {

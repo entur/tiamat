@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "scheduledHeadwayInterval",
-    "minimumHeadwayInterval",
 public class HeadwayIntervalStructure {
 
     protected Duration scheduledHeadwayInterval;

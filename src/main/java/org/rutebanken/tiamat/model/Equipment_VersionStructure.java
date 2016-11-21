@@ -10,13 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "privateCode",
-    "publicCode",
-    "image",
-    "typeOfEquipmentRef",
-    "description",
-    "note",
 public abstract class Equipment_VersionStructure
     extends DataManagedObjectStructure
 {

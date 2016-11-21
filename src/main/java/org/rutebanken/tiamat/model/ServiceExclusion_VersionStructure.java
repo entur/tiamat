@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "excludingJourneyPatternRef",
-    "startPointRef",
-    "endPointRef",
 public class ServiceExclusion_VersionStructure
     extends Assignment_VersionStructure
 {

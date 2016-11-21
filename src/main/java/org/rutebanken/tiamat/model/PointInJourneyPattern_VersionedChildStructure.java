@@ -11,13 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pointRef",
-    "destinationDisplayRef",
-    "destinationDisplayView",
-    "vias",
-    "flexiblePointProperties",
-    "changeOfDestinationDisplay",
-    "changeOfServiceRequirements",
 public class PointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {

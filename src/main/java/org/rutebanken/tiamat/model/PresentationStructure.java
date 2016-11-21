@@ -13,13 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "colour",
-    "colourName",
-    "textColour",
-    "textColourName",
-    "textFont",
-    "textFontName",
-    "textLanguage",
 public class PresentationStructure {
 
     protected byte[] colour;

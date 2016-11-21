@@ -12,15 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "depth",
-    "numberOfSteps",
-    "stepHeight",
-    "stepColourContrast",
-    "handrailType",
-    "handrailHeight",
-    "lowerHandrailHeight",
-    "topEnd",
-    "bottomEnd",
 public class StairFlight_VersionedChildStructure
     extends VersionedChildStructure
 {

@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "timingLinkInJourneyPatternRef",
-    "timingLinkRef",
-    "toPointRef",
 public class OnwardTimingLink_DerivedViewStructure
     extends DerivedViewStructure
 {

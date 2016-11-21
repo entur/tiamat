@@ -9,14 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
-    "typeOfFrameRef",
-    "baselineVersionFrameRef",
-    "codespaces",
-    "frameDefaults",
-    "versions",
-    "traces",
 public class VersionFrame_VersionStructure
     extends DataManagedObjectStructure
 {

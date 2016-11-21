@@ -13,12 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "gisFeatureRef",
-    "roadNumber",
-    "roadName",
-    "bearingCompass",
-    "bearingDegrees",
-    "oddNumberRange",
 @MappedSuperclass
 public class RoadAddress_VersionStructure
     extends Address_VersionStructure

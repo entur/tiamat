@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromNumber",
 public class RoadNumberRangeStructure {
 
     protected BigInteger fromNumber;

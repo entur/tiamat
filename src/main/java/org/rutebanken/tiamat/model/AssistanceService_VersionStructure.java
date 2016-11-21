@@ -13,13 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "assistanceFacilityList",
-    "assistanceAvailability",
-    "staffing",
-    "accessibilityToolList",
-    "languages",
-    "accessibilityTrainedStaff",
-    "emergencyServiceList",
 public class AssistanceService_VersionStructure
     extends LocalService_VersionStructure
 {

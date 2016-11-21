@@ -12,14 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "seats",
-    "width",
-    "length",
-    "stepFree",
-    "wheelchairAreaWidth",
-    "wheelchairAreaLength",
-    "smokingAllowed",
-    "heated",
 public abstract class WaitingEquipment_VersionStructure
     extends SiteEquipment_VersionStructure
 {

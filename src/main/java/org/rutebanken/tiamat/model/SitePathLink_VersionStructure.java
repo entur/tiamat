@@ -9,13 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "siteRef",
-    "levelRef",
-    "classOfUseRef",
-    "checkConstraints",
-    "equipmentPlaces",
-    "placeEquipments",
-    "localServices",
 public class SitePathLink_VersionStructure
     extends PathLink_VersionStructure
 {

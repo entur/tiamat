@@ -14,9 +14,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "fromPointRef",
-    "toPointRef",
-    "typeOfLinkRef",
 public class ModalLinkRefByValue2Structure {
 
     protected PointRefStructure fromPointRef;

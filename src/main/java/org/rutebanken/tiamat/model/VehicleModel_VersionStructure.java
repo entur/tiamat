@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
-    "manufacturer",
 public class VehicleModel_VersionStructure
     extends DataManagedObjectStructure
 {

@@ -8,9 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "passengerCapacity",
-    "lowFloor",
-    "hasLiftOrRamp",
 public class PassengerCarryingPassengerCarrying_ViewStructure
     extends DerivedViewStructure
 {

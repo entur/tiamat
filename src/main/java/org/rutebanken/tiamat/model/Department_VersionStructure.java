@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "typeOfOperationRef",
 public class Department_VersionStructure
     extends OrganisationPart_VersionStructure
 {

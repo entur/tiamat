@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "accessibilityAssessment",
 public class AccessZone_VersionStructure
     extends Zone_VersionStructure
 {

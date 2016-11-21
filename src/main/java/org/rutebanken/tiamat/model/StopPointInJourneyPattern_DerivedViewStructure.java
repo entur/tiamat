@@ -14,20 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "pointInJourneyPatternRef",
-    "visitNumber",
-    "scheduledStopPointRef",
-    "scheduledStopPointView",
-    "onwardTimingLinkView",
-    "onwardServiceLinkRef",
-    "onwardServiceLinkView",
-    "timingPointStatus",
-    "isWaitPoint",
-    "timeDemandTypeRef",
-    "timebandRef",
-    "waitTime",
-    "scheduledHeadwayInterval",
-    "minimumHeadwayInterval",
 public class StopPointInJourneyPattern_DerivedViewStructure
     extends DerivedViewStructure
 {

@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromPointRef",
-    "toPointRef",
-    "vehicleMode",
 public class ServiceLink_VersionStructure
     extends Link_VersionStructure
 {

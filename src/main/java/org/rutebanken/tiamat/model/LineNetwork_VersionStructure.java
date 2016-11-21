@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
-    "groupOfLinesRef",
-    "lineRef",
 public class LineNetwork_VersionStructure
     extends DataManagedObjectStructure
 {

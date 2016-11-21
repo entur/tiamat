@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parentRef",
-    "parkingUserType",
-    "parkingVehicleType",
-    "parkingStayType",
 public class ParkingCapacity_VersionedChildStructure
     extends VersionedChildStructure
 {

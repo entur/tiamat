@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fromPointRef",
 public class WireElement_VersionStructure
     extends InfrastructureLink_VersionStructure
 {

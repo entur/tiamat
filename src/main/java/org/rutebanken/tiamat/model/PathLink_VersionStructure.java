@@ -14,27 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "from",
-    "to",
-    "description",
-    "accessibilityAssessmentRef",
-    "accessibilityAssessment",
-    "accessModes",
-    "publicUse",
-    "covered",
-    "gated",
-    "lighting",
-    "allAreasWheelchairAccessible",
-    "personCapacity",
-    "facilities",
-    "towards",
-    "back",
-    "numberOfSteps",
-    "allowedUse",
-    "transition",
-    "accessFeatureType",
-    "passageType",
-    "maximumFlowPerMinute",
 public abstract class PathLink_VersionStructure
     extends Link_VersionStructure
 {

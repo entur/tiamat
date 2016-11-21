@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "telNationalNumber",
-    "telExtensionNumber",
 public class TelephoneContactStructure {
 
     protected String telNationalNumber;

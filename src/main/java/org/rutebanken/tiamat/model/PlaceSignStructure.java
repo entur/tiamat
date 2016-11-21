@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "placeName",
 public class PlaceSignStructure
     extends SignEquipment_VersionStructure
 {

@@ -9,11 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "operatorRef",
-    "name",
-    "shortName",
-    "legalName",
-    "tradingName",
 public class Operator_DerivedViewStructure
     extends DerivedViewStructure
 {

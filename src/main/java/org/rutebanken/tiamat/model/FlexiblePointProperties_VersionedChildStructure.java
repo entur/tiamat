@@ -11,11 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pointOnRouteRef",
-    "pointRef",
-    "mayBeSkipped",
-    "onMainRoute",
-    "pointStandingForAZone",
 public class FlexiblePointProperties_VersionedChildStructure
     extends VersionedChildStructure
 {

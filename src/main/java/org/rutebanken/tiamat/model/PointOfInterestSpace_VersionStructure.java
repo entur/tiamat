@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "accessSpaceType",
-    "pointOfInterestSpaceType",
-    "passageType",
-    "parentPointOfInterestSpaceRef",
 public class PointOfInterestSpace_VersionStructure
     extends PointOfInterestComponent_VersionStructure
 {

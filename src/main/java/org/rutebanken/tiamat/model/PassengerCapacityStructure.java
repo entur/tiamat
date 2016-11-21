@@ -11,12 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fareClass",
-    "totalCapacity",
-    "seatingCapacity",
-    "standingCapacity",
-    "specialPlaceCapacity",
-    "pushchairCapacity",
 public class PassengerCapacityStructure
     extends DataManagedObjectStructure
 {

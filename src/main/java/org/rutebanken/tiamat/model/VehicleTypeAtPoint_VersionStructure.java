@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "forVehicleTypeRef",
 public class VehicleTypeAtPoint_VersionStructure
     extends NetworkRestriction_VersionStructure
 {

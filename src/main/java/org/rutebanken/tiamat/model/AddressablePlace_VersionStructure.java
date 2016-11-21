@@ -8,9 +8,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "url",
-    "image",
-    "postalAddress",
 @MappedSuperclass
 public class AddressablePlace_VersionStructure
     extends Place_VersionStructure

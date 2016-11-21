@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "groupOfEntitiesRef",
 public class ComplexFeature_VersionStructure
     extends GroupOfPoints_VersionStructure
 {

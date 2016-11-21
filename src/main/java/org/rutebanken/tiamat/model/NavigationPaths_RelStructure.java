@@ -27,12 +27,10 @@ public class NavigationPaths_RelStructure
 
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(
-            idType = "integer", metaType = "string",
             metaValues = {
             }
     )
     @JoinTable(
-            name = "navigationPath",
             joinColumns = @JoinColumn( name = "id" ),
             inverseJoinColumns = @JoinColumn( name = "path_id" )
     )

@@ -13,9 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "fareClass",
-    "womenOnly",
-    "sanitary",
 public class WaitingRoomEquipment_VersionStructure
     extends WaitingEquipment_VersionStructure
 {

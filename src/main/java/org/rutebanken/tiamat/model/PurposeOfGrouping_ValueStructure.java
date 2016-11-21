@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "classes",
 public class PurposeOfGrouping_ValueStructure
     extends TypeOfValue_VersionStructure
 {

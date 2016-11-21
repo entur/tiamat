@@ -13,8 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "lineSectionPointType",
-    "showAsAccessible",
 public class LineSectionPointMember_VersionStructure
     extends CommonSectionPointMember_VersionedChildStructure
 {

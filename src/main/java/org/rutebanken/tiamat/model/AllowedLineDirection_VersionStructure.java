@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "lineRef",
 public class AllowedLineDirection_VersionStructure
     extends DataManagedObjectStructure
 {

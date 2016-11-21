@@ -9,10 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "topographicPlaceRef",
-    "name",
-    "shortName",
-    "qualifierName",
 public class TopographicPlace_DerivedViewStructure
     extends DerivedViewStructure
 {

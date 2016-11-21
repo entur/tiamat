@@ -11,11 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import net.opengis.gml._3.LineStringType;
 
 
-    "name",
-    "distance",
-    "types",
-    "lineString",
-    "projections",
 public abstract class Link_VersionStructure
     extends DataManagedObjectStructure
 {

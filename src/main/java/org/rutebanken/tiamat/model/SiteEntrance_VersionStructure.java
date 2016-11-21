@@ -13,15 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "publicCode",
-    "label",
-    "entranceType",
-    "isExternal",
-    "isEntry",
-    "isExit",
-    "width",
-    "height",
-    "droppedKerbOutside",
 public class SiteEntrance_VersionStructure
     extends SiteComponent_VersionStructure
 {

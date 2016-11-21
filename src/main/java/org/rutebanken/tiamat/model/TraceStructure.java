@@ -14,10 +14,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "objectRef",
-    "changedAt",
-    "changedBy",
-    "description",
 public class TraceStructure {
 
     protected VersionOfObjectRefStructure objectRef;

@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "stopPlaceRef",
-    "name",
-    "placeTypes",
-    "shortName",
-    "publicCode",
-    "stopPlaceType",
 public class StopPlace_DerivedViewStructure
     extends DerivedViewStructure
 {

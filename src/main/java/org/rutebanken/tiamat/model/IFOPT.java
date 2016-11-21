@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "organisations",
-    "responsibilitySets",
-    "sites",
-    "stopAssignments",
-    "connections",
-    "navigationPaths",
 public class IFOPT {
 
     protected Organisations organisations;

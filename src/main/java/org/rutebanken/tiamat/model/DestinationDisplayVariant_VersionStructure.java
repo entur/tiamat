@@ -10,13 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "destinationDisplayRef",
-    "destinationDisplayVariantMediaType",
-    "name",
-    "shortName",
-    "sideText",
-    "frontText",
-    "driverDisplayText",
 public class DestinationDisplayVariant_VersionStructure
     extends DataManagedObjectStructure
 {

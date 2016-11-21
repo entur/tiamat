@@ -13,12 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "passengerStopAssignmentRef",
-    "trainRef",
-    "trainComponentRef",
-    "trainComponentView",
-    "positionOfTrainElement",
-    "boardingPositionRef",
 public class TrainStopAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {

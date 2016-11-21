@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "isServiceDay",
 public class OrganisationDayType_VersionStructure
     extends DayType_VersionStructure
 {

@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "passengerCapacity",
-    "lowFloor",
-    "hasLiftOrRamp",
 public class PassengerCarryingRequirement_VersionStructure
     extends VehicleRequirement_VersionStructure
 {

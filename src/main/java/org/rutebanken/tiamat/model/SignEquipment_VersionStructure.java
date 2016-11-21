@@ -11,12 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "height",
-    "width",
-    "heightFromFloor",
-    "placement",
-    "brandGraphic",
-    "signGraphic",
 public abstract class SignEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {

@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "from",
 public class Access_VersionStructure
     extends Transfer_VersionStructure
 {

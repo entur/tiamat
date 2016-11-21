@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "crossRoad",
 public class AlternativeQuayDescriptor_VersionedChildStructure
     extends AlternativeName_VersionedChildStructure
 {

@@ -13,12 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "emergencyServiceList",
-    "hireFacilityList",
-    "luggageLockerFacilityList",
-    "luggageServiceFacilityList",
-    "moneyFacilityList",
-    "parkingFacilityList",
 public class SiteFacilitySetStructure
     extends FacilitySet_VersionStructure
 {

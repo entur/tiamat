@@ -14,13 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "description",
-    "publicCode",
-    "publicUse",
-    "accessibilityAssessment",
-    "allAreasWheelchairAccessible",
 @MappedSuperclass
 public class Level_VersionStructure
     extends DataManagedObjectStructure

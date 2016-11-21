@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportOrganisationRef",
 public class Network_VersionStructure
     extends GroupOfLines_VersionStructure
 {

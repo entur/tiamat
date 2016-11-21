@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "members",
-    "countryRef",
 public class GroupOfPlaces_VersionStructure
     extends GroupOfEntities_VersionStructure
 {

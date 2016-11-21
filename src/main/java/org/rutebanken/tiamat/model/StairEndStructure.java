@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "continuingHandrail",
-    "texturedSurface",
 public class StairEndStructure {
 
     protected Boolean continuingHandrail;

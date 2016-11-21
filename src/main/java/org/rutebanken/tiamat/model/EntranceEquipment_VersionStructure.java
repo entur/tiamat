@@ -11,21 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "door",
-    "keptOpen",
-    "revolvingDoor",
-    "barrier",
-    "numberOfGates",
-    "staffing",
-    "entranceRequiresStaffing",
-    "entranceRequiresTicket",
-    "entranceRequiresPassport",
-    "acousticSensor",
-    "automaticDoor",
-    "glassDoor",
-    "wheelchairPassable",
-    "wheechairUnaided",
-    "entranceAttention",
 public class EntranceEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

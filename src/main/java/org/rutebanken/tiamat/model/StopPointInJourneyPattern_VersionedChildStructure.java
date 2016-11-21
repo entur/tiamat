@@ -13,23 +13,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "scheduledStopPointRef",
-    "onwardTimingLinkRef",
-    "isWaitPoint",
-    "waitTime",
-    "waitTimes",
-    "headways",
-    "onwardServiceLinkRef",
-    "forAlighting",
-    "forBoarding",
-    "destinationDisplayRef",
-    "destinationDisplayView",
-    "vias",
-    "flexiblePointProperties",
-    "changeOfDestinationDisplay",
-    "changeOfServiceRequirements",
-    "noticeAssignments",
-    "requestStop",
 public class StopPointInJourneyPattern_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {

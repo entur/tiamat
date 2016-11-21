@@ -13,14 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "logicalDisplayRef",
-    "scheduledStopPointRef",
-    "vehicleMode",
-    "lineRef",
-    "directionRef",
-    "journeyPatternRef",
-    "displayAssignmentType",
-    "numberOfJourneysToShow",
 public class DisplayAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

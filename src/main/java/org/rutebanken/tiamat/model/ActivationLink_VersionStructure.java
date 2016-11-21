@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "typeOfActivationRef",
-    "fromPointRef",
 public class ActivationLink_VersionStructure
     extends Link_VersionStructure
 {

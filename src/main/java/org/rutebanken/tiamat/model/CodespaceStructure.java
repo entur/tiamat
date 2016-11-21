@@ -13,8 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "xmlns",
-    "xmlnsUrl",
 public class CodespaceStructure
     extends EntityStructure
 {

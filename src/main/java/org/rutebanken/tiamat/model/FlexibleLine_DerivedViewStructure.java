@@ -15,15 +15,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "flexibleLineType",
-    "bookingContact",
-    "bookingMethods",
-    "bookingAccess",
-    "bookWhen",
-    "buyWhen",
-    "latestBookingTime",
-    "minimumBookingPeriod",
-    "bookingUrl",
 public class FlexibleLine_DerivedViewStructure
     extends Line_DerivedViewStructure
 {

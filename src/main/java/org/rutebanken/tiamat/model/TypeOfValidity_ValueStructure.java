@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "periodicity",
-    "nature",
 public class TypeOfValidity_ValueStructure
     extends TypeOfValue_VersionStructure
 {

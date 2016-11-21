@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import net.opengis.gml._3.LineStringType;
 
 
-    "pointOnLink",
 public class PointsOnLink_RelStructure
     extends StrictContainmentAggregationStructure
 {

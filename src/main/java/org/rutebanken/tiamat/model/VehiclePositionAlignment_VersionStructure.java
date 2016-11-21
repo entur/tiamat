@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "vehicleStoppingPositionRef",
-    "boardingPositionRef",
 public class VehiclePositionAlignment_VersionStructure
     extends VersionedChildStructure
 {

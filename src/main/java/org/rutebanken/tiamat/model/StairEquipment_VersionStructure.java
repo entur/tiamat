@@ -12,14 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "depth",
-    "numberOfSteps",
-    "stepHeight",
-    "stepColourContrast",
-    "handrailType",
-    "handrailHeight",
-    "lowerHandrailHeight",
-    "topEnd",
 public abstract class StairEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

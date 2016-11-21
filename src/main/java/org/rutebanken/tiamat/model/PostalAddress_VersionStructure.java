@@ -12,17 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "houseNumber",
-    "buildingName",
-    "addressLine1",
-    "addressLine2",
-    "street",
-    "town",
-    "suburb",
-    "postCode",
-    "postCodeExtension",
-    "postalRegion",
-    "province",
 public class PostalAddress_VersionStructure
     extends Address_VersionStructure
 {

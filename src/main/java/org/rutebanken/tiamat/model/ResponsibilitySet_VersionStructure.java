@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
 public class ResponsibilitySet_VersionStructure
     extends DataManagedObjectStructure
 {

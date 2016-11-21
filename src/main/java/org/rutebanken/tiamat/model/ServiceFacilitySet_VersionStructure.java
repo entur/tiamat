@@ -13,17 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "accommodationAccessList",
-    "accommodationFacilityList",
-    "boardingPermisssion",
-    "bookingProcessFacilityList",
-    "couchetteFacilityList",
-    "groupBookingFacility",
-    "luggageCarriageFacilityList",
-    "serviceReservationFacilityList",
-    "uicProductCharacteristicList",
-    "uicTrainRate",
-    "accommodations",
 public class ServiceFacilitySet_VersionStructure
     extends FacilitySet_VersionStructure
 {

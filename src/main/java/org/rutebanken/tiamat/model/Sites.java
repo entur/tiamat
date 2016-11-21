@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "stopPlaces",
-    "pointsOfInterest",
 public class Sites {
 
     protected StopPlaces stopPlaces;

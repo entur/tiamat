@@ -14,8 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "typeOfProjectionRef",
-    "name",
 public class Projection_VersionStructure
     extends DataManagedObjectStructure
 {

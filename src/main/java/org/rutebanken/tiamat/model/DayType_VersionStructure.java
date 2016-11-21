@@ -12,13 +12,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "name",
-    "shortName",
-    "description",
-    "privateCode",
-    "earliestTime",
-    "dayLength",
-    "properties",
 public class DayType_VersionStructure
     extends DataManagedObjectStructure
 {

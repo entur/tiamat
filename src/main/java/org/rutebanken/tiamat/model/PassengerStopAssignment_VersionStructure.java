@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "stopPlaceRef",
-    "quayRef",
-    "boardingPositionRef",
 public class PassengerStopAssignment_VersionStructure
     extends StopAssignment_VersionStructure
 {

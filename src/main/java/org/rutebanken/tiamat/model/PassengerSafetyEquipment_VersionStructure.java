@@ -11,12 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "cctv",
-    "mobilePhoneCoverage",
-    "panicButton",
-    "sosPhones",
-    "heightOfSosPanel",
-    "lighting",
 public class PassengerSafetyEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
 public class LogicalDisplay_VersionStructure
     extends DataManagedObjectStructure
 {

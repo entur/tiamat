@@ -9,10 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "destinationDisplayRef",
-    "destinationDisplayView",
-    "name",
-    "routePointRef",
 public class Via_VersionedChildStructure
     extends VersionedChildStructure
 {

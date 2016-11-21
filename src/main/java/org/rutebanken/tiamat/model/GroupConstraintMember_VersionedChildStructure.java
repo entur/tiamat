@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "purposeOfGroupingRef",
-    "memberClassRef",
 public class GroupConstraintMember_VersionedChildStructure
     extends VersionedChildStructure
 {

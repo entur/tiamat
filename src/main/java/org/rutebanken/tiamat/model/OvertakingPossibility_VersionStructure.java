@@ -10,10 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "overtakingWidth",
-    "overtakingOnLinkRef",
-    "overtakingAtPointRef",
-    "overtakingVehicleTypeRef",
 public class OvertakingPossibility_VersionStructure
     extends NetworkRestriction_VersionStructure
 {

@@ -12,10 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "label",
-    "description",
-    "trainRef",
-    "trainElementRef",
 public class TrainComponent_VersionStructure
     extends DataManagedObjectStructure
 {

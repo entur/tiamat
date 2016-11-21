@@ -13,19 +13,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "scheduledStopPointRef",
-    "name",
-    "typeOfPointRef",
-    "shortName",
-    "description",
-    "label",
-    "shortStopCode",
-    "publicCode",
-    "privateCode",
-    "externalStopPointRef",
-    "url",
-    "stopType",
-    "compassBearing",
 public class ScheduledStopPoint_DerivedViewStructure
     extends DerivedViewStructure
 {

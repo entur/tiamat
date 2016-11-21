@@ -10,21 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "routeRef",
-    "routeView",
-    "directionType",
-    "directionRef",
-    "directionView",
-    "destinationDisplayRef",
-    "destinationDisplayView",
-    "typeOfJourneyPatternRef",
-    "operationalContextRef",
-    "timingPatternRef",
-    "runTimes",
-    "waitTimes",
-    "headways",
-    "layovers",
-    "pointsInSequence",
 public abstract class JourneyPattern_VersionStructure
     extends LinkSequence_VersionStructure
 {

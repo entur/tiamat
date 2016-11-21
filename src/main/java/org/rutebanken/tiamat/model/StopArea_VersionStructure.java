@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "publicCode",
-    "parentStopAreaRef",
-    "topographicPlaceRef",
 public class StopArea_VersionStructure
     extends Zone_VersionStructure
 {

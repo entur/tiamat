@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "enclosed",
 public class ShelterEquipment_VersionStructure
     extends WaitingEquipment_VersionStructure
 {

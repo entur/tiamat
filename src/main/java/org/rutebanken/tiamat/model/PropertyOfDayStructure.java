@@ -14,17 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "name",
-    "description",
-    "daysOfWeek",
-    "weeksOfMonth",
-    "monthOfYear",
-    "dayOfYear",
-    "countryRef",
-    "holidayTypes",
-    "seasons",
-    "tides",
-    "dayEvent",
 public class PropertyOfDayStructure {
 
     protected MultilingualStringEntity name;

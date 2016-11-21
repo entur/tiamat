@@ -15,14 +15,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "vehicleModes",
-    "ticketingServiceList",
-    "ticketTypeList",
-    "ticketCounterService",
-    "onlinePurchaseForCollection",
-    "onlinePurchaseForETicket",
-    "onlinePurchaseForSelfPrintTicket",
-    "mobileDeviceTickets",
 public class TicketingService_VersionStructure
     extends LocalService_VersionStructure
 {

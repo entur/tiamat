@@ -12,14 +12,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "text",
-    "publicCode",
-    "shortCode",
-    "privateCode",
-    "typeOfNoticeRef",
-    "canBeAdvertised",
-    "driverDisplayText",
 public class Notice_VersionStructure
     extends DataManagedObjectStructure
 {

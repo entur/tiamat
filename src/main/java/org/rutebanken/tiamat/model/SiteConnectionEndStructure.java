@@ -9,22 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "transportMode",
-    "stopAreaRef",
-    "scheduledStopPointRef",
-    "stopPlaceRef",
-    "accessSpaceRef",
-    "boardingPositionRef",
-    "quayRef",
-    "stopPlaceEntranceRef",
-    "pointOfInterestRef",
-    "pointOfInterestSpaceRef",
-    "pointOfInterestEntranceRef",
-    "parkingRef",
-    "parkingAreaRef",
-    "parkingEntranceRef",
-    "operatorRef",
-    "operatorView",
 public class SiteConnectionEndStructure {
 
     protected AllVehicleModesOfTransportEnumeration transportMode;

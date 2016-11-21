@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "width",
-    "directionOfUse",
-    "passengersPerMinute",
 public abstract class AccessEquipment_VersionStructure
     extends InstalledEquipment_VersionStructure
 {

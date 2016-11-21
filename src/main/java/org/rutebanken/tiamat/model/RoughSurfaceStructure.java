@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "surfaceType",
 public class RoughSurfaceStructure
     extends AccessEquipment_VersionStructure
 {

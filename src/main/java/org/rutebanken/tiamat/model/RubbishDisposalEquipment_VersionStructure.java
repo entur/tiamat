@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "sharpsDispsal",
 public class RubbishDisposalEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

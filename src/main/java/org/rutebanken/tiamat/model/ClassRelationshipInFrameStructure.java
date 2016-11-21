@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "relationshipRef",
-    "mandatory",
-    "containment",
 public class ClassRelationshipInFrameStructure {
 
     protected RelationshipRefStructure relationshipRef;

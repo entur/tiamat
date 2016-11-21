@@ -10,12 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "typeOfTransferRef",
-    "description",
-    "distance",
-    "transferDuration",
-    "walkTransferDuration",
 public abstract class Transfer_VersionStructure
     extends DataManagedObjectStructure
 {

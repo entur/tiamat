@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "from",
-    "to",
-    "topographicPlaceView",
-    "stopAreaRef",
 public class DefaultConnection_VersionStructure
     extends Transfer_VersionStructure
 {

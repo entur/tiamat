@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "lighting",
 public class PlaceLighting_VersionStructure
     extends AccessEquipment_VersionStructure
 {

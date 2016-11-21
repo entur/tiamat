@@ -13,10 +13,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "name",
-    "startTime",
-    "endTime",
-    "dayOffset",
 public class Timeband_VersionedChildStructure
     extends DataManagedObjectStructure
 {

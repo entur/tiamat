@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "members",
-    "mainLineRef",
 public class GroupOfLines_VersionStructure
     extends GroupOfEntities_VersionStructure
 {

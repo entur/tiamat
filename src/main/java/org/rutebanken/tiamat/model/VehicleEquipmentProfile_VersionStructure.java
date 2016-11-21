@@ -12,10 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "equipmentRef",
-    "units",
-    "manufacturer",
 public class VehicleEquipmentProfile_VersionStructure
     extends DataManagedObjectStructure
 {

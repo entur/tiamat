@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "journeyPatternRef",
 public class JourneyPatternHeadway_VersionedChildStructure
     extends JourneyHeadway_VersionedChildStructure
 {

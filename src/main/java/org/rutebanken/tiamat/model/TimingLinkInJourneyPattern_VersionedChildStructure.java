@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "timingLinkRef",
 public class TimingLinkInJourneyPattern_VersionedChildStructure
     extends LinkInLinkSequence_VersionedChildStructure
 {

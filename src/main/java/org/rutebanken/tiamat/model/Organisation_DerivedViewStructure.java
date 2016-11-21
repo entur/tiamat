@@ -11,12 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "organisationRef",
-    "name",
-    "shortName",
-    "legalName",
-    "tradingName",
-    "alternativeNames",
 public class Organisation_DerivedViewStructure
     extends DerivedViewStructure
 {

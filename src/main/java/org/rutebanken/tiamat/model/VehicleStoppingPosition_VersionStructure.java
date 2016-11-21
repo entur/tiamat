@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "stoppingPositionName",
-    "label",
-    "bearing",
 public class VehicleStoppingPosition_VersionStructure
     extends DataManagedObjectStructure
 {

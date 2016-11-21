@@ -13,12 +13,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "serviceCalendarRef",
-    "operatingPeriodRef",
-    "operatingDayRef",
-    "date",
-    "dayTypeRef",
-    "timebandRef",
 public class DayTypeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

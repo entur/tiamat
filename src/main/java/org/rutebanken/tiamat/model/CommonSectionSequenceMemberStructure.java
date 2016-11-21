@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parentCommonSectionRef",
 public class CommonSectionSequenceMemberStructure
     extends AbstractGroupMember_VersionedChildStructure
 {

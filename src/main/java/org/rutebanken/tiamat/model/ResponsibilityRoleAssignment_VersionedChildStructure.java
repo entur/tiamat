@@ -12,13 +12,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "responsibilitySetRef",
-    "description",
-    "dataRoleType",
-    "stakeholderRoleType",
-    "typeOfResponsibilityRoleRef",
-    "responsibleOrganisationRef",
-    "responsiblePartRef",
 public class ResponsibilityRoleAssignment_VersionedChildStructure
     extends VersionedChildStructure
 {

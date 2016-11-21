@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "linkSequenceRef",
 public abstract class LinkInLinkSequence_VersionedChildStructure
     extends VersionedChildStructure
 {

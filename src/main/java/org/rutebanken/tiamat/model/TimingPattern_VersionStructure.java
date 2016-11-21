@@ -10,12 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "routeRef",
-    "directionType",
-    "timeDemandTypeRef",
-    "timebandRef",
-    "pointsInSequence",
-    "points",
 public class TimingPattern_VersionStructure
     extends LinkSequence_VersionStructure
 {

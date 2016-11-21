@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import net.opengis.gml._3.LineStringType;
 
 
-    "projectedLinkSequenceRef",
-    "distance",
-    "points",
 public class LinkSequenceProjection_VersionStructure
     extends Projection_VersionStructure
 {

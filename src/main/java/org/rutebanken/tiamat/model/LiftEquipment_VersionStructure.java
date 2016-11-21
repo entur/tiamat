@@ -11,26 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "depth",
-    "maximumLoad",
-    "wheelchairPasssable",
-    "wheelchairTurningCircle",
-    "internalWidth",
-    "handrailType",
-    "handrailHeight",
-    "lowerHandrailHeight",
-    "callButtonHeight",
-    "directionButtonHeight",
-    "raisedButtons",
-    "brailleButtons",
-    "throughLoader",
-    "mirrorOnOppositeSide",
-    "attendant",
-    "automatic",
-    "alarmButton",
-    "tactileActuators",
-    "accousticAnnouncements",
-    "signageToLift",
 public class LiftEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

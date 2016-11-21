@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parentRef",
-    "deliveryVariantMediaType",
-    "typeOfDeliveryVariantRef",
 public class DeliveryVariant_VersionStructure
     extends DataManagedObjectStructure
 {

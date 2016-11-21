@@ -14,13 +14,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "bookingMethods",
-    "bookingAccess",
-    "bookWhen",
-    "buyWhen",
-    "latestBookingTime",
-    "minimumBookingPeriod",
-    "bookingUrl",
 public class BookingArrangementsStructure {
 
     protected List<BookingMethodEnumeration> bookingMethods;

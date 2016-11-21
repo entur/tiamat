@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 
-    "mobilityImpairedAccess",
-    "limitations",
-    "suitabilities",
 @MappedSuperclass
 public class AccessibilityAssessment_VersionedChildStructure
     extends VersionedChildStructure

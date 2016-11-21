@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "accessSpaceType",
-    "passageType",
 public class AccessSpace_VersionStructure
     extends StopPlaceSpace_VersionStructure
 {

@@ -13,11 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "wheelchairAccess",
-    "stepFreeAccess",
-    "escalatorFreeAccess",
-    "liftFreeAccess",
-    "audibleSignalsAvailable",
 @MappedSuperclass
 public class AccessibilityLimitation_VersionedChildStructure
     extends VersionedChildStructure

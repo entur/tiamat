@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "hasWheelChairSpaces",
-    "numberOfWheelchairAreas",
-    "widthOfAccessArea",
-    "lengthOfAccessArea",
-    "heightOfAccessArea",
-    "wheelchairTurningCircle",
 public class WheelchairVehicleEquipment_VersionStructure
     extends ActualVehicleEquipment_VersionStructure
 {

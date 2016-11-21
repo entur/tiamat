@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "privateCode",
 public class AliasStructure {
 
     protected PrivateCodeStructure privateCode;

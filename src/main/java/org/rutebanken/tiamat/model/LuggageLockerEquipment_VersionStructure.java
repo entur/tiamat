@@ -12,10 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "numberOfLockers",
-    "lockerWidth",
-    "lockerHeight",
-    "lockerDepth",
 public class LuggageLockerEquipment_VersionStructure
     extends SiteEquipment_VersionStructure
 {

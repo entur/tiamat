@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "reverseMembers",
-    "sectionType",
-    "lineRef",
 public class LineSection_VersionStructure
     extends CommonSection_VersionStructure
 {

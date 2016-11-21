@@ -15,13 +15,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-        "namedObjectRef",
-        "lang",
-        "nameType",
-        "typeOfName",
-        "name",
-        "shortName",
-        "abbreviation",
 @MappedSuperclass
 public class AlternativeName_VersionedChildStructure
         extends VersionedChildStructure {

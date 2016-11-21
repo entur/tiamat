@@ -11,16 +11,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "journeyPatternRef",
-    "routeRef",
-    "routeView",
-    "directionType",
-    "directionRef",
-    "directionView",
-    "destinationDisplayRef",
-    "destinationDisplayView",
-    "typeOfJourneyPatternRef",
-    "operationalContextRef",
 public class JourneyPattern_DerivedViewStructure
     extends DerivedViewStructure
 {

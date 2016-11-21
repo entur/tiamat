@@ -11,9 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "parentCommonSectionRef",
-    "pointRef",
-    "linkRef",
 public class CommonSectionPointMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {

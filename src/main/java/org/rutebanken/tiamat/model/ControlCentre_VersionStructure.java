@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "number",
-    "controlCentreCode",
 public class ControlCentre_VersionStructure
     extends OrganisationPart_VersionStructure
 {

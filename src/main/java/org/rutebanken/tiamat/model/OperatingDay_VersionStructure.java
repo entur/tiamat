@@ -13,13 +13,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "calendarDate",
-    "serviceCalendarRef",
-    "name",
-    "shortName",
-    "dayNumber",
-    "privateCode",
-    "earliestTime",
 public class OperatingDay_VersionStructure
     extends DataManagedObjectStructure
 {

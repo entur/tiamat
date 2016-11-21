@@ -12,11 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "trainComponentRef",
-    "label",
-    "description",
-    "trainElementRef",
-    "fareClasses",
 public class TrainComponent_DerivedViewStructure
     extends DerivedViewStructure
 {

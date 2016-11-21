@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "numberOfCars",
 public class TrainSizeStructure {
 
     protected BigInteger numberOfCars;

@@ -17,34 +17,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "pathLinks",
-    "pathJunctions",
-    "accesses",
-    "navigationPaths",
-    "publicCode",
-    "label",
-    "parkingType",
-    "parkingVehicleTypes",
-    "parkingLayout",
-    "numberOfParkingLevels",
-    "principalCapacity",
-    "totalCapacity",
-    "overnightParkingPermitted",
-    "prohibitedForHazardousMaterials",
-    "rechargingAvailable",
-    "secure",
-    "realTimeOccupancyAvailable",
-    "parkingPaymentProcess",
-    "paymentMethods",
-    "defaultCurrency",
-    "currenciesAccepted",
-    "cardsAccepted",
-    "parkingReservation",
-    "bookingUrl",
-    "paymentByMobile",
-    "freeParkingOutOfHours",
-    "parkingProperties",
-    "parkingAreas",
 public class Parking_VersionStructure
     extends Site_VersionStructure
 {

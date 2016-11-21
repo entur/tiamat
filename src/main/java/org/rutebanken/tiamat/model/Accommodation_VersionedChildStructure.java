@@ -14,17 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "fareClass",
-    "classOfUseRef",
-    "accommodationFacility",
-    "couchetteFacility",
-    "maximumNumberOfBerths",
-    "berthFacility",
-    "showerFacility",
-    "toiletFacility",
-    "genderLimitation",
-    "nuisanceFacilityList",
 public class Accommodation_VersionedChildStructure
     extends VersionedChildStructure
 {

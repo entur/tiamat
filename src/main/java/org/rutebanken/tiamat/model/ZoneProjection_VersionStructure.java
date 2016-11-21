@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "projectedZoneRef",
-    "projectToZoneRef",
-    "projectToPointRef",
 public class ZoneProjection_VersionStructure
     extends Projection_VersionStructure
 {

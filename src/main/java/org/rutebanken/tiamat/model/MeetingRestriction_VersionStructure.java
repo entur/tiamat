@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "forVehicleTypeRef",
 public class MeetingRestriction_VersionStructure
     extends InfrastructureLinkRestriction_VersionStructure
 {

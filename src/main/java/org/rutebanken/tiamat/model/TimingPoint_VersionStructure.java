@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "timingPointStatus",
 public class TimingPoint_VersionStructure
     extends Point_VersionStructure
 {

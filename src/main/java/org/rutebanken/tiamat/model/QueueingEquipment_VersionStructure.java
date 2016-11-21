@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "numberOfServers",
-    "railedQueue",
 public class QueueingEquipment_VersionStructure
     extends AccessEquipment_VersionStructure
 {

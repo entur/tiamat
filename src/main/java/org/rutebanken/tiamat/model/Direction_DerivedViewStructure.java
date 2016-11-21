@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "directionRef",
 public class Direction_DerivedViewStructure
     extends DerivedViewStructure
 {

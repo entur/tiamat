@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "complexFeatureRef",
-    "simpleFeatureRef",
 public class ComplexFeatureMember_VersionedChildStructure
     extends AbstractGroupMember_VersionedChildStructure
 {

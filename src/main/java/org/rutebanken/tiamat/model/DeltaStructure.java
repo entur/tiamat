@@ -13,10 +13,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
-    "simpleObjectRef",
-    "fromVersionRef",
-    "toVersionRef",
-    "modification",
 public class DeltaStructure {
 
     protected SimpleObjectRefStructure simpleObjectRef;

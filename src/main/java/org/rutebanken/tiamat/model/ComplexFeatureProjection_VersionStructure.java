@@ -13,9 +13,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "projectedFeartureRef",
-    "ontoFeatureRef",
-    "pointRef",
 public class ComplexFeatureProjection_VersionStructure
     extends Projection_VersionStructure
 {

@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "organisationRef",
-    "responsibilities",
 public class AdministrativeZone_VersionStructure
     extends Zone_VersionStructure
 {

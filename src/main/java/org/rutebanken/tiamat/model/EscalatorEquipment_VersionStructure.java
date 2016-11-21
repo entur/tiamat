@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "tactileActuators",
-    "energySaving",
 public class EscalatorEquipment_VersionStructure
     extends StairEquipment_VersionStructure
 {

@@ -12,9 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "units",
-    "vehicleTypeRef",
-    "equipmentRef",
 public abstract class ActualVehicleEquipment_VersionStructure
     extends PassengerEquipment_VersionStructure
 {

@@ -9,10 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "hideLink",
-    "hideDestination",
-    "showEntranceSeparately",
-    "showExitSeparately",
 public class PathLink_DerivedViewStructure
     extends DerivedViewStructure
 {

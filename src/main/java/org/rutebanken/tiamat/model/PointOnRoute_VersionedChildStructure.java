@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "pointRef",
 public class PointOnRoute_VersionedChildStructure
     extends PointInLinkSequence_VersionedChildStructure
 {

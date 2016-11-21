@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "projectedPointRef",
-    "projectToPointRef",
-    "projectToLinkRef",
 public class PointProjection_VersionStructure
     extends Projection_VersionStructure
 {

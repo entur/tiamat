@@ -14,12 +14,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "luggageServiceFacilityList",
-    "luggageTrolleys",
-    "wheelchairLuggageTrolleys",
-    "freeToUse",
-    "maximumBagWidth",
-    "maximumBagHeight",
 public class LuggageService_VersionStructure
     extends LocalService_VersionStructure
 {

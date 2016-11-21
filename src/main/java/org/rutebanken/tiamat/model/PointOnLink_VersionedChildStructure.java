@@ -15,10 +15,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "linkRef",
-    "distanceFromStart",
-    "pointRef",
 public class PointOnLink_VersionedChildStructure
     extends VersionedChildStructure
 {

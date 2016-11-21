@@ -16,10 +16,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "passengerStopAssignmentRef",
-    "stopPlaceRef",
-    "quayRef",
-    "quayName",
 public class PassengerStopAssignment_DerivedViewStructure
     extends DerivedViewStructure
 {

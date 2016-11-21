@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "serviceLinkInJourneyPattern",
-    "serviceLinkRef",
-    "toPointRef",
-    "distance",
 public class OnwardServiceLink_DerivedViewStructure
     extends DerivedViewStructure
 {

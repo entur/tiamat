@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "routeRef",
-    "vehicleMode",
-    "name",
-    "lineRef",
-    "lineView",
-    "directionView",
 public class Route_DerivedViewStructure
     extends DerivedViewStructure
 {

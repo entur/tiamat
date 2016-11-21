@@ -12,16 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "noticeRef",
-    "groupOfNoticesRef",
-    "noticedObjectRef",
-    "linkSequenceRef",
-    "commonSectionRef",
-    "startPointInPatternRef",
-    "endPointInPatternRef",
-    "mark",
-    "markUrl",
-    "publicityChannel",
 public class NoticeAssignment_VersionStructure
     extends Assignment_VersionStructure
 {

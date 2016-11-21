@@ -14,13 +14,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "name",
-    "shortName",
-    "registrationNumber",
-    "operationalNumber",
-    "privateCode",
-    "operatorRef",
-    "vehicleTypeRef",
 public class Vehicle_VersionStructure
     extends DataManagedObjectStructure
 {

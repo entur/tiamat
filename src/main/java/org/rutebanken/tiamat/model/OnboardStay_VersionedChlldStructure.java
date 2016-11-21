@@ -11,8 +11,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "fareClass",
-    "boardingPermisssion",
 public class OnboardStay_VersionedChlldStructure
     extends VersionedChildStructure
 {

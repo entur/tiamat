@@ -15,25 +15,6 @@ import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
-    "stopAreas",
-    "shortName",
-    "description",
-    "label",
-    "shortStopCode",
-    "publicCode",
-    "privateCode",
-    "externalStopPointRef",
-    "url",
-    "stopType",
-    "compassBearing",
-    "presentation",
-    "vehicleModes",
-    "forAlighting",
-    "forBoarding",
-    "requestStop",
-    "countryRef",
-    "topographicPlaceRef",
-    "topographicPlaceView",
 public class ScheduledStopPoint_VersionStructure
     extends TimingPoint_VersionStructure
 {

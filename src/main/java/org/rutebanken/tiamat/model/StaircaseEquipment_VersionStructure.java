@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "continuousHandrail",
-    "spiralStair",
-    "numberOfFlights",
 public class StaircaseEquipment_VersionStructure
     extends StairEquipment_VersionStructure
 {

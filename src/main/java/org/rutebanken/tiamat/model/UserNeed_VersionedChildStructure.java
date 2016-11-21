@@ -11,11 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "mobilityNeed",
-    "psychosensoryNeed",
-    "medicalNeed",
-    "encumbranceNeed",
-    "excluded",
 public class UserNeed_VersionedChildStructure
     extends VersionedChildStructure
 {

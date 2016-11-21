@@ -9,15 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "description",
-    "privateCode",
-    "typeOfTimeDemandTypeRef",
-    "presentation",
-    "runTimes",
-    "waitTimes",
-    "layovers",
-    "headways",
 public class TimeDemandType_VersionStructure
     extends DataManagedObjectStructure
 {

@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "externalConnectionLinkRef",
-    "from",
-    "to",
 public class Connection_VersionStructure
     extends Transfer_VersionStructure
 {

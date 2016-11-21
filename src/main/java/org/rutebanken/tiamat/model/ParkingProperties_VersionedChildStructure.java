@@ -14,11 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "parkingUserTypes",
-    "parkingVehicleTypes",
-    "parkingStayList",
-    "maximumStay",
-    "spaces",
 public class ParkingProperties_VersionedChildStructure
     extends VersionedChildStructure
 {

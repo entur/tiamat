@@ -12,11 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "name",
-    "shortName",
-    "privateCode",
-    "organisationPartRef",
-    "vehicleMode",
 public class OperationalContext_VersionStructure
     extends DataManagedObjectStructure
 {

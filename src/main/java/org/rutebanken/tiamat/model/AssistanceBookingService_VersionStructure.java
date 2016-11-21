@@ -12,14 +12,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "assistanceAvailability",
-    "wheelchairBookingRequired",
-    "bookingContact",
-    "bookingArrangements",
-    "vehicleMode",
-    "transportOrganisationRef",
-    "lineRef",
-    "bookedObjectRef",
 public class AssistanceBookingService_VersionStructure
     extends LocalService_VersionStructure
 {

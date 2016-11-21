@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
-    "access",
-    "connection",
-    "defaultConnection",
 public class Connections {
 
     protected List<Access> access;

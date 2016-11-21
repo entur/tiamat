@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
-    "timingLinkRef",
 public class JourneyRunTime_VersionedChildStructure
     extends JourneyTiming_VersionedChildStructure
 {
