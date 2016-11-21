@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 

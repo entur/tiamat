@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
@@ -64,7 +63,6 @@ public abstract class SiteComponent_VersionStructure
 
 
     public void setClassOfUseRef(ClassOfUseRef value) {
-        this.classOfUseRef = value;
     }
 
 

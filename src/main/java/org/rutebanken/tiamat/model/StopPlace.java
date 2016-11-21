@@ -3,9 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 
-import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
 
 @Entity
 public class StopPlace
@@ -43,7 +41,6 @@ public class StopPlace
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
 
-    @ElementCollection(targetClass = VehicleModeEnumeration.class)
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
@@ -249,7 +246,6 @@ public class StopPlace
 
         StopPlace other = (StopPlace) object;
 
-        // Could have used super
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.centroid, other.centroid);
     }

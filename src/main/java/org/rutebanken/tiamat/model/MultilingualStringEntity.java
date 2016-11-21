@@ -1,10 +1,8 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "multilingual_string", indexes = {@Index(name = "multilingual_value", columnList = "value")})
 public class MultilingualStringEntity extends MultilingualString {
 
     @Id

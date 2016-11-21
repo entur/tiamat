@@ -2,12 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
 
-import javax.persistence.*;
-import java.util.*;
 
-/**
- * Value class for use with Map<String, Value> in {@link DataManagedObjectStructure}.
- */
 @Entity
 public class Value {
 
