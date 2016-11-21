@@ -56,12 +56,13 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         Quay other = (Quay) object;
 
         return Objects.equals(this.name, other.name)
-                && Objects.equals(this.centroid, other.centroid);
+                && Objects.equals(this.centroid, other.centroid)
+                && Objects.equals(this.compassBearing, other.compassBearing);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, centroid);
+        return Objects.hash(name, centroid, compassBearing);
     }
 
     @Override
