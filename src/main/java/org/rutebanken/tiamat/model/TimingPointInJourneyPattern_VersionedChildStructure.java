@@ -1,20 +1,11 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
 
 
 public class TimingPointInJourneyPattern_VersionedChildStructure
-    extends PointInLinkSequence_VersionedChildStructure
-{
+        extends PointInLinkSequence_VersionedChildStructure {
 
     protected JAXBElement<? extends TimingPointRefStructure> timingPointRef;
     protected TimingLinkRefStructure onwardTimingLinkRef;

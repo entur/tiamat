@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.model.ValidityCondition_VersionStructure;
 import javax.persistence.Embeddable;
 
 @Embeddable

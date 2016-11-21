@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum HolidayTypeEnumeration {
 
@@ -27,17 +20,17 @@ public enum HolidayTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static HolidayTypeEnumeration fromValue(String v) {
-        for (HolidayTypeEnumeration c: HolidayTypeEnumeration.values()) {
+        for (HolidayTypeEnumeration c : HolidayTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

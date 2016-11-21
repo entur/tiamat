@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum OrganisationTypeEnumeration {
 
@@ -25,17 +18,17 @@ public enum OrganisationTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static OrganisationTypeEnumeration fromValue(String v) {
-        for (OrganisationTypeEnumeration c: OrganisationTypeEnumeration.values()) {
+        for (OrganisationTypeEnumeration c : OrganisationTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

@@ -1,16 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-
 public class StopPlaces_RelStructure
-    extends ContainmentAggregationStructure
-{
+        extends ContainmentAggregationStructure {
 
     protected StopPlaceReference stopPlaceRef;
     protected StopPlace stopPlace;

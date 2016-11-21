@@ -1,18 +1,10 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 public class PurposeOfGrouping_ValueStructure
-    extends TypeOfValue_VersionStructure
-{
+        extends TypeOfValue_VersionStructure {
 
     protected ClassRefs_RelStructure classes;
     protected JAXBElement<? extends TypeOfEntity_VersionStructure> typeOfEntity;

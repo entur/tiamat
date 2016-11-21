@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum ParkingUserEnumeration {
 
@@ -27,17 +20,17 @@ public enum ParkingUserEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static ParkingUserEnumeration fromValue(String v) {
-        for (ParkingUserEnumeration c: ParkingUserEnumeration.values()) {
+        for (ParkingUserEnumeration c : ParkingUserEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

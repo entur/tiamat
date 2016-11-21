@@ -1,19 +1,10 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 public class NavigationPathAssignment_VersionStructure
-    extends StopAssignment_VersionStructure
-{
+        extends StopAssignment_VersionStructure {
 
     protected JAXBElement<? extends ConnectionRefStructure> connectionRef;
     protected JAXBElement<? extends SiteRefStructure> siteRef;

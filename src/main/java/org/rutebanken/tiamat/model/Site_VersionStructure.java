@@ -2,13 +2,6 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,62 +9,47 @@ import java.util.List;
 public abstract class Site_VersionStructure
         extends SiteElement_VersionStructure {
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @Transient
+    private final List<Level> levels = new ArrayList<>();
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "topographic_place_ref")),
             @AttributeOverride(name = "version", column = @Column(name = "topographic_place_version"))
     })
     @Embedded
     protected TopographicPlaceRefStructure topographicPlaceRef;
-
     @Transient
     protected TopographicPlaceView topographicPlaceView;
-
     @Transient
     protected TopographicPlaceRefs_RelStructure additionalTopographicPlaces;
-
     @Transient
     protected SiteTypeEnumeration siteType;
-
     @Transient
     protected Boolean atCentre;
-
     @Transient
     protected LocaleStructure locale;
-
     @Transient
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
-
     @Transient
     protected Organisation_DerivedViewStructure operatingOrganisationView;
-
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
             @AttributeOverride(name = "version", column = @Column(name = "parent_site_version"))
     })
     @Embedded
     protected SiteRefStructure parentSiteRef;
-
     @Transient
     protected SiteRefs_RelStructure adjacentSites;
-
     @Transient
     protected TopographicPlaceRefStructure containedInPlaceRef;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @Transient
-    private final List<Level> levels = new ArrayList<>();
-
     @Transient
     protected SiteEntrances_RelStructure entrances;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<EquipmentPlace> equipmentPlaces;
-
     @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
-
     @Transient
     protected LocalServices_RelStructure localServices;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<EquipmentPlace> equipmentPlaces;
 
     public Site_VersionStructure(EmbeddableMultilingualString name) {
         super(name);

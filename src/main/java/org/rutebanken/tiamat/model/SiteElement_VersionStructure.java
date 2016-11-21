@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
@@ -10,21 +8,16 @@ import java.util.List;
 
 @MappedSuperclass
 public abstract class SiteElement_VersionStructure
-    extends AddressablePlace_VersionStructure
-{
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    protected AccessibilityAssessment accessibilityAssessment;
-
-    @Transient
-    protected List<AccessModeEnumeration> accessModes;
-
-    @Transient
-    protected MultilingualStringEntity nameSuffix;
+        extends AddressablePlace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
-
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    protected AccessibilityAssessment accessibilityAssessment;
+    @Transient
+    protected List<AccessModeEnumeration> accessModes;
+    @Transient
+    protected MultilingualStringEntity nameSuffix;
     @Transient
     protected MultilingualStringEntity crossRoad;
 
@@ -54,7 +47,8 @@ public abstract class SiteElement_VersionStructure
         super(name);
     }
 
-    public SiteElement_VersionStructure() {}
+    public SiteElement_VersionStructure() {
+    }
 
     public AccessibilityAssessment getAccessibilityAssessment() {
         return accessibilityAssessment;
@@ -82,7 +76,6 @@ public abstract class SiteElement_VersionStructure
     public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
-
 
 
     public MultilingualStringEntity getCrossRoad() {

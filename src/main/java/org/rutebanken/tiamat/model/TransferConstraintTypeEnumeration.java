@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum TransferConstraintTypeEnumeration {
 
@@ -18,17 +11,17 @@ public enum TransferConstraintTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static TransferConstraintTypeEnumeration fromValue(String v) {
-        for (TransferConstraintTypeEnumeration c: TransferConstraintTypeEnumeration.values()) {
+        for (TransferConstraintTypeEnumeration c : TransferConstraintTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

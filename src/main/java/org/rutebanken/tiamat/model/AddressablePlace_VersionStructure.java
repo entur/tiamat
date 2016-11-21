@@ -1,19 +1,12 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 @MappedSuperclass
 public class AddressablePlace_VersionStructure
-    extends Place_VersionStructure
-{
+        extends Place_VersionStructure {
 
     @Transient
     protected String url;
@@ -32,7 +25,8 @@ public class AddressablePlace_VersionStructure
         super(name);
     }
 
-    public AddressablePlace_VersionStructure() {}
+    public AddressablePlace_VersionStructure() {
+    }
 
     public String getUrl() {
         return url;

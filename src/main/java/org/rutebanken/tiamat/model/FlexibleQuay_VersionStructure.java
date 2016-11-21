@@ -1,20 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-
 public class FlexibleQuay_VersionStructure
-    extends Place_VersionStructure
-{
+        extends Place_VersionStructure {
 
     protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;
@@ -23,7 +10,7 @@ public class FlexibleQuay_VersionStructure
     protected Boolean boardingUse;
     protected Boolean alightingUse;
     protected String publicCode;
-    
+
     public MultilingualStringEntity getNameSuffix() {
         return nameSuffix;
     }

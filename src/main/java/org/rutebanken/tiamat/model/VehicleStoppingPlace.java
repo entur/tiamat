@@ -1,15 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
-
-
 public class VehicleStoppingPlace
-    extends VehicleStoppingPlace_VersionStructure
-{
+        extends VehicleStoppingPlace_VersionStructure {
 
 
 }

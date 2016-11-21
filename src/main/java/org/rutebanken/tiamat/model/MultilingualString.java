@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import org.hibernate.validator.constraints.Length;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.util.Objects;
@@ -34,7 +32,7 @@ public abstract class MultilingualString {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null) return false;
-        if(!(object instanceof MultilingualString)) return false;
+        if (!(object instanceof MultilingualString)) return false;
 
         MultilingualString other = (MultilingualString) object;
 
@@ -49,6 +47,6 @@ public abstract class MultilingualString {
 
     @Override
     public String toString() {
-        return getValue() +" ("+lang+")";
+        return getValue() + " (" + lang + ")";
     }
 }

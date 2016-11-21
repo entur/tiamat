@@ -1,21 +1,10 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.math.BigDecimal;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 public class SiteEntrance_VersionStructure
-    extends SiteComponent_VersionStructure
-{
+        extends SiteComponent_VersionStructure {
 
     protected String publicCode;
     protected MultilingualStringEntity label;

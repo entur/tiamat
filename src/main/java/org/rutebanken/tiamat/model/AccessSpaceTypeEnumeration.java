@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum AccessSpaceTypeEnumeration {
 
@@ -31,17 +24,17 @@ public enum AccessSpaceTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static AccessSpaceTypeEnumeration fromValue(String v) {
-        for (AccessSpaceTypeEnumeration c: AccessSpaceTypeEnumeration.values()) {
+        for (AccessSpaceTypeEnumeration c : AccessSpaceTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

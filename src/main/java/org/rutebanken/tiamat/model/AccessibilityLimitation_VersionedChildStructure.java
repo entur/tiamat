@@ -1,22 +1,13 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 @MappedSuperclass
 public class AccessibilityLimitation_VersionedChildStructure
-    extends VersionedChildStructure
-{
+        extends VersionedChildStructure {
 
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration wheelchairAccess;

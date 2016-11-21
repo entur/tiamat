@@ -1,10 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum RelativeOperatorEnumeration {
 
@@ -18,12 +12,12 @@ public enum RelativeOperatorEnumeration {
 
     LT;
 
-    public String value() {
-        return name();
-    }
-
     public static RelativeOperatorEnumeration fromValue(String v) {
         return valueOf(v);
+    }
+
+    public String value() {
+        return name();
     }
 
 }

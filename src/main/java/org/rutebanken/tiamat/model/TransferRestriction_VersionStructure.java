@@ -1,18 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-
-
 public class TransferRestriction_VersionStructure
-    extends Assignment_VersionStructure
-{
+        extends Assignment_VersionStructure {
 
     protected TypeOfTransferRefStructure typeOfTransferRef;
     protected Boolean bothWays;

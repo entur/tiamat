@@ -1,18 +1,10 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.math.BigInteger;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 public class OrderedVersionOfObjectRefStructure
-    extends VersionOfObjectRefStructure
-{
+        extends VersionOfObjectRefStructure {
 
     protected BigInteger order;
 

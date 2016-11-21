@@ -1,19 +1,12 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import java.math.BigDecimal;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import net.opengis.gml._3.LineStringType;
+
+import java.math.BigDecimal;
 
 
 public class LinkSequenceProjection_VersionStructure
-    extends Projection_VersionStructure
-{
+        extends Projection_VersionStructure {
 
     protected LinkSequenceRefStructure projectedLinkSequenceRef;
     protected BigDecimal distance;

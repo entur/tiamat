@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum TopographicPlaceTypeEnumeration {
 
@@ -43,17 +36,17 @@ public enum TopographicPlaceTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static TopographicPlaceTypeEnumeration fromValue(String v) {
-        for (TopographicPlaceTypeEnumeration c: TopographicPlaceTypeEnumeration.values()) {
+        for (TopographicPlaceTypeEnumeration c : TopographicPlaceTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

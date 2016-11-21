@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
-
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
@@ -13,10 +11,9 @@ import java.util.Set;
 
 @MappedSuperclass
 public abstract class DataManagedObjectStructure
-    extends EntityInVersionStructure
-{
+        extends EntityInVersionStructure {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Map<String,Value> keyValues = new HashMap<>();
+    private final Map<String, Value> keyValues = new HashMap<>();
 
     @Transient
     protected ExtensionsStructure extensions;

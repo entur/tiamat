@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum LanguageUseEnumeration {
 
@@ -23,17 +16,17 @@ public enum LanguageUseEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static LanguageUseEnumeration fromValue(String v) {
-        for (LanguageUseEnumeration c: LanguageUseEnumeration.values()) {
+        for (LanguageUseEnumeration c : LanguageUseEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

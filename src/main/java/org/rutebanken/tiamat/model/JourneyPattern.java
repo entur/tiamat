@@ -1,15 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
-
-
 public class JourneyPattern
-    extends JourneyPattern_VersionStructure
-{
+        extends JourneyPattern_VersionStructure {
 
 
 }

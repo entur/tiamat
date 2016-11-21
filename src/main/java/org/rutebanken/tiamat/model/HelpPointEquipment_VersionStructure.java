@@ -1,19 +1,11 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import java.math.BigDecimal;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.Duration;
+import java.math.BigDecimal;
 
 
 public class HelpPointEquipment_VersionStructure
-    extends PassengerEquipment_VersionStructure
-{
+        extends PassengerEquipment_VersionStructure {
 
     protected AccessibilityAssessment accessibilityAssessment;
     protected BigDecimal heightFromGround;

@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.util.Objects;
 
 @Entity
 public class MultilingualStringEntity extends MultilingualString {
@@ -13,7 +12,8 @@ public class MultilingualStringEntity extends MultilingualString {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
-    public MultilingualStringEntity() {}
+    public MultilingualStringEntity() {
+    }
 
     public MultilingualStringEntity(String value, String lang) {
         this.value = value;

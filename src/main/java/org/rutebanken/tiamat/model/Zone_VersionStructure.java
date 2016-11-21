@@ -9,8 +9,7 @@ import javax.persistence.Transient;
 
 @MappedSuperclass
 public class Zone_VersionStructure
-    extends GroupOfPoints_VersionStructure
-{
+        extends GroupOfPoints_VersionStructure {
 
     @Transient
     protected TypeOfZoneRefs_RelStructure types;
@@ -26,7 +25,8 @@ public class Zone_VersionStructure
     @Transient
     protected ZoneRefStructure parentZoneRef;
 
-    public Zone_VersionStructure() {}
+    public Zone_VersionStructure() {
+    }
 
     public Zone_VersionStructure(EmbeddableMultilingualString name) {
         super(name);

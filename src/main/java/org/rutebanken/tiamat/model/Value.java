@@ -19,7 +19,8 @@ public class Value {
     @ElementCollection
     private Set<String> items = new HashSet<>();
 
-    public Value() {}
+    public Value() {
+    }
 
     public Value(String... items) {
         Collections.addAll(this.items, items);

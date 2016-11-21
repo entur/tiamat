@@ -1,19 +1,12 @@
-
-
 package org.rutebanken.tiamat.model;
 
+import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlType;
 
 
 public class EquipmentsInFrame_RelStructure
-    extends ContainmentAggregationStructure
-{
+        extends ContainmentAggregationStructure {
 
     protected List<JAXBElement<? extends Equipment_VersionStructure>> equipment;
 

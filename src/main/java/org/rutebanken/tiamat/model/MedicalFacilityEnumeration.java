@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum MedicalFacilityEnumeration {
 
@@ -18,17 +11,17 @@ public enum MedicalFacilityEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static MedicalFacilityEnumeration fromValue(String v) {
-        for (MedicalFacilityEnumeration c: MedicalFacilityEnumeration.values()) {
+        for (MedicalFacilityEnumeration c : MedicalFacilityEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

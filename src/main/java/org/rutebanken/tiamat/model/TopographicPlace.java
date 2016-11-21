@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @Entity
 public class TopographicPlace
@@ -14,15 +12,15 @@ public class TopographicPlace
     protected TopographicPlaceTypeEnumeration topographicPlaceType;
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column= @Column(name="country_ref")),
-            @AttributeOverride(name="value", column= @Column(name="country_ref_value"))
+            @AttributeOverride(name = "ref", column = @Column(name = "country_ref")),
+            @AttributeOverride(name = "value", column = @Column(name = "country_ref_value"))
     })
     @Embedded
     protected CountryRef countryRef;
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column= @Column(name="parent_topographic_ref")),
-            @AttributeOverride(name="version", column= @Column(name="parent_topographic_ref_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "parent_topographic_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "parent_topographic_ref_version"))
     })
     @Embedded
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;

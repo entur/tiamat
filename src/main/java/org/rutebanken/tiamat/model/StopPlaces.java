@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.util.ArrayList;

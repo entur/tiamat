@@ -1,24 +1,14 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlList;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @MappedSuperclass
 public abstract class StopPlaceComponent_VersionStructure
-    extends SiteComponent_VersionStructure
-{
+        extends SiteComponent_VersionStructure {
 
     @Transient
     protected VehicleModeEnumeration transportMode;
@@ -57,7 +47,8 @@ public abstract class StopPlaceComponent_VersionStructure
         super(name);
     }
 
-    public StopPlaceComponent_VersionStructure() { }
+    public StopPlaceComponent_VersionStructure() {
+    }
 
     public VehicleModeEnumeration getTransportMode() {
         return transportMode;

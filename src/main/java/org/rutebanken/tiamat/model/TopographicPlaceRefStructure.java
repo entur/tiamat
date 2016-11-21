@@ -4,8 +4,7 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class TopographicPlaceRefStructure
-    extends PlaceRefStructure
-{
+        extends PlaceRefStructure {
 
 
 }

@@ -1,19 +1,13 @@
-
-
 package org.rutebanken.tiamat.model;
+
+import net.opengis.gml._3.LineStringType;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import net.opengis.gml._3.LineStringType;
 
 
 public class PointsOnLink_RelStructure
-    extends StrictContainmentAggregationStructure
-{
+        extends StrictContainmentAggregationStructure {
 
     protected List<PointOnLink> pointOnLink;
     protected LineStringType lineString;

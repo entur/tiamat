@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum LimitedUseTypeEnumeration {
 
@@ -26,17 +19,17 @@ public enum LimitedUseTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static LimitedUseTypeEnumeration fromValue(String v) {
-        for (LimitedUseTypeEnumeration c: LimitedUseTypeEnumeration.values()) {
+        for (LimitedUseTypeEnumeration c : LimitedUseTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

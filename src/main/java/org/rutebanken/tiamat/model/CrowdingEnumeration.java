@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum CrowdingEnumeration {
 
@@ -20,17 +13,17 @@ public enum CrowdingEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static CrowdingEnumeration fromValue(String v) {
-        for (CrowdingEnumeration c: CrowdingEnumeration.values()) {
+        for (CrowdingEnumeration c : CrowdingEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

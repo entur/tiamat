@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
 
@@ -10,33 +9,29 @@ public abstract class SiteComponent_VersionStructure
         extends SiteElement_VersionStructure {
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column= @Column(name="site_ref")),
-            @AttributeOverride(name="version", column= @Column(name="site_ref_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "site_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "site_ref_version"))
     })
     @Embedded
     protected SiteRefStructure siteRef;
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column= @Column(name="level_ref")),
-            @AttributeOverride(name="version", column= @Column(name="level_ref_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "level_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "level_ref_version"))
     })
     @Embedded
     protected LevelRefStructure levelRef;
 
     @Transient
     protected ClassOfUseRef classOfUseRef;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<CheckConstraint> checkConstraints;
-
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
-
     @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
-
     @Transient
     protected LocalServices_RelStructure localServices;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<CheckConstraint> checkConstraints;
 
     public SiteComponent_VersionStructure(EmbeddableMultilingualString name) {
         super(name);

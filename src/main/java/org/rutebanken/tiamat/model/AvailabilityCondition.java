@@ -4,8 +4,7 @@ import javax.persistence.Entity;
 
 @Entity
 public class AvailabilityCondition
-    extends AvailabilityCondition_VersionStructure
-{
+        extends AvailabilityCondition_VersionStructure {
 
 
 }

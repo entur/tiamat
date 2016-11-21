@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,12 +12,10 @@ import java.util.Objects;
 @Entity
 public class Quay extends StopPlaceSpace_VersionStructure {
 
-    protected String plateCode;
-
-    protected Float compassBearing;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
+    protected String plateCode;
+    protected Float compassBearing;
 
     public Quay(EmbeddableMultilingualString name) {
         super(name);
@@ -49,7 +46,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @Override
     public boolean equals(Object object) {
-        if(this == object) {
+        if (this == object) {
             return true;
         } else if (!(object instanceof Quay)) {
             return false;

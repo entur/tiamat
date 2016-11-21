@@ -1,21 +1,14 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 
 @MappedSuperclass
-public class EquipmentPlace_VersionStructure extends Place_VersionStructure
-{
+public class EquipmentPlace_VersionStructure extends Place_VersionStructure {
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPosition> equipmentPositions;
 

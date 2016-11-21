@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum ModificationEnumeration {
 
@@ -22,17 +15,17 @@ public enum ModificationEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c: ModificationEnumeration.values()) {
+        for (ModificationEnumeration c : ModificationEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

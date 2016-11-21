@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum SurfaceTypeEnumeration {
 
@@ -25,17 +18,17 @@ public enum SurfaceTypeEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static SurfaceTypeEnumeration fromValue(String v) {
-        for (SurfaceTypeEnumeration c: SurfaceTypeEnumeration.values()) {
+        for (SurfaceTypeEnumeration c : SurfaceTypeEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

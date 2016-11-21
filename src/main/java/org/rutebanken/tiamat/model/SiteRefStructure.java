@@ -4,7 +4,6 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class SiteRefStructure
-    extends SiteElementRefStructure
-{
+        extends SiteElementRefStructure {
 
 }

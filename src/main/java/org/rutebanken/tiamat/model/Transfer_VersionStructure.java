@@ -1,18 +1,10 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import java.math.BigDecimal;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 public abstract class Transfer_VersionStructure
-    extends DataManagedObjectStructure
-{
+        extends DataManagedObjectStructure {
 
     protected MultilingualStringEntity name;
     protected TypeOfTransferRefStructure typeOfTransferRef;

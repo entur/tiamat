@@ -1,17 +1,14 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlElement;
-
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.description;
 
 @MappedSuperclass
 public abstract class GroupOfEntities_VersionStructure
         extends DataManagedObjectStructure {
 
     @AttributeOverrides({
-            @AttributeOverride(name="value", column= @Column(name="name_value")),
-            @AttributeOverride(name="lang", column= @Column(name="name_lang"))
+            @AttributeOverride(name = "value", column = @Column(name = "name_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "name_lang"))
     })
     @Embedded
     protected EmbeddableMultilingualString name;
@@ -24,8 +21,8 @@ public abstract class GroupOfEntities_VersionStructure
     protected EmbeddableMultilingualString shortName;
 
     @AttributeOverrides({
-            @AttributeOverride(name="value", column= @Column(name="description_value")),
-            @AttributeOverride(name="lang", column= @Column(name="description_lang"))
+            @AttributeOverride(name = "value", column = @Column(name = "description_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "description_lang"))
     })
     @Embedded
     protected EmbeddableMultilingualString description;

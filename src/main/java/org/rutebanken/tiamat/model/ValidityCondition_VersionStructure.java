@@ -1,18 +1,11 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 
 @MappedSuperclass
 public class ValidityCondition_VersionStructure
-    extends DataManagedObjectStructure
-{
+        extends DataManagedObjectStructure {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private MultilingualStringEntity name;

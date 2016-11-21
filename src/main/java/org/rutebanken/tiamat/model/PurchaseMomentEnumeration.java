@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum PurchaseMomentEnumeration {
 
@@ -21,17 +14,17 @@ public enum PurchaseMomentEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static PurchaseMomentEnumeration fromValue(String v) {
-        for (PurchaseMomentEnumeration c: PurchaseMomentEnumeration.values()) {
+        for (PurchaseMomentEnumeration c : PurchaseMomentEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

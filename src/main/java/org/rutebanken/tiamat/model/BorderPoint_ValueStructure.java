@@ -1,17 +1,7 @@
-
-
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-
-
 public class BorderPoint_ValueStructure
-    extends TimingPoint_VersionStructure
-{
+        extends TimingPoint_VersionStructure {
 
     protected MultilingualStringEntity shortName;
     protected MultilingualStringEntity description;

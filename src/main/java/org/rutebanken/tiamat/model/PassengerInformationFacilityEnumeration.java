@@ -1,11 +1,4 @@
-
-
 package org.rutebanken.tiamat.model;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 
 public enum PassengerInformationFacilityEnumeration {
 
@@ -20,17 +13,17 @@ public enum PassengerInformationFacilityEnumeration {
         value = v;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static PassengerInformationFacilityEnumeration fromValue(String v) {
-        for (PassengerInformationFacilityEnumeration c: PassengerInformationFacilityEnumeration.values()) {
+        for (PassengerInformationFacilityEnumeration c : PassengerInformationFacilityEnumeration.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
     }
 
 }

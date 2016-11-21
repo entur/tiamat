@@ -1,5 +1,3 @@
-
-
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
@@ -8,8 +6,7 @@ import java.math.BigDecimal;
 
 
 @MappedSuperclass
-public class EquipmentPositionStructure extends DataManagedObjectStructure
-{
+public class EquipmentPositionStructure extends DataManagedObjectStructure {
     @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 
@@ -17,8 +14,8 @@ public class EquipmentPositionStructure extends DataManagedObjectStructure
     protected MultilingualStringEntity description;
 
     @AttributeOverrides({
-            @AttributeOverride(name="ref", column= @Column(name="reference_point_ref")),
-            @AttributeOverride(name="version", column= @Column(name="reference_point_version"))
+            @AttributeOverride(name = "ref", column = @Column(name = "reference_point_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "reference_point_version"))
     })
     @Embedded
     protected PointRefStructure referencePointRef;

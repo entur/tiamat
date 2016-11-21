@@ -4,7 +4,6 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class LevelRefStructure
-    extends VersionOfObjectRefStructure
-{
+        extends VersionOfObjectRefStructure {
 
 }
