@@ -1,0 +1,1 @@
+CREATE INDEX stop_place_centroid_index ON stop_place USING GIST ( centroid );
