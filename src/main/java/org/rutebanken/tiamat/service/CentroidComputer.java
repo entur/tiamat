@@ -31,7 +31,7 @@ public class CentroidComputer {
 
         if(optionalPoint.isPresent()) {
             Point point = optionalPoint.get();
-            boolean changed = !point.equals(stopPlace.getCentroid());
+            boolean changed = stopPlace.getCentroid() == null || !point.equals(stopPlace.getCentroid());
             stopPlace.setCentroid(point);
             return changed;
         }

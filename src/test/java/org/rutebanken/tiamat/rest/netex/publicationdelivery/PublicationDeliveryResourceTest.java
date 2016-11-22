@@ -101,6 +101,37 @@ public class PublicationDeliveryResourceTest {
 
     }
 
+    // Import stop place StopPlace{name=Skaret (no), quays=
+    // [Quay{name=Skaret (no), centroid=POINT (7.328336965528884 62.799557598196465), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548612801]}}},
+    // Quay{name=Skaret (no), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548575301]}}}],
+    // keyValues={imported-id=Value{id=0, items=[MOR:StopArea:15485753]}}}
+    @Test
+    public void importStopWithoutCoordinatesWithQuays1() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("MOR:StopArea:15485753")
+                .withName(new MultilingualString().withValue("Skaret").withLang("no"))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("MOR:StopArea:1548612801")
+                                        .withName(new MultilingualString().withValue("Skaret").withLang("no"))
+                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("62.799557598196465"))
+                                        .withLongitude(new BigDecimal("7.328336965528884")))),
+                        new Quay()
+                            .withId("MOR:StopArea:1548575301")
+                                .withName(new MultilingualString().withValue("Skaret").withLang("no"))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+        // Exception should not have been thrown
+        StopPlace actualStopPlace = findFirstStopPlace(response);
+
+        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+    }
+
     @Test
     public void importStopPlaceWithoutCoordinates() throws Exception {
 
