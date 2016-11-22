@@ -17,6 +17,10 @@ public class Value {
     private long id;
 
     @ElementCollection
+    @CollectionTable(
+            name="items",
+            indexes = @Index(name = "items_index", columnList = "items")
+    )
     private Set<String> items = new HashSet<>();
 
     public Value() {
