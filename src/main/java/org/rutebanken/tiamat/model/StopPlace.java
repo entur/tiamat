@@ -8,7 +8,9 @@ import java.io.Serializable;
 import java.util.*;
 
 @Entity
-@Table(indexes = {@Index(name = "name_value_index", columnList = "name_value")})
+@Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
+        @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
+        @Index(name="stop_place_type_index", columnList = "stopPlaceType")})
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
@@ -38,8 +40,10 @@ public class StopPlace
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
+
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
+
     protected Boolean borderCrossing;
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
