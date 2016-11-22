@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @Entity
+@Table(indexes = {@Index(name = "name_value_index", columnList = "name_value")})
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
