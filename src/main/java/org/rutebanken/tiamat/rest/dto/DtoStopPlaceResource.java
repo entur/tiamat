@@ -1,7 +1,11 @@
 package org.rutebanken.tiamat.rest.dto;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
@@ -11,11 +15,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +51,8 @@ public class DtoStopPlaceResource {
     @Autowired
     private QuayRepository quayRepository;
 
+    private static final boolean ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES = false;
+
     @GET
     public List<StopPlaceDto> getStopPlaces(
             @DefaultValue(value = "0") @QueryParam(value = "page") int page,
@@ -87,7 +88,7 @@ public class DtoStopPlaceResource {
             stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
         }
 
-        return stopPlaceAssembler.assemble(stopPlaces);
+        return stopPlaceAssembler.assemble(stopPlaces, ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);
     }
 
     private KeycloakAuthenticationToken keyCloak() {
@@ -127,7 +128,9 @@ public class DtoStopPlaceResource {
         Pageable pageable = new PageRequest(page, size);
 
         List<StopPlaceDto> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
-                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax, boundingBox.yMax, Long.valueOf(stopPlaceSearchDTO.ignoreStopPlaceId), pageable));
+                .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
+                        boundingBox.yMax, Long.valueOf(stopPlaceSearchDTO.ignoreStopPlaceId), pageable),
+                        ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);
         logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;
     }
@@ -135,7 +138,7 @@ public class DtoStopPlaceResource {
     @GET
     @Path("{id}")
     public StopPlaceDto getStopPlace(@PathParam("id") String id) {
-       return stopPlaceAssembler.assemble(stopPlaceRepository.findOne(Long.valueOf(id)));
+       return stopPlaceAssembler.assemble(stopPlaceRepository.findOne(Long.valueOf(id)), true);
     }
 
     @POST
@@ -150,7 +153,7 @@ public class DtoStopPlaceResource {
         if(stopPlace != null) {
             stopPlaceRepository.save(stopPlace);
             quayRepository.save(stopPlace.getQuays());
-            return stopPlaceAssembler.assemble(stopPlace);
+            return stopPlaceAssembler.assemble(stopPlace, true);
         }
 
         throw new WebApplicationException("Cannot find stop place with id "+ simpleStopPlaceDto.id, 400);
@@ -174,7 +177,7 @@ public class DtoStopPlaceResource {
             stopPlaceRepository.save(stopPlace);
             quayRepository.save(stopPlace.getQuays());
             logger.info("Returning created stop place with id {}", stopPlace.getId());
-            return stopPlaceAssembler.assemble(stopPlace);
+            return stopPlaceAssembler.assemble(stopPlace , true);
         }
 
         throw new WebApplicationException("Cannot save stop place with name "+ simpleStopPlaceDto.name, 400);

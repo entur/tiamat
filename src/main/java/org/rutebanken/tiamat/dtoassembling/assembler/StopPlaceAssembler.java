@@ -33,7 +33,7 @@ public class StopPlaceAssembler {
         this.quayAssembler = quayAssembler;
     }
 
-    public StopPlaceDto assemble(StopPlace stopPlace) {
+    public StopPlaceDto assemble(StopPlace stopPlace, boolean assembleQuays) {
         StopPlaceDto stopPlaceDto = new StopPlaceDto();
         stopPlaceDto.id = String.valueOf(stopPlace.getId());
 
@@ -47,22 +47,24 @@ public class StopPlaceAssembler {
             stopPlaceDto.allAreasWheelchairAccessible = stopPlace.isAllAreasWheelchairAccessible();
         }
 
-        stopPlaceDto.quays = stopPlace.getQuays()
-                .stream()
-                .map(quay -> quayAssembler.assemble(quay))
-                .collect(Collectors.toList());
+        if(assembleQuays) {
+            stopPlaceDto.quays = stopPlace.getQuays()
+                    .stream()
+                    .map(quay -> quayAssembler.assemble(quay))
+                    .collect(Collectors.toList());
+        }
 
         stopPlaceDto = assembleMunicipalityAndCounty(stopPlaceDto, stopPlace);
 
         return stopPlaceDto;
     }
 
-    public List<StopPlaceDto> assemble(Page<StopPlace> stopPlaces) {
+    public List<StopPlaceDto> assemble(Page<StopPlace> stopPlaces, boolean assembleQuays) {
         if(stopPlaces != null) {
             return stopPlaces.getContent()
                     .stream()
                     .filter(Objects::nonNull)
-                    .map(this::assemble)
+                    .map(stopPlace -> assemble(stopPlace, assembleQuays))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
