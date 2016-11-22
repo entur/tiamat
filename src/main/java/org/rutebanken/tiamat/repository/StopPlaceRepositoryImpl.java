@@ -186,8 +186,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         if(hasCountyFilter) {
-            String posix = hasMunicipalityFilter ? ")" : "";
-            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+posix);
+            String suffix = hasMunicipalityFilter ? ")" : "";
+            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+suffix);
             parameters.put("countyId", countyIds);
         }
 
