@@ -18,7 +18,7 @@ public class Value {
 
     @ElementCollection
     @CollectionTable(
-            name="items",
+            name="value_items",
             indexes = @Index(name = "items_index", columnList = "items")
     )
     private Set<String> items = new HashSet<>();
