@@ -67,7 +67,7 @@ public class SiteFrameImporter {
             org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                        .parallelStream()
+                        .stream()
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace ->
@@ -147,13 +147,13 @@ public class SiteFrameImporter {
 
     private String getStripedSemaphoreKey(StopPlace stopPlace) {
         final String semaphoreKey;
-        if (stopPlace.getName() != null
-                && stopPlace.getName().getValue() != null
-                && !stopPlace.getName().getValue().isEmpty()) {
-            semaphoreKey = "name-" + stopPlace.getName().getValue();
-        } else {
+//        if (stopPlace.getName() != null
+//                && stopPlace.getName().getValue() != null
+//                && !stopPlace.getName().getValue().isEmpty()) {
+//            semaphoreKey = "name-" + stopPlace.getName().getValue();
+//        } else {
             semaphoreKey = "all";
-        }
+//        }
         return semaphoreKey;
     }
 }
