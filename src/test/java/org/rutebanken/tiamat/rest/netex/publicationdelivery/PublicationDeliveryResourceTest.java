@@ -15,8 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -175,27 +176,35 @@ public class PublicationDeliveryResourceTest {
                                                         .withLongitude(new BigDecimal("11.14317535486387"))))
                         ));
 
+        List<PublicationDeliveryStructure> publicationDeliveryStructures = new ArrayList<>();
 
-        PublicationDeliveryStructure publicationDelivery1 = createPublicationDeliveryWithStopPlace(stopPlace1);
-        PublicationDeliveryStructure publicationDelivery2 = createPublicationDeliveryWithStopPlace(stopPlace2);
+        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace1, stopPlace2));
+        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace1));
+        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2));
+        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2, stopPlace2));
 
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery1);
-        PublicationDeliveryStructure secondResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery2);
+        ExecutorService executor = Executors.newFixedThreadPool(100);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        for(int i = 0; i < 1000; i ++) {
 
-        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+            executor.submit(() -> {
 
-        Quay quay = actualStopPlace.getQuays()
-                .getQuayRefOrQuay().stream()
-                .filter(object -> object instanceof Quay)
-                .map(object -> ((Quay) object))
-                .findFirst()
-                .get();
+                List<PublicationDeliveryStructure> imports = new ArrayList<PublicationDeliveryStructure>();
+                imports.addAll(publicationDeliveryStructures);
+
+                Collections.shuffle(imports);
+
+                for(PublicationDeliveryStructure pubde : imports) {
+                    publicationDeliveryResource.importPublicationDelivery(pubde);
+                }
+
+            });
+        }
 
 
-        assertThat(quay.getName()).isEqualTo(name);
-        assertThat(quay.getId()).isNotNull();
+        executor.shutdown();;
+        executor.awaitTermination(10, TimeUnit.MINUTES);
+
 
     }
 
