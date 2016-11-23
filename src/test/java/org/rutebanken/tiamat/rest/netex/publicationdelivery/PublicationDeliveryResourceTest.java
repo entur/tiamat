@@ -1,9 +1,9 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.TiamatApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.TiamatApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -97,6 +97,104 @@ public class PublicationDeliveryResourceTest {
 
 
         assertThat(quay.getName().getValue()).isEqualTo("quay");
+        assertThat(quay.getId()).isNotNull();
+
+    }
+
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-830
+     */
+    @Test
+    public void handleChangesToQuaysWithoutSavingDuplicates() throws Exception {
+
+        /**
+         * StopPlace{name=Fredheimveien (no),
+         *      quays=[Quay{name=Fredheimveien (no), centroid=POINT (11.142676854561447 59.83314448493502), keyValues={imported-id=Value{id=0, items=[RUT:StopArea:0229012201]}}},
+         *        Quay{name=Fredheimveien (no), centroid=POINT (11.142897636770531 59.83297022041692), keyValues={imported-id=Value{id=0, items=[RUT:StopArea:0229012202]}}}],
+         *    centroid=POINT (11.142676854561447 59.83314448493502),
+         *    keyValues={imported-id=Value{id=0, items=[RUT:StopArea:02290122]}}}
+         */
+        MultilingualString name = new MultilingualString().withValue("Fredheimveien").withLang("no");
+
+
+        StopPlace stopPlace1 = new StopPlace()
+                .withId("RUT:StopArea:02290122")
+                .withName(name)
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.83314448493502"))
+                                .withLongitude(new BigDecimal("11.142676854561447"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                        .withId("RUT:StopArea:0229012201")
+                                        .withName(name)
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("59.83314448493502"))
+                                                        .withLongitude(new BigDecimal("11.142676854561447")))),
+                                new Quay()
+                                        .withId("RUT:StopArea:0229012202")
+                                        .withName(name)
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("59.83297022041692"))
+                                                        .withLongitude(new BigDecimal("11.142897636770531"))))
+                        ));
+
+        /**
+         * StopPlace{name=Fredheimveien (no),
+         *      quays=[Quay{name=Fredheimveien (no), centroid=POINT (11.142902250197631 59.83304200609072), keyValues={imported-id=Value{id=0, items=[RUT:StopArea:0229012201]}}},
+         *          Quay{name=Fredheimveien (no), centroid=POINT (11.14317535486387 59.832848923825956), keyValues={imported-id=Value{id=0, items=[RUT:StopArea:0229012202]}}}],
+         *
+         *  centroid=POINT (11.142902250197631 59.83304200609072),
+         *  keyValues={imported-id=Value{id=0, items=[RUT:StopArea:02290122]}}}
+         *
+         */
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopArea:02290122")
+                .withName(name)
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.83304200609072"))
+                                .withLongitude(new BigDecimal("11.142902250197631"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(
+                                new Quay()
+                                        .withId("RUT:StopArea:0229012201")
+                                        .withName(name)
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("59.83304200609072"))
+                                                        .withLongitude(new BigDecimal("11.142902250197631")))),
+                                new Quay()
+                                        .withId("RUT:StopArea:0229012202")
+                                        .withName(name)
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("59.832848923825956"))
+                                                        .withLongitude(new BigDecimal("11.14317535486387"))))
+                        ));
+
+
+        PublicationDeliveryStructure publicationDelivery1 = createPublicationDeliveryWithStopPlace(stopPlace1);
+        PublicationDeliveryStructure publicationDelivery2 = createPublicationDeliveryWithStopPlace(stopPlace2);
+
+        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery1);
+        PublicationDeliveryStructure secondResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery2);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+
+        Quay quay = actualStopPlace.getQuays()
+                .getQuayRefOrQuay().stream()
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .findFirst()
+                .get();
+
+
+        assertThat(quay.getName()).isEqualTo(name);
         assertThat(quay.getId()).isNotNull();
 
     }
