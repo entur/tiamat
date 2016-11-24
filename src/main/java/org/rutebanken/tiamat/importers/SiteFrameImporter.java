@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
+import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +69,7 @@ public class SiteFrameImporter {
             org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                        .stream()
+                        .parallelStream()
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace ->
@@ -115,8 +117,14 @@ public class SiteFrameImporter {
             semaphore.acquire();
             logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
             return importStopPlaceInsideLock(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated);
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+        } catch (DataIntegrityViolationException | InterruptedException | ExecutionException e) {
+
+            // When having issues with one stop place, do not fail for all other stop places in publication delivery.
+            logger.error("Caught exception while importing stop place " + stopPlace.toString(), e);
+            org.rutebanken.netex.model.StopPlace stop = new org.rutebanken.netex.model.StopPlace()
+                    .withId(stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).toString())
+                    .withName(new MultilingualString().withValue("FAILED: "+ e.getMessage()));
+            return stop;
         } finally {
             semaphore.release();
             logger.info("Released semaphore '{}'", semaphoreKey);
@@ -147,13 +155,13 @@ public class SiteFrameImporter {
 
     private String getStripedSemaphoreKey(StopPlace stopPlace) {
         final String semaphoreKey;
-//        if (stopPlace.getName() != null
-//                && stopPlace.getName().getValue() != null
-//                && !stopPlace.getName().getValue().isEmpty()) {
-//            semaphoreKey = "name-" + stopPlace.getName().getValue();
-//        } else {
+        if (stopPlace.getName() != null
+                && stopPlace.getName().getValue() != null
+                && !stopPlace.getName().getValue().isEmpty()) {
+            semaphoreKey = "name-" + stopPlace.getName().getValue();
+        } else {
             semaphoreKey = "all";
-//        }
+        }
         return semaphoreKey;
     }
 }
