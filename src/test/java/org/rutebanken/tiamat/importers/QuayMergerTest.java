@@ -7,13 +7,13 @@ import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class QuayMergerTest {
@@ -23,6 +23,80 @@ public class QuayMergerTest {
     private QuayRepository quayRepository = mock(QuayRepository.class);
     
     private QuayMerger quayMerger = new QuayMerger(new KeyValueListAppender(), quayRepository);
+
+
+    @Test
+    public void twoQuaysWithSameOriginalIdButDifferentCoordinatesShouldBeTreatedAsSame() {
+
+        AtomicInteger updatedQuaysCounter = new AtomicInteger();
+        AtomicInteger createQuaysCounter = new AtomicInteger();
+
+        Quay quay1 = new Quay();
+        quay1.setId(123L);
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(quay1);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(quay2);
+
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void twoNewQuaysThatMatchesOnIdMustNotBeAddedMultipleTimes() {
+        AtomicInteger updatedQuaysCounter = new AtomicInteger();
+        AtomicInteger createQuaysCounter = new AtomicInteger();
+
+        Quay quay1 = new Quay();
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(quay2);
+        incomingQuays.add(quay1);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter);
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void twoNewQuaysThatMatchesOnCoordinatesMustNotBeAddedMultipleTimes() {
+        AtomicInteger updatedQuaysCounter = new AtomicInteger();
+        AtomicInteger createQuaysCounter = new AtomicInteger();
+
+        Quay quay1 = new Quay();
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("another-id");
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(quay2);
+        incomingQuays.add(quay1);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter);
+
+        assertThat(result).hasSize(1);
+
+        for(Quay actualQuay : result) {
+            assertThat(actualQuay.getOriginalIds()).contains("original-id-1", "another-id");
+        }
+    }
 
     @Test
     public void quaysAreClose() {
@@ -87,42 +161,19 @@ public class QuayMergerTest {
         existingQuay.setName(new EmbeddableMultilingualString("existing quay"));
         existingQuay.setCentroid(existingQuayPoint);
 
-        Quay alreadyAdded = new Quay();
-        alreadyAdded.setName(new EmbeddableMultilingualString("already added quay"));
-        alreadyAdded.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        Quay unrelatedExistingQuay = new Quay();
+        unrelatedExistingQuay.setName(new EmbeddableMultilingualString("already added quay"));
+        unrelatedExistingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
 
         Quay newQuayToInspect = new Quay();
         newQuayToInspect.setName(new EmbeddableMultilingualString("New quay which matches existing quay on the coordinates"));
         newQuayToInspect.setCentroid(existingQuayPoint);
 
-        List<Quay> existingQuays = Arrays.asList(existingQuay);
-        List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAdded);
+        Set<Quay> existingQuays = new HashSet<>(Arrays.asList(existingQuay, unrelatedExistingQuay));
+        Set<Quay> newQuays = new HashSet<>(Arrays.asList(unrelatedExistingQuay));
 
-        Quay actual = quayMerger.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
-        assertThat(actual).as("The same quay object as existingQuay should be returned").isSameAs(existingQuay);
+        Set<Quay> actual = quayMerger.addNewQuaysOrAppendImportIds(newQuays, existingQuays, new AtomicInteger(), new AtomicInteger() );
+        assertThat(actual).as("The same quay object as existingQuay should be returned").contains(existingQuay);
     }
 
-    @Test
-    public void findQuayIfAlreadyAdded() {
-
-        Point alreadyAddedQuayPoint = geometryFactory.createPoint(new Coordinate(61, 12));
-
-        Quay existingQuay = new Quay();
-        existingQuay.setName(new EmbeddableMultilingualString("Existing quay"));
-        existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(71, 9)));
-
-        Quay alreadyAddedQuay = new Quay();
-        alreadyAddedQuay.setName(new EmbeddableMultilingualString("Quay to be added"));
-        alreadyAddedQuay.setCentroid(alreadyAddedQuayPoint);
-
-        Quay newQuayToInspect = new Quay();
-        newQuayToInspect.setName(new EmbeddableMultilingualString("New quay to check for match"));
-        newQuayToInspect.setCentroid(alreadyAddedQuayPoint);
-
-        List<Quay> existingQuays = Arrays.asList(existingQuay);
-        List<Quay> alreadyAddedQuays = Arrays.asList(alreadyAddedQuay);
-
-        Quay actual = quayMerger.findQuayWithCoordinates(newQuayToInspect, existingQuays, alreadyAddedQuays).get();
-        assertThat(actual).as("The same quay object as addedQuay should be returned").isSameAs(alreadyAddedQuay);
-    }
 }

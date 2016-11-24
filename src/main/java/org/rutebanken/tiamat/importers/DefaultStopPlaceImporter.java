@@ -111,7 +111,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
         logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
-        boolean quaysChanged = quayMerger.addAndSaveNewQuays(newStopPlace, foundStopPlace);
+        boolean quaysChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
         boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 

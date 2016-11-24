@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
@@ -58,5 +60,9 @@ public abstract class DataManagedObjectStructure
         }
 
         return keyValues.get(key).getItems();
+    }
+
+    public Set<String> getOriginalIds() {
+        return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
     }
 }

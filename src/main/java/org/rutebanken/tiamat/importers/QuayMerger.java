@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,79 +37,79 @@ public class QuayMerger {
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
-    public boolean addAndSaveNewQuays(StopPlace newStopPlace, StopPlace foundStopPlace) {
+    public boolean addNewQuaysOrAppendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
-        AtomicInteger createdQuays = new AtomicInteger();
+        AtomicInteger addedQuays = new AtomicInteger();
 
+        logger.debug("About to compare quays for {}", existingStopPlace.getId());
 
-        logger.debug("About to compare quays for {}", foundStopPlace.getId());
-
-        if (foundStopPlace.getQuays() == null) {
-            foundStopPlace.setQuays(new HashSet<>());
+        if (existingStopPlace.getQuays() == null) {
+            existingStopPlace.setQuays(new HashSet<>());
         }
 
         if (newStopPlace.getQuays() == null) {
-            foundStopPlace.setQuays(new HashSet<>());
+            existingStopPlace.setQuays(new HashSet<>());
         }
 
-        if (foundStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Existing stop place {} does not have any quays, using all quays from incoming stop {}, {}", foundStopPlace, newStopPlace, newStopPlace.getName());
-            for (Quay newQuay : newStopPlace.getQuays()) {
-                saveNewQuay(newQuay, foundStopPlace, createdQuays);
+        Set<Quay> result = addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays);
+
+        for(Quay possibleNewQuay : result) {
+            if(possibleNewQuay.getId() == null) {
+                logger.info("Detected new previously unsaved Quay. Saving. {} ", possibleNewQuay);
+                existingStopPlace.getQuays().add(possibleNewQuay);
+                quayRepository.save(possibleNewQuay);
             }
-        } else if (!newStopPlace.getQuays().isEmpty() && !newStopPlace.getQuays().isEmpty()) {
-            logger.debug("Comparing existing: {}, incoming: {}. Removing/ignoring quays that has matching coordinates (but keeping their ID)", foundStopPlace, newStopPlace);
+        }
 
-            Set<Quay> quaysToAdd = new HashSet<>();
-            for (Quay newQuay : newStopPlace.getQuays()) {
-                Optional<Quay> optionalExistingQuay = findQuayWithCoordinates(newQuay, foundStopPlace.getQuays(), quaysToAdd);
-                if (optionalExistingQuay.isPresent()) {
-                    Quay existingQuay = optionalExistingQuay.get();
-                    logger.debug("Found matching quay {} for incoming quay {}. Appending original ID to the key if required {}", existingQuay, newQuay, NetexIdMapper.ORIGINAL_ID_KEY);
-                    boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newQuay, existingQuay);
+        logger.debug("Created {} quays and updated {} quays for stop place {}", addedQuays.get(), updatedQuays.get(), existingStopPlace);
+        return addedQuays.get() > 0;
+    }
 
-                    if (changed) {
-                        logger.info("Updated quay {}, {}", existingQuay.getId(), existingQuay);
-                        updatedQuays.incrementAndGet();
-                        quayRepository.save(existingQuay);
-                    }
-                } else {
-                    logger.info("Incoming {} does not match any existing quays for {}. Adding and saving it.", newQuay, foundStopPlace);
-                    saveNewQuay(newQuay, foundStopPlace, createdQuays);
+
+    public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
+
+        if(existingQuays == null) {
+            existingQuays = new HashSet<>();
+        }
+
+        for(Quay incomingQuay : newQuays) {
+
+            boolean foundMatch = false;
+            for(Quay alreadyAdded : existingQuays) {
+                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded, updatedQuaysCounter);
+                if(foundMatch) {
+                    break;
                 }
             }
-        }
 
-        logger.debug("Created {} quays and updated {} quays for stop place {}", createdQuays.get(), updatedQuays.get(), foundStopPlace);
-        return createdQuays.get() > 0;
-    }
-
-
-    private void saveNewQuay(Quay newQuay, StopPlace existingStopPlace, AtomicInteger createdQuays) {
-        newQuay.setId(null);
-        existingStopPlace.getQuays().add(newQuay);
-        quayRepository.save(newQuay);
-        createdQuays.incrementAndGet();
-    }
-
-    /**
-     * Find first matching quay that has the same coordinates as the new Quay.
-     */
-    public Optional<Quay> findQuayWithCoordinates(Quay newQuay, Collection<Quay> existingQuays, Collection<Quay> quaysToAdd) {
-        List<Quay> concatenatedQuays = new ArrayList<>();
-        concatenatedQuays.addAll(existingQuays);
-        concatenatedQuays.addAll(quaysToAdd);
-
-        for (Quay alreadyAddedOrExistingQuay : concatenatedQuays) {
-            boolean areClose = areClose(alreadyAddedOrExistingQuay, newQuay);
-            logger.info("Does quay {} and {} have the same coordinates? {}", alreadyAddedOrExistingQuay, newQuay, areClose);
-            if (areClose) {
-                return Optional.of(alreadyAddedOrExistingQuay);
+            if(!foundMatch) {
+                logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
+                existingQuays.add(incomingQuay);
+                addedQuaysCounter.incrementAndGet();
             }
         }
-        return Optional.empty();
+
+        return existingQuays;
     }
+
+    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+
+        if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
+            logger.info("Quay matches on original ID {}. Adding all IDs", incomingQuay);
+            // The incoming quay could for some reason already have multiple imported IDs.
+            alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            return true;
+        }
+
+        if (areClose(incomingQuay, alreadyAdded)) {
+            logger.info("New quay {} is close to existing quay {}. Appending it's ID", alreadyAdded, incomingQuay);
+            alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            return true;
+        }
+        return false;
+    }
+
 
     public boolean areClose(Quay quay1, Quay quay2) {
         if (!quay1.hasCoordinates() || !quay2.hasCoordinates()) {
