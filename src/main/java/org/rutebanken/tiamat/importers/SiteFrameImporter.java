@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +76,7 @@ public class SiteFrameImporter {
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toList());
 
                 logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
@@ -117,14 +119,10 @@ public class SiteFrameImporter {
             semaphore.acquire();
             logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
             return importStopPlaceInsideLock(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated);
-        } catch (DataIntegrityViolationException | InterruptedException | ExecutionException e) {
-
+        } catch (Exception e) {
             // When having issues with one stop place, do not fail for all other stop places in publication delivery.
-            logger.error("Caught exception while importing stop place " + stopPlace.toString(), e);
-            org.rutebanken.netex.model.StopPlace stop = new org.rutebanken.netex.model.StopPlace()
-                    .withId(stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).toString())
-                    .withName(new MultilingualString().withValue("FAILED: "+ e.getMessage()));
-            return stop;
+            logger.error("Caught exception while importing stop place. Semaphore was " + semaphoreKey, e);
+            return null;
         } finally {
             semaphore.release();
             logger.info("Released semaphore '{}'", semaphoreKey);
