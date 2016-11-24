@@ -44,12 +44,8 @@ public class QuayMerger {
 
         logger.debug("About to compare quays for {}", existingStopPlace.getId());
 
-        if (existingStopPlace.getQuays() == null) {
-            existingStopPlace.setQuays(new HashSet<>());
-        }
-
         if (newStopPlace.getQuays() == null) {
-            existingStopPlace.setQuays(new HashSet<>());
+            newStopPlace.setQuays(new HashSet<>());
         }
 
         Set<Quay> result = addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays);
