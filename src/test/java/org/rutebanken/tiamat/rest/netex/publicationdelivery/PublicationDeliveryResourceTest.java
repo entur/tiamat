@@ -183,29 +183,11 @@ public class PublicationDeliveryResourceTest {
         publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2));
         publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2, stopPlace2));
 
-        ExecutorService executor = Executors.newFixedThreadPool(100);
-
-        for(int i = 0; i < 1000; i ++) {
-
-            executor.submit(() -> {
-
-                List<PublicationDeliveryStructure> imports = new ArrayList<PublicationDeliveryStructure>();
-                imports.addAll(publicationDeliveryStructures);
-
-                Collections.shuffle(imports);
-
-                for(PublicationDeliveryStructure pubde : imports) {
-                    publicationDeliveryResource.importPublicationDelivery(pubde);
-                }
-
-            });
+        for(PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
+            PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(pubde);
+            StopPlace actualStopPlace = findFirstStopPlace(response);
+            assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
         }
-
-
-        executor.shutdown();;
-        executor.awaitTermination(10, TimeUnit.MINUTES);
-
-
     }
 
     // Import stop place StopPlace{name=Skaret (no), quays=
