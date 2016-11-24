@@ -62,7 +62,6 @@ public class QuayMerger {
         return addedQuays.get() > 0;
     }
 
-
     public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
 
         if(existingQuays == null) {

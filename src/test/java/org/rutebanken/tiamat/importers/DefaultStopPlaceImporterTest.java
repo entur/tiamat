@@ -141,7 +141,7 @@ public class DefaultStopPlaceImporterTest {
                 .as("The same stop place should be returned as they have the same chouette id");
     }
 
-    /**
+     /**
      * When importing a stop place with matching chouette ID, the quay should be added to existing stop place.
      */
     @Test
@@ -220,6 +220,30 @@ public class DefaultStopPlaceImporterTest {
         assertThat(importResult.getQuays()).hasSize(1);
         assertThat(importResult.getQuays()).contains(terminal1);
     }
+
+    /**
+     * NRP-830 New stop (or existing)must be merged by original ID or coordinate.
+     */
+    @Test
+    public void mergeIncomingQuaysForStopPlace() throws ExecutionException, InterruptedException {
+        final String chouetteId = "OPP:StopArea:321";
+        final String chouetteQuayId = "OPP:Quays:3333";
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
+        stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
+
+        Quay quay1 = new Quay();
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        stopPlace.getQuays().add(quay1);
+
+
+        StopPlace actual = stopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+
+        assertThat(actual.getQuays()).hasSize(1);
+    }
+
 
     private void mockStopPlaceSave(Long persistedStopPlaceId, StopPlace stopPlace) {
         when(stopPlaceRepository.save(stopPlace)).then(invocationOnMock -> {

@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,18 +94,16 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         } else {
             lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
         }
-
-        if (newStopPlace.getQuays() != null) {
+        if(newStopPlace.getQuays() != null) {
+            Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
+            newStopPlace.setQuays(quays);
             logger.info("Importing quays for new stop place {}", newStopPlace);
             newStopPlace.getQuays().forEach(quay -> {
-                if (!quay.hasCoordinates()) {
-                    logger.warn("Quay does not have coordinates.", quay.getId());
-                }
-                logger.info("Saving quay {}", quay);
                 quayRepository.save(quay);
                 logger.debug("Saved quay. Got id {} back", quay.getId());
             });
         }
+
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
         return saveAndUpdateCache(newStopPlace);
     }
