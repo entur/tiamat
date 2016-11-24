@@ -120,7 +120,7 @@ public class SiteFrameImporter {
         } catch (DataIntegrityViolationException | InterruptedException | ExecutionException e) {
 
             // When having issues with one stop place, do not fail for all other stop places in publication delivery.
-            logger.warn("Caught exception while importing stop place {} ", stopPlace, e);
+            logger.error("Caught exception while importing stop place " + stopPlace.toString(), e);
             org.rutebanken.netex.model.StopPlace stop = new org.rutebanken.netex.model.StopPlace()
                     .withId(stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).toString())
                     .withName(new MultilingualString().withValue("FAILED: "+ e.getMessage()));
