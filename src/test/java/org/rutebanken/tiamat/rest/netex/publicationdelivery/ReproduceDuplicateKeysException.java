@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ReproduceDuplicateKeysException {
 
+    private static final String TIAMAT_URL = "http://localhost:1997/jersey/publication_delivery";
+
     @Ignore
     @Test
     public void reproduceDuplicateKeyIssue() throws JAXBException, InterruptedException {
@@ -32,7 +35,7 @@ public class ReproduceDuplicateKeysException {
         final int eachPublicationDeliverySentTimes = 5;
 
         final int stopPlacesPerPublicationDelivery = 20;
-        final PublicationDeliveryClient client = new PublicationDeliveryClient("http://localhost:1997/jersey/publication_delivery");
+        final PublicationDeliveryClient client = new PublicationDeliveryClient(TIAMAT_URL);
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
         final AtomicInteger publicationDeliveriesSent = new AtomicInteger();
@@ -68,6 +71,70 @@ public class ReproduceDuplicateKeysException {
         assertThat(exceptionsReceived.get()).isZero().as("no exceptions expected");
         System.out.println("done");
 
+    }
+
+    @Ignore
+    @Test
+    public void reproduceDuplicateKeyIssue2() throws JAXBException, InterruptedException, IOException {
+        final PublicationDeliveryClient client = new PublicationDeliveryClient(TIAMAT_URL);
+
+        LocationStructure location = randomCoordinates();
+        StopPlace stopPlace1 = new StopPlace()
+                .withId("XYZ:StopPlace:1")
+                .withName(new MultilingualString().withValue("Stop place "))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(location))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(
+                                new Quay()
+                                        .withName(new MultilingualString().withValue("Quay 1"))
+                                        .withId("XYZ:Quay1")
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(location)),
+                                new Quay()
+                                        .withName(new MultilingualString().withValue("Quay 2"))
+                                        .withId("XYZ:Quay2")
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(location))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("XYZ:StopPlace:1")
+                .withName(new MultilingualString().withValue("Stop place "))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(location))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(
+                                new Quay()
+                                        .withName(new MultilingualString().withValue("Quay 1"))
+                                        .withId("123")
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(location)),
+                                new Quay()
+                                        .withName(new MultilingualString().withValue("Quay 2"))
+                                        .withId("1234")
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withLocation(location))));
+
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace1));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        client.sendPublicationDelivery(publicationDelivery);
+
+
+        SiteFrame siteFrame2 = new SiteFrame();
+        siteFrame2.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace2));
+
+        PublicationDeliveryStructure publicationDelivery2 = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame2)));
+
+        client.sendPublicationDelivery(publicationDelivery2);
     }
 
     public List<StopPlace> createStopPlacesWithQuays(int salt, int numberOfstopPlaces) {
