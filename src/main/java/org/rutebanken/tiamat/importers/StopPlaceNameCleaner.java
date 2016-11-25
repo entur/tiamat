@@ -16,9 +16,7 @@ public class StopPlaceNameCleaner {
     public StopPlaceNameCleaner(WordsRemover wordsRemover) {
         this.wordsRemover = wordsRemover;
     }
-
-    private static final Pattern pattern = Pattern.compile("\\(\\w\\s+!\\)");
-
+    
     public StopPlace cleanNames(StopPlace stopPlace) {
         cleanAndSetName(stopPlace);
         if(stopPlace.getQuays() != null) {
