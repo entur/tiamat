@@ -23,7 +23,6 @@ public class StopPlaceNameCleanerTest {
         String stopPlaceName =  "St. Halvards plass (mot Bispelokket) ";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
         stopPlaceNameCleaner.cleanNames(stopPlace);
-        assertThat(stopPlace.getName().getValue()).isEqualTo(stopPlaceName);
-        assertThat(stopPlace.getName().getValue()).isEqualTo(stopPlaceName);
+        assertThat(stopPlace.getName().getValue()).isEqualTo(stopPlaceName.trim());
     }
 }

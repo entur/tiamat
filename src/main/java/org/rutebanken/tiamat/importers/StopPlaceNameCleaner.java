@@ -16,7 +16,7 @@ public class StopPlaceNameCleaner {
     public StopPlaceNameCleaner(WordsRemover wordsRemover) {
         this.wordsRemover = wordsRemover;
     }
-    
+
     public StopPlace cleanNames(StopPlace stopPlace) {
         cleanAndSetName(stopPlace);
         if(stopPlace.getQuays() != null) {
