@@ -40,14 +40,14 @@ public class PublicationDeliveryResourceTest {
     public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("NSR:StopPlace:123123")
+                .withId("RUT:StopPlace:123123")
                 .withCentroid(new SimplePoint_VersionStructure()
                     .withLocation(new LocationStructure()
                             .withLatitude(new BigDecimal("9"))
                             .withLongitude(new BigDecimal("71"))));
 
         StopPlace stopPlace2 = new StopPlace()
-                .withId("NSR:StopPlace:123123")
+                .withId("RUT:StopPlace:123123")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))

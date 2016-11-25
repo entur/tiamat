@@ -56,6 +56,7 @@ public class StopPlace
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
+
     @OneToMany(cascade = CascadeType.MERGE)
     private Set<Quay> quays = new HashSet<>();
 

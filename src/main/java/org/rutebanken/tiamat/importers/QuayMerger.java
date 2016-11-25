@@ -50,13 +50,7 @@ public class QuayMerger {
 
         Set<Quay> result = addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays);
 
-        for(Quay possibleNewQuay : result) {
-            if(possibleNewQuay.getId() == null) {
-                logger.info("Detected new previously unsaved Quay. Saving. {} ", possibleNewQuay);
-                existingStopPlace.getQuays().add(possibleNewQuay);
-                quayRepository.save(possibleNewQuay);
-            }
-        }
+        existingStopPlace.setQuays(result);
 
         logger.debug("Created {} quays and updated {} quays for stop place {}", addedQuays.get(), updatedQuays.get(), existingStopPlace);
         return addedQuays.get() > 0;
@@ -64,15 +58,17 @@ public class QuayMerger {
 
     public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
 
+        Set<Quay> result = new HashSet<>();
         if(existingQuays == null) {
             existingQuays = new HashSet<>();
         }
+        result.addAll(existingQuays);
 
         for(Quay incomingQuay : newQuays) {
 
             boolean foundMatch = false;
-            for(Quay alreadyAdded : existingQuays) {
-                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded, updatedQuaysCounter);
+            for(Quay alreadyAdded : result) {
+                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded);
                 if(foundMatch) {
                     break;
                 }
@@ -80,15 +76,15 @@ public class QuayMerger {
 
             if(!foundMatch) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
-                existingQuays.add(incomingQuay);
+                result.add(incomingQuay);
                 addedQuaysCounter.incrementAndGet();
             }
         }
 
-        return existingQuays;
+        return result;
     }
 
-    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded) {
 
         if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
             logger.info("Quay matches on original ID {}. Adding all IDs", incomingQuay);

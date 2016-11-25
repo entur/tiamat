@@ -87,6 +87,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
 
+        if(newStopPlace.getId() != null) {
+            newStopPlace.setId(null);
+            if(newStopPlace.getQuays() != null) {
+                newStopPlace.getQuays().forEach(q -> q.setId(null));
+            }
+        }
         if (hasTopographicPlaces(siteFrame)) {
             topographicPlaceCreator.setTopographicReference(newStopPlace,
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
@@ -98,10 +104,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
             newStopPlace.setQuays(quays);
             logger.info("Importing quays for new stop place {}", newStopPlace);
-            newStopPlace.getQuays().forEach(quay -> {
-                quayRepository.save(quay);
-                logger.debug("Saved quay. Got id {} back", quay.getId());
-            });
         }
 
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
@@ -115,16 +117,26 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
         boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 
-        if (originalIdChanged || quaysChanged || centroidChanged) {
-            logger.info("Updated existing stop place {}. ", foundStopPlace);
-            foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
-            saveAndUpdateCache(foundStopPlace);
-        }
+//        if (originalIdChanged || quaysChanged || centroidChanged) {
+        logger.info("Updated existing stop place {}. ", foundStopPlace);
+        foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
+        saveAndUpdateCache(foundStopPlace);
+//        }
         return foundStopPlace;
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
-        stopPlaceRepository.save(stopPlace);
+        if(stopPlace.getId() == null) {
+            stopPlaceRepository.save(stopPlace);
+        }
+        if(stopPlace.getQuays() != null) {
+            for (Quay quay : stopPlace.getQuays()) {
+                if (quay.getId() == null) {
+                    quayRepository.save(quay);
+                }
+            }
+        }
+
         stopPlaceFromOriginalIdFinder.update(stopPlace);
         nearbyStopPlaceFinder.update(stopPlace);
         logger.info("Saved stop place {}", stopPlace);
