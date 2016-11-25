@@ -128,7 +128,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public List<IdMappingDto> findKeyValueMappings(int recordPosition, int recordsPerRoundTrip) {
+    public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
         String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN stop_place_quays spq on spq.quays_id = q.quay_id INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
@@ -137,6 +137,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
             mappingResult.add(new IdMappingDto("Quay", (String)row[0], (BigInteger)row[1]));
+        }
+
+        return mappingResult;
+    }
+
+    @Override
+    public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
+        String sql = "select v.items, spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id";
+        Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<IdMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new IdMappingDto("StopPlace", (String)row[0], (BigInteger)row[1]));
         }
 
         return mappingResult;

@@ -33,13 +33,15 @@ public class DtoIdMappingResource {
             try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( output ) ) ) ) {
                 while (!lastEmpty) {
 
-                    List<IdMappingDto> keyValueMappings = stopPlaceRepository.findKeyValueMappings(recordPosition, recordsPerRoundTrip);
-                    for (IdMappingDto mapping : keyValueMappings) {
+                    List<IdMappingDto> quayMappings = stopPlaceRepository.findKeyValueMappingsForQuay(recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(recordPosition, recordsPerRoundTrip);
+                    quayMappings.addAll(stopPlaceMappings);
+                    for (IdMappingDto mapping : quayMappings) {
                         writer.println(mapping.toCsvString());
                         recordPosition ++;
                     }
                     writer.flush();
-                    if(keyValueMappings.isEmpty()) lastEmpty = true;
+                    if(quayMappings.isEmpty()) lastEmpty = true;
                 }
                 writer.close();
             }

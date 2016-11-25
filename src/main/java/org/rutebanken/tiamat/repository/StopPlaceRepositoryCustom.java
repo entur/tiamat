@@ -29,7 +29,9 @@ public interface StopPlaceRepositoryCustom {
 
     Long findByKeyValue(String key, Set<String> value);
     
-    List<IdMappingDto> findKeyValueMappings(int recordPosition, int recordsPerRoundTrip);
+    List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
+
+    List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
 
     Page<StopPlace> findStopPlace(String query, List<String> municipalityId, List<String> countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable);
 }
