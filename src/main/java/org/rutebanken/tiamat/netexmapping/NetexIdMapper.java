@@ -38,12 +38,12 @@ public class NetexIdMapper {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setId(null);
-        } else if(netexEntity.getId().startsWith(NSR)) {
+        }/* else if(netexEntity.getId().startsWith(NSR)) {
             logger.debug("Detected tiamat ID: {} ", netexEntity.getId());
             String netexId = netexEntity.getId();
             Long tiamatId = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
             tiamatEntity.setId(tiamatId);
-        } else {
+        } */else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setId(null);

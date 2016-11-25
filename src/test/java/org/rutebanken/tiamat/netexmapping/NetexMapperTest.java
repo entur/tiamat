@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netexmapping;
 
+import org.junit.Ignore;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.CountryRef;
@@ -148,6 +149,10 @@ public class NetexMapperTest {
         assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
     }
 
+    /**
+     * Ignored because the logic for handling incoming NSR IDs must be implemented differently.
+     */
+    @Ignore
     @Test
     public void mapNetexQuayIdToInternal() {
         org.rutebanken.netex.model.Quay netexQuay = new org.rutebanken.netex.model.Quay();
