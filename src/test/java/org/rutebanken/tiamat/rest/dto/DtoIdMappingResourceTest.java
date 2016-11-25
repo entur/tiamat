@@ -30,7 +30,7 @@ public class DtoIdMappingResourceTest {
         int keyValueMappingCount = 3;
         int size = 1;
 
-        when(stopPlaceRepository.findKeyValueMappings(anyInt(), anyInt()))
+        when(stopPlaceRepository.findKeyValueMappingsForQuay(anyInt(), anyInt()))
                 .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.ONE)))
                 .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.TEN)))
                 .thenReturn(Arrays.asList(new IdMappingDto("idtype", "original id", BigInteger.ZERO)))
@@ -41,7 +41,7 @@ public class DtoIdMappingResourceTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
         // plus one for the last empty call.
-        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappings(anyInt(), anyInt());
+        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(anyInt(), anyInt());
     }
 
 }
