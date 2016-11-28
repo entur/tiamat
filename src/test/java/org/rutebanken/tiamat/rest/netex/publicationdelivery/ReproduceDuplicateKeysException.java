@@ -41,6 +41,7 @@ public class ReproduceDuplicateKeysException {
         for (int i = 0; i < publicationDeliveries; i++) {
 
             SiteFrame siteFrame = new SiteFrame();
+            siteFrame.setId(i+"");
             siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                     .withStopPlace(createStopPlacesWithQuays(i % 2 == 0 ? i : 0, stopPlacesPerPublicationDelivery)));
 

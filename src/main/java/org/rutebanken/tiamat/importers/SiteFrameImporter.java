@@ -71,6 +71,7 @@ public class SiteFrameImporter {
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .parallelStream()
+                        .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace ->
