@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.exporters;
 
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.VersionFrameRefStructure;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -12,11 +14,19 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import java.math.BigInteger;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 @Component
 @Transactional
@@ -33,12 +43,26 @@ public class PublicationDeliveryExporter {
         this.netexMapper = netexMapper;
     }
 
+
+    public PublicationDeliveryStructure exportStopPlaces(String query, List<String> municipalityIds, List<String> countyIds, List<org.rutebanken.tiamat.model.StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+
+        Page<StopPlace> stopPlaces;
+
+        if ((query != null && !query.isEmpty()) || countyIds != null || municipalityIds != null || stopPlaceTypes != null) {
+            stopPlaces = stopPlaceRepository.findStopPlace(query, municipalityIds, countyIds, stopPlaceTypes, pageable);
+        } else {
+            stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
+        }
+        return exportStopPlaces(stopPlaces);
+    }
+
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
+        return exportStopPlaces(stopPlaceRepository.findAll());
+    }
 
+    public PublicationDeliveryStructure exportStopPlaces(Iterable<StopPlace> iterableStopPlaces) {
         logger.info("Preparing publication delivery export");
-        SiteFrame siteFrame = new SiteFrame();
-
-        Iterable<StopPlace> iterableStopPlaces = stopPlaceRepository.findAll();
+        org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
@@ -61,7 +85,6 @@ public class PublicationDeliveryExporter {
         return new PublicationDeliveryStructure()
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(convertedSiteFrame)));
-
 
     }
 }

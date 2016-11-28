@@ -1,11 +1,14 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import com.google.common.base.MoreObjects;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netexmapping.NetexMapper;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.slf4j.Logger;
@@ -13,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -108,8 +115,31 @@ public class PublicationDeliveryResource {
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportAllStopPlaces() throws JAXBException {
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
+    public Response exportStopPlaces(
+            @DefaultValue(value = "0") @QueryParam(value = "page") int page,
+            @DefaultValue(value = "20") @QueryParam(value = "size") int size,
+            @QueryParam(value = "q") String query,
+            @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
+            @QueryParam(value = "countyReference") List<String> countyReferences,
+            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException {
+
+        List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
+        if (stopPlaceTypes != null) {
+            stopPlaceTypes.forEach(string ->
+                    stopTypeEnums.add(StopTypeEnumeration.fromValue(string)));
+        }
+
+        logger.info("Export publication delivery with stop places '{}'", MoreObjects.toStringHelper("Query")
+                .add("municipalityReferences", municipalityReferences)
+                .add("countyReference", countyReferences)
+                .add("stopPlaceType", stopPlaceTypes)
+                .add("q", query)
+                .add("page", page)
+                .add("size", size));
+
+        Pageable pageable = new PageRequest(page, size);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(query, municipalityReferences, countyReferences, stopTypeEnums, pageable);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 }
