@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.mapper;
+package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
@@ -6,9 +6,6 @@ import org.hibernate.collection.internal.PersistentMap;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.Value;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Implemented because of difficulties making orika use the KeyListMapper.

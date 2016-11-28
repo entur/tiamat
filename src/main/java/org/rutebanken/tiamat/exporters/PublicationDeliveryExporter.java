@@ -1,14 +1,11 @@
 package org.rutebanken.tiamat.exporters;
 
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.VersionFrameRefStructure;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.netexmapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
@@ -19,14 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import java.math.BigInteger;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 @Component
 @Transactional
@@ -63,6 +55,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportStopPlaces(Iterable<StopPlace> iterableStopPlaces) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
+        siteFrame.setCreated(ZonedDateTime.now());
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 

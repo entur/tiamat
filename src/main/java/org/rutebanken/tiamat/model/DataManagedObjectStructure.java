@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;

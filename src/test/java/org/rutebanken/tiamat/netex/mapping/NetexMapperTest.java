@@ -1,11 +1,10 @@
-package org.rutebanken.tiamat.netexmapping;
+package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Ignore;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;

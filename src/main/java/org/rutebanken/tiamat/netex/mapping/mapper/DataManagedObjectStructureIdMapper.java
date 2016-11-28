@@ -1,10 +1,9 @@
-package org.rutebanken.tiamat.netexmapping.mapper;
+package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 
 public class DataManagedObjectStructureIdMapper extends CustomMapper<DataManagedObjectStructure, org.rutebanken.tiamat.model.DataManagedObjectStructure> {
 

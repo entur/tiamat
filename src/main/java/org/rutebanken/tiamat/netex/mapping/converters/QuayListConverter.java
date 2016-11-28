@@ -1,16 +1,13 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converters;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_RelStructure> {

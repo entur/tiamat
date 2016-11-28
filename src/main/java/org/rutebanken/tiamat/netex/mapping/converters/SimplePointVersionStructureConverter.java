@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -10,7 +10,6 @@ import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 public class SimplePointVersionStructureConverter extends BidirectionalConverter<Point, SimplePoint_VersionStructure> {
 

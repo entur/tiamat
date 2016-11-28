@@ -1,10 +1,10 @@
-package org.rutebanken.tiamat.netexmapping;
+package org.rutebanken.tiamat.netex.mapping;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.netexmapping.converters.*;
-import org.rutebanken.tiamat.netexmapping.mapper.*;
+import org.rutebanken.tiamat.netex.mapping.converters.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -1,8 +1,7 @@
-package org.rutebanken.tiamat.netexmapping;
+package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
-import org.rutebanken.tiamat.model.CompositeFrame;
 import org.rutebanken.tiamat.model.SiteFrame;
 
 import static org.assertj.core.api.Assertions.assertThat;

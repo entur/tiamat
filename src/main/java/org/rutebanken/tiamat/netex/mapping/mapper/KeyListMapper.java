@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.mapper;
+package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
