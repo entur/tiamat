@@ -387,54 +387,6 @@ public class PublicationDeliveryResourceTest {
     }
 
 
-    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setId(UUID.randomUUID().toString());
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
-
-        return publicationDelivery;
-    }
-
-    private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
-        assertThat(object).isNotNull();
-        assertThat(object.getKeyList()).isNotNull();
-        List<String> list = object.getKeyList().getKeyValue()
-                .stream()
-                .peek(keyValueStructure -> System.out.println(keyValueStructure))
-                .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
-                .map(keyValueStructure -> keyValueStructure.getValue())
-                .collect(Collectors.toList());
-        assertThat(list).hasSize(1);
-        String originalIdString = list.get(0);
-        assertThat(originalIdString).isNotEmpty();
-        assertThat(originalIdString).isEqualTo(expectedId);
-    }
-
-    private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return  publicationDeliveryStructure.getDataObjects()
-                .getCompositeFrameOrCommonFrame()
-                .stream()
-                .map(JAXBElement::getValue)
-                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
-                .collect(toList());
-    }
-
-    private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return publicationDeliveryStructure.getDataObjects()
-                .getCompositeFrameOrCommonFrame()
-                .stream()
-                .map(JAXBElement::getValue)
-                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
-                .findFirst().get();
-    }
-
     @Test
     public void receivePublicationDelivery() throws Exception {
 
@@ -492,12 +444,72 @@ public class PublicationDeliveryResourceTest {
     @Test
     public void exportStopPlaces() throws JAXBException, IOException, SAXException {
 
-        Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "", null, null, null);
+        // Import stop to make sure we have something to export, allthough other tests might have populated the test database.
+        StopPlace stopPlace = new StopPlace()
+                .withName(new MultilingualString().withValue("Østre gravlund"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.914353"))
+                                .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+
+        Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "Østre gravlund", null, null, null);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+    }
+
+    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.setId(UUID.randomUUID().toString());
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        return publicationDelivery;
+    }
+
+    private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
+        assertThat(object).isNotNull();
+        assertThat(object.getKeyList()).isNotNull();
+        List<String> list = object.getKeyList().getKeyValue()
+                .stream()
+                .peek(keyValueStructure -> System.out.println(keyValueStructure))
+                .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
+                .map(keyValueStructure -> keyValueStructure.getValue())
+                .collect(Collectors.toList());
+        assertThat(list).hasSize(1);
+        String originalIdString = list.get(0);
+        assertThat(originalIdString).isNotEmpty();
+        assertThat(originalIdString).isEqualTo(expectedId);
+    }
+
+    private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
+        return  publicationDeliveryStructure.getDataObjects()
+                .getCompositeFrameOrCommonFrame()
+                .stream()
+                .map(JAXBElement::getValue)
+                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
+                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .collect(toList());
+    }
+
+    private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
+        return publicationDeliveryStructure.getDataObjects()
+                .getCompositeFrameOrCommonFrame()
+                .stream()
+                .map(JAXBElement::getValue)
+                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
+                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .findFirst().get();
     }
 }

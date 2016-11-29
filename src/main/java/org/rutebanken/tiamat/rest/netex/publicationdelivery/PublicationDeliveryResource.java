@@ -1,14 +1,13 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -22,8 +21,7 @@ import org.xml.sax.SAXException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.*;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -99,10 +97,9 @@ public class PublicationDeliveryResource {
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
-                    .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-            return new PublicationDeliveryStructure()
-                    .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                            .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
+                    .findFirst().get();
+
+            return publicationDeliveryExporter.exportSiteFrame(siteFrameWithProcessedStopPlaces);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
         }
