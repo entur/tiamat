@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TopographicPlacesInFrame_RelStructure
+public class TopographicPlacesInFrame
         extends ContainmentAggregationStructure {
 
     protected List<TopographicPlace> topographicPlace;

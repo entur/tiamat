@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 public class SiteFrame
         extends Common_VersionFrameStructure {
 
-    protected TopographicPlacesInFrame_RelStructure topographicPlaces = new TopographicPlacesInFrame_RelStructure();
+    protected TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
     protected AddressesInFrame_RelStructure addresses;
     protected AccessesInFrame_RelStructure accesses;
     protected StopPlacesInFrame_RelStructure stopPlaces;
@@ -22,11 +22,11 @@ public class SiteFrame
     protected PointOfInterestClassificationHierarchiesInFrame_RelStructure pointOfInterestClassificationHierarchies;
     protected SiteFacilitySetsInFrame_RelStructure siteFacilitySets;
 
-    public TopographicPlacesInFrame_RelStructure getTopographicPlaces() {
+    public TopographicPlacesInFrame getTopographicPlaces() {
         return topographicPlaces;
     }
 
-    public void setTopographicPlaces(TopographicPlacesInFrame_RelStructure value) {
+    public void setTopographicPlaces(TopographicPlacesInFrame value) {
         this.topographicPlaces = value;
     }
 

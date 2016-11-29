@@ -4,7 +4,7 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
 import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -65,14 +65,20 @@ public class PublicationDeliveryExporter {
         logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
         siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        Iterator<TopographicPlace> topographicPlaceIterable = topographicPlaceRepository.findAll().iterator();
+        List<TopographicPlace> allTopographicPlaces = topographicPlaceRepository.findAll();
+        if(!allTopographicPlaces.isEmpty()) {
+            Iterator<TopographicPlace> topographicPlaceIterable = allTopographicPlaces.iterator();
 
-        TopographicPlacesInFrame_RelStructure topographicPlaces = new TopographicPlacesInFrame_RelStructure();
-        topographicPlaceIterable
-                .forEachRemaining(topographicPlace -> topographicPlaces.getTopographicPlace().add(topographicPlace));
-        logger.info("Adding {} topographic places", topographicPlaces.getTopographicPlace().size());
-        siteFrame.setTopographicPlaces(topographicPlaces);
 
+            TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
+            topographicPlaceIterable
+                    .forEachRemaining(topographicPlace -> topographicPlaces.getTopographicPlace().add(topographicPlace));
+
+            logger.info("Adding {} topographic places", topographicPlaces.getTopographicPlace().size());
+            siteFrame.setTopographicPlaces(topographicPlaces);
+        } else {
+            logger.warn("No topographic places found to export");
+        }
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 

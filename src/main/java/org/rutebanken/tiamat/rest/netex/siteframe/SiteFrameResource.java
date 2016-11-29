@@ -9,7 +9,7 @@ import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -80,7 +80,7 @@ public class SiteFrameResource {
 
         Iterator<TopographicPlace> topographicPlaceIterable = topographicPlaceRepository.findAll().iterator();
 
-        TopographicPlacesInFrame_RelStructure topographicPlaces = new TopographicPlacesInFrame_RelStructure();
+        TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
         topographicPlaceIterable
                 .forEachRemaining(topographicPlace -> topographicPlaces.getTopographicPlace().add(topographicPlace));
 
