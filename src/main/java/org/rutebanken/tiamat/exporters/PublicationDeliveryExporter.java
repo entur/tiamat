@@ -86,12 +86,19 @@ public class PublicationDeliveryExporter {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
+
         logger.info("Returning publication delivery");
-        return new PublicationDeliveryStructure()
+        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
+                .withVersion("any")
                 .withPublicationTimestamp(OffsetDateTime.now())
-                .withParticipantRef(NetexIdMapper.NSR)
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(convertedSiteFrame)));
+                .withParticipantRef(NetexIdMapper.NSR);
+
+        if(convertedSiteFrame.getTopographicPlaces() != null && convertedSiteFrame.getStopPlaces() != null) {
+            publicationDeliveryStructure.withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                    .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(convertedSiteFrame)));
+        }
+
+        return publicationDeliveryStructure;
 
     }
 }
