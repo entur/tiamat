@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.tiamat.netex.validation.NeTExValidator;
+import org.rutebanken.netex.validation.NeTExValidator;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
