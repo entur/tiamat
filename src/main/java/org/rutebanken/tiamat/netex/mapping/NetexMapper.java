@@ -1,8 +1,18 @@
 package org.rutebanken.tiamat.netex.mapping;
 
+import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.converters.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -36,7 +46,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
-                .byDefault()
+                .customize(new TopographicPlaceMapper())
                 .register();
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
