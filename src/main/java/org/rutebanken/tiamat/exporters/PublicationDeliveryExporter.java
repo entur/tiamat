@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -76,6 +78,8 @@ public class PublicationDeliveryExporter {
 
         logger.info("Returning publication delivery");
         return new PublicationDeliveryStructure()
+                .withPublicationTimestamp(OffsetDateTime.now())
+                .withParticipantRef(NetexIdMapper.NSR)
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(convertedSiteFrame)));
 
