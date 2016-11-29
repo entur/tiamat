@@ -29,9 +29,10 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new SimplePointVersionStructureConverter());
+        mapperFactory.getConverterFactory().registerConverter(new KeyListConverter());
 
-        mapperFactory.registerMapper(new KeyListPersistentMapMapper());
-        mapperFactory.registerMapper(new KeyListMapper());
+//        mapperFactory.registerMapper(new KeyListPersistentMapMapper());
+//        mapperFactory.registerMapper(new KeyListMapper());
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .byDefault()

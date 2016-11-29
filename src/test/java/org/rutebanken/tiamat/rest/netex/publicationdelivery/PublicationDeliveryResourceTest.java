@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBElement;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import javax.xml.bind.JAXBException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -483,4 +485,19 @@ public class PublicationDeliveryResourceTest {
         assertThat(response.getStatus()).isEqualTo(200);
     }
 
+    /**
+     * Make stop places exported in publication deliveries are valid according to the xsd.
+     * It should be validated when streaming out.
+     */
+    @Test
+    public void exportStopPlaces() throws JAXBException, IOException, SAXException {
+
+        Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "", null, null, null);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
 }
