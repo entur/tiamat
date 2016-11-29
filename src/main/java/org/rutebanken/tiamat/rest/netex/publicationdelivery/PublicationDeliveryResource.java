@@ -17,11 +17,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.*;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public class PublicationDeliveryResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
             PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
@@ -114,7 +116,7 @@ public class PublicationDeliveryResource {
             @QueryParam(value = "q") String query,
             @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
             @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException {
+            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException, IOException, SAXException {
 
         List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
         if (stopPlaceTypes != null) {

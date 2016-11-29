@@ -12,10 +12,10 @@ import java.io.InputStream;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-public class PublicationDeliveryStreamingOutputTest {
+public class PublicationDeliveryUnmarshallerTest {
 
     @Test
-    public void streamingOutputShouldValidateAgainstXsd() throws IOException, SAXException, JAXBException {
+    public void expectUnmarshalExceptionWhenIncorrectPublicationDeliveryXml() throws IOException, SAXException, JAXBException {
 
         String notValidPublicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\">\n" +

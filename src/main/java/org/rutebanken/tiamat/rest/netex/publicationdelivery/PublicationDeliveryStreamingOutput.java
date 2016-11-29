@@ -2,10 +2,13 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.netex.validation.NeTExValidator;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.*;
+import java.io.IOException;
 import java.io.InputStream;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -17,6 +20,8 @@ public class PublicationDeliveryStreamingOutput {
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
+    private final NeTExValidator neTExValidator = new NeTExValidator();
+
     static {
         try {
             jaxbContext = newInstance(PublicationDeliveryStructure.class);
@@ -25,8 +30,13 @@ public class PublicationDeliveryStreamingOutput {
         }
     }
 
-    public StreamingOutput stream(PublicationDeliveryStructure publicationDelivery) throws JAXBException {
+    public PublicationDeliveryStreamingOutput() throws IOException, SAXException {
+    }
+
+    public StreamingOutput stream(PublicationDeliveryStructure publicationDelivery) throws JAXBException, IOException, SAXException {
         Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setSchema(neTExValidator.getSchema());
+
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return outputStream -> {
             try {
