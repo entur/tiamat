@@ -436,40 +436,42 @@ public class PublicationDeliveryResourceTest {
     @Test
     public void receivePublicationDelivery() throws Exception {
 
-        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">" +
-                " <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>" +
-                " <ParticipantRef>NHR</ParticipantRef>" +
-                " <dataObjects>" +
-                "  <SiteFrame version=\"01\" id=\"nhr:sf:1\">" +
-                "   <stopPlaces>" +
-                "    <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">" +
-                "     <Centroid>" +
-                "      <Location srsName=\"WGS84\">" +
-                "       <Longitude>10.8577903</Longitude>" +
-                "       <Latitude>59.910579</Latitude>" +
-                "      </Location>" +
-                "     </Centroid>" +
-                "     <Name lang=\"no-NO\">Krokstien</Name>    " +
-                "     <TransportMode>bus</TransportMode>" +
-                "     <StopPlaceType>onstreetBus</StopPlaceType>" +
-                "     <quays>" +
-                "      <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">" +
-                "       <Centroid>" +
-                "        <Location srsName=\"WGS84\">" +
-                "         <Longitude>10.8577903</Longitude>" +
-                "         <Latitude>59.910579</Latitude>" +
-                "        </Location>" +
-                "       </Centroid>" +
-                "       <Covered>outdoors</Covered>" +
-                "       <Lighting>wellLit</Lighting>" +
-                "       <QuayType>busStop</QuayType>" +
-                "      </Quay>" +
-                "     </quays>" +
-                "    </StopPlace>" +
-                "   </stopPlaces>" +
-                "  </SiteFrame>" +
-                " </dataObjects>" +
+        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\"\n" +
+                "                     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "                     xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
+                "    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
+                "    <ParticipantRef>NHR</ParticipantRef>\n" +
+                "    <dataObjects>\n" +
+                "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
+                "            <stopPlaces>\n" +
+                "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
+                "                    <Name lang=\"no-NO\">Krokstien</Name>\n" +
+                "                    <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\">\n" +
+                "                            <Longitude>10.8577903</Longitude>\n" +
+                "                            <Latitude>59.910579</Latitude>\n" +
+                "                        </Location>\n" +
+                "                    </Centroid>\n" +
+                "                    <TransportMode>bus</TransportMode>\n" +
+                "                    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
+                "                    <quays>\n" +
+                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">\n" +
+                "                            <Centroid>\n" +
+                "                                <Location srsName=\"WGS84\">\n" +
+                "                                    <Longitude>10.8577903</Longitude>\n" +
+                "                                    <Latitude>59.910579</Latitude>\n" +
+                "                                </Location>\n" +
+                "                            </Centroid>\n" +
+                "                            <Covered>outdoors</Covered>\n" +
+                "                            <Lighting>wellLit</Lighting>\n" +
+                "                            <QuayType>busStop</QuayType>\n" +
+                "                        </Quay>\n" +
+                "                    </quays>\n" +
+                "                </StopPlace>\n" +
+                "            </stopPlaces>\n" +
+                "        </SiteFrame>\n" +
+                "    </dataObjects>\n" +
                 "</PublicationDelivery>";
 
 
