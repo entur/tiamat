@@ -18,7 +18,7 @@ public class PublicationDeliveryStreamingOutputTest {
 
     /**
      * Publication delivery should not validate.
-     * It does not, for instance, contain publication timestamp and participant ref.
+     * It does not, for instance, contain publication timestamp nor participant ref.
      */
     @Test
     public void cannotStreamInvalidXml() throws Exception {
