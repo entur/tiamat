@@ -64,6 +64,9 @@ public class PublicationDeliveryExporter {
         iterableStopPlaces.forEach(stopPlace -> stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace));
         logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
         siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
+        if(siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
+            siteFrame.setStopPlaces(null);
+        }
 
         List<TopographicPlace> allTopographicPlaces = topographicPlaceRepository.findAll();
         if(!allTopographicPlaces.isEmpty()) {
@@ -78,6 +81,7 @@ public class PublicationDeliveryExporter {
             siteFrame.setTopographicPlaces(topographicPlaces);
         } else {
             logger.warn("No topographic places found to export");
+            siteFrame.setTopographicPlaces(null);
         }
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
