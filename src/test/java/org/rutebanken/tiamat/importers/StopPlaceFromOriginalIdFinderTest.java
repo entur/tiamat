@@ -11,7 +11,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
 import static org.mockito.Mockito.*;
-import static org.rutebanken.tiamat.netex.mapping.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class StopPlaceFromOriginalIdFinderTest {
 

@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

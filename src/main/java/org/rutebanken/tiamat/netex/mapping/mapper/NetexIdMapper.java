@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netex.mapping;
+package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.rutebanken.tiamat.importers.KeyValueListAppender;
 import org.rutebanken.tiamat.model.*;

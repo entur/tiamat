@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.importers;
 
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;

@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.slf4j.Logger;

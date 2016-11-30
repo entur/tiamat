@@ -7,7 +7,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.tiamat.netex.mapping.converters.*;
+import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

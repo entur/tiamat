@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -2,11 +2,9 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.CountryRef;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
-import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 
 public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.rutebanken.tiamat.model.TopographicPlace> {
 

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
-import static org.rutebanken.tiamat.netex.mapping.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 /**
  * Helper class to find stop places based on saved original ID key.

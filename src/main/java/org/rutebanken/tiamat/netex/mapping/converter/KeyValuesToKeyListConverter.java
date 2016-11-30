@@ -1,13 +1,11 @@
-package org.rutebanken.tiamat.netex.mapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.CustomConverter;
-import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.Value;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class KeyValuesToKeyListConverter extends CustomConverter<Map<String, Value>, KeyListStructure> {
