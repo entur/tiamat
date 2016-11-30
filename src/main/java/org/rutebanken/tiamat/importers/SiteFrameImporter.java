@@ -80,10 +80,12 @@ public class SiteFrameImporter {
                 logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
 
                 topographicPlaceCreator.invalidateCache();
-                netexSiteFrame.withStopPlaces(
-                        new StopPlacesInFrame_RelStructure()
-                                .withStopPlace(createdStopPlaces)
-                );
+                netexSiteFrame
+                        .withId(originalIds+"-response")
+                        .withVersion("1")
+                        .withStopPlaces(
+                            new StopPlacesInFrame_RelStructure()
+                                    .withStopPlace(createdStopPlaces));
             } else {
                 logger.info("Site frame does not contain any stop places: ", siteFrame);
             }
