@@ -10,8 +10,6 @@ import org.rutebanken.tiamat.netex.mapping.NetexIdMapper;
 
 public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.rutebanken.tiamat.model.TopographicPlace> {
 
-    private NetexIdMapper netexIdMapper = new NetexIdMapper();
-
     @Override
     public void mapAtoB(TopographicPlace netexTopographicPlace, org.rutebanken.tiamat.model.TopographicPlace tiamatTopographicPlace, MappingContext context) {
         super.mapAtoB(netexTopographicPlace, tiamatTopographicPlace, context);
