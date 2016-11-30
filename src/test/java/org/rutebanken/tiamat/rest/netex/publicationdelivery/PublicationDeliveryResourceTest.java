@@ -14,10 +14,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -187,6 +193,24 @@ public class PublicationDeliveryResourceTest {
             PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(pubde);
             StopPlace actualStopPlace = findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
+            List<Quay> quays = extractQuays(actualStopPlace);
+
+            long matches = quays
+                    .stream()
+                    .map(quay -> quay.getKeyList())
+                    .flatMap(keyList -> keyList.getKeyValue().stream())
+                    .map(keyValue -> keyValue.getValue())
+                    .filter(value -> value.equals("RUT:StopArea:0229012202") || value.equals("RUT:StopArea:0229012201"))
+                    .count();
+            assertThat(matches)
+                    .as("Expecting quay to contain orignal ID in key val")
+                    .isEqualTo(2);
+
+//            assertThat(quays)
+//                    .extracting(Quay::getKeyList)
+//                    .extracting(KeyListStructure::getKeyValue)
+//                    .extracting(KeyValueStructure::getValue)
+//                    .contains("RUT:StopArea:0229012202");
         }
     }
 
@@ -500,6 +524,16 @@ public class PublicationDeliveryResourceTest {
                 .map(JAXBElement::getValue)
                 .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
                 .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .collect(toList());
+    }
+
+    private List<Quay> extractQuays(StopPlace stopPlace) {
+        return stopPlace
+                .getQuays()
+                .getQuayRefOrQuay()
+                .stream()
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
                 .collect(toList());
     }
 
