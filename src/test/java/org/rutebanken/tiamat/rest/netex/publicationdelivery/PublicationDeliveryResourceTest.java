@@ -65,8 +65,7 @@ public class PublicationDeliveryResourceTest {
 
         List<StopPlace> result = extractStopPlace(response);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(result.get(1).getId());
+        assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
 
     @Test

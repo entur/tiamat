@@ -14,14 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class SiteFrameImporter {
@@ -75,9 +73,11 @@ public class SiteFrameImporter {
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                 logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
+
+
 
                 topographicPlaceCreator.invalidateCache();
                 netexSiteFrame
@@ -85,7 +85,7 @@ public class SiteFrameImporter {
                         .withVersion("1")
                         .withStopPlaces(
                             new StopPlacesInFrame_RelStructure()
-                                    .withStopPlace(createdStopPlaces));
+                                    .withStopPlace(distinctById(createdStopPlaces)));
             } else {
                 logger.info("Site frame does not contain any stop places: ", siteFrame);
             }
@@ -129,6 +129,13 @@ public class SiteFrameImporter {
         }
     }
 
+    private Collection<org.rutebanken.netex.model.StopPlace> distinctById(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
+        Map<String, org.rutebanken.netex.model.StopPlace> uniqueStopPlaces = new HashMap<>();
+        for(org.rutebanken.netex.model.StopPlace stopPlace : stopPlaces) {
+            uniqueStopPlaces.put(stopPlace.getId(), stopPlace);
+        }
+        return uniqueStopPlaces.values();
+    }
 
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
