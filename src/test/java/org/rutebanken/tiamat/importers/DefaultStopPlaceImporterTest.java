@@ -49,7 +49,7 @@ public class DefaultStopPlaceImporterTest {
 
     private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
 
-    private QuayMerger quayMerger = new QuayMerger(keyValueListAppender, quayRepository);
+    private QuayMerger quayMerger = new QuayMerger();
 
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
