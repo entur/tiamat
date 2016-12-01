@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -269,6 +270,8 @@ public class PublicationDeliveryResourceTest {
                     .map(quay -> quay.getKeyList())
                     .flatMap(keyList -> keyList.getKeyValue().stream())
                     .map(keyValue -> keyValue.getValue())
+                    .map(value -> value.split(","))
+                    .flatMap(values -> Stream.of(values))
                     .filter(value -> value.equals("RUT:StopArea:0229012202") || value.equals("RUT:StopArea:0229012201"))
                     .count();
             assertThat(matches)
