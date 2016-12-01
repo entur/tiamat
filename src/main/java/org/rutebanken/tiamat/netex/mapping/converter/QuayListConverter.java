@@ -16,6 +16,10 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
 
     @Override
     public Quays_RelStructure convertTo(Set<Quay> quays, Type<Quays_RelStructure> type) {
+        if(quays == null || quays.isEmpty()) {
+            return null;
+        }
+
         Quays_RelStructure quays_relStructure = new Quays_RelStructure();
 
         logger.debug("Mapping {} quays to netex", quays != null ? quays.size() : 0);

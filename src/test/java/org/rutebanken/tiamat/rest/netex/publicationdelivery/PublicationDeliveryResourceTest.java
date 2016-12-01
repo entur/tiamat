@@ -388,8 +388,11 @@ public class PublicationDeliveryResourceTest {
         // Same ID, but no coordinates
         StopPlace stopPlaceWithoutCoordinates = new StopPlace()
                 .withId(chouetteId)
+                .withVersion("1")
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:Quay:1")
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay"))));
 
         PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
