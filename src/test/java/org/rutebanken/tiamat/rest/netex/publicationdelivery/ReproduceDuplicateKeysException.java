@@ -4,6 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.client.PublicationDeliveryClient;
 import org.rutebanken.netex.model.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class ReproduceDuplicateKeysException {
 
     @Ignore
     @Test
-    public void reproduceDuplicateKeyIssue() throws JAXBException, InterruptedException {
+    public void reproduceDuplicateKeyIssue() throws JAXBException, IOException, SAXException, InterruptedException {
         final int threads = 20;
         final int publicationDeliveries = 100;
         final int eachPublicationDeliverySentTimes = 5;
@@ -55,7 +56,7 @@ public class ReproduceDuplicateKeysException {
                     try {
                         client.sendPublicationDelivery(publicationDelivery);
                         publicationDeliveriesSent.incrementAndGet();
-                    } catch (JAXBException | IOException e) {
+                    } catch (JAXBException | IOException | SAXException e) {
                         exceptionsReceived.incrementAndGet();
                         throw new RuntimeException(e);
                     }
