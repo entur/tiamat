@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jdk.internal.util.xml.impl.Input;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
@@ -12,27 +13,36 @@ import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.bind.*;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
 public class PublicationDeliveryResourceTest {
+
+    private static final JAXBContext jaxbContext;
+
+    static {
+        try {
+            jaxbContext = newInstance(PublicationDeliveryStructure.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;
@@ -262,7 +272,7 @@ public class PublicationDeliveryResourceTest {
                     .filter(value -> value.equals("RUT:StopArea:0229012202") || value.equals("RUT:StopArea:0229012201"))
                     .count();
             assertThat(matches)
-                    .as("Expecting quay to contain orignal ID in key val")
+                    .as("Expecting quay to contain two matching orignal IDs in key val")
                     .isEqualTo(2);
 
 //            assertThat(quays)
@@ -441,34 +451,42 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("CentroidStopPlace")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("1"))
                                 .withLongitude(new BigDecimal("2"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
+                                .withId("1")
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay number one"))
                                 .withCentroid(new SimplePoint_VersionStructure()
+                                        .withId("12")
+                                        .withVersion("1")
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("10"))
                                                 .withLongitude(new BigDecimal("20")))),
                                 new Quay()
+                                        .withId("133")
+                                        .withVersion("1")
                                         .withName(new MultilingualString().withValue("quay number two"))
                                         .withCentroid(new SimplePoint_VersionStructure()
+                                                .withId("30")
+                                                .withVersion("1")
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("12"))
                                                         .withLongitude(new BigDecimal("22"))))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
         assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(21.0);
         assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(11.0);
     }
-
 
     @Test
     public void receivePublicationDelivery() throws Exception {
@@ -519,6 +537,7 @@ public class PublicationDeliveryResourceTest {
 
         assertThat(response.getStatus()).isEqualTo(200);
     }
+
 
     /**
      * Make stop places exported in publication deliveries are valid according to the xsd.
@@ -588,19 +607,23 @@ public class PublicationDeliveryResourceTest {
         System.out.println(byteArrayOutputStream.toString());
     }
 
-
     private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = new SiteFrame();
+        siteFrame.setVersion("1");
         siteFrame.setId(UUID.randomUUID().toString());
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withPublicationTimestamp(OffsetDateTime.now())
+                .withVersion("1")
+                .withParticipantRef("test")
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
         return publicationDelivery;
     }
+
 
     private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
         assertThat(object).isNotNull();
@@ -645,5 +668,32 @@ public class PublicationDeliveryResourceTest {
                 .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
                 .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
                 .findFirst().get();
+    }
+
+    private PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
+        Response response = postPublicationDelivery(publicationDeliveryStructure);
+        StreamingOutput output = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        output.write(outputStream);
+
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
+        return (PublicationDeliveryStructure) element.getValue();
+
+    }
+
+    private Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
+        Marshaller marshaller = jaxbContext.createMarshaller();
+
+        JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = new ObjectFactory().createPublicationDelivery(publicationDeliveryStructure);
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        marshaller.marshal(jaxPublicationDelivery, outputStream);
+        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+        return publicationDeliveryResource.receivePublicationDelivery(inputStream);
     }
 }
