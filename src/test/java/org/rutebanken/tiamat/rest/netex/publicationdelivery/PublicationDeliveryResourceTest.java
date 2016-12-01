@@ -68,6 +68,10 @@ public class PublicationDeliveryResourceTest {
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
 
+    /**
+     * Real life example: Two stops with different IDs should be merged into one, and their quays should be added.
+     * @throws Exception
+     */
     @Test
     public void publicationDeliveryWithDuplicateStopPlaceWithDifferentId() throws Exception {
 
@@ -113,7 +117,7 @@ public class PublicationDeliveryResourceTest {
 
         List<StopPlace> result = extractStopPlace(response);
 
-        assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place wtice").hasSize(1);
+        assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place twice").hasSize(1);
         String importedIds = result.get(0).getKeyList().getKeyValue()
                 .stream()
                 .filter(kv -> "imported-id".equals(kv.getKey()))
@@ -122,7 +126,7 @@ public class PublicationDeliveryResourceTest {
                 .get();
         assertThat(importedIds).contains(stopPlace.getId());
         assertThat(importedIds).contains(stopPlace2.getId());
-        assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(1);
+        assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(2);
     }
 
     @Test
