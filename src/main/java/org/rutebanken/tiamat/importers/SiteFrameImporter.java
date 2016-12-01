@@ -4,8 +4,8 @@ import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public class SiteFrameImporter {
                         .withVersion("1")
                         .withStopPlaces(
                             new StopPlacesInFrame_RelStructure()
-                                    .withStopPlace(distinctById(createdStopPlaces)));
+                                    .withStopPlace(distinctByIdAndHighestVersion(createdStopPlaces)));
             } else {
                 logger.info("Site frame does not contain any stop places: ", siteFrame);
             }
@@ -129,14 +129,36 @@ public class SiteFrameImporter {
         }
     }
 
-    private Collection<org.rutebanken.netex.model.StopPlace> distinctById(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
+    /**
+     * In order to get a distinct list over stop places, and the newest version if duplicates.
+     * @param stopPlaces
+     * @return unique list with stop places based on ID
+     */
+    private Collection<org.rutebanken.netex.model.StopPlace> distinctByIdAndHighestVersion(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
         Map<String, org.rutebanken.netex.model.StopPlace> uniqueStopPlaces = new HashMap<>();
         for(org.rutebanken.netex.model.StopPlace stopPlace : stopPlaces) {
-            uniqueStopPlaces.put(stopPlace.getId(), stopPlace);
+            if(uniqueStopPlaces.containsKey(stopPlace.getId())) {
+                org.rutebanken.netex.model.StopPlace existingStopPlace = uniqueStopPlaces.get(stopPlace.getId());
+                long existingStopVersion = tryParseLong(existingStopPlace.getVersion());
+                long stopPlaceVersion = tryParseLong(stopPlace.getVersion());
+                if(existingStopVersion < stopPlaceVersion) {
+                    logger.info("Returning newest version of stop place with ID {}: {}", stopPlace.getId(), stopPlace.getVersion());
+                    uniqueStopPlaces.put(stopPlace.getId(), stopPlace);
+                }
+            } else {
+                uniqueStopPlaces.put(stopPlace.getId(), stopPlace);
+            }
         }
         return uniqueStopPlaces.values();
     }
 
+    private long tryParseLong(String version) {
+        try {
+            return Long.parseLong(version);
+        } catch(NumberFormatException|NullPointerException e) {
+            return 0L;
+        }
+    }
 
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
         long duration = System.currentTimeMillis() - startTime;

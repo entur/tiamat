@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.importers;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,9 +44,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private final KeyValueListAppender keyValueListAppender;
 
     private final QuayMerger quayMerger;
-
-    private static DecimalFormat format = new DecimalFormat("#.#");
-
 
 
     @Autowired
@@ -106,22 +104,36 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
+        incrementVersion(newStopPlace);
         return saveAndUpdateCache(newStopPlace);
     }
 
     public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
         logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
-        boolean quaysChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
-        boolean originalIdChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
-        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
+        quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
+        keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+        centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 
-//        if (originalIdChanged || quaysChanged || centroidChanged) {
         logger.info("Updated existing stop place {}. ", foundStopPlace);
         foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
-        saveAndUpdateCache(foundStopPlace);
-//        }
-        return foundStopPlace;
+        incrementVersion(newStopPlace);
+
+        return saveAndUpdateCache(foundStopPlace);
+    }
+
+    private void incrementVersion(StopPlace stopPlace) {
+        Long version = tryParseLong(stopPlace.getVersion());
+        version ++;
+        stopPlace.setVersion(version.toString());
+    }
+
+    private long tryParseLong(String version) {
+        try {
+            return Long.parseLong(version);
+        } catch(NumberFormatException |NullPointerException e) {
+            return 0L;
+        }
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
