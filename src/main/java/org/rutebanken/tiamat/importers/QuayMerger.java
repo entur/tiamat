@@ -58,9 +58,18 @@ public class QuayMerger {
 
             boolean foundMatch = false;
             for(Quay alreadyAdded : result) {
-                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded, updatedQuaysCounter);
+                foundMatch = appendIdIfMatchingOriginalId(incomingQuay, alreadyAdded, updatedQuaysCounter);
                 if(foundMatch) {
                     break;
+                }
+            }
+
+            if(!foundMatch) {
+                for (Quay alreadyAdded : result) {
+                    foundMatch = appendIdIfClose(incomingQuay, alreadyAdded, updatedQuaysCounter);
+                    if (foundMatch) {
+                        break;
+                    }
                 }
             }
 
@@ -74,18 +83,7 @@ public class QuayMerger {
         return result;
     }
 
-    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
-
-        if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
-            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
-            // The incoming quay could for some reason already have multiple imported IDs.
-            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
-            if(changed) {
-                updatedQuaysCounter.incrementAndGet();
-            }
-            return true;
-        }
-
+    private boolean appendIdIfClose(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
         if (areClose(incomingQuay, alreadyAdded)) {
             logger.info("New quay {} is close to existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
@@ -97,6 +95,18 @@ public class QuayMerger {
         return false;
     }
 
+    private boolean appendIdIfMatchingOriginalId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+        if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
+            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
+            // The incoming quay could for some reason already have multiple imported IDs.
+            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            if(changed) {
+                updatedQuaysCounter.incrementAndGet();
+            }
+            return true;
+        }
+        return false;
+    }
 
     public boolean areClose(Quay quay1, Quay quay2) {
         if (!quay1.hasCoordinates() || !quay2.hasCoordinates()) {

@@ -99,8 +99,11 @@ public class QuayMergerTest {
         }
     }
 
+    /**
+     * Add two new quays with already existing original IDs with different coordinates that are close to other quay.
+     */
     @Test
-    public void idsMustNotBeAddedToMultipleQuaysWhenOrderIsDifferent() {
+    public void idsMustNotBeAddedToOtherQuayEvenIfTheyAreClose() {
         Quay existingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
         existingQuay1.setId(1L);
         existingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.142897636770531, 59.83297022041692)));
