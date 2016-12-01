@@ -77,7 +77,7 @@ public class ReproduceDuplicateKeysException {
 
     @Ignore
     @Test
-    public void reproduceDuplicateKeyIssue2() throws JAXBException, InterruptedException, IOException {
+    public void reproduceDuplicateKeyIssue2() throws JAXBException, InterruptedException, IOException, SAXException {
         final PublicationDeliveryClient client = new PublicationDeliveryClient(TIAMAT_URL);
 
         LocationStructure location = randomCoordinates();
