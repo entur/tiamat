@@ -9,6 +9,7 @@ import org.keycloak.representations.AccessToken;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDTO;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -28,6 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +46,7 @@ public class DtoStopPlaceResource {
     private static final Logger logger = LoggerFactory.getLogger(DtoStopPlaceResource.class);
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    StopPlaceRepository stopPlaceRepository;
 
     @Autowired
     private StopPlaceAssembler stopPlaceAssembler;
@@ -89,6 +95,32 @@ public class DtoStopPlaceResource {
         }
 
         return stopPlaceAssembler.assemble(stopPlaces, ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);
+    }
+
+    @GET
+    @Produces("text/plain")
+    @Path("/id_mapping")
+    public Response getIdMapping(@DefaultValue(value = "20000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
+
+        return  Response.ok().entity((StreamingOutput) output -> {
+
+            int recordPosition = 0;
+            boolean lastEmpty = false;
+
+            try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( output ) ) ) ) {
+                while (!lastEmpty) {
+
+                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(recordPosition, recordsPerRoundTrip);
+                    for (IdMappingDto mapping : stopPlaceMappings) {
+                        writer.println(mapping.toCsvString());
+                        recordPosition ++;
+                    }
+                    writer.flush();
+                    if(stopPlaceMappings.isEmpty()) lastEmpty = true;
+                }
+                writer.close();
+            }
+        }).build();
     }
 
     private KeycloakAuthenticationToken keyCloak() {
