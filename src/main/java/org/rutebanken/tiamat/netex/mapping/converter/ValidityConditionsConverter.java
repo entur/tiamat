@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;

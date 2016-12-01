@@ -1,10 +1,8 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.CheckConstraints_RelStructure;
 import org.rutebanken.netex.model.DestinationDisplayViews_RelStructure;
-import org.rutebanken.tiamat.model.CheckConstraint;
 import org.rutebanken.tiamat.model.DestinationDisplayView;
 
 import java.util.List;

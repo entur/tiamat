@@ -1,20 +1,17 @@
 package org.rutebanken.tiamat.importers;
 
 import com.google.common.util.concurrent.Striped;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
-import org.rutebanken.tiamat.netexmapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -83,10 +80,12 @@ public class SiteFrameImporter {
                 logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
 
                 topographicPlaceCreator.invalidateCache();
-                netexSiteFrame.withStopPlaces(
-                        new StopPlacesInFrame_RelStructure()
-                                .withStopPlace(createdStopPlaces)
-                );
+                netexSiteFrame
+                        .withId(originalIds+"-response")
+                        .withVersion("1")
+                        .withStopPlaces(
+                            new StopPlacesInFrame_RelStructure()
+                                    .withStopPlace(createdStopPlaces));
             } else {
                 logger.info("Site frame does not contain any stop places: ", siteFrame);
             }

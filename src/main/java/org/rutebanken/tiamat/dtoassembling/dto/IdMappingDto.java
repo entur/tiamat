@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.dtoassembling.dto;
 
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.math.BigInteger;
 

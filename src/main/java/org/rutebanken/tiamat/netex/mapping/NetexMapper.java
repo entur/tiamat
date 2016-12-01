@@ -1,10 +1,14 @@
-package org.rutebanken.tiamat.netexmapping;
+package org.rutebanken.tiamat.netex.mapping;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.netexmapping.converters.*;
-import org.rutebanken.tiamat.netexmapping.mapper.*;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.tiamat.netex.mapping.converter.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,15 +33,16 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new SimplePointVersionStructureConverter());
+        mapperFactory.getConverterFactory().registerConverter(new KeyValuesToKeyListConverter());
 
-        mapperFactory.registerMapper(new KeyListPersistentMapMapper());
-        mapperFactory.registerMapper(new KeyListMapper());
+        mapperFactory.registerMapper(new KeyListToKeyValuesMapMapper());
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
+                .customize(new TopographicPlaceMapper())
                 .byDefault()
                 .register();
 
@@ -76,8 +81,7 @@ public class NetexMapper {
     }
 
     public org.rutebanken.tiamat.model.StopPlace mapToTiamatModel(StopPlace netexStopPlace) {
-        org.rutebanken.tiamat.model.StopPlace stopPlace = mapperFactory.getMapperFacade().map(netexStopPlace, org.rutebanken.tiamat.model.StopPlace.class);
-        return stopPlace;
+        return mapperFactory.getMapperFacade().map(netexStopPlace, org.rutebanken.tiamat.model.StopPlace.class);
     }
 
     public org.rutebanken.tiamat.model.Quay mapToTiamatModel(Quay netexQuay) {

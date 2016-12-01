@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
@@ -14,6 +14,9 @@ public class LevelsConverter extends BidirectionalConverter<List<Level>, Levels_
 
     @Override
     public Levels_RelStructure convertTo(List<Level> levels, Type<Levels_RelStructure> type) {
+        if(levels == null || levels.isEmpty()) {
+            return null;
+        }
         logger.debug("Mapping {} levels into levels_RelStructure", levels.size());
 
         Levels_RelStructure levels_relStructure = new Levels_RelStructure();

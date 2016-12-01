@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;

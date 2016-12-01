@@ -1,10 +1,8 @@
-package org.rutebanken.tiamat.netexmapping.converters;
+package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.AccessSpaces_RelStructure;
 import org.rutebanken.netex.model.BoardingPositions_RelStructure;
-import org.rutebanken.tiamat.model.AccessSpace;
 import org.rutebanken.tiamat.model.BoardingPosition;
 
 import java.util.List;

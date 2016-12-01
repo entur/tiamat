@@ -1,15 +1,11 @@
-package org.rutebanken.tiamat.netexmapping;
+package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Ignore;
-import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.CountryRef;
-import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
-import org.rutebanken.tiamat.model.SiteFrame;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,17 +101,19 @@ public class NetexMapperTest {
         assertThat(netexStopPlace.getKeyList().getKeyValue()).extracting("value").contains(originalId);
     }
 
+    /**
+     * Usually, a stop place's ID field will be moved to key value.
+     * But when the stop place already has key values, we should map them to tiamat's keyValues.
+     */
     @Test
     public void mapStopPlaceWithKeyValuesToTiamat() throws Exception {
-
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
-        netexStopPlace.setKeyList(new org.rutebanken.netex.model.KeyListStructure());
-
         String originalId = "OPP:StopArea:123";
-        org.rutebanken.netex.model.KeyValueStructure keyValueStructure = new org.rutebanken.netex.model.KeyValueStructure()
-                .withKey(NetexIdMapper.ORIGINAL_ID_KEY).withValue(originalId);
-
-        netexStopPlace.getKeyList().getKeyValue().add(keyValueStructure);
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace()
+                .withKeyList(
+                    new KeyListStructure().withKeyValue(
+                            new KeyValueStructure()
+                                    .withKey(NetexIdMapper.ORIGINAL_ID_KEY)
+                                    .withValue(originalId)));
 
         StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
         assertThat(tiamatStopPlace.getKeyValues()).isNotNull();
@@ -219,7 +217,7 @@ public class NetexMapperTest {
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
         org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
-        assertThat(netexTopographicPlace.getCountryRef()).isNotNull().as("Reference to country shall not be null");
+        assertThat(netexTopographicPlace.getCountryRef()).as("Reference to country shall not be null").isNotNull();
         assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
 
 

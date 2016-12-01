@@ -1,12 +1,10 @@
 package org.rutebanken.tiamat.importers;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 
 @Component

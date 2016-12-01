@@ -1,38 +1,31 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.netexmapping.NetexMapper;
-import org.rutebanken.tiamat.importers.SiteFrameImporter;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Component
 @Produces("application/xml")
@@ -73,7 +66,7 @@ public class PublicationDeliveryResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
             PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
@@ -104,10 +97,9 @@ public class PublicationDeliveryResource {
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
-                    .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-            return new PublicationDeliveryStructure()
-                    .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                            .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
+                    .findFirst().get();
+
+            return publicationDeliveryExporter.exportSiteFrame(siteFrameWithProcessedStopPlaces);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
         }
@@ -121,7 +113,7 @@ public class PublicationDeliveryResource {
             @QueryParam(value = "q") String query,
             @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
             @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException {
+            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException, IOException, SAXException {
 
         List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
         if (stopPlaceTypes != null) {

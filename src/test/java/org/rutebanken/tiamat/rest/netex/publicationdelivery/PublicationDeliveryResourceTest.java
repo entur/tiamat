@@ -8,21 +8,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.netexmapping.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
@@ -187,6 +192,24 @@ public class PublicationDeliveryResourceTest {
             PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(pubde);
             StopPlace actualStopPlace = findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
+            List<Quay> quays = extractQuays(actualStopPlace);
+
+            long matches = quays
+                    .stream()
+                    .map(quay -> quay.getKeyList())
+                    .flatMap(keyList -> keyList.getKeyValue().stream())
+                    .map(keyValue -> keyValue.getValue())
+                    .filter(value -> value.equals("RUT:StopArea:0229012202") || value.equals("RUT:StopArea:0229012201"))
+                    .count();
+            assertThat(matches)
+                    .as("Expecting quay to contain orignal ID in key val")
+                    .isEqualTo(2);
+
+//            assertThat(quays)
+//                    .extracting(Quay::getKeyList)
+//                    .extracting(KeyListStructure::getKeyValue)
+//                    .extracting(KeyValueStructure::getValue)
+//                    .contains("RUT:StopArea:0229012202");
         }
     }
 
@@ -387,6 +410,125 @@ public class PublicationDeliveryResourceTest {
     }
 
 
+    @Test
+    public void receivePublicationDelivery() throws Exception {
+
+        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\"\n" +
+                "                     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "                     xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
+                "    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
+                "    <ParticipantRef>NHR</ParticipantRef>\n" +
+                "    <dataObjects>\n" +
+                "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
+                "            <stopPlaces>\n" +
+                "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
+                "                    <Name lang=\"no-NO\">Krokstien</Name>\n" +
+                "                    <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\">\n" +
+                "                            <Longitude>10.8577903</Longitude>\n" +
+                "                            <Latitude>59.910579</Latitude>\n" +
+                "                        </Location>\n" +
+                "                    </Centroid>\n" +
+                "                    <TransportMode>bus</TransportMode>\n" +
+                "                    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
+                "                    <quays>\n" +
+                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">\n" +
+                "                            <Centroid>\n" +
+                "                                <Location srsName=\"WGS84\">\n" +
+                "                                    <Longitude>10.8577903</Longitude>\n" +
+                "                                    <Latitude>59.910579</Latitude>\n" +
+                "                                </Location>\n" +
+                "                            </Centroid>\n" +
+                "                            <Covered>outdoors</Covered>\n" +
+                "                            <Lighting>wellLit</Lighting>\n" +
+                "                            <QuayType>busStop</QuayType>\n" +
+                "                        </Quay>\n" +
+                "                    </quays>\n" +
+                "                </StopPlace>\n" +
+                "            </stopPlaces>\n" +
+                "        </SiteFrame>\n" +
+                "    </dataObjects>\n" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    /**
+     * Make stop places exported in publication deliveries are valid according to the xsd.
+     * It should be validated when streaming out.
+     */
+    @Test
+    public void exportStopPlaces() throws JAXBException, IOException, SAXException {
+
+        // Import stop to make sure we have something to export, allthough other tests might have populated the test database.
+        StopPlace stopPlace = new StopPlace()
+                .withName(new MultilingualString().withValue("Østre gravlund"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.914353"))
+                                .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+
+        Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "Østre gravlund", null, null, null);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    /**
+     * Partially copied from https://github.com/rutebanken/netex-norway-examples/blob/master/examples/stops/BasicStopPlace_example.xml
+     */
+    @Test
+    public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
+
+        String xml = "<PublicationDelivery\n" +
+                "\tversion=\"1.0\"\n" +
+                "\txmlns=\"http://www.netex.org.uk/netex\"\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
+                "\t<!-- Når denne dataleveransen ble generert -->\n" +
+                "\t<PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
+                "\t<ParticipantRef>NHR</ParticipantRef>\n" +
+                "\t<dataObjects>\n" +
+                "\t\t<SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
+                "\t\t\t<stopPlaces>\n" +
+                "\t\t\t\t<!--===Stop=== -->\n" +
+                "\t\t\t\t<!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
+                "\t\t\t\t<StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
+                "\t\t\t\t\t<Name lang=\"no-NO\">Krokstien</Name>\n" +
+                "\t\t\t\t</StopPlace>\n" +
+                "\t\t\t</stopPlaces>\n" +
+                "\t\t</SiteFrame>\n" +
+                "\t</dataObjects>\n" +
+                "</PublicationDelivery>\n" +
+                "\n";
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+
     private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setId(UUID.randomUUID().toString());
@@ -425,6 +567,16 @@ public class PublicationDeliveryResourceTest {
                 .collect(toList());
     }
 
+    private List<Quay> extractQuays(StopPlace stopPlace) {
+        return stopPlace
+                .getQuays()
+                .getQuayRefOrQuay()
+                .stream()
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .collect(toList());
+    }
+
     private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
         return publicationDeliveryStructure.getDataObjects()
                 .getCompositeFrameOrCommonFrame()
@@ -434,53 +586,4 @@ public class PublicationDeliveryResourceTest {
                 .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
                 .findFirst().get();
     }
-
-    @Test
-    public void receivePublicationDelivery() throws Exception {
-
-        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">" +
-                " <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>" +
-                " <ParticipantRef>NHR</ParticipantRef>" +
-                " <dataObjects>" +
-                "  <SiteFrame version=\"01\" id=\"nhr:sf:1\">" +
-                "   <stopPlaces>" +
-                "    <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">" +
-                "     <Centroid>" +
-                "      <Location srsName=\"WGS84\">" +
-                "       <Longitude>10.8577903</Longitude>" +
-                "       <Latitude>59.910579</Latitude>" +
-                "      </Location>" +
-                "     </Centroid>" +
-                "     <Name lang=\"no-NO\">Krokstien</Name>    " +
-                "     <TransportMode>bus</TransportMode>" +
-                "     <StopPlaceType>onstreetBus</StopPlaceType>" +
-                "     <quays>" +
-                "      <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">" +
-                "       <Centroid>" +
-                "        <Location srsName=\"WGS84\">" +
-                "         <Longitude>10.8577903</Longitude>" +
-                "         <Latitude>59.910579</Latitude>" +
-                "        </Location>" +
-                "       </Centroid>" +
-                "       <Covered>outdoors</Covered>" +
-                "       <Lighting>wellLit</Lighting>" +
-                "       <QuayType>busStop</QuayType>" +
-                "      </Quay>" +
-                "     </quays>" +
-                "    </StopPlace>" +
-                "   </stopPlaces>" +
-                "  </SiteFrame>" +
-                " </dataObjects>" +
-                "</PublicationDelivery>";
-
-
-        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-
-
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
-
-        assertThat(response.getStatus()).isEqualTo(200);
-    }
-
 }
