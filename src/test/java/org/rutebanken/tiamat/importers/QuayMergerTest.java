@@ -22,10 +22,8 @@ import static org.mockito.Mockito.mock;
 public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
-    
-    private QuayRepository quayRepository = mock(QuayRepository.class);
-    
-    private QuayMerger quayMerger = new QuayMerger(new KeyValueListAppender(), quayRepository);
+
+    private QuayMerger quayMerger = new QuayMerger();
 
 
     @Test

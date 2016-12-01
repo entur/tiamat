@@ -24,16 +24,6 @@ public class QuayMerger {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
-    private final KeyValueListAppender keyValueListAppender;
-
-    private final QuayRepository quayRepository;
-
-    @Autowired
-    public QuayMerger(KeyValueListAppender keyValueListAppender, QuayRepository quayRepository) {
-        this.keyValueListAppender = keyValueListAppender;
-        this.quayRepository = quayRepository;
-    }
-
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
@@ -68,7 +58,7 @@ public class QuayMerger {
 
             boolean foundMatch = false;
             for(Quay alreadyAdded : result) {
-                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded);
+                foundMatch = matchAndPossibleAppendId(incomingQuay, alreadyAdded, updatedQuaysCounter);
                 if(foundMatch) {
                     break;
                 }
@@ -84,18 +74,24 @@ public class QuayMerger {
         return result;
     }
 
-    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded) {
+    private boolean matchAndPossibleAppendId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
 
         if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
-            logger.info("Quay matches on original ID {}. Adding all IDs", incomingQuay);
+            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
             // The incoming quay could for some reason already have multiple imported IDs.
-            alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            if(changed) {
+                updatedQuaysCounter.incrementAndGet();
+            }
             return true;
         }
 
         if (areClose(incomingQuay, alreadyAdded)) {
-            logger.info("New quay {} is close to existing quay {}. Appending it's ID", alreadyAdded, incomingQuay);
-            alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            logger.info("New quay {} is close to existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
+            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+            if(changed) {
+                updatedQuaysCounter.incrementAndGet();
+            }
             return true;
         }
         return false;
