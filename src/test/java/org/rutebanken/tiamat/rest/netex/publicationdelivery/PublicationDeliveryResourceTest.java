@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import jdk.internal.util.xml.impl.Input;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
@@ -14,7 +13,10 @@ import org.xml.sax.SAXException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -27,7 +29,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,6 +58,7 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:123123")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                     .withLocation(new LocationStructure()
                             .withLatitude(new BigDecimal("9"))
@@ -64,15 +66,19 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopPlace:123123")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
                                 .withLongitude(new BigDecimal("72"))));
 
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        postAndReturnPublicationDelivery(publicationDelivery);
 
-        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery2 = createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery2);
+
 
         List<StopPlace> result = extractStopPlace(response);
 
@@ -91,6 +97,7 @@ public class PublicationDeliveryResourceTest {
         StopPlace stopPlace = new StopPlace()
                 .withName(new MultilingualString().withValue(name))
                 .withId("OST:StopArea:01360680")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.4172358106178"))
@@ -98,6 +105,7 @@ public class PublicationDeliveryResourceTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withId("OST:StopArea:0136068001")
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue(name))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -108,6 +116,7 @@ public class PublicationDeliveryResourceTest {
         StopPlace stopPlace2 = new StopPlace()
                 .withName(new MultilingualString().withValue(name))
                 .withId("OST:StopArea:01040720")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.41727956639375"))
@@ -115,6 +124,7 @@ public class PublicationDeliveryResourceTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withId("OST:StopArea:0104072001")
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue(name))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -124,7 +134,7 @@ public class PublicationDeliveryResourceTest {
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
 
-        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
 
         List<StopPlace> result = extractStopPlace(response);
 
@@ -145,21 +155,24 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("NSR:StopPlace:123123")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
                     .withQuayRefOrQuay(new Quay()
-                        .withName(new MultilingualString().withValue("quay"))
-                        .withCentroid(new SimplePoint_VersionStructure()
-                            .withLocation(new LocationStructure()
-                                    .withLatitude(new BigDecimal("9.1"))
-                                    .withLongitude(new BigDecimal("71.2"))))));
+                            .withId("xyz:123")
+                            .withVersion("1")
+                            .withName(new MultilingualString().withValue("quay"))
+                            .withCentroid(new SimplePoint_VersionStructure()
+                                .withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("9.1"))
+                                        .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
@@ -196,6 +209,7 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace1 = new StopPlace()
                 .withId("RUT:StopArea:02290122")
+                .withVersion("1")
                 .withName(name)
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -204,6 +218,7 @@ public class PublicationDeliveryResourceTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                         .withId("RUT:StopArea:0229012201")
+                                        .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
@@ -211,6 +226,7 @@ public class PublicationDeliveryResourceTest {
                                                         .withLongitude(new BigDecimal("11.142676854561447")))),
                                 new Quay()
                                         .withId("RUT:StopArea:0229012202")
+                                        .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
@@ -229,6 +245,7 @@ public class PublicationDeliveryResourceTest {
          */
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopArea:02290122")
+                .withVersion("1")
                 .withName(name)
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -238,6 +255,7 @@ public class PublicationDeliveryResourceTest {
                         .withQuayRefOrQuay(
                                 new Quay()
                                         .withId("RUT:StopArea:0229012201")
+                                        .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
@@ -245,6 +263,7 @@ public class PublicationDeliveryResourceTest {
                                                         .withLongitude(new BigDecimal("11.142902250197631")))),
                                 new Quay()
                                         .withId("RUT:StopArea:0229012202")
+                                        .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
@@ -254,13 +273,11 @@ public class PublicationDeliveryResourceTest {
 
         List<PublicationDeliveryStructure> publicationDeliveryStructures = new ArrayList<>();
 
-        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace1, stopPlace2));
         publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace1));
         publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2));
-        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2, stopPlace2));
 
         for(PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
-            PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(pubde);
+            PublicationDeliveryStructure response = postAndReturnPublicationDelivery(pubde);
             StopPlace actualStopPlace = findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
             List<Quay> quays = extractQuays(actualStopPlace);
@@ -295,21 +312,24 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("MOR:StopArea:15485753")
+                .withVersion("1")
                 .withName(new MultilingualString().withValue("Skaret").withLang("no"))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withId("MOR:StopArea:1548612801")
+                                        .withVersion("1")
+                                        .withId("MOR:StopArea:1548612801")
                                         .withName(new MultilingualString().withValue("Skaret").withLang("no"))
-                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
-                                        .withLatitude(new BigDecimal("62.799557598196465"))
-                                        .withLongitude(new BigDecimal("7.328336965528884")))),
-                        new Quay()
-                            .withId("MOR:StopArea:1548575301")
-                                .withName(new MultilingualString().withValue("Skaret").withLang("no"))));
+                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("62.799557598196465"))
+                                                .withLongitude(new BigDecimal("7.328336965528884")))),
+                                new Quay()
+                                        .withId("MOR:StopArea:1548575301")
+                                        .withVersion("1")
+                                        .withName(new MultilingualString().withValue("Skaret").withLang("no"))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
 
         // Exception should not have been thrown
         StopPlace actualStopPlace = findFirstStopPlace(response);
@@ -324,12 +344,15 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId(chouetteId)
+                .withVersion("1")
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withName(new MultilingualString().withValue("quay"))));
+                                .withName(new MultilingualString().withValue("quay"))
+                                .withId("XYZ:Quay:1")
+                                .withVersion("1")));
 
         PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(firstPublicationDelivery);
+        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(firstPublicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(response);
 
@@ -344,12 +367,15 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId(chouetteId)
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
+                                .withVersion("1")
+                                .withId(chouetteId+1)
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -357,7 +383,7 @@ public class PublicationDeliveryResourceTest {
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(firstPublicationDelivery);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(firstPublicationDelivery);
         StopPlace firstStopPlaceReturned = findFirstStopPlace(firstResponse);
         // Same ID, but no coordinates
         StopPlace stopPlaceWithoutCoordinates = new StopPlace()
@@ -367,7 +393,7 @@ public class PublicationDeliveryResourceTest {
                                 .withName(new MultilingualString().withValue("quay"))));
 
         PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
-        PublicationDeliveryStructure secondResponse = publicationDeliveryResource.importPublicationDelivery(secondPublicationDelivery);
+        PublicationDeliveryStructure secondResponse = postAndReturnPublicationDelivery(secondPublicationDelivery);
 
         StopPlace secondStopPlaceReturned = findFirstStopPlace(secondResponse);
         assertThat(secondStopPlaceReturned.getId()).isEqualTo(firstStopPlaceReturned.getId())
@@ -382,6 +408,7 @@ public class PublicationDeliveryResourceTest {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("XYZ:StopPlace:123123")
+                .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -389,6 +416,7 @@ public class PublicationDeliveryResourceTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withId(originalQuayId)
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -396,7 +424,7 @@ public class PublicationDeliveryResourceTest {
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
@@ -417,6 +445,8 @@ public class PublicationDeliveryResourceTest {
     @Test
     public void importPublicationDeliveryAndExpectCertainWordsToBeRemovedFromNames() throws Exception {
         StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:stoparea:1")
+                .withVersion("1")
                 .withName(new MultilingualString().withValue("Steinerskolen Moss (Buss)"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -424,6 +454,8 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:boardingpos:2")
+                                .withVersion("1")
                                 .withName(new MultilingualString().withValue("Steinerskolen Moss [tog]"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -431,7 +463,7 @@ public class PublicationDeliveryResourceTest {
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
 
         StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
 
@@ -551,6 +583,8 @@ public class PublicationDeliveryResourceTest {
 
         // Import stop to make sure we have something to export, allthough other tests might have populated the test database.
         StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:Stopplace:1")
+                .withVersion("1")
                 .withName(new MultilingualString().withValue("Østre gravlund"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -558,7 +592,7 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("10.806387"))));
 
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+        postAndReturnPublicationDelivery(publicationDelivery);
 
 
         Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "Østre gravlund", null, null, null);
