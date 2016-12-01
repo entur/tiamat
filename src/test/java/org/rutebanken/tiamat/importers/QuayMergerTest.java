@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import org.assertj.core.api.Condition;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -13,6 +14,8 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -96,6 +99,47 @@ public class QuayMergerTest {
         for(Quay actualQuay : result) {
             assertThat(actualQuay.getOriginalIds()).contains("original-id-1", "another-id");
         }
+    }
+
+    @Test
+    public void idsMustNotBeAddedToMultipleQuaysWhenOrderIsDifferent() {
+        Quay existingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
+        existingQuay1.setId(1L);
+        existingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.142897636770531, 59.83297022041692)));
+        existingQuay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
+
+        Quay existingQuay2 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
+        existingQuay2.setId(2L);
+        existingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.142676854561447, 59.83314448493502)));
+        existingQuay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(existingQuay1);
+        existingQuays.add(existingQuay2);
+
+        Quay incomingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
+        incomingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.14317535486387, 59.832848923825956)));
+        incomingQuay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
+
+        Quay incomingQuay2 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
+        incomingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.142902250197631, 59.83304200609072)));
+        incomingQuay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(incomingQuay2);
+        incomingQuays.add(incomingQuay1);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).hasSize(2);
+
+        List<String> actualOriginalIds = result.stream()
+                .flatMap(q -> q.getOriginalIds().stream())
+                .peek(originalId -> System.out.println(originalId))
+                .collect(toList());
+
+        assertThat(actualOriginalIds).as("Number of original IDs in total").hasSize(2);
+
+        result.forEach(q -> System.out.println(q.getOriginalIds()));
     }
 
     @Test
