@@ -69,6 +69,63 @@ public class PublicationDeliveryResourceTest {
     }
 
     @Test
+    public void publicationDeliveryWithDuplicateStopPlaceWithDifferentId() throws Exception {
+
+        String name = "Varnaveien bensin";
+
+        StopPlace stopPlace = new StopPlace()
+                .withName(new MultilingualString().withValue(name))
+                .withId("OST:StopArea:01360680")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.4172358106178"))
+                                .withLongitude(new BigDecimal("10.66847409589632"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("OST:StopArea:0136068001")
+                                .withName(new MultilingualString().withValue(name))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLongitude(new BigDecimal("10.6684740958963200085918288095854222774505615234375"))
+                                                .withLatitude(new BigDecimal("59.41723581061779668743838556110858917236328125"))))));
+
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withName(new MultilingualString().withValue(name))
+                .withId("OST:StopArea:01040720")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.41727956639375"))
+                                .withLongitude(new BigDecimal("10.66856436373097"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("OST:StopArea:0104072001")
+                                .withName(new MultilingualString().withValue(name))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLongitude(new BigDecimal("10.6685643637309706122096031322143971920013427734375"))
+                                                .withLatitude(new BigDecimal("59.41727956639375207714692805893719196319580078125"))))));
+
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
+
+        PublicationDeliveryStructure response = publicationDeliveryResource.importPublicationDelivery(publicationDelivery);
+
+        List<StopPlace> result = extractStopPlace(response);
+
+        assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place wtice").hasSize(1);
+        String importedIds = result.get(0).getKeyList().getKeyValue()
+                .stream()
+                .filter(kv -> "imported-id".equals(kv.getKey()))
+                .map(KeyValueStructure::getValue)
+                .findFirst()
+                .get();
+        assertThat(importedIds).contains(stopPlace.getId());
+        assertThat(importedIds).contains(stopPlace2.getId());
+        assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(1);
+    }
+
+    @Test
     public void publicationDeliveryWithStopPlaceAndQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
