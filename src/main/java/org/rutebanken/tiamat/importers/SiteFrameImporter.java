@@ -134,7 +134,7 @@ public class SiteFrameImporter {
      * @param stopPlaces
      * @return unique list with stop places based on ID
      */
-    private Collection<org.rutebanken.netex.model.StopPlace> distinctByIdAndHighestVersion(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
+    public Collection<org.rutebanken.netex.model.StopPlace> distinctByIdAndHighestVersion(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
         Map<String, org.rutebanken.netex.model.StopPlace> uniqueStopPlaces = new HashMap<>();
         for(org.rutebanken.netex.model.StopPlace stopPlace : stopPlaces) {
             if(uniqueStopPlaces.containsKey(stopPlace.getId())) {

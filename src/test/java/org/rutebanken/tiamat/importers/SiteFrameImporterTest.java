@@ -3,10 +3,14 @@ package org.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -14,8 +18,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -78,4 +85,28 @@ public class SiteFrameImporterTest {
         siteFrameImporter.importSiteFrame(siteFrames.get(1), stopPlaceImporter);
     }
 
+
+    @Test
+    public void uniqueByIdAndVersion() {
+
+        List<org.rutebanken.netex.model.StopPlace> stopPlacesWithDuplicates = new ArrayList<>();
+
+        org.rutebanken.netex.model.StopPlace stopPlace1 = new org.rutebanken.netex.model.StopPlace();
+        stopPlace1.setId("100");
+        stopPlace1.setVersion("10");
+
+        org.rutebanken.netex.model.StopPlace stopPlace2 = new org.rutebanken.netex.model.StopPlace();
+        stopPlace2.setId("100");
+        stopPlace2.setVersion("1");
+
+        stopPlacesWithDuplicates.add(stopPlace2);
+        stopPlacesWithDuplicates.add(stopPlace1);
+
+        Collection<org.rutebanken.netex.model.StopPlace> actual = siteFrameImporter.distinctByIdAndHighestVersion(stopPlacesWithDuplicates);
+
+        assertThat(actual).hasSize(1);
+        assertThat(actual).containsOnlyOnce(stopPlace1);
+        assertThat(actual).extracting(org.rutebanken.netex.model.StopPlace::getVersion).containsOnly("10");
+
+    }
 }

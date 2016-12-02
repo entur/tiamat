@@ -125,6 +125,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private void incrementVersion(StopPlace stopPlace) {
         Long version = tryParseLong(stopPlace.getVersion());
         version ++;
+        logger.info("Setting version {} for stop place {}", version, stopPlace.getName());
         stopPlace.setVersion(version.toString());
     }
 
