@@ -60,11 +60,10 @@ public class PublicationDeliveryExporter {
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withParticipantRef(NetexIdMapper.NSR);
 
-        if(siteFrame.getTopographicPlaces() != null || siteFrame.getStopPlaces() != null) {
+
             publicationDeliveryStructure.withDataObjects(
                     new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
-        }
 
         return publicationDeliveryStructure;
     }
