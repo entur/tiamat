@@ -50,6 +50,32 @@ public class SimplePointVersionStructureConverterTest {
     }
 
     @Test
+    public void allowMaxSixDecimalsWhenConvertingToNetex() {
+        double longitude = 10.123456789;
+        double latitude = 20.123123123123;
+        Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+
+        SimplePoint_VersionStructure simplePointversionStructure =  simplePointVersionStructureConverter.convertTo(point, simplePointVersionStructureType);
+
+        assertThat(simplePointversionStructure.getLocation().getLongitude().doubleValue()).isEqualTo(10.123457);
+        assertThat(simplePointversionStructure.getLocation().getLatitude().doubleValue()).isEqualTo(20.123123);
+    }
+
+    @Test
+    public void allowMaxSixDecimalsWhenConvertingToPoint() {
+        double longitude = 10.123456789;
+        double latitude = 20.123123123123;
+        SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
+                .withLocation(new LocationStructure()
+                        .withLongitude(BigDecimal.valueOf(longitude))
+                        .withLatitude(BigDecimal.valueOf(latitude)));
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+
+        assertThat(point.getX()).isEqualTo(10.123457);
+        assertThat(point.getY()).isEqualTo(20.123123);
+    }
+
+    @Test
     public void nullCheckLocation() {
         SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure();
         simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);

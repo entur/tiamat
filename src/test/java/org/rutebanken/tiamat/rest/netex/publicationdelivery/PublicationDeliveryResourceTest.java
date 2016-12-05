@@ -630,6 +630,44 @@ public class PublicationDeliveryResourceTest {
     }
 
     @Test
+    public void maxNumberOfDigitsInCoordinatesShouldBeSix() throws Exception {
+
+        final int maxdigits = 6;
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("CentroidStopPlace")
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10.123456789123456789123456789"))
+                                .withLongitude(new BigDecimal("20.123456789123456789123456789"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                        .withId("1")
+                                        .withVersion("1")
+                                        .withName(new MultilingualString().withValue("quay number one"))
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withId("12.")
+                                                .withVersion("1")
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("10.123456789123456789123456789"))
+                                                        .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        BigDecimal longitude = actualStopPlace.getCentroid().getLocation().getLongitude();
+        BigDecimal latitude = actualStopPlace.getCentroid().getLocation().getLatitude();
+
+        assertThat(String.valueOf(longitude).split("\\.")[1].length()).as("longitude decimals length").isLessThanOrEqualTo(maxdigits);
+        assertThat(String.valueOf(latitude).split("\\.")[1].length()).as("latitude decimals length").isLessThanOrEqualTo(maxdigits);
+
+    }
+
+    @Test
     public void receivePublicationDelivery() throws Exception {
 
         String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
