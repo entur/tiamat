@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,7 +44,7 @@ public class QuayMerger {
         existingStopPlace.setQuays(result);
 
         logger.debug("Created {} quays and updated {} quays for stop place {}", addedQuays.get(), updatedQuays.get(), existingStopPlace);
-        return addedQuays.get() > 0;
+        return addedQuays.get() > 0 || updatedQuays.get() > 0;
     }
 
     public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
@@ -76,6 +77,8 @@ public class QuayMerger {
             if(!foundMatch) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
+                incomingQuay.setCreated(ZonedDateTime.now());
+                incomingQuay.setChanged(ZonedDateTime.now());
                 addedQuaysCounter.incrementAndGet();
             }
         }
@@ -88,6 +91,7 @@ public class QuayMerger {
             logger.info("New quay {} is close to existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
             if(changed) {
+                incomingQuay.setChanged(ZonedDateTime.now());
                 updatedQuaysCounter.incrementAndGet();
             }
             return true;
@@ -101,6 +105,7 @@ public class QuayMerger {
             // The incoming quay could for some reason already have multiple imported IDs.
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
             if(changed) {
+                incomingQuay.setChanged(ZonedDateTime.now());
                 updatedQuaysCounter.incrementAndGet();
             }
             return true;

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -107,16 +108,21 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.info("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
         newStopPlace.setVersion("1");
+        newStopPlace.setCreated(ZonedDateTime.now());
+        newStopPlace.setChanged(ZonedDateTime.now());
         return saveAndUpdateCache(newStopPlace);
     }
 
     public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
         logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
-        quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
-        keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
-        centroidComputer.computeCentroidForStopPlace(foundStopPlace);
+        boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
+        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 
+        if(quayChanged || keyValuesChanged || centroidChanged) {
+            foundStopPlace.setChanged(ZonedDateTime.now());
+        }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
         foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
         incrementVersion(foundStopPlace);

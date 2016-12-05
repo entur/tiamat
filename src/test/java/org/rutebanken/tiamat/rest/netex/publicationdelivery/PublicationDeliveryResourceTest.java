@@ -334,8 +334,73 @@ public class PublicationDeliveryResourceTest {
         // Exception should not have been thrown
         StopPlace actualStopPlace = findFirstStopPlace(response);
 
-        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+        List<Quay> actualQuays = extractQuays(actualStopPlace);
+        assertThat(actualQuays).isNotNull().as("quays should not be null");
     }
+
+    @Test
+    public void createdAndChangedTimestampsMustBeSetOnStopPlaceAndQuays() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("x")
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("new"))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                        .withVersion("1")
+                                        .withId("y")
+                                        .withName(new MultilingualString().withValue("new quay"))
+                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("62.799557598196465"))
+                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(response);
+        assertThat(actualStopPlace.getCreated()).as("The imported stop place's created date must not be null").isNotNull();
+        assertThat(actualStopPlace.getChanged()).as("The imported stop place's changed date must not be null").isNotNull();
+
+        List<Quay> actualQuays = extractQuays(actualStopPlace);
+
+        assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
+        assertThat(actualQuays.get(0).getChanged()).as("The imported quay's changed date must not be null").isNotNull();
+    }
+
+    @Test
+    public void updateStopPlaceShouldHaveItsDateChanged() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("x")
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("new"));
+
+        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(firstPublicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        OffsetDateTime changedDate = actualStopPlace.getChanged();
+
+        // Add a Quay to the stop place so that it will be updated.
+        stopPlace.withQuays(
+                        new Quays_RelStructure()
+                                .withQuayRefOrQuay(new Quay()
+                                        .withVersion("1")
+                                        .withId("y")
+                                        .withName(new MultilingualString().withValue("new quay"))
+                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("62.799557598196465"))
+                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+
+        PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure secondResponse = postAndReturnPublicationDelivery(secondPublicationDelivery);
+
+        StopPlace changedStopPlace = findFirstStopPlace(secondResponse);
+        assertThat(changedDate).as("The changed date for stop should not be the same as the first time it was imported")
+                .isNotEqualTo(changedStopPlace.getChanged());
+    }
+
 
     @Test
     public void importStopPlaceWithoutCoordinates() throws Exception {
