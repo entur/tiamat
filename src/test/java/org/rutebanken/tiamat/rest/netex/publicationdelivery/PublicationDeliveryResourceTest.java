@@ -459,7 +459,7 @@ public class PublicationDeliveryResourceTest {
                         .withQuayRefOrQuay(new Quay()
                                 .withId("XYZ:boardingpos:2")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("Steinerskolen Moss [tog]"))
+                                .withName(new MultilingualString().withValue("Steinerskolen [tog]"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
@@ -480,8 +480,46 @@ public class PublicationDeliveryResourceTest {
                 .findFirst().get();
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Steinerskolen Moss");
-        assertThat(quay.getName().getValue()).isEqualTo("Steinerskolen Moss");
+        assertThat(quay.getName().getValue()).isEqualTo("Steinerskolen");
 
+    }
+
+    @Test
+    public void expectQuayNameToBeRemovedIfSameAsParentStopPlaceName() throws Exception {
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:stoparea:2")
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Fleskeby sentrum"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:boardingpos:2")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("Fleskeby sentrum"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
+
+        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+
+        Quay quay = actualStopPlace.getQuays()
+                .getQuayRefOrQuay()
+                .stream()
+                .peek(object -> System.out.println(object))
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .peek(q-> System.out.println(q))
+                .findFirst().get();
+
+        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Fleskeby sentrum");
+        assertThat(quay.getName()).isNull();
     }
 
     @Test

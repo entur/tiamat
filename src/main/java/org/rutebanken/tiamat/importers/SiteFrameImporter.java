@@ -26,21 +26,21 @@ public class SiteFrameImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameImporter.class);
 
-    private TopographicPlaceCreator topographicPlaceCreator;
+    private static final Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
-    private NetexMapper netexMapper;
-    private StopPlaceNameCleaner stopPlaceNameCleaner;
-    private NameToDescriptionMover nameToDescriptionMover;
-
-    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
-
+    private final TopographicPlaceCreator topographicPlaceCreator;
+    private final NetexMapper netexMapper;
+    private final StopPlaceNameCleaner stopPlaceNameCleaner;
+    private final NameToDescriptionMover nameToDescriptionMover;
+    private final QuayNameRemover quayNameRemover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
+        this.quayNameRemover = quayNameRemover;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -69,6 +69,7 @@ public class SiteFrameImporter {
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
+                        .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
