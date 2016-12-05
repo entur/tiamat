@@ -104,7 +104,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         }
 
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
-        incrementVersion(newStopPlace);
+        // Ignore incoming version. Always set version to 1 for new stop places.
+        logger.info("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
+        newStopPlace.setVersion("1");
         return saveAndUpdateCache(newStopPlace);
     }
 
@@ -117,7 +119,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
         logger.info("Updated existing stop place {}. ", foundStopPlace);
         foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
-        incrementVersion(newStopPlace);
+        incrementVersion(foundStopPlace);
 
         return saveAndUpdateCache(foundStopPlace);
     }
@@ -133,6 +135,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         try {
             return Long.parseLong(version);
         } catch(NumberFormatException |NullPointerException e) {
+            logger.warn("Could not parse version from string {}. Returning 0", version);
             return 0L;
         }
     }

@@ -65,6 +65,7 @@ public class DefaultStopPlaceImporterTest {
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstStopPlace.setId(firstStopId);
+        firstStopPlace.setVersion("1");
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("terminal 1"));
@@ -92,6 +93,7 @@ public class DefaultStopPlaceImporterTest {
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(2);
+        assertThat(importResult.getVersion()).isEqualTo("2");
     }
 
 
