@@ -63,6 +63,9 @@ public class SiteFrameImporter {
 
         try {
             org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+            netexSiteFrame
+                    .withId(originalIds+"-response")
+                    .withVersion("1");
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .parallelStream()
@@ -81,10 +84,8 @@ public class SiteFrameImporter {
 
 
                 topographicPlaceCreator.invalidateCache();
-                netexSiteFrame
-                        .withId(originalIds+"-response")
-                        .withVersion("1")
-                        .withStopPlaces(
+
+                netexSiteFrame.withStopPlaces(
                             new StopPlacesInFrame_RelStructure()
                                     .withStopPlace(distinctByIdAndHighestVersion(createdStopPlaces)));
             } else {
