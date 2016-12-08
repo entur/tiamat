@@ -86,12 +86,13 @@ public class CoordinatesFixerResource {
                             String latitude = coordinatesSplitted[0];
                             String longitude = coordinatesSplitted[1];
 
-                            logger.info("Latitude: {}, Longitude: {}", latitude, longitude);
+                            logger.info("Parsed: Latitude: {}, Longitude: {}", latitude, longitude);
 
                             Point point = geometryFactory.createPoint(new Coordinate(Double.valueOf(longitude), Double.valueOf(latitude)));
 
 
                             stopPlace.setCentroid(point);
+                            logger.info("Saving stop place {}", stopPlace);
                             stopPlaceRepository.save(stopPlace);
 
                         } else {
