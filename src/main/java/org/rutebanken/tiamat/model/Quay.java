@@ -16,6 +16,11 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
     protected String plateCode;
+
+    /**
+     * TODO: reconsider data type for compass bearing.
+     * https://rutebanken.atlassian.net/browse/NRP-895
+     */
     protected Float compassBearing;
 
     public Quay(EmbeddableMultilingualString name) {
