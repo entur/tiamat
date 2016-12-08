@@ -99,6 +99,16 @@ public class QuayMergerTest {
         assertThat(quayMerger.hasCloseCompassBearing(one, two)).isFalse();
     }
 
+    @Test
+    public void twoQuaysWithSimilarCompassBearingOneAndThreeFiftyNine() {
+        Quay one = new Quay();
+        one.setCompassBearing(1f);
+
+        Quay two = new Quay();
+        two.setCompassBearing(359f);
+
+        assertThat(quayMerger.hasCloseCompassBearing(one, two)).isTrue();
+    }
 
     @Test
     public void twoNewQuaysThatMatchesOnIdMustNotBeAddedMultipleTimes() {
@@ -146,6 +156,7 @@ public class QuayMergerTest {
             assertThat(actualQuay.getOriginalIds()).contains("original-id-1", "another-id");
         }
     }
+
 
     /**
      * Add two new quays with already existing original IDs with different coordinates that are close to other quay.

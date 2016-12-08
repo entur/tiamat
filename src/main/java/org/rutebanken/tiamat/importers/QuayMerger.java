@@ -130,7 +130,9 @@ public class QuayMerger {
 
     public boolean hasCloseCompassBearing(Quay quay1, Quay quay2) {
 
-        if (quay1.getCompassBearing() == null || quay2.getCompassBearing() == null) {
+        if(quay1.getCompassBearing() == null && quay2.getCompassBearing() == null) {
+            return true;
+        } else if (quay1.getCompassBearing() == null && quay2.getCompassBearing() != null || quay1.getCompassBearing() != null && quay2.getCompassBearing() == null) {
             return false;
         }
 
