@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -99,6 +100,7 @@ public class QuayMergerTest {
         assertThat(quayMerger.hasCloseCompassBearing(one, two)).isFalse();
     }
 
+    @Ignore
     @Test
     public void twoQuaysWithSimilarCompassBearingOneAndThreeFiftyNine() {
         Quay one = new Quay();
