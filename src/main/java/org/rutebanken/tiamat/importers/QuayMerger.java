@@ -3,14 +3,15 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -24,6 +25,9 @@ public class QuayMerger {
     public static final double MERGE_DISTANCE = 0.0001;
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
+
+    @Value("${quayMerger.maxCompassBearingDifference:180}")
+    private final int maxCompassBearingDifference = 180;
 
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
@@ -67,7 +71,7 @@ public class QuayMerger {
 
             if(!foundMatch) {
                 for (Quay alreadyAdded : result) {
-                    foundMatch = appendIdIfClose(incomingQuay, alreadyAdded, updatedQuaysCounter);
+                    foundMatch = appendIdIfCloseAndSimilarCompassBearing(incomingQuay, alreadyAdded, updatedQuaysCounter);
                     if (foundMatch) {
                         break;
                     }
@@ -86,11 +90,12 @@ public class QuayMerger {
         return result;
     }
 
-    private boolean appendIdIfClose(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
-        if (areClose(incomingQuay, alreadyAdded)) {
+    private boolean appendIdIfCloseAndSimilarCompassBearing(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+
+        if (areClose(incomingQuay, alreadyAdded) && hasCloseCompassBearing(incomingQuay, alreadyAdded)) {
             logger.info("New quay {} is close to existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
-            if(changed) {
+            if (changed) {
                 incomingQuay.setChanged(ZonedDateTime.now());
                 updatedQuaysCounter.incrementAndGet();
             }
@@ -121,6 +126,33 @@ public class QuayMerger {
         Geometry buffer = quay1.getCentroid().buffer(MERGE_DISTANCE);
         boolean intersects = buffer.intersects(quay2.getCentroid());
         return intersects;
+    }
+
+    public boolean hasCloseCompassBearing(Quay quay1, Quay quay2) {
+
+        if (quay1.getCompassBearing() == null || quay2.getCompassBearing() == null) {
+            return false;
+        }
+
+        int quayBearing1 = Math.round(quay1.getCompassBearing());
+        int quayBearing2 = Math.round(quay2.getCompassBearing());
+
+        int difference;
+        if (quayBearing1 > quayBearing2) {
+            difference = quayBearing1 - quayBearing2;
+        } else if (quayBearing2 > quayBearing1) {
+            difference = quayBearing2 - quayBearing1;
+        } else {
+            difference = 0;
+        }
+
+        if (difference >= maxCompassBearingDifference) {
+            logger.debug("Quays have too much difference in compass bearing {}. {} {}", difference, quay1, quay2);
+            return false;
+        }
+
+        logger.debug("Compass bearings for quays has less difference than the limit {}. {} {}", difference, quay1, quay2);
+        return true;
     }
 
 }

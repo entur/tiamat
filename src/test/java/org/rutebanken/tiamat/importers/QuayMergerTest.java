@@ -3,19 +3,16 @@ package org.rutebanken.tiamat.importers;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import org.assertj.core.api.Condition;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -51,6 +48,57 @@ public class QuayMergerTest {
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
         assertThat(result).hasSize(1);
     }
+
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-894
+     */
+    @Test
+    public void twoQuaysWithDifferentBearingPointShouldNotBeTreatedAsSame() {
+
+        Quay west = new Quay();
+        west.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        west.setCompassBearing(270f);
+        west.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay east = new Quay();
+        east.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        east.setCompassBearing(40f);
+        east.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(west);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(east);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Number of quays in response").hasSize(2);
+    }
+
+    @Test
+    public void twoQuaysWithSimilarCompassBearing() {
+        Quay one = new Quay();
+        one.setCompassBearing(90f);
+
+        Quay two = new Quay();
+        two.setCompassBearing(269f);
+
+        assertThat(quayMerger.hasCloseCompassBearing(one, two))
+                .as("Quays with less than 180 degrees difference should be treated as same bearing point")
+                .isTrue();
+    }
+
+    @Test
+    public void twoQuaysWithTooMuchdifferenceInCompassBearing() {
+        Quay one = new Quay();
+        one.setCompassBearing(90f);
+
+        Quay two = new Quay();
+        two.setCompassBearing(290f);
+
+        assertThat(quayMerger.hasCloseCompassBearing(one, two)).isFalse();
+    }
+
 
     @Test
     public void twoNewQuaysThatMatchesOnIdMustNotBeAddedMultipleTimes() {
@@ -195,7 +243,6 @@ public class QuayMergerTest {
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(59.858616, 10.493858)));
         assertThat(quayMerger.areClose(quay1, quay2)).isTrue();
     }
-
 
     @Test
     public void findQuayIfAlreadyExisting() {
