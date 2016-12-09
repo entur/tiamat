@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -29,13 +30,19 @@ public class PublicationDeliveryUnmarshaller {
 
     private final NeTExValidator neTExValidator;
 
+    @Value("${publicationDeliveryUnmarshaller.validateAgainstSchema:false}")
+    private boolean validateAgainstSchema;
+
     public PublicationDeliveryUnmarshaller() throws IOException, SAXException {
         this.neTExValidator = new NeTExValidator();
     }
 
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        jaxbUnmarshaller.setSchema(neTExValidator.getSchema());
+        if(validateAgainstSchema) {
+            jaxbUnmarshaller.setSchema(neTExValidator.getSchema());
+        }
+
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
                 (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
