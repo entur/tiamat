@@ -2,6 +2,8 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -17,6 +19,8 @@ import static javax.xml.bind.JAXBContext.*;
 
 @Component
 public class PublicationDeliveryUnmarshaller {
+
+    private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryUnmarshaller.class);
 
     private static final JAXBContext jaxbContext;
 
@@ -43,9 +47,12 @@ public class PublicationDeliveryUnmarshaller {
             jaxbUnmarshaller.setSchema(neTExValidator.getSchema());
         }
 
+        logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
+
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
                 (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
+        logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
         return publicationDeliveryStructure;
     }
 }

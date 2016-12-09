@@ -50,6 +50,7 @@ public class PublicationDeliveryStreamingOutput {
 
         return outputStream -> {
             try {
+                logger.debug("Marshalling publication delivery to outputstream");
                 marshaller.marshal(jaxPublicationDelivery, outputStream);
             } catch (JAXBException e) {
                 throw new RuntimeException("Could not stream site frame", e);
