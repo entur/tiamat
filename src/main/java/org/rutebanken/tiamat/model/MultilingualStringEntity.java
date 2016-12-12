@@ -1,15 +1,13 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class MultilingualStringEntity extends MultilingualString {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgen")
+    @SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_multilingual_string_entity")
     private long id;
 
     public MultilingualStringEntity() {

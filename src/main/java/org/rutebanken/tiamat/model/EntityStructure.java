@@ -12,9 +12,8 @@ import java.io.Serializable;
 @MappedSuperclass
 public abstract class EntityStructure implements Serializable {
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="idgen")
     protected Long id;
 
     public Long getId() {

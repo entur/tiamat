@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.model;
 import javax.persistence.*;
 
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_topographic_place" )
 @Table(indexes = {@Index(name = "parent_topographic_ref_index", columnList = "parent_topographic_ref")})
 public class TopographicPlace
         extends Place_VersionStructure {

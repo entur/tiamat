@@ -6,11 +6,13 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_quay")
 public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

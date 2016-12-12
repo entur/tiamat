@@ -5,17 +5,14 @@ import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.MetaValue;
 import org.hibernate.mapping.Property;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Entity
-public class NavigationPaths_RelStructure
-        extends ContainmentAggregationStructure {
+@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_navigation_paths_rel_structure" )
+public class NavigationPaths_RelStructure extends ContainmentAggregationStructure {
 
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(
