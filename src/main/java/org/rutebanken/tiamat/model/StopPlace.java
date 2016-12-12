@@ -2,13 +2,14 @@ package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_stop_place" )
 @Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
         @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
         @Index(name="stop_place_type_index", columnList = "stopPlaceType")})

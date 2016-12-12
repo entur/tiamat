@@ -6,8 +6,8 @@ import javax.persistence.*;
 public class MultilingualStringEntity extends MultilingualString {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgen")
-    @SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_multilingual_string_entity")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(initialValue = 1, name = "sequenceGenerator", sequenceName = "seq_multilingual_string_entity")
     private long id;
 
     public MultilingualStringEntity() {
