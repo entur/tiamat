@@ -29,6 +29,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             logger.info("{} does not already have ID. Generating it.", obj);
             Serializable id = super.generate(session, obj);
             logger.info("Generated id {}", id);
+
             return id;
         } else {
             logger.info("{} does already have ID. Trying to insert it", obj);
