@@ -113,7 +113,6 @@ public class QuayMergerTest {
         assertThat(quayMerger.hasCloseCompassBearing(one, two)).isFalse();
     }
 
-    @Ignore
     @Test
     public void twoQuaysWithSimilarCompassBearingOneAndThreeFiftyNine() {
         Quay one = new Quay();
