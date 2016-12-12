@@ -26,8 +26,8 @@ public class QuayMerger {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
-    @Value("${quayMerger.maxCompassBearingDifference:180}")
-    private final int maxCompassBearingDifference = 180;
+    @Value("${quayMerger.maxCompassBearingDifference:60}")
+    private final int maxCompassBearingDifference = 60;
 
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
@@ -139,16 +139,9 @@ public class QuayMerger {
         int quayBearing1 = Math.round(quay1.getCompassBearing());
         int quayBearing2 = Math.round(quay2.getCompassBearing());
 
-        int difference;
-        if (quayBearing1 > quayBearing2) {
-            difference = quayBearing1 - quayBearing2;
-        } else if (quayBearing2 > quayBearing1) {
-            difference = quayBearing2 - quayBearing1;
-        } else {
-            difference = 0;
-        }
+        int difference = Math.abs(getAngle(quayBearing1, quayBearing2));
 
-        if (difference >= maxCompassBearingDifference) {
+        if (difference > maxCompassBearingDifference) {
             logger.debug("Quays have too much difference in compass bearing {}. {} {}", difference, quay1, quay2);
             return false;
         }
@@ -156,5 +149,11 @@ public class QuayMerger {
         logger.debug("Compass bearings for quays has less difference than the limit {}. {} {}", difference, quay1, quay2);
         return true;
     }
+
+    private int getAngle(Integer bearing, Integer heading) {
+        return ((((bearing - heading) % 360) + 540) % 360) - 180;
+
+    }
+
 
 }

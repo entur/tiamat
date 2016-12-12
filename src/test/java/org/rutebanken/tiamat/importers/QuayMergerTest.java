@@ -79,10 +79,23 @@ public class QuayMergerTest {
     @Test
     public void twoQuaysWithSimilarCompassBearing() {
         Quay one = new Quay();
-        one.setCompassBearing(90f);
+        one.setCompassBearing(1f);
 
         Quay two = new Quay();
-        two.setCompassBearing(269f);
+        two.setCompassBearing(60f);
+
+        assertThat(quayMerger.hasCloseCompassBearing(one, two))
+                .as("Quays with less than 180 degrees difference should be treated as same bearing point")
+                .isTrue();
+    }
+
+    @Test
+    public void twoQuaysWithSimilarCompassBearingCrossingZero() {
+        Quay one = new Quay();
+        one.setCompassBearing(350f);
+
+        Quay two = new Quay();
+        two.setCompassBearing(2f);
 
         assertThat(quayMerger.hasCloseCompassBearing(one, two))
                 .as("Quays with less than 180 degrees difference should be treated as same bearing point")
