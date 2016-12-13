@@ -167,51 +167,54 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
 
-        if(stopPlaceSearch.getQuery() != null) {
-            parameters.put("query", stopPlaceSearch.getQuery());
-            if(Longs.tryParse(stopPlaceSearch.getQuery()) != null) {
-                wheres.add("concat('', id) like concat('%', :query, '%')");
-            } else {
-                if(stopPlaceSearch.getQuery().length() <= 3) {
-                  wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
-                } else {
-                    wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
-                }
-            }
-            operators.add("and");
-        }
-
-        if(stopPlaceSearch.getStopTypeEnumerations()!= null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
-            wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
-            parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations());
-            operators.add("and");
-        }
-
-        boolean hasIdFilter = stopPlaceSearch.getIdList() != null;
-        boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
-        boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
-
-        if(hasMunicipalityFilter && !hasIdFilter){
-            String prefix;
-            if(hasCountyFilter) {
-                operators.add("or");
-                prefix = "(";
-            } else prefix = "";
-
-            wheres.add(prefix+"stopPlace.topographicPlaceRef.ref in :municipalityId");
-            parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
-        }
-
-        if(hasCountyFilter && !hasIdFilter) {
-            String suffix = hasMunicipalityFilter ? ")" : "";
-            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+suffix);
-            parameters.put("countyId", stopPlaceSearch.getCountyIds() );
-        }
+        boolean hasIdFilter = stopPlaceSearch.getIdList() != null && !stopPlaceSearch.getIdList().isEmpty();
 
         if(hasIdFilter) {
             wheres.add("stopPlace.id in :idList");
             parameters.put("idList", stopPlaceSearch.getIdList());
+        } else {
+            if (stopPlaceSearch.getQuery() != null) {
+                parameters.put("query", stopPlaceSearch.getQuery());
+                if (Longs.tryParse(stopPlaceSearch.getQuery()) != null) {
+                    wheres.add("concat('', id) like concat('%', :query, '%')");
+                } else {
+                    if (stopPlaceSearch.getQuery().length() <= 3) {
+                        wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
+                    } else {
+                        wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+                    }
+                }
+                operators.add("and");
+            }
+
+            if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
+                wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
+                parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations());
+                operators.add("and");
+            }
+
+            boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
+            boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
+
+            if (hasMunicipalityFilter && !hasIdFilter) {
+                String prefix;
+                if (hasCountyFilter) {
+                    operators.add("or");
+                    prefix = "(";
+                } else prefix = "";
+
+                wheres.add(prefix + "stopPlace.topographicPlaceRef.ref in :municipalityId");
+                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
+            }
+
+            if (hasCountyFilter && !hasIdFilter) {
+                String suffix = hasMunicipalityFilter ? ")" : "";
+                wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
+                parameters.put("countyId", stopPlaceSearch.getCountyIds());
+            }
         }
+
+
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {

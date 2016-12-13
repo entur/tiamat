@@ -518,7 +518,7 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
-    public void emptyListShouldReturnNoStops() throws Exception {
+    public void emptyIdListShouldReturnStops() throws Exception {
 
         StopPlace stopPlace1 = new StopPlace();
         stopPlaceRepository.save(stopPlace1);
@@ -531,7 +531,35 @@ public class StopPlaceRepositoryImplTest {
         StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
-        assertThat(result).isEmpty();
+        assertThat(result).isNotEmpty();
+    }
+
+
+    @Test
+    public void searchingForIdListShouldNotUseQueryMunicipalityOrCounty() throws Exception {
+
+        TopographicPlace county = createCounty("Hedmark");
+        TopographicPlace municipality = createMunicipality("Hamar", county);
+        createStopPlaceWithMunicipality("FromMunicipality", municipality);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("OnlyThis"));
+        stopPlaceRepository.save(stopPlace);
+
+        List<Long> stopPlaceIds = new ArrayList<>();
+        stopPlaceIds.add(stopPlace.getId());
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+                .setQuery("FromMu")
+                .setIdList(stopPlaceIds)
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+        assertThat(result).extracting(StopPlace::getName).extracting(EmbeddableMultilingualString::getValue)
+                .contains("OnlyThis")
+                .doesNotContain("FromMunicipality");
     }
 
     @Test
