@@ -4,12 +4,14 @@ import org.rutebanken.tiamat.importers.KeyValueListAppender;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
  * and missing default mapping for subtypes
  **/
+@Component
 public class NetexIdMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
@@ -41,13 +43,24 @@ public class NetexIdMapper {
         } else if(netexEntity.getId().startsWith(NSR)) {
             logger.warn("Detected tiamat ID: {}. ", netexEntity.getId());
             String netexId = netexEntity.getId();
-            Long tiamatId = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+            Long tiamatId = extractLongAfterLastColon(netexId);
             tiamatEntity.setId(tiamatId);
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setId(null);
         }
+    }
+
+
+    /**
+     *
+     * @param netexId Id with long value after last colon.
+     * @return long value
+     */
+    public long extractLongAfterLastColon(String netexId) {
+        Long longValue = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+        return longValue;
     }
 
     private String determineIdType(EntityStructure entityStructure) {

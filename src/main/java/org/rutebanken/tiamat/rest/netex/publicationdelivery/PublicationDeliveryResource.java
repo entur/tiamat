@@ -1,22 +1,21 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.google.common.base.MoreObjects;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -26,7 +25,6 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,12 +41,14 @@ public class PublicationDeliveryResource {
     private SiteFrameImporter siteFrameImporter;
 
     private NetexMapper netexMapper;
-
+    
     private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
 
     private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
     private StopPlaceImporter stopPlaceImporter;
+
+    private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     private SimpleStopPlaceImporter simpleStopPlaceImporter;
 
@@ -59,13 +59,14 @@ public class PublicationDeliveryResource {
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter) {
+                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceImporter = stopPlaceImporter;
+        this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.simpleStopPlaceImporter = simpleStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
     }
@@ -121,25 +122,21 @@ public class PublicationDeliveryResource {
             @QueryParam(value = "q") String query,
             @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
             @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) throws JAXBException, IOException, SAXException {
+            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes,
+            @QueryParam(value = "idList") List<String> idList) throws JAXBException, IOException, SAXException {
 
-        List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
-        if (stopPlaceTypes != null) {
-            stopPlaceTypes.forEach(string ->
-                    stopTypeEnums.add(StopTypeEnumeration.fromValue(string)));
-        }
+        DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
+                .setPage(page)
+                .setSize(size)
+                .setQuery(query)
+                .setMunicipalityReferences(municipalityReferences)
+                .setCountyReferences(countyReferences)
+                .setStopPlaceTypes(stopPlaceTypes)
+                .setIdList(idList)
+                .build();
 
-        logger.info("Export publication delivery with stop places '{}'", MoreObjects.toStringHelper("Query")
-                .add("municipalityReferences", municipalityReferences)
-                .add("countyReference", countyReferences)
-                .add("stopPlaceType", stopPlaceTypes)
-                .add("q", query)
-                .add("page", page)
-                .add("size", size));
-
-        Pageable pageable = new PageRequest(page, size);
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(query, municipalityReferences, countyReferences, stopTypeEnums, pageable);
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 

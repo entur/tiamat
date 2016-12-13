@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +38,13 @@ public class PublicationDeliveryExporter {
         this.netexMapper = netexMapper;
     }
 
-    public PublicationDeliveryStructure exportStopPlaces(String query, List<String> municipalityIds, List<String> countyIds, List<org.rutebanken.tiamat.model.StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
 
-        Page<StopPlace> stopPlaces;
-
-        if ((query != null && !query.isEmpty()) || countyIds != null || municipalityIds != null || stopPlaceTypes != null) {
-            stopPlaces = stopPlaceRepository.findStopPlace(query, municipalityIds, countyIds, stopPlaceTypes, pageable);
+        if(stopPlaceSearch.isEmpty()) {
+            return exportPublicationDelivery(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
         } else {
-            stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
+            return exportPublicationDelivery(stopPlaceRepository.findStopPlace(stopPlaceSearch));
         }
-        return exportPublicationDelivery(stopPlaces);
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {

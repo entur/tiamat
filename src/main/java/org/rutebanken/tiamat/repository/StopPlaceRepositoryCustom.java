@@ -33,5 +33,7 @@ public interface StopPlaceRepositoryCustom {
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
 
+    Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
+
     Page<StopPlace> findStopPlace(String query, List<String> municipalityId, List<String> countyId, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable);
 }

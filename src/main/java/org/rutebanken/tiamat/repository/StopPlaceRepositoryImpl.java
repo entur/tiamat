@@ -159,7 +159,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     @Override
-    public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
+        return findStopPlace(stopPlaceSearch.getQuery(),
+                stopPlaceSearch.getMunicipalityIds(),
+                stopPlaceSearch.getCountyIds(),
+                stopPlaceSearch.getStopTypeEnumerations(),
+                stopPlaceSearch.getPageable());
+    }
+
+    @Override
+    public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds,
+                                         List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
         StringBuilder queryString = new StringBuilder("select stopPlace from StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
