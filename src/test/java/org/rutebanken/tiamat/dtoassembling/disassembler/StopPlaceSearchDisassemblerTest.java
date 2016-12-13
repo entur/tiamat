@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class StopPlaceDisassemblerTest {
+public class StopPlaceSearchDisassemblerTest {
 
     private StopPlaceSearchDisassembler stopPlaceDisassembler = new StopPlaceSearchDisassembler(new NetexIdMapper());
 
