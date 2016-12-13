@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.rest.dto;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.QueryParam;
 import java.util.List;
 
 /**
  * Data transfer object for stop place search params.
  */
 public class DtoStopPlaceSearch {
+    public static final int DEFAULT_PAGE = 1;
+    public static final int DEFAULT_PAGE_SIZE = 20;
     public int page;
     public int size;
     public String query;
@@ -29,8 +29,9 @@ public class DtoStopPlaceSearch {
     }
 
     public static class Builder {
-        private int page = 1;
-        private int size = 20;
+        private int page = DEFAULT_PAGE;
+        private int size = DEFAULT_PAGE_SIZE;
+
         private String query;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
