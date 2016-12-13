@@ -187,7 +187,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             operators.add("and");
         }
 
-        boolean hasIdFilter = stopPlaceSearch.getIdList() != null && !stopPlaceSearch.getIdList().isEmpty();
+        boolean hasIdFilter = stopPlaceSearch.getIdList() != null;
         boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
         boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
 
