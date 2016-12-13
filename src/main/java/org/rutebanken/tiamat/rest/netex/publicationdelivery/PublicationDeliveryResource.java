@@ -41,7 +41,7 @@ public class PublicationDeliveryResource {
     private SiteFrameImporter siteFrameImporter;
 
     private NetexMapper netexMapper;
-    
+
     private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
 
     private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
@@ -116,25 +116,7 @@ public class PublicationDeliveryResource {
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportStopPlaces(
-            @DefaultValue(value = "0") @QueryParam(value = "page") int page,
-            @DefaultValue(value = "20") @QueryParam(value = "size") int size,
-            @QueryParam(value = "q") String query,
-            @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
-            @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes,
-            @QueryParam(value = "idList") List<String> idList) throws JAXBException, IOException, SAXException {
-
-        DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
-                .setPage(page)
-                .setSize(size)
-                .setQuery(query)
-                .setMunicipalityReferences(municipalityReferences)
-                .setCountyReferences(countyReferences)
-                .setStopPlaceTypes(stopPlaceTypes)
-                .setIdList(idList)
-                .build();
-
+    public Response exportStopPlaces(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) throws JAXBException, IOException, SAXException {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();

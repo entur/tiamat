@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -514,6 +515,23 @@ public class StopPlaceRepositoryImplTest {
                 .extracting(StopPlace::getId)
                 .contains(stopPlace1.getId(), stopPlace2.getId())
                 .doesNotContain(stopPlaceThatShouldNotBeReturned.getId());
+    }
+
+    @Test
+    public void emptyListShouldReturnNoStops() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace();
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlaceRepository.save(stopPlace2);
+
+        List<Long> stopPlaceIds = new ArrayList<>();
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+        assertThat(result).isEmpty();
     }
 
     @Test

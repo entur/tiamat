@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -38,6 +39,7 @@ public class StopPlaceSearchDisassembler {
         if(dtoStopPlaceSearch.idList != null) {
             stopPlaceSearchBuilder.setIdList(dtoStopPlaceSearch.idList.stream()
                     .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
+                    .filter(nsrId -> nsrId.toLowerCase().contains(StopPlace.class.getSimpleName().toLowerCase()))
                     .map(nsrId -> netexIdMapper.extractLongAfterLastColon(nsrId))
                     .collect(Collectors.toList()));
         }
