@@ -32,6 +32,10 @@ public class QuayAssembler {
             quayDto.description = quay.getDescription().getValue();
         }
 
+        if(quay.getCompassBearing() != null) {
+            quayDto.compassBearing = Math.round(quay.getCompassBearing());
+        }
+
         return quayDto;
     }
 

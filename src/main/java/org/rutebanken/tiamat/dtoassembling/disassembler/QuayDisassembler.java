@@ -51,6 +51,10 @@ public class QuayDisassembler {
         quay.setDescription(new EmbeddableMultilingualString(quayDto.description, "no"));
         quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
+        if(quayDto.compassBearing != null) {
+            quay.setCompassBearing(Float.valueOf(quayDto.compassBearing));
+        }
+
         logger.trace("Set allAreasWheelchairAccessible {}", quayDto.allAreasWheelchairAccessible);
         quay.setAllAreasWheelchairAccessible(quayDto.allAreasWheelchairAccessible);
 

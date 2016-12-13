@@ -40,4 +40,14 @@ public class QuayAssemblerTest {
         assertThat(quayDto.id).contains(quay.getId().toString());
     }
 
+    @Test
+    public void assembleQuayWithBearing() {
+        Quay quay = new Quay();
+        quay.setCompassBearing(250f);
+
+        QuayDto quayDto = quayAssembler.assemble(quay);
+
+        assertThat(quayDto.compassBearing).isEqualTo(250);
+    }
+
 }

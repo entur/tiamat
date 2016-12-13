@@ -11,26 +11,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class QuayDisassemblerTest {
-
-    QuayRepository quayRepository = mock(QuayRepository.class);
-    PointDisassembler pointDisassembler = mock(PointDisassembler.class);
+    private QuayRepository quayRepository = mock(QuayRepository.class);
+    private PointDisassembler pointDisassembler = mock(PointDisassembler.class);
+    private QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
 
 
     @Test
-    public void disassembledQuayNotNull() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
-
+    public void disassembleQuayNotNull() {
         QuayDto quayDto = new QuayDto();
-
         Quay quay = quayDisassembler.disassemble(quayDto);
 
         assertThat(quay).isNotNull();
     }
 
     @Test
-    public void disassembledQuayNName() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
-
+    public void disassembleQuayNName() {
         QuayDto quayDto = new QuayDto();
         quayDto.name = "name";
         Quay quay = quayDisassembler.disassemble(quayDto);
@@ -39,9 +34,7 @@ public class QuayDisassemblerTest {
     }
 
     @Test
-    public void disassembledQuayDescription() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
-
+    public void disassembleQuayDescription() {
         QuayDto quayDto = new QuayDto();
         quayDto.description = "description";
         Quay quay = quayDisassembler.disassemble(quayDto);
@@ -51,9 +44,7 @@ public class QuayDisassemblerTest {
 
 
     @Test
-    public void disassembledExistingQuay() {
-        QuayDisassembler quayDisassembler = new QuayDisassembler(quayRepository, pointDisassembler);
-
+    public void disassembleExistingQuay() {
         QuayDto quayDto = new QuayDto();
         quayDto.id = "12333";
 
@@ -65,6 +56,26 @@ public class QuayDisassemblerTest {
         Quay actualQuay = quayDisassembler.disassemble(quayDto);
 
         assertThat(actualQuay.getId().toString()).isEqualTo(quayDto.id);
+    }
+
+    @Test
+    public void disassembleCompassBearing() {
+        QuayDto quayDto = new QuayDto();
+        quayDto.compassBearing = 250;
+
+        Quay quay = quayDisassembler.disassemble(quayDto);
+
+        assertThat(quay.getCompassBearing()).isEqualTo(250f);
+    }
+
+    @Test
+    public void disassembledNullCompassBearing() {
+        QuayDto quayDto = new QuayDto();
+        quayDto.compassBearing = null;
+
+        Quay quay = quayDisassembler.disassemble(quayDto);
+
+        assertThat(quay.getCompassBearing()).isNull();
     }
 
 }
