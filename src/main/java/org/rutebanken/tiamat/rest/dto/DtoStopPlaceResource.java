@@ -62,28 +62,11 @@ public class DtoStopPlaceResource {
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     @GET
-    public List<StopPlaceDto> getStopPlaces(
-            @DefaultValue(value = "0") @QueryParam(value = "page") int page,
-            @DefaultValue(value = "20") @QueryParam(value = "size") int size,
-            @QueryParam(value = "q") String query,
-            @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
-            @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes,
-            @QueryParam(value = "idList") List<String> idList) {
+    public List<StopPlaceDto> getStopPlaces(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
 
         keyCloak();
 
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(
-                new DtoStopPlaceSearch.Builder()
-                        .setPage(page)
-                        .setSize(size)
-                        .setQuery(query)
-                        .setMunicipalityReferences(municipalityReferences)
-                        .setCountyReferences(countyReferences)
-                        .setStopPlaceTypes(stopPlaceTypes)
-                        .setIdList(idList)
-                        .build());
-
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
 
         Page<StopPlace> stopPlaces;
         if(stopPlaceSearch.isEmpty()) {
