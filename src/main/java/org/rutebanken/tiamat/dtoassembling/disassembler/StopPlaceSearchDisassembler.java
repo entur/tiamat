@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
-import com.google.common.base.MoreObjects;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -8,7 +7,6 @@ import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,26 +26,27 @@ public class StopPlaceSearchDisassembler {
 
     public StopPlaceSearch disassemble(DtoStopPlaceSearch dtoStopPlaceSearch) {
 
-        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch();
+        StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
         List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
         if (dtoStopPlaceSearch.stopPlaceTypes != null) {
             dtoStopPlaceSearch.stopPlaceTypes.forEach(string ->
                     stopTypeEnums.add(StopTypeEnumeration.fromValue(string)));
-            stopPlaceSearch.setStopTypeEnumerations(stopTypeEnums);
+            stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypeEnums);
         }
 
         if(dtoStopPlaceSearch.idList != null) {
-            stopPlaceSearch.setIdList(dtoStopPlaceSearch.idList.stream()
+            stopPlaceSearchBuilder.setIdList(dtoStopPlaceSearch.idList.stream()
                     .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
                     .map(nsrId -> netexIdMapper.extractLongAfterLastColon(nsrId))
                     .collect(Collectors.toList()));
         }
-        stopPlaceSearch.setCountyIds(dtoStopPlaceSearch.countyReferences);
-        stopPlaceSearch.setMunicipalityIds(dtoStopPlaceSearch.municipalityReferences);
-        stopPlaceSearch.setQuery(dtoStopPlaceSearch.query);
-        stopPlaceSearch.setPageable(new PageRequest(dtoStopPlaceSearch.page, dtoStopPlaceSearch.size));
+        stopPlaceSearchBuilder.setCountyIds(dtoStopPlaceSearch.countyReferences);
+        stopPlaceSearchBuilder.setMunicipalityIds(dtoStopPlaceSearch.municipalityReferences);
+        stopPlaceSearchBuilder.setQuery(dtoStopPlaceSearch.query);
+        stopPlaceSearchBuilder.setPageable(new PageRequest(dtoStopPlaceSearch.page, dtoStopPlaceSearch.size));
 
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
         logger.info("Disassembled stop place search '{}'", stopPlaceSearch);
 
         return stopPlaceSearch;
