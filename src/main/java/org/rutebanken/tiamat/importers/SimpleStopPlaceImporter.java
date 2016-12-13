@@ -46,11 +46,13 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
             return null;
         }
 
-        topographicPlaceCreator.setTopographicReference(stopPlace,
-                siteFrame.getTopographicPlaces().getTopographicPlace(),
-                topographicPlacesCreatedCounter);
-
-        logger.trace("Resetting IDs for stop place");
+        if(siteFrame.getTopographicPlaces() != null) {
+            topographicPlaceCreator.setTopographicReference(stopPlace,
+                    siteFrame.getTopographicPlaces().getTopographicPlace(),
+                    topographicPlacesCreatedCounter);
+        } else {
+            logger.warn("Site frame does not contain any topographic places");
+        }
 
         if (stopPlace.getQuays() != null) {
             logger.debug("Stop place has {} quays", stopPlace.getQuays().size());

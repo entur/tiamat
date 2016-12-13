@@ -1,9 +1,11 @@
 package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -12,9 +14,13 @@ import java.io.Serializable;
 @MappedSuperclass
 public abstract class EntityStructure implements Serializable {
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator="idgen")
+    @GenericGenerator(name = "idgen",
+            strategy = "org.rutebanken.tiamat.repository.OptionalIdGenerator",
+            parameters = {
+                    @Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
+            })
     protected Long id;
 
     public Long getId() {

@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -738,8 +740,10 @@ public class PublicationDeliveryResourceTest {
         PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
         postAndReturnPublicationDelivery(publicationDelivery);
 
-
-        Response response = publicationDeliveryResource.exportStopPlaces(1, 10, "Østre gravlund", null, null, null);
+        DtoStopPlaceSearch stopPlaceSearch = new DtoStopPlaceSearch.Builder()
+                .setQuery("Østre gravlund")
+                .build();
+        Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();

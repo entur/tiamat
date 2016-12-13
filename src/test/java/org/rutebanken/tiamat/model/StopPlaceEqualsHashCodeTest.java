@@ -27,14 +27,14 @@ public class StopPlaceEqualsHashCodeTest {
     }
 
     @Test
-    public void hasCodeShouldBeEqual() {
+    public void hashCodeShouldBeEqual() {
         StopPlace stopPlace = createStopPlaceWithQuayAndCentroid("Lillehammer", 12, 23);
         StopPlace stopPlace2 = createStopPlaceWithQuayAndCentroid("Lillehammer", 12, 23);
         assertThat(stopPlace.hashCode()).isEqualTo(stopPlace2.hashCode());
     }
 
     @Test
-    public void hasCodeShouldNotBeEqualWithDifferentName() {
+    public void hashCodeShouldNotBeEqualWithDifferentName() {
         StopPlace stopPlace = createStopPlaceWithQuayAndCentroid("Åndalsnes", 12, 23);
         StopPlace stopPlace2 = createStopPlaceWithQuayAndCentroid("Lillehammer", 12, 23);
         assertThat(stopPlace.hashCode()).isNotEqualTo(stopPlace2.hashCode());

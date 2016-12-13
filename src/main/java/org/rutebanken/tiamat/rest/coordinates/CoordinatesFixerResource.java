@@ -3,28 +3,21 @@ package org.rutebanken.tiamat.rest.coordinates;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import org.rutebanken.tiamat.dtoassembling.assembler.QuayAssembler;
-import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Transactional
 @Component
@@ -61,7 +54,8 @@ public class CoordinatesFixerResource {
 
             logger.info("Parsed prefix: {}, name: {}, coordinates: {}", prefix, name, coordinates);
 
-            Page<StopPlace> stopPlaces = stopPlaceRepository.findStopPlace(name, null, null, null, new PageRequest(0, 100));
+            StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setQuery(name).build();
+            Page<StopPlace> stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
 
             logger.info("Found {} stop places from name {}", stopPlaces.getTotalElements(), name);
 

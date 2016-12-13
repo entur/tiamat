@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.dto;
 
-import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -8,14 +7,15 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
+import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDTO;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -42,6 +41,8 @@ import java.util.List;
 @Path("/stop_place")
 @Transactional
 public class DtoStopPlaceResource {
+
+    private static final boolean ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES = false;
 
     private static final Logger logger = LoggerFactory.getLogger(DtoStopPlaceResource.class);
 
@@ -57,41 +58,21 @@ public class DtoStopPlaceResource {
     @Autowired
     private QuayRepository quayRepository;
 
-    private static final boolean ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES = false;
+    @Autowired
+    private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     @GET
-    public List<StopPlaceDto> getStopPlaces(
-            @DefaultValue(value = "0") @QueryParam(value = "page") int page,
-            @DefaultValue(value = "20") @QueryParam(value = "size") int size,
-            @QueryParam(value = "q") String query,
-            @QueryParam(value = "municipalityReference") List<String> municipalityReferences,
-            @QueryParam(value = "countyReference") List<String> countyReferences,
-            @QueryParam(value = "stopPlaceType") List<String> stopPlaceTypes) {
-
-        List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
-        if (stopPlaceTypes != null) {
-            stopPlaceTypes.forEach(string ->
-                    stopTypeEnums.add(StopTypeEnumeration.fromValue(string)));
-        }
+    public List<StopPlaceDto> getStopPlaces(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
 
         keyCloak();
 
-        logger.info("Get stop places '{}'", MoreObjects.toStringHelper("Query")
-                .add("municipalityReferences", municipalityReferences)
-                .add("countyReference", countyReferences)
-                .add("stopPlaceType", stopPlaceTypes)
-                .add("q", query)
-                .add("page", page)
-                .add("size", size));
-
-        Pageable pageable = new PageRequest(page, size);
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
 
         Page<StopPlace> stopPlaces;
-
-        if ((query != null && !query.isEmpty()) || countyReferences != null || municipalityReferences != null || stopPlaceTypes != null) {
-            stopPlaces = stopPlaceRepository.findStopPlace(query, municipalityReferences, countyReferences, stopTypeEnums, pageable);
+        if(stopPlaceSearch.isEmpty()) {
+            stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable());
         } else {
-            stopPlaces = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
+            stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         }
 
         return stopPlaceAssembler.assemble(stopPlaces, ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);

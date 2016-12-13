@@ -159,19 +159,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     @Override
-    public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
+
         StringBuilder queryString = new StringBuilder("select stopPlace from StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
 
-        if(query != null) {
-            parameters.put("query", query);
-            if(Longs.tryParse(query) != null) {
+        if(stopPlaceSearch.getQuery() != null) {
+            parameters.put("query", stopPlaceSearch.getQuery());
+            if(Longs.tryParse(stopPlaceSearch.getQuery()) != null) {
                 wheres.add("concat('', id) like concat('%', :query, '%')");
             } else {
-                if(query.length() <= 3) {
+                if(stopPlaceSearch.getQuery().length() <= 3) {
                   wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
                 } else {
                     wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
@@ -180,16 +181,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             operators.add("and");
         }
 
-        if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
+        if(stopPlaceSearch.getStopTypeEnumerations()!= null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
             wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
-            parameters.put("stopPlaceTypes", stopPlaceTypes);
+            parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations());
             operators.add("and");
         }
 
-        boolean hasMunicipalityFilter = municipalityIds != null && !municipalityIds.isEmpty();
-        boolean hasCountyFilter = countyIds != null && !countyIds.isEmpty();
+        boolean hasIdFilter = stopPlaceSearch.getIdList() != null;
+        boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
+        boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
 
-        if(hasMunicipalityFilter){
+        if(hasMunicipalityFilter && !hasIdFilter){
             String prefix;
             if(hasCountyFilter) {
                 operators.add("or");
@@ -197,13 +199,18 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             } else prefix = "";
 
             wheres.add(prefix+"stopPlace.topographicPlaceRef.ref in :municipalityId");
-            parameters.put("municipalityId", municipalityIds);
+            parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
         }
 
-        if(hasCountyFilter) {
+        if(hasCountyFilter && !hasIdFilter) {
             String suffix = hasMunicipalityFilter ? ")" : "";
             wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+suffix);
-            parameters.put("countyId", countyIds);
+            parameters.put("countyId", stopPlaceSearch.getCountyIds() );
+        }
+
+        if(hasIdFilter) {
+            wheres.add("stopPlace.id in :idList");
+            parameters.put("idList", stopPlaceSearch.getIdList());
         }
 
         for(int i = 0; i < wheres.size(); i++) {
@@ -221,11 +228,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         parameters.forEach(typedQuery::setParameter);
 
-        typedQuery.setFirstResult(pageable.getOffset());
-        typedQuery.setMaxResults(pageable.getPageSize());
+        typedQuery.setFirstResult(stopPlaceSearch.getPageable().getOffset());
+        typedQuery.setMaxResults(stopPlaceSearch.getPageable().getPageSize());
 
         List<StopPlace> stopPlaces = typedQuery.getResultList();
-        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+        return new PageImpl<>(stopPlaces, stopPlaceSearch.getPageable(), stopPlaces.size());
 
     }
 
