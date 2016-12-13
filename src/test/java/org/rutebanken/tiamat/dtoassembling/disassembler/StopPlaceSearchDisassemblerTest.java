@@ -20,7 +20,7 @@ public class StopPlaceSearchDisassemblerTest {
     @Test
     public void disassembleIdList() {
 
-        List<String> ids = Arrays.asList("NSR:StopPlace:123", "NSR:Quay:321");
+        List<String> ids = Arrays.asList("NSR:StopPlace:123", "NSR:StopPlace:321");
 
         DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
                 .setIdList(ids)
