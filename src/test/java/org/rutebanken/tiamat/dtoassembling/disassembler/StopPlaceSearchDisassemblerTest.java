@@ -13,14 +13,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class StopPlaceDisassemblerTest {
+public class StopPlaceSearchDisassemblerTest {
 
     private StopPlaceSearchDisassembler stopPlaceDisassembler = new StopPlaceSearchDisassembler(new NetexIdMapper());
 
     @Test
     public void disassembleIdList() {
 
-        List<String> ids = Arrays.asList("NSR:StopPlace:123", "NSR:Quay:321");
+        List<String> ids = Arrays.asList("NSR:StopPlace:123", "NSR:StopPlace:321");
 
         DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
                 .setIdList(ids)
