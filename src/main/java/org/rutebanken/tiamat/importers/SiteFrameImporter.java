@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -68,7 +71,7 @@ public class SiteFrameImporter {
                     .withVersion("1");
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                        .parallelStream()
+                        .stream()
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
@@ -99,15 +102,21 @@ public class SiteFrameImporter {
 
     /**
      * When importing site frames in multiple threads, and those site frames might contain different stop place that will be merged,
-     * we run into the risc of having multiple threads trying to save the same stop place.
+     * we run into the risk of having multiple threads trying to save the same stop place.
      *
      * That's why we use a striped semaphore to not work on the same stop place concurrently.
      * it is important to flush the session between each stop place, *before* the semaphore has been released.
      *
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
-    @Transactional
     private org.rutebanken.netex.model.StopPlace importStopPlaceInsideLock(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) throws ExecutionException, InterruptedException {
+//        if(!TransactionSynchronizationManager.isActualTransactionActive() || !(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel() == null || TransactionSynchronizationManager.getCurrentTransactionIsolationLevel().equals(Isolation.SERIALIZABLE.value()))) {
+//            throw new RuntimeException("Transaction with required isolation not as expected. "
+//                    + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive()
+//                    + ". TransactionSynchronizationManager.getCurrentTransactionIsolationLevel(): " + TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
+//        }
+
+        logger.info("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
         StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
         stopPlacesCreated.incrementAndGet();
         return netexMapper.mapToNetexModel(importedStopPlace);
@@ -184,13 +193,13 @@ public class SiteFrameImporter {
 
     private String getStripedSemaphoreKey(StopPlace stopPlace) {
         final String semaphoreKey;
-        if (stopPlace.getName() != null
-                && stopPlace.getName().getValue() != null
-                && !stopPlace.getName().getValue().isEmpty()) {
-            semaphoreKey = "name-" + stopPlace.getName().getValue();
-        } else {
+//        if (stopPlace.getName() != null
+//                && stopPlace.getName().getValue() != null
+//                && !stopPlace.getName().getValue().isEmpty()) {
+//            semaphoreKey = "name-" + stopPlace.getName().getValue();
+//        } else {
             semaphoreKey = "all";
-        }
+//        }
         return semaphoreKey;
     }
 }
