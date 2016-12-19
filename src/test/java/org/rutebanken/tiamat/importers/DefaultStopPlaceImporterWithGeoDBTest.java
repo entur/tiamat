@@ -171,7 +171,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         List<StopPlace> stopPlaces = new ArrayList<>();
 
-        for(int i = 0; i < 9; i++) {
+        for(int i = 0; i < 5; i++) {
             StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop place " + i));
             stopPlace.setId(Long.valueOf(i));
             stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
