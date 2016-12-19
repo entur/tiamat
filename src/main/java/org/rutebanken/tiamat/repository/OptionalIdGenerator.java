@@ -54,10 +54,12 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
                     SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
                     List list = sqlQuery.list();
-
                     if (list.size() > 0) {
-                        return ((Integer) list.get(0)).longValue();
+                        long newId = ((Integer) list.get(0)).longValue();
+                        logger.info("Generated ID: {} for {}", newId, entityStructure);
+                        return newId;
                     }
+
                     logger.warn("Could not get next available ID for table_name {}", tableName);
                 } else {
                     // TODO update next available ID. Do it in the db function as it needs to know about it.
