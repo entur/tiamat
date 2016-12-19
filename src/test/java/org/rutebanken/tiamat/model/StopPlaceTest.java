@@ -39,7 +39,7 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getId()).isNotNull();
     }
 
-
+    @Ignore
     @Test
     public void fillGapsInStopPlaces() {
         StopPlace explicitIdStopPlace = new StopPlace();
