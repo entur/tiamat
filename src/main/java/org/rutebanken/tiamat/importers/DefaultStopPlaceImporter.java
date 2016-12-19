@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importers;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -13,7 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -46,6 +50,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private final QuayMerger quayMerger;
 
+    private final NetexMapper netexMapper;
+
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
@@ -54,7 +60,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
-                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger) {
+                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
@@ -64,11 +70,34 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.centroidComputer = centroidComputer;
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
+        this.netexMapper = netexMapper;
     }
 
+    /**
+     * When importing site frames in multiple threads, and those site frames might contain different stop places that will be merged,
+     * we run into the risk of having multiple threads trying to save the same stop place.
+     *
+     * That's why we use a striped semaphore to not work on the same stop place concurrently. (SiteFrameImporter)
+     * it is important to flush the session between each stop place, *before* the semaphore has been released.
+     *
+     * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
+     */
     @Override
-    public StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
-                                     AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+//    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
+                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+
+        logger.debug("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
+
+        if(!TransactionSynchronizationManager.isActualTransactionActive()) {
+            throw new RuntimeException("Transaction with required "
+                    + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive());
+        }
+
+        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, topographicPlacesCreatedCounter));
+    }
+
+    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
         logger.info("Import stop place {}", newStopPlace);
 
         final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);

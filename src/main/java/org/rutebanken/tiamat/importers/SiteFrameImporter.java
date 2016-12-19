@@ -100,28 +100,6 @@ public class SiteFrameImporter {
         }
     }
 
-    /**
-     * When importing site frames in multiple threads, and those site frames might contain different stop place that will be merged,
-     * we run into the risk of having multiple threads trying to save the same stop place.
-     *
-     * That's why we use a striped semaphore to not work on the same stop place concurrently.
-     * it is important to flush the session between each stop place, *before* the semaphore has been released.
-     *
-     * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
-     */
-    private org.rutebanken.netex.model.StopPlace importStopPlaceInsideLock(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) throws ExecutionException, InterruptedException {
-//        if(!TransactionSynchronizationManager.isActualTransactionActive() || !(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel() == null || TransactionSynchronizationManager.getCurrentTransactionIsolationLevel().equals(Isolation.SERIALIZABLE.value()))) {
-//            throw new RuntimeException("Transaction with required isolation not as expected. "
-//                    + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive()
-//                    + ". TransactionSynchronizationManager.getCurrentTransactionIsolationLevel(): " + TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
-//        }
-
-        logger.info("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
-        StopPlace importedStopPlace = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
-        stopPlacesCreated.incrementAndGet();
-        return netexMapper.mapToNetexModel(importedStopPlace);
-    }
-
     private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
         String semaphoreKey = getStripedSemaphoreKey(stopPlace);
         Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
@@ -129,7 +107,11 @@ public class SiteFrameImporter {
         try {
             semaphore.acquire();
             logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
-            return importStopPlaceInsideLock(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated);
+
+            org.rutebanken.netex.model.StopPlace importedStop = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+            stopPlacesCreated.incrementAndGet();
+            return importedStop;
+
         } catch (Exception e) {
             // When having issues with one stop place, do not fail for all other stop places in publication delivery.
             logger.error("Caught exception while importing stop place. Semaphore was " + semaphoreKey, e);

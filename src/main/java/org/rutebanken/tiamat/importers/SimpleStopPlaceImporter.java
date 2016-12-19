@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.importers;
 
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -24,23 +26,26 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleStopPlaceImporter.class);
 
-    private TopographicPlaceCreator topographicPlaceCreator;
+    private final TopographicPlaceCreator topographicPlaceCreator;
 
-    private QuayRepository quayRepository;
+    private final QuayRepository quayRepository;
 
-    private StopPlaceRepository stopPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
+
+    private final NetexMapper netexMapper;
 
 
     @Autowired
-    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
+    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
+        this.netexMapper = netexMapper;
     }
 
     @Override
-    public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
-                                     AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
+                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
         if (!stopPlace.hasCoordinates()) {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
             return null;
@@ -64,7 +69,7 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());
-        return stopPlace;
+        return netexMapper.mapToNetexModel(stopPlace);
     }
 
 }

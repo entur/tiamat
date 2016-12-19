@@ -93,7 +93,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
                 quay.setCentroid(randomPoint);
                 stopPlace.getQuays().add(quay);
                 try {
-                    StopPlace response = defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), new AtomicInteger());
+                    StopPlace response = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace, new SiteFrame(), new AtomicInteger());
                     if (response != null) {
                         imports.incrementAndGet();
                     }
@@ -105,7 +105,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
         executeNTimes(sameStopImportedCount, executorService, () -> {
             try {
-                StopPlace response = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger());
+                StopPlace response = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
                 if(response != null) {
                     imports.incrementAndGet();
                 }
@@ -118,7 +118,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.MINUTES);
         assertThat(imports.get()).isEqualTo(sameStopImportedCount + (eachQuayImportedCount*uniqueQuays));
-        StopPlace importedStopPlace = defaultStopPlaceImporter.importStopPlace(createStop(), new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
         assertThat(importedStopPlace.getQuays()).hasSize(uniqueQuays)
                 .as("Regardless of how many times similar stop with two different quays as imported. We must end up with a stop place with two quays.");
     }
