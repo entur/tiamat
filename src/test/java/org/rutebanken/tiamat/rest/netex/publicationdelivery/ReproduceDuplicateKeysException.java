@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -44,12 +45,14 @@ public class ReproduceDuplicateKeysException {
 
         for (int i = 0; i < publicationDeliveries; i++) {
 
-            SiteFrame siteFrame = new SiteFrame();
-            siteFrame.setId(i+"");
+            SiteFrame siteFrame = createSiteFrame();
             siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                     .withStopPlace(createStopPlacesWithQuays(i % 2 == 0 ? i : 0, stopPlacesPerPublicationDelivery)));
 
             PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                    .withPublicationTimestamp(OffsetDateTime.now())
+                    .withParticipantRef("NSR")
+                    .withVersion("any")
                     .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                             .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
@@ -83,6 +86,7 @@ public class ReproduceDuplicateKeysException {
         LocationStructure location = randomCoordinates();
         StopPlace stopPlace1 = new StopPlace()
                 .withId("XYZ:StopPlace:1")
+                .withVersion("1")
                 .withName(new MultilingualString().withValue("Stop place "))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(location))
@@ -91,16 +95,19 @@ public class ReproduceDuplicateKeysException {
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 1"))
                                         .withId("XYZ:Quay1")
+                                        .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location)),
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 2"))
                                         .withId("XYZ:Quay2")
+                                        .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location))));
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("XYZ:StopPlace:1")
+                .withVersion("1")
                 .withName(new MultilingualString().withValue("Stop place "))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(location))
@@ -109,34 +116,49 @@ public class ReproduceDuplicateKeysException {
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 1"))
                                         .withId("123")
+                                        .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location)),
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 2"))
                                         .withId("1234")
+                                        .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location))));
 
-        SiteFrame siteFrame = new SiteFrame();
+        SiteFrame siteFrame = createSiteFrame();
         siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace1));
 
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+                .withParticipantRef("NSR")
+                .withPublicationTimestamp(OffsetDateTime.now())
+                .withVersion("any")
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
         client.sendPublicationDelivery(publicationDelivery);
 
 
-        SiteFrame siteFrame2 = new SiteFrame();
+        SiteFrame siteFrame2 = createSiteFrame();
         siteFrame2.withStopPlaces(new StopPlacesInFrame_RelStructure()
                 .withStopPlace(stopPlace2));
 
         PublicationDeliveryStructure publicationDelivery2 = new PublicationDeliveryStructure()
+                .withParticipantRef("NSR")
+                .withVersion("any")
+                .withPublicationTimestamp(OffsetDateTime.now())
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame2)));
 
         client.sendPublicationDelivery(publicationDelivery2);
+    }
+
+    public SiteFrame createSiteFrame() {
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.setVersion("any");
+        siteFrame.setId("1");
+        return  siteFrame;
     }
 
     public List<StopPlace> createStopPlacesWithQuays(int salt, int numberOfstopPlaces) {
@@ -147,6 +169,7 @@ public class ReproduceDuplicateKeysException {
             LocationStructure location = randomCoordinates();
             StopPlace stopPlace = new StopPlace()
                     .withId("XYZ:StopPlace" + salt + ":" + i)
+                    .withVersion("1")
                     .withName(new MultilingualString().withValue("Stop place " + i + " pd" + salt))
                     .withCentroid(new SimplePoint_VersionStructure()
                             .withLocation(location))
@@ -154,11 +177,13 @@ public class ReproduceDuplicateKeysException {
                             .withQuayRefOrQuay(new Quay()
                                             .withName(new MultilingualString().withValue("Quay " + i + " pd" + salt))
                                             .withId("XYZ:Quay" + salt + ":" + i)
+                                            .withVersion("1")
                                             .withCentroid(new SimplePoint_VersionStructure()
                                                     .withLocation(location)),
                                     new Quay()
                                             .withName(new MultilingualString().withValue("someother Quay " + i + " pd" + salt))
                                             .withId("XYZ:Quay" + salt + "two:" + i)
+                                            .withVersion("1")
                                             .withCentroid(new SimplePoint_VersionStructure()
                                                     .withLocation(location))));
 
