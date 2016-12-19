@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Create funciton in database for generating IDs
@@ -43,6 +45,7 @@ public class CreateIdGeneratorFunction implements InitializingBean {
             "END;\n" +
             "$$ LANGUAGE 'plpgsql'";
 
+    private static final AtomicInteger h2IdCounter = new AtomicInteger();
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -50,11 +53,17 @@ public class CreateIdGeneratorFunction implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if(jdbcTemplate.getDataSource().getConnection().getMetaData().getDatabaseProductName().contains("H2")) {
-            logger.warn("Does not create function for generating next available ID for H2. Not implemented.");
+            logger.info("H2 detected. Creating alias to method generateNextAvailableId.");
+            jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_next_available_id FOR \"org.rutebanken.tiamat.config.CreateIdGeneratorFunction.generateNextAvailableId\"");
+
         } else {
             logger.info("Executing create function\n{}", SQL);
             jdbcTemplate.execute(SQL);
             logger.info("Executed create function");
         }
+    }
+
+    public static Integer generateNextAvailableId(String entity) {
+        return h2IdCounter.incrementAndGet();
     }
 }
