@@ -56,7 +56,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                     List list = sqlQuery.list();
 
                     if (list.size() > 0) {
-                        return ((BigInteger) list.get(0)).longValue();
+                        return ((Integer) list.get(0)).longValue();
                     }
                     logger.warn("Could not get next available ID for table_name {}", tableName);
                 } else {
