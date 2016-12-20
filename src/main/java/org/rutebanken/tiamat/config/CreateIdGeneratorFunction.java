@@ -12,6 +12,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,7 +77,26 @@ public class CreateIdGeneratorFunction implements InitializingBean {
         }
     }
 
-    public static Integer generateNextAvailableId(String entity) {
-        return h2IdCounter.incrementAndGet();
+    private static Set<Integer> usedIds = new HashSet<>();
+
+    public static Integer generateNextAvailableId(String entity, Integer desiredId) throws SQLException {
+
+        if(desiredId > 0) {
+            if (usedIds.contains(desiredId)) {
+                throw new SQLException("Desired entity ID is already taken: " + desiredId + " for entity " + entity);
+            } else {
+                usedIds.add(desiredId);
+                return desiredId;
+            }
+        }
+
+        int i = 0;
+        while(usedIds.contains(++i)) {
+            logger.debug("Looking for next available ID. {} is taken", i);
+        }
+
+        usedIds.add(i);
+        return i;
+
     }
 }
