@@ -27,23 +27,32 @@ public class CreateIdGeneratorFunction implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateIdGeneratorFunction.class);
 
-    private static final String SQL = "CREATE OR REPLACE FUNCTION generate_next_available_id(entity text) RETURNS integer AS $$\n" +
+    private static final String SQL = "CREATE OR REPLACE FUNCTION generate_next_available_id(entity text, desired_id integer) RETURNS integer AS $$\n" +
             "DECLARE\n" +
             "    next_value integer;\n" +
-            "BEGIN\n" +
-            "    SELECT id FROM (SELECT id_value + 1 AS id\n" +
-            "      FROM id_generator g1\n" +
-            "      WHERE NOT EXISTS(SELECT null FROM id_generator g2 WHERE g2.id_value = g1.id_value + 1 AND g2.table_name = entity)\n" +
-            "      UNION\n" +
-            "      SELECT 1 AS id\n" +
-            "      WHERE NOT EXISTS (SELECT null FROM id_generator WHERE id_value = 1 AND table_name = entity)\n" +
-            "      ) ot\n" +
-            "    ORDER BY 1 INTO next_value;\n" +
             "\n" +
-            "    INSERT INTO id_generator(table_name, id_value) values(entity, next_value);\n" +
+            "BEGIN\n" +
+            "    IF desired_id > 0 THEN\n" +
+            "      IF EXISTS (SELECT id_value FROM id_generator WHERE id_value = desired_id AND table_name = entity) THEN\n" +
+            "        RAISE 'Desired entity ID is already taken: % for entity %', desired_id, entity USING ERRCODE = 'unique_violation';\n" +
+            "      ELSE\n" +
+            "        INSERT INTO id_generator(table_name, id_value) VALUES(entity, desired_id);\n" +
+            "        next_value := desired_id;\n" +
+            "      END IF;\n" +
+            "    ELSE\n" +
+            "      SELECT id FROM (SELECT id_value + 1 AS id\n" +
+            "        FROM id_generator g1\n" +
+            "        WHERE NOT EXISTS(SELECT null FROM id_generator g2 WHERE g2.id_value = g1.id_value + 1 AND g2.table_name = entity)\n" +
+            "          UNION\n" +
+            "          SELECT 1 AS id\n" +
+            "          WHERE NOT EXISTS (SELECT null FROM id_generator WHERE id_value = 1 AND table_name = entity)\n" +
+            "          ) ot\n" +
+            "        ORDER BY 1 INTO next_value;\n" +
+            "      INSERT INTO id_generator(table_name, id_value) values(entity, next_value);\n" +
+            "    END IF;\n" +
             "  RETURN next_value;\n" +
             "END;\n" +
-            "$$ LANGUAGE 'plpgsql'";
+            "$$ LANGUAGE 'plpgsql'\n";
 
     private static final AtomicInteger h2IdCounter = new AtomicInteger();
 
