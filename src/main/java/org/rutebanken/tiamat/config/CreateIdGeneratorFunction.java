@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Create funciton in database for generating IDs
+ * Create function in database for generating IDs
  * See https://rutebanken.atlassian.net/browse/NRP-23 for liquibase implementation.
  */
 @Configuration
