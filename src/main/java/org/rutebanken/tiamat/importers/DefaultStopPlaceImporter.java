@@ -176,14 +176,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
-        if(stopPlace.getId() == null) {
-            stopPlaceRepository.save(stopPlace);
-        }
+//        if(stopPlace.getId() == null) {
+        stopPlaceRepository.save(stopPlace);
+//        }
         if(stopPlace.getQuays() != null) {
             for (Quay quay : stopPlace.getQuays()) {
-                if (quay.getId() == null) {
+//                if (quay.getId() == null) {
                     quayRepository.save(quay);
-                }
+//                }
             }
         }
 
