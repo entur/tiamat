@@ -18,11 +18,11 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
     @Override
-    @CachePut(value = "stopPlace", key = "#p0.getId()", cacheManager = "guavaCacheManager")
+//    @CachePut(value = "stopPlace", key = "#p0.getId()", cacheManager = "guavaCacheManager")
     StopPlace save(StopPlace stopPlace);
 
     @Override
-    @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
+//    @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
     StopPlace findOne(Long stopPlaceId);
 
 }
