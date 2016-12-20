@@ -43,29 +43,29 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             logger.info("{} is instance of entity structre", entityStructure);
 
             if((entityStructure instanceof StopPlace || entityStructure instanceof Quay)) {
+                long desiredId;
                 if(entityStructure.getId() == null) {
-
-                    logger.info("{} does not already have ID. Generating it.", entityStructure);
-
-                    SessionImpl sessionImpl = (SessionImpl) session;
-                    String tableName = ((SingleTableEntityPersister) (sessionImpl).getSessionFactory().getAllClassMetadata().get(obj.getClass().getCanonicalName())).getTableName();
-
-                    String sql = "SELECT generate_next_available_id('" + tableName + "')";
-
-                    SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
-                    List list = sqlQuery.list();
-                    if (list.size() > 0) {
-                        long newId = ((Integer) list.get(0)).longValue();
-                        logger.info("Generated ID: {} for {}", newId, entityStructure);
-                        return newId;
-                    }
-
-                    logger.warn("Could not get next available ID for table_name {}", tableName);
+                    desiredId = 0L;
                 } else {
-                    // TODO update next available ID. Do it in the db function as it needs to know about it.
-                    logger.info("{} does already have ID. Trying to use it", entityStructure);
-                    return entityStructure.getId();
+                    desiredId = entityStructure.getId();
                 }
+
+                logger.info("About to retrieve or set id for: {}", entityStructure);
+
+                SessionImpl sessionImpl = (SessionImpl) session;
+                String tableName = ((SingleTableEntityPersister) (sessionImpl).getSessionFactory().getAllClassMetadata().get(obj.getClass().getCanonicalName())).getTableName();
+
+                String sql = "SELECT generate_next_available_id('" + tableName + "', " + desiredId + ")";
+
+                SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
+                List list = sqlQuery.list();
+                if (list.size() > 0) {
+                    long newId = ((Integer) list.get(0)).longValue();
+                    logger.info("Got ID: {} for {}", newId, entityStructure);
+                    return newId;
+                }
+
+                logger.warn("Could not get next available ID for table_name {}", tableName);
             }
         }
         Serializable id = super.generate(session, obj);
