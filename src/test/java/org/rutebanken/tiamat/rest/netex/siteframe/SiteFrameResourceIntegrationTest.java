@@ -114,12 +114,9 @@ public class SiteFrameResourceIntegrationTest {
                 .asString();
 
         System.out.println(xml);
-        stopPlaceRepository.delete(stopPlace);
-        topographicPlaceRepository.delete(municipality);
-        topographicPlaceRepository.delete(county);
 
         System.out.println("---------------------");
-        System.out.println("About to post the xml");
+        System.out.println("About to post the xml back");
         given().contentType(ContentType.XML)
                 .content(xml)
                 .when()
