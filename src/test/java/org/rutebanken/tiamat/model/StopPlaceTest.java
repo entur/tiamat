@@ -41,20 +41,20 @@ public class StopPlaceTest {
         assertThat(actualStopPlace.getId()).isNotNull();
     }
 
-    @Ignore
     @Test
     public void fillGapsInStopPlaces() {
+        long explicitId = 200000L;
         StopPlace explicitIdStopPlace = new StopPlace();
-        explicitIdStopPlace.setId(2L);
+        explicitIdStopPlace.setId(explicitId);
         explicitIdStopPlace = stopPlaceRepository.save(explicitIdStopPlace);
 
         StopPlace giveMeAnyId = stopPlaceRepository.save(new StopPlace());
 
         StopPlace giveMeAnyId2 = stopPlaceRepository.save(new StopPlace());
 
-        assertThat(explicitIdStopPlace.getId()).isEqualTo(2L);
-        assertThat(giveMeAnyId.getId()).isEqualTo(1L);
-        assertThat(giveMeAnyId2.getId()).isEqualTo(3L);
+        assertThat(explicitIdStopPlace.getId()).isEqualTo(explicitId);
+        assertThat(giveMeAnyId.getId()).isLessThan(explicitId);
+        assertThat(giveMeAnyId2.getId()).isLessThan(explicitId);
     }
 
     /**
