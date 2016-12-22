@@ -25,6 +25,32 @@ public class QuayMergerTest {
 
 
     @Test
+    public void twoQuaysWithSameOriginalIdAfterPrefixShouldBeTreatedAsSame() {
+
+        AtomicInteger updatedQuaysCounter = new AtomicInteger();
+        AtomicInteger createQuaysCounter = new AtomicInteger();
+
+        Quay quay1 = new Quay();
+        quay1.setId(123L);
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("BRA:StopArea:123123");
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:123123");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(quay1);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(quay2);
+
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
     public void twoQuaysWithSameOriginalIdButDifferentCoordinatesShouldBeTreatedAsSame() {
 
         AtomicInteger updatedQuaysCounter = new AtomicInteger();

@@ -104,8 +104,18 @@ public class QuayMerger {
         return false;
     }
 
+    /**
+     * If the incoming Quay has an original ID that matches on any original ID on an existing Quay, append Ids.
+     * @param incomingQuay incoming Quay with
+     * @param alreadyAdded
+     * @param updatedQuaysCounter
+     * @return
+     */
     private boolean appendIdIfMatchingOriginalId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
-        if(!Collections.disjoint(alreadyAdded.getOriginalIds(), incomingQuay.getOriginalIds())) {
+        Set<String> strippedAlreadyAddedIds = removePrefixesFromIds(alreadyAdded.getOriginalIds());
+        Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
+
+        if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
             logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
             // The incoming quay could for some reason already have multiple imported IDs.
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
@@ -116,6 +126,19 @@ public class QuayMerger {
             return true;
         }
         return false;
+    }
+
+    private Set<String> removePrefixesFromIds(Set<String> originalIds) {
+        Set<String> strippedIds = new HashSet<>(originalIds.size());
+        originalIds.forEach(completeId -> {
+            if(completeId.contains(":")) {
+                strippedIds.add(completeId.substring(completeId.indexOf(':')));
+            } else {
+                logger.info("Cannot strip prefix from ID {} as it does not contain colon", completeId);
+                strippedIds.add(completeId);
+            }
+        });
+        return strippedIds;
     }
 
     public boolean areClose(Quay quay1, Quay quay2) {
