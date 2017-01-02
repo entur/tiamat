@@ -31,7 +31,7 @@
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
         <!-- Version must correspond with hibernate core version from spring -->
-        <hibernate-spatial.version>5.1.0.Final</hibernate-spatial.version>
+        <hibernate-spatial.version>5.0.11.Final</hibernate-spatial.version>
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.7</geodb.version>
 
@@ -87,10 +87,7 @@
             <id>OSGEO GeoTools repo</id>
             <url>http://download.osgeo.org/webdav/geotools</url>
         </repository>
-        <repository>
-            <id>Hibernate Spatial repo</id>
-            <url>http://www.hibernatespatial.org/repository</url>
-        </repository>
+
         <repository>
             <id>geo-solutions.it</id>
             <url>http://maven.geo-solutions.it</url>
