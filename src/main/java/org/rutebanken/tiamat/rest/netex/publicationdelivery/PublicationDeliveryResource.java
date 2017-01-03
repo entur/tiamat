@@ -1,13 +1,14 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
+import org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
@@ -22,16 +23,10 @@ import org.xml.sax.SAXException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -60,15 +55,15 @@ public class PublicationDeliveryResource {
 
     private PublicationDeliveryExporter publicationDeliveryExporter;
 
-    private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-                                       .setNameFormat("publication-delivery-exporter-%d").build());
+    private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
+
 
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter) {
+                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
@@ -78,6 +73,7 @@ public class PublicationDeliveryResource {
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.simpleStopPlaceImporter = simpleStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
     }
 
 
@@ -123,61 +119,19 @@ public class PublicationDeliveryResource {
         }
     }
 
-    private static final Map<Integer, ExportJob> exportJobs = new ConcurrentHashMap<>();
-    private static AtomicInteger exportIndex = new AtomicInteger(0);
 
     @GET
     @Path("async/jobs")
     public Collection<ExportJob> getJobs() {
-        return exportJobs.values();
-    }
-
-    @Provider
-    public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
-        @Override
-        public Response toResponse(Exception exception) {
-            logger.error("Caught exception", exception);
-            return Response.status(500).build();
-        }
+        return asyncPublicationDeliveryExporter.getJobs();
     }
 
     @GET
     @Path("async")
     public Response asyncStopPlaceSearch(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
-
-        final int jobId = exportIndex.incrementAndGet();
-        ExportJob exportJob = new ExportJob(jobId,  "export_job/"+exportIndex.get(), "tbd", ExportJob.Status.PROCESSING);
-
-        Future<String> future = exportService.submit(new Callable<String>() {
-            @Override
-            public String call() {
-                logger.info("Started export job {}", jobId);
-                PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
-
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                try {
-                    StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
-                    streamingOutput.write(byteArrayOutputStream);
-                    String xml = byteArrayOutputStream.toString();
-                    Thread.sleep(5000);
-                    logger.info("Export job {} done", jobId);
-
-                    exportJob.status = ExportJob.Status.FINISHED;
-                    return xml;
-
-                } catch (JAXBException|IOException|SAXException|InterruptedException e) {
-                    String message = "Error executing export job "+ jobId;
-                    logger.error(message, e);
-                    return message;
-                }
-            }
-        });
-        exportJob.future = future;
-        exportJobs.put(jobId, exportJob);
-
-        return Response.accepted(exportJob).build();
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
+        return Response.ok(exportJob).build();
     }
 
     @GET
