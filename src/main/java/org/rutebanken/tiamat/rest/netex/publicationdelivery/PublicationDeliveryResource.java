@@ -23,10 +23,14 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -119,8 +123,23 @@ public class PublicationDeliveryResource {
         }
     }
 
-    private static final Map<Integer, Future> exportJobs =  new ConcurrentHashMap<>();
+    private static final Map<Integer, ExportJob> exportJobs = new ConcurrentHashMap<>();
     private static AtomicInteger exportIndex = new AtomicInteger(0);
+
+    @GET
+    @Path("async/jobs")
+    public Collection<ExportJob> getJobs() {
+        return exportJobs.values();
+    }
+
+    @Provider
+    public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
+        @Override
+        public Response toResponse(Exception exception) {
+            logger.error("Caught exception", exception);
+            return Response.status(500).build();
+        }
+    }
 
     @GET
     @Path("async")
@@ -128,6 +147,8 @@ public class PublicationDeliveryResource {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
 
         final int jobId = exportIndex.incrementAndGet();
+        ExportJob exportJob = new ExportJob(jobId,  "export_job/"+exportIndex.get(), "tbd", ExportJob.Status.PROCESSING);
+
         Future<String> future = exportService.submit(new Callable<String>() {
             @Override
             public String call() {
@@ -142,21 +163,19 @@ public class PublicationDeliveryResource {
                     String xml = byteArrayOutputStream.toString();
                     Thread.sleep(5000);
                     logger.info("Export job {} done", jobId);
+
+                    exportJob.status = ExportJob.Status.FINISHED;
                     return xml;
 
                 } catch (JAXBException|IOException|SAXException|InterruptedException e) {
                     String message = "Error executing export job "+ jobId;
                     logger.error(message, e);
                     return message;
-
                 }
             }
         });
-        exportJobs.put(jobId, future);
-
-        ExportJob exportJob = new ExportJob();
-        exportJob.jobId = exportIndex.get();
-        exportJob.jobUrl = "export_job/"+exportIndex.get();
+        exportJob.future = future;
+        exportJobs.put(jobId, exportJob);
 
         return Response.accepted(exportJob).build();
     }
