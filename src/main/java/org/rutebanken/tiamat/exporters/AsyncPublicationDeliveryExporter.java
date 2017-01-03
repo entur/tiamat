@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput;
+import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,14 @@ public class AsyncPublicationDeliveryExporter {
 
     private final ExportJobRepository exportJobRepository;
 
+    private final BlobStoreService blobStoreService;
+
     @Autowired
-    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput, ExportJobRepository exportJobRepository) {
+    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService) {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.exportJobRepository = exportJobRepository;
+        this.blobStoreService = blobStoreService;
     }
 
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
@@ -61,6 +65,11 @@ public class AsyncPublicationDeliveryExporter {
                     StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
                     streamingOutput.write(byteArrayOutputStream);
                     String xml = byteArrayOutputStream.toString();
+
+
+
+                    blobStoreService.upload("", xml);
+
                     Thread.sleep(5000);
 
                     exportJob.setStatus(JobStatus.FINISHED);
