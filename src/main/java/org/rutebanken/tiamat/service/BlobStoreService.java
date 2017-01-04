@@ -28,14 +28,13 @@ public class BlobStoreService {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        logger.info("Creating storage for project {}", projectId);
+        logger.info("Get storage for project {}", projectId);
         storage = BlobStoreHelper.getStorage(credentialPath, projectId);
 
     }
 
-    public void upload(String fileName, String fileContents) {
+    public void upload(String fileName, InputStream inputStream) {
         String blobIdName = createBlobIdName(blobPath, fileName);
-        InputStream inputStream = new ByteArrayInputStream(fileContents.getBytes());
         try {
             logger.info("Uploading {} to path {} in bucket {}", fileName, blobPath, bucketName);
             BlobStoreHelper.uploadBlob(storage, bucketName, blobIdName, inputStream, false);

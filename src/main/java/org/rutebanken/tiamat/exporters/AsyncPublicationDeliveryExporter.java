@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.exporters;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.h2.util.IOUtils;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -13,11 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
+import sun.nio.ch.IOUtil;
 
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -55,33 +56,51 @@ public class AsyncPublicationDeliveryExporter {
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJobRepository.save(exportJob);
 
-
-        exportService.submit(new Callable<String>() {
+        exportService.submit(new Runnable() {
             @Override
-            public String call() {
+            public void run() {
                 logger.info("Started export job {}", exportJob);
                 PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
 
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
 
                 try {
-                    StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
-                    streamingOutput.write(byteArrayOutputStream);
-                    String xml = byteArrayOutputStream.toString();
 
-                    blobStoreService.upload(createFileName(exportJob.getId()), xml);
+                    final PipedInputStream in = new PipedInputStream();
+                    final PipedOutputStream out = new PipedOutputStream(in);
 
-                    Thread.sleep(5000);
+                    Thread outputStreamThread = new Thread(
+                            new Runnable(){
+                                public void run(){
+                                    try {
+                                        logger.info("Streaming output thread running");
 
-                    exportJob.setStatus(JobStatus.FINISHED);
-                    logger.info("Export job {} done", exportJob);
-                    return xml;
+                                        StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
+                                        logger.info("Write to streaming output which is piped to input stream");
 
-                } catch (JAXBException | IOException | SAXException | InterruptedException e) {
-                    exportJob.setStatus(JobStatus.FAILED);
-                    String message = "Error executing export job " + exportJob;
-                    logger.error(message, e);
-                    return message;
+                                        streamingOutput.write(out);
+                                        out.close();
+
+                                    } catch (JAXBException | IOException | SAXException e) {
+                                        exportJob.setStatus(JobStatus.FAILED);
+                                        String message = "Error executing export job " + exportJob;
+                                        logger.error(message, e);
+                                    }
+                                }
+                            }
+                    );
+                    outputStreamThread.setName("OutputStreamThread-"+exportJob.getFileName());
+                    outputStreamThread.start();
+
+                    blobStoreService.upload(createFileName(exportJob.getId()), in);
+                    outputStreamThread.join();
+
+                    if(!exportJob.getStatus().equals(JobStatus.FAILED)) {
+                        exportJob.setStatus(JobStatus.FINISHED);
+                        logger.info("Export job {} done", exportJob);
+                    }
+                } catch (IOException|InterruptedException e) {
+                    logger.error("Error creating piped inputstream", e);
                 } finally {
                     exportJobRepository.save(exportJob);
                 }
@@ -89,11 +108,12 @@ public class AsyncPublicationDeliveryExporter {
         });
         exportJob.setJobUrl("export_job/" + exportJob.getId());
         exportJobRepository.save(exportJob);
+        logger.info("Returning export job {}", exportJob);
         return exportJob;
     }
 
     public String createFileName(long exportJobId) {
-        return "tiamat-export-"+exportJobId+".xml";
+        return "tiamat-export-" + exportJobId + ".xml";
     }
 
     public Collection<ExportJob> getJobs() {
