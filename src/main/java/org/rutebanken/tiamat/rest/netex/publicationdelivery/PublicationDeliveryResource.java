@@ -133,11 +133,11 @@ public class PublicationDeliveryResource {
         try {
             InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJobId);
 
-            Response.ok(inputStream).build();
+            return Response.ok(inputStream).build();
 
         } catch (RuntimeException e) {
-
-            Response.accepted("").status(Response.Status.ACCEPTED).build();
+            logger.error("Got exception when getting job contents", e);
+            return Response.accepted("").status(Response.Status.ACCEPTED).build();
 
         }
     }
