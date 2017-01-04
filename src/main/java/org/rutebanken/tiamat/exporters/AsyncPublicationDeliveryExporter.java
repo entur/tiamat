@@ -28,6 +28,8 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
+    private static final String FILENAME_DATE_FORMAT = "YYYY-MM-DDThh:mm:ss";
+
     private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setNameFormat("publication-delivery-exporter-%d").build());
 
@@ -65,8 +67,6 @@ public class AsyncPublicationDeliveryExporter {
                     StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
                     streamingOutput.write(byteArrayOutputStream);
                     String xml = byteArrayOutputStream.toString();
-
-
 
                     blobStoreService.upload("", xml);
 

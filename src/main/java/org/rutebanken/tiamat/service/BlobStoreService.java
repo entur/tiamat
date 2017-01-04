@@ -21,31 +21,30 @@ public class BlobStoreService {
     @Value("${blobstore.gcs.blob.path}")
     private final String blobPath;
 
-    @Value("${blobstore.gcs.provider.id}")
-    private final String providerId;
-
     private final Storage storage;
 
     public BlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
-                            @Value("${blobstore.gcs.project.id}")String bucketName,
-                            String blobPath, String projectId, String providerId) {
+                            @Value("${blobstore.gcs.project.id}") String bucketName,
+                            String blobPath, String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        this.providerId = providerId;
-
         logger.info("Creating storage for project {}", projectId);
         storage = BlobStoreHelper.getStorage(credentialPath, projectId);
 
     }
 
     public void upload(String fileName, String fileContents) {
-        String blobIdName = blobPath + '/' + fileName;
+        String blobIdName = createBlobIdName(blobPath, fileName);
         InputStream inputStream = new ByteArrayInputStream(fileContents.getBytes());
         try {
             BlobStoreHelper.uploadBlob(storage, bucketName, blobIdName, inputStream, false);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error uploading file "+fileName + ", blobIdName " + blobIdName + " to bucket "+ bucketName);
+            throw new RuntimeException("Error uploading file "+fileName + ", blobIdName " + blobIdName + " to bucket "+ bucketName, e);
         }
+    }
+
+    public String createBlobIdName(String blobPath, String fileName) {
+        return blobPath + '/' + fileName;
     }
 }
