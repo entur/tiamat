@@ -121,9 +121,25 @@ public class PublicationDeliveryResource {
 
 
     @GET
-    @Path("async/jobs")
+    @Path("async/job")
     public Collection<ExportJob> getJobs() {
         return asyncPublicationDeliveryExporter.getJobs();
+    }
+
+    @GET
+    @Path("async/job/{id}")
+    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+
+        try {
+            InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJobId);
+
+            Response.ok(inputStream).build();
+
+        } catch (RuntimeException e) {
+
+            Response.accepted("").status(Response.Status.ACCEPTED).build();
+
+        }
     }
 
     @GET

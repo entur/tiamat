@@ -16,9 +16,7 @@ import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -118,6 +116,18 @@ public class AsyncPublicationDeliveryExporter {
 
     public String createFileName(long exportJobId, ZonedDateTime started) {
         return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER) + ".xml";
+    }
+
+    public InputStream getJobFileContent(long exportJobId) {
+        ExportJob exportJob = exportJobRepository.findOne(exportJobId);
+
+        logger.info("Found export job by id: {}", exportJob);
+
+        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            throw new RuntimeException("Job status is not FINISHED for job: "+exportJob);
+        }
+
+        return blobStoreService.download(exportJob.getFileName());
     }
 
     public Collection<ExportJob> getJobs() {

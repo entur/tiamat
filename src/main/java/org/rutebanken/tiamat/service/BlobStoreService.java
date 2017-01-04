@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 @Service
 public class BlobStoreService {
@@ -41,6 +42,11 @@ public class BlobStoreService {
         } catch (RuntimeException e) {
             throw new RuntimeException("Error uploading file "+fileName + ", blobIdName " + blobIdName + " to bucket "+ bucketName, e);
         }
+    }
+
+    public InputStream download(String fileName) {
+        String blobIdName = createBlobIdName(blobPath, fileName);
+        return BlobStoreHelper.getBlob(storage, bucketName, blobIdName);
     }
 
     public String createBlobIdName(String blobPath, String fileName) {
