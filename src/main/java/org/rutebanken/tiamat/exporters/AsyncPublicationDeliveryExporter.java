@@ -19,7 +19,9 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +33,8 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setNameFormat("publication-delivery-exporter-%d").build());
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
 
     private final PublicationDeliveryExporter publicationDeliveryExporter;
 
@@ -53,7 +57,7 @@ public class AsyncPublicationDeliveryExporter {
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(ZonedDateTime.now());
         exportJobRepository.save(exportJob);
-        exportJob.setFileName(createFileName(exportJob.getId()));
+        exportJob.setFileName(createFileName(exportJob.getId(), exportJob.getStarted()));
         exportJob.setJobUrl("export_job/" + exportJob.getId());
 
         exportService.submit(new Runnable() {
@@ -112,8 +116,8 @@ public class AsyncPublicationDeliveryExporter {
         return exportJob;
     }
 
-    public String createFileName(long exportJobId) {
-        return "tiamat-export-" + exportJobId + ".xml";
+    public String createFileName(long exportJobId, ZonedDateTime started) {
+        return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER) + ".xml";
     }
 
     public Collection<ExportJob> getJobs() {
