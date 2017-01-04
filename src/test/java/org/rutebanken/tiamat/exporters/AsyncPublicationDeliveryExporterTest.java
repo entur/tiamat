@@ -32,7 +32,7 @@ public class AsyncPublicationDeliveryExporterTest {
      * Test uploading export file to google blob store.
      * Ignored. Intended for manual use.
      */
-//    @Ignore
+    @Ignore
     @Test
     public void startExportJob() throws Exception {
 
