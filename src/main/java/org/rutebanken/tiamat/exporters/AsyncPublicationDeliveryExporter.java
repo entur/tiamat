@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.exporters;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.h2.util.IOUtils;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -14,16 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
-import sun.nio.ch.IOUtil;
 
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
-import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Date;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,7 +51,10 @@ public class AsyncPublicationDeliveryExporter {
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
+        exportJob.setStarted(ZonedDateTime.now());
         exportJobRepository.save(exportJob);
+        exportJob.setFileName(createFileName(exportJob.getId()));
+        exportJob.setJobUrl("export_job/" + exportJob.getId());
 
         exportService.submit(new Runnable() {
             @Override
@@ -70,8 +70,8 @@ public class AsyncPublicationDeliveryExporter {
                     final PipedOutputStream out = new PipedOutputStream(in);
 
                     Thread outputStreamThread = new Thread(
-                            new Runnable(){
-                                public void run(){
+                            new Runnable() {
+                                public void run() {
                                     try {
                                         logger.info("Streaming output thread running");
 
@@ -89,24 +89,24 @@ public class AsyncPublicationDeliveryExporter {
                                 }
                             }
                     );
-                    outputStreamThread.setName("OutputStreamThread-"+exportJob.getFileName());
+                    outputStreamThread.setName("export-output" + exportJob.getFileName());
                     outputStreamThread.start();
 
-                    blobStoreService.upload(createFileName(exportJob.getId()), in);
+                    blobStoreService.upload(exportJob.getFileName(), in);
                     outputStreamThread.join();
 
-                    if(!exportJob.getStatus().equals(JobStatus.FAILED)) {
+                    if (!exportJob.getStatus().equals(JobStatus.FAILED)) {
                         exportJob.setStatus(JobStatus.FINISHED);
+                        exportJob.setFinished(ZonedDateTime.now());
                         logger.info("Export job {} done", exportJob);
                     }
-                } catch (IOException|InterruptedException e) {
-                    logger.error("Error creating piped inputstream", e);
+                } catch (IOException | InterruptedException e) {
+                    logger.error("Error while exporting asynchronously", e);
                 } finally {
                     exportJobRepository.save(exportJob);
                 }
             }
         });
-        exportJob.setJobUrl("export_job/" + exportJob.getId());
         exportJobRepository.save(exportJob);
         logger.info("Returning export job {}", exportJob);
         return exportJob;

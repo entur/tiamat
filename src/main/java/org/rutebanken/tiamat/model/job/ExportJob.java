@@ -8,7 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.concurrent.Future;
 
 @Entity
@@ -22,8 +24,8 @@ public class ExportJob {
     private String jobUrl;
     private String fileName;
 
-    private ZoneOffset started;
-    private ZoneOffset finished;
+    private ZonedDateTime started;
+    private ZonedDateTime finished;
 
     private  JobStatus status;
 
@@ -48,6 +50,8 @@ public class ExportJob {
                 .add("status", status)
                 .add("jobUrl", jobUrl)
                 .add("fileName", fileName)
+                .add("started", started)
+                .add("finished", finished)
                 .toString();
     }
 
@@ -75,19 +79,19 @@ public class ExportJob {
         this.fileName = fileName;
     }
 
-    public ZoneOffset getStarted() {
+    public ZonedDateTime getStarted() {
         return started;
     }
 
-    public void setStarted(ZoneOffset started) {
+    public void setStarted(ZonedDateTime started) {
         this.started = started;
     }
 
-    public ZoneOffset getFinished() {
+    public ZonedDateTime getFinished() {
         return finished;
     }
 
-    public void setFinished(ZoneOffset finished) {
+    public void setFinished(ZonedDateTime finished) {
         this.finished = finished;
     }
 
