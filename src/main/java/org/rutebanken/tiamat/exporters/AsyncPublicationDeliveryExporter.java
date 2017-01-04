@@ -18,7 +18,10 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,8 +30,6 @@ import java.util.concurrent.Executors;
 public class AsyncPublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
-
-    private static final String FILENAME_DATE_FORMAT = "YYYY-MM-DDThh:mm:ss";
 
     private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setNameFormat("publication-delivery-exporter-%d").build());
@@ -68,7 +69,7 @@ public class AsyncPublicationDeliveryExporter {
                     streamingOutput.write(byteArrayOutputStream);
                     String xml = byteArrayOutputStream.toString();
 
-                    blobStoreService.upload("", xml);
+                    blobStoreService.upload(createFileName(exportJob.getId()), xml);
 
                     Thread.sleep(5000);
 
@@ -89,6 +90,10 @@ public class AsyncPublicationDeliveryExporter {
         exportJob.setJobUrl("export_job/" + exportJob.getId());
         exportJobRepository.save(exportJob);
         return exportJob;
+    }
+
+    public String createFileName(long exportJobId) {
+        return "tiamat-export-"+exportJobId+".xml";
     }
 
     public Collection<ExportJob> getJobs() {
