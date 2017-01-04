@@ -15,17 +15,16 @@ public class BlobStoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(BlobStoreService.class);
 
-    @Value("${blobstore.gcs.bucket.name}")
     private final String bucketName;
 
-    @Value("${blobstore.gcs.blob.path}")
     private final String blobPath;
 
     private final Storage storage;
 
     public BlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
-                            @Value("${blobstore.gcs.project.id}") String bucketName,
-                            String blobPath, String projectId) {
+                            @Value("${blobstore.gcs.bucket.name}") String bucketName,
+                            @Value("${blobstore.gcs.blob.path}") String blobPath,
+                            @Value("${blobstore.gcs.project.id}") String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
@@ -38,6 +37,7 @@ public class BlobStoreService {
         String blobIdName = createBlobIdName(blobPath, fileName);
         InputStream inputStream = new ByteArrayInputStream(fileContents.getBytes());
         try {
+            logger.info("Uploading {} to path {} in bucket {}", fileName, blobPath, bucketName);
             BlobStoreHelper.uploadBlob(storage, bucketName, blobIdName, inputStream, false);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error uploading file "+fileName + ", blobIdName " + blobIdName + " to bucket "+ bucketName, e);
