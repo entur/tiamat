@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
 import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
@@ -130,16 +131,14 @@ public class PublicationDeliveryResource {
     @Path("async/job/{id}")
     public Response getJobContents(@PathParam(value = "id") long exportJobId) {
 
-        try {
-            InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJobId);
+        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
-            return Response.ok(inputStream).build();
-
-        } catch (RuntimeException e) {
-            logger.error("Got exception when getting job contents", e);
-            return Response.accepted("").status(Response.Status.ACCEPTED).build();
-
+        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
         }
+
+        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
+        return Response.ok(inputStream).build();
     }
 
     @GET

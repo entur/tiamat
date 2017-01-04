@@ -24,6 +24,8 @@ public class ExportJob {
     private String jobUrl;
     private String fileName;
 
+    private String message;
+
     private ZonedDateTime started;
     private ZonedDateTime finished;
 
@@ -36,12 +38,6 @@ public class ExportJob {
         status = jobStatus;
     }
 
-    public ExportJob(String jobUrl, String fileName, JobStatus status) {
-        this.jobUrl = jobUrl;
-        this.fileName = fileName;
-        this.status = status;
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -52,6 +48,7 @@ public class ExportJob {
                 .add("fileName", fileName)
                 .add("started", started)
                 .add("finished", finished)
+                .add("message", message)
                 .toString();
     }
 
@@ -101,5 +98,13 @@ public class ExportJob {
 
     public void setStatus(JobStatus status) {
         this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

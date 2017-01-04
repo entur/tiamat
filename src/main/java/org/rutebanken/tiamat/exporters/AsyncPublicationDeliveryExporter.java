@@ -104,6 +104,8 @@ public class AsyncPublicationDeliveryExporter {
                     }
                 } catch (IOException | InterruptedException e) {
                     logger.error("Error while exporting asynchronously", e);
+                    exportJob.setStatus(JobStatus.FAILED);
+                    exportJob.setMessage(e.getMessage());
                 } finally {
                     exportJobRepository.save(exportJob);
                 }
@@ -118,15 +120,11 @@ public class AsyncPublicationDeliveryExporter {
         return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER) + ".xml";
     }
 
-    public InputStream getJobFileContent(long exportJobId) {
-        ExportJob exportJob = exportJobRepository.findOne(exportJobId);
+    public ExportJob getExportJob(long exportJobId) {
+        return exportJobRepository.findOne(exportJobId);
+    }
 
-        logger.info("Found export job by id: {}", exportJob);
-
-        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
-            throw new RuntimeException("Job status is not FINISHED for job: "+exportJob);
-        }
-
+    public InputStream getJobFileContent(ExportJob exportJob) {
         return blobStoreService.download(exportJob.getFileName());
     }
 
