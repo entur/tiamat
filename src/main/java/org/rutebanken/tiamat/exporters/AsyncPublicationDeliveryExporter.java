@@ -59,7 +59,8 @@ public class AsyncPublicationDeliveryExporter {
         exportJobRepository.save(exportJob);
         exportJob.setFileName(createFileName(exportJob.getId(), exportJob.getStarted()));
         exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
-
+        exportJobRepository.save(exportJob);
+        
         exportService.submit(new Runnable() {
             @Override
             public void run() {
@@ -113,7 +114,6 @@ public class AsyncPublicationDeliveryExporter {
                 }
             }
         });
-        exportJobRepository.save(exportJob);
         logger.info("Returning export job {}", exportJob);
         return exportJob;
     }
