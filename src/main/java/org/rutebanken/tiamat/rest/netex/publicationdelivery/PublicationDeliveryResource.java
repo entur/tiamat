@@ -3,12 +3,14 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
+import org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.slf4j.Logger;
@@ -25,8 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Collection;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -54,12 +56,15 @@ public class PublicationDeliveryResource {
 
     private PublicationDeliveryExporter publicationDeliveryExporter;
 
+    private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
+
+
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter) {
+                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
@@ -69,6 +74,7 @@ public class PublicationDeliveryResource {
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.simpleStopPlaceImporter = simpleStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
     }
 
 
@@ -112,6 +118,36 @@ public class PublicationDeliveryResource {
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
         }
+    }
+
+
+    @GET
+    @Path("async/job")
+    public Collection<ExportJob> getJobs() {
+        return asyncPublicationDeliveryExporter.getJobs();
+    }
+
+    @GET
+    @Path("async/job/{id}")
+    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+
+        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+
+        logger.info("Returning result of job {}", exportJob);
+        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
+        }
+
+        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
+        return Response.ok(inputStream).build();
+    }
+
+    @GET
+    @Path("async")
+    public Response asyncStopPlaceSearch(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
+        return Response.ok(exportJob).build();
     }
 
     @GET

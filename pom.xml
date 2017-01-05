@@ -115,6 +115,7 @@
 
 
     <dependencies>
+
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
@@ -131,6 +132,18 @@
             <groupId>org.rutebanken</groupId>
             <artifactId>netex-java-model</artifactId>
             <version>${netex-java-model.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rutebanken.helpers</groupId>
+            <artifactId>gcp-storage</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
