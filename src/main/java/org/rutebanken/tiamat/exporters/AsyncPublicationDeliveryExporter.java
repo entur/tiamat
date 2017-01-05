@@ -27,6 +27,8 @@ import java.util.concurrent.Executors;
 @Service
 public class AsyncPublicationDeliveryExporter {
 
+    public static final String ASYNC_JOB_URL = "async/job";
+
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
     private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
@@ -56,7 +58,7 @@ public class AsyncPublicationDeliveryExporter {
         exportJob.setStarted(ZonedDateTime.now());
         exportJobRepository.save(exportJob);
         exportJob.setFileName(createFileName(exportJob.getId(), exportJob.getStarted()));
-        exportJob.setJobUrl("export_job/" + exportJob.getId());
+        exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
 
         exportService.submit(new Runnable() {
             @Override
