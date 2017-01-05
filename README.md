@@ -130,6 +130,15 @@ CREATE EXTENSION postgis_topology;
 ```
 
 
+## Validation for incoming and outgoing NeTEx publication delivery
+
+It is possible to configure if tiamat should validate incoming and outgoing netex xml when unmarshalling or marshalling publication deliveries.
+Default values are true. Can be deactivated with setting properties to false.
+```
+publicationDeliveryStreamingOutput.validateAgainstSchema
+publicationDeliveryUnmarshaller.validateAgainstSchema
+```
+
 # Import data into Tiamat
 
 If you are running this from `spring:run`, then you need to make sure that you
@@ -143,6 +152,7 @@ TRUNCATE quay CASCADE;
 TRUNCATE topographic_place CASCADE;
 ```
 
+TODO: Update URLs to publication_delivery
 ```
 curl --max-time 60000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
 ```
