@@ -32,6 +32,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
+
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
@@ -122,13 +124,13 @@ public class PublicationDeliveryResource {
 
 
     @GET
-    @Path("async/job")
+    @Path(ASYNC_JOB_URL)
     public Collection<ExportJob> getJobs() {
         return asyncPublicationDeliveryExporter.getJobs();
     }
 
     @GET
-    @Path("async/job/{id}")
+    @Path(ASYNC_JOB_URL+"/{id}")
     public Response getJobContents(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);

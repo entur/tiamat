@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 @Service
 public class BlobStoreService {
@@ -19,8 +17,9 @@ public class BlobStoreService {
     private final String bucketName;
 
     private final String blobPath;
+    private final String credentialPath;
+    private final String projectId;
 
-    private final Storage storage;
 
     public BlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
                             @Value("${blobstore.gcs.bucket.name}") String bucketName,
@@ -29,24 +28,33 @@ public class BlobStoreService {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        logger.info("Get storage for project {}", projectId);
-        storage = BlobStoreHelper.getStorage(credentialPath, projectId);
-
+        this.credentialPath = credentialPath;
+        this.projectId = projectId;
     }
 
     public void upload(String fileName, InputStream inputStream) {
+        Storage storage = getStorage();
         String blobIdName = createBlobIdName(blobPath, fileName);
         try {
             logger.info("Uploading {} to path {} in bucket {}", fileName, blobPath, bucketName);
             BlobStoreHelper.uploadBlob(storage, bucketName, blobIdName, inputStream, false);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error uploading file "+fileName + ", blobIdName " + blobIdName + " to bucket "+ bucketName, e);
+            throw new RuntimeException("Error uploading file " + fileName + ", blobIdName " + blobIdName + " to bucket " + bucketName, e);
+        }
+    }
+
+    private Storage getStorage() {
+        try {
+            logger.info("Get storage for project {}", projectId);
+            return BlobStoreHelper.getStorage(credentialPath, projectId);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.credential.path '" + credentialPath + "' and blobstore.gcs.project.id '" + projectId + "'", e);
         }
     }
 
     public InputStream download(String fileName) {
         String blobIdName = createBlobIdName(blobPath, fileName);
-        return BlobStoreHelper.getBlob(storage, bucketName, blobIdName);
+        return BlobStoreHelper.getBlob(getStorage(), bucketName, blobIdName);
     }
 
     public String createBlobIdName(String blobPath, String fileName) {
