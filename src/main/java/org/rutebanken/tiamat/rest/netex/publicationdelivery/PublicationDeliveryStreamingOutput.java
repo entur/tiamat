@@ -5,6 +5,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -35,6 +36,10 @@ public class PublicationDeliveryStreamingOutput {
         }
     }
 
+
+    @Value("${publicationDeliveryStreamingOutput.validateAgainstSchema:true}")
+    private boolean validateAgainstSchema = true;
+
     public PublicationDeliveryStreamingOutput() throws IOException, SAXException {
     }
 
@@ -46,7 +51,9 @@ public class PublicationDeliveryStreamingOutput {
 
         logXmlIfDebugEnabled(jaxPublicationDelivery, marshaller);
 
-        marshaller.setSchema(neTExValidator.getSchema());
+        if(validateAgainstSchema) {
+            marshaller.setSchema(neTExValidator.getSchema());
+        }
 
         return outputStream -> {
             try {
