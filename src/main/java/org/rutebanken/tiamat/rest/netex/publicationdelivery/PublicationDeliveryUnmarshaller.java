@@ -36,7 +36,7 @@ public class PublicationDeliveryUnmarshaller {
 
     private final NeTExValidator neTExValidator;
 
-    @Value("${publicationDeliveryUnmarshaller.validateAgainstSchema:false}")
+    @Value("${publicationDeliveryUnmarshaller.validateAgainstSchema:true}")
     private boolean validateAgainstSchema;
 
     public PublicationDeliveryUnmarshaller() throws IOException, SAXException {
@@ -50,6 +50,7 @@ public class PublicationDeliveryUnmarshaller {
             String xml = new String(toByteArray(inputStream));
             logger.debug("Debug is enabled. Will log the input (this kills performance.):\n{}", xml);
             inputStream = new ByteArrayInputStream(xml.getBytes());
+            logger.debug("Valdiation enabled? {}", validateAgainstSchema);
         }
 
         if(validateAgainstSchema) {
