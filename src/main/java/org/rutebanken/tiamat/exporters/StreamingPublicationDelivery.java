@@ -103,15 +103,9 @@ public class StreamingPublicationDelivery {
                         bufferedWriter.write(lineSeparator);
                     }
 
-
-                    bufferedWriter.write("<stopPlaces>");
-                    bufferedWriter.write(lineSeparator);
-
                     logger.info("Marshalling stops");
                     marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
 
-                    bufferedWriter.write("</stopPlaces>");
-                    bufferedWriter.write(lineSeparator);
 
                     if (addClosingSiteFrameTag) {
                         bufferedWriter.write("</SiteFrame>");
@@ -144,11 +138,20 @@ public class StreamingPublicationDelivery {
                 break;
             }
 
+            if(count == 0) {
+                bufferedWriter.write("<stopPlaces>");
+                bufferedWriter.write(lineSeparator);
+            }
+
             ++count;
             logger.debug("Marshalling stop place {}: {}", count, stopPlace);
             StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
             JAXBElement<StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
             stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
+            bufferedWriter.write(lineSeparator);
+        }
+        if(count > 0) {
+            bufferedWriter.write("</stopPlaces>");
             bufferedWriter.write(lineSeparator);
         }
     }
