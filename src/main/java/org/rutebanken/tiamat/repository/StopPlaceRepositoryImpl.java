@@ -184,11 +184,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Thread thread = new Thread(() -> {
             int counter = 0;
             try {
-                logger.info("{}", results.next());
                 while (results.next()) {
                     Object row = results.get()[0];
                     StopPlace stopPlace = (StopPlace) row;
-                    logger.info("{}", stopPlace.getQuays());
 
                     if(++counter % fetchSize == 0) {
                         logger.info("Scrolling stop places. Counter is currently at {]", counter);
