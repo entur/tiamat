@@ -131,15 +131,17 @@ public class StreamingPublicationDelivery {
                              Marshaller stopPlaceMarshaller,
                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
 
+        int count = 0;
         while (true) {
             org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
 
             if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
-                logger.info("Got poison pill from stop place queue. Finished marshalling stop places.");
+                logger.info("Got poison pill from stop place queue. Finished marshalling {} stop places.", count);
                 break;
             }
 
-            logger.debug("Marshalling stop place {}", stopPlace);
+            ++count;
+            logger.debug("Marshalling stop place {}: {}", count, stopPlace);
             StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
             JAXBElement<StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
             stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
