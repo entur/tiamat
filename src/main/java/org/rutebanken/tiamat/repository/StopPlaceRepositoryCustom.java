@@ -2,14 +2,13 @@ package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.concurrent.BlockingQueue;
 
 
 public interface StopPlaceRepositoryCustom {
@@ -32,6 +31,8 @@ public interface StopPlaceRepositoryCustom {
     List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
+
+    BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException;
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 }
