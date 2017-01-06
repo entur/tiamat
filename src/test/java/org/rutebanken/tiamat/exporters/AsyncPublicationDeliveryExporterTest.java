@@ -9,11 +9,10 @@ import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.ExportJobRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,87 +40,65 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.Iterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@SpringBootTest(classes = TiamatApplication.class)
-//@ActiveProfiles("geodb")
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = TiamatApplication.class)
+@ActiveProfiles("geodb")
 public class AsyncPublicationDeliveryExporterTest {
-
 
     private NetexMapper netexMapper = new NetexMapper();
 
-//    @Autowired
-    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(mock(StopPlaceRepository.class),
-        mock(TopographicPlaceRepository.class), netexMapper);
+    @Autowired
+    private PublicationDeliveryExporter publicationDeliveryExporter;
 
+    @Autowired
+    private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
-//    @Autowired
-//    private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter = new AsyncPublicationDeliveryExporter(publicationDeliveryExporter, mock(ex))
+    @Autowired
+    private ExportJobRepository exportJobRepository;
 
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
 
-
-
-    /**
-     * Test uploading export file to google blob store.
-     * Ignored. Intended for manual use.
-     */
     @Ignore
     @Test
-    public void startExportJob() throws Exception {
+    public void test() throws JAXBException, ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException, InterruptedException {
 
-//        asyncPublicationDeliveryExporter.startExportJob(new StopPlaceSearch());
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place to be exported"));
 
-        Thread.sleep(10000);
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(new StopPlaceSearch());
+
+        assertThat(exportJob.getId()).isGreaterThan(0L);
+
+        long start = System.currentTimeMillis();
+        long timeout = 10000;
+        while(true) {
+            ExportJob actualExportJob = exportJobRepository.findOne(exportJob.getId());
+            if(actualExportJob.getStatus().equals(exportJob.getStatus())) {
+                if(System.currentTimeMillis() - start > timeout) {
+                    fail("Waited more than "+timeout + " millis for job status to change");
+                }
+                Thread.sleep(1000);
+                continue;
+            }
+
+            if(actualExportJob.getStatus().equals(JobStatus.FAILED)) {
+                fail("Job status is failed");
+            } else if(actualExportJob.getStatus().equals(JobStatus.FINISHED)) {
+                System.out.println("Job finished");
+
+            }
+        }
     }
-
-
-    @Test
-    public void test() throws JAXBException, ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException {
-
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
-
-
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place"));
-
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
-
-
-
-
-
-
-
-//
-//
-//        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-//
-//        DocumentBuilder builder = domFactory.newDocumentBuilder();
-//        Document doc = builder.parse(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
-//        TransformerFactory transFactory = TransformerFactory.newInstance();
-//        Transformer transformer = transFactory.newTransformer();
-//
-//        StringWriter buffer = new StringWriter();
-//        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "false");
-//
-//
-//        for(int i = 0; i < doc.getChildNodes().getLength(); i++) {
-//
-//            Node node = doc.getChildNodes().item(i);
-//            transformer.transform(new DOMSource(node), new StreamResult(buffer));
-//
-//        }
-//        System.out.println(buffer.toString());
-//
-
-    }
-
-
-
-
 }
