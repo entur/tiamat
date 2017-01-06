@@ -79,51 +79,55 @@ public class StreamingPublicationDelivery {
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
         BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
 
-        Marshaller stopPlaceMarshaller = createStopPlaceMarshaller();
+        try {
+            Marshaller stopPlaceMarshaller = createStopPlaceMarshaller();
 
-        String lineSeparator = System.getProperty("line.separator");
-        String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(lineSeparator);
+            String lineSeparator = System.getProperty("line.separator");
+            String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(lineSeparator);
 
-        for (String publicationDeliveryLine : publicationDeliveryLines) {
-            logger.debug("Line: {}", publicationDeliveryLine);
-            boolean addClosingSiteFrameTag = false;
+            for (String publicationDeliveryLine : publicationDeliveryLines) {
+                logger.debug("Line: {}", publicationDeliveryLine);
+                boolean addClosingSiteFrameTag = false;
 
-            if (publicationDeliveryLine.contains("<SiteFrame")) {
-                if (publicationDeliveryLine.contains("/>")) {
+                if (publicationDeliveryLine.contains("<SiteFrame")) {
+                    if (publicationDeliveryLine.contains("/>")) {
 
-                    String modifiedLine = publicationDeliveryLine.replace("/>", ">");
+                        String modifiedLine = publicationDeliveryLine.replace("/>", ">");
 
-                    bufferedWriter.write(modifiedLine);
+                        bufferedWriter.write(modifiedLine);
+                        bufferedWriter.write(lineSeparator);
+
+                        addClosingSiteFrameTag = true;
+                    } else {
+                        bufferedWriter.write(publicationDeliveryLine);
+                        bufferedWriter.write(lineSeparator);
+                    }
+
+
+                    bufferedWriter.write("<stopPlaces>");
                     bufferedWriter.write(lineSeparator);
 
-                    addClosingSiteFrameTag = true;
+                    logger.info("Marshalling stops");
+                    marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+
+                    bufferedWriter.write("</stopPlaces>");
+                    bufferedWriter.write(lineSeparator);
+
+                    if (addClosingSiteFrameTag) {
+                        bufferedWriter.write("</SiteFrame>");
+                        bufferedWriter.write(lineSeparator);
+                    } else {
+                        bufferedWriter.write(publicationDeliveryLine);
+                        bufferedWriter.write(lineSeparator);
+                    }
                 } else {
                     bufferedWriter.write(publicationDeliveryLine);
                     bufferedWriter.write(lineSeparator);
                 }
-
-                bufferedWriter.write("<stopPlaces>");
-                bufferedWriter.write(lineSeparator);
-
-                logger.info("Marshalling stops");
-                marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
-
-                bufferedWriter.write("</stopPlaces>");
-                bufferedWriter.write(lineSeparator);
-
-                if (addClosingSiteFrameTag) {
-                    bufferedWriter.write("</SiteFrame>");
-                    bufferedWriter.write(lineSeparator);
-                } else {
-                    bufferedWriter.write(publicationDeliveryLine);
-                    bufferedWriter.write(lineSeparator);
-                }
-            } else {
-                bufferedWriter.write(publicationDeliveryLine);
-                bufferedWriter.write(lineSeparator);
             }
+        } finally {
+            bufferedWriter.close();
         }
-        bufferedWriter.close();
     }
 
     public void marshalStops(BlockingQueue<org.rutebanken.tiamat.model.StopPlace> stopPlacesQueue,
