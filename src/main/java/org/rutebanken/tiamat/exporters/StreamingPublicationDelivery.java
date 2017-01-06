@@ -20,6 +20,10 @@ import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 
+/**
+ * Stream data objects inside already serialized publication delivery.
+ * To be able to export many stop places wihtout keeping them all in memory.
+ */
 @Component
 public class StreamingPublicationDelivery {
 
