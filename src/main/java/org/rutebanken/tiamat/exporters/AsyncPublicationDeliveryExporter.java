@@ -95,10 +95,12 @@ public class AsyncPublicationDeliveryExporter {
                                         exportJob.setStatus(JobStatus.FAILED);
                                         String message = "Error executing export job " + exportJob;
                                         logger.error(message, e);
+                                        Thread.currentThread().interrupt();
                                     }
                                 }
                             }
                     );
+
                     outputStreamThread.setName("outstream-" + exportJob.getId());
                     outputStreamThread.start();
 
