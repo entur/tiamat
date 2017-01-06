@@ -161,7 +161,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     public static final StopPlace POISON_PILL = new StopPlace();
-    {
+    static {
         POISON_PILL.setId(-100L);
     }
 
