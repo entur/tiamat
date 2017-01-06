@@ -110,7 +110,7 @@ public class AsyncPublicationDeliveryExporter {
                         exportJob.setFinished(ZonedDateTime.now());
                         logger.info("Export job {} done", exportJob);
                     }
-                } catch (IOException | InterruptedException e) {
+                } catch (Exception e) {
                     logger.error("Error while exporting asynchronously", e);
                     exportJob.setStatus(JobStatus.FAILED);
                     exportJob.setMessage(e.getMessage());
