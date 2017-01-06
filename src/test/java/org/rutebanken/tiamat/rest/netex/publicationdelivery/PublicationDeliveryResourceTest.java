@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -122,7 +121,7 @@ public class PublicationDeliveryResourceTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.41727956639375"))
-                                .withLongitude(new BigDecimal("10.66856436373097"))))
+                                .withLongitude(new BigDecimal("10.66866436373097"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withId("OST:StopArea:0104072001")
@@ -130,7 +129,7 @@ public class PublicationDeliveryResourceTest {
                                 .withName(new MultilingualString().withValue(name))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
-                                                .withLongitude(new BigDecimal("10.6685643637309706122096031322143971920013427734375"))
+                                                .withLongitude(new BigDecimal("10.6686643637309706122096031322143971920013427734375"))
                                                 .withLatitude(new BigDecimal("59.41727956639375207714692805893719196319580078125"))))));
 
 

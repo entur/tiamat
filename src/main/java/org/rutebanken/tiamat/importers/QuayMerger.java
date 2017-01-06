@@ -19,11 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class QuayMerger {
 
-    /**
-     * The max distance for checking if two quays are nearby each other.
-     * http://gis.stackexchange.com/questions/28799/what-is-the-unit-of-measurement-for-buffer-calculation
-     * https://en.wikipedia.org/wiki/Decimal_degrees
-     */
     @Value("${quayMerger.mergeDistanceMeters:10}")
     public static final double MERGE_DISTANCE_METERS = 10;
 
