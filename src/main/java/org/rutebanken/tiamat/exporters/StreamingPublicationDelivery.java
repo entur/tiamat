@@ -114,9 +114,6 @@ public class StreamingPublicationDelivery {
                     if (addClosingSiteFrameTag) {
                         bufferedWriter.write("</SiteFrame>");
                         bufferedWriter.write(lineSeparator);
-                    } else {
-                        bufferedWriter.write(publicationDeliveryLine);
-                        bufferedWriter.write(lineSeparator);
                     }
                 } else {
                     bufferedWriter.write(publicationDeliveryLine);
