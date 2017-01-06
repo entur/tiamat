@@ -87,8 +87,8 @@ public class StreamingPublicationDelivery {
         String lineSeparator = System.getProperty("line.separator");
         String[] lines = publicationDeliveryStructureXml.split(lineSeparator);
 
-
         for(String line : lines) {
+            logger.debug("Line: {}", line);
             boolean addClosingSiteFrameTag = false;
 
             if(line.contains("<SiteFrame")) {
@@ -101,7 +101,7 @@ public class StreamingPublicationDelivery {
 
                     addClosingSiteFrameTag = true;
                 }
-                else if(line.contains("SiteFrame")) {
+                else {
                     bufferedWriter.write(line);
                     bufferedWriter.write(lineSeparator);
                 }
@@ -118,8 +118,10 @@ public class StreamingPublicationDelivery {
                 if(addClosingSiteFrameTag) {
                     bufferedWriter.write("</SiteFrame>");
                     bufferedWriter.write(lineSeparator);
+                } else {
+                    bufferedWriter.write(line);
+                    bufferedWriter.write(lineSeparator);
                 }
-
             } else {
                 bufferedWriter.write(line);
                 bufferedWriter.write(lineSeparator);
@@ -133,7 +135,6 @@ public class StreamingPublicationDelivery {
                               String lineSeparator) throws InterruptedException, JAXBException, IOException {
 
         while(true) {
-            logger.info("About to take from queue");
             org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
 
             if(stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
