@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.importers;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -22,7 +24,8 @@ public class QuayMerger {
      * http://gis.stackexchange.com/questions/28799/what-is-the-unit-of-measurement-for-buffer-calculation
      * https://en.wikipedia.org/wiki/Decimal_degrees
      */
-    public static final double MERGE_DISTANCE = 0.0001;
+    @Value("${quayMerger.mergeDistanceMeters:10}")
+    public static final double MERGE_DISTANCE_METERS = 10;
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
@@ -123,9 +126,17 @@ public class QuayMerger {
             return false;
         }
 
-        Geometry buffer = quay1.getCentroid().buffer(MERGE_DISTANCE);
-        boolean intersects = buffer.intersects(quay2.getCentroid());
-        return intersects;
+        try {
+            double distanceInMeters = JTS.orthodromicDistance(
+                    quay1.getCentroid().getCoordinate(),
+                    quay2.getCentroid().getCoordinate(),
+                    DefaultGeographicCRS.WGS84);
+
+            return distanceInMeters < MERGE_DISTANCE_METERS;
+        } catch (TransformException e) {
+            logger.warn("Could not calculate distance", e);
+            return false;
+        }
     }
 
     public boolean hasCloseCompassBearing(Quay quay1, Quay quay2) {
