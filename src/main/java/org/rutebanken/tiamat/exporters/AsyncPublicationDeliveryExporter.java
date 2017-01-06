@@ -5,24 +5,27 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBException;
+import javax.xml.bind.*;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static javax.xml.bind.JAXBContext.newInstance;
 
 @Service
 public class AsyncPublicationDeliveryExporter {
@@ -32,24 +35,27 @@ public class AsyncPublicationDeliveryExporter {
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
     private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-            .setNameFormat("publication-delivery-exporter-%d").build());
+            .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
 
     private final PublicationDeliveryExporter publicationDeliveryExporter;
 
-    private final PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
-
     private final ExportJobRepository exportJobRepository;
 
     private final BlobStoreService blobStoreService;
 
+    private final StreamingPublicationDelivery streamingPublicationDelivery;
+
+    private final StopPlaceRepository stopPlaceRepository;
+
     @Autowired
-    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService) {
+    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery, StopPlaceRepository stopPlaceRepository) {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
-        this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
+        this.streamingPublicationDelivery = streamingPublicationDelivery;
+        this.stopPlaceRepository = stopPlaceRepository;
     }
 
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
@@ -59,16 +65,17 @@ public class AsyncPublicationDeliveryExporter {
         exportJobRepository.save(exportJob);
         exportJob.setFileName(createFileName(exportJob.getId(), exportJob.getStarted()));
         exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
-
+        exportJobRepository.save(exportJob);
+        
         exportService.submit(new Runnable() {
             @Override
             public void run() {
                 logger.info("Started export job {}", exportJob);
-                PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
-
+                PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
                 logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
 
                 try {
+                    logger.info("About to add stop places?");
 
                     final PipedInputStream in = new PipedInputStream();
                     final PipedOutputStream out = new PipedOutputStream(in);
@@ -79,21 +86,22 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
 
-                                        StreamingOutput streamingOutput = publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure);
                                         logger.info("Write to streaming output which is piped to input stream");
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceRepository.scrollStopPlaces(), out);
 
-                                        streamingOutput.write(out);
                                         out.close();
 
-                                    } catch (JAXBException | IOException | SAXException e) {
+                                    } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
                                         exportJob.setStatus(JobStatus.FAILED);
                                         String message = "Error executing export job " + exportJob;
                                         logger.error(message, e);
+                                        Thread.currentThread().interrupt();
                                     }
                                 }
                             }
                     );
-                    outputStreamThread.setName("export-output" + exportJob.getFileName());
+
+                    outputStreamThread.setName("outstream-" + exportJob.getId());
                     outputStreamThread.start();
 
                     blobStoreService.upload(exportJob.getFileName(), in);
@@ -104,7 +112,7 @@ public class AsyncPublicationDeliveryExporter {
                         exportJob.setFinished(ZonedDateTime.now());
                         logger.info("Export job {} done", exportJob);
                     }
-                } catch (IOException | InterruptedException e) {
+                } catch (Exception e) {
                     logger.error("Error while exporting asynchronously", e);
                     exportJob.setStatus(JobStatus.FAILED);
                     exportJob.setMessage(e.getMessage());
@@ -113,7 +121,6 @@ public class AsyncPublicationDeliveryExporter {
                 }
             }
         });
-        exportJobRepository.save(exportJob);
         logger.info("Returning export job {}", exportJob);
         return exportJob;
     }

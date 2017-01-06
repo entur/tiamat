@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -35,6 +36,9 @@ public class StopPlaceRepositoryImplTest {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private QuayRepository quayRepository;
+
+    @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
@@ -44,6 +48,27 @@ public class StopPlaceRepositoryImplTest {
     public void before() {
         stopPlaceRepository.deleteAll();
         topographicPlaceRepository.deleteAll();
+    }
+
+    @Test
+    public void scrollableResult() throws InterruptedException {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));
+
+        stopPlace.getKeyValues().put("key", new Value("value"));
+
+        Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
+        stopPlace.getQuays().add(quay);
+
+        quayRepository.save(quay);
+        quayRepository.flush();
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+
+        BlockingQueue<StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
+        StopPlace actual = stopPlaces.take();
+        assertThat(actual.getId()).isEqualTo(stopPlace.getId());
+        StopPlace poison = stopPlaces.take();
+        assertThat(poison.getId()).isEqualTo(StopPlaceRepositoryImpl.POISON_PILL.getId());
     }
 
     @Test

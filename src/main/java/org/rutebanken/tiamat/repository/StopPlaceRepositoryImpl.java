@@ -5,9 +5,9 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +17,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 @Repository
 @Transactional
@@ -157,6 +160,54 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
+    public static final StopPlace POISON_PILL = new StopPlace();
+    static {
+        POISON_PILL.setId(-100L);
+    }
+
+    @Override
+    public BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException {
+
+        final int fetchSize = 100;
+
+        BlockingQueue<StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
+
+        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+
+        Criteria query = session.createCriteria(StopPlace.class);
+
+        query.setReadOnly(true);
+        query.setFetchSize(fetchSize);
+
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+
+        Thread thread = new Thread(() -> {
+            int counter = 0;
+            try {
+                while (results.next()) {
+                    Object row = results.get()[0];
+                    StopPlace stopPlace = (StopPlace) row;
+
+                    if(++counter % fetchSize == 0) {
+                        logger.info("Scrolling stop places. Counter is currently at {]", counter);
+                    }
+
+                    blockingQueue.put(stopPlace);
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Got interupted while scrolling stop place results", e);
+                Thread.currentThread().interrupt();
+                return;
+            } finally {
+                logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
+                results.close();
+                blockingQueue.add(POISON_PILL);
+            }
+        });
+        thread.setName("scroll-results");
+        thread.start();
+        return blockingQueue;
+    }
 
     @Override
     public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
