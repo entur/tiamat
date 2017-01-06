@@ -14,11 +14,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.io.*;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -43,7 +40,7 @@ public class StreamingPublicationDelivery {
         try {
             return newInstance(clazz);
         } catch (JAXBException e) {
-            logger.warn("Could not create instance of jaxb context for class "+ clazz, e);
+            logger.warn("Could not create instance of jaxb context for class " + clazz, e);
             throw new RuntimeException(e);
         }
     }
@@ -85,24 +82,23 @@ public class StreamingPublicationDelivery {
         Marshaller stopPlaceMarshaller = createStopPlaceMarshaller();
 
         String lineSeparator = System.getProperty("line.separator");
-        String[] lines = publicationDeliveryStructureXml.split(lineSeparator);
+        String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(lineSeparator);
 
-        for(String line : lines) {
-            logger.debug("Line: {}", line);
+        for (String publicationDeliveryLine : publicationDeliveryLines) {
+            logger.debug("Line: {}", publicationDeliveryLine);
             boolean addClosingSiteFrameTag = false;
 
-            if(line.contains("<SiteFrame")) {
-                if(line.contains("/>")) {
+            if (publicationDeliveryLine.contains("<SiteFrame")) {
+                if (publicationDeliveryLine.contains("/>")) {
 
-                    String modifiedLine = line.replace("/>", ">");
+                    String modifiedLine = publicationDeliveryLine.replace("/>", ">");
 
                     bufferedWriter.write(modifiedLine);
                     bufferedWriter.write(lineSeparator);
 
                     addClosingSiteFrameTag = true;
-                }
-                else {
-                    bufferedWriter.write(line);
+                } else {
+                    bufferedWriter.write(publicationDeliveryLine);
                     bufferedWriter.write(lineSeparator);
                 }
 
@@ -115,15 +111,15 @@ public class StreamingPublicationDelivery {
                 bufferedWriter.write("</stopPlaces>");
                 bufferedWriter.write(lineSeparator);
 
-                if(addClosingSiteFrameTag) {
+                if (addClosingSiteFrameTag) {
                     bufferedWriter.write("</SiteFrame>");
                     bufferedWriter.write(lineSeparator);
                 } else {
-                    bufferedWriter.write(line);
+                    bufferedWriter.write(publicationDeliveryLine);
                     bufferedWriter.write(lineSeparator);
                 }
             } else {
-                bufferedWriter.write(line);
+                bufferedWriter.write(publicationDeliveryLine);
                 bufferedWriter.write(lineSeparator);
             }
         }
@@ -131,14 +127,14 @@ public class StreamingPublicationDelivery {
     }
 
     public void marshalStops(BlockingQueue<org.rutebanken.tiamat.model.StopPlace> stopPlacesQueue,
-                              BufferedWriter bufferedWriter,
-                              Marshaller stopPlaceMarshaller,
-                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
+                             BufferedWriter bufferedWriter,
+                             Marshaller stopPlaceMarshaller,
+                             String lineSeparator) throws InterruptedException, JAXBException, IOException {
 
-        while(true) {
+        while (true) {
             org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
 
-            if(stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
+            if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
                 logger.info("Got poison pill from stop place queue. Finished marshalling stop places.");
                 break;
             }
