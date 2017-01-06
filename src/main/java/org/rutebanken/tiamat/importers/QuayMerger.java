@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class QuayMerger {
 
     @Value("${quayMerger.mergeDistanceMeters:10}")
-    public static final double MERGE_DISTANCE_METERS = 10;
+    public final double MERGE_DISTANCE_METERS = 10;
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
