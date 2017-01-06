@@ -67,7 +67,7 @@ public class SiteFrameResourceIntegrationTest {
         countryRef.setRef(IanaCountryTldEnumeration.NO);
 
         TopographicPlace county = new TopographicPlace();
-        county.setName(new MultilingualString("Buskerud", "no", ""));
+        county.setName(new EmbeddableMultilingualString("Buskerud", "no"));
         county.setCountryRef(countryRef);
 
         topographicPlaceRepository.save(county);
@@ -76,7 +76,7 @@ public class SiteFrameResourceIntegrationTest {
         countyReference.setRef(String.valueOf(county.getId()));
 
         TopographicPlace municipality = new TopographicPlace();
-        municipality.setName(new MultilingualString("Nedre Eiker", "no", ""));
+        municipality.setName(new EmbeddableMultilingualString("Nedre Eiker", "no"));
         municipality.setParentTopographicPlaceRef(countyReference);
         municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
         municipality.setCountryRef(countryRef);
@@ -88,14 +88,14 @@ public class SiteFrameResourceIntegrationTest {
 
         StopPlace stopPlace = new StopPlace();
         String firstStopPlaceName = "first stop place name";
-        stopPlace.setName(new MultilingualString(firstStopPlaceName, "en", ""));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
+        stopPlace.setName(new EmbeddableMultilingualString(firstStopPlaceName, "en"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
 
 
         Quay quay = new Quay();
-        quay.setName(new MultilingualString("quay", "en", ""));
-        quay.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(6, 70)))));
+        quay.setName(new EmbeddableMultilingualString("quay", "en"));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(6, 70)));
 
         quayRepository.save(quay);
         stopPlace.getQuays().add(quay);
@@ -114,12 +114,9 @@ public class SiteFrameResourceIntegrationTest {
                 .asString();
 
         System.out.println(xml);
-        stopPlaceRepository.delete(stopPlace);
-        topographicPlaceRepository.delete(municipality);
-        topographicPlaceRepository.delete(county);
 
         System.out.println("---------------------");
-        System.out.println("About to post the xml");
+        System.out.println("About to post the xml back");
         given().contentType(ContentType.XML)
                 .content(xml)
                 .when()

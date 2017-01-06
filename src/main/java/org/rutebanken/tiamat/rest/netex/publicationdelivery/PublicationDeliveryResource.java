@@ -1,38 +1,46 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
+import org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
-import org.rutebanken.tiamat.importers.StopPlaceImporter;
-import org.rutebanken.tiamat.netexmapping.NetexMapper;
+import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
+import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.JobStatus;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Collection;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
-//@Transactional
 public class PublicationDeliveryResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryResource.class);
+    public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
 
     private SiteFrameImporter siteFrameImporter;
 
@@ -44,31 +52,46 @@ public class PublicationDeliveryResource {
 
     private StopPlaceImporter stopPlaceImporter;
 
+    private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
+
+    private SimpleStopPlaceImporter simpleStopPlaceImporter;
+
     private PublicationDeliveryExporter publicationDeliveryExporter;
+
+    private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
+
 
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       PublicationDeliveryExporter publicationDeliveryExporter) {
+                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceImporter = stopPlaceImporter;
+        this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
+        this.simpleStopPlaceImporter = simpleStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
     }
 
 
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException {
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
-        PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
-        return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+        try {
+            PublicationDeliveryStructure responsePublicationDelivery = importPublicationDelivery(incomingPublicationDelivery);
+            return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+        } catch (Exception e) {
+            logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -78,69 +101,105 @@ public class PublicationDeliveryResource {
             logger.warn(responseMessage);
             throw new RuntimeException(responseMessage);
         }
-        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+        logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
-                .stream()
-                .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> netexMapper.mapToTiamatModel((SiteFrame) element.getValue()))
-                .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
-                .findFirst().orElseThrow(() -> new RuntimeException("Could not return site frame with created stop places"));
-        
-        return new PublicationDeliveryStructure()
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrameWithProcessedStopPlaces)));
+        try {
+            org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+                    .stream()
+                    .filter(element -> element.getValue() instanceof SiteFrame)
+                    .map(element -> (SiteFrame) element.getValue())
+                    .peek(netexSiteFrame -> {
+                        MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
+                        logger.info("Publication delivery contains site frame created at ", netexSiteFrame.getCreated());
+                    })
+                    .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
+                    .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
+                    .findFirst().get();
 
+            return publicationDeliveryExporter.exportSiteFrame(siteFrameWithProcessedStopPlaces);
+        } finally {
+            MDC.remove(IMPORT_CORRELATION_ID);
+        }
     }
 
-    // Import publication delivery without using SiteFrameImporter
-//    public PublicationDeliveryStructure importPublicationDelivery2(PublicationDeliveryStructure incomingPublicationDelivery) {
-//        if(incomingPublicationDelivery.getDataObjects() == null) {
-//            String responseMessage = "Received publication delivery but it does not contain any data objects.";
-//            logger.warn(responseMessage);
-//            throw new RuntimeException(responseMessage);
-//        }
-//        logger.info("Got publication delivery: {}", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
-//
-//        SiteFrame netexSiteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
-//                .stream()
-//                .filter(element -> element.getValue() instanceof SiteFrame)
-//                .map(element -> (SiteFrame) element.getValue())
-//                .findFirst().get();
-//
-//        org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
-//
-//        AtomicInteger topographicPlacesCreated = new AtomicInteger();
-//
-//        List<StopPlace> importedStopPlaces = tiamatSiteFrame.getStopPlaces().getStopPlace()
-//                .parallelStream()
-//                .map(stopPlace -> {
-//                    try {
-//                        return stopPlaceImporter.importStopPlace(stopPlace, tiamatSiteFrame, topographicPlacesCreated);
-//                    } catch (InterruptedException|ExecutionException e) {
-//                        e.printStackTrace();
-//                        return null;
-//                    }
-//                })
-//                .map(importedStopPlace -> netexMapper.mapToNetexModel(importedStopPlace))
-//                .collect(Collectors.toList());
-//
-//
-//
-//        netexSiteFrame.getStopPlaces().getStopPlace().clear();
-//        netexSiteFrame.getStopPlaces().getStopPlace().addAll(importedStopPlaces);
-//
-//
-//        return new PublicationDeliveryStructure()                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-//                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(netexSiteFrame)));
-//
-//    }
+
+    @GET
+    @Path(ASYNC_JOB_URL)
+    public Collection<ExportJob> getJobs() {
+        return asyncPublicationDeliveryExporter.getJobs();
+    }
+
+    @GET
+    @Path(ASYNC_JOB_URL+"/{id}")
+    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+
+        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+
+        logger.info("Returning result of job {}", exportJob);
+        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
+        }
+
+        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
+        return Response.ok(inputStream).build();
+    }
+
+    @GET
+    @Path("async")
+    public Response asyncStopPlaceSearch(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
+        return Response.ok(exportJob).build();
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportAllStopPlaces() throws JAXBException {
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
+    public Response exportStopPlaces(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) throws JAXBException, IOException, SAXException {
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
+    }
+
+    /**
+     * This method requires all incoming data to have IDs that are previously generated by Tiamat and that they are unique.
+     * IDs for quays and stop places will not be generated. They will be used as is,
+     */
+    @POST
+    @Path("initial_import")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException {
+        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
+        try {
+            AtomicInteger topographicPlacesCounter = new AtomicInteger();
+            org.rutebanken.tiamat.model.SiteFrame siteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+                    .stream()
+                    .filter(element -> element.getValue() instanceof SiteFrame)
+                    .map(element -> (SiteFrame) element.getValue())
+                    .peek(netexSiteFrame -> {
+                        MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
+                        logger.info("Publication delivery contains site frame created at ", netexSiteFrame.getCreated());
+                    })
+                    .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
+                    .findFirst().get();
+
+            siteFrame.getStopPlaces().getStopPlace().stream()
+                    .peek(stopPlace -> logger.info("{}", stopPlace))
+                    .map(stopPlace -> {
+                        try {
+                            return simpleStopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCounter);
+                        } catch (InterruptedException|ExecutionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            return Response.ok("Imported "+siteFrame.getStopPlaces().getStopPlace().size() + " stop places.").build();
+
+        } catch (Exception e) {
+            logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
+        }
     }
 }
 

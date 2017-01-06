@@ -15,18 +15,21 @@
                             <!-- the pattern that defines what to include -->
                             <pattern>
                                 {
-                                "serviceContext": {
-                                    "service": "tiamat"
-                                },
-                                "eventTime": "%date{\"yyyy-MM-dd'T'HH:mm:ss.SSS'000000Z'\", \"UTC\"}",
-                                "thread": "%thread",
-                                "message": "%message\n%ex{full}",
-                                "severity": "%level",
-                                "reportLocation": {
-                                    "filePath": "%logger",
-                                    "lineNumber": "%line",
-                                    "functionName": "%method"
-                                }
+                                    "serviceContext": {
+                                        "service": "tiamat"
+                                    },
+                                    "eventTime": "%date{\"yyyy-MM-dd'T'HH:mm:ss.SSS'000000Z'\", \"UTC\"}",
+                                    "thread": "%thread",
+                                    "message": "%message\n%ex{full}",
+                                    "severity": "%level",
+                                    "reportLocation": {
+                                        "filePath": "%logger",
+                                        "lineNumber": "%line",
+                                        "functionName": "%method"
+                                    },
+                                    "operation": {
+                                        "id": "%X{importCorrelationId}"
+                                    }
                                 }
                             </pattern>
                         </pattern>

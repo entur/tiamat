@@ -1,15 +1,14 @@
 package org.rutebanken.tiamat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
-import org.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -53,7 +52,9 @@ public class StopPlaceFromQuaysCorrelationService {
 
     private final NvdbSearchService nvdbSearchService;
 
-    private final NvdbQuayAugmenter nvdbQuayAugmenter;
+    private final NvdbStopPlaceTypeMapper nvdbStopPlaceTypeMapper;
+
+    private final CentroidComputer centroidComputer;
 
     private int maxLimit;
 
@@ -64,7 +65,9 @@ public class StopPlaceFromQuaysCorrelationService {
                                                 StopPlaceRepository stopPlaceRepository,
                                                 GeometryFactory geometryFactory,
                                                 CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
-                                                NvdbSearchService nvdbSearchService, NvdbQuayAugmenter nvdbQuayAugmenter,
+                                                NvdbSearchService nvdbSearchService,
+                                                NvdbStopPlaceTypeMapper nvdbStopPlaceTypeMapper,
+                                                CentroidComputer centroidComputer,
                                                 @Value("${StopPlaceFromQuaysCorrelationService.maxLimit:1000000}") int maxLimit,
                                                 @Value("${StopPlaceFromQuaysCorrelationService.threads:20}") int threads) {
         this.quayRepository = quayRepository;
@@ -72,7 +75,8 @@ public class StopPlaceFromQuaysCorrelationService {
         this.geometryFactory = geometryFactory;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.nvdbSearchService = nvdbSearchService;
-        this.nvdbQuayAugmenter = nvdbQuayAugmenter;
+        this.nvdbStopPlaceTypeMapper = nvdbStopPlaceTypeMapper;
+        this.centroidComputer = centroidComputer;
         this.maxLimit = maxLimit;
         this.threads = threads;
     }
@@ -203,9 +207,9 @@ public class StopPlaceFromQuaysCorrelationService {
         }
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(quayGroupName, "no", ""));
+        stopPlace.setName(new EmbeddableMultilingualString(quayGroupName, "no"));
 
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
 
         quays.forEach(quay -> {
 
@@ -224,10 +228,10 @@ public class StopPlaceFromQuaysCorrelationService {
 
                 logger.debug("Quay {}, {} is close enough to be added",
                         quay.getName(),
-                        quay.getCentroid().getLocation().getGeometryPoint().toText());
+                        quay.getCentroid().toText());
                 addQuay = true;
             } else {
-                logger.debug("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().getLocation().getGeometryPoint().toText());
+                logger.debug("Ignoring (for now) quay {} {}", quay.getName(), quay.getCentroid().toText());
             }
 
             if (addQuay) {
@@ -236,12 +240,7 @@ public class StopPlaceFromQuaysCorrelationService {
                 try {
                     VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
                     if(vegObjekt != null) {
-                        quay = nvdbQuayAugmenter.augmentFromNvdb(quay, vegObjekt);
-                        if (quay.getQuayType() != null && stopPlace.getStopPlaceType() == null) {
-                            if (quay.getQuayType().equals(QuayTypeEnumeration.BUS_BAY) || quay.getQuayType().equals(QuayTypeEnumeration.BUS_STOP)) {
-                                stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-                            }
-                        }
+                        nvdbStopPlaceTypeMapper.augmentFromNvdb(stopPlace, vegObjekt);
                     }
                 } catch (JsonProcessingException | UnsupportedEncodingException e) {
                     logger.warn("Exception caught using the NDVB search service... {}", e.getMessage(), e);
@@ -259,10 +258,7 @@ public class StopPlaceFromQuaysCorrelationService {
         if (stopPlace.getQuays().isEmpty()) {
             logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
         } else {
-
-            stopPlace.setCentroid(new SimplePoint());
-            stopPlace.getCentroid().setLocation(new LocationStructure());
-            stopPlace.getCentroid().getLocation().setGeometryPoint(calculateCentroidForStopPlace(stopPlace.getQuays()));
+            stopPlace.setCentroid(centroidComputer.computeCentroidForStopPlace(stopPlace.getQuays()).get());
 
             try {
                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, new AtomicInteger());
@@ -284,7 +280,7 @@ public class StopPlaceFromQuaysCorrelationService {
         return false;
     }
 
-    public boolean quayIsCloseToExistingQuays(Quay otherQuay, List<Quay> existingQuays) {
+    public boolean quayIsCloseToExistingQuays(Quay otherQuay, Set<Quay> existingQuays) {
         return existingQuays.stream().allMatch(q -> areClose(otherQuay, q));
     }
 
@@ -299,46 +295,33 @@ public class StopPlaceFromQuaysCorrelationService {
         if (quay == null || otherQuay == null && quay.getCentroid() == null || otherQuay.getCentroid() == null) {
             return false;
         }
-        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(DISTANCE);
-        boolean intersects = buffer.intersects(otherQuay.getCentroid().getLocation().getGeometryPoint());
+        Geometry buffer = quay.getCentroid().buffer(DISTANCE);
+        boolean intersects = buffer.intersects(otherQuay.getCentroid());
 
         if (intersects) {
             logger.debug("Quay {} {} is close to quay {} {}",
                     quay.getName(),
-                    quay.getCentroid().getLocation().getGeometryPoint().toText(),
+                    quay.getCentroid().toText(),
                     otherQuay.getName(),
-                    otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
+                    otherQuay.getCentroid().toText());
             return true;
         }
 
         logger.debug("Quay {} {} is NOT close to quay {} {}",
                 quay.getName(),
-                quay.getCentroid().getLocation().getGeometryPoint().toText(),
+                quay.getCentroid().toText(),
                 otherQuay.getName(),
-                otherQuay.getCentroid().getLocation().getGeometryPoint().toText());
+                otherQuay.getCentroid().toText());
         return false;
     }
 
     public Envelope createEnvelopeForQuay(Quay quay) {
 
-        Geometry buffer = quay.getCentroid().getLocation().getGeometryPoint().buffer(0.004);
+        Geometry buffer = quay.getCentroid().buffer(0.004);
 
         Envelope envelope = buffer.getEnvelopeInternal();
         logger.trace("Created envelope {}", envelope.toString());
 
         return envelope;
     }
-
-    public Point calculateCentroidForStopPlace(List<Quay> quays) {
-        CentroidPoint centroidPoint = new CentroidPoint();
-        quays.stream()
-            .filter(quay -> quay.getCentroid() != null)
-            .forEach(quay -> centroidPoint.add(quay.getCentroid().getLocation().getGeometryPoint()));
-
-        logger.debug("Created centroid for stop place based on {} quays. x: {}, y: {}", quays.size(),
-                centroidPoint.getCentroid().x, centroidPoint.getCentroid().y);
-
-        return geometryFactory.createPoint(centroidPoint.getCentroid());
-    }
-
 }

@@ -1,14 +1,15 @@
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.junit.Before;
-import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.*;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -16,8 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.plaf.multi.MultiButtonUI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +28,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
+@Transactional
 public class StopPlaceRepositoryImplTest {
 
     @Autowired
@@ -33,9 +36,6 @@ public class StopPlaceRepositoryImplTest {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -53,7 +53,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "value");
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
         StopPlace actual = stopPlaceRepository.findOne(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
@@ -67,7 +67,7 @@ public class StopPlaceRepositoryImplTest {
         firstStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(firstStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "anotherValue");
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("anotherValue"));
         assertThat(id).isNull();
     }
 
@@ -81,7 +81,7 @@ public class StopPlaceRepositoryImplTest {
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", "value");
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
 
         assertThat(id).isEqualTo(matchingStopPlace.getId());
 
@@ -91,6 +91,21 @@ public class StopPlaceRepositoryImplTest {
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
     }
 
+    @Test
+    public void findCorrectStopPlaceFromValues() {
+        StopPlace stopPlaceWithSomeValues = new StopPlace();
+        stopPlaceWithSomeValues.getKeyValues().put("key", new Value("One value", "Second value", "Third value"));
+        stopPlaceRepository.save(stopPlaceWithSomeValues);
+
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("Third value"));
+
+        assertThat(id).isEqualTo(stopPlaceWithSomeValues.getId());
+
+        StopPlace actual = stopPlaceRepository.findOne(id);
+        Assertions.assertThat(actual).isNotNull();
+        Assertions.assertThat(actual.getKeyValues()).containsKey("key");
+        Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("Third value");
+    }
 
     @Test
     public void findStopPlacesWithin() throws Exception {
@@ -180,12 +195,9 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("name", "", ""));
-        SimplePoint centroid = new SimplePoint();
+        stopPlace.setName(new EmbeddableMultilingualString("name", ""));
 
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
@@ -199,12 +211,8 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void noNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("stop place", "", ""));
-        SimplePoint centroid = new SimplePoint();
-
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setName(new EmbeddableMultilingualString("stop place", ""));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
@@ -216,11 +224,8 @@ public class StopPlaceRepositoryImplTest {
     @Test
     public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString("This name is different", "", ""));
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60))));
-
-        stopPlace.setCentroid(centroid);
+        stopPlace.setName(new EmbeddableMultilingualString("This name is different", ""));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
         stopPlaceRepository.save(stopPlace);
 
         // Stop place coordinates within envelope
@@ -232,11 +237,11 @@ public class StopPlaceRepositoryImplTest {
 
     @Test
     public void multipleNearbyStopPlaces() throws Exception {
-        StopPlace stopPlace = new StopPlace(new MultilingualString("name"));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15, 60)))));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
 
-        StopPlace stopPlace2 = new StopPlace(new MultilingualString("name"));
-        stopPlace2.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)))));
+        StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("name"));
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)));
 
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.save(stopPlace2);
@@ -260,7 +265,12 @@ public class StopPlaceRepositoryImplTest {
 
         List<StopTypeEnumeration> stopTypeEnumerations = Arrays.asList(StopTypeEnumeration.BUS_STATION);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()), null, stopTypeEnumerations, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()))
+                .setStopTypeEnumerations(stopTypeEnumerations)
+                .setPageable(pageable)
+                .build());
         assertThat(result).isEmpty();
     }
 
@@ -273,7 +283,11 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceRepository.save(stopPlace);
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()), null, null, pageable);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()))
+                .setPageable(pageable).build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -285,8 +299,10 @@ public class StopPlaceRepositoryImplTest {
 
         stopPlaceRepository.save(nesbru);
         stopPlaceRepository.save(bru);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("bru").build();
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("bru", null, null, null, new PageRequest(0, 10));
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
                 .contains(bru.getName().getValue())
@@ -302,7 +318,9 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceRepository.save(nesset);
         stopPlaceRepository.save(brunesset);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("nesset", null, null, null, new PageRequest(0, 10));
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("nesset").build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
                 .contains(brunesset.getName().getValue())
@@ -321,7 +339,13 @@ public class StopPlaceRepositoryImplTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, Arrays.asList(municipality.getId().toString()), Arrays.asList(county.getId().toString()), null, pageable);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setPageable(pageable)
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -336,9 +360,12 @@ public class StopPlaceRepositoryImplTest {
         TopographicPlace municipality = createMunicipality(municipalityName, county);
         createStopPlaceWithMunicipality(stopPlaceName, municipality);
 
-        Pageable pageable = new PageRequest(0, 10);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .build();
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, null, Arrays.asList(county.getId().toString()), null, pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -360,9 +387,14 @@ public class StopPlaceRepositoryImplTest {
         List<String> countyRefs = Arrays.asList(buskerud.getId().toString());
         List<String> municipalityRefs = Arrays.asList(municipality.getId().toString());
 
-        Pageable pageable = new PageRequest(0, 10);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setMunicipalityIds(municipalityRefs)
+                .setCountyIds(countyRefs)
+                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
+                .build();
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceName, municipalityRefs, countyRefs, Arrays.asList(StopTypeEnumeration.BUS_STATION), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         assertThat(result).extracting(actual -> actual.getId()).contains(stopPlace.getId());
     }
@@ -371,10 +403,12 @@ public class StopPlaceRepositoryImplTest {
     public void findStopPlacNameContainsIgnoreCase() throws Exception {
         String stopPlaceName = "IKEA Slependen";
 
-        Pageable pageable = new PageRequest(0, 10);
-
         createStopPlaceWithMunicipality(stopPlaceName, null);
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("lEpEnden", null, null, null, pageable);
+
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("lEpEnden")
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
     }
@@ -392,11 +426,13 @@ public class StopPlaceRepositoryImplTest {
         TopographicPlace municipality = createMunicipality(municipalityName, county);
         createStopPlaceWithMunicipality("Does not matter", municipality);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace(null,
-                Arrays.asList(municipality.getId().toString()),
-                Arrays.asList(county.getId().toString()),
-                Arrays.asList(StopTypeEnumeration.COACH_STATION),
-                new PageRequest(0, 1));
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
+                .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
 
         assertThat(result).isEmpty();
     }
@@ -414,11 +450,14 @@ public class StopPlaceRepositoryImplTest {
         TopographicPlace municipality = createMunicipality(municipalityName, county);
         createStopPlaceWithMunicipality("XYZ", municipality);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Name",
-                Arrays.asList(municipality.getId().toString()),
-                Arrays.asList(county.getId().toString()),
-                null,
-                new PageRequest(0, 1));
+
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("Name")
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
 
         System.out.println(result);
         assertThat(result).isEmpty();
@@ -433,9 +472,11 @@ public class StopPlaceRepositoryImplTest {
         TopographicPlace municipality = createMunicipality(municipalityName, county);
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
-        Pageable pageable = new PageRequest(0, 10);
-
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", null, Arrays.asList(county.getId().toString()), null, pageable);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("Somewhere else")
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
     }
 
@@ -444,10 +485,81 @@ public class StopPlaceRepositoryImplTest {
         TopographicPlace municipality = createMunicipality("Asker", createCounty("Akershus"));
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
-        Pageable pageable = new PageRequest(0, 10);
-
-        Page<StopPlace> result = stopPlaceRepository.findStopPlace("Somewhere else", Arrays.asList(municipality.getId().toString()), null, null, pageable);
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery("Somewhere else")
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void findStopPlacesByListOfIds() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace();
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlaceRepository.save(stopPlace2);
+
+        StopPlace stopPlaceThatShouldNotBeReturned = new StopPlace();
+        stopPlaceRepository.save(stopPlaceThatShouldNotBeReturned);
+
+        List<Long> stopPlaceIds = Arrays.asList(stopPlace1.getId(), stopPlace2.getId());
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(StopPlace::getId)
+                .contains(stopPlace1.getId(), stopPlace2.getId())
+                .doesNotContain(stopPlaceThatShouldNotBeReturned.getId());
+    }
+
+    @Test
+    public void emptyIdListShouldReturnStops() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace();
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlaceRepository.save(stopPlace2);
+
+        List<Long> stopPlaceIds = new ArrayList<>();
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+        assertThat(result).isNotEmpty();
+    }
+
+
+    @Test
+    public void searchingForIdListShouldNotUseQueryMunicipalityOrCounty() throws Exception {
+
+        TopographicPlace county = createCounty("Hedmark");
+        TopographicPlace municipality = createMunicipality("Hamar", county);
+        createStopPlaceWithMunicipality("FromMunicipality", municipality);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("OnlyThis"));
+        stopPlaceRepository.save(stopPlace);
+
+        List<Long> stopPlaceIds = new ArrayList<>();
+        stopPlaceIds.add(stopPlace.getId());
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+                .setQuery("FromMu")
+                .setIdList(stopPlaceIds)
+                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+        assertThat(result).extracting(StopPlace::getName).extracting(EmbeddableMultilingualString::getValue)
+                .contains("OnlyThis")
+                .doesNotContain("FromMunicipality");
     }
 
     @Test
@@ -457,15 +569,20 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
 
         stopPlaceRepository.save(stopPlace);
-        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(null, null, null, Arrays.asList(StopTypeEnumeration.AIRPORT), new PageRequest(0,1));
-        Assertions.assertThat(actual).isNotEmpty();
+
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.AIRPORT))
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
+
+        Assertions.assertThat(result).isNotEmpty();
     }
 
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
-        municipality.setName(new MultilingualString(municipalityName, "", ""));
+        municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
 
-        if(parentCounty != null) {
+        if (parentCounty != null) {
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
             countyRef.setRef(parentCounty.getId().toString());
             municipality.setParentTopographicPlaceRef(countyRef);
@@ -478,7 +595,7 @@ public class StopPlaceRepositoryImplTest {
     private TopographicPlace createCounty(String countyName) {
 
         TopographicPlace county = new TopographicPlace();
-        county.setName(new MultilingualString(countyName, "", ""));
+        county.setName(new EmbeddableMultilingualString(countyName, ""));
         topographicPlaceRepository.save(county);
 
         return county;
@@ -486,9 +603,9 @@ public class StopPlaceRepositoryImplTest {
 
     private StopPlace createStopPlaceWithMunicipality(String name, TopographicPlace municipality) {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new MultilingualString(name, "", ""));
+        stopPlace.setName(new EmbeddableMultilingualString(name, ""));
 
-        if(municipality != null) {
+        if (municipality != null) {
             TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
             municipalityRef.setRef(municipality.getId().toString());
             stopPlace.setTopographicPlaceRef(municipalityRef);
@@ -499,13 +616,9 @@ public class StopPlaceRepositoryImplTest {
         return stopPlace;
     }
 
-
-
     private StopPlace createStopPlace(double latitude, double longitude) {
         StopPlace stopPlace = new StopPlace();
-        SimplePoint centroid = new SimplePoint();
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(longitude, latitude))));
-        stopPlace.setCentroid(centroid);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         return stopPlace;
     }
 }

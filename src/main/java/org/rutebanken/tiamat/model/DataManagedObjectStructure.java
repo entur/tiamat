@@ -1,19 +1,21 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.netexmapping.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
-import javax.persistence.*;
-import java.util.ArrayList;
+import javax.persistence.CascadeType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 
 @MappedSuperclass
 public abstract class DataManagedObjectStructure
-    extends EntityInVersionStructure
-{
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private final Map<String,Value> keyValues = new HashMap<>();
+        extends EntityInVersionStructure {
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private final Map<String, Value> keyValues = new HashMap<>();
 
     @Transient
     protected ExtensionsStructure extensions;
@@ -52,11 +54,15 @@ public abstract class DataManagedObjectStructure
         return keyValues;
     }
 
-    public List<String> getOrCreateValues(String key) {
+    public Set<String> getOrCreateValues(String key) {
         if (keyValues.get(key) == null) {
             keyValues.put(key, new Value());
         }
 
         return keyValues.get(key).getItems();
+    }
+
+    public Set<String> getOriginalIds() {
+        return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
     }
 }

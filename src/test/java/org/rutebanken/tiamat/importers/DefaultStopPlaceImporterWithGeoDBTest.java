@@ -2,9 +2,8 @@ package org.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.assertj.core.api.AssertionsForClassTypes;
+import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -17,11 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = TiamatApplication.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ActiveProfiles("geodb")
+//@Transactional
 public class DefaultStopPlaceImporterWithGeoDBTest {
 
     @Autowired
@@ -68,16 +67,44 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes() throws ExecutionException, InterruptedException {
         String name = "Hestehovveien";
 
-        double stopPlaceLatitude = 59.422556268440956728227320127189159393310546875;
-        double stopPlaceLongitude = 5.265704397012616055917533230967819690704345703125;
+        double stopPlaceLatitude = 59.422556;
+        double stopPlaceLongitude = 5.265704;
 
-        double quayLatitude = 59.4221750629462661663637845776975154876708984375;
-        double quayLongitude = 5.2646351097871768587310725706629455089569091796875;
+        double quayLatitude = 59.422556;
+        double quayLongitude = 5.265704;
 
         StopPlace firstStopPlace = createStopPlace(name,
-                stopPlaceLongitude, stopPlaceLatitude, 987987L);
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, 987987L));
-        firstStopPlace.getQuays().add(createQuay(name, quayLongitude + 0.01, quayLatitude + 0.01, 987987L));
+                stopPlaceLongitude, stopPlaceLatitude, null);
+        firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
+
+        AtomicInteger topographicPlacesCounter = new AtomicInteger();
+        SiteFrame siteFrame = new SiteFrame();
+
+        // Import first stop place.
+        StopPlace firstImportResult = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace, siteFrame, topographicPlacesCounter);
+
+        StopPlace secondStopPlace = createStopPlace(name,
+                stopPlaceLongitude, stopPlaceLatitude, null);
+        secondStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
+
+        // Import second stop place
+        StopPlace importResult = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+
+        assertThat(importResult.getId()).isEqualTo(firstImportResult.getId());
+        assertThat(importResult.getQuays()).hasSize(1);
+
+        assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
+
+    }
+
+    @Test
+    public void addQuaysToStopPlaceWithoutQuays() throws ExecutionException, InterruptedException {
+        String name = "Eselbergveien";
+
+        double longitude = 5;
+        double latitude = 71;
+
+        StopPlace firstStopPlace = createStopPlace(name, longitude, latitude, null);
 
         AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
@@ -85,18 +112,27 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         // Import first stop place.
         defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
 
-        StopPlace secondStopPlace = createStopPlace(name,
-                stopPlaceLongitude, stopPlaceLatitude, 321321321L);
-        secondStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, 321321321L));
+        StopPlace secondStopPlace = createStopPlace(name, longitude, latitude, null);
+        secondStopPlace.getQuays().add(createQuay(name, longitude, latitude, null));
 
         // Import second stop place
-        StopPlace importResult = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace importResult = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
-        assertThat(importResult.getQuays()).hasSize(2);
+        assertThat(importResult.getQuays()).hasSize(1);
 
-        assertThat(importResult.getQuays().get(0).getName().getValue()).isEqualTo(name);
+        assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
+    }
 
+    @Test
+    public void reproduceIssueWithCollectionNotAssosiatedWithAnySession() throws ExecutionException, InterruptedException {
+        String name = "Skillebekkgata";
+        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
+                6, 60, 11063200L, 11063200L);
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
+                6, 60.0001, 11063198L, 11063198L);
+        defaultStopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
     }
 
     /**
@@ -125,7 +161,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
                 longitude, latitude, stopPlaceId, quayId);
 
         // Import second stop place with a quay with the same coordinates as second stop place
-        StopPlace actualStopPlace = defaultStopPlaceImporter.importStopPlace(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace actualStopPlace = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
 
         assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
@@ -135,20 +171,20 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         List<StopPlace> stopPlaces = new ArrayList<>();
 
-        for(int i = 0; i < 10; i++) {
-            StopPlace stopPlace = new StopPlace(new MultilingualString("Stop place " + i));
+        for(int i = 0; i < 5; i++) {
+            StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop place " + i));
             stopPlace.setId(Long.valueOf(i));
-            stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)))));
+            stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
             stopPlaces.add(stopPlace);
         }
 
-        AtomicInteger topographicPlacesConter = new AtomicInteger();
+        AtomicInteger topographicPlacesCounter = new AtomicInteger();
 
         stopPlaces.parallelStream()
                 .forEach(stopPlace -> {
                     try {
 
-                        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), topographicPlacesConter);
+                        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), topographicPlacesCounter);
                     } catch (ExecutionException|InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -162,7 +198,9 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
             System.out.println("Topographic place repo contains " + tp.getName());
         });
 
-        assertThat(size[0]).isEqualTo(2).withFailMessage("Number of topographic places in the repository is not as expected");
+        assertThat(size[0])
+                .as("Number of topographic places in the repository is not as expected")
+                .isEqualTo(2);
 
         List<TopographicPlace> counties = topographicPlaceRepository
                 .findByNameValueAndCountryRefRefAndTopographicPlaceType(
@@ -180,14 +218,14 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         assertThat(municipalities).hasSize(1);
 
-        assertThat(topographicPlacesConter.get()).isEqualTo(2);
+        assertThat(topographicPlacesCounter.get()).isEqualTo(2);
     }
 
 
-    private SimplePoint point(double longitude, double latitude) {
-        return new SimplePoint(new LocationStructure(
+    private Point point(double longitude, double latitude) {
+        return 
                 geometryFactory.createPoint(
-                        new Coordinate(longitude, latitude))));
+                        new Coordinate(longitude, latitude));
     }
 
     private StopPlace createStopPlaceWithQuay(String name, double longitude, double latitude, Long stopPlaceId, Long quayId) {
@@ -199,14 +237,14 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     private StopPlace createStopPlace(String name, double longitude, double latitude, Long stopPlaceId) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point(longitude, latitude));
-        stopPlace.setName(new MultilingualString(name, "", ""));
+        stopPlace.setName(new EmbeddableMultilingualString(name, ""));
         stopPlace.setId(stopPlaceId);
         return stopPlace;
     }
 
     private Quay createQuay(String name, double longitude, double latitude, Long id) {
         Quay quay = new Quay();
-        quay.setName(new MultilingualString(name, "", ""));
+        quay.setName(new EmbeddableMultilingualString(name, ""));
         quay.setId(id);
         quay.setCentroid(point(longitude, latitude));
         return quay;

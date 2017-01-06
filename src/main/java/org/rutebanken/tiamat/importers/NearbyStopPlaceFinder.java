@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import org.rutebanken.tiamat.model.SimplePoint;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -43,6 +43,10 @@ public class NearbyStopPlaceFinder {
 
     public StopPlace find(StopPlace stopPlace) {
 
+        if(!stopPlace.hasCoordinates()) {
+            return null;
+        }
+
         try {
             Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
@@ -59,7 +63,9 @@ public class NearbyStopPlaceFinder {
     }
 
     public void update(StopPlace savedStopPlace) {
-        nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getId()));
+        if(savedStopPlace.hasCoordinates()) {
+            nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getId()));
+        }
     }
 
     public final String createKey(StopPlace stopPlace, Envelope envelope) {
@@ -70,9 +76,9 @@ public class NearbyStopPlaceFinder {
         return createKey(stopPlace, createBoundingBox(stopPlace.getCentroid()));
     }
 
-    public Envelope createBoundingBox(SimplePoint simplePoint) {
+    public Envelope createBoundingBox(Point point) {
 
-        Geometry buffer = simplePoint.getLocation().getGeometryPoint().buffer(BOUNDING_BOX_BUFFER);
+        Geometry buffer = point.buffer(BOUNDING_BOX_BUFFER);
 
         Envelope envelope = buffer.getEnvelopeInternal();
         logger.trace("Created envelope {}", envelope.toString());

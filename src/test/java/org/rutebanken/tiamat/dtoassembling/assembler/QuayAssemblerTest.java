@@ -2,7 +2,8 @@ package org.rutebanken.tiamat.dtoassembling.assembler;
 
 
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.QuayTypeEnumeration;
@@ -12,25 +13,13 @@ import static org.mockito.Mockito.mock;
 
 public class QuayAssemblerTest {
 
-    private QuayAssembler quayAssembler = new QuayAssembler(mock(SimplePointAssembler.class));
-
-    @Test
-    public void assembleQuayWithQuayType() {
-
-
-        Quay quay = new Quay();
-        quay.setQuayType(QuayTypeEnumeration.BUS_BAY);
-
-        QuayDto quayDto = quayAssembler.assemble(quay);
-
-        assertThat(quayDto.quayType).isEqualTo("busBay");
-    }
+    private QuayAssembler quayAssembler = new QuayAssembler(mock(PointAssembler.class));
 
     @Test
     public void assembleQuayWithQuayDescription() {
 
         Quay quay = new Quay();
-        quay.setDescription(new MultilingualString("description","no",""));
+        quay.setDescription(new EmbeddableMultilingualString("description","no"));
 
         QuayDto quayDto = quayAssembler.assemble(quay);
 
@@ -49,6 +38,16 @@ public class QuayAssemblerTest {
 
         assertThat(quayDto.id).isNotEmpty();
         assertThat(quayDto.id).contains(quay.getId().toString());
+    }
+
+    @Test
+    public void assembleQuayWithBearing() {
+        Quay quay = new Quay();
+        quay.setCompassBearing(250f);
+
+        QuayDto quayDto = quayAssembler.assemble(quay);
+
+        assertThat(quayDto.compassBearing).isEqualTo(250);
     }
 
 }

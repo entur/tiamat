@@ -1,7 +1,8 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,10 +52,10 @@ public class StopPlaceRepositoryTest {
         StopPlace stopPlaceNewer = new StopPlace();
 
         stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-        stopPlaceOlder.setName(new MultilingualString("it's older", "en", ""));
+        stopPlaceOlder.setName(new EmbeddableMultilingualString("it's older", "en"));
 
         stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
-        stopPlaceNewer.setName(new MultilingualString("it's newer", "en", ""));
+        stopPlaceNewer.setName(new EmbeddableMultilingualString("it's newer", "en"));
 
         stopPlaceRepository.save(stopPlaceNewer);
         stopPlaceRepository.save(stopPlaceOlder);

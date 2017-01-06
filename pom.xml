@@ -26,11 +26,10 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.2.84</fabric8.version>
         <docker.maven.plugin.version>0.13.9</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.4.0.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>1.4.3.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>1.4.3.RELEASE</spring-boot.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
-        <!-- Version must correspond with hibernate core version from spring -->
         <hibernate-spatial.version>5.1.0.Final</hibernate-spatial.version>
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.7</geodb.version>
@@ -87,10 +86,7 @@
             <id>OSGEO GeoTools repo</id>
             <url>http://download.osgeo.org/webdav/geotools</url>
         </repository>
-        <repository>
-            <id>Hibernate Spatial repo</id>
-            <url>http://www.hibernatespatial.org/repository</url>
-        </repository>
+
         <repository>
             <id>geo-solutions.it</id>
             <url>http://maven.geo-solutions.it</url>
@@ -140,6 +136,18 @@
             <groupId>org.rutebanken</groupId>
             <artifactId>netex-java-model</artifactId>
             <version>${netex-java-model.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rutebanken.helpers</groupId>
+            <artifactId>gcp-storage</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -228,6 +236,18 @@
             <groupId>org.opengeo</groupId>
             <artifactId>geodb</artifactId>
             <version>${geodb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>16.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-jts-wrapper</artifactId>
+            <version>16.1</version>
         </dependency>
 
         <dependency>

@@ -5,6 +5,7 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
@@ -14,17 +15,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.NumberUtils;
-import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.persistence.*;
+import java.math.BigInteger;
+import java.util.*;
 
 @Repository
 @Transactional
@@ -43,15 +37,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         EntityGraph<StopPlace> graph = entityManager.createEntityGraph(StopPlace.class);
 
-        graph.addAttributeNodes("tariffZones");
         graph.addAttributeNodes("accessSpaces");
         graph.addAttributeNodes("equipmentPlaces");
-        graph.addAttributeNodes("validityConditions");
+//        graph.addAttributeNodes("validityConditions");
         graph.addAttributeNodes("accessibilityAssessment");
-        graph.addAttributeNodes("levels");
+//        graph.addAttributeNodes("levels");
         graph.addAttributeNodes("alternativeNames");
-        graph.addAttributeNodes("otherTransportModes");
-        graph.addAttributeNodes("roadAddress");
+//        graph.addAttributeNodes("otherTransportModes");
+//        graph.addAttributeNodes("roadAddress");
         graph.addAttributeNodes("parentSiteRef");
 
         // Be aware of https://hibernate.atlassian.net/browse/HHH-10261
@@ -77,9 +70,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String queryString = "SELECT s FROM StopPlace s " +
-                "LEFT OUTER JOIN s.centroid sp " +
-                "LEFT OUTER JOIN sp.location l "+
-                "WHERE within(l.geometryPoint, :filter) = true " +
+                "WHERE within(s.centroid, :filter) = true " +
                 "AND (:ignoreStopPlaceId IS NULL OR s.id != :ignoreStopPlaceId)";
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
@@ -99,9 +90,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
-                                "LEFT OUTER JOIN s.centroid sp " +
-                                "LEFT OUTER JOIN sp.location l " +
-                             "WHERE within(l.geometryPoint, :filter) = true " +
+                             "WHERE within(s.centroid, :filter) = true " +
                             "AND s.name.value = :name", Long.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
@@ -114,70 +103,118 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findByKeyValue(String key, String value) {
-        TypedQuery<Long> query = entityManager
-                .createQuery("SELECT s.id FROM StopPlace s " +
-                                "JOIN s.keyValues spkv " +
-                                "ON ( KEY(spkv) = :key) " +
-                                "WHERE :value IN elements(spkv.items)",
-                        Long.class);
+    public Long findByKeyValue(String key, Set<String> values) {
+
+        Query query = entityManager.createNativeQuery("SELECT stop_place_id " +
+                                                        "FROM stop_place_key_values spkv " +
+                                                            "INNER JOIN value_items v " +
+                                                            "ON spkv.key_values_id = v.value_id " +
+                                                        "WHERE  spkv.key_values_key = :key " +
+                                                            "AND v.items IN ( :values ) ");
+
         query.setParameter("key", key);
-        query.setParameter("value", value);
+        query.setParameter("values", values);
 
         try {
-            return query.getSingleResult();
+            List<BigInteger> results = query.getResultList();
+            if(results.isEmpty()) {
+                return null;
+            } else {
+                return results.get(0).longValue();
+            }
         } catch (NoResultException noResultException) {
             return null;
         }
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopPlaceTypes, Pageable pageable) {
+    public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
+        String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN stop_place_quays spq on spq.quays_id = q.quay_id INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
+        Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<IdMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new IdMappingDto("Quay", (String)row[0], (BigInteger)row[1]));
+        }
+
+        return mappingResult;
+    }
+
+    @Override
+    public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
+        String sql = "select v.items, spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id";
+        Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<IdMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new IdMappingDto("StopPlace", (String)row[0], (BigInteger)row[1]));
+        }
+
+        return mappingResult;
+    }
+
+
+    @Override
+    public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
+
         StringBuilder queryString = new StringBuilder("select stopPlace from StopPlace stopPlace ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
 
-        if(query != null) {
-            parameters.put("query", query);
-            if(Longs.tryParse(query) != null) {
-                wheres.add("concat('', id) like concat('%', :query, '%')");
-            } else {
-                if(query.length() <= 3) {
-                  wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
+        boolean hasIdFilter = stopPlaceSearch.getIdList() != null && !stopPlaceSearch.getIdList().isEmpty();
+
+        if(hasIdFilter) {
+            wheres.add("stopPlace.id in :idList");
+            parameters.put("idList", stopPlaceSearch.getIdList());
+        } else {
+            if (stopPlaceSearch.getQuery() != null) {
+                parameters.put("query", stopPlaceSearch.getQuery());
+                if (Longs.tryParse(stopPlaceSearch.getQuery()) != null) {
+                    wheres.add("concat('', id) like concat('%', :query, '%')");
                 } else {
-                    wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+                    if (stopPlaceSearch.getQuery().length() <= 3) {
+                        wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
+                    } else {
+                        wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+                    }
                 }
+                operators.add("and");
             }
-            operators.add("and");
+
+            if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
+                wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
+                parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations());
+                operators.add("and");
+            }
+
+            boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
+            boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
+
+            if (hasMunicipalityFilter && !hasIdFilter) {
+                String prefix;
+                if (hasCountyFilter) {
+                    operators.add("or");
+                    prefix = "(";
+                } else prefix = "";
+
+                wheres.add(prefix + "stopPlace.topographicPlaceRef.ref in :municipalityId");
+                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
+            }
+
+            if (hasCountyFilter && !hasIdFilter) {
+                String suffix = hasMunicipalityFilter ? ")" : "";
+                wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
+                parameters.put("countyId", stopPlaceSearch.getCountyIds());
+            }
         }
 
-        if(stopPlaceTypes != null && !stopPlaceTypes.isEmpty()) {
-            wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
-            parameters.put("stopPlaceTypes", stopPlaceTypes);
-            operators.add("and");
-        }
 
-        boolean hasMunicipalityFilter = municipalityIds != null && !municipalityIds.isEmpty();
-        boolean hasCountyFilter = countyIds != null && !countyIds.isEmpty();
-
-        if(hasMunicipalityFilter){
-            String prefix;
-            if(hasCountyFilter) {
-                operators.add("or");
-                prefix = "(";
-            } else prefix = "";
-
-            wheres.add(prefix+"stopPlace.topographicPlaceRef.ref in :municipalityId");
-            parameters.put("municipalityId", municipalityIds);
-        }
-
-        if(hasCountyFilter) {
-            String posix = hasMunicipalityFilter ? ")" : "";
-            wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)"+posix);
-            parameters.put("countyId", countyIds);
-        }
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
@@ -194,11 +231,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         parameters.forEach(typedQuery::setParameter);
 
-        typedQuery.setFirstResult(pageable.getOffset());
-        typedQuery.setMaxResults(pageable.getPageSize());
+        typedQuery.setFirstResult(stopPlaceSearch.getPageable().getOffset());
+        typedQuery.setMaxResults(stopPlaceSearch.getPageable().getPageSize());
 
         List<StopPlace> stopPlaces = typedQuery.getResultList();
-        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+        return new PageImpl<>(stopPlaces, stopPlaceSearch.getPageable(), stopPlaces.size());
 
     }
 

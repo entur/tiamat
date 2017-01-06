@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.importers;
 
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -24,43 +26,42 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleStopPlaceImporter.class);
 
-    private TopographicPlaceCreator topographicPlaceCreator;
+    private final TopographicPlaceCreator topographicPlaceCreator;
 
-    private QuayRepository quayRepository;
+    private final QuayRepository quayRepository;
 
-    private StopPlaceRepository stopPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
+
+    private final NetexMapper netexMapper;
 
 
     @Autowired
-    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
+    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
+        this.netexMapper = netexMapper;
     }
 
     @Override
-    public StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
-                                     AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        if (stopPlace.getCentroid() == null
-                || stopPlace.getCentroid().getLocation() == null
-                || stopPlace.getCentroid().getLocation().getGeometryPoint() == null) {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
+                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+        if (!stopPlace.hasCoordinates()) {
             logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
             return null;
         }
 
-        topographicPlaceCreator.setTopographicReference(stopPlace,
-                siteFrame.getTopographicPlaces().getTopographicPlace(),
-                topographicPlacesCreatedCounter);
-
-        logger.trace("Resetting IDs for stop place");
-        resetIds(stopPlace);
+        if(siteFrame.getTopographicPlaces() != null) {
+            topographicPlaceCreator.setTopographicReference(stopPlace,
+                    siteFrame.getTopographicPlaces().getTopographicPlace(),
+                    topographicPlacesCreatedCounter);
+        } else {
+            logger.warn("Site frame does not contain any topographic places");
+        }
 
         if (stopPlace.getQuays() != null) {
             logger.debug("Stop place has {} quays", stopPlace.getQuays().size());
             stopPlace.getQuays().forEach(quay -> {
-
-                logger.trace("Resetting IDs for quay");
-                resetIds(quay);
                 logger.debug("Saving quay ");
                 quayRepository.save(quay);
             });
@@ -68,20 +69,7 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getId());
-        return stopPlace;
+        return netexMapper.mapToNetexModel(stopPlace);
     }
 
-    /**
-     * Incoming data might contain IDs which may not correspond with our IDs. Reset.
-     * @param zone
-     */
-    public void resetIds(Zone_VersionStructure zone) {
-        zone.setId(null);
-        if(zone.getCentroid() != null) {
-            zone.getCentroid().setId(null);
-            if(zone.getCentroid().getLocation() != null) {
-                zone.getCentroid().getLocation().setId(0);
-            }
-        }
-    }
 }

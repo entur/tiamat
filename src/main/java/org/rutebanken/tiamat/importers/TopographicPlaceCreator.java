@@ -81,6 +81,7 @@ public class TopographicPlaceCreator {
     public Optional<TopographicPlace> findOrCreateTopographicPlace(List<TopographicPlace> incomingTopographicPlaces,
                                                                    TopographicPlaceRefStructure topographicPlaceRef,
                                                                    AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+        if(topographicPlaceRef.getRef() == null) return Optional.empty();
         return topographicPlaces.get(topographicPlaceRef.getRef(), () -> findOrCreate(
                 incomingTopographicPlaces,
                 topographicPlaceRef,

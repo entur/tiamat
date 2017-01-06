@@ -1,47 +1,33 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
-import javax.persistence.*;
-import java.math.BigInteger;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Quay extends StopPlaceSpace_VersionStructure {
 
-    protected String publicCode;
-
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<BoardingPosition> boardingPositions = new ArrayList<>();
     protected String plateCode;
 
-    protected BigInteger shortCode;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<DestinationDisplayView> destinations;
-    //protected DestinationDisplayViews_RelStructure destinations;
-
-    @Transient
+    /**
+     * TODO: reconsider data type for compass bearing.
+     * https://rutebanken.atlassian.net/browse/NRP-895
+     */
     protected Float compassBearing;
 
-    @Enumerated(EnumType.STRING)
-    protected CompassBearing8Enumeration compassOctant;
-
-    @Enumerated(EnumType.STRING)
-    protected QuayTypeEnumeration quayType;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    protected QuayReference parentQuayRef;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private final List<BoardingPosition> boardingPositions = new ArrayList<>();
-    //protected BoardingPositions_RelStructure boardingPositions;
-
-    public String getPublicCode() {
-        return publicCode;
+    public Quay(EmbeddableMultilingualString name) {
+        super(name);
     }
 
-    public void setPublicCode(String value) {
-        this.publicCode = value;
+    public Quay() {
     }
 
     public String getPlateCode() {
@@ -52,22 +38,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         this.plateCode = value;
     }
 
-    public BigInteger getShortCode() {
-        return shortCode;
-    }
-
-    public void setShortCode(BigInteger value) {
-        this.shortCode = value;
-    }
-
-     /*   public DestinationDisplayViews_RelStructure getDestinations() {
-        return destinations;
-    }
-*/
-    //   public void setDestinations(DestinationDisplayViews_RelStructure value) {
-    //       this.destinations = value;
-    //   }
-
     public Float getCompassBearing() {
         return compassBearing;
     }
@@ -76,50 +46,30 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         this.compassBearing = value;
     }
 
-    public CompassBearing8Enumeration getCompassOctant() {
-        return compassOctant;
-    }
-
-    public void setCompassOctant(CompassBearing8Enumeration value) {
-        this.compassOctant = value;
-    }
-
-    public QuayTypeEnumeration getQuayType() {
-        return quayType;
-    }
-
-    public void setQuayType(QuayTypeEnumeration value) {
-        this.quayType = value;
-    }
-
-    public QuayReference getParentQuayRef() {
-        return parentQuayRef;
-    }
-
-    public void setParentQuayRef(QuayReference value) {
-        this.parentQuayRef = value;
-    }
-
-    public List<DestinationDisplayView> getDestinations() {
-        return destinations;
-    }
-
-    public void setDestinations(List<DestinationDisplayView> destinations) {
-        this.destinations = destinations;
-    }
-
     public List<BoardingPosition> getBoardingPositions() {
         return boardingPositions;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        } else if (!(object instanceof Quay)) {
+            return false;
+        }
 
-       /* public BoardingPositions_RelStructure getBoardingPositions() {
-        return boardingPositions;
-    }*
+        Quay other = (Quay) object;
 
-       /* public void setBoardingPositions(BoardingPositions_RelStructure value) {
-        this.boardingPositions = value;
-    }*/
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.centroid, other.centroid)
+                && Objects.equals(this.compassBearing, other.compassBearing)
+                && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, centroid, compassBearing, getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
+    }
 
     @Override
     public String toString() {
@@ -127,8 +77,9 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .omitNullValues()
                 .add("id", id)
                 .add("name", name)
+                .add("centroid", centroid)
+                .add("bearing", compassBearing)
                 .add("keyValues", getKeyValues())
                 .toString();
     }
-
 }
