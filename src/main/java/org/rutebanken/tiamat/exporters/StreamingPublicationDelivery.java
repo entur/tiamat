@@ -91,7 +91,7 @@ public class StreamingPublicationDelivery {
         for(String line : lines) {
             boolean addClosingSiteFrameTag = false;
 
-            if(line.contains("SiteFrame")) {
+            if(line.contains("<SiteFrame")) {
                 if(line.contains("/>")) {
 
                     String modifiedLine = line.replace("/>", ">");
@@ -109,21 +109,9 @@ public class StreamingPublicationDelivery {
                 bufferedWriter.write("<stopPlaces>");
                 bufferedWriter.write(lineSeparator);
 
-                while(true) {
-                    logger.info("About to take from queue");
-                    org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
+                logger.info("Marshalling stops");
+                marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
 
-                    if(stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
-                        logger.info("Got poison pill from stop place queue. Finished marshalling stop places.");
-                        break;
-                    }
-
-                    logger.debug("Marshalling stop place {}", stopPlace);
-                    StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
-                    JAXBElement<StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
-                    stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
-                    bufferedWriter.write(lineSeparator);
-                }
                 bufferedWriter.write("</stopPlaces>");
                 bufferedWriter.write(lineSeparator);
 
@@ -138,6 +126,29 @@ public class StreamingPublicationDelivery {
             }
         }
     }
+
+    public void marshalStops(BlockingQueue<org.rutebanken.tiamat.model.StopPlace> stopPlacesQueue,
+                              BufferedWriter bufferedWriter,
+                              Marshaller stopPlaceMarshaller,
+                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
+
+        while(true) {
+            logger.info("About to take from queue");
+            org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
+
+            if(stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
+                logger.info("Got poison pill from stop place queue. Finished marshalling stop places.");
+                break;
+            }
+
+            logger.debug("Marshalling stop place {}", stopPlace);
+            StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+            JAXBElement<StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
+            stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
+            bufferedWriter.write(lineSeparator);
+        }
+    }
+
 //
 //    public void nonamespacewriter() throws XMLStreamException {
 //
