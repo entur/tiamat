@@ -13,8 +13,6 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,14 +39,14 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
 
         if(stopPlaceSearch.isEmpty()) {
-            return exportPublicationDelivery(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
+            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
         } else {
-            return exportPublicationDelivery(stopPlaceRepository.findStopPlace(stopPlaceSearch));
+            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
         }
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
-        return exportPublicationDelivery(stopPlaceRepository.findAll());
+        return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAll());
     }
 
     public PublicationDeliveryStructure exportSiteFrame(SiteFrame siteFrame) {
@@ -66,7 +64,11 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure exportPublicationDelivery(Iterable<StopPlace> iterableStopPlaces) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
+        return exportPublicationDeliveryWithoutStops(null);
+    }
+
+    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops(Iterable<StopPlace> iterableStopPlaces) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
@@ -75,11 +77,13 @@ public class PublicationDeliveryExporter {
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
-        iterableStopPlaces.forEach(stopPlace -> stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace));
-        logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
-        siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
-        if(siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
-            siteFrame.setStopPlaces(null);
+        if(iterableStopPlaces != null) {
+            iterableStopPlaces.forEach(stopPlace -> stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace));
+            logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
+            siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
+            if(siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
+                siteFrame.setStopPlaces(null);
+            }
         }
 
         List<TopographicPlace> allTopographicPlaces = topographicPlaceRepository.findAll();

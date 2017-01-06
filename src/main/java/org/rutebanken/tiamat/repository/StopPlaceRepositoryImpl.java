@@ -172,18 +172,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         BlockingQueue<StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
 
-        new Thread(() -> {
+        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
-            Session session = entityManager.unwrap(Session.class);
+        Criteria query = session.createCriteria(StopPlace.class);
 
-            Criteria query = session.createCriteria(StopPlace.class);
+        query.setReadOnly(true);
+        query.setFetchSize(fetchSize);
 
-            query.setReadOnly(true);
-            query.setFetchSize(fetchSize);
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 
+        Thread thread = new Thread(() -> {
             int counter = 0;
-            ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
             try {
+                logger.info("{}", results.next());
                 while (results.next()) {
                     Object row = results.get()[0];
                     StopPlace stopPlace = (StopPlace) row;
@@ -199,10 +200,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 logger.warn("Got interupted while scrolling stop place results", e);
                 Thread.currentThread().interrupt();
                 return;
+            } finally {
+                logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
+                results.close();
+                blockingQueue.add(POISON_PILL);
             }
-            results.close();
-            blockingQueue.add(POISON_PILL);
-        }).start();
+        });
+        thread.setName("scroll-results");
+        thread.start();
         return blockingQueue;
     }
 
