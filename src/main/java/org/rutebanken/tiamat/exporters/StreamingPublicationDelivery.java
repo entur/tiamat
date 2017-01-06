@@ -127,6 +127,7 @@ public class StreamingPublicationDelivery {
                 bufferedWriter.write(lineSeparator);
             }
         }
+        bufferedWriter.close();
     }
 
     public void marshalStops(BlockingQueue<org.rutebanken.tiamat.model.StopPlace> stopPlacesQueue,
