@@ -80,17 +80,17 @@ public class AsyncPublicationDeliveryExporter {
 
                     final PipedInputStream in = new PipedInputStream();
                     final PipedOutputStream out = new PipedOutputStream(in);
-                    final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
-                    zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
 
                     Thread outputStreamThread = new Thread(
                             new Runnable() {
                                 public void run() {
+                                    final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+
                                     try {
                                         logger.info("Streaming output thread running");
-                                        
+                                        zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
                                         streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceRepository.scrollStopPlaces(), zipOutputStream);
-
+                                        zipOutputStream.closeEntry();
                                     } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
                                         exportJob.setStatus(JobStatus.FAILED);
                                         String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getMessage();
@@ -100,8 +100,9 @@ public class AsyncPublicationDeliveryExporter {
                                             Thread.currentThread().interrupt();
                                         }
                                     } finally {
+
                                         try {
-                                            zipOutputStream.finish();
+                                            zipOutputStream.close();
                                         } catch (IOException e) {
                                             logger.warn("Could not close stream", e);
                                         }
