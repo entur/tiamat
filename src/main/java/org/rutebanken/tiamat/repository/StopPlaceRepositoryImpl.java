@@ -189,7 +189,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     StopPlace stopPlace = (StopPlace) row;
 
                     if(++counter % fetchSize == 0) {
-                        logger.info("Scrolling stop places. Counter is currently at {]", counter);
+                        logger.info("Scrolling stop places. Counter is currently at {}", counter);
                     }
 
                     blockingQueue.put(stopPlace);
