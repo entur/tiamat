@@ -122,7 +122,7 @@ public class StreamingPublicationDelivery {
                 bufferedWriter.write(lineSeparator);
             }
         } finally {
-            bufferedWriter.close();
+            bufferedWriter.flush();
         }
     }
 
