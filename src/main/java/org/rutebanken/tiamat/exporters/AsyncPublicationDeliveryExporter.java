@@ -24,6 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class AsyncPublicationDeliveryExporter {
@@ -61,7 +63,8 @@ public class AsyncPublicationDeliveryExporter {
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(ZonedDateTime.now());
         exportJobRepository.save(exportJob);
-        exportJob.setFileName(createFileName(exportJob.getId(), exportJob.getStarted()));
+        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
+        exportJob.setFileName(fileNameWithoutExtention + ".zip");
         exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
         exportJobRepository.save(exportJob);
         
@@ -77,24 +80,30 @@ public class AsyncPublicationDeliveryExporter {
 
                     final PipedInputStream in = new PipedInputStream();
                     final PipedOutputStream out = new PipedOutputStream(in);
+                    final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+                    zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
 
                     Thread outputStreamThread = new Thread(
                             new Runnable() {
                                 public void run() {
                                     try {
                                         logger.info("Streaming output thread running");
-
-                                        logger.info("Write to streaming output which is piped to input stream");
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceRepository.scrollStopPlaces(), out);
-
-                                        out.close();
+                                        
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceRepository.scrollStopPlaces(), zipOutputStream);
 
                                     } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
                                         exportJob.setStatus(JobStatus.FAILED);
-                                        String message = "Error executing export job " + exportJob + ". Cause: " + e.getMessage();
-                                        logger.error(message, e);
+                                        String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getMessage();
+                                        logger.error(message + " " + exportJob, e);
+                                        exportJob.setMessage(message);
                                         if (e instanceof InterruptedException) {
                                             Thread.currentThread().interrupt();
+                                        }
+                                    } finally {
+                                        try {
+                                            zipOutputStream.finish();
+                                        } catch (IOException e) {
+                                            logger.warn("Could not close stream", e);
                                         }
                                     }
                                 }
@@ -125,8 +134,8 @@ public class AsyncPublicationDeliveryExporter {
         return exportJob;
     }
 
-    public String createFileName(long exportJobId, ZonedDateTime started) {
-        return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER) + ".xml";
+    public String createFileNameWithoutExtention(long exportJobId, ZonedDateTime started) {
+        return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER);
     }
 
     public ExportJob getExportJob(long exportJobId) {
