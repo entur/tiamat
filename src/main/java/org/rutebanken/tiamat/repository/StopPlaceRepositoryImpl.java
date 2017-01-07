@@ -198,6 +198,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 logger.warn("Got interupted while scrolling stop place results", e);
                 Thread.currentThread().interrupt();
                 return;
+            } catch (Exception e) {
+                logger.warn("Got exception while scrolling stop place results", e);
             } finally {
                 logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
                 results.close();
