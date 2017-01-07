@@ -8,8 +8,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -66,10 +73,10 @@ public class StopPlaceRepositoryImplTest {
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
-        BlockingQueue<StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
-        StopPlace actual = stopPlaces.take();
-        assertThat(actual.getId()).isEqualTo(stopPlace.getId());
-        StopPlace poison = stopPlaces.take();
+        BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
+        org.rutebanken.netex.model.StopPlace actual = stopPlaces.take();
+        assertThat(actual.getId()).contains(String.valueOf(stopPlace.getId()));
+        org.rutebanken.netex.model.StopPlace poison = stopPlaces.take();
         assertThat(poison.getId()).isEqualTo(StopPlaceRepositoryImpl.POISON_PILL.getId());
     }
 

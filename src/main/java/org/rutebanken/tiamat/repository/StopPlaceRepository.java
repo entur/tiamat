@@ -25,7 +25,7 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     StopPlace findOne(Long stopPlaceId);
 
     @Override
-    BlockingQueue<StopPlace> scrollStopPlaces();
+    BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces();
 
 }
 

@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
     private GeometryFactory geometryFactory;
+
+    @Autowired
+    private NetexMapper netexMapper;
 
     @Override
     public StopPlace findStopPlaceDetailed(Long stopPlaceId) {
@@ -160,17 +164,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
-    public static final StopPlace POISON_PILL = new StopPlace();
+    public static final org.rutebanken.netex.model.StopPlace POISON_PILL = new org.rutebanken.netex.model.StopPlace();
     static {
-        POISON_PILL.setId(-100L);
+        POISON_PILL.setId("POISON");
     }
 
     @Override
-    public BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException {
+    public BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces() throws InterruptedException {
 
         final int fetchSize = 100;
 
-        BlockingQueue<StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
+        BlockingQueue<org.rutebanken.netex.model.StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
 
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
@@ -192,7 +196,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                         logger.info("Scrolling stop places. Counter is currently at {}", counter);
                     }
 
-                    blockingQueue.put(stopPlace);
+
+                    blockingQueue.put(netexMapper.mapToNetexModel(stopPlace));
                 }
             } catch (InterruptedException e) {
                 logger.warn("Got interupted while scrolling stop place results", e);
