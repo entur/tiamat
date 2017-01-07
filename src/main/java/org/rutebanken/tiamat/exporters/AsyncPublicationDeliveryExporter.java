@@ -12,20 +12,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.xml.sax.SAXException;
 
-import javax.xml.bind.*;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static javax.xml.bind.JAXBContext.newInstance;
 
 @Service
 public class AsyncPublicationDeliveryExporter {
@@ -93,9 +91,11 @@ public class AsyncPublicationDeliveryExporter {
 
                                     } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
                                         exportJob.setStatus(JobStatus.FAILED);
-                                        String message = "Error executing export job " + exportJob;
+                                        String message = "Error executing export job " + exportJob + ". Cause: " + e.getMessage();
                                         logger.error(message, e);
-                                        Thread.currentThread().interrupt();
+                                        if (e instanceof InterruptedException) {
+                                            Thread.currentThread().interrupt();
+                                        }
                                     }
                                 }
                             }
