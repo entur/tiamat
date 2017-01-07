@@ -77,6 +77,7 @@ public class StreamingPublicationDelivery {
 
     /**
      * In order to not hold all stop places in memory at once, we need to marshal stop places from a queue.
+     * Requires a publication delivery xml that contains newlines.
      */
     public void stream(String publicationDeliveryStructureXml, BlockingQueue<org.rutebanken.tiamat.model.StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
@@ -89,36 +90,36 @@ public class StreamingPublicationDelivery {
             String lineSeparator = System.getProperty("line.separator");
             String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(lineSeparator);
 
-            for (String publicationDeliveryLine : publicationDeliveryLines) {
+            for (int index = 0; index < publicationDeliveryLines.length; index++) {
+                String publicationDeliveryLine = publicationDeliveryLines[index];
                 logger.debug("Line: {}", publicationDeliveryLine);
-                boolean addClosingSiteFrameTag = false;
 
                 if (publicationDeliveryLine.contains("<SiteFrame")) {
                     if (publicationDeliveryLine.contains("/>")) {
 
+                        // Handle empty site frame
                         String modifiedLine = publicationDeliveryLine.replace("/>", ">");
 
                         bufferedWriter.write(modifiedLine);
                         bufferedWriter.write(lineSeparator);
 
-                        addClosingSiteFrameTag = true;
+                        marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+
+                        bufferedWriter.write("</SiteFrame>");
+                        bufferedWriter.write(lineSeparator);
+
                     } else {
                         bufferedWriter.write(publicationDeliveryLine);
                         bufferedWriter.write(lineSeparator);
                     }
-
-                    logger.info("Marshalling stops");
-                    marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
-
-
-                    if (addClosingSiteFrameTag) {
-                        bufferedWriter.write("</SiteFrame>");
-                        bufferedWriter.write(lineSeparator);
-                    }
-                } else {
-                    bufferedWriter.write(publicationDeliveryLine);
-                    bufferedWriter.write(lineSeparator);
+                    continue;
                 }
+                if (publicationDeliveryLine.contains("</SiteFrame>")) {
+                    // Marhsal stops after other nodes, such as topographic places
+                    marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                }
+                bufferedWriter.write(publicationDeliveryLine);
+                bufferedWriter.write(lineSeparator);
             }
         } finally {
             bufferedWriter.close();
@@ -129,13 +130,14 @@ public class StreamingPublicationDelivery {
                              BufferedWriter bufferedWriter,
                              Marshaller stopPlaceMarshaller,
                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
+        logger.info("Marshaling stops");
 
         int count = 0;
         while (true) {
             org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlacesQueue.take();
 
             if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
-                logger.info("Got poison pill from stop place queue. Finished marshalling {} stop places.", count);
+                logger.info("Got poison pill from stop place queue. Finished marshaling {} stop places.", count);
                 break;
             }
 
