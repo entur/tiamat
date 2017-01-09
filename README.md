@@ -98,22 +98,25 @@ For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.ht
 docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
 ```
 
-# Export *ALL* data from Tiamat
+# Async export *ALL* data from Tiamat
 
-Note that you need to run this with enough memory available, or else you might
-run into **java.lang.OutOfMemoryError: GC overhead limit exceeded**. Exactly
-how much memory should be tested. **Note** at the time of writing
-(24.08.2016), this does not work due to GW timeout,
-
+Start async export:
 ```
-curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET https://nhr.rutebanken.org/jersey/site_frame > netex_site_frame_stop_places.xml
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
 ```
 
-Alternative:
 
+Check job status:
 ```
-kubectl exec -i tiamat-HASH -- curl -H"Accept: application/xml" -H"Content-type: application/xml" -XGET http://localhost:8777/jersey/site_frame > netex_site_frame_stop_places.xml
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
 ```
+
+When job is done. Download it:
+```
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
+```
+
+See also https://rutebanken.atlassian.net/browse/NRP-924
 
 ## Database creation
 
