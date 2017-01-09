@@ -55,7 +55,8 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
-                .field("keyList", "keyValues")
+//                .field()
+                .fieldBToA("keyValues", "keyList")
                 .customize(new DataManagedObjectStructureIdMapper())
                 .exclude("id")
                 .exclude("keyList")

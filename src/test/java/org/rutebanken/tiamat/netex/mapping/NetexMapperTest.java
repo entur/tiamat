@@ -14,7 +14,6 @@ public class NetexMapperTest {
 
     private NetexMapper netexMapper = new NetexMapper();
 
-
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
 
