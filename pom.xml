@@ -243,7 +243,12 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.11.0.SP6-SNAPSHOT</version>
+            <!--
+                https://rutebanken.atlassian.net/browse/NRP-907
+                https://github.com/jboss/xerces/pull/14
+                https://issues.apache.org/jira/browse/XERCESJ-1276
+            -->
+            <version>2.11.0.SP6-RB</version>
         </dependency>
 
         <dependency>
