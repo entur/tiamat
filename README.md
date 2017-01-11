@@ -122,7 +122,7 @@ publicationDeliveryStreamingOutput.validateAgainstSchema
 publicationDeliveryUnmarshaller.validateAgainstSchema
 ```
 
-# Import data into Tiamat
+# Import data into Tiamat TODO: outdated
 
 If you are running this from `spring:run`, then you need to make sure that you
 have enough memory available for the java process:
@@ -153,8 +153,58 @@ Example site frame data can be found on the jump server (/var/www/...). There ar
 
 *Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times. It also might happen that you loose the connection, but the import continues to run in Tiamat. Please monitor the logs of Tiamat while using the import.*
 
+# NeTEx export with query params
+It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery
 
-# Async export *ALL* data from Tiamat
+## Query by name example:
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=Arne%20Garborgs%20vei
+```
+
+## Query by ids that contains the number 3115
+ ```
+ https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=3115
+ ```
+
+## Query by stop place type
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?stopPlaceType=onstreetBus
+```
+It is also possible with multiple types.
+
+## Query by topographic place ref
+
+### First, get references from this end point:
+```
+https://test.rutebanken.org/admin/nsr/jersey/topographic_place
+```
+
+### Then you can set *countyReference* or *municipalityReference*
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
+```
+
+# Size of results
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?size=1000
+```
+
+# Page
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?page=1
+```
+
+# ID list
+You can specify a list of NSR stop place IDs to return
+```
+https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+```
+
+See the possible params
+https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/tiamat/rest/dto/DtoStopPlaceSearch.java
+
+# Async NeTEx export *ALL* data from Tiamat
 
 Start async export:
 ```
