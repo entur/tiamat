@@ -98,26 +98,6 @@ For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.ht
 docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
 ```
 
-# Async export *ALL* data from Tiamat
-
-Start async export:
-```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
-```
-
-
-Check job status:
-```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
-```
-
-When job is done. Download it:
-```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
-```
-
-See also https://rutebanken.atlassian.net/browse/NRP-924
-
 ## Database creation
 
 Before starting tiamat, you need to run the following commands:
@@ -172,6 +152,28 @@ Example site frame data can be found on the jump server (/var/www/...). There ar
 
 
 *Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times. It also might happen that you loose the connection, but the import continues to run in Tiamat. Please monitor the logs of Tiamat while using the import.*
+
+
+# Async export *ALL* data from Tiamat
+
+Start async export:
+```
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
+```
+
+
+Check job status:
+```
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
+```
+
+When job is done. Download it:
+```
+curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
+```
+
+See also https://rutebanken.atlassian.net/browse/NRP-924
+
 
 
 # See also
