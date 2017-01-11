@@ -2,16 +2,16 @@
 
 Module also known as the backend for "Stoppestedsregisteret"
 
-# Build
+## Build
 `mvn clean install`
 
-# Run with in-memory GeoDB (H2)
+## Run with in-memory GeoDB (H2)
 ```
 mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
 ```
 (default profiles are set in application.properties)
 
-# Run with external properties file and PostgreSQL
+## Run with external properties file and PostgreSQL
 To run with PostgreSQL you ned an external application.properties.
 Below is an example of application.properties:
 ```
@@ -36,20 +36,20 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 
 `mvn spring-boot:run -Dspring.config.location=/path/to/tiamat.properties`
 
-# Database
+## Database
 
-## HikariCP
+### HikariCP
 Tiamat is using HikariCP. Most properties should be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
 See also http://stackoverflow.com/a/26514779
 
-## Postgres
+### Postgres
 
-### Run postgres/gis for tiamat in docker for development 
+#### Run postgres/gis for tiamat in docker for development 
 ```
 docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
 ```
 
-### Database creation in google cloud / kubernetes
+#### Database creation in google cloud / kubernetes
 
 Before starting tiamat, you need to run the following commands:
 
@@ -64,7 +64,7 @@ CREATE EXTENSION postgis_topology;
 ```
 
 
-### Postgres docker container in vagrant
+#### Postgres docker container in vagrant
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
 ```
@@ -73,13 +73,13 @@ ONLY_TAGS=rb PLAY=run vagrant provision
 ```
 
 
-# Bootstrap generation of data from GTFS stops.txt for development
+## Bootstrap generation of data from GTFS stops.txt for development
 It is not common to do this anymore. It reads an old stops.txt file and generates data. It is probably better to use a NeTEx export from google cloud storage.
 ```
 mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties
 ```
 
-## Run with external config **and** bootstrap data from GTFS for development
+### Run with external config **and** bootstrap data from GTFS for development
 Can be used with an empty PostgreSQL.
 ```
 mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties
@@ -120,49 +120,49 @@ publicationDeliveryStreamingOutput.validateAgainstSchema=false
 publicationDeliveryUnmarshaller.validateAgainstSchema=true
 ```
 
-# NeTEx export with query params
+## NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery
 
-## Query by name example:
+### Query by name example:
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=Arne%20Garborgs%20vei
 ```
 
-## Query by ids that contains the number 3115
+### Query by ids that contains the number 3115
  ```
  https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=3115
  ```
 
-## Query by stop place type
+### Query by stop place type
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?stopPlaceType=onstreetBus
 ```
 It is also possible with multiple types.
 
-## Query by topographic place ref
+### Query by topographic place ref
 
-### First, get references from this endpoint:
+#### First, get references from this endpoint:
 ```
 https://test.rutebanken.org/admin/nsr/jersey/topographic_place
 ```
 
-### Then you can set *countyReference* or *municipalityReference*
+#### Then you can set *countyReference* or *municipalityReference*
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
 ```
 
-## Size of results
+### Size of results
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?size=1000
 ```
 
-## Page
+### Page
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?page=1
 ```
 
-## ID list
+### ID list
 You can specify a list of NSR stop place IDs to return
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
@@ -171,26 +171,26 @@ https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:Sto
 See the possible params
 https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/tiamat/rest/dto/DtoStopPlaceSearch.java
 
-# Async NeTEx export *ALL* data from Tiamat
+## Async NeTEx export *ALL* data from Tiamat
 At the time of writing, you need to export everything with async export.
-### Start async export:
+#### Start async export:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
 ```
 
-### Check job status:
+#### Check job status:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
 ```
 
-### When job is done. Download it:
+#### When job is done. Download it:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
 
-# Truncate data in tiamat database
+## Truncate data in tiamat database
 Clean existing data in postgresql (streamline if frequently used):
 ```
 TRUNCATE stop_place CASCADE;
@@ -198,7 +198,7 @@ TRUNCATE quay CASCADE;
 TRUNCATE topographic_place CASCADE;
 ```
 
-# Import data into Tiamat
+## Import data into Tiamat
 
 If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process:
 ```
@@ -224,5 +224,5 @@ curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://loca
 
 
 
-# See also
+## See also
 https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
