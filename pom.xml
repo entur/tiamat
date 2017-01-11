@@ -232,6 +232,23 @@
             <groupId>org.opengeo</groupId>
             <artifactId>geodb</artifactId>
             <version>${geodb.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <!--
+                https://rutebanken.atlassian.net/browse/NRP-907
+                https://github.com/jboss/xerces/pull/14
+                https://issues.apache.org/jira/browse/XERCESJ-1276
+            -->
+            <version>2.11.0.SP6-RB</version>
         </dependency>
 
         <dependency>
