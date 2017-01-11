@@ -205,13 +205,13 @@ If you are running this from `spring:run`, then you need to make sure that you h
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
 
-## Import previously exported NeTEx file into emtpy Tiamat
+### Import previously exported NeTEx file into emtpy Tiamat
 This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will bypass the ID sequence and insert these IDs as primary keys into the database.
 ```
 curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/jersey/publication_delivery/initial_import
 ```
 
-## Import NeTEx file without *NSR* IDs
+### Import NeTEx file without *NSR* IDs
 This NeTEx file should not contain NSR ID.
 * Tiamat will match existing stops based on name and coordinates.
 * Tiamat will merge Quays inside stops that are close, have the same original ID and does not have too different compass bearing. 
