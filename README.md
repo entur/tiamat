@@ -1,15 +1,15 @@
 # Tiamat
 
-Module also known as the backend for "Holdeplassregisteret"
+Module also known as the backend for "Stoppestedsregisteret"
 
-## Build
-
+# Build
 `mvn clean install`
 
-## Local run
-
-`mvn spring-boot:run`
-
+# Run with in-memory GeoDB (H2)
+```
+mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
+```
+(default profiles are set in application.properties)
 
 # Run with external properties file and PostgreSQL
 To run with PostgreSQL you ned an external application.properties.
@@ -34,14 +34,37 @@ logging.level.no.rutebanken.tiamat.pelias=TRACE
 
 To start Tiamat with this configuration, specify **spring.config.location**:
 
-`mvn spring-boot:run -Dspring.config.location=/path/to/application.properties`
+`mvn spring-boot:run -Dspring.config.location=/path/to/tiamat.properties`
 
+# Database
 
 ## HikariCP
-Tiamat is using HikariCP. Most properties shoul be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
+Tiamat is using HikariCP. Most properties should be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
 See also http://stackoverflow.com/a/26514779
 
-# Postgres
+## Postgres
+
+### Run postgres/gis for tiamat in docker for development 
+```
+docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
+```
+
+### Database creation in google cloud / kubernetes
+
+Before starting tiamat, you need to run the following commands:
+
+```
+kubectl exec -it tiamatdb-HASH psql -- --username=postgres tiamat
+CREATE DATABASE template_postgis;
+UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template_postgis';
+CREATE DATABASE tiamat WITH encoding 'UTF8' template=template0;
+\c tiamat
+CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;
+```
+
+
+### Postgres docker container in vagrant
 There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
 
 ```
@@ -49,19 +72,14 @@ ONLY_TAGS=rb PLAY=build vagrant provision
 ONLY_TAGS=rb PLAY=run vagrant provision
 ```
 
-# Run with in-memory GeoDB and bootstrap generation of data from GTFS stops.txt
 
-`mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties`
-
-# Run with in-memory GeoDB without bootstrapped data from GTFS stops.txt
-
+# Bootstrap generation of data from GTFS stops.txt for development
+It is not common to do this anymore. It reads an old stops.txt file and generates data. It is probably better to use a NeTEx export from google cloud storage.
 ```
-mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
+mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties
 ```
-(default profiles are set in internal application.properties)
 
-# Run with external config **and** bootstrap data from GTFS:
-
+## Run with external config **and** bootstrap data from GTFS for development
 Can be used with an empty PostgreSQL.
 ```
 mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties
@@ -93,65 +111,14 @@ choose **one** of:
 For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
 
 
-# Run postgres/gis for tiamat in docker
-```
-docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
-```
-
-## Database creation
-
-Before starting tiamat, you need to run the following commands:
-
-```
-kubectl exec -it tiamatdb-HASH psql -- --username=postgres tiamat
-CREATE DATABASE template_postgis;
-UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template_postgis';
-CREATE DATABASE tiamat WITH encoding 'UTF8' template=template0;
-\c tiamat
-CREATE EXTENSION postgis;
-CREATE EXTENSION postgis_topology;
-```
-
-
 ## Validation for incoming and outgoing NeTEx publication delivery
 
-It is possible to configure if tiamat should validate incoming and outgoing netex xml when unmarshalling or marshalling publication deliveries.
+It is possible to configure if tiamat should validate incoming and outgoing NeTEx xml when unmarshalling or marshalling publication deliveries.
 Default values are true. Can be deactivated with setting properties to false.
 ```
-publicationDeliveryStreamingOutput.validateAgainstSchema
-publicationDeliveryUnmarshaller.validateAgainstSchema
+publicationDeliveryStreamingOutput.validateAgainstSchema=false
+publicationDeliveryUnmarshaller.validateAgainstSchema=true
 ```
-
-# Import data into Tiamat TODO: outdated
-
-If you are running this from `spring:run`, then you need to make sure that you
-have enough memory available for the java process:
-`export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'``
-
-Clean existing data in postgresql (streamline if frequently used):
-```
-TRUNCATE stop_place CASCADE;
-TRUNCATE quay CASCADE;
-TRUNCATE topographic_place CASCADE;
-```
-
-TODO: Update URLs to publication_delivery
-```
-curl --max-time 60000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@netex_site_frame_stop_places.xml http://nhr.rutebanken.org/jersey/site_frame
-```
-
-Alternative:
-
-```
-kc exec -i tiamat-HASH -- bash -c 'cat > /tmp/netex.xml' < netex_site_frame_stop_places.xml
-kc exec -i tiamat-HASH -- curl --max-time 60000 -H"Accept: application/xml" -H"Content-type: application/xml" -XPOST -d@/tmp/netex.xml http://localhost:8777/jersey/site_frame
-```
-
-
-Example site frame data can be found on the jump server (/var/www/...). There are several example files. Recent versions of Tiamat requires XML namespaces.
-
-
-*Note that the import above is somewhat fragile. It is developed during the proof of concept. For instance, it does allow you to call the import multiple times. It also might happen that you loose the connection, but the import continues to run in Tiamat. Please monitor the logs of Tiamat while using the import.*
 
 # NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
@@ -175,7 +142,7 @@ It is also possible with multiple types.
 
 ## Query by topographic place ref
 
-### First, get references from this end point:
+### First, get references from this endpoint:
 ```
 https://test.rutebanken.org/admin/nsr/jersey/topographic_place
 ```
@@ -185,17 +152,17 @@ https://test.rutebanken.org/admin/nsr/jersey/topographic_place
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
 ```
 
-# Size of results
+## Size of results
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?size=1000
 ```
 
-# Page
+## Page
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?page=1
 ```
 
-# ID list
+## ID list
 You can specify a list of NSR stop place IDs to return
 ```
 https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
@@ -205,24 +172,55 @@ See the possible params
 https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/tiamat/rest/dto/DtoStopPlaceSearch.java
 
 # Async NeTEx export *ALL* data from Tiamat
-
-Start async export:
+At the time of writing, you need to export everything with async export.
+### Start async export:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
 ```
 
-
-Check job status:
+### Check job status:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
 ```
 
-When job is done. Download it:
+### When job is done. Download it:
 ```
 curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
+
+# Truncate data in tiamat database
+Clean existing data in postgresql (streamline if frequently used):
+```
+TRUNCATE stop_place CASCADE;
+TRUNCATE quay CASCADE;
+TRUNCATE topographic_place CASCADE;
+```
+
+# Import data into Tiamat
+
+If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process:
+```
+export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
+```
+
+## Import previously exported NeTEx file into emtpy Tiamat
+This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will bypass the ID sequence and insert these IDs as primary keys into the database.
+```
+curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/jersey/publication_delivery/initial_import
+```
+
+## Import NeTEx file without *NSR* IDs
+This NeTEx file should not contain NSR ID.
+* Tiamat will match existing stops based on name and coordinates.
+* Tiamat will merge Quays inside stops that are close, have the same original ID and does not have too different compass bearing. 
+
+Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original IDs will be present in key value list on each object.
+ 
+```
+curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/jersey/publication_delivery
+```
 
 
 
