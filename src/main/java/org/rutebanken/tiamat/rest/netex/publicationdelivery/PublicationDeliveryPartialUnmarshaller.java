@@ -80,9 +80,9 @@ public class PublicationDeliveryPartialUnmarshaller {
 
         logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
         XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
-        readWithXmlEventReader(xmlInputFactory, inputStream, unmarshaller, resultQueues);
+        PublicationDeliveryStructure publicationDeliveryStructure = readWithXmlEventReader(xmlInputFactory, inputStream, unmarshaller, resultQueues);
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
-        return null;
+        return publicationDeliveryStructure;
     }
 
     public PublicationDeliveryStructure readWithXmlEventReader(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller, ResultQueues resultQueues) throws XMLStreamException, JAXBException, InterruptedException, IOException {
@@ -129,6 +129,13 @@ public class PublicationDeliveryPartialUnmarshaller {
         JAXBElement<PublicationDeliveryStructure> jaxbElement =
                 (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) unmarshaller.unmarshal(byteArrayInputStream);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
+
+        SiteFrame siteFrame = publicationDeliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame().stream()
+                .filter(element -> element.getValue() instanceof SiteFrame)
+                .map(element -> (SiteFrame) element.getValue())
+                .findFirst().get();
+
+        
 
         logger.info("{}", resultQueues);
         return publicationDeliveryStructure;
