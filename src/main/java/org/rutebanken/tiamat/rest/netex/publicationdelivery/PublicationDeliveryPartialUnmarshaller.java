@@ -132,7 +132,6 @@ public class PublicationDeliveryPartialUnmarshaller {
 
         logger.info("{}", resultQueues);
         return publicationDeliveryStructure;
-
     }
 
     public void writeCharacters(Characters characters, Writer writer) throws IOException {
@@ -194,9 +193,9 @@ public class PublicationDeliveryPartialUnmarshaller {
 
         public ResultQueues(int size) {
 
-            stopPlaceQueue = new ArrayBlockingQueue<StopPlace>(size);
-            topographicPlaceQueue = new ArrayBlockingQueue<TopographicPlace>(size);
-            navigationPathsQueue = new ArrayBlockingQueue<NavigationPath>(size);
+            stopPlaceQueue = new ArrayBlockingQueue<>(size);
+            topographicPlaceQueue = new ArrayBlockingQueue<>(size);
+            navigationPathsQueue = new ArrayBlockingQueue<>(size);
         }
 
 
