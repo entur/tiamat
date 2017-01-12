@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.rest.coordinates.CoordinatesFixerResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
 import org.rutebanken.tiamat.rest.dto.DtoTopographicPlaceResource;
+import org.rutebanken.tiamat.rest.dto.GraphQLResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.rutebanken.tiamat.rest.netex.siteframe.SiteFrameResource;
 import org.springframework.context.annotation.Configuration;
@@ -21,5 +22,6 @@ public class JerseyConfig extends ResourceConfig {
         register(DtoTopographicPlaceResource.class);
         register(SiteFrameResource.class);
         register(PublicationDeliveryResource.class);
+        register(GraphQLResource.class);
     }
 }
