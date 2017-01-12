@@ -34,6 +34,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.io.ByteStreams.toByteArray;
 import static javax.xml.bind.JAXBContext.newInstance;
 
+/**
+ * Unmarshal publication delivery in multiple steps:
+ * * Write everything to temp file
+ * * Unmarshal publication delivery from file, but filter out certain parts
+ * * Unmarshal publication delivery again, but unmarshal only stop places
+ * To be able to not having to hold everything in memory.
+ */
 @Component
 public class PublicationDeliveryPartialUnmarshaller {
 
