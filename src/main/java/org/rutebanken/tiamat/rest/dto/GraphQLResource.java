@@ -29,33 +29,34 @@ public class GraphQLResource {
 
 	public GraphQLResource() {
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema,
 				new ExecutorServiceExecutionStrategy(Executors
 						.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("GraphQLExecutor--%d").build())));
-		
+
 	}
 
 	private GraphQL graphQL;
 
-	
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response getGraphQL (HashMap<String, Object> query) {
-        Map<String, Object> variables;
-        if (query.get("variables") instanceof Map) {
-            variables = (Map) query.get("variables");
-        } else {
-            variables = new HashMap<>();
-        }
-        return getGraphQLResponse((String) query.get("query"), variables);
-    }
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getGraphQL (HashMap<String, Object> query) {
+		Map<String, Object> variables;
+		if (query.get("variables") instanceof Map) {
+			variables = (Map) query.get("variables");
+		} else {
+			variables = new HashMap<>();
+		}
+		return getGraphQLResponse((String) query.get("query"), variables);
+	}
 
 	@POST
 	@Consumes("application/graphql")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getGraphQL(String query) {
 
 		return getGraphQLResponse(query, new HashMap<>());
