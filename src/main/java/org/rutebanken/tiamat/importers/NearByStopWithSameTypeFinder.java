@@ -63,11 +63,12 @@ public class NearByStopWithSameTypeFinder implements StopPlaceFinder {
 
         MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
         Geometry metricGeometry = JTS.transform(point, transform);
-        metricGeometry.buffer(meters);
+        Geometry metricBuffer = metricGeometry.buffer(meters);
 
+        // Back to source
         MathTransform transformBack = CRS.findMathTransform(targetCRS, sourceCRS);
 
-        Geometry buffer = JTS.transform(metricGeometry, transformBack);
+        Geometry buffer = JTS.transform(metricBuffer, transformBack);
         Envelope envelope = buffer.getEnvelopeInternal();
 
         return envelope;
