@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class NearbyStopPlaceFinder {
+public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     private static final double BOUNDING_BOX_BUFFER = 0.004;
 
@@ -41,6 +41,7 @@ public class NearbyStopPlaceFinder {
 
     }
 
+    @Override
     public StopPlace find(StopPlace stopPlace) {
 
         if(!stopPlace.hasCoordinates()) {

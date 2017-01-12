@@ -21,7 +21,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
  * It uses a guava cache to avoid expensive calls to the database.
  */
 @Component
-public class StopPlaceFromOriginalIdFinder {
+public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromOriginalIdFinder.class);
 
@@ -40,6 +40,7 @@ public class StopPlaceFromOriginalIdFinder {
                 .build();
     }
 
+    @Override
     public StopPlace find(StopPlace stopPlace) {
 
         Set<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);

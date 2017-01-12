@@ -213,6 +213,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return existingStopPlace;
         }
 
+        // Find existing nearby stop place based on type
+
+
         if (newStopPlace.getName() != null) {
             final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
             if (nearbyStopPlace != null) {
