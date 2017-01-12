@@ -191,15 +191,17 @@ public class PublicationDeliveryResource {
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .findFirst().get();
 
-//            while(true) {
-//                org.rutebanken.netex.model.TopographicPlace topographicPlace = unmarshalResult.getTopographicPlaceQueue().take();
-//                if(topographicPlace.getId() == PublicationDeliveryPartialUnmarshaller.POISON_TOPOGRAPHIC_PLACE.getId()) {
-//                    logger.info("Finished importing topographic places");
-//                    break;
-//                }
-//                netexMapper.
-//            }
+            while(true) {
+                org.rutebanken.netex.model.TopographicPlace topographicPlace = unmarshalResult.getTopographicPlaceQueue().take();
+                if(topographicPlace.getId() == PublicationDeliveryPartialUnmarshaller.POISON_TOPOGRAPHIC_PLACE.getId()) {
+                    logger.info("Finished importing topographic places");
+                    break;
+                }
+                TopographicPlace tiamatTopographicPlace = netexMapper.mapToTiamatModel(topographicPlace);
+                siteFrame.getTopographicPlaces().getTopographicPlace().add(tiamatTopographicPlace);
+            }
 
+            int stopPlacesImported = 0;
             while(true) {
                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
                 if(stopPlace.getId().equals(PublicationDeliveryPartialUnmarshaller.POISON_STOP_PLACE.getId())) {
@@ -208,25 +210,22 @@ public class PublicationDeliveryResource {
                 }
                 logger.info("Importing {}", stopPlace);
                 simpleStopPlaceImporter.importStopPlace(netexMapper.mapToTiamatModel(stopPlace), siteFrame, topographicPlacesCounter);
+                stopPlacesImported++;
             }
 
-            // stop place
+//
+//            siteFrame.getStopPlaces().getStopPlace().stream()
+//                    .peek(stopPlace -> logger.info("{}", stopPlace))
+//                    .map(stopPlace -> {
+//                        try {
+//                            return simpleStopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCounter);
+//                        } catch (InterruptedException|ExecutionException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    })
+//                    .collect(Collectors.toList());
 
-            // nav paths
-
-
-            siteFrame.getStopPlaces().getStopPlace().stream()
-                    .peek(stopPlace -> logger.info("{}", stopPlace))
-                    .map(stopPlace -> {
-                        try {
-                            return simpleStopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCounter);
-                        } catch (InterruptedException|ExecutionException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            return Response.ok("Imported "+siteFrame.getStopPlaces().getStopPlace().size() + " stop places.").build();
+            return Response.ok("Imported "+stopPlacesImported + " stop places.").build();
 
         } catch (Exception e) {
             logger.error("Caught exception while importing publication delivery: " + unmarshalResult.getPublicationDeliveryStructure(), e);
