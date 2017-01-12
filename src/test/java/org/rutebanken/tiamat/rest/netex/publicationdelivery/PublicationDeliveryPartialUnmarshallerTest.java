@@ -102,7 +102,7 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
         PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller();
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+        PublicationDeliveryPartialUnmarshaller.UnmarshalResult publicationDeliveryStructure = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
 
         assertThat(publicationDeliveryStructure).isNotNull();
 

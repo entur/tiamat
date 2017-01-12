@@ -1,38 +1,31 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.base.MoreObjects;
-import com.sun.xml.internal.stream.XMLEventReaderImpl;
-import com.sun.xml.internal.stream.events.EndElementEvent;
 import com.sun.xml.internal.stream.events.StartElementEvent;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.NavigationPath;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Attr;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.*;
+import javax.xml.stream.EventFilter;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.*;
 import java.io.*;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -44,7 +37,7 @@ public class PublicationDeliveryPartialUnmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryPartialUnmarshaller.class);
 
-    private static final JAXBContext jaxbContext = getContext(new Class[] {PublicationDeliveryStructure.class, StopPlace.class, TopographicPlace.class});
+    private static final JAXBContext jaxbContext = getContext(new Class[]{PublicationDeliveryStructure.class, StopPlace.class, TopographicPlace.class});
 
     private static JAXBContext getContext(Class[] classes) {
         try {
@@ -63,82 +56,136 @@ public class PublicationDeliveryPartialUnmarshaller {
         this.neTExValidator = new NeTExValidator();
     }
 
-    public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
+    public UnmarshalResult unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
+        File file = File.createTempFile("tiamat-" + System.currentTimeMillis(), ".xml");
+        Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             String xml = new String(toByteArray(inputStream));
             logger.debug("Debug is enabled. Will log the input (this kills performance.):\n{}", xml);
             inputStream = new ByteArrayInputStream(xml.getBytes());
             logger.debug("Valdiation enabled? {}", validateAgainstSchema);
         }
 
-        if(validateAgainstSchema) {
+        if (validateAgainstSchema) {
             unmarshaller.setSchema(neTExValidator.getSchema());
         }
-        ResultQueues resultQueues = new ResultQueues(1);
+
+        XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
 
         logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
-        PublicationDeliveryStructure publicationDeliveryStructure = readWithXmlEventReader(xmlInputFactory, inputStream, unmarshaller, resultQueues);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = readPublicationDeliveryStructure(xmlInputFactory, new FileInputStream(file), unmarshaller);
+
+        // Read the rest from the same file
+        UnmarshalResult unmarshalResult = readWithXmlEventReader(xmlInputFactory, new FileInputStream(file), unmarshaller);
+        unmarshalResult.setPublicationDeliveryStructure(publicationDeliveryStructure);
+
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
+        return unmarshalResult;
+    }
+
+
+    /**
+     * Unmarshal publication delivery structure without stop places, topographic places and navigation paths.
+     */
+    private PublicationDeliveryStructure readPublicationDeliveryStructure(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws FileNotFoundException, XMLStreamException, JAXBException {
+
+        EventFilter eventFilter = new EventFilter() {
+            @Override
+            public boolean accept(XMLEvent event) {
+                if (event.isStartElement()) {
+                    StartElementEvent startElementEvent = (StartElementEvent) event;
+                    String localPartOfName = startElementEvent.getName().getLocalPart();
+
+                    if (localPartOfName.equals("StopPlace")) {
+                        logger.info("Ignore stop place");
+                        return false;
+                    } else if (localPartOfName.equals("TopographicPlace")) {
+                        logger.info("Ignore topographic place");
+                        return false;
+                    } else if (localPartOfName.equals("NavigationPath")) {
+                        logger.info("Ingore navigation path");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        };
+
+        XMLEventReader xmlEventReader = xmlInputFactory.createFilteredReader(xmlInputFactory.createXMLEventReader(inputStream), eventFilter);
+        PublicationDeliveryStructure publicationDeliveryStructure = unmarshaller.unmarshal(xmlEventReader, PublicationDeliveryStructure.class).getValue();
+
+        xmlEventReader.close();
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure readWithXmlEventReader(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller, ResultQueues resultQueues) throws XMLStreamException, JAXBException, InterruptedException, IOException {
+    private static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
+    private static final TopographicPlace POISON_TOPOGRAPHIC_PLACE = new TopographicPlace().withId("-101");
+    private static final NavigationPath POISON_NAVIGATION_PATH = new NavigationPath().withId("-102");
 
+    public UnmarshalResult readWithXmlEventReader(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
+
+        UnmarshalResult unmarshalResult = new UnmarshalResult(100);
         final XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(inputStream);
 
         XMLEvent xmlEvent = null;
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
+//        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//        OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
 
         while ((xmlEvent = xmlEventReader.peek()) != null) {
-            if(xmlEvent.isStartElement()) {
+            if (xmlEvent.isStartElement()) {
                 StartElementEvent startElementEvent = (StartElementEvent) xmlEvent;
 
                 String localPartOfName = startElementEvent.getName().getLocalPart();
 
-                if(localPartOfName.equals("StopPlace")) {
+                if (localPartOfName.equals("StopPlace")) {
                     logger.debug("xmlEvent: {}", xmlEvent);
                     StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
-                    resultQueues.getStopPlaceQueue().put(stopPlace);
-                } else if(localPartOfName.equals("TopographicPlace")) {
+                    unmarshalResult.getStopPlaceQueue().put(stopPlace);
+                } else if (localPartOfName.equals("TopographicPlace")) {
                     TopographicPlace topographicPlace = unmarshaller.unmarshal(xmlEventReader, TopographicPlace.class).getValue();
-                    resultQueues.getTopographicPlaceQueue().put(topographicPlace);
-                } else if(localPartOfName.equals("NavigationPath")) {
+                    unmarshalResult.getTopographicPlaceQueue().put(topographicPlace);
+                } else if (localPartOfName.equals("NavigationPath")) {
                     NavigationPath navigationPath = unmarshaller.unmarshal(xmlEventReader, NavigationPath.class).getValue();
-                    resultQueues.getNavigationPathsQueue().put(navigationPath);
+                    unmarshalResult.getNavigationPathsQueue().put(navigationPath);
                 } else {
-                    writeStartElement(startElementEvent, writer);
+//                    writeStartElement(startElementEvent, writer);
                 }
-            } else if(xmlEvent.isEndElement()) {
-                writeEndElement(xmlEvent.asEndElement(), writer);
-            } else if(xmlEvent.isCharacters()) {
-                writeCharacters(xmlEvent.asCharacters(), writer);
+            } else if (xmlEvent.isEndElement()) {
+                EndElement endElement = xmlEvent.asEndElement();
+                String localPartOfName = endElement.getName().getLocalPart();
+                if (localPartOfName.equals("stopPlaces")) {
+                    unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+                } else if (localPartOfName.equals("topographicPlaces")) {
+                    unmarshalResult.getTopographicPlaceQueue().put(POISON_TOPOGRAPHIC_PLACE);
+                } else if (localPartOfName.equals("navigationPaths")) {
+                    unmarshalResult.getNavigationPathsQueue().put(POISON_NAVIGATION_PATH);
+                }
+//                else {
+//                    writeStartElement(startElementEvent, writer);
+//                }
             }
+//            else if(xmlEvent.isCharacters()) {
+//                writeCharacters(xmlEvent.asCharacters(), writer);
+
             xmlEventReader.next();
         }
 
-        writer.flush();
-        logger.info("Got this xml: {}", byteArrayOutputStream.toString());
-
-        InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-        JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) unmarshaller.unmarshal(byteArrayInputStream);
-        PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
-
-        SiteFrame siteFrame = publicationDeliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame().stream()
-                .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> (SiteFrame) element.getValue())
-                .findFirst().get();
-
-        
-
-        logger.info("{}", resultQueues);
-        return publicationDeliveryStructure;
+//        writer.flush();
+//        logger.info("Got this xml: {}", byteArrayOutputStream.toString());
+//
+//        InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+//
+//        JAXBElement<PublicationDeliveryStructure> jaxbElement =
+//                (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) unmarshaller.unmarshal(byteArrayInputStream);
+//        PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
+//
+        return unmarshalResult;
     }
 
     public void writeCharacters(Characters characters, Writer writer) throws IOException {
@@ -151,25 +198,25 @@ public class PublicationDeliveryPartialUnmarshaller {
 
         Iterator attributes = startElement.getAttributes();
 
-        if(attributes.hasNext()) {
+        if (attributes.hasNext()) {
             writer.write(' ');
         }
         while (attributes.hasNext()) {
             Attribute attribute = (Attribute) attributes.next();
             writer.write(attribute.toString());
-            if(attributes.hasNext()) {
+            if (attributes.hasNext()) {
                 writer.write(' ');
             }
         }
 
         Iterator namespaces = startElement.getNamespaces();
-        if(namespaces.hasNext()) {
+        if (namespaces.hasNext()) {
             writer.write(' ');
         }
         while (namespaces.hasNext()) {
             Namespace namespace = (Namespace) namespaces.next();
             logger.info("Found name {}", namespace);
-            if(namespace.getName().getLocalPart().isEmpty()) {
+            if (namespace.getName().getLocalPart().isEmpty()) {
                 writer.write(namespace.getName().getPrefix());
                 writer.write('=');
                 writer.write('\'');
@@ -179,7 +226,7 @@ public class PublicationDeliveryPartialUnmarshaller {
                 writer.write(namespace.toString());
             }
 
-            if(namespaces.hasNext()) {
+            if (namespaces.hasNext()) {
                 writer.write(' ');
             }
         }
@@ -192,13 +239,15 @@ public class PublicationDeliveryPartialUnmarshaller {
         writer.write(">");
     }
 
-    public class ResultQueues {
+    public class UnmarshalResult {
 
         private final BlockingQueue<StopPlace> stopPlaceQueue;
         private final BlockingQueue<TopographicPlace> topographicPlaceQueue;
         private final BlockingQueue<NavigationPath> navigationPathsQueue;
 
-        public ResultQueues(int size) {
+        private PublicationDeliveryStructure publicationDeliveryStructure;
+
+        public UnmarshalResult(int size) {
 
             stopPlaceQueue = new ArrayBlockingQueue<>(size);
             topographicPlaceQueue = new ArrayBlockingQueue<>(size);
@@ -221,10 +270,19 @@ public class PublicationDeliveryPartialUnmarshaller {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
+                    .add("publicationDelivery", publicationDeliveryStructure)
                     .add("stopPlaceQueue", stopPlaceQueue.size())
                     .add("topographicPlaceQueue", topographicPlaceQueue.size())
                     .add("navigationPathsQueue", navigationPathsQueue.size())
                     .toString();
+        }
+
+        public PublicationDeliveryStructure getPublicationDeliveryStructure() {
+            return publicationDeliveryStructure;
+        }
+
+        public void setPublicationDeliveryStructure(PublicationDeliveryStructure publicationDeliveryStructure) {
+            this.publicationDeliveryStructure = publicationDeliveryStructure;
         }
     }
 

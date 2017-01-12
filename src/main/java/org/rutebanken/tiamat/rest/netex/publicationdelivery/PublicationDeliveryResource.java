@@ -174,10 +174,11 @@ public class PublicationDeliveryResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
     public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
-        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+        PublicationDeliveryPartialUnmarshaller.UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+
         try {
             AtomicInteger topographicPlacesCounter = new AtomicInteger();
-            org.rutebanken.tiamat.model.SiteFrame siteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+            org.rutebanken.tiamat.model.SiteFrame siteFrame = unmarshalResult.getPublicationDeliveryStructure().getDataObjects().getCompositeFrameOrCommonFrame()
                     .stream()
                     .filter(element -> element.getValue() instanceof SiteFrame)
                     .map(element -> (SiteFrame) element.getValue())
@@ -202,7 +203,7 @@ public class PublicationDeliveryResource {
             return Response.ok("Imported "+siteFrame.getStopPlaces().getStopPlace().size() + " stop places.").build();
 
         } catch (Exception e) {
-            logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
+            logger.error("Caught exception while importing publication delivery: " + unmarshalResult.getPublicationDeliveryStructure(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
         }
     }
