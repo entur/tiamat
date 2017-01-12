@@ -46,11 +46,6 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
     @Override
     public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
                                                                 AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        if (!stopPlace.hasCoordinates()) {
-            logger.info("Ignoring stop place {} - {} because it lacks geometry", stopPlace.getName(), stopPlace.getId());
-            return null;
-        }
-
         if(siteFrame.getTopographicPlaces() != null) {
             topographicPlaceCreator.setTopographicReference(stopPlace,
                     siteFrame.getTopographicPlaces().getTopographicPlace(),
