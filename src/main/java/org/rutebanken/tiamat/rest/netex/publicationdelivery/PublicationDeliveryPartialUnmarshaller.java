@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.base.MoreObjects;
-import com.sun.xml.internal.stream.events.StartElementEvent;
 import org.rutebanken.netex.model.NavigationPath;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.StopPlace;
@@ -95,25 +94,48 @@ public class PublicationDeliveryPartialUnmarshaller {
     private PublicationDeliveryStructure readPublicationDeliveryStructure(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws FileNotFoundException, XMLStreamException, JAXBException {
 
         EventFilter eventFilter = new EventFilter() {
+
+            private boolean deleteSection = false;
+
             @Override
             public boolean accept(XMLEvent event) {
-                if (event.isStartElement()) {
-                    StartElementEvent startElementEvent = (StartElementEvent) event;
-                    String localPartOfName = startElementEvent.getName().getLocalPart();
-
-                    if (localPartOfName.equals("StopPlace")) {
-                        logger.info("Ignore stop place");
-                        return false;
-                    } else if (localPartOfName.equals("TopographicPlace")) {
-                        logger.info("Ignore topographic place");
-                        return false;
-                    } else if (localPartOfName.equals("NavigationPath")) {
-                        logger.info("Ingore navigation path");
+                if(event.isEndElement()) {
+                    EndElement endElement = event.asEndElement();
+                    if(doesMatch(endElement.getName().getLocalPart())) {
+                        deleteSection = false;
+                        logger.trace("NO ACCEPT. Release delete section: {}", event);
                         return false;
                     }
                 }
 
+                if(deleteSection) {
+                    logger.trace("NO ACCEPT. Deleting section: {}", event);
+                    return false;
+                }
+
+                if (event.isStartElement()) {
+                    StartElement startElement = event.asStartElement();
+                    String localPartOfName = startElement.getName().getLocalPart();
+
+                    if(doesMatch(localPartOfName)) {
+                        deleteSection = true;
+                        return false;
+                    }
+                }
+
+                logger.trace("Accept: {}", event);
                 return true;
+            }
+
+            private boolean doesMatch(String localPartOfName) {
+                if (localPartOfName.equals("stopPlaces")) {
+                    return true;
+                } else if (localPartOfName.equals("topographicPlaces")) {
+                    return true;
+                } else if (localPartOfName.equals("navigationPaths")) {
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -154,9 +176,8 @@ public class PublicationDeliveryPartialUnmarshaller {
 
                     {
                         if (xmlEvent.isStartElement()) {
-                            StartElementEvent startElementEvent = (StartElementEvent) xmlEvent;
-
-                            String localPartOfName = startElementEvent.getName().getLocalPart();
+                            StartElement startElement = xmlEvent.asStartElement();
+                            String localPartOfName = startElement.getName().getLocalPart();
 
                             if (localPartOfName.equals("StopPlace")) {
                                 StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
@@ -192,12 +213,9 @@ public class PublicationDeliveryPartialUnmarshaller {
 
                         xmlEventReader.next();
                     }
-                } catch (XMLStreamException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (JAXBException e) {
-                    e.printStackTrace();
+                } catch (XMLStreamException|InterruptedException |JAXBException e) {
+
+                    logger.error("Could not read netex from events. " + e.getMessage(), e);
                 }
                 logger.info("Unmarshalling thread finished after {} stops, {} topographic places and {} navigation paths", stops.get(), topographicPlaces.get(), navgiationPaths.get());
             }
@@ -280,7 +298,6 @@ public class PublicationDeliveryPartialUnmarshaller {
         private PublicationDeliveryStructure publicationDeliveryStructure;
 
         public UnmarshalResult(int size) {
-
             stopPlaceQueue = new ArrayBlockingQueue<>(size);
             topographicPlaceQueue = new ArrayBlockingQueue<>(size);
             navigationPathsQueue = new ArrayBlockingQueue<>(size);
