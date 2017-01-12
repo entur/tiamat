@@ -186,24 +186,6 @@ public class PublicationDeliveryPartialUnmarshaller {
         writer.write(">");
     }
 
-    public class IngoreTypesFilter extends XMLFilterImpl {
-
-        public IngoreTypesFilter(XMLReader arg0) {
-            super(arg0);
-        }
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-
-            if(localName.equals(StopPlace.class.getSimpleName()) || localName.equals(TopographicPlace.class.getSimpleName()) || localName.equals(PathLink.class.getSimpleName())) {
-                logger.info("Detected one of stopplace, topographic place or pathlink");
-            } else {
-                super.startElement(uri, localName, qName, attributes);
-            }
-
-        }
-    }
-
     public class ResultQueues {
 
         private final BlockingQueue<StopPlace> stopPlaceQueue;
