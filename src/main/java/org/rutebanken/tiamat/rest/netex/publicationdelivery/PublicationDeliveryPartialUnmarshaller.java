@@ -82,7 +82,7 @@ public class PublicationDeliveryPartialUnmarshaller {
         PublicationDeliveryStructure publicationDeliveryStructure = readPublicationDeliveryStructure(xmlInputFactory, new FileInputStream(file), unmarshaller);
 
         // Read the rest from the same file
-        UnmarshalResult unmarshalResult = readWithXmlEventReaderAsync(xmlInputFactory, new FileInputStream(file), unmarshaller);
+        UnmarshalResult unmarshalResult = readWithXmlEventReaderAsync(new FileInputStream(file), unmarshaller);
         unmarshalResult.setPublicationDeliveryStructure(publicationDeliveryStructure);
 
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
@@ -104,7 +104,7 @@ public class PublicationDeliveryPartialUnmarshaller {
         return publicationDeliveryStructure;
     }
 
-    public UnmarshalResult readWithXmlEventReaderAsync(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
+    public UnmarshalResult readWithXmlEventReaderAsync(InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
 
         UnmarshalResult unmarshalResult = new UnmarshalResult(100);
 
