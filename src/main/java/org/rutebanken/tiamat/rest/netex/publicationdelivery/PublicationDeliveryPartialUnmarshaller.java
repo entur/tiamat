@@ -24,7 +24,9 @@ import javax.xml.stream.events.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,57 +95,59 @@ public class PublicationDeliveryPartialUnmarshaller {
      */
     private PublicationDeliveryStructure readPublicationDeliveryStructure(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws FileNotFoundException, XMLStreamException, JAXBException {
 
-        EventFilter eventFilter = new EventFilter() {
-
-            private boolean deleteSection = false;
-
-            @Override
-            public boolean accept(XMLEvent event) {
-                if(event.isEndElement()) {
-                    EndElement endElement = event.asEndElement();
-                    if(doesMatch(endElement.getName().getLocalPart())) {
-                        deleteSection = false;
-                        logger.trace("NO ACCEPT. Release delete section: {}", event);
-                        return false;
-                    }
-                }
-
-                if(deleteSection) {
-                    logger.trace("NO ACCEPT. Deleting section: {}", event);
-                    return false;
-                }
-
-                if (event.isStartElement()) {
-                    StartElement startElement = event.asStartElement();
-                    String localPartOfName = startElement.getName().getLocalPart();
-
-                    if(doesMatch(localPartOfName)) {
-                        deleteSection = true;
-                        return false;
-                    }
-                }
-
-                logger.trace("Accept: {}", event);
-                return true;
-            }
-
-            private boolean doesMatch(String localPartOfName) {
-                if (localPartOfName.equals("stopPlaces")) {
-                    return true;
-                } else if (localPartOfName.equals("topographicPlaces")) {
-                    return true;
-                } else if (localPartOfName.equals("navigationPaths")) {
-                    return true;
-                }
-                return false;
-            }
-        };
+        EventFilter eventFilter = new TypesEventFilter("stopPlaces", "topographicPlaces", "navigationPaths");
 
         XMLEventReader xmlEventReader = xmlInputFactory.createFilteredReader(xmlInputFactory.createXMLEventReader(inputStream), eventFilter);
         PublicationDeliveryStructure publicationDeliveryStructure = unmarshaller.unmarshal(xmlEventReader, PublicationDeliveryStructure.class).getValue();
 
         xmlEventReader.close();
         return publicationDeliveryStructure;
+    }
+
+    public class TypesEventFilter implements EventFilter {
+        private boolean deleteSection = false;
+        private final List<String> ignoreTypes;
+
+        public TypesEventFilter(String ...ignoreTypes) {
+            this.ignoreTypes = new ArrayList<>(ignoreTypes.length);
+            for(String ignoreType : ignoreTypes) {
+                this.ignoreTypes.add(ignoreType);
+            }
+        }
+
+        @Override
+        public boolean accept(XMLEvent event) {
+            if(event.isEndElement()) {
+                EndElement endElement = event.asEndElement();
+                if(doesMatch(endElement.getName().getLocalPart())) {
+                    deleteSection = false;
+                    logger.trace("NO ACCEPT. Release delete section: {}", event);
+                    return false;
+                }
+            }
+
+            if(deleteSection) {
+                logger.trace("NO ACCEPT. Deleting section: {}", event);
+                return false;
+            }
+
+            if (event.isStartElement()) {
+                StartElement startElement = event.asStartElement();
+                String localPartOfName = startElement.getName().getLocalPart();
+
+                if(doesMatch(localPartOfName)) {
+                    deleteSection = true;
+                    return false;
+                }
+            }
+
+            logger.trace("Accept: {}", event);
+            return true;
+        }
+
+        private boolean doesMatch(String localPartOfName) {
+            return ignoreTypes.contains(localPartOfName);
+        }
     }
 
     public static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
