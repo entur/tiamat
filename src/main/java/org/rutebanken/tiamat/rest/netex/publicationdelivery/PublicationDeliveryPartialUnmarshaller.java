@@ -28,6 +28,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.io.ByteStreams.toByteArray;
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -80,7 +81,7 @@ public class PublicationDeliveryPartialUnmarshaller {
         PublicationDeliveryStructure publicationDeliveryStructure = readPublicationDeliveryStructure(xmlInputFactory, new FileInputStream(file), unmarshaller);
 
         // Read the rest from the same file
-        UnmarshalResult unmarshalResult = readWithXmlEventReader(xmlInputFactory, new FileInputStream(file), unmarshaller);
+        UnmarshalResult unmarshalResult = readWithXmlEventReaderAsync(xmlInputFactory, new FileInputStream(file), unmarshaller);
         unmarshalResult.setPublicationDeliveryStructure(publicationDeliveryStructure);
 
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
@@ -123,58 +124,89 @@ public class PublicationDeliveryPartialUnmarshaller {
         return publicationDeliveryStructure;
     }
 
-    private static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
-    private static final TopographicPlace POISON_TOPOGRAPHIC_PLACE = new TopographicPlace().withId("-101");
-    private static final NavigationPath POISON_NAVIGATION_PATH = new NavigationPath().withId("-102");
+    public static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
+    public static final TopographicPlace POISON_TOPOGRAPHIC_PLACE = new TopographicPlace().withId("-101");
+    public static final NavigationPath POISON_NAVIGATION_PATH = new NavigationPath().withId("-102");
 
-    public UnmarshalResult readWithXmlEventReader(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
+    public UnmarshalResult readWithXmlEventReaderAsync(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
 
         UnmarshalResult unmarshalResult = new UnmarshalResult(100);
-        final XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(inputStream);
 
-        XMLEvent xmlEvent = null;
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                AtomicInteger stops = new AtomicInteger();
+                AtomicInteger topographicPlaces = new AtomicInteger();
+                AtomicInteger navgiationPaths = new AtomicInteger();
+
+                final XMLEventReader xmlEventReader;
+                try {
+                    xmlEventReader = xmlInputFactory.createXMLEventReader(inputStream);
+
+                    XMLEvent xmlEvent = null;
 
 //        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 //        OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
 
-        while ((xmlEvent = xmlEventReader.peek()) != null) {
-            if (xmlEvent.isStartElement()) {
-                StartElementEvent startElementEvent = (StartElementEvent) xmlEvent;
+                    while ((xmlEvent = xmlEventReader.peek()) != null)
 
-                String localPartOfName = startElementEvent.getName().getLocalPart();
+                    {
+                        if (xmlEvent.isStartElement()) {
+                            StartElementEvent startElementEvent = (StartElementEvent) xmlEvent;
 
-                if (localPartOfName.equals("StopPlace")) {
-                    logger.debug("xmlEvent: {}", xmlEvent);
-                    StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
-                    unmarshalResult.getStopPlaceQueue().put(stopPlace);
-                } else if (localPartOfName.equals("TopographicPlace")) {
-                    TopographicPlace topographicPlace = unmarshaller.unmarshal(xmlEventReader, TopographicPlace.class).getValue();
-                    unmarshalResult.getTopographicPlaceQueue().put(topographicPlace);
-                } else if (localPartOfName.equals("NavigationPath")) {
-                    NavigationPath navigationPath = unmarshaller.unmarshal(xmlEventReader, NavigationPath.class).getValue();
-                    unmarshalResult.getNavigationPathsQueue().put(navigationPath);
-                } else {
+                            String localPartOfName = startElementEvent.getName().getLocalPart();
+
+                            if (localPartOfName.equals("StopPlace")) {
+                                StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
+                                stops.incrementAndGet();
+                                unmarshalResult.getStopPlaceQueue().put(stopPlace);
+                            } else if (localPartOfName.equals("TopographicPlace")) {
+                                TopographicPlace topographicPlace = unmarshaller.unmarshal(xmlEventReader, TopographicPlace.class).getValue();
+                                topographicPlaces.incrementAndGet();
+                                unmarshalResult.getTopographicPlaceQueue().put(topographicPlace);
+                            } else if (localPartOfName.equals("NavigationPath")) {
+                                NavigationPath navigationPath = unmarshaller.unmarshal(xmlEventReader, NavigationPath.class).getValue();
+                                navgiationPaths.incrementAndGet();
+                                unmarshalResult.getNavigationPathsQueue().put(navigationPath);
+                            } else {
 //                    writeStartElement(startElementEvent, writer);
-                }
-            } else if (xmlEvent.isEndElement()) {
-                EndElement endElement = xmlEvent.asEndElement();
-                String localPartOfName = endElement.getName().getLocalPart();
-                if (localPartOfName.equals("stopPlaces")) {
-                    unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
-                } else if (localPartOfName.equals("topographicPlaces")) {
-                    unmarshalResult.getTopographicPlaceQueue().put(POISON_TOPOGRAPHIC_PLACE);
-                } else if (localPartOfName.equals("navigationPaths")) {
-                    unmarshalResult.getNavigationPathsQueue().put(POISON_NAVIGATION_PATH);
-                }
+                            }
+                        } else if (xmlEvent.isEndElement()) {
+                            EndElement endElement = xmlEvent.asEndElement();
+                            String localPartOfName = endElement.getName().getLocalPart();
+                            if (localPartOfName.equals("stopPlaces")) {
+                                unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+                            } else if (localPartOfName.equals("topographicPlaces")) {
+                                unmarshalResult.getTopographicPlaceQueue().put(POISON_TOPOGRAPHIC_PLACE);
+                            } else if (localPartOfName.equals("navigationPaths")) {
+                                unmarshalResult.getNavigationPathsQueue().put(POISON_NAVIGATION_PATH);
+                            }
 //                else {
 //                    writeStartElement(startElementEvent, writer);
 //                }
-            }
+                        }
 //            else if(xmlEvent.isCharacters()) {
 //                writeCharacters(xmlEvent.asCharacters(), writer);
 
-            xmlEventReader.next();
-        }
+                        xmlEventReader.next();
+                    }
+                } catch (XMLStreamException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (JAXBException e) {
+                    e.printStackTrace();
+                }
+                logger.info("Unmarshalling thread finished after {} stops, {} topographic places and {} navigation paths", stops.get(), topographicPlaces.get(), navgiationPaths.get());
+            }
+        });
+
+        thread.setName("unmarshalling-thread");
+        logger.info("Starting unmarshalling thread ", thread);
+        thread.start();
+
 
 //        writer.flush();
 //        logger.info("Got this xml: {}", byteArrayOutputStream.toString());

@@ -2,12 +2,14 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
 import org.rutebanken.tiamat.importers.SiteFrameImporter;
 import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -188,6 +190,30 @@ public class PublicationDeliveryResource {
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .findFirst().get();
+
+//            while(true) {
+//                org.rutebanken.netex.model.TopographicPlace topographicPlace = unmarshalResult.getTopographicPlaceQueue().take();
+//                if(topographicPlace.getId() == PublicationDeliveryPartialUnmarshaller.POISON_TOPOGRAPHIC_PLACE.getId()) {
+//                    logger.info("Finished importing topographic places");
+//                    break;
+//                }
+//                netexMapper.
+//            }
+
+            while(true) {
+                StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
+                if(stopPlace.getId().equals(PublicationDeliveryPartialUnmarshaller.POISON_STOP_PLACE.getId())) {
+                    logger.info("Finished importing stops");
+                    break;
+                }
+                logger.info("Importing {}", stopPlace);
+                simpleStopPlaceImporter.importStopPlace(netexMapper.mapToTiamatModel(stopPlace), siteFrame, topographicPlacesCounter);
+            }
+
+            // stop place
+
+            // nav paths
+
 
             siteFrame.getStopPlaces().getStopPlace().stream()
                     .peek(stopPlace -> logger.info("{}", stopPlace))
