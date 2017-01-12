@@ -76,6 +76,10 @@ public class NetexMapper {
         return mapperFactory.getMapperFacade().map(tiamatStopPlace, StopPlace.class);
     }
 
+    public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {
+        return mapperFactory.getMapperFacade().map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
+    }
+
     public org.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {
         org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame = mapperFactory.getMapperFacade().map(netexSiteFrame, org.rutebanken.tiamat.model.SiteFrame.class);
         return tiamatSiteFrame;
