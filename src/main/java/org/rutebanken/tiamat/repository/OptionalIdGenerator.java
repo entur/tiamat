@@ -40,7 +40,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
         if(obj instanceof EntityStructure) {
             EntityStructure entityStructure = (EntityStructure) obj;
 
-            logger.info("{} is instance of entity structre", entityStructure);
+            logger.trace("{} is instance of entity structre", entityStructure);
 
             if((entityStructure instanceof StopPlace || entityStructure instanceof Quay)) {
                 long desiredId;
@@ -50,7 +50,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                     desiredId = entityStructure.getId();
                 }
 
-                logger.info("About to retrieve or set id for: {}", entityStructure);
+                logger.trace("About to retrieve or set id for: {}", entityStructure);
 
                 SessionImpl sessionImpl = (SessionImpl) session;
                 String tableName = ((SingleTableEntityPersister) (sessionImpl).getSessionFactory().getAllClassMetadata().get(obj.getClass().getCanonicalName())).getTableName();
@@ -61,7 +61,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                 List list = sqlQuery.list();
                 if (list.size() > 0) {
                     long newId = ((Integer) list.get(0)).longValue();
-                    logger.info("Got ID: {} for {}", newId, entityStructure);
+                    logger.trace("Got ID: {} for {}", newId, entityStructure);
                     return newId;
                 }
 
@@ -69,7 +69,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             }
         }
         Serializable id = super.generate(session, obj);
-        logger.info("Generated id {}", id);
+        logger.trace("Generated id {}", id);
         return id;
     }
 }

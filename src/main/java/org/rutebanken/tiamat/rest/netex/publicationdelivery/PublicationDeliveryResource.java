@@ -191,6 +191,7 @@ public class PublicationDeliveryResource {
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .findFirst().get();
 
+            logger.info("Importing stops");
             int stopPlacesImported = 0;
             while(true) {
                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
@@ -198,7 +199,6 @@ public class PublicationDeliveryResource {
                     logger.info("Finished importing stops");
                     break;
                 }
-                logger.info("Importing {}", stopPlace);
                 simpleStopPlaceImporter.importStopPlace(netexMapper.mapToTiamatModel(stopPlace), siteFrame, topographicPlacesCounter);
                 stopPlacesImported++;
             }

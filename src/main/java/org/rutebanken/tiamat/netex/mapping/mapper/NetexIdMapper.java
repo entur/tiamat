@@ -42,7 +42,7 @@ public class NetexIdMapper {
         if(netexEntity.getId() == null) {
             tiamatEntity.setId(null);
         } else if(netexEntity.getId().startsWith(NSR)) {
-            logger.warn("Detected tiamat ID: {}. ", netexEntity.getId());
+            logger.debug("Detected tiamat ID: {}. ", netexEntity.getId());
             String netexId = netexEntity.getId();
             Long tiamatId = extractLongAfterLastColon(netexId);
             tiamatEntity.setId(tiamatId);
