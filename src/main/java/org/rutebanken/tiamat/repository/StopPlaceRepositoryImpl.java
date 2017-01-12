@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,24 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                             "AND s.name.value = :name", Long.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
+        try {
+            List<Long> resultList = query.getResultList();
+            return  resultList.isEmpty() ? null : resultList.get(0);
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Long findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
+        Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+        TypedQuery<Long> query = entityManager
+                .createQuery("SELECT s.id FROM StopPlace s " +
+                        "WHERE within(s.centroid, :filter) = true " +
+                        "AND s.stopType = :stopType", Long.class);
+        query.setParameter("filter", geometryFilter);
+        query.setParameter("stopType", stopTypeEnumeration);
         try {
             List<Long> resultList = query.getResultList();
             return  resultList.isEmpty() ? null : resultList.get(0);
