@@ -204,57 +204,6 @@ public class PublicationDeliveryPartialUnmarshaller {
         return unmarshalResult;
     }
 
-    public void writeCharacters(Characters characters, Writer writer) throws IOException {
-        writer.write(characters.getData());
-    }
-
-    public void writeStartElement(StartElement startElement, Writer writer) throws IOException {
-        writer.write('<');
-        writer.write(startElement.getName().getLocalPart());
-
-        Iterator attributes = startElement.getAttributes();
-
-        if (attributes.hasNext()) {
-            writer.write(' ');
-        }
-        while (attributes.hasNext()) {
-            Attribute attribute = (Attribute) attributes.next();
-            writer.write(attribute.toString());
-            if (attributes.hasNext()) {
-                writer.write(' ');
-            }
-        }
-
-        Iterator namespaces = startElement.getNamespaces();
-        if (namespaces.hasNext()) {
-            writer.write(' ');
-        }
-        while (namespaces.hasNext()) {
-            Namespace namespace = (Namespace) namespaces.next();
-            logger.info("Found name {}", namespace);
-            if (namespace.getName().getLocalPart().isEmpty()) {
-                writer.write(namespace.getName().getPrefix());
-                writer.write('=');
-                writer.write('\'');
-                writer.write(namespace.getNamespaceURI());
-                writer.write('\'');
-            } else {
-                writer.write(namespace.toString());
-            }
-
-            if (namespaces.hasNext()) {
-                writer.write(' ');
-            }
-        }
-        writer.write('>');
-    }
-
-    public void writeEndElement(EndElement endElement, Writer writer) throws IOException {
-        writer.write("</");
-        writer.write(endElement.getName().getLocalPart());
-        writer.write(">");
-    }
-
     public class UnmarshalResult {
 
         private final BlockingQueue<StopPlace> stopPlaceQueue;
