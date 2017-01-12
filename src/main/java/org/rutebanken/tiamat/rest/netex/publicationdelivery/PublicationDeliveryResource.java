@@ -25,6 +25,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -48,6 +50,8 @@ public class PublicationDeliveryResource {
 
     private PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
 
+    private PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller;
+
     private PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
     private StopPlaceImporter stopPlaceImporter;
@@ -64,13 +68,14 @@ public class PublicationDeliveryResource {
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
-                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
+                                       PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
                                        StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
+        this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceImporter = stopPlaceImporter;
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
@@ -168,8 +173,8 @@ public class PublicationDeliveryResource {
     @Path("initial_import")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException {
-        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
+    public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
+        PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
         try {
             AtomicInteger topographicPlacesCounter = new AtomicInteger();
             org.rutebanken.tiamat.model.SiteFrame siteFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
