@@ -104,104 +104,16 @@ public class PublicationDeliveryPartialUnmarshaller {
         return publicationDeliveryStructure;
     }
 
-    public static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
-
     public UnmarshalResult readWithXmlEventReaderAsync(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws XMLStreamException, JAXBException, InterruptedException, IOException {
 
         UnmarshalResult unmarshalResult = new UnmarshalResult(100);
 
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                AtomicInteger stops = new AtomicInteger();
-
-                final XMLEventReader xmlEventReader;
-                try {
-                    xmlEventReader = xmlInputFactory.createXMLEventReader(inputStream);
-
-                    XMLEvent xmlEvent = null;
-
-                    while ((xmlEvent = xmlEventReader.peek()) != null)
-
-                    {
-                        if (xmlEvent.isStartElement()) {
-                            StartElement startElement = xmlEvent.asStartElement();
-                            String localPartOfName = startElement.getName().getLocalPart();
-
-                            if (localPartOfName.equals("StopPlace")) {
-                                StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
-                                stops.incrementAndGet();
-                                unmarshalResult.getStopPlaceQueue().put(stopPlace);
-                            }
-                        } else if (xmlEvent.isEndElement()) {
-                            EndElement endElement = xmlEvent.asEndElement();
-                            String localPartOfName = endElement.getName().getLocalPart();
-                            if (localPartOfName.equals("stopPlaces")) {
-                                unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
-                            }
-                        }
-                        xmlEventReader.next();
-                    }
-                } catch (XMLStreamException|InterruptedException |JAXBException e) {
-
-                    logger.error("Could not read netex from events. " + e.getMessage(), e);
-                }
-                logger.info("Unmarshalling thread finished after {} stops", stops.get());
-            }
-        });
+        Thread thread = new Thread(new RunnableUnmarshaller(inputStream, unmarshaller, unmarshalResult));
 
         thread.setName("unmarshalling-thread");
         logger.info("Starting unmarshalling thread ", thread);
         thread.start();
         return unmarshalResult;
-    }
-
-    public class UnmarshalResult {
-
-        private final BlockingQueue<StopPlace> stopPlaceQueue;
-        private final BlockingQueue<TopographicPlace> topographicPlaceQueue;
-        private final BlockingQueue<NavigationPath> navigationPathsQueue;
-
-        private PublicationDeliveryStructure publicationDeliveryStructure;
-
-        public UnmarshalResult(int size) {
-            stopPlaceQueue = new ArrayBlockingQueue<>(size);
-            topographicPlaceQueue = new ArrayBlockingQueue<>(size);
-            navigationPathsQueue = new ArrayBlockingQueue<>(size);
-        }
-
-
-        public BlockingQueue<StopPlace> getStopPlaceQueue() {
-            return stopPlaceQueue;
-        }
-
-        public BlockingQueue<TopographicPlace> getTopographicPlaceQueue() {
-            return topographicPlaceQueue;
-        }
-
-        public BlockingQueue<NavigationPath> getNavigationPathsQueue() {
-            return navigationPathsQueue;
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("publicationDelivery", publicationDeliveryStructure)
-                    .add("stopPlaceQueue", stopPlaceQueue.size())
-                    .add("topographicPlaceQueue", topographicPlaceQueue.size())
-                    .add("navigationPathsQueue", navigationPathsQueue.size())
-                    .toString();
-        }
-
-        public PublicationDeliveryStructure getPublicationDeliveryStructure() {
-            return publicationDeliveryStructure;
-        }
-
-        public void setPublicationDeliveryStructure(PublicationDeliveryStructure publicationDeliveryStructure) {
-            this.publicationDeliveryStructure = publicationDeliveryStructure;
-        }
     }
 
 }

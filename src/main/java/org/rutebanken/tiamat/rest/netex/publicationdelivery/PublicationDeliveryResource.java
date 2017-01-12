@@ -176,7 +176,7 @@ public class PublicationDeliveryResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
     public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
-        PublicationDeliveryPartialUnmarshaller.UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+        UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
 
         try {
             AtomicInteger topographicPlacesCounter = new AtomicInteger();
@@ -194,7 +194,7 @@ public class PublicationDeliveryResource {
             int stopPlacesImported = 0;
             while(true) {
                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
-                if(stopPlace.getId().equals(PublicationDeliveryPartialUnmarshaller.POISON_STOP_PLACE.getId())) {
+                if(stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                     logger.info("Finished importing stops");
                     break;
                 }
