@@ -173,3 +173,168 @@ Example site frame data can be found on the jump server (/var/www/...). There ar
 
 # See also
 https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
+
+
+# GraphQL
+GraphQL endpoint is available on
+```
+https://test.rutebanken.org/admin/nsr/jersey/graphql
+```
+
+## Available data
+```
+{
+	stopPlace {
+		id
+		name
+		shortName
+		description
+		allAreasWheelchairAccessible
+		stopPlaceType
+		county
+		municipality
+		centroid {
+			location {
+				latitude
+				longitude
+			}
+		}
+		quays {
+			id
+			name
+			shortName
+			description
+			allAreasWheelchairAccessible
+			quayType
+			compassBearing
+			centroid {
+			location {
+				latitude
+				longitude
+			}
+		}
+		}
+	}
+}
+```
+
+## Limit response 
+_page_ and _count_ parameters may be used together with all other parameters. Defaults will be used if not provided.
+```
+{
+	stopPlace (page:0 count:20) {
+		id 
+		name
+	}
+}
+```
+
+## Search
+
+Available search parameters.
+
+### id
+```
+{
+	stopPlace (id:1) {
+		id 
+		name
+	}
+}
+
+{
+	stopPlace (id:[1,2,3,4,5]) {
+		id 
+		name
+	}
+}
+```
+
+### stopPlaceType
+```
+{
+	stopPlace (stopPlaceType:onstreetBus) {
+		id 
+		name
+	}
+}
+
+{
+	stopPlace (stopPlaceType:[onstreetBus, onstreetTram]) {
+		id 
+		name
+	}
+}
+```
+
+### countyReference
+```
+{
+	stopPlace (countyReference:1) {
+		id 
+		name
+	}
+}
+
+{
+	stopPlace (countyReference:[1,2,3,4,5]) {
+		id 
+		name
+	}
+}
+```
+
+### municipalityReference
+```
+{
+	stopPlace (municipalityReference:1) {
+		id 
+		name
+	}
+}
+
+{
+	stopPlace (municipalityReference:[1,2,3,4,5]) {
+		id 
+		name
+	}
+}
+```
+
+### query
+```
+{
+	stopPlace (query:"asker") {
+		id 
+		name
+	}
+}
+```
+
+### Combinations
+All query-parameters above may be combined
+```
+{
+	stopPlace (stopPlaceType:onstreetBus municipalityReference:2 query:"stad") {
+		name
+	}
+}
+```
+
+## BoundingBox
+```
+{
+	stopPlace (xMin:5.2 yMin:59.9 xMax:12.7 yMax:63.0 ignoreStopPlaceId:1234) {
+		id 
+		name
+		stopPlaceType
+		centroid {
+			location {
+				latitude
+				longitude
+			}
+		}
+	}
+}
+```
+Parameter _ignoreStopPlaceId_ is optional 
