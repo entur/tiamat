@@ -51,6 +51,8 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
+    private final AtomicInteger topographicPlacesCounter = new AtomicInteger();
+
 
     @Before
     public void cleanRepositories() {
@@ -77,7 +79,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
                 stopPlaceLongitude, stopPlaceLatitude, null);
         firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
 
-        AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
@@ -105,8 +106,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         double latitude = 71;
 
         StopPlace firstStopPlace = createStopPlace(name, longitude, latitude, null);
-
-        AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
@@ -124,15 +123,36 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
     }
 
+    /**
+     * Two nearby stops with the same type should be treated as the same.
+     */
+    @Test
+    public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
+
+        StopPlace firstStopPlace = createStopPlace("Filipstad", 10.7096245, 59.9086885, null);
+        firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        SiteFrame siteFrame = new SiteFrame();
+
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+
+        StopPlace secondStopPlace = createStopPlace("Filipstad ferjeterminal", 10.709707, 59.908737, null);
+        secondStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        StopPlace importResult = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+
+        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getName().getValue()).isEqualTo(firstStopPlace.getName().getValue());
+    }
+
     @Test
     public void reproduceIssueWithCollectionNotAssosiatedWithAnySession() throws ExecutionException, InterruptedException {
         String name = "Skillebekkgata";
         StopPlace firstStopPlace = createStopPlaceWithQuay(name,
                 6, 60, 11063200L, 11063200L);
-        defaultStopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), new AtomicInteger());
+        defaultStopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), topographicPlacesCounter);
         StopPlace secondStopPlace = createStopPlaceWithQuay(name,
                 6, 60.0001, 11063198L, 11063198L);
-        defaultStopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), new AtomicInteger());
+        defaultStopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), topographicPlacesCounter);
     }
 
     /**
@@ -151,7 +171,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace firstStopPlace = createStopPlaceWithQuay(name,
                 longitude, latitude, stopPlaceId, quayId);
 
-        AtomicInteger topographicPlacesCounter = new AtomicInteger();
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
@@ -177,8 +196,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
             stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
             stopPlaces.add(stopPlace);
         }
-
-        AtomicInteger topographicPlacesCounter = new AtomicInteger();
 
         stopPlaces.parallelStream()
                 .forEach(stopPlace -> {

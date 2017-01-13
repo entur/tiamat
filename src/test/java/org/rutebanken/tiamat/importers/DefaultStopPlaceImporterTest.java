@@ -15,6 +15,7 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 import org.rutebanken.tiamat.service.CentroidComputer;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,6 +62,53 @@ public class DefaultStopPlaceImporterTest {
             nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper);
 
     private SiteFrame siteFrame = new SiteFrame();
+
+    /**
+     * Test that two nearby stops close to each other is treated as the same.
+     * Note that the DB query is mocked. To test this, use DefaultStopPlaceImporterWithGeoDBTest
+     */
+    @Test
+    public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
+
+        Long firstStopId = 1L;
+        StopPlace firstStopPlace = new StopPlace();
+        firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
+        firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
+        firstStopPlace.setId(firstStopId);
+        firstStopPlace.setVersion("1");
+        firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        Quay terminal1 = new Quay();
+        terminal1.setName(new EmbeddableMultilingualString("Filipstad"));
+        terminal1.setId(2L);
+        terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
+
+        firstStopPlace.getQuays().add(terminal1);
+
+        mockStopPlaceSave(firstStopId, firstStopPlace);
+
+        StopPlace secondStopPlace = new StopPlace();
+        secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.709707, 59.908737)));
+        secondStopPlace.setName(new EmbeddableMultilingualString("Filipstad ferjeterminal", "no"));
+        secondStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        Quay terminal2 = new Quay();
+        terminal2.setName(new EmbeddableMultilingualString("Filipstad ferjeterminal"));
+        terminal2.setId(3L);
+        terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(10.709707, 59.908737)));
+        secondStopPlace.getQuays().add(terminal2);
+
+
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(StopTypeEnumeration.class))).thenReturn(Arrays.asList(firstStopId));
+        when(stopPlaceRepository.findAll(anyCollection())).thenReturn(Arrays.asList(firstStopPlace));
+
+        // Import only the second stop place as the first one is already "saved" (mocked)
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+
+        assertThat(importResult.getId()).isEqualTo(firstStopId);
+        assertThat(importResult.getVersion()).isEqualTo("2");
+    }
+
 
     @Test
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
