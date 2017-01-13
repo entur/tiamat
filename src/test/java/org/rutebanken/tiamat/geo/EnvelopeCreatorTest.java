@@ -22,8 +22,8 @@ public class EnvelopeCreatorTest {
 
     @Test
     public void envelopeIntersectsWithCoordinate() throws FactoryException, TransformException {
-        Coordinate coordinate = new Coordinate(59.858690, 10.493860);
-        Coordinate coveredCoordinate = new Coordinate(59.858616, 10.493858);
+        Coordinate coordinate = new Coordinate(10.493860, 59.858690);
+        Coordinate coveredCoordinate = new Coordinate(10.493858, 59.858616);
         Point point = geometryFactory.createPoint(coordinate);
 
         final int meters = 9;
@@ -32,7 +32,8 @@ public class EnvelopeCreatorTest {
 
         Envelope envelope = envelopeCreator.createFromPoint(point, meters);
 
-        assertThat(envelope.intersects(coveredCoordinate)).isTrue();
+        assertThat(envelope.intersects(coveredCoordinate)).as(coveredCoordinate + " should be covered by envelope "+envelope.toString()).isTrue();
+        assertThat(envelope.intersects(coordinate)).isTrue();
 
     }
 
@@ -41,8 +42,8 @@ public class EnvelopeCreatorTest {
      */
     @Test
     public void envelopeDoesNotIntersectWithCoordinate() throws FactoryException, TransformException {
-        Coordinate coordinate = new Coordinate(59.858690, 10.493860);
-        Coordinate notCoveredCoordinate = new Coordinate(59.858684, 10.493682);
+        Coordinate coordinate = new Coordinate(10.493860, 59.858690);
+        Coordinate notCoveredCoordinate = new Coordinate(10.493682, 59.858684);
         Point point = geometryFactory.createPoint(coordinate);
 
         final int meters = 9;
@@ -50,27 +51,6 @@ public class EnvelopeCreatorTest {
         Envelope envelope = envelopeCreator.createFromPoint(point, meters);
 
         assertThat(envelope.intersects(notCoveredCoordinate)).isFalse();
-    }
-
-    @Test
-    public void findUtmZone32() {
-        // Nesbru, Asker: 59.858690, 10.493860
-        String zone = envelopeCreator.findUtmCrs(10.493860);
-        assertThat(zone).isEqualTo("EPSG:32632");
-    }
-
-    @Test
-    public void findUtmZone33() {
-        // Somewhere in Narvik: 68.437437, 17.426283
-        String zone = envelopeCreator.findUtmCrs(17.426283);
-        assertThat(zone).isEqualTo("EPSG:32633");
-    }
-
-    @Test
-    public void findUtmZone35() {
-        // Mehamn: 71.035717, 27.848786
-        String zone = envelopeCreator.findUtmCrs(27.848786);
-        assertThat(zone).isEqualTo("EPSG:32635");
     }
 
     /**
