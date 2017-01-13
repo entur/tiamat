@@ -1,16 +1,9 @@
 package org.rutebanken.tiamat.importers;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.referencing.operation.Transformation;
+import org.rutebanken.tiamat.geo.EnvelopeCreator;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -28,14 +21,17 @@ public class NearByStopWithSameTypeFinder implements StopPlaceFinder {
 
     private final StopPlaceRepository stopPlaceRepository;
 
+    private final EnvelopeCreator envelopeCreator;
 
     /**
      *
      * @param stopPlaceRepository
+     * @param envelopeCreator
      */
     @Autowired
-    public NearByStopWithSameTypeFinder(StopPlaceRepository stopPlaceRepository) {
+    public NearByStopWithSameTypeFinder(StopPlaceRepository stopPlaceRepository, EnvelopeCreator envelopeCreator) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.envelopeCreator = envelopeCreator;
     }
 
 
@@ -45,7 +41,7 @@ public class NearByStopWithSameTypeFinder implements StopPlaceFinder {
 
         try {
 
-            Envelope envelope = createBoundingBox(stopPlace.getCentroid(), 800.00);
+            Envelope envelope = envelopeCreator.createFromPoint(stopPlace.getCentroid(), 800.00);
             long stopPlaceId = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getStopPlaceType());
             if(stopPlaceId > 0) {
                 logger.debug("Found nearby match on type with stop place ID {}", stopPlaceId);
@@ -57,20 +53,5 @@ public class NearByStopWithSameTypeFinder implements StopPlaceFinder {
     }
 
 
-    public Envelope createBoundingBox(Point point, double meters) throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
-        CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:32633");
 
-        MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
-        Geometry metricGeometry = JTS.transform(point, transform);
-        Geometry metricBuffer = metricGeometry.buffer(meters);
-
-        // Back to source
-        MathTransform transformBack = CRS.findMathTransform(targetCRS, sourceCRS);
-
-        Geometry buffer = JTS.transform(metricBuffer, transformBack);
-        Envelope envelope = buffer.getEnvelopeInternal();
-
-        return envelope;
-    }
 }
