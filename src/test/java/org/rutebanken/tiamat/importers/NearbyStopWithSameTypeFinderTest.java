@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opengis.referencing.FactoryException;
@@ -41,29 +42,24 @@ public class NearbyStopWithSameTypeFinderTest {
     @Autowired
     private NearbyStopWithSameTypeFinder nearbyStopWithSameTypeFinder;
 
+    @Before
+    public void cleanRepositories() {
+        stopPlaceRepository.deleteAll();
+    }
+
+
     @Test
     public void findNearbyAirport() throws FactoryException, TransformException {
 
         Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("OSL Gardermoen"));
-        stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
-        stopPlace.setCentroid(point);
-
-        stopPlaceRepository.save(stopPlace);
-
-        int azimuth = 90;
-        int offsetMeters = 300;
-
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(point.getX(), point.getY());
-        calc.setDirection(azimuth, offsetMeters);
-        Point2D dest = calc.getDestinationGeographicPoint();
-        Point offsetPoint = geometryFactory.createPoint(new Coordinate(dest.getX(), dest.getY()));
-        System.out.println(offsetPoint);
+        createSavedStopPlace("OSL", StopTypeEnumeration.AIRPORT, point);
 
         StopPlace incomingStopPlace = new StopPlace(new EmbeddableMultilingualString("Gardermoen"));
         incomingStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
-        incomingStopPlace.setCentroid(point);
+
+        int azimuth = 90;
+        int offsetMeters = 300;
+        incomingStopPlace.setCentroid(getOffsetPoint(point, offsetMeters, azimuth));
 
         List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
         assertThat(foundStopPlaces).isNotNull();
@@ -71,49 +67,55 @@ public class NearbyStopWithSameTypeFinderTest {
     }
 
     @Test
-    public void noNearByAirport() throws FactoryException, TransformException {
+    public void findNoNearbyRailStation() throws FactoryException, TransformException {
 
         Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("OSL Gardermoen"));
-        stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
-        stopPlace.setCentroid(point);
-
-        stopPlaceRepository.save(stopPlace);
-
-        int offsetMeters = 9000;
-        int azimuth = 90;
-
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(point.getX(), point.getY());
-        calc.setDirection(azimuth, offsetMeters);
-        Point2D dest = calc.getDestinationGeographicPoint();
-        Point offsetPoint = geometryFactory.createPoint(new Coordinate(dest.getX(), dest.getY()));
-        System.out.println(offsetPoint);
+        createSavedStopPlace("OSL", StopTypeEnumeration.AIRPORT, point);
 
         StopPlace incomingStopPlace = new StopPlace(new EmbeddableMultilingualString("Gardermoen"));
-        incomingStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
-        incomingStopPlace.setCentroid(offsetPoint);
+        incomingStopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
 
-        System.out.println("Searching with stop place " + stopPlace);
+        incomingStopPlace.setCentroid(point);
+
         List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
         assertThat(foundStopPlaces).isNotNull();
         assertThat(foundStopPlaces).isEmpty();
     }
 
     @Test
-    public void findNearbyTrainStation() {
+    public void noNearByAirport() throws FactoryException, TransformException {
+        Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
+        createSavedStopPlace("OSL Gardermoen", StopTypeEnumeration.AIRPORT, point);
 
+        StopPlace incomingStopPlace = new StopPlace(new EmbeddableMultilingualString("Gardermoen"));
+        incomingStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
+
+        int offsetMeters = 9000; int azimuth = 90;
+        incomingStopPlace.setCentroid(getOffsetPoint(point, offsetMeters, azimuth));
+
+        System.out.println("Searching with stop place " + incomingStopPlace);
+
+        List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
+        assertThat(foundStopPlaces).isNotNull();
+        assertThat(foundStopPlaces).isEmpty();
     }
 
-    @Test
-    public void findNearbyBusStop() {
 
+    private StopPlace createSavedStopPlace(String name, StopTypeEnumeration stopType, Point point) {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
+        stopPlace.setStopPlaceType(stopType);
+        stopPlace.setCentroid(point);
+
+        stopPlaceRepository.save(stopPlace);
+        return stopPlace;
     }
 
-    @Test
-    public void findNearbyTramStation() {
-
-
+    private Point getOffsetPoint(Point point, int offsetMeters, int azimuth) {
+        GeodeticCalculator calc = new GeodeticCalculator();
+        calc.setStartingGeographicPoint(point.getX(), point.getY());
+        calc.setDirection(azimuth, offsetMeters);
+        Point2D dest = calc.getDestinationGeographicPoint();
+        return geometryFactory.createPoint(new Coordinate(dest.getX(), dest.getY()));
     }
 
 }
