@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,9 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Some nearby stops like airports can be treated as the same if they are close enough.
  */
 @Component
-public class NearbyStopWithSameTypeFinder {
+public class NearbyStopsWithSameTypeFinder {
 
-    private static final Logger logger = LoggerFactory.getLogger(NearbyStopWithSameTypeFinder.class);
+    private static final Logger logger = LoggerFactory.getLogger(NearbyStopsWithSameTypeFinder.class);
 
     private static final int DEFAULT_LIMIT_METERS = 20;
 
@@ -37,17 +36,22 @@ public class NearbyStopWithSameTypeFinder {
      *
      * @param stopPlaceRepository
      * @param envelopeCreator
+     *
      */
     @Autowired
-    public NearbyStopWithSameTypeFinder(StopPlaceRepository stopPlaceRepository,
-                                        EnvelopeCreator envelopeCreator,
-                                        @Value("${nearbyStopWithSameTypeFinder.airportLimit:2000}") int airportLimit,
-                                        @Value("${nearbyStopWithSameTypeFinder.railStationLimit:300}") int railStationLimit) {
+    public NearbyStopsWithSameTypeFinder(StopPlaceRepository stopPlaceRepository,
+                                         EnvelopeCreator envelopeCreator,
+                                         @Value("${nearbyStopWithSameTypeFinder.airportLimit:1000}") int airportLimit,
+                                         @Value("${nearbyStopWithSameTypeFinder.railStationLimit:300}") int railStationLimit) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.envelopeCreator = envelopeCreator;
         typesLimitMap = new ConcurrentHashMap<>(2);
         typesLimitMap.put(StopTypeEnumeration.AIRPORT, airportLimit);
         typesLimitMap.put(StopTypeEnumeration.RAIL_STATION, railStationLimit);
+    }
+
+    public NearbyStopsWithSameTypeFinder(StopPlaceRepository stopPlaceRepository, EnvelopeCreator envelopeCreator) {
+        this(stopPlaceRepository, envelopeCreator, 1000, 300);
     }
 
     private int getLimit(StopPlace stopPlace) {
@@ -57,10 +61,15 @@ public class NearbyStopWithSameTypeFinder {
             logger.warn("Could not find limit for stop place type {}. Returning default limit: {}", stopPlace.getStopPlaceType(), DEFAULT_LIMIT_METERS);
             return DEFAULT_LIMIT_METERS;
         }
+        logger.debug("Using limit {} for type {}", limit, stopPlace.getStopPlaceType());
         return limit;
     }
 
     public List<StopPlace> find(StopPlace stopPlace) {
+        if(stopPlace.getStopPlaceType() == null) {
+            logger.warn("Stop place does not have type set: {}", stopPlace);
+            return Collections.emptyList();
+        }
 
         try {
             int limit = getLimit(stopPlace);
@@ -70,6 +79,10 @@ public class NearbyStopWithSameTypeFinder {
             if(!stopPlacesIds.isEmpty()) {
                 logger.debug("Found {} nearby matches on type with stop place ID", stopPlacesIds.size());
 
+                if(stopPlacesIds.size() > 1) {
+                    logger.warn("Query for stop places returned more than one. Incoming stop place: {}. Result: ", stopPlace, stopPlacesIds);
+                }
+
                 return stopPlaceRepository.findAll(stopPlacesIds);
             }
 
@@ -78,9 +91,7 @@ public class NearbyStopWithSameTypeFinder {
         } catch (FactoryException|TransformException e) {
             logger.error("Error finding nearby stop from type and buffer", e);
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
-
-
 
 }

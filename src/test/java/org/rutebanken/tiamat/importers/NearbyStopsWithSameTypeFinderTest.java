@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
 @Transactional
-public class NearbyStopWithSameTypeFinderTest {
+public class NearbyStopsWithSameTypeFinderTest {
 
     private static final Coordinate OSL_GARDERMOEN = new Coordinate(60.190448, 11.106292);
 
@@ -40,13 +40,12 @@ public class NearbyStopWithSameTypeFinderTest {
     private GeometryFactory geometryFactory;
 
     @Autowired
-    private NearbyStopWithSameTypeFinder nearbyStopWithSameTypeFinder;
+    private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder;
 
     @Before
     public void cleanRepositories() {
         stopPlaceRepository.deleteAll();
     }
-
 
     @Test
     public void findNearbyAirport() throws FactoryException, TransformException {
@@ -61,7 +60,7 @@ public class NearbyStopWithSameTypeFinderTest {
         int offsetMeters = 300;
         incomingStopPlace.setCentroid(getOffsetPoint(point, offsetMeters, azimuth));
 
-        List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
+        List<StopPlace> foundStopPlaces = nearbyStopsWithSameTypeFinder.find(incomingStopPlace);
         assertThat(foundStopPlaces).isNotNull();
         assertThat(foundStopPlaces).hasSize(1);
     }
@@ -77,7 +76,7 @@ public class NearbyStopWithSameTypeFinderTest {
 
         incomingStopPlace.setCentroid(point);
 
-        List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
+        List<StopPlace> foundStopPlaces = nearbyStopsWithSameTypeFinder.find(incomingStopPlace);
         assertThat(foundStopPlaces).isNotNull();
         assertThat(foundStopPlaces).isEmpty();
     }
@@ -95,7 +94,7 @@ public class NearbyStopWithSameTypeFinderTest {
 
         System.out.println("Searching with stop place " + incomingStopPlace);
 
-        List<StopPlace> foundStopPlaces = nearbyStopWithSameTypeFinder.find(incomingStopPlace);
+        List<StopPlace> foundStopPlaces = nearbyStopsWithSameTypeFinder.find(incomingStopPlace);
         assertThat(foundStopPlaces).isNotNull();
         assertThat(foundStopPlaces).isEmpty();
     }

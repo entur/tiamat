@@ -14,13 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +41,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private final StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
+    private final NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder;
+
     private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
     private final CentroidComputer centroidComputer;
@@ -58,7 +59,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                                     CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
-                                    NearbyStopPlaceFinder nearbyStopPlaceFinder,
+                                    NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper) {
         this.topographicPlaceCreator = topographicPlaceCreator;
@@ -66,6 +67,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
+        this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
         this.centroidComputer = centroidComputer;
         this.keyValueListAppender = keyValueListAppender;
@@ -213,15 +215,20 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             return existingStopPlace;
         }
 
-        // Find existing nearby stop place based on type
-
-
         if (newStopPlace.getName() != null) {
             final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
             if (nearbyStopPlace != null) {
                 logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
                 return nearbyStopPlace;
             }
+        }
+
+        // Find existing nearby stop place based on type
+        final List<StopPlace> nearbyStopsWithSameType = nearbyStopsWithSameTypeFinder.find(newStopPlace);
+        if(!nearbyStopsWithSameType.isEmpty()) {
+            StopPlace nearbyStopWithSameType = nearbyStopsWithSameType.get(0);
+            logger.debug("Found nearby stop place with same type: {}", nearbyStopWithSameType);
+            return nearbyStopWithSameType;
         }
         return null;
     }
