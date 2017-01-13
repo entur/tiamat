@@ -19,6 +19,9 @@ public class GeometryTransformer {
     private final CoordinateReferenceSystem wgs84;
     private final Geometry geometry;
 
+    /**
+     * @param geometry Geometry to transform into UTM
+     */
     public GeometryTransformer(Geometry geometry) throws FactoryException {
         CRSAuthorityFactory factory = CRS.getAuthorityFactory(true);
 
