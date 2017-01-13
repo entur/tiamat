@@ -10,18 +10,15 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.importers.NearByStopWithSameTypeFinder;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 
 public class EnvelopeCreatorTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
-    private EnvelopeCreator envelopeCreator = new EnvelopeCreator();
+    private EnvelopeCreator envelopeCreator = new EnvelopeCreator(geometryFactory);
 
     @Test
     public void envelopeIntersectsWithCoordinate() throws FactoryException, TransformException {
@@ -53,6 +50,27 @@ public class EnvelopeCreatorTest {
         Envelope envelope = envelopeCreator.createFromPoint(point, meters);
 
         assertThat(envelope.intersects(notCoveredCoordinate)).isFalse();
+    }
+
+    @Test
+    public void findUtmZone32() {
+        // Nesbru, Asker: 59.858690, 10.493860
+        String zone = envelopeCreator.findUtmCrs(10.493860);
+        assertThat(zone).isEqualTo("EPSG:32632");
+    }
+
+    @Test
+    public void findUtmZone33() {
+        // Somewhere in Narvik: 68.437437, 17.426283
+        String zone = envelopeCreator.findUtmCrs(17.426283);
+        assertThat(zone).isEqualTo("EPSG:32633");
+    }
+
+    @Test
+    public void findUtmZone35() {
+        // Mehamn: 71.035717, 27.848786
+        String zone = envelopeCreator.findUtmCrs(27.848786);
+        assertThat(zone).isEqualTo("EPSG:32635");
     }
 
     /**
