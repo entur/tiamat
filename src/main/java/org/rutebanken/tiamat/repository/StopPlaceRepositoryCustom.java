@@ -27,7 +27,7 @@ public interface StopPlaceRepositoryCustom {
 
     Long findNearbyStopPlace(Envelope envelope, String name);
 
-    Long findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
+    List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 
     Long findByKeyValue(String key, Set<String> value);
     

@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class GeometryTransformerTest {
-    
+
     @Test
     public void findUtmZone32() {
         // Nesbru, Asker: 59.858690, 10.493860

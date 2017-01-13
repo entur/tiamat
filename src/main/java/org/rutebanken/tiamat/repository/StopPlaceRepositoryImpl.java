@@ -111,18 +111,18 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
+    public List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                         "WHERE within(s.centroid, :filter) = true " +
-                        "AND s.stopType = :stopType", Long.class);
+                        "AND s.stopPlaceType = :stopPlaceType", Long.class);
         query.setParameter("filter", geometryFilter);
-        query.setParameter("stopType", stopTypeEnumeration);
+        query.setParameter("stopPlaceType", stopTypeEnumeration);
         try {
             List<Long> resultList = query.getResultList();
-            return  resultList.isEmpty() ? null : resultList.get(0);
+            return resultList;
         } catch (NoResultException e) {
             return null;
         }
