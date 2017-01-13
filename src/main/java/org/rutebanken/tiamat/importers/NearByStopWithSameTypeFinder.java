@@ -40,11 +40,11 @@ public class NearByStopWithSameTypeFinder implements StopPlaceFinder {
 
 
         try {
-
             Envelope envelope = envelopeCreator.createFromPoint(stopPlace.getCentroid(), 800.00);
             long stopPlaceId = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getStopPlaceType());
             if(stopPlaceId > 0) {
                 logger.debug("Found nearby match on type with stop place ID {}", stopPlaceId);
+                return stopPlaceRepository.findOne(stopPlaceId);
             }
         } catch (FactoryException|TransformException e) {
             logger.error("Could not find nearby stop from type and buffer", e);

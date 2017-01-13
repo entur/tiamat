@@ -23,8 +23,8 @@ public class EnvelopeCreator {
      * @throws TransformException
      */
     public Envelope createFromPoint(Point point, double meters) throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
-        CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:32633");
+        CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326"); // WGS 84
+        CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:32633"); // UTM zone 33N
 
         MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
         Geometry metricGeometry = JTS.transform(point, transform);

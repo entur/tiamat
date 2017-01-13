@@ -56,7 +56,7 @@ public class EnvelopeCreatorTest {
     }
 
     /**
-     * When testing with coordinates, verify that they are less than or equal in meters
+     * When testing with coordinates, verify that they are less than or equal in meters to each other
      */
     private void verifyDistanceInMetersLessThanOrEqualTo(Coordinate coordinate1, Coordinate coordinate2, int meters) throws TransformException {
         double distanceInMeters = JTS.orthodromicDistance(
