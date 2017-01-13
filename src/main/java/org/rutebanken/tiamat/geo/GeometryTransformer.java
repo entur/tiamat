@@ -37,7 +37,7 @@ public class GeometryTransformer {
         return JTS.transform(utmGeometry, transform);
     }
 
-    public String findUtmCrs(double longitude) {
+    public static String findUtmCrs(double longitude) {
         int zone = (int) (1 + Math.floor((longitude+180)/6));
         return "EPSG:326"+zone;
     }
