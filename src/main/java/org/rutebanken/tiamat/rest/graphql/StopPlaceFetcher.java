@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.dto;
+package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
@@ -7,7 +7,6 @@ import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -28,8 +28,6 @@ class StopPlaceFetcher implements DataFetcher {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    @Autowired
-    private StopPlaceAssembler stopPlaceAssembler;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -57,7 +55,6 @@ class StopPlaceFetcher implements DataFetcher {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
 
 
-        boolean quaysRequested = isQuaysRequested(environment);
         Page<StopPlace> stopPlaces;
         if (environment.getArgument("xMin") != null) {
             BoundingBoxDto boundingBox = new BoundingBoxDto();
@@ -81,7 +78,11 @@ class StopPlaceFetcher implements DataFetcher {
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         }
 
-        return stopPlaceAssembler.assemble(stopPlaces, quaysRequested);
+        if (isQuaysRequested(environment)) {
+            stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
+        }
+
+        return stopPlaces;
 
     }
 

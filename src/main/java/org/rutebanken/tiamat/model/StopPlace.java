@@ -2,8 +2,9 @@ package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import graphql.annotations.GraphQLField;
+import graphql.annotations.GraphQLName;
+import graphql.annotations.GraphQLType;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,39 +14,63 @@ import java.util.*;
 @Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
         @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
         @Index(name="stop_place_type_index", columnList = "stopPlaceType")})
+@GraphQLType
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
+    @GraphQLField
     protected String publicCode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected CoachSubmodeEnumeration coachSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected FunicularSubmodeEnumeration funicularSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected MetroSubmodeEnumeration metroSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected TramSubmodeEnumeration tramSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected TelecabinSubmodeEnumeration telecabinSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected RailSubmodeEnumeration railSubmode;
+
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
 
+    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
 
+    @GraphQLField
     protected Boolean borderCrossing;
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
@@ -218,9 +243,17 @@ public class StopPlace
         return accessSpaces;
     }
 
-
     public Set<Quay> getQuays() {
         return quays;
+    }
+
+    @GraphQLField
+    @GraphQLName("quays")
+    public List<Quay> getGraphQlQuays() {
+        if (quays != null) {
+            return new ArrayList<>(getQuays());
+        }
+        return null;
     }
 
     public void setQuays(Set<Quay> quays) {

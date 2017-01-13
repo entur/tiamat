@@ -1,9 +1,9 @@
-package org.rutebanken.tiamat.rest.dto;
+package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.Scalars;
 import graphql.annotations.GraphQLAnnotations;
 import graphql.schema.*;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType stopPlaceDtoObjectType;
         try {
-            stopPlaceDtoObjectType = GraphQLAnnotations.object(StopPlaceDto.class);
+            stopPlaceDtoObjectType = GraphQLAnnotations.object(StopPlace.class);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to start.", e);
         }

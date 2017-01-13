@@ -1,15 +1,21 @@
 package org.rutebanken.tiamat.model;
 
+import graphql.annotations.GraphQLField;
+import graphql.annotations.GraphQLType;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.util.Objects;
 
 @MappedSuperclass
+@GraphQLType
 public abstract class MultilingualString {
 
+    @GraphQLField
     protected String value;
 
     @Column(length = 5)
+    @GraphQLField
     protected String lang;
 
     public String getValue() {
