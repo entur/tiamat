@@ -51,7 +51,6 @@ public class StavangerImportTest {
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        // Exception should not have been thrown
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Stavanger");
@@ -89,7 +88,6 @@ public class StavangerImportTest {
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        // Exception should not have been thrown
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
 
         assertThat(actualStopPlace.getName().getValue()).describedAs("Stop place name").isEqualTo("Stavanger");
