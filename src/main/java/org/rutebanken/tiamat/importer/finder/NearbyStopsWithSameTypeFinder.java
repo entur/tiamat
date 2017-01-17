@@ -69,6 +69,8 @@ public class NearbyStopsWithSameTypeFinder {
         if(stopPlace.getStopPlaceType() == null) {
             logger.warn("Stop place does not have type set: {}", stopPlace);
             return Collections.emptyList();
+        } else if(stopPlace.getCentroid() == null) {
+            return Collections.emptyList();
         }
 
         try {
