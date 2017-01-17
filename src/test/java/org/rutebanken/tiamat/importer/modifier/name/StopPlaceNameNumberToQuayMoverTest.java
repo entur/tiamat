@@ -56,4 +56,20 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo(originalQuayName);
     }
+
+    @Test
+    public void quayNameCouldBeNull() throws Exception {
+
+        final String originalStopPlaceName = "Stavanger hpl. 13";
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(originalStopPlaceName));
+
+        stopPlace.getQuays().add(new Quay());
+
+        stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace);
+
+        assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
+
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("hpl. 13");
+    }
 }

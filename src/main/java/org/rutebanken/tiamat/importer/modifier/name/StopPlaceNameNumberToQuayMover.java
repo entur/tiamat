@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.modifier.name;
 
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -43,20 +44,7 @@ public class StopPlaceNameNumberToQuayMover {
                 String newStopPlaceName = matcher.group(1);
                 String newQuayName = matcher.group(2);
 
-                if (stopPlace.getQuays().isEmpty()) {
-                    logger.warn("No quays for stop place. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
-                } else if (stopPlace.getQuays().size() > 1) {
-                    logger.warn("This stop place contains multiple quays. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
-                } else {
-                    Quay quay = stopPlace.getQuays().iterator().next();
-                    String originalQuayName = quay.getName().getValue();
-                    if (originalQuayName.equals(originalStopPlaceName)) {
-                        quay.getName().setValue(newQuayName);
-                        logger.info("Changing quay name from '{}' to '{}'. Quay: {}", originalQuayName, newQuayName, quay);
-                    } else {
-                        logger.warn("Original quay name '{}' is not equal to original stop place name '{}'. Cannot set quay name to '{}'.", originalQuayName, originalQuayName, newQuayName);
-                    }
-                }
+                setQuayName(stopPlace, originalStopPlaceName, newQuayName);
 
                 stopPlace.getName().setValue(newStopPlaceName);
                 logger.info("Changing stop place name from '{}' to '{}'. {}", originalStopPlaceName, newStopPlaceName, stopPlace);
@@ -70,6 +58,33 @@ public class StopPlaceNameNumberToQuayMover {
         }
 
         return stopPlace;
+    }
+
+    private void setQuayName(StopPlace stopPlace, String originalStopPlaceName, String newQuayName) {
+
+        if (stopPlace.getQuays().isEmpty()) {
+            logger.warn("No quays for stop place. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            return;
+        }
+        if (stopPlace.getQuays().size() > 1) {
+            logger.warn("This stop place contains multiple quays. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            return;
+        }
+
+        Quay quay = stopPlace.getQuays().iterator().next();
+        if(quay.getName() == null) {
+            logger.info("Quay name is empty. Will set it to '{}'. Stop Place: {}", newQuayName, stopPlace);
+            quay.setName(new EmbeddableMultilingualString(newQuayName));
+        } else {
+            String originalQuayName = quay.getName().getValue();
+            if (originalQuayName.equals(originalStopPlaceName)) {
+                quay.getName().setValue(newQuayName);
+                logger.info("Changing quay name from '{}' to '{}'. Quay: {}", originalQuayName, newQuayName, quay);
+            } else {
+                logger.warn("Original quay name '{}' is not equal to original stop place name '{}'. Cannot set quay name to '{}'.", originalQuayName, originalStopPlaceName, newQuayName);
+            }
+        }
+
     }
 
 }
