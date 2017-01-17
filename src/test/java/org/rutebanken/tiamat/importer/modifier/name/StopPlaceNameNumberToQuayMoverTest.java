@@ -11,7 +11,7 @@ public class StopPlaceNameNumberToQuayMoverTest {
     private StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover = new StopPlaceNameNumberToQuayMover();
 
     @Test
-    public void moveNumberEndingToQuay() throws Exception {
+    public void moveHplNumberEndingToQuay() throws Exception {
 
         final String originalName = "Stavanger hpl. 13";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(originalName));
@@ -23,6 +23,21 @@ public class StopPlaceNameNumberToQuayMoverTest {
         assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
 
         assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("hpl. 13");
+    }
+
+    @Test
+    public void moveSporNumberEndingToQuay() throws Exception {
+
+        final String originalName = "Bussterminalen spor 6";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(originalName));
+
+        stopPlace.getQuays().add(new Quay(new EmbeddableMultilingualString(originalName)));
+
+        stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace);
+
+        assertThat(stopPlace.getName().getValue()).isEqualTo("Bussterminalen");
+
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("spor 6");
     }
 
     @Test

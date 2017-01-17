@@ -21,7 +21,7 @@ public class StopPlaceNameNumberToQuayMover {
     @Autowired
     public StopPlaceNameNumberToQuayMover(@Value("${StopPlaceNameNumberToQuayMover.terms:hpl,spor}") String[] terms) {
         String termsPart = String.join("|", terms);
-        pattern = Pattern.compile("(\\w*)\\s((" + termsPart + ")\\.\\s[0-9]+)");
+        pattern = Pattern.compile("(\\w*)\\s((" + termsPart + ")\\.?\\s[0-9]+)");
         logger.info("Terms: {}. Pattern: {}", terms, pattern);
     }
 
