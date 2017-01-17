@@ -4,6 +4,8 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -14,20 +16,30 @@ public class StopPlaceNameNumberToQuayMover {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceNameNumberToQuayMover.class);
 
+    private final Pattern pattern;
 
-    private static final Pattern PATTERN = Pattern.compile("(\\w*)\\s(hpl\\.\\s[0-9]+)");
+    @Autowired
+    public StopPlaceNameNumberToQuayMover(@Value("${StopPlaceNameNumberToQuayMover.terms:hpl,spor}") String[] terms) {
+        String termsPart = String.join("|", terms);
+        pattern = Pattern.compile("(\\w*)\\s((" + termsPart + ")\\.\\s[0-9]+)");
+        logger.info("Terms: {}. Pattern: {}", terms, pattern);
+    }
+
+    public StopPlaceNameNumberToQuayMover() {
+        this(new String[]{"hpl", "spor"});
+    }
 
     public void moveNumberEndingToQuay(StopPlace stopPlace) {
 
-        if(stopPlace.getName() == null) {
+        if (stopPlace.getName() == null) {
             return;
         }
 
         String originalStopPlaceName = stopPlace.getName().getValue();
 
-        Matcher matcher = PATTERN.matcher(originalStopPlaceName);
-        if(matcher.matches()) {
-            if(matcher.groupCount() == 2) {
+        Matcher matcher = pattern.matcher(originalStopPlaceName);
+        if (matcher.matches()) {
+            if (matcher.groupCount() == 3) {
                 String newStopPlaceName = matcher.group(1);
                 String newQuayName = matcher.group(2);
 
@@ -38,7 +50,7 @@ public class StopPlaceNameNumberToQuayMover {
                 } else {
                     Quay quay = stopPlace.getQuays().iterator().next();
                     String originalQuayName = quay.getName().getValue();
-                    if(originalQuayName.equals(originalStopPlaceName)) {
+                    if (originalQuayName.equals(originalStopPlaceName)) {
                         quay.getName().setValue(newQuayName);
                         logger.info("Changing quay name from '{}' to '{}'. Quay: {}", originalQuayName, newQuayName, quay);
                     } else {
