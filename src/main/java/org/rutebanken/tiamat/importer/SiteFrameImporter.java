@@ -5,6 +5,7 @@ import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.importer.modifier.name.NameToDescriptionMover;
 import org.rutebanken.tiamat.importer.modifier.name.QuayNameRemover;
 import org.rutebanken.tiamat.importer.modifier.name.StopPlaceNameCleaner;
+import org.rutebanken.tiamat.importer.modifier.name.StopPlaceNameNumberToQuayMover;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -34,14 +35,16 @@ public class SiteFrameImporter {
     private final StopPlaceNameCleaner stopPlaceNameCleaner;
     private final NameToDescriptionMover nameToDescriptionMover;
     private final QuayNameRemover quayNameRemover;
+    private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
+        this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -73,6 +76,7 @@ public class SiteFrameImporter {
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
+                        .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
                         .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)

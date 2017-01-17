@@ -29,19 +29,20 @@ public class StavangerImportTest {
     /**
      * Import stop place with hpl. and number in the name.
      * The part "hpl. [number]" should be moved to the Quay name.
+     * Stop place does not have centroid. This causes tests to not interfer with each other.
      */
     @Test
     public void importStavangerWithHplNumbering() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("KOL:StopArea:11032650")
+                .withId("KOL:StopArea:987654")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("Stavanger hpl. 12").withLang("no"))
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                         .withVersion("1")
-                                        .withId("KOL:StopArea:1103265001")
+                                        .withId("KOL:StopArea:87654")
                                         .withName(new MultilingualString().withValue("Stavanger hpl. 12").withLang("no"))
                                         .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("58.966910"))

@@ -29,10 +29,10 @@ public class StopPlaceNameNumberToQuayMover {
         this(new String[]{"hpl", "spor"});
     }
 
-    public void moveNumberEndingToQuay(StopPlace stopPlace) {
+    public StopPlace moveNumberEndingToQuay(StopPlace stopPlace) {
 
         if (stopPlace.getName() == null) {
-            return;
+            return stopPlace;
         }
 
         String originalStopPlaceName = stopPlace.getName().getValue();
@@ -69,7 +69,7 @@ public class StopPlaceNameNumberToQuayMover {
             logger.debug("No match in stop place name {}", originalStopPlaceName);
         }
 
-
+        return stopPlace;
     }
 
 }
