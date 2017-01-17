@@ -4,12 +4,11 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
-import org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter;
-import org.rutebanken.tiamat.exporters.PublicationDeliveryExporter;
-import org.rutebanken.tiamat.importers.SimpleStopPlaceImporter;
-import org.rutebanken.tiamat.importers.SiteFrameImporter;
-import org.rutebanken.tiamat.importers.StopPlaceImporter;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.importer.SimpleStopPlaceImporter;
+import org.rutebanken.tiamat.importer.SiteFrameImporter;
+import org.rutebanken.tiamat.importer.StopPlaceImporter;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -32,11 +31,9 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import static org.rutebanken.tiamat.exporters.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
+import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
 @Component
 @Produces("application/xml")
