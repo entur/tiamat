@@ -77,7 +77,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace firstStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
         firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
-
+        firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
@@ -86,6 +86,8 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         StopPlace secondStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
         secondStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
+        secondStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
 
         // Import second stop place
         StopPlace importResult = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);

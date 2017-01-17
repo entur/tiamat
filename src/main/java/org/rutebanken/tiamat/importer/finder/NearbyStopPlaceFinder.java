@@ -48,10 +48,15 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
             return null;
         }
 
+        if(stopPlace.getStopPlaceType() == null) {
+            logger.warn("Stop place does not have type. Cannot check for similar stop places. {}", stopPlace);
+            return null;
+        }
+
         try {
             Optional<Long> stopPlaceId = nearbyStopCache.get(createKey(stopPlace), () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
-                return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue()));
+                return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), stopPlace.getStopPlaceType()));
             });
             if(stopPlaceId.isPresent()) {
                 return stopPlaceRepository.findOne(stopPlaceId.get());

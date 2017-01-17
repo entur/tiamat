@@ -25,7 +25,7 @@ public interface StopPlaceRepositoryCustom {
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable);
 
-    Long findNearbyStopPlace(Envelope envelope, String name);
+    Long findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
 
     List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 

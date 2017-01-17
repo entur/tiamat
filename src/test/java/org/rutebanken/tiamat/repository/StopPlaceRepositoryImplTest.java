@@ -230,13 +230,14 @@ public class StopPlaceRepositoryImplTest {
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("name", ""));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
         StopPlace actual = stopPlaceRepository.findOne(result);
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -247,11 +248,12 @@ public class StopPlaceRepositoryImplTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("stop place", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -260,12 +262,13 @@ public class StopPlaceRepositoryImplTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("This name is different", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlaceRepository.save(stopPlace);
 
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -273,7 +276,7 @@ public class StopPlaceRepositoryImplTest {
     public void multipleNearbyStopPlaces() throws Exception {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
-
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)));
 
@@ -283,7 +286,7 @@ public class StopPlaceRepositoryImplTest {
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name");
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
     }
 

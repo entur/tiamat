@@ -122,6 +122,7 @@ public class DefaultStopPlaceImporterTest {
         firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstStopPlace.setId(firstStopId);
         firstStopPlace.setVersion("1");
+        firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("terminal 1"));
@@ -133,6 +134,7 @@ public class DefaultStopPlaceImporterTest {
         StopPlace secondStopPlace = new StopPlace();
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
         secondStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
+        secondStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal2 = new Quay();
         terminal2.setName(new EmbeddableMultilingualString("terminal 2"));
@@ -141,7 +143,7 @@ public class DefaultStopPlaceImporterTest {
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(firstStopId, firstStopPlace);
-        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class))).thenReturn(firstStopId);
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
         when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
