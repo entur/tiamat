@@ -58,6 +58,11 @@ public class AsyncPublicationDeliveryExporter {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
+    /**
+     * Start export job with upload to google cloud storage
+     * @param stopPlaceSearch NOTE: Not currently used.
+     * @return
+     */
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
