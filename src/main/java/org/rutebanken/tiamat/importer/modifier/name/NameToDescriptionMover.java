@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.modifier.name;
 
 
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;

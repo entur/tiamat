@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.finder;
 
 import org.rutebanken.tiamat.model.StopPlace;
 

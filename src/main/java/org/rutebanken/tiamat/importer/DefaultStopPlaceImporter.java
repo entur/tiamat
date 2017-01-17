@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
+import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
+import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;

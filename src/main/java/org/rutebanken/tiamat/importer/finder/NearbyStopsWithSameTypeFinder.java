@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.finder;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.opengis.referencing.FactoryException;

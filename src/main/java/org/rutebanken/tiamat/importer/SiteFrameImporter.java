@@ -2,6 +2,9 @@ package org.rutebanken.tiamat.importer;
 
 import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.importer.modifier.name.NameToDescriptionMover;
+import org.rutebanken.tiamat.importer.modifier.name.QuayNameRemover;
+import org.rutebanken.tiamat.importer.modifier.name.StopPlaceNameCleaner;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;

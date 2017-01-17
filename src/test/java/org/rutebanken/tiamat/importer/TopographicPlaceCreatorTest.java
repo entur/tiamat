@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.junit.Ignore;
