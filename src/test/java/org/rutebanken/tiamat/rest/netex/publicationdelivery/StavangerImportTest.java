@@ -28,7 +28,7 @@ public class StavangerImportTest {
 
     /**
      * Import stop place with hpl. and number in the name.
-     * The part "hpl. [number]" should be moved to the Quay name.
+     * The number should be moved to the Quay name.
      * Stop place does not have centroid. This causes tests to not interfer with each other.
      */
     @Test
@@ -59,12 +59,12 @@ public class StavangerImportTest {
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
         assertThat(actualQuays.get(0).getName()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("hpl. 12");
+        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("12");
     }
 
     /**
      * Import stop place with spor and number in the name.
-     * The part "spor [number]" should be moved to the Quay name.
+     * The number should be moved to the Quay name.
      */
     @Test
     public void importStopWithSporAndNumbering() throws Exception {
@@ -96,6 +96,6 @@ public class StavangerImportTest {
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
         assertThat(actualQuays.get(0).getName()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("spor 2");
+        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("2");
     }
 }
