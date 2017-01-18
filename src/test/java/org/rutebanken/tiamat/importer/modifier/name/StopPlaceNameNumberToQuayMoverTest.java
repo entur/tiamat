@@ -41,6 +41,20 @@ public class StopPlaceNameNumberToQuayMoverTest {
     }
 
     @Test
+    public void handleSpacesAndDotsInStopPlaceName() {
+        final String originalStopPlaceName = "Sandnes rb.st hpl. 20";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(originalStopPlaceName));
+
+        stopPlace.getQuays().add(new Quay(new EmbeddableMultilingualString(originalStopPlaceName)));
+
+        stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace);
+
+        assertThat(stopPlace.getName().getValue()).isEqualTo("Sandnes rb.st");
+
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("20");
+    }
+
+    @Test
     public void originalQuayNameMustBeEqualToStopPlaceNameInOrderToChangeQuayName() throws Exception {
 
         final String originalStopPlaceName = "Stavanger hpl. 13";
