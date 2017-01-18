@@ -22,7 +22,7 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("hpl. 13");
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("13");
     }
 
     @Test
@@ -37,7 +37,7 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Bussterminalen");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("spor 6");
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("6");
     }
 
     @Test
@@ -70,6 +70,6 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("hpl. 13");
+        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("13");
     }
 }

@@ -22,7 +22,7 @@ public class StopPlaceNameNumberToQuayMover {
     @Autowired
     public StopPlaceNameNumberToQuayMover(@Value("${StopPlaceNameNumberToQuayMover.terms:hpl,spor}") String[] terms) {
         String termsPart = String.join("|", terms);
-        pattern = Pattern.compile("(\\w*)\\s((" + termsPart + ")\\.?\\s[0-9]+)");
+        pattern = Pattern.compile("(\\w*)\\s(" + termsPart + ")\\.?\\s([0-9]+)");
         logger.info("Terms: {}. Pattern: {}", terms, pattern);
     }
 
@@ -42,7 +42,7 @@ public class StopPlaceNameNumberToQuayMover {
         if (matcher.matches()) {
             if (matcher.groupCount() == 3) {
                 String newStopPlaceName = matcher.group(1);
-                String newQuayName = matcher.group(2);
+                String newQuayName = matcher.group(3);
 
                 setQuayName(stopPlace, originalStopPlaceName, newQuayName);
 
