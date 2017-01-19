@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.junit.Before;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;
@@ -27,6 +28,11 @@ public class StopPlaceRepositoryTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Before
+    public void cleanRepositoriey() {
+        stopPlaceRepository.deleteAll();
+    }
 
     @Test
     public void findStopPlacesSortedCorrectly() {
