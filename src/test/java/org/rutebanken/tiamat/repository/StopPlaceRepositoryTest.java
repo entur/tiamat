@@ -42,7 +42,9 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
+        assertThat(page.getContent().get(0).getId()).isEqualTo(stopPlaceNewer.getId());
         assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+        assertThat(page.getContent().get(1).getId()).isEqualTo(stopPlaceOlder.getId());
         assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
     }
 
