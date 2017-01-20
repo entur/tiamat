@@ -50,7 +50,7 @@ class StopPlaceUpdater implements DataFetcher {
                 Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
                 Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
 
-                stopPlace = stopPlaceRepository.findOne((Long)environment.getArgument("stopPlaceId"));
+                stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument("stopPlaceId")));
                 if(stopPlace != null) {
                     logger.info("Adding quay to StopPlace {}", stopPlace.getId());
                     if (stopPlace.getQuays() != null) {
@@ -67,7 +67,7 @@ class StopPlaceUpdater implements DataFetcher {
 
                 Preconditions.checkNotNull(environment.getArgument("id"), "id cannot be null");
 
-                Quay quay = quayRepository.findOne((Long)environment.getArgument("id"));
+                Quay quay = quayRepository.findOne(new Long(environment.getArgument("id")));
                 if(quay != null) {
                     logger.info("Updating Quay {}", quay.getId());
 
@@ -83,20 +83,29 @@ class StopPlaceUpdater implements DataFetcher {
                     quayRepository.save(quay);
                 }
             } else if (field.getName().equals("updateStopPlace")) {
-                stopPlace = stopPlaceRepository.findOne((Long)environment.getArgument("id"));
+                stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument("id")));
                 if(stopPlace != null) {
                     logger.info("Updating StopPlace {}", stopPlace.getId());
-
-                    if (environment.getArgument("stopPlaceType") != null) {
+                    boolean hasValuesChanged = false;
+                    if (environment.getArgument("stopPlaceType") != null &&
+                            !stopPlace.getStopPlaceType().equals(environment.getArgument("stopPlaceType"))) {
                         stopPlace.setStopPlaceType(environment.getArgument("stopPlaceType"));
+                        hasValuesChanged = true;
                     }
                     if (environment.getArgument("name") != null) {
                         EmbeddableMultilingualString name = stopPlace.getName();
-                        name.setValue(environment.getArgument("name"));
-                        stopPlace.setName(name);
+
+                        String updatedName = environment.getArgument("name");
+                        if (!updatedName.equals(name.getValue())) {
+                            name.setValue(updatedName);
+                            stopPlace.setName(name);
+                            hasValuesChanged = true;
+                        }
                     }
-                    stopPlace.setChanged(ZonedDateTime.now());
-                    stopPlaceRepository.save(stopPlace);
+                    if (hasValuesChanged) {
+                        stopPlace.setChanged(ZonedDateTime.now());
+                        stopPlaceRepository.save(stopPlace);
+                    }
                 }
             }
         }

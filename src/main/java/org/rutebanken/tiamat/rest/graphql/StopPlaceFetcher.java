@@ -32,53 +32,56 @@ class StopPlaceFetcher implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
-        if (environment.getArgument("id") != null) {
-            stopPlaceSearchBuilder.setIdList(Arrays.asList((Long)environment.getArgument("id")));
-        }
-        stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument("stopPlaceType"));
-
-        if (environment.getArgument("countyReference") != null) {
-            stopPlaceSearchBuilder.setCountyIds(
-                    Lists.transform(environment.getArgument("countyReference"), Functions.toStringFunction())
-            );
-        }
-
-        if (environment.getArgument("municipalityReference") != null) {
-            stopPlaceSearchBuilder.setMunicipalityIds(
-                    Lists.transform(environment.getArgument("municipalityReference"), Functions.toStringFunction())
-            );
-        }
-
-        stopPlaceSearchBuilder.setQuery(environment.getArgument("query"));
-
-        PageRequest pageable = new PageRequest(environment.getArgument("page"), environment.getArgument("size"));
-        stopPlaceSearchBuilder.setPageable(pageable);
-
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
 
         Page<StopPlace> stopPlaces;
-        if (environment.getArgument("xMin") != null) {
-            BoundingBoxDto boundingBox = new BoundingBoxDto();
+        if (environment.getArgument("id") != null) {
+            stopPlaceSearchBuilder.setIdList(Arrays.asList(new Long(environment.getArgument("id"))));
+            stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+        } else {
+            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument("stopPlaceType"));
 
-            try {
-                boundingBox.xMin = ((BigDecimal) environment.getArgument("xMin")).doubleValue();
-                boundingBox.yMin = ((BigDecimal) environment.getArgument("yMin")).doubleValue();
-                boundingBox.xMax = ((BigDecimal) environment.getArgument("xMax")).doubleValue();
-                boundingBox.yMax = ((BigDecimal) environment.getArgument("yMax")).doubleValue();
-            } catch (NullPointerException npe) {
-                RuntimeException rte = new RuntimeException("xMin, yMin, xMax and yMax must all be set when searching within bounding box");
-                rte.setStackTrace(new StackTraceElement[0]);
-                throw rte;
+            if (environment.getArgument("countyReference") != null) {
+                stopPlaceSearchBuilder.setCountyIds(
+                        Lists.transform(environment.getArgument("countyReference"), Functions.toStringFunction())
+                );
             }
 
-            Long ignoreStopPlaceId = environment.getArgument("ignoreStopPlaceId");
+            if (environment.getArgument("municipalityReference") != null) {
+                stopPlaceSearchBuilder.setMunicipalityIds(
+                        Lists.transform(environment.getArgument("municipalityReference"), Functions.toStringFunction())
+                );
+            }
 
-            stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
-                    boundingBox.yMax, ignoreStopPlaceId, pageable);
-        } else {
-            stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+            stopPlaceSearchBuilder.setQuery(environment.getArgument("query"));
+
+            PageRequest pageable = new PageRequest(environment.getArgument("page"), environment.getArgument("size"));
+            stopPlaceSearchBuilder.setPageable(pageable);
+
+            if (environment.getArgument("xMin") != null) {
+                BoundingBoxDto boundingBox = new BoundingBoxDto();
+
+                try {
+                    boundingBox.xMin = ((BigDecimal) environment.getArgument("xMin")).doubleValue();
+                    boundingBox.yMin = ((BigDecimal) environment.getArgument("yMin")).doubleValue();
+                    boundingBox.xMax = ((BigDecimal) environment.getArgument("xMax")).doubleValue();
+                    boundingBox.yMax = ((BigDecimal) environment.getArgument("yMax")).doubleValue();
+                } catch (NullPointerException npe) {
+                    RuntimeException rte = new RuntimeException("xMin, yMin, xMax and yMax must all be set when searching within bounding box");
+                    rte.setStackTrace(new StackTraceElement[0]);
+                    throw rte;
+                }
+
+                Long ignoreStopPlaceId = null;
+                if (environment.getArgument("ignoreStopPlaceId") != null) {
+                    ignoreStopPlaceId = new Long(environment.getArgument("ignoreStopPlaceId"));
+                }
+
+                stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
+                        boundingBox.yMax, ignoreStopPlaceId, pageable);
+            } else {
+                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+            }
         }
-
         return lazyFetchStopPlaces(stopPlaces, environment);
     }
 
