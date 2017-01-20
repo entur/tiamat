@@ -6,6 +6,7 @@ import graphql.annotations.GraphQLName;
 import graphql.annotations.GraphQLType;
 
 @GraphQLType
+@GraphQLName("Point")
 public class SimplePointDto {
 
 
