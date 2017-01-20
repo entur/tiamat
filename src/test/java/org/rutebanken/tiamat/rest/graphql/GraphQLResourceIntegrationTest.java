@@ -90,25 +90,18 @@ public class GraphQLResourceIntegrationTest {
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlQuery = "{" +
-                    " stopPlace (id:" + stopPlace.getId() + ") {" +
-                    "   id " +
-                    "   name { value } " +
-                    "   quays { " +
-                    "      id " +
-                    "      name  { value } " +
-                    "     }" +
-                    "}";
-
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                graphQlQuery +
+                "{" +
+                " stopPlace (id:" + stopPlace.getId() + ") {" +
+                "   id " +
+                "   name { value } " +
+                "   quays { " +
+                "      id " +
+                "      name  { value } " +
+                "     }" +
+                "}" +
                 "}\",\"variables\":\"\"}";
-
-        executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
-                .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
-                .body("data.stopPlace[0].quays.id", hasItems(quay.getId().intValue(), secondQuay.getId().intValue()));
 
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
