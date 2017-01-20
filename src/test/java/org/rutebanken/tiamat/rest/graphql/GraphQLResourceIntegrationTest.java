@@ -250,7 +250,7 @@ public class GraphQLResourceIntegrationTest {
         TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", null);
 
         createStopPlaceWithMunicipalityRef("Nesbru", asker);
-        createStopPlaceWithMunicipalityRef("Oksenøyveien", baerum);
+        createStopPlaceWithMunicipalityRef("Slependen", baerum);
 
 
         String graphQlJsonQuery = "{" +
@@ -266,7 +266,7 @@ public class GraphQLResourceIntegrationTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace.name.value", hasItems("Nesbru", "Oksenøyveien"));
+                .body("data.stopPlace.name.value", hasItems("Nesbru", "Slependen"));
     }
 
     @Test
@@ -297,7 +297,7 @@ public class GraphQLResourceIntegrationTest {
         TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
         TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", akershus);
 
-        createStopPlaceWithMunicipalityRef("Måsan", asker);
+        createStopPlaceWithMunicipalityRef("Trollstua", asker);
         createStopPlaceWithMunicipalityRef("Haslum", baerum);
 
         String graphQlJsonQuery = "{" +
@@ -308,7 +308,7 @@ public class GraphQLResourceIntegrationTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace.name.value", hasItems("Måsan", "Haslum"));
+                .body("data.stopPlace.name.value", hasItems("Trollstua", "Haslum"));
     }
 
     @Test
