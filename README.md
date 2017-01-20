@@ -234,4 +234,4 @@ GraphQL endpoint is available on
 https://test.rutebanken.org/admin/nsr/jersey/graphql
 ```
 
-Tip: GraphQl can be explored using Chrome extension available on https://chrome.google.com/webstore/detail/chromeiql/fkkiamalmpiidkljmicmjfbieiclmeij
+Tip: GraphiQL UI available on https://test.rutebanken.org/admin/shamash-nsr/ 
