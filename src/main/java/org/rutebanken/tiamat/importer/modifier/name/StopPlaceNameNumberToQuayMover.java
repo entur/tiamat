@@ -20,14 +20,14 @@ public class StopPlaceNameNumberToQuayMover {
     private final Pattern pattern;
 
     @Autowired
-    public StopPlaceNameNumberToQuayMover(@Value("${StopPlaceNameNumberToQuayMover.terms:hpl,spor}") String[] terms) {
+    public StopPlaceNameNumberToQuayMover(@Value("${StopPlaceNameNumberToQuayMover.terms:hpl,spor,plattform,pl}") String[] terms) {
         String termsPart = String.join("|", terms);
         pattern = Pattern.compile("(.+)\\s(" + termsPart + ")\\.?\\s([0-9]+)");
         logger.info("Terms: {}. Pattern: {}", terms, pattern);
     }
 
     public StopPlaceNameNumberToQuayMover() {
-        this(new String[]{"hpl", "spor"});
+        this(new String[]{"hpl", "spor", "plattform", "pl"});
     }
 
     public StopPlace moveNumberEndingToQuay(StopPlace stopPlace) {
