@@ -1,14 +1,14 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import graphql.language.Field;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.dtoassembling.disassembler.PointDisassembler;
-import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
-import org.rutebanken.tiamat.dtoassembling.dto.SimplePointDto;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +37,7 @@ class StopPlaceUpdater implements DataFetcher {
     private QuayRepository quayRepository;
 
     @Autowired
-    PointDisassembler pointDisassembler;
+    private GeometryFactory geometryFactory;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -57,11 +56,7 @@ class StopPlaceUpdater implements DataFetcher {
                     if (stopPlace.getQuays() != null) {
                         Quay newQuay = new Quay();
                         newQuay.setCreated(ZonedDateTime.now());
-                        SimplePointDto simplePoint = new SimplePointDto();
-                        simplePoint.location = new LocationDto();
-                        simplePoint.location.latitude = ((BigDecimal)environment.getArgument("latitude")).doubleValue();
-                        simplePoint.location.longitude = ((BigDecimal)environment.getArgument("longitude")).doubleValue();
-                        newQuay.setCentroid(pointDisassembler.disassemble(simplePoint));
+                        newQuay.setCentroid(createPoint(environment));
                         stopPlace.getQuays().add(newQuay);
                     }
                     stopPlaceRepository.save(stopPlace);
@@ -82,11 +77,7 @@ class StopPlaceUpdater implements DataFetcher {
                         Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
                         Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
 
-                        SimplePointDto simplePoint = new SimplePointDto();
-                        simplePoint.location = new LocationDto();
-                        simplePoint.location.latitude = ((BigDecimal) environment.getArgument("latitude")).doubleValue();
-                        simplePoint.location.longitude = ((BigDecimal) environment.getArgument("longitude")).doubleValue();
-                        quay.setCentroid(pointDisassembler.disassemble(simplePoint));
+                        quay.setCentroid(createPoint(environment));
                     }
 
                     quayRepository.save(quay);
@@ -111,6 +102,14 @@ class StopPlaceUpdater implements DataFetcher {
         }
 
         return lazyFetchStopPlaces(stopPlace, environment);
+    }
+
+    private Point createPoint(DataFetchingEnvironment environment) {
+
+        Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
+        Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
+
+        return geometryFactory.createPoint(new Coordinate(environment.getArgument("longitude"), environment.getArgument("latitude")));
     }
 
     private Object lazyFetchStopPlaces(StopPlace stopPlace, DataFetchingEnvironment environment) {
