@@ -1,15 +1,20 @@
 package org.rutebanken.tiamat.model;
 
+import graphql.annotations.GraphQLField;
+import graphql.annotations.GraphQLType;
+
 import javax.persistence.*;
 
 @Entity
 @Table(indexes = {@Index(name = "parent_topographic_ref_index", columnList = "parent_topographic_ref")})
+@GraphQLType
 public class TopographicPlace
         extends Place_VersionStructure {
 
     protected String isoCode;
 
     @Enumerated(EnumType.STRING)
+    @GraphQLField
     protected TopographicPlaceTypeEnumeration topographicPlaceType;
 
     @AttributeOverrides({
@@ -24,6 +29,7 @@ public class TopographicPlace
             @AttributeOverride(name = "version", column = @Column(name = "parent_topographic_ref_version"))
     })
     @Embedded
+    @GraphQLField
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
 
     public TopographicPlace(EmbeddableMultilingualString name) {

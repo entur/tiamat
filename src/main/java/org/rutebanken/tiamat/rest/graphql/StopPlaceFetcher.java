@@ -18,21 +18,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-@Service
+@Service("stopPlaceFetcher")
 @Transactional
 class StopPlaceFetcher implements DataFetcher {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-
     @Override
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
-        stopPlaceSearchBuilder.setIdList(environment.getArgument("id"));
+        if (environment.getArgument("id") != null) {
+            stopPlaceSearchBuilder.setIdList(Arrays.asList((Long)environment.getArgument("id")));
+        }
         stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument("stopPlaceType"));
 
         if (environment.getArgument("countyReference") != null) {
@@ -53,7 +55,6 @@ class StopPlaceFetcher implements DataFetcher {
         stopPlaceSearchBuilder.setPageable(pageable);
 
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
-
 
         Page<StopPlace> stopPlaces;
         if (environment.getArgument("xMin") != null) {
@@ -78,12 +79,17 @@ class StopPlaceFetcher implements DataFetcher {
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         }
 
+        return lazyFetchStopPlaces(stopPlaces, environment);
+    }
+
+    private Object lazyFetchStopPlaces(Page<StopPlace> stopPlaces, DataFetchingEnvironment environment) {
+
+        //TODO: Avoid this - i.e. fix @Transactional usage
         if (isQuaysRequested(environment)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
         }
 
         return stopPlaces;
-
     }
 
     private boolean isQuaysRequested(DataFetchingEnvironment environment) {

@@ -9,6 +9,7 @@ import graphql.annotations.GraphQLType;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
@@ -247,13 +248,15 @@ public class StopPlace
         return quays;
     }
 
+    @JsonIgnore
     @GraphQLField
     @GraphQLName("quays")
-    public List<Quay> getGraphQlQuays() {
-        if (quays != null) {
-            return new ArrayList<>(getQuays());
-        }
-        return null;
+    public List<Quay> getQuaysAsList() {
+        /*
+         * TODO: Remove this when graphql-java-annotations supports Set
+         * https://github.com/graphql-java/graphql-java-annotations/pull/57
+         */
+        return quays.stream().collect(Collectors.toList());
     }
 
     public void setQuays(Set<Quay> quays) {
