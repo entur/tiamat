@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.annotations.GraphQLField;
+import graphql.annotations.GraphQLType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
@@ -12,6 +14,7 @@ import java.io.Serializable;
 
 
 @MappedSuperclass
+@GraphQLType
 public abstract class EntityStructure implements Serializable {
 
     @Id
@@ -21,6 +24,7 @@ public abstract class EntityStructure implements Serializable {
             parameters = {
                     @Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
             })
+    @GraphQLField
     protected Long id;
 
     public Long getId() {

@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.dto;
+package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
@@ -7,7 +7,6 @@ import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -19,22 +18,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
-@Service
+@Service("stopPlaceFetcher")
 @Transactional
 class StopPlaceFetcher implements DataFetcher {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    @Autowired
-    private StopPlaceAssembler stopPlaceAssembler;
-
     @Override
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
-        stopPlaceSearchBuilder.setIdList(environment.getArgument("id"));
+        if (environment.getArgument("id") != null) {
+            stopPlaceSearchBuilder.setIdList(Arrays.asList((Long)environment.getArgument("id")));
+        }
         stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument("stopPlaceType"));
 
         if (environment.getArgument("countyReference") != null) {
@@ -56,8 +56,6 @@ class StopPlaceFetcher implements DataFetcher {
 
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
 
-
-        boolean quaysRequested = isQuaysRequested(environment);
         Page<StopPlace> stopPlaces;
         if (environment.getArgument("xMin") != null) {
             BoundingBoxDto boundingBox = new BoundingBoxDto();
@@ -81,8 +79,17 @@ class StopPlaceFetcher implements DataFetcher {
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         }
 
-        return stopPlaceAssembler.assemble(stopPlaces, quaysRequested);
+        return lazyFetchStopPlaces(stopPlaces, environment);
+    }
 
+    private Object lazyFetchStopPlaces(Page<StopPlace> stopPlaces, DataFetchingEnvironment environment) {
+
+        //TODO: Avoid this - i.e. fix @Transactional usage
+        if (isQuaysRequested(environment)) {
+            stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
+        }
+
+        return stopPlaces;
     }
 
     private boolean isQuaysRequested(DataFetchingEnvironment environment) {
