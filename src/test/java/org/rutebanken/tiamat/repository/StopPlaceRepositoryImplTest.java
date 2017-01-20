@@ -8,8 +8,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -17,11 +24,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -35,6 +44,9 @@ public class StopPlaceRepositoryImplTest {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private QuayRepository quayRepository;
+
+    @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
@@ -44,6 +56,28 @@ public class StopPlaceRepositoryImplTest {
     public void before() {
         stopPlaceRepository.deleteAll();
         topographicPlaceRepository.deleteAll();
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    @Test
+    public void scrollableResult() throws InterruptedException {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));
+
+        stopPlace.getKeyValues().put("key", new Value("value"));
+
+        Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
+        stopPlace.getQuays().add(quay);
+
+        quayRepository.save(quay);
+        quayRepository.flush();
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+
+        BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
+        org.rutebanken.netex.model.StopPlace actual = stopPlaces.take();
+        assertThat(actual.getId()).contains(String.valueOf(stopPlace.getId()));
+        org.rutebanken.netex.model.StopPlace poison = stopPlaces.take();
+        assertThat(poison.getId()).isEqualTo(StopPlaceRepositoryImpl.POISON_PILL.getId());
     }
 
     @Test
@@ -196,13 +230,14 @@ public class StopPlaceRepositoryImplTest {
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("name", ""));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.500430, 59.875679)));
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
         StopPlace actual = stopPlaceRepository.findOne(result);
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
@@ -213,11 +248,12 @@ public class StopPlaceRepositoryImplTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("stop place", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlaceRepository.save(stopPlace);
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue());
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -226,12 +262,13 @@ public class StopPlaceRepositoryImplTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("This name is different", ""));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlaceRepository.save(stopPlace);
 
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist");
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -239,7 +276,7 @@ public class StopPlaceRepositoryImplTest {
     public void multipleNearbyStopPlaces() throws Exception {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(15, 60)));
-
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("name"));
         stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(15.0001, 60.0002)));
 
@@ -249,7 +286,7 @@ public class StopPlaceRepositoryImplTest {
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name");
+        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
     }
 

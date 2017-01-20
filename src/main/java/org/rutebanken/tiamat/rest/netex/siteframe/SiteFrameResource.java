@@ -3,8 +3,8 @@ package org.rutebanken.tiamat.rest.netex.siteframe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.importers.SiteFrameImporter;
-import org.rutebanken.tiamat.importers.StopPlaceImporter;
+import org.rutebanken.tiamat.importer.SiteFrameImporter;
+import org.rutebanken.tiamat.importer.StopPlaceImporter;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;

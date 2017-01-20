@@ -55,7 +55,8 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
-                .field("keyList", "keyValues")
+//                .field()
+                .fieldBToA("keyValues", "keyList")
                 .customize(new DataManagedObjectStructureIdMapper())
                 .exclude("id")
                 .exclude("keyList")
@@ -73,6 +74,10 @@ public class NetexMapper {
 
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
         return mapperFactory.getMapperFacade().map(tiamatStopPlace, StopPlace.class);
+    }
+
+    public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {
+        return mapperFactory.getMapperFacade().map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
     }
 
     public org.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {

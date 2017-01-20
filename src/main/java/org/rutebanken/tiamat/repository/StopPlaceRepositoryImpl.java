@@ -5,9 +5,11 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +19,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 @Repository
 @Transactional
@@ -31,6 +36,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
     private GeometryFactory geometryFactory;
+
+    @Autowired
+    private NetexMapper netexMapper;
 
     @Override
     public StopPlace findStopPlaceDetailed(Long stopPlaceId) {
@@ -85,18 +93,38 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findNearbyStopPlace(Envelope envelope, String name) {
+    public Long findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         TypedQuery<Long> query = entityManager
                 .createQuery("SELECT s.id FROM StopPlace s " +
                              "WHERE within(s.centroid, :filter) = true " +
-                            "AND s.name.value = :name", Long.class);
+                            "AND s.name.value = :name " +
+                            "AND s.stopPlaceType = :stopPlaceType", Long.class);
         query.setParameter("filter", geometryFilter);
+        query.setParameter("stopPlaceType", stopTypeEnumeration);
         query.setParameter("name", name);
         try {
             List<Long> resultList = query.getResultList();
             return  resultList.isEmpty() ? null : resultList.get(0);
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
+        Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+        TypedQuery<Long> query = entityManager
+                .createQuery("SELECT s.id FROM StopPlace s " +
+                        "WHERE within(s.centroid, :filter) = true " +
+                        "AND s.stopPlaceType = :stopPlaceType", Long.class);
+        query.setParameter("filter", geometryFilter);
+        query.setParameter("stopPlaceType", stopTypeEnumeration);
+        try {
+            List<Long> resultList = query.getResultList();
+            return resultList;
         } catch (NoResultException e) {
             return null;
         }
@@ -157,6 +185,57 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
+    public static final org.rutebanken.netex.model.StopPlace POISON_PILL = new org.rutebanken.netex.model.StopPlace();
+    static {
+        POISON_PILL.setId("POISON");
+    }
+
+    @Override
+    public BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces() throws InterruptedException {
+
+        final int fetchSize = 100;
+
+        BlockingQueue<org.rutebanken.netex.model.StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
+
+        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+
+        Criteria query = session.createCriteria(StopPlace.class);
+
+        query.setReadOnly(true);
+        query.setFetchSize(fetchSize);
+
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+
+        Thread thread = new Thread(() -> {
+            int counter = 0;
+            try {
+                while (results.next()) {
+                    Object row = results.get()[0];
+                    StopPlace stopPlace = (StopPlace) row;
+
+                    if(++counter % fetchSize == 0) {
+                        logger.info("Scrolling stop places. Counter is currently at {}", counter);
+                    }
+
+
+                    blockingQueue.put(netexMapper.mapToNetexModel(stopPlace));
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Got interupted while scrolling stop place results", e);
+                Thread.currentThread().interrupt();
+                return;
+            } catch (Exception e) {
+                logger.warn("Got exception while scrolling stop place results", e);
+            } finally {
+                logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
+                results.close();
+                blockingQueue.add(POISON_PILL);
+            }
+        });
+        thread.setName("scroll-results");
+        thread.start();
+        return blockingQueue;
+    }
 
     @Override
     public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {

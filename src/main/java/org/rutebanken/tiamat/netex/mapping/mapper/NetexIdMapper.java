@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
-import org.rutebanken.tiamat.importers.KeyValueListAppender;
+import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class NetexIdMapper {
         if(netexEntity.getId() == null) {
             tiamatEntity.setId(null);
         } else if(netexEntity.getId().startsWith(NSR)) {
-            logger.warn("Detected tiamat ID: {}. ", netexEntity.getId());
+            logger.debug("Detected tiamat ID: {}. ", netexEntity.getId());
             String netexId = netexEntity.getId();
             Long tiamatId = extractLongAfterLastColon(netexId);
             tiamatEntity.setId(tiamatId);
@@ -50,8 +51,38 @@ public class NetexIdMapper {
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setId(null);
         }
+        logger.debug("Copy key values to tiamat model");
+        copyKeyValuesToTiamatModel(netexEntity, tiamatEntity);
     }
 
+    /**
+     * Copies key values from netex object to internal Tiamat model.
+     * The internal Tiamat model can hold lists of values for each key.
+     * Therefore, if the key matches ORIGINAL_ID_KEY, the incoming values will be separated by comma.
+     * @param netexEntity netexEntity containing key values. If it contains ORIGINAL_ID_KEY. Values will be separated.
+     * @param tiamatEntity tiamat entity to add key values to.
+     */
+    public void copyKeyValuesToTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
+        if(netexEntity.getKeyList() != null) {
+            if(netexEntity.getKeyList().getKeyValue() != null) {
+                for(KeyValueStructure keyValueStructure : netexEntity.getKeyList().getKeyValue()) {
+                    if(keyValueStructure.getKey().equals(ORIGINAL_ID_KEY)) {
+                        if(keyValueStructure.getValue().contains(",")) {
+                            String[] originalIds = keyValueStructure.getValue().split(",");
+                            for(String originalId : originalIds) {
+                                tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(originalId);
+                            }
+                        } else {
+                            tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(keyValueStructure.getValue());
+                        }
+
+                    } else {
+                        tiamatEntity.getOrCreateValues(keyValueStructure.getKey()).add(keyValueStructure.getValue());
+                    }
+                }
+            }
+        }
+    }
 
     /**
      *
@@ -76,8 +107,13 @@ public class NetexIdMapper {
         }
     }
 
+    /**
+     * Writes netex ID to keyval in internal Tiamat model
+     * @param dataManagedObjectStructure to set the keyval on (tiamat model)
+     * @param netexId The id to add to values, using the key #{ORIGINAL_ID_KEY}
+     */
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        dataManagedObjectStructure.getKeyValues().put(ORIGINAL_ID_KEY, new Value(netexId));
+        dataManagedObjectStructure.getOrCreateValues(ORIGINAL_ID_KEY).add(netexId);
     }
 
 }

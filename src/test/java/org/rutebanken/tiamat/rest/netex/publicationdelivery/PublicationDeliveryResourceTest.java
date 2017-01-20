@@ -37,18 +37,11 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 @ActiveProfiles("geodb")
 public class PublicationDeliveryResourceTest {
 
-    private static final JAXBContext jaxbContext;
-
-    static {
-        try {
-            jaxbContext = newInstance(PublicationDeliveryStructure.class);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;
+
+    @Autowired
+    private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
@@ -74,14 +67,14 @@ public class PublicationDeliveryResourceTest {
                                 .withLongitude(new BigDecimal("72"))));
 
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        PublicationDeliveryStructure publicationDelivery2 = createPublicationDeliveryWithStopPlace(stopPlace2);
-        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery2);
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
 
 
-        List<StopPlace> result = extractStopPlace(response);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlace(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
@@ -99,6 +92,7 @@ public class PublicationDeliveryResourceTest {
                 .withName(new MultilingualString().withValue(name))
                 .withId("OST:StopArea:01360680")
                 .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.4172358106178"))
@@ -118,6 +112,7 @@ public class PublicationDeliveryResourceTest {
                 .withName(new MultilingualString().withValue(name))
                 .withId("OST:StopArea:01040720")
                 .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.41727956639375"))
@@ -133,11 +128,11 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("59.41727956639375207714692805893719196319580078125"))))));
 
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
 
-        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        List<StopPlace> result = extractStopPlace(response);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlace(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place twice").hasSize(1);
         String importedIds = result.get(0).getKeyList().getKeyValue()
@@ -171,11 +166,11 @@ public class PublicationDeliveryResourceTest {
                                         .withLatitude(new BigDecimal("9.1"))
                                         .withLongitude(new BigDecimal("71.2"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
         assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
 
@@ -274,14 +269,14 @@ public class PublicationDeliveryResourceTest {
 
         List<PublicationDeliveryStructure> publicationDeliveryStructures = new ArrayList<>();
 
-        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace1));
-        publicationDeliveryStructures.add(createPublicationDeliveryWithStopPlace(stopPlace2));
+        publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1));
+        publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2));
 
         for(PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
-            PublicationDeliveryStructure response = postAndReturnPublicationDelivery(pubde);
-            StopPlace actualStopPlace = findFirstStopPlace(response);
+            PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(pubde);
+            StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
-            List<Quay> quays = extractQuays(actualStopPlace);
+            List<Quay> quays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
             long matches = quays
                     .stream()
@@ -304,10 +299,12 @@ public class PublicationDeliveryResourceTest {
         }
     }
 
-    // Import stop place StopPlace{name=Skaret (no), quays=
-    // [Quay{name=Skaret (no), centroid=POINT (7.328336965528884 62.799557598196465), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548612801]}}},
-    // Quay{name=Skaret (no), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548575301]}}}],
-    // keyValues={imported-id=Value{id=0, items=[MOR:StopArea:15485753]}}}
+    /**
+     * Import stop place StopPlace{name=Skaret (no), quays=
+     * [Quay{name=Skaret (no), centroid=POINT (7.328336965528884 62.799557598196465), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548612801]}}},
+     * Quay{name=Skaret (no), keyValues={imported-id=Value{id=0, items=[MOR:StopArea:1548575301]}}}],
+     * keyValues={imported-id=Value{id=0, items=[MOR:StopArea:15485753]}}}
+     */
     @Test
     public void importStopWithoutCoordinatesWithQuays1() throws Exception {
 
@@ -328,14 +325,14 @@ public class PublicationDeliveryResourceTest {
                                         .withVersion("1")
                                         .withName(new MultilingualString().withValue("Skaret").withLang("no"))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
         // Exception should not have been thrown
-        StopPlace actualStopPlace = findFirstStopPlace(response);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
 
-        List<Quay> actualQuays = extractQuays(actualStopPlace);
+        List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
     }
 
@@ -355,15 +352,15 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("62.799557598196465"))
                                                 .withLongitude(new BigDecimal("7.328336965528884"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(response);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
         assertThat(actualStopPlace.getCreated()).as("The imported stop place's created date must not be null").isNotNull();
         assertThat(actualStopPlace.getChanged()).as("The imported stop place's changed date must not be null").isNotNull();
 
-        List<Quay> actualQuays = extractQuays(actualStopPlace);
+        List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
         assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
         assertThat(actualQuays.get(0).getChanged()).as("The imported quay's changed date must not be null").isNotNull();
@@ -377,10 +374,10 @@ public class PublicationDeliveryResourceTest {
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"));
 
-        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(firstPublicationDelivery);
+        PublicationDeliveryStructure firstPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
         OffsetDateTime changedDate = actualStopPlace.getChanged();
 
         // Add a Quay to the stop place so that it will be updated.
@@ -394,10 +391,10 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("62.799557598196465"))
                                                 .withLongitude(new BigDecimal("7.328336965528884"))))));
 
-        PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure secondResponse = postAndReturnPublicationDelivery(secondPublicationDelivery);
+        PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
 
-        StopPlace changedStopPlace = findFirstStopPlace(secondResponse);
+        StopPlace changedStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(secondResponse);
         assertThat(changedDate).as("The changed date for stop should not be the same as the first time it was imported")
                 .isNotEqualTo(changedStopPlace.getChanged());
     }
@@ -417,10 +414,10 @@ public class PublicationDeliveryResourceTest {
                                 .withId("XYZ:Quay:1")
                                 .withVersion("1")));
 
-        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure response = postAndReturnPublicationDelivery(firstPublicationDelivery);
+        PublicationDeliveryStructure firstPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(response);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
 
         assertThat(actualStopPlace).isNotNull();
 
@@ -448,9 +445,9 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        PublicationDeliveryStructure firstPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(firstPublicationDelivery);
-        StopPlace firstStopPlaceReturned = findFirstStopPlace(firstResponse);
+        PublicationDeliveryStructure firstPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
+        StopPlace firstStopPlaceReturned = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
         // Same ID, but no coordinates
         StopPlace stopPlaceWithoutCoordinates = new StopPlace()
                 .withId(chouetteId)
@@ -461,10 +458,10 @@ public class PublicationDeliveryResourceTest {
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay"))));
 
-        PublicationDeliveryStructure secondPublicationDelivery = createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
-        PublicationDeliveryStructure secondResponse = postAndReturnPublicationDelivery(secondPublicationDelivery);
+        PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
+        PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
 
-        StopPlace secondStopPlaceReturned = findFirstStopPlace(secondResponse);
+        StopPlace secondStopPlaceReturned = publicationDeliveryTestHelper.findFirstStopPlace(secondResponse);
         assertThat(secondStopPlaceReturned.getId()).isEqualTo(firstStopPlaceReturned.getId())
                 .as("Expecting IDs to be the same, because the chouette ID is the same");
 
@@ -492,12 +489,12 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
-        hasOriginalId(stopPlace.getId(), actualStopPlace);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlace.getId(), actualStopPlace);
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
@@ -508,7 +505,7 @@ public class PublicationDeliveryResourceTest {
                 .peek(q-> System.out.println(q))
                 .findFirst().get();
 
-        hasOriginalId(originalQuayId, quay);
+        publicationDeliveryTestHelper.hasOriginalId(originalQuayId, quay);
     }
 
     @Test
@@ -531,10 +528,10 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
@@ -570,10 +567,10 @@ public class PublicationDeliveryResourceTest {
                                                 .withLatitude(new BigDecimal("9.1"))
                                                 .withLongitude(new BigDecimal("71.2"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
@@ -620,11 +617,11 @@ public class PublicationDeliveryResourceTest {
                                                         .withLatitude(new BigDecimal("12"))
                                                         .withLongitude(new BigDecimal("22"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
         assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(21.0);
         assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(11.0);
@@ -654,11 +651,11 @@ public class PublicationDeliveryResourceTest {
                                                         .withLatitude(new BigDecimal("10.123456789123456789123456789"))
                                                         .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryStructure firstResponse = postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        StopPlace actualStopPlace = findFirstStopPlace(firstResponse);
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
         BigDecimal longitude = actualStopPlace.getCentroid().getLocation().getLongitude();
         BigDecimal latitude = actualStopPlace.getCentroid().getLocation().getLatitude();
@@ -736,8 +733,8 @@ public class PublicationDeliveryResourceTest {
                                 .withLatitude(new BigDecimal("59.914353"))
                                 .withLongitude(new BigDecimal("10.806387"))));
 
-        PublicationDeliveryStructure publicationDelivery = createPublicationDeliveryWithStopPlace(stopPlace);
-        postAndReturnPublicationDelivery(publicationDelivery);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
         DtoStopPlaceSearch stopPlaceSearch = new DtoStopPlaceSearch.Builder()
                 .setQuery("Østre gravlund")
@@ -789,95 +786,5 @@ public class PublicationDeliveryResourceTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
-    }
-
-    private PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setVersion("1");
-        siteFrame.setId(UUID.randomUUID().toString());
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withPublicationTimestamp(OffsetDateTime.now())
-                .withVersion("1")
-                .withParticipantRef("test")
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
-
-        return publicationDelivery;
-    }
-
-
-    private void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
-        assertThat(object).isNotNull();
-        assertThat(object.getKeyList()).isNotNull();
-        List<String> list = object.getKeyList().getKeyValue()
-                .stream()
-                .peek(keyValueStructure -> System.out.println(keyValueStructure))
-                .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
-                .map(keyValueStructure -> keyValueStructure.getValue())
-                .collect(Collectors.toList());
-        assertThat(list).hasSize(1);
-        String originalIdString = list.get(0);
-        assertThat(originalIdString).isNotEmpty();
-        assertThat(originalIdString).isEqualTo(expectedId);
-    }
-
-    private List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return  publicationDeliveryStructure.getDataObjects()
-                .getCompositeFrameOrCommonFrame()
-                .stream()
-                .map(JAXBElement::getValue)
-                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
-                .collect(toList());
-    }
-
-    private List<Quay> extractQuays(StopPlace stopPlace) {
-        return stopPlace
-                .getQuays()
-                .getQuayRefOrQuay()
-                .stream()
-                .filter(object -> object instanceof Quay)
-                .map(object -> ((Quay) object))
-                .collect(toList());
-    }
-
-    private StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return publicationDeliveryStructure.getDataObjects()
-                .getCompositeFrameOrCommonFrame()
-                .stream()
-                .map(JAXBElement::getValue)
-                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
-                .findFirst().get();
-    }
-
-    private PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
-        Response response = postPublicationDelivery(publicationDeliveryStructure);
-        StreamingOutput output = (StreamingOutput) response.getEntity();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        output.write(outputStream);
-
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
-        return (PublicationDeliveryStructure) element.getValue();
-
-    }
-
-    private Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
-        Marshaller marshaller = jaxbContext.createMarshaller();
-
-        JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = new ObjectFactory().createPublicationDelivery(publicationDeliveryStructure);
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        marshaller.marshal(jaxPublicationDelivery, outputStream);
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-
-        return publicationDeliveryResource.receivePublicationDelivery(inputStream);
     }
 }

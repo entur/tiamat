@@ -9,7 +9,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.concurrent.BlockingQueue;
 
 
 public interface StopPlaceRepositoryCustom {
@@ -25,13 +25,17 @@ public interface StopPlaceRepositoryCustom {
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable);
 
-    Long findNearbyStopPlace(Envelope envelope, String name);
+    Long findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
+
+    List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 
     Long findByKeyValue(String key, Set<String> value);
     
     List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
+
+    BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces() throws InterruptedException;
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 }

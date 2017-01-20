@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.junit.Before;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;
@@ -28,6 +29,11 @@ public class StopPlaceRepositoryTest {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Before
+    public void cleanRepositoriey() {
+        stopPlaceRepository.deleteAll();
+    }
+
     @Test
     public void findStopPlacesSortedCorrectly() {
         StopPlace stopPlaceOlder = new StopPlace();
@@ -42,7 +48,9 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
+        assertThat(page.getContent().get(0).getId()).isEqualTo(stopPlaceNewer.getId());
         assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+        assertThat(page.getContent().get(1).getId()).isEqualTo(stopPlaceOlder.getId());
         assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
     }
 

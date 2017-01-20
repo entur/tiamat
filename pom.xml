@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.rutebanken.superpom</groupId>
         <artifactId>superpom</artifactId>
-        <version>0.0.5</version>
+        <version>0.0.6</version>
     </parent>
 
     <groupId>org.rutebanken</groupId>
@@ -33,6 +33,7 @@
         <hibernate-spatial.version>5.1.0.Final</hibernate-spatial.version>
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.7</geodb.version>
+        <geotools.version>16.1</geotools.version>
 
         <!-- Docker & Fabric8 Configs -->
         <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
@@ -146,7 +147,7 @@
         <dependency>
             <groupId>org.rutebanken.helpers</groupId>
             <artifactId>gcp-storage</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -241,18 +242,41 @@
             <groupId>org.opengeo</groupId>
             <artifactId>geodb</artifactId>
             <version>${geodb.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <!--
+                https://rutebanken.atlassian.net/browse/NRP-907
+                https://github.com/jboss/xerces/pull/14
+                https://issues.apache.org/jira/browse/XERCESJ-1276
+            -->
+            <version>2.11.0.SP6-RB</version>
         </dependency>
 
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
-            <version>16.1</version>
+            <version>${geotools.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-jts-wrapper</artifactId>
-            <version>16.1</version>
+            <version>${geotools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
 
         <dependency>
