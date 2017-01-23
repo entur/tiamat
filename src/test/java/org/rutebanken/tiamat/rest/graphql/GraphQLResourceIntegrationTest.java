@@ -92,8 +92,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{" +
-                " stopPlace (id:" + stopPlace.getId() + ") {" +
+                "{ stopPlace:" + GraphQLNames.FIND_STOPPPLACE_BY_ID + " (id:" + stopPlace.getId() + ") {" +
                 "   id " +
                 "   name { value } " +
                 "   quays { " +
@@ -116,8 +115,8 @@ public class GraphQLResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace {" +
-                "name { value } " +
+                "\"query\":\"{stopPlace: " + GraphQLNames.STOPPLACE_SEARCH +
+                " { name { value } " +
                 "}" +
                 "}\",\"variables\":\"\"}";
 
@@ -135,7 +134,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace (query:\\\"ytNES\\\") { " +
+                "  stopPlace: " + GraphQLNames.STOPPLACE_SEARCH + " (query:\\\"ytNES\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -155,7 +154,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace (stopPlaceType:" + StopTypeEnumeration.FERRY_STOP.value() + ") { " +
+                "  stopPlace: " + GraphQLNames.STOPPLACE_SEARCH +  " (stopPlaceType:" + StopTypeEnumeration.FERRY_STOP.value() + ") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -192,7 +191,8 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:" + hordaland.getId() + " municipalityReference:" + kvinnherad.getId() +") { " +
+                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:" + hordaland.getId() + " municipalityReference:" + kvinnherad.getId() +") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -214,7 +214,8 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace (municipalityReference:" + asker.getId() +") { " +
+                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (municipalityReference:" + asker.getId() +") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -233,7 +234,8 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace (municipalityReference:" + asker.getId() +") { " +
+                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (municipalityReference:" + asker.getId() +") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -254,7 +256,8 @@ public class GraphQLResourceIntegrationTest {
 
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace (municipalityReference:["+baerum.getId()+","+asker.getId()+"]) {" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (municipalityReference:["+baerum.getId()+","+asker.getId()+"]) {" +
                 "id " +
                 "name { value } " +
                 "quays " +
@@ -281,7 +284,8 @@ public class GraphQLResourceIntegrationTest {
         createStopPlaceWithMunicipalityRef("Hennumkrysset", asker);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace (countyReference:["+akershus.getId()+","+buskerud.getId()+"] municipalityReference:["+lier.getId()+","+asker.getId()+"]) {" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (countyReference:["+akershus.getId()+","+buskerud.getId()+"] municipalityReference:["+lier.getId()+","+asker.getId()+"]) {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -301,7 +305,8 @@ public class GraphQLResourceIntegrationTest {
         createStopPlaceWithMunicipalityRef("Haslum", baerum);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace (countyReference:"+akershus.getId()+") {" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                " (countyReference:"+akershus.getId()+") {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -318,7 +323,8 @@ public class GraphQLResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace (id:"+stopPlace.getId()+") {" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPPLACE_BY_ID+
+                " (id:"+stopPlace.getId()+") {" +
                 "id " +
                 "name { value } " +
                 "}" +
