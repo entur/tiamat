@@ -24,43 +24,33 @@ public class StopPlace
     @GraphQLField
     protected String publicCode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected CoachSubmodeEnumeration coachSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected FunicularSubmodeEnumeration funicularSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected MetroSubmodeEnumeration metroSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected TramSubmodeEnumeration tramSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected TelecabinSubmodeEnumeration telecabinSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected RailSubmodeEnumeration railSubmode;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
     @Enumerated(EnumType.STRING)
