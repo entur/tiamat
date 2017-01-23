@@ -18,13 +18,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+
 @Service("stopPlaceFetcher")
 @Transactional
 class StopPlaceFetcher implements DataFetcher {
+
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -34,46 +38,46 @@ class StopPlaceFetcher implements DataFetcher {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
         Page<StopPlace> stopPlaces;
-        if (environment.getArgument("id") != null) {
-            stopPlaceSearchBuilder.setIdList(Arrays.asList(new Long(environment.getArgument("id"))));
+        if (environment.getArgument(ID) != null) {
+            stopPlaceSearchBuilder.setIdList(Arrays.asList(new Long(environment.getArgument(ID))));
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
         } else {
-            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument("stopPlaceType"));
+            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOPPLACE_TYPE));
 
-            if (environment.getArgument("countyReference") != null) {
+            if (environment.getArgument(COUNTY_REF) != null) {
                 stopPlaceSearchBuilder.setCountyIds(
-                        Lists.transform(environment.getArgument("countyReference"), Functions.toStringFunction())
+                        Lists.transform(environment.getArgument(COUNTY_REF), Functions.toStringFunction())
                 );
             }
 
-            if (environment.getArgument("municipalityReference") != null) {
+            if (environment.getArgument(MUNICIPALITY_REF) != null) {
                 stopPlaceSearchBuilder.setMunicipalityIds(
-                        Lists.transform(environment.getArgument("municipalityReference"), Functions.toStringFunction())
+                        Lists.transform(environment.getArgument(MUNICIPALITY_REF), Functions.toStringFunction())
                 );
             }
 
-            stopPlaceSearchBuilder.setQuery(environment.getArgument("query"));
+            stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
 
-            PageRequest pageable = new PageRequest(environment.getArgument("page"), environment.getArgument("size"));
+            PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
             stopPlaceSearchBuilder.setPageable(pageable);
 
-            if (environment.getArgument("xMin") != null) {
+            if (environment.getArgument(LONGITUDE_MIN) != null) {
                 BoundingBoxDto boundingBox = new BoundingBoxDto();
 
                 try {
-                    boundingBox.xMin = ((BigDecimal) environment.getArgument("xMin")).doubleValue();
-                    boundingBox.yMin = ((BigDecimal) environment.getArgument("yMin")).doubleValue();
-                    boundingBox.xMax = ((BigDecimal) environment.getArgument("xMax")).doubleValue();
-                    boundingBox.yMax = ((BigDecimal) environment.getArgument("yMax")).doubleValue();
+                    boundingBox.xMin = ((BigDecimal) environment.getArgument(LONGITUDE_MIN)).doubleValue();
+                    boundingBox.yMin = ((BigDecimal) environment.getArgument(LATITUDE_MIN)).doubleValue();
+                    boundingBox.xMax = ((BigDecimal) environment.getArgument(LONGITUDE_MAX)).doubleValue();
+                    boundingBox.yMax = ((BigDecimal) environment.getArgument(LATITUDE_MAX)).doubleValue();
                 } catch (NullPointerException npe) {
-                    RuntimeException rte = new RuntimeException("xMin, yMin, xMax and yMax must all be set when searching within bounding box");
+                    RuntimeException rte = new RuntimeException(MessageFormat.format("{}, {}, {} and {} must all be set when searching within bounding box", LONGITUDE_MIN, LATITUDE_MIN, LONGITUDE_MAX, LATITUDE_MAX));
                     rte.setStackTrace(new StackTraceElement[0]);
                     throw rte;
                 }
 
                 Long ignoreStopPlaceId = null;
-                if (environment.getArgument("ignoreStopPlaceId") != null) {
-                    ignoreStopPlaceId = new Long(environment.getArgument("ignoreStopPlaceId"));
+                if (environment.getArgument(IGNORE_STOPPLACE_ID) != null) {
+                    ignoreStopPlaceId = new Long(environment.getArgument(IGNORE_STOPPLACE_ID));
                 }
 
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
@@ -102,9 +106,11 @@ class StopPlaceFetcher implements DataFetcher {
             SelectionSet selectionSet = field.getSelectionSet();
             List<Selection> selections = selectionSet.getSelections();
             for (Selection selection : selections) {
-                Field selectedField = (Field) selection;
-                if ("quays".equals(selectedField.getName())) {
-                    quaysRequested = true;
+                if (selection instanceof  Field) {
+                    Field selectedField = (Field) selection;
+                    if (QUAYS.equals(selectedField.getName())) {
+                        quaysRequested = true;
+                    }
                 }
             }
         }

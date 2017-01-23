@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+
 @Service("topographicPlaceFetcher")
 @Transactional
 class TopographicPlaceFetcher implements DataFetcher {
@@ -25,8 +27,8 @@ class TopographicPlaceFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         Example<TopographicPlace> example = getTopographicPlaceExample(environment);
 
-        if (environment.getArgument("id") != null) {
-            return Arrays.asList(topographicPlaceRepository.findOne(environment.<Long>getArgument("id")));
+        if (environment.getArgument(ID) != null) {
+            return Arrays.asList(topographicPlaceRepository.findOne(environment.<Long>getArgument(ID)));
         }
         return topographicPlaceRepository.findAll(example);
 
@@ -34,11 +36,11 @@ class TopographicPlaceFetcher implements DataFetcher {
 
     private Example<TopographicPlace> getTopographicPlaceExample(DataFetchingEnvironment environment) {
         TopographicPlace tp = new TopographicPlace();
-        if (environment.getArgument("topographicPlaceType") != null) {
-            tp.setTopographicPlaceType(environment.getArgument("topographicPlaceType"));
+        if (environment.getArgument(TOPOGRAPHIC_PLACE_TYPE) != null) {
+            tp.setTopographicPlaceType(environment.getArgument(TOPOGRAPHIC_PLACE_TYPE));
         }
-        if (environment.getArgument("query") != null) {
-            EmbeddableMultilingualString mlString = new EmbeddableMultilingualString(environment.getArgument("query"));
+        if (environment.getArgument(QUERY) != null) {
+            EmbeddableMultilingualString mlString = new EmbeddableMultilingualString(environment.getArgument(QUERY));
             tp.setName(mlString);
         }
         ExampleMatcher matcher = ExampleMatcher.matching()

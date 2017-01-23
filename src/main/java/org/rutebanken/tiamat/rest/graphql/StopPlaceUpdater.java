@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+
 @Service("stopPlaceUpdater")
 @Transactional
 class StopPlaceUpdater implements DataFetcher {
@@ -44,81 +46,121 @@ class StopPlaceUpdater implements DataFetcher {
         List<Field> fields = environment.getFields();
         StopPlace stopPlace = null;
         for (Field field : fields) {
-            if (field.getName().equals("addQuay")) {
+            if (field.getName().equals(CREATE_QUAY)) {
 
-                Preconditions.checkNotNull(environment.getArgument("stopPlaceId"), "stopPlaceId cannot be null");
-                Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
-                Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
+                stopPlace = createQuay(environment);
+            } else if (field.getName().equals(UPDATE_QUAY)) {
 
-                stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument("stopPlaceId")));
-                if(stopPlace != null) {
-                    logger.info("Adding quay to StopPlace {}", stopPlace.getId());
-                    if (stopPlace.getQuays() != null) {
-                        Quay newQuay = new Quay();
-                        newQuay.setCreated(ZonedDateTime.now());
-                        newQuay.setCentroid(createPoint(environment));
-                        stopPlace.getQuays().add(newQuay);
-                    }
-                    stopPlaceRepository.save(stopPlace);
-                    quayRepository.save(stopPlace.getQuays());
-                }
-            }
-            if (field.getName().equals("updateQuay")) {
+                stopPlace = updateQuay(environment);
+            } else if (field.getName().equals(CREATE_STOPPLACE)) {
 
-                Preconditions.checkNotNull(environment.getArgument("id"), "id cannot be null");
+                stopPlace = createStopPlace(environment);
+            }else if (field.getName().equals(UPDATE_STOPPLACE)) {
 
-                Quay quay = quayRepository.findOne(new Long(environment.getArgument("id")));
-                if(quay != null) {
-                    logger.info("Updating Quay {}", quay.getId());
-
-                    quay.setChanged(ZonedDateTime.now());
-                    if (environment.getArgument("latitude") != null) {
-
-                        Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
-                        Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
-
-                        quay.setCentroid(createPoint(environment));
-                    }
-
-                    quayRepository.save(quay);
-                }
-            } else if (field.getName().equals("updateStopPlace")) {
-                stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument("id")));
-                if(stopPlace != null) {
-                    logger.info("Updating StopPlace {}", stopPlace.getId());
-                    boolean hasValuesChanged = false;
-                    if (environment.getArgument("stopPlaceType") != null &&
-                            !stopPlace.getStopPlaceType().equals(environment.getArgument("stopPlaceType"))) {
-                        stopPlace.setStopPlaceType(environment.getArgument("stopPlaceType"));
-                        hasValuesChanged = true;
-                    }
-                    if (environment.getArgument("name") != null) {
-                        EmbeddableMultilingualString name = stopPlace.getName();
-
-                        String updatedName = environment.getArgument("name");
-                        if (!updatedName.equals(name.getValue())) {
-                            name.setValue(updatedName);
-                            stopPlace.setName(name);
-                            hasValuesChanged = true;
-                        }
-                    }
-                    if (hasValuesChanged) {
-                        stopPlace.setChanged(ZonedDateTime.now());
-                        stopPlaceRepository.save(stopPlace);
-                    }
-                }
+                stopPlace = updateStopPlace(environment);
             }
         }
 
         return lazyFetchStopPlaces(stopPlace, environment);
     }
 
+    private StopPlace createStopPlace(DataFetchingEnvironment environment) {
+
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.setName(new EmbeddableMultilingualString(environment.getArgument(NAME), "no"));
+        stopPlace.setChanged(ZonedDateTime.now());
+        stopPlace.setShortName(new EmbeddableMultilingualString(environment.getArgument(SHORT_NAME), "no"));
+        stopPlace.setDescription(new EmbeddableMultilingualString(environment.getArgument(DESCRIPTION), "no"));
+        stopPlace.setStopPlaceType(environment.getArgument(STOPPLACE_TYPE));
+
+        stopPlace.setCentroid(createPoint(environment));
+
+        stopPlace.setAllAreasWheelchairAccessible(environment.getArgument(WHEELCHAIR_ACCESSIBLE));
+
+        // TODO: Create Quays
+
+        StopPlace saved = stopPlaceRepository.save(stopPlace);
+        return saved;
+    }
+
+    private StopPlace updateStopPlace(DataFetchingEnvironment environment) {
+        StopPlace stopPlace;
+        stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument(ID)));
+        if(stopPlace != null) {
+            logger.info("Updating StopPlace {}", stopPlace.getId());
+            boolean hasValuesChanged = false;
+            if (environment.getArgument(STOPPLACE_TYPE) != null &&
+                    !stopPlace.getStopPlaceType().equals(environment.getArgument(STOPPLACE_TYPE))) {
+                stopPlace.setStopPlaceType(environment.getArgument(STOPPLACE_TYPE));
+                hasValuesChanged = true;
+            }
+            if (environment.getArgument(NAME) != null) {
+                EmbeddableMultilingualString name = stopPlace.getName();
+
+                String updatedName = environment.getArgument(NAME);
+                if (!updatedName.equals(name.getValue())) {
+                    name.setValue(updatedName);
+                    stopPlace.setName(name);
+                    hasValuesChanged = true;
+                }
+            }
+            if (hasValuesChanged) {
+                stopPlace.setChanged(ZonedDateTime.now());
+                stopPlaceRepository.save(stopPlace);
+            }
+        }
+        return stopPlace;
+    }
+
+    private StopPlace updateQuay(DataFetchingEnvironment environment) {
+        Preconditions.checkNotNull(environment.getArgument(ID), ID + " cannot be null");
+        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID +" cannot be null");
+
+        Quay quay = quayRepository.findOne(new Long(environment.getArgument(ID)));
+        if(quay != null) {
+            logger.info("Updating Quay {}", quay.getId());
+
+            quay.setChanged(ZonedDateTime.now());
+            if (environment.getArgument(LATITUDE) != null) {
+
+                Preconditions.checkNotNull(environment.getArgument(LATITUDE), LATITUDE+" cannot be null");
+                Preconditions.checkNotNull(environment.getArgument(LONGITUDE), LONGITUDE+" cannot be null");
+
+                quay.setCentroid(createPoint(environment));
+            }
+
+            quayRepository.save(quay);
+        }
+        return stopPlaceRepository.findOne(new Long(environment.getArgument(STOPPLACE_ID)));
+    }
+
+    private StopPlace createQuay(DataFetchingEnvironment environment) {
+        StopPlace stopPlace;
+        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID + " cannot be null");
+        Preconditions.checkNotNull(environment.getArgument(LATITUDE), LATITUDE+" cannot be null");
+        Preconditions.checkNotNull(environment.getArgument(LONGITUDE), LONGITUDE+" cannot be null");
+
+        stopPlace = stopPlaceRepository.findOne(new Long(environment.getArgument(STOPPLACE_ID)));
+        if(stopPlace != null) {
+            logger.info("Adding quay to StopPlace {}", stopPlace.getId());
+            if (stopPlace.getQuays() != null) {
+                Quay newQuay = new Quay();
+                newQuay.setCreated(ZonedDateTime.now());
+                newQuay.setCentroid(createPoint(environment));
+                stopPlace.getQuays().add(newQuay);
+            }
+            stopPlaceRepository.save(stopPlace);
+            quayRepository.save(stopPlace.getQuays());
+        }
+        return stopPlace;
+    }
+
     private Point createPoint(DataFetchingEnvironment environment) {
-
-        Preconditions.checkNotNull(environment.getArgument("latitude"), "latitude cannot be null");
-        Preconditions.checkNotNull(environment.getArgument("longitude"), "longitude cannot be null");
-
-        return geometryFactory.createPoint(new Coordinate(environment.getArgument("longitude"), environment.getArgument("latitude")));
+        if (environment.getArgument(LONGITUDE) != null && environment.getArgument(LATITUDE) != null) {
+            return geometryFactory.createPoint(new Coordinate(environment.getArgument(LONGITUDE), environment.getArgument(LATITUDE)));
+        }
+        return null;
     }
 
     private Object lazyFetchStopPlaces(StopPlace stopPlace, DataFetchingEnvironment environment) {
@@ -139,7 +181,7 @@ class StopPlaceUpdater implements DataFetcher {
             List<Selection> selections = selectionSet.getSelections();
             for (Selection selection : selections) {
                 Field selectedField = (Field) selection;
-                if ("quays".equals(selectedField.getName())) {
+                if (QUAYS.equals(selectedField.getName())) {
                     quaysRequested = true;
                 }
             }
