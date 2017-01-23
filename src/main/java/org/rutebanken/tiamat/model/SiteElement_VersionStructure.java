@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.model;
 
+import graphql.annotations.GraphQLField;
+import graphql.annotations.GraphQLType;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -7,6 +10,7 @@ import java.util.List;
 
 
 @MappedSuperclass
+@GraphQLType
 public abstract class SiteElement_VersionStructure
         extends AddressablePlace_VersionStructure {
 
@@ -35,6 +39,7 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected LightingEnumeration lighting;
 
+    @GraphQLField
     protected Boolean allAreasWheelchairAccessible;
 
     @Transient
