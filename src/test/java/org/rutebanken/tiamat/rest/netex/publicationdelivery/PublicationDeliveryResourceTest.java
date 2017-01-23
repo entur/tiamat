@@ -250,7 +250,7 @@ public class PublicationDeliveryResourceTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(
                                 new Quay()
-                                        .withId("RUT:StopArea:0229012201")
+                                        .withId("BRA:StopArea:0229012201")
                                         .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
@@ -258,7 +258,7 @@ public class PublicationDeliveryResourceTest {
                                                         .withLatitude(new BigDecimal("59.83304200609072"))
                                                         .withLongitude(new BigDecimal("11.142902250197631")))),
                                 new Quay()
-                                        .withId("RUT:StopArea:0229012202")
+                                        .withId("BRA:StopArea:0229012202")
                                         .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
