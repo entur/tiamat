@@ -29,7 +29,7 @@ public class GraphQLNames {
     static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
 
     static final String FIND_STOPPPLACE_BY_ID = "stopPlaceLookup";
-    static final String STOPPLACE_SEARCH = "stopPlaceSearch";
+    static final String STOPPLACE_SEARCH = "stopPlace";
     static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     static final String CREATE_STOPPLACE = "createStopPlace";
