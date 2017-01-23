@@ -55,7 +55,7 @@ class StopPlaceUpdater implements DataFetcher {
             } else if (field.getName().equals(CREATE_STOPPLACE)) {
 
                 stopPlace = createStopPlace(environment);
-            }else if (field.getName().equals(UPDATE_STOPPLACE)) {
+            } else if (field.getName().equals(UPDATE_STOPPLACE)) {
 
                 stopPlace = updateStopPlace(environment);
             }

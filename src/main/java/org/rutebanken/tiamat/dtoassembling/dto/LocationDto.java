@@ -5,7 +5,7 @@ import graphql.annotations.GraphQLName;
 import graphql.annotations.GraphQLType;
 
 @GraphQLType
-@GraphQLName("Coordinate")
+@GraphQLName("location")
 public class LocationDto {
 
     @GraphQLField
