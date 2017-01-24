@@ -83,7 +83,7 @@ public class NearbyStopsWithSameTypeFinder {
         Integer limit = typesLimitMap.get(stopPlace.getStopPlaceType());
 
         if(limit == null) {
-            logger.warn("Could not find limit for stop place type {}. Returning default limit: {}", stopPlace.getStopPlaceType(), DEFAULT_LIMIT_METERS);
+            logger.debug("Could not find limit for stop place type {}. Returning default limit: {}", stopPlace.getStopPlaceType(), DEFAULT_LIMIT_METERS);
             return DEFAULT_LIMIT_METERS;
         }
         logger.debug("Using limit {} for type {}", limit, stopPlace.getStopPlaceType());
