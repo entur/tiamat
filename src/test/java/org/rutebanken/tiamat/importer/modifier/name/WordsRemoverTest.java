@@ -45,4 +45,11 @@ public class WordsRemoverTest {
         String actual = wordsRemover.remove("Kambosenteret  ");
         assertThat(actual).isEqualTo("Kambosenteret");
     }
+
+    @Test
+    public void removeByBaneStopp() {
+        String actual = wordsRemover.remove("Byparken, bybanestopp");
+        assertThat(actual).isEqualTo("Byparken");
+    }
+
 }
