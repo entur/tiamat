@@ -8,10 +8,7 @@ import org.keycloak.representations.AccessToken;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
-import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
-import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDTO;
+import org.rutebanken.tiamat.dtoassembling.dto.*;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -62,11 +59,11 @@ public class DtoStopPlaceResource {
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     @GET
-    public List<StopPlaceDto> getStopPlaces(@BeanParam DtoStopPlaceSearch dtoStopPlaceSearch) {
+    public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
 
         keyCloak();
 
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(dtoStopPlaceSearch);
+        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
 
         Page<StopPlace> stopPlaces;
         if(stopPlaceSearch.isEmpty()) {
@@ -134,15 +131,15 @@ public class DtoStopPlaceResource {
     public List<StopPlaceDto> getStopPlacesFromBoundingBox(@Context HttpServletResponse response,
                                                            @DefaultValue(value="0") @QueryParam(value="page") int page,
                                                            @DefaultValue(value="200") @QueryParam(value="size") int size,
-                                                           StopPlaceSearchDTO stopPlaceSearchDTO) {
-        BoundingBoxDto boundingBox = stopPlaceSearchDTO.boundingBox;
+                                                           StopPlaceBBoxSearchDTO stopPlaceBBoxSearchDTO) {
+        BoundingBoxDto boundingBox = stopPlaceBBoxSearchDTO.boundingBox;
 
         logger.debug("Search for stop places within bounding box {}", ToStringBuilder.reflectionToString(boundingBox));
         Pageable pageable = new PageRequest(page, size);
 
         List<StopPlaceDto> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
                 .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
-                        boundingBox.yMax, Long.valueOf(stopPlaceSearchDTO.ignoreStopPlaceId), pageable),
+                        boundingBox.yMax, Long.valueOf(stopPlaceBBoxSearchDTO.ignoreStopPlaceId), pageable),
                         ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);
         logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;

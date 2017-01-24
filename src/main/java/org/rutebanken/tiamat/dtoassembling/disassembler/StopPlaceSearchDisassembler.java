@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -25,28 +25,28 @@ public class StopPlaceSearchDisassembler {
         this.netexIdMapper = netexIdMapper;
     }
 
-    public StopPlaceSearch disassemble(DtoStopPlaceSearch dtoStopPlaceSearch) {
+    public StopPlaceSearch disassemble(StopPlaceSearchDto stopPlaceSearchDto) {
 
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
         List<StopTypeEnumeration> stopTypeEnums = new ArrayList<>();
-        if (dtoStopPlaceSearch.stopPlaceTypes != null) {
-            dtoStopPlaceSearch.stopPlaceTypes.forEach(string ->
+        if (stopPlaceSearchDto.stopPlaceTypes != null) {
+            stopPlaceSearchDto.stopPlaceTypes.forEach(string ->
                     stopTypeEnums.add(StopTypeEnumeration.fromValue(string)));
             stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypeEnums);
         }
 
-        if(dtoStopPlaceSearch.idList != null) {
-            stopPlaceSearchBuilder.setIdList(dtoStopPlaceSearch.idList.stream()
+        if(stopPlaceSearchDto.idList != null) {
+            stopPlaceSearchBuilder.setIdList(stopPlaceSearchDto.idList.stream()
                     .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
                     .filter(nsrId -> nsrId.toLowerCase().contains(StopPlace.class.getSimpleName().toLowerCase()))
                     .map(nsrId -> netexIdMapper.extractLongAfterLastColon(nsrId))
                     .collect(Collectors.toList()));
         }
-        stopPlaceSearchBuilder.setCountyIds(dtoStopPlaceSearch.countyReferences);
-        stopPlaceSearchBuilder.setMunicipalityIds(dtoStopPlaceSearch.municipalityReferences);
-        stopPlaceSearchBuilder.setQuery(dtoStopPlaceSearch.query);
-        stopPlaceSearchBuilder.setPageable(new PageRequest(dtoStopPlaceSearch.page, dtoStopPlaceSearch.size));
+        stopPlaceSearchBuilder.setCountyIds(stopPlaceSearchDto.countyReferences);
+        stopPlaceSearchBuilder.setMunicipalityIds(stopPlaceSearchDto.municipalityReferences);
+        stopPlaceSearchBuilder.setQuery(stopPlaceSearchDto.query);
+        stopPlaceSearchBuilder.setPageable(new PageRequest(stopPlaceSearchDto.page, stopPlaceSearchDto.size));
 
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
         logger.info("Disassembled stop place search '{}'", stopPlaceSearch);

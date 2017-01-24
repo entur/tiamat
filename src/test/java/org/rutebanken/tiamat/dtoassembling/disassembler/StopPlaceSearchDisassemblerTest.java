@@ -1,12 +1,11 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.junit.Test;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,27 +21,27 @@ public class StopPlaceSearchDisassemblerTest {
 
         List<String> ids = Arrays.asList("NSR:StopPlace:123", "NSR:StopPlace:321");
 
-        DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
+        StopPlaceSearchDto stopPlaceSearchDto = new StopPlaceSearchDto.Builder()
                 .setIdList(ids)
                 .build();
 
-        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(dtoStopPlaceSearch);
+        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(stopPlaceSearchDto);
         assertThat(stopPlaceSearch.getIdList()).contains(123L, 321L);
     }
 
     @Test
     public void disassembleStopPlaceTypes() {
-        DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
+        StopPlaceSearchDto stopPlaceSearchDto = new StopPlaceSearchDto.Builder()
                 .setStopPlaceTypes(Arrays.asList("onstreetBus")).build();
-        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(dtoStopPlaceSearch);
+        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(stopPlaceSearchDto);
         assertThat(stopPlaceSearch.getStopTypeEnumerations()).contains(StopTypeEnumeration.ONSTREET_BUS);
     }
 
     @Test
     public void disassembleMunicipalityReference() {
-        DtoStopPlaceSearch dtoStopPlaceSearch = new DtoStopPlaceSearch.Builder()
+        StopPlaceSearchDto stopPlaceSearchDto = new StopPlaceSearchDto.Builder()
                 .setMunicipalityReferences(Arrays.asList("123")).build();
-        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(dtoStopPlaceSearch);
+        StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(stopPlaceSearchDto);
         assertThat(stopPlaceSearch.getMunicipalityIds()).contains("123");
     }
 }

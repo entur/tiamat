@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.rest.dto.DtoStopPlaceSearch;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,14 +23,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
@@ -736,7 +731,7 @@ public class PublicationDeliveryResourceTest {
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        DtoStopPlaceSearch stopPlaceSearch = new DtoStopPlaceSearch.Builder()
+        StopPlaceSearchDto stopPlaceSearch = new StopPlaceSearchDto.Builder()
                 .setQuery("Østre gravlund")
                 .build();
         Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch);
