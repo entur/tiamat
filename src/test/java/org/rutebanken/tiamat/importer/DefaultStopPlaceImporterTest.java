@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.geo.EnvelopeCreator;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
@@ -15,7 +17,6 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.junit.Test;
 import org.rutebanken.tiamat.service.CentroidComputer;
 
 import java.util.Arrays;
@@ -24,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.TimeUnit.HOURS;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -112,6 +112,35 @@ public class DefaultStopPlaceImporterTest {
         assertThat(importResult.getVersion()).isEqualTo("2");
     }
 
+    /**
+     * The second time the stop place is imported, the type must be updated if it was empty.
+     */
+    @Test
+    public void updateStopPlaceType() throws ExecutionException, InterruptedException {
+
+        Point point = geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885));
+
+        Long firstStopId = 1L;
+        StopPlace firstStopPlace = new StopPlace();
+        firstStopPlace.setCentroid(point);
+        firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
+        firstStopPlace.setId(firstStopId);
+        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id");
+        firstStopPlace.setVersion("1");
+
+        StopPlace newStopPlace = new StopPlace();
+        newStopPlace.setCentroid(point);
+        newStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
+        newStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
+        when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
+
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, new AtomicInteger());
+
+        assertThat(importResult.getId()).isEqualTo(firstStopId);
+        assertThat(importResult.getStopPlaceType()).isEqualTo(StopTypeEnumeration.ONSTREET_BUS);
+    }
 
     @Test
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
@@ -198,7 +227,7 @@ public class DefaultStopPlaceImporterTest {
                 .as("The same stop place should be returned as they have the same chouette id");
     }
 
-     /**
+    /**
      * When importing a stop place with matching chouette ID, the quay should be added to existing stop place.
      */
     @Test

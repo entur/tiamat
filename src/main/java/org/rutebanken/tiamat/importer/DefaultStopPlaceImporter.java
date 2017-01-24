@@ -154,7 +154,14 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
         boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 
-        if(quayChanged || keyValuesChanged || centroidChanged) {
+        boolean typeChanged = false;
+        if(foundStopPlace.getStopPlaceType() == null && newStopPlace.getStopPlaceType() != null) {
+            foundStopPlace.setStopPlaceType(newStopPlace.getStopPlaceType());
+            typeChanged = true;
+
+        }
+        
+        if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
         }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
