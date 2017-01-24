@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,31 +29,54 @@ public class NearbyStopsWithSameTypeFinder {
 
     private static final int DEFAULT_LIMIT_METERS = 20;
 
-    private final StopPlaceRepository stopPlaceRepository;
+    private static final Map<String, Integer> DEFAULT_LIMITS = new HashMap<>();
 
+    static {
+        for (StopTypeEnumeration type : StopTypeEnumeration.values()) {
+            if(type.equals(StopTypeEnumeration.AIRPORT)) {
+                DEFAULT_LIMITS.put(type.value(), 3000);
+            } else if (type.equals(StopTypeEnumeration.RAIL_STATION)) {
+                DEFAULT_LIMITS.put(type.value(), 1000);
+            }
+            DEFAULT_LIMITS.put(type.value(), DEFAULT_LIMIT_METERS);
+        }
+    }
+
+    private final StopPlaceRepository stopPlaceRepository;
     private final EnvelopeCreator envelopeCreator;
+
     private final ConcurrentHashMap<StopTypeEnumeration, Integer> typesLimitMap;
 
     /**
      *
      * @param stopPlaceRepository
      * @param envelopeCreator
-     *
+     * @param limits map with limits per value of StopTypeEnumeration. In meters.
      */
     @Autowired
-    public NearbyStopsWithSameTypeFinder(StopPlaceRepository stopPlaceRepository,
-                                         EnvelopeCreator envelopeCreator,
-                                         @Value("${nearbyStopWithSameTypeFinder.airportLimit:1000}") int airportLimit,
-                                         @Value("${nearbyStopWithSameTypeFinder.railStationLimit:300}") int railStationLimit) {
-        this.stopPlaceRepository = stopPlaceRepository;
+    private NearbyStopsWithSameTypeFinder(StopPlaceRepository stopPlaceRepository,
+                                          EnvelopeCreator envelopeCreator,
+                                          @Value("#{${nearbyStopsWithSameTypeFinder.limits:{airport:'3000',railStation:'1000'}}}") Map<String, Integer> limits) {
+
         this.envelopeCreator = envelopeCreator;
-        typesLimitMap = new ConcurrentHashMap<>(2);
-        typesLimitMap.put(StopTypeEnumeration.AIRPORT, airportLimit);
-        typesLimitMap.put(StopTypeEnumeration.RAIL_STATION, railStationLimit);
+        this.stopPlaceRepository = stopPlaceRepository;
+
+        typesLimitMap = new ConcurrentHashMap<>();
+
+        for(String key : limits.keySet() ) {
+            try {
+                StopTypeEnumeration stopTypeEnumeration = StopTypeEnumeration.fromValue(key);
+                typesLimitMap.put(stopTypeEnumeration, limits.get(key));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("The configured value '"+key+"': '"+limits.get(key)+"' is not possible to resolve as StopTypeEnumeration value.", e);
+            }
+        }
+
+        logger.info("Limits configured: {}", typesLimitMap);
     }
 
     public NearbyStopsWithSameTypeFinder(StopPlaceRepository stopPlaceRepository, EnvelopeCreator envelopeCreator) {
-        this(stopPlaceRepository, envelopeCreator, 1000, 300);
+        this(stopPlaceRepository, envelopeCreator, DEFAULT_LIMITS);
     }
 
     private int getLimit(StopPlace stopPlace) {
