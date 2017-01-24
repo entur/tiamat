@@ -157,10 +157,11 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         boolean typeChanged = false;
         if(foundStopPlace.getStopPlaceType() == null && newStopPlace.getStopPlaceType() != null) {
             foundStopPlace.setStopPlaceType(newStopPlace.getStopPlaceType());
+            logger.info("Updated stop place type to {} for stop place {}", foundStopPlace.getStopPlaceType(), foundStopPlace);
             typeChanged = true;
 
         }
-        
+
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
         }
