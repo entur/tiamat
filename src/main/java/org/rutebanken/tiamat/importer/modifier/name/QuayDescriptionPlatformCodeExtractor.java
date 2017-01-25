@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer.modifier.name;
 
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,13 @@ public class QuayDescriptionPlatformCodeExtractor {
         this(new String[]{"hpl", "spor", "plattform", "pl", "plf"});
     }
 
+
+    public StopPlace extractPlatformCodes(StopPlace stopPlace) {
+        if(stopPlace.getQuays() != null) {
+            stopPlace.getQuays().forEach(q -> extractPlatformCode(q));
+        }
+        return stopPlace;
+    }
 
     public void extractPlatformCode(Quay quay) {
 

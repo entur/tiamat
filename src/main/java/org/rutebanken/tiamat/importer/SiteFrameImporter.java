@@ -2,10 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.importer.modifier.name.NameToDescriptionMover;
-import org.rutebanken.tiamat.importer.modifier.name.QuayNameRemover;
-import org.rutebanken.tiamat.importer.modifier.name.StopPlaceNameCleaner;
-import org.rutebanken.tiamat.importer.modifier.name.StopPlaceNameNumberToQuayMover;
+import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -36,15 +33,17 @@ public class SiteFrameImporter {
     private final NameToDescriptionMover nameToDescriptionMover;
     private final QuayNameRemover quayNameRemover;
     private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
+    private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
         this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
+        this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -74,6 +73,7 @@ public class SiteFrameImporter {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
+                        .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
                         .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
