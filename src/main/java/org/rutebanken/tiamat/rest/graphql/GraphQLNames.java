@@ -2,9 +2,9 @@ package org.rutebanken.tiamat.rest.graphql;
 
 public class GraphQLNames {
 
-    static final String TYPE_TOPOGRAPHIC_PLACE = "topographicPlace";
-    static final String TYPE_STOPPLACE = "stopPlace";
-    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "embeddableMultilingualString";
+    static final String TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
+    static final String TYPE_STOPPLACE = "StopPlace";
+    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
 
     static final String ID = "id";
     static final String STOPPLACE_TYPE = "stopPlaceType";
@@ -40,10 +40,10 @@ public class GraphQLNames {
     static final String VALUE = "value";
     static final String LANG = "lang";
 
-    static final String FIND_STOPPPLACE_BY_ID = "stopPlaceLookup";
-    static final String STOPPLACE_SEARCH = "stopPlace";
+    static final String FIND_STOPPLACE = "stopPlace";
     static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
+
     static final String CREATE_STOPPLACE = "createStopPlace";
     static final String UPDATE_STOPPLACE = "updateStopPlace";
     static final String CREATE_QUAY = "createQuay";
