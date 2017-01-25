@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.importer.modifier.CompassBearingRemover;
 import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -34,9 +35,10 @@ public class SiteFrameImporter {
     private final QuayNameRemover quayNameRemover;
     private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
     private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
+    private final CompassBearingRemover compassBearingRemover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor, CompassBearingRemover compassBearingRemover) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.netexMapper = netexMapper;
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
@@ -44,6 +46,7 @@ public class SiteFrameImporter {
         this.quayNameRemover = quayNameRemover;
         this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
         this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
+        this.compassBearingRemover = compassBearingRemover;
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -73,6 +76,7 @@ public class SiteFrameImporter {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
+                        .map(stopPlace -> compassBearingRemover.remove(stopPlace))
                         .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
