@@ -1,18 +1,13 @@
 package org.rutebanken.tiamat.model;
 
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
-
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass
-public @GraphQLType class VersionOfObjectRefStructure implements Serializable {
+public class VersionOfObjectRefStructure implements Serializable {
 
-    @GraphQLField
     protected String ref;
 
-    @GraphQLField
     protected String version;
 
     public String getRef() {

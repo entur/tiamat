@@ -1,12 +1,8 @@
 package org.rutebanken.tiamat.model;
 
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
-
 import javax.persistence.*;
 
 @MappedSuperclass
-@GraphQLType
 public abstract class GroupOfEntities_VersionStructure
         extends DataManagedObjectStructure {
 
@@ -15,7 +11,6 @@ public abstract class GroupOfEntities_VersionStructure
             @AttributeOverride(name = "lang", column = @Column(name = "name_lang"))
     })
     @Embedded
-    @GraphQLField
     protected EmbeddableMultilingualString name;
 
     @AttributeOverrides({
@@ -23,7 +18,6 @@ public abstract class GroupOfEntities_VersionStructure
             @AttributeOverride(name = "lang", column = @Column(name = "short_name_lang"))
     })
     @Embedded
-    @GraphQLField
     protected EmbeddableMultilingualString shortName;
 
     @AttributeOverrides({
@@ -31,7 +25,6 @@ public abstract class GroupOfEntities_VersionStructure
             @AttributeOverride(name = "lang", column = @Column(name = "description_lang"))
     })
     @Embedded
-    @GraphQLField
     protected EmbeddableMultilingualString description;
 
     @Transient

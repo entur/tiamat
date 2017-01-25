@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import javax.persistence.CascadeType;
@@ -13,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@GraphQLType
 public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -24,7 +21,6 @@ public class Quay extends StopPlaceSpace_VersionStructure {
      * TODO: reconsider data type for compass bearing.
      * https://rutebanken.atlassian.net/browse/NRP-895
      */
-    @GraphQLField
     protected Float compassBearing;
 
     public Quay(EmbeddableMultilingualString name) {

@@ -1,15 +1,11 @@
 package org.rutebanken.tiamat.model;
 
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
-
 import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
-@GraphQLType
 public abstract class Site_VersionStructure
         extends SiteElement_VersionStructure {
 
@@ -21,7 +17,6 @@ public abstract class Site_VersionStructure
             @AttributeOverride(name = "version", column = @Column(name = "topographic_place_version"))
     })
     @Embedded
-    @GraphQLField
     protected TopographicPlaceRefStructure topographicPlaceRef;
     @Transient
     protected TopographicPlaceView topographicPlaceView;

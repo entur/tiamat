@@ -76,7 +76,7 @@ class StopPlaceUpdater implements DataFetcher {
 
         stopPlace.setCentroid(createPoint(environment));
 
-        stopPlace.setAllAreasWheelchairAccessible(environment.getArgument(WHEELCHAIR_ACCESSIBLE));
+        stopPlace.setAllAreasWheelchairAccessible(environment.getArgument(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
 
         // TODO: Create Quays
 

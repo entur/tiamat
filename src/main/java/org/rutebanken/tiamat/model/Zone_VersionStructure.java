@@ -1,18 +1,13 @@
 package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Point;
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLRelayMutation;
-import graphql.annotations.GraphQLType;
 import net.opengis.gml._3.PolygonType;
-import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 
 @MappedSuperclass
-@GraphQLType
 public class Zone_VersionStructure
         extends GroupOfPoints_VersionStructure {
 
@@ -29,18 +24,6 @@ public class Zone_VersionStructure
 
     @Transient
     protected ZoneRefStructure parentZoneRef;
-
-    @GraphQLField
-    public LocationDto getLocation() {
-        if (centroid != null) {
-            LocationDto locationDto = new LocationDto();
-            locationDto.longitude = centroid.getX();
-            locationDto.latitude = centroid.getY();
-
-            return locationDto;
-        }
-        return null;
-    }
 
     public Zone_VersionStructure() {
     }
@@ -61,7 +44,6 @@ public class Zone_VersionStructure
         return centroid;
     }
 
-    @GraphQLRelayMutation
     public void setCentroid(Point value) {
         this.centroid = value;
     }

@@ -1,11 +1,13 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.annotations.GraphQLAnnotations;
+import com.vividsolutions.jts.geom.Point;
 import graphql.schema.*;
+import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private final String SIZE_DESCRIPTION_TEXT = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public GraphQLSchema stopPlaceRegisterSchema;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -61,15 +66,105 @@ public class StopPlaceRegisterGraphQLSchema {
                 .value("other", StopTypeEnumeration.OTHER)
                 .build();
 
+        GraphQLObjectType embeddableMultilingualStringObjectType = newObject()
+                .name(TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
+                .field(newFieldDefinition()
+                        .name(VALUE)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(LANG)
+                        .type(GraphQLString))
+                .build();
 
-        GraphQLObjectType topographicPlaceObjectType;
-        GraphQLObjectType stopPlaceObjectType;
-        try {
-            stopPlaceObjectType = GraphQLAnnotations.object(StopPlace.class);
-            topographicPlaceObjectType = GraphQLAnnotations.object(TopographicPlace.class);
-        } catch (Throwable e) {
-            throw new RuntimeException("Unable to start.", e);
-        }
+        GraphQLObjectType topographicPlaceObjectType = newObject()
+                .name(TYPE_TOPOGRAPHIC_PLACE)
+                .field(newFieldDefinition()
+                        .name(ID)
+                        .type(GraphQLLong))
+                .field(newFieldDefinition()
+                        .name(TOPOGRAPHIC_PLACE_TYPE)
+                        .type(topographicPlaceTypeEnum))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .build();
+
+        GraphQLObjectType locationObjectType = newObject()
+                .name(LOCATION)
+                .field(newFieldDefinition()
+                        .name(LONGITUDE)
+                        .type(GraphQLBigDecimal))
+                .field(newFieldDefinition()
+                        .name(LATITUDE)
+                        .type(GraphQLBigDecimal))
+                .build();
+
+        GraphQLType quayObjectType = newObject()
+                .name(QUAY)
+                .field(newFieldDefinition()
+                        .name(ID)
+                        .type(GraphQLLong))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(COMPASS_BEARING)
+                        .type(GraphQLFloat))
+                .field(newFieldDefinition()
+                        .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
+                        .type(GraphQLBoolean))
+                .field(newFieldDefinition()
+                        .name(LOCATION)
+                        .type(locationObjectType).name(LOCATION)
+                        .type(locationObjectType)
+                        .dataFetcher(env -> {
+                            Quay quay = (Quay) env.getSource();
+                            LocationDto dto = new LocationDto();
+                            Point point = quay.getCentroid();
+                            dto.longitude = point.getX();
+                            dto.latitude = point.getY();
+                            return dto;
+                        }))
+                .build();
+
+        GraphQLObjectType stopPlaceObjectType  = newObject()
+                .name(TYPE_STOPPLACE)
+                .field(newFieldDefinition()
+                        .name(ID)
+                        .type(GraphQLLong))
+                .field(newFieldDefinition()
+                        .name(TOPOGRAPHIC_PLACE)
+                        .type(topographicPlaceObjectType)
+                        .dataFetcher(env -> {
+                            StopPlace sp = (StopPlace) env.getSource();
+                            String ref = sp.getTopographicPlaceRef().getRef();
+                            if (ref != null) {
+                                return topographicPlaceRepository.findOne(Long.valueOf(ref));
+                            }
+                            return null;
+                        }))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(STOPPLACE_TYPE)
+                        .type(stopPlaceTypeEnum))
+                .field(newFieldDefinition()
+                        .name(LOCATION)
+                        .type(locationObjectType).name(LOCATION)
+                        .type(locationObjectType)
+                        .dataFetcher(env -> {
+                            StopPlace stopPlace = (StopPlace) env.getSource();
+                            LocationDto dto = new LocationDto();
+                            Point point = stopPlace.getCentroid();
+                            dto.longitude = point.getX();
+                            dto.latitude = point.getY();
+                            return dto;
+                        }))
+                .field(newFieldDefinition()
+                        .name(QUAYS)
+                        .type(new GraphQLList(quayObjectType)))
+                .build();
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name("SearchAndQuery")
@@ -80,8 +175,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Retrieve StopPlace by ID")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(new GraphQLNonNull(GraphQLID))
-                                .description("ID used to lookup StopPlace"))
+                                .type(new GraphQLNonNull(new GraphQLList(GraphQLLong)))
+                                .description("IDs used to lookup StopPlace"))
                         .dataFetcher(stopPlaceFetcher))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(stopPlaceObjectType))
@@ -158,7 +253,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Find topographic places")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(GraphQLID))
+                                .type(GraphQLLong))
                         .argument(GraphQLArgument.newArgument()
                                 .name(TOPOGRAPHIC_PLACE_TYPE)
                                 .type(topographicPlaceTypeEnum)
@@ -196,7 +291,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .name(LONGITUDE)
                                 .type(GraphQLBigDecimal))
                         .argument(GraphQLArgument.newArgument()
-                                .name(WHEELCHAIR_ACCESSIBLE)
+                                .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                                 .type(GraphQLBoolean))
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
