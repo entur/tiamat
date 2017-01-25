@@ -102,7 +102,7 @@ public class SiteFrameImporter {
             }
             return netexSiteFrame;
         } finally {
-            timerTask.cancel();
+            timer.cancel();
         }
     }
 
