@@ -26,7 +26,7 @@ public class CompassBearingRemoverTest {
     }
 
     @Test
-    public void keepCompassBearingForAirportQuay() throws Exception {
+    public void keepCompassBearingForBusQuay() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
 
