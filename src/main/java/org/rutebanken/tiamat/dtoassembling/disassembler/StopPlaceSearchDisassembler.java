@@ -40,7 +40,7 @@ public class StopPlaceSearchDisassembler {
             stopPlaceSearchBuilder.setIdList(stopPlaceSearchDto.idList.stream()
                     .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
                     .filter(nsrId -> nsrId.toLowerCase().contains(StopPlace.class.getSimpleName().toLowerCase()))
-                    .map(nsrId -> netexIdMapper.extractLongAfterLastColon(nsrId))
+                    .map(nsrId -> netexIdMapper.getTiamatId(nsrId))
                     .collect(Collectors.toList()));
         }
         stopPlaceSearchBuilder.setCountyIds(stopPlaceSearchDto.countyReferences);

@@ -29,8 +29,12 @@ public class NetexIdMapper {
             logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
-            netexEntity.setId(getNetexId(determineIdType(internalEntity), internalEntity.getId().toString()));
+            netexEntity.setId(getNetexId(internalEntity, internalEntity.getId()));
         }
+    }
+
+    public static String getNetexId(EntityStructure internalEntity, Long id) {
+        return "NSR:" + determineIdType(internalEntity) +":" + id;
     }
 
     public static String getNetexId(String idType, String id) {
@@ -44,7 +48,7 @@ public class NetexIdMapper {
         } else if(netexEntity.getId().startsWith(NSR)) {
             logger.debug("Detected tiamat ID: {}. ", netexEntity.getId());
             String netexId = netexEntity.getId();
-            Long tiamatId = extractLongAfterLastColon(netexId);
+            Long tiamatId = getTiamatId(netexId);
             tiamatEntity.setId(tiamatId);
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
@@ -89,12 +93,12 @@ public class NetexIdMapper {
      * @param netexId Id with long value after last colon.
      * @return long value
      */
-    public long extractLongAfterLastColon(String netexId) {
+    public static long getTiamatId(String netexId) {
         Long longValue = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
         return longValue;
     }
 
-    private String determineIdType(EntityStructure entityStructure) {
+    private static String determineIdType(EntityStructure entityStructure) {
 
         if(entityStructure instanceof StopPlace) {
             return "StopPlace";
