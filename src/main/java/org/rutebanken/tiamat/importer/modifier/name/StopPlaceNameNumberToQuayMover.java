@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * If the stop place name contains platform number, move this to the Quay name.
+ */
 @Component
 public class StopPlaceNameNumberToQuayMover {
 

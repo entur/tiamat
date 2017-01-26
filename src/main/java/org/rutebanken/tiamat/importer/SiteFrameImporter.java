@@ -77,11 +77,11 @@ public class SiteFrameImporter {
                         .stream()
                         .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace -> compassBearingRemover.remove(stopPlace))
-                        .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                         .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                         .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
-                        .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
                         .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
+                        .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
+                        .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )

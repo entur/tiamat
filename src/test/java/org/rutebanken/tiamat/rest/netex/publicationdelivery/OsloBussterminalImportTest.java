@@ -30,9 +30,6 @@ public class OsloBussterminalImportTest {
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
-    @Autowired
-    private PublicationDeliveryResource publicationDeliveryResource;
-
     /**
      * Oslo bussterminal.
      * Usually, object structures are preferred for type checks and refactoring.
@@ -96,7 +93,7 @@ public class OsloBussterminalImportTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("17");
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("avstigning");
+        assertThat(actualQuays.get(1).getName().getValue()).isEqualTo("17");
+        assertThat(actualQuays.get(0).getDescription().getValue()).contains("avstigning");
     }
 }
