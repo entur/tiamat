@@ -19,14 +19,16 @@ public class WordsRemover {
     private final List<Pattern> patterns = new ArrayList<>();
 
     public WordsRemover() {
-        this(Arrays.asList("båt", "buss", "tog", "bussterminal"));
+        this(Arrays.asList("båt", "buss", "tog", "bussterminal", "bybanestopp"));
     }
     public WordsRemover(List<String> words) {
 
         for(String word : words) {
             patterns.add(Pattern.compile("\\("+word+"\\)", Pattern.CASE_INSENSITIVE));
-            patterns.add(Pattern.compile("\\[("+word+")\\]", Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile("\\["+word+"\\]", Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile(",?\\s"+word, Pattern.CASE_INSENSITIVE));
         }
+        logger.info("Patterns: {}", patterns);
     }
 
     public String remove(String name) {
