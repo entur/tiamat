@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -110,6 +111,25 @@ public class PublicationDeliveryTestHelper {
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
         Response response = postPublicationDelivery(publicationDeliveryStructure);
+        StreamingOutput output = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        output.write(outputStream);
+
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
+        return (PublicationDeliveryStructure) element.getValue();
+    }
+
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml) throws JAXBException, IOException, SAXException {
+
+        InputStream stream = new ByteArrayInputStream(publicationDeliveryXml.getBytes(StandardCharsets.UTF_8));
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);

@@ -35,6 +35,7 @@ public class WordsRemover {
         String returnString = name;
         for(Pattern pattern : patterns) {
             returnString = pattern.matcher(returnString).replaceAll("");
+            logger.info("Changed name {} to {} using pattern: {}", name, returnString, pattern.pattern());
         }
         return returnString.trim();
     }
