@@ -20,7 +20,8 @@ public class CompassBearingRemover {
 
     private final Set<StopTypeEnumeration> stopTypes = new HashSet<>();
 
-    public CompassBearingRemover(@Value("${CompassBearingRemover.types:airport,railStation,liftStation,ferryStop}") String[] removeBearingForTypes) {
+    public CompassBearingRemover(@Value("${CompassBearingRemover.types:airport,railStation,liftStation,ferryStop,ferryPort,harbourPort}")
+                                         String[] removeBearingForTypes) {
         for (String type : removeBearingForTypes) {
             StopTypeEnumeration stopTypeEnumeration = StopTypeEnumeration.fromValue(type);
             stopTypes.add(stopTypeEnumeration);
