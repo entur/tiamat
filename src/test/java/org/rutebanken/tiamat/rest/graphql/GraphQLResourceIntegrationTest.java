@@ -334,9 +334,9 @@ public class GraphQLResourceIntegrationTest {
     @Test
     public void testSimpleMutationCreateStopPlace() throws Exception {
 
-        String name = "Testing name æøåÆØÅ";
-        String shortName = "Testing shortname æøåÆØÅ";
-        String description = "Testing description æøåÆØÅ";
+        String name = "Testing name";
+        String shortName = "Testing shortname";
+        String description = "Testing description";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -389,9 +389,9 @@ public class GraphQLResourceIntegrationTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        String updatedName = "Testing name æøåÆØÅ";
-        String updatedShortName = "Testing shortname æøåÆØÅ";
-        String updatedDescription = "Testing description æøåÆØÅ";
+        String updatedName = "Testing name ";
+        String updatedShortName = "Testing shortname ";
+        String updatedDescription = "Testing description ";
 
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);
@@ -437,9 +437,9 @@ public class GraphQLResourceIntegrationTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name æøåÆØÅ";
-        String shortName = "Testing shortname æøåÆØÅ";
-        String description = "Testing description æøåÆØÅ";
+        String name = "Testing name ";
+        String shortName = "Testing shortname ";
+        String description = "Testing description ";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -492,9 +492,9 @@ public class GraphQLResourceIntegrationTest {
         quayRepository.save(quay);
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name æøåÆØÅ";
-        String shortName = "Testing shortname æøåÆØÅ";
-        String description = "Testing description æøåÆØÅ";
+        String name = "Testing name ";
+        String shortName = "Testing shortname ";
+        String description = "Testing description ";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -554,9 +554,9 @@ public class GraphQLResourceIntegrationTest {
         quayRepository.save(quay);
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name æøåÆØÅ";
-        String shortName = "Testing shortname æøåÆØÅ";
-        String description = "Testing description æøåÆØÅ";
+        String name = "Testing name ";
+        String shortName = "Testing shortname ";
+        String description = "Testing description ";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
