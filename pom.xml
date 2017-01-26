@@ -66,6 +66,7 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
+        <hazelcast-hibernate5.version>1.2</hazelcast-hibernate5.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
@@ -123,6 +124,12 @@
         <dependency>
             <groupId>org.rutebanken.helpers</groupId>
             <artifactId>hazelcast-helper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-hibernate5</artifactId>
+            <version>${hazelcast-hibernate5.version}</version>
         </dependency>
 
         <dependency>
