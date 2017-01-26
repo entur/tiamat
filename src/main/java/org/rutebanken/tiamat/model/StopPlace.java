@@ -70,6 +70,9 @@ public class StopPlace
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
+    @org.hibernate.annotations.Cache(
+            usage = CacheConcurrencyStrategy.READ_WRITE
+    )
     @OneToMany(cascade = CascadeType.MERGE)
     private Set<Quay> quays = new HashSet<>();
 
