@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -34,8 +35,12 @@ public class WordsRemover {
     public String remove(String name) {
         String returnString = name;
         for(Pattern pattern : patterns) {
-            returnString = pattern.matcher(returnString).replaceAll("");
-            logger.info("Changed name {} to {} using pattern: {}", name, returnString, pattern.pattern());
+            Matcher matcher = pattern.matcher(returnString);
+            if(matcher.find()) {
+                String replaced = matcher.replaceAll("").trim();
+                logger.info("Changed name '{}' to '{}' using pattern: {}", returnString, replaced, pattern.pattern());
+                returnString = replaced;
+            }
         }
         return returnString.trim();
     }
