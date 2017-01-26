@@ -27,4 +27,20 @@ public class StopPlaceNameCleanerTest {
         stopPlaceNameCleaner.cleanNames(stopPlace);
         assertThat(stopPlace.getName().getValue()).isEqualTo(stopPlaceName.trim());
     }
+
+    @Test
+    public void doNotCleanOsloBussterminal() throws Exception {
+        String stopPlaceName =  "Oslo Bussterminal";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        stopPlaceNameCleaner.cleanNames(stopPlace);
+        assertThat(stopPlace.getName().getValue()).isEqualTo(stopPlaceName.trim());
+    }
+
+    @Test
+    public void cleanBybanestopp() throws Exception {
+        String stopPlaceName =  "Sentrum, bybanestopp";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        stopPlaceNameCleaner.cleanNames(stopPlace);
+        assertThat(stopPlace.getName().getValue()).isEqualTo("Sentrum");
+    }
 }

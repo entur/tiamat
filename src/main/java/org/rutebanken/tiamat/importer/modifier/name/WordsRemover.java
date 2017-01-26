@@ -26,7 +26,7 @@ public class WordsRemover {
         for(String word : words) {
             patterns.add(Pattern.compile("\\("+word+"\\)", Pattern.CASE_INSENSITIVE));
             patterns.add(Pattern.compile("\\["+word+"\\]", Pattern.CASE_INSENSITIVE));
-            patterns.add(Pattern.compile(",?\\s"+word, Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile(",\\s"+word, Pattern.CASE_INSENSITIVE));
         }
         logger.info("Patterns: {}", patterns);
     }

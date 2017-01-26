@@ -92,7 +92,7 @@ public class OsloBussterminalImportTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(publicationDeliveryResponse);
 
-        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Oslo bussterminal");
+        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Oslo Bussterminal");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
