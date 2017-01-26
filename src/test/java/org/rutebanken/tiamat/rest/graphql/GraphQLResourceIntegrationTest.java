@@ -5,14 +5,12 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
-import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -23,11 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -92,7 +88,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{ stopPlace:" + GraphQLNames.FIND_STOPPPLACE_BY_ID + " (id:" + stopPlace.getId() + ") {" +
+                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:" + stopPlace.getId() + ") {" +
                 "   id " +
                 "   name { value } " +
                 "   quays { " +
@@ -115,7 +111,7 @@ public class GraphQLResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.STOPPLACE_SEARCH +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
                 " { name { value } " +
                 "}" +
                 "}\",\"variables\":\"\"}";
@@ -134,7 +130,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace: " + GraphQLNames.STOPPLACE_SEARCH + " (query:\\\"ytNES\\\") { " +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE + " (query:\\\"ytNES\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -154,7 +150,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace: " + GraphQLNames.STOPPLACE_SEARCH +  " (stopPlaceType:" + StopTypeEnumeration.FERRY_STOP.value() + ") { " +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (stopPlaceType:" + StopTypeEnumeration.FERRY_STOP.value() + ") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -191,7 +187,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:" + hordaland.getId() + " municipalityReference:" + kvinnherad.getId() +") { " +
                 "    name {value} " +
                 "  } " +
@@ -214,7 +210,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (municipalityReference:" + asker.getId() +") { " +
                 "    name {value} " +
                 "  } " +
@@ -234,7 +230,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (municipalityReference:" + asker.getId() +") { " +
                 "    name {value} " +
                 "  } " +
@@ -256,7 +252,7 @@ public class GraphQLResourceIntegrationTest {
 
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (municipalityReference:["+baerum.getId()+","+asker.getId()+"]) {" +
                 "id " +
                 "name { value } " +
@@ -284,7 +280,7 @@ public class GraphQLResourceIntegrationTest {
         createStopPlaceWithMunicipalityRef("Hennumkrysset", asker);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (countyReference:["+akershus.getId()+","+buskerud.getId()+"] municipalityReference:["+lier.getId()+","+asker.getId()+"]) {" +
                 "id " +
                 "name { value } " +
@@ -305,7 +301,7 @@ public class GraphQLResourceIntegrationTest {
         createStopPlaceWithMunicipalityRef("Haslum", baerum);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.STOPPLACE_SEARCH +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
                 " (countyReference:"+akershus.getId()+") {" +
                 "id " +
                 "name { value } " +
@@ -323,7 +319,7 @@ public class GraphQLResourceIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPPLACE_BY_ID+
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
                 " (id:"+stopPlace.getId()+") {" +
                 "id " +
                 "name { value } " +
@@ -334,68 +330,286 @@ public class GraphQLResourceIntegrationTest {
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()));
     }
 
-    /**
-     * https://rutebanken.atlassian.net/browse/NRP-677
-     */
+
     @Test
-    @Ignore
-    public void createStopPlaceShouldExposeQuayIds() {
-        StopPlaceDto stopPlaceDto = new StopPlaceDto();
-        stopPlaceDto.quays = new ArrayList<>(1);
-        stopPlaceDto.quays.add(new QuayDto());
+    public void testSimpleMutationCreateStopPlace() throws Exception {
+
+        String name = "Testing name æøåÆØÅ";
+        String shortName = "Testing shortname æøåÆØÅ";
+        String description = "Testing description æøåÆØÅ";
+
+        Float lon = new Float(10.11111);
+        Float lat = new Float(59.11111);
+
+        Boolean allAreasWheelchairAccessible = Boolean.TRUE;
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.CREATE_STOPPLACE + " (" +
+                "          name:\\\"" + name + "\\\" " +
+                "          shortName:\\\"" + shortName + "\\\" " +
+                "          description:\\\"" + description + "\\\"" +
+                "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
+                "          longitude:" + lon +
+                "          latitude:" + lat +
+                "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
+                ") { " +
+                "  id " +
+                "  name { value } " +
+                "  shortName { value } " +
+                "  description { value } " +
+                "  stopPlaceType " +
+                "  allAreasWheelchairAccessible " +
+                "  location { longitude latitude } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", notNullValue())
+                .body("data.stopPlace[0].name.value", equalTo(name))
+                .body("data.stopPlace[0].shortName.value", equalTo(shortName))
+                .body("data.stopPlace[0].description.value", equalTo(description))
+                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                .body("data.stopPlace[0].location.longitude", comparesEqualTo(lon))
+                .body("data.stopPlace[0].location.latitude", comparesEqualTo(lat))
+                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
 
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(stopPlaceDto)
-                .when()
-                .post(BASE_URI_GRAPHQL)
-                .then()
-                .log().body()
-                .assertThat()
-                .body("quays[0].id", notNullValue());
     }
 
-    /**
-     * https://rutebanken.atlassian.net/browse/NRP-677
-     */
     @Test
-    @Ignore
-    public void createStopPlaceWithNewQuayShouldExposeQuayIds() {
-        StopPlaceDto stopPlaceDto = new StopPlaceDto();
-        stopPlaceDto.quays = new ArrayList<>(1);
-        QuayDto quayDto = new QuayDto();
-        quayDto.name = "quay 1";
-        stopPlaceDto.quays.add(quayDto);
+    public void testSimpleMutationUpdateStopPlace() throws Exception {
 
+        StopPlace stopPlace = createStopPlace("Espa");
+        stopPlace.setShortName(new EmbeddableMultilingualString("E"));
+        stopPlace.setDescription(new EmbeddableMultilingualString("E6s beste boller"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        stopPlace.setAllAreasWheelchairAccessible(false);
 
-        // Create
-        stopPlaceDto = given()
-                .contentType(ContentType.JSON)
-                .body(stopPlaceDto)
-                .post(BASE_URI_GRAPHQL)
-                .as(StopPlaceDto.class);
+        stopPlaceRepository.save(stopPlace);
 
-        // Add new quay
-        QuayDto anotherQuayDto = new QuayDto();
-        anotherQuayDto.name = "quay 2";
-        stopPlaceDto.quays.add(anotherQuayDto);
+        String updatedName = "Testing name æøåÆØÅ";
+        String updatedShortName = "Testing shortname æøåÆØÅ";
+        String updatedDescription = "Testing description æøåÆØÅ";
 
-        // Update
-        stopPlaceDto = given()
-                .contentType(ContentType.JSON)
-                .body(stopPlaceDto)
-                .post(BASE_URI_GRAPHQL + stopPlaceDto.id)
-                .as(StopPlaceDto.class);
+        Float updatedLon = new Float(10.11111);
+        Float updatedLat = new Float(59.11111);
 
-        assertThat(stopPlaceDto.quays)
-                .hasSize(2)
-                .extracting(actualQuayDto -> actualQuayDto.id)
-                .doesNotContain("null")
-                .isNotNull()
-                .isNotEmpty();
+        Boolean allAreasWheelchairAccessible = Boolean.TRUE;
 
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.UPDATE_STOPPLACE + " (id:" + stopPlace.getId() +
+                "          name:\\\"" + updatedName + "\\\" " +
+                "          shortName:\\\"" + updatedShortName + "\\\" " +
+                "          description:\\\"" + updatedDescription + "\\\"" +
+                "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
+                "          longitude:" + updatedLon +
+                "          latitude:" + updatedLat +
+                "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
+                ") { " +
+                "  id " +
+                "  name { value } " +
+                "  shortName { value } " +
+                "  description { value } " +
+                "  stopPlaceType " +
+                "  allAreasWheelchairAccessible " +
+                "  location { longitude latitude } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].name.value", equalTo(updatedName))
+                .body("data.stopPlace[0].shortName.value", equalTo(updatedShortName))
+                .body("data.stopPlace[0].description.value", equalTo(updatedDescription))
+                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                .body("data.stopPlace[0].location.longitude", comparesEqualTo(updatedLon))
+                .body("data.stopPlace[0].location.latitude", comparesEqualTo(updatedLat))
+                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
     }
+
+
+    @Test
+    public void testSimpleMutationCreateQuay() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Espa");
+
+        stopPlaceRepository.save(stopPlace);
+
+        String name = "Testing name æøåÆØÅ";
+        String shortName = "Testing shortname æøåÆØÅ";
+        String description = "Testing description æøåÆØÅ";
+
+        Float lon = new Float(10.11111);
+        Float lat = new Float(59.11111);
+
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (stopPlaceId:" + stopPlace.getId() +
+                "          name:\\\"" + name + "\\\" " +
+                "          shortName:\\\"" + shortName + "\\\" " +
+                "          description:\\\"" + description + "\\\"" +
+                "          longitude:" + lon +
+                "          latitude:" + lat +
+                ") { " +
+                "  id " +
+                "  name { value } " +
+                "  quays {" +
+                "    id " +
+                "    name { value } " +
+                "    shortName { value } " +
+                "    description { value } " +
+                "    location { longitude latitude } " +
+                "  } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
+                .body("data.stopPlace[0].quays[0].id", notNullValue())
+                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
+                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
+                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
+                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
+                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat));
+    }
+
+    @Test
+    public void testSimpleMutationUpdateQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Espa"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
+        stopPlace.getQuays().add(quay);
+
+        quayRepository.save(quay);
+        stopPlaceRepository.save(stopPlace);
+
+        String name = "Testing name æøåÆØÅ";
+        String shortName = "Testing shortname æøåÆØÅ";
+        String description = "Testing description æøåÆØÅ";
+
+        Float lon = new Float(10.11111);
+        Float lat = new Float(59.11111);
+
+        Float compassBearing = new Float(180);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.UPDATE_QUAY + " (id:" + quay.getId() +
+                "          stopPlaceId:" + stopPlace.getId() + " " +
+                "          name:\\\"" + name + "\\\" " +
+                "          shortName:\\\"" + shortName + "\\\" " +
+                "          description:\\\"" + description + "\\\"" +
+                "          longitude:" + lon +
+                "          latitude:" + lat +
+                "          compassBearing:" + compassBearing +
+                ") { " +
+                "  id " +
+                "  name { value } " +
+                "  quays {" +
+                "    id " +
+                "    name { value } " +
+                "    shortName { value } " +
+                "    description { value } " +
+                "    location { longitude latitude } " +
+                "    compassBearing " +
+                "  } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
+                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(quay.getId().intValue()))
+                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
+                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
+                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
+                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
+                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat))
+                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(compassBearing));
+    }
+
+
+    @Test
+    public void testSimpleMutationAddSecondQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Espa"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        Point point = geometryFactory.createPoint(new Coordinate(11.2, 60.2));
+        quay.setCentroid(point);
+        stopPlace.getQuays().add(quay);
+
+        quayRepository.save(quay);
+        stopPlaceRepository.save(stopPlace);
+
+        String name = "Testing name æøåÆØÅ";
+        String shortName = "Testing shortname æøåÆØÅ";
+        String description = "Testing description æøåÆØÅ";
+
+        Float lon = new Float(10.11111);
+        Float lat = new Float(59.11111);
+
+        Float compassBearing = new Float(180);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (" +
+                "          stopPlaceId:" + stopPlace.getId() + " " +
+                "          name:\\\"" + name + "\\\" " +
+                "          shortName:\\\"" + shortName + "\\\" " +
+                "          description:\\\"" + description + "\\\"" +
+                "          longitude:" + lon +
+                "          latitude:" + lat +
+                "          compassBearing:" + compassBearing +
+                ") { " +
+                "  id " +
+                "  name { value } " +
+                "  quays {" +
+                "    id " +
+                "    name { value } " +
+                "    shortName { value } " +
+                "    description { value } " +
+                "    location { longitude latitude } " +
+                "    compassBearing " +
+                "  } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
+                .body("data.stopPlace[0].quays", Matchers.hasSize(2))
+                // First Quay - added manually
+                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(quay.getId().intValue()))
+                .body("data.stopPlace[0].quays[0].name.", nullValue())
+                .body("data.stopPlace[0].quays[0].shortName", nullValue())
+                .body("data.stopPlace[0].quays[0].description", nullValue())
+                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(new Float(point.getX())))
+                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
+                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                // Second Quay - added using GraphQL
+                .body("data.stopPlace[0].quays[1].id", not(quay.getId()))
+                .body("data.stopPlace[0].quays[1].id", not(stopPlace.getId()))
+                .body("data.stopPlace[0].quays[1].name.value", equalTo(name))
+                .body("data.stopPlace[0].quays[1].shortName.value", equalTo(shortName))
+                .body("data.stopPlace[0].quays[1].description.value", equalTo(description))
+                .body("data.stopPlace[0].quays[1].location.longitude", comparesEqualTo(lon))
+                .body("data.stopPlace[0].quays[1].location.latitude", comparesEqualTo(lat))
+                .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
+    }
+
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));

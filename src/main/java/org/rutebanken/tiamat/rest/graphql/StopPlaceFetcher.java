@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -34,12 +33,13 @@ class StopPlaceFetcher implements DataFetcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Override
+    @Transactional
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
         Page<StopPlace> stopPlaces;
         if (environment.getArgument(ID) != null) {
-            stopPlaceSearchBuilder.setIdList(Arrays.asList(new Long(environment.getArgument(ID))));
+            stopPlaceSearchBuilder.setIdList(environment.getArgument(ID));
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
         } else {
             stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOPPLACE_TYPE));
@@ -86,20 +86,13 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         }
-        return lazyFetchStopPlaces(stopPlaces, environment);
-    }
-
-    private Object lazyFetchStopPlaces(Page<StopPlace> stopPlaces, DataFetchingEnvironment environment) {
-
-        //TODO: Avoid this - i.e. fix @Transactional usage
-        if (isQuaysRequested(environment)) {
+        if (isFieldRequested(environment, QUAYS)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
         }
-
         return stopPlaces;
     }
 
-    private boolean isQuaysRequested(DataFetchingEnvironment environment) {
+    private boolean isFieldRequested(DataFetchingEnvironment environment, String fieldName) {
         boolean quaysRequested = false;
         List<Field> fields = environment.getFields();
         for (Field field : fields) {
@@ -108,7 +101,7 @@ class StopPlaceFetcher implements DataFetcher {
             for (Selection selection : selections) {
                 if (selection instanceof  Field) {
                     Field selectedField = (Field) selection;
-                    if (QUAYS.equals(selectedField.getName())) {
+                    if (fieldName.equals(selectedField.getName())) {
                         quaysRequested = true;
                     }
                 }

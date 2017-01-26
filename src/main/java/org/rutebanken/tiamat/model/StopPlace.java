@@ -2,26 +2,20 @@ package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLName;
-import graphql.annotations.GraphQLType;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
         @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
         @Index(name="stop_place_type_index", columnList = "stopPlaceType")})
-@GraphQLType
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
-    @GraphQLField
     protected String publicCode;
 
     @Enumerated(EnumType.STRING)
@@ -57,11 +51,9 @@ public class StopPlace
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
 
-    @GraphQLField
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
 
-    @GraphQLField
     protected Boolean borderCrossing;
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
@@ -236,17 +228,6 @@ public class StopPlace
 
     public Set<Quay> getQuays() {
         return quays;
-    }
-
-    @JsonIgnore
-    @GraphQLField
-    @GraphQLName("quays")
-    public List<Quay> getQuaysAsList() {
-        /*
-         * TODO: Remove this when graphql-java-annotations supports Set
-         * https://github.com/graphql-java/graphql-java-annotations/pull/57
-         */
-        return quays.stream().collect(Collectors.toList());
     }
 
     public void setQuays(Set<Quay> quays) {

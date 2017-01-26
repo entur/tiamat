@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
 
 import javax.persistence.*;
 import java.util.Collections;
@@ -12,7 +10,6 @@ import java.util.Set;
 
 
 @Entity
-@GraphQLType
 public class Value {
 
     @Id
@@ -24,7 +21,6 @@ public class Value {
             name="value_items",
             indexes = @Index(name = "items_index", columnList = "items")
     )
-    @GraphQLField
     private Set<String> items = new HashSet<>();
 
     public Value() {

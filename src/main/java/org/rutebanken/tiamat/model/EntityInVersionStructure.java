@@ -1,8 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import graphql.annotations.GraphQLField;
-import graphql.annotations.GraphQLType;
-
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
@@ -12,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
-@GraphQLType
 public class EntityInVersionStructure extends EntityStructure {
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -32,11 +28,9 @@ public class EntityInVersionStructure extends EntityStructure {
     @Transient
     protected ModificationEnumeration modification;
 
-    @GraphQLField
     protected String version;
 
     @Transient
-    @GraphQLField
     protected StatusEnumeration status;
 
     @Transient
