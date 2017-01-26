@@ -3,10 +3,8 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.vividsolutions.jts.geom.Point;
 import graphql.schema.*;
 import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -102,10 +100,22 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         List<GraphQLFieldDefinition> commonFieldsList = new ArrayList<>();
-        commonFieldsList.add(newFieldDefinition().name(ID).type(GraphQLLong).build());
         commonFieldsList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
+        commonFieldsList.add(newFieldDefinition()
+                .name(IMPORTED_ID)
+                .type(new GraphQLList(GraphQLString))
+                .dataFetcher(env -> {
+                    DataManagedObjectStructure source = (DataManagedObjectStructure) env.getSource();
+                    return source.getOriginalIds();
+                })
+                .build());
+        commonFieldsList.add(newFieldDefinition()
+                .name(ID)
+                .type(GraphQLString)
+                .dataFetcher(env -> NetexIdMapper.getNetexId((EntityStructure) env.getSource(), ((EntityStructure) env.getSource()).getId()))
+                .build());
         commonFieldsList.add(newFieldDefinition()
                 .name(LOCATION)
                 .type(locationObjectType)
@@ -173,7 +183,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .description(SIZE_DESCRIPTION_TEXT))
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(new GraphQLList(GraphQLLong))
+                                .type(new GraphQLList(GraphQLString))
                                 .description("IDs used to lookup StopPlace(s). If used - all other searchparameters are ignored."))
                                 //Search
                         .argument(GraphQLArgument.newArgument()
@@ -192,6 +202,10 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .name(QUERY)
                                 .type(GraphQLString)
                                 .description("Searches for StopPlaces with matching name."))
+                        .argument(GraphQLArgument.newArgument()
+                                .name(IMPORTED_ID_QUERY)
+                                .type(GraphQLString)
+                                .description("Searches for StopPlaces and Quays with matching OriginalId."))
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
@@ -227,7 +241,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .type(new GraphQLNonNull(GraphQLBigDecimal)))
                         .argument(GraphQLArgument.newArgument()
                                 .name(IGNORE_STOPPLACE_ID)
-                                .type(GraphQLLong)
+                                .type(GraphQLString)
                                 .description("ID of StopPlace to excluded from result"))
                         .dataFetcher(stopPlaceFetcher))
                 .field(newFieldDefinition()
@@ -236,7 +250,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Find topographic places")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(GraphQLLong))
+                                .type(GraphQLString))
                         .argument(GraphQLArgument.newArgument()
                                 .name(TOPOGRAPHIC_PLACE_TYPE)
                                 .type(topographicPlaceTypeEnum)
@@ -280,7 +294,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Update single StopPlace")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(new GraphQLNonNull(GraphQLLong)))
+                                .type(new GraphQLNonNull(GraphQLString)))
                         .argument(stopPlaceArgumentsList)
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
@@ -289,7 +303,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Create Quay and add to existing StopPlace defined by 'stopPlaceId'")
                         .argument(GraphQLArgument.newArgument()
                                 .name(STOPPLACE_ID)
-                                .type(new GraphQLNonNull(GraphQLLong)))
+                                .type(new GraphQLNonNull(GraphQLString)))
                         .argument(quayArgumentsList)
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
@@ -298,10 +312,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Updates single Quay")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(new GraphQLNonNull(GraphQLLong)))
+                                .type(new GraphQLNonNull(GraphQLString)))
                         .argument(GraphQLArgument.newArgument()
                                 .name(STOPPLACE_ID)
-                                .type(new GraphQLNonNull(GraphQLLong)))
+                                .type(new GraphQLNonNull(GraphQLString)))
                         .argument(quayArgumentsList)
                         .dataFetcher(stopPlaceUpdater))
                 .build();

@@ -10,6 +10,7 @@ import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -59,8 +61,12 @@ class StopPlaceUpdater implements DataFetcher {
                 stopPlace = updateStopPlace(environment);
             }
         }
-        if (isFieldRequested(environment, QUAYS)) {
+        if (stopPlace != null && isFieldRequested(environment, QUAYS)) {
             stopPlace.setQuays(new HashSet<>(stopPlace.getQuays()));
+        }
+        if (stopPlace != null && isFieldRequested(environment, IMPORTED_ID)) {
+            List<String> originalIds = new ArrayList<>(stopPlace.getOriginalIds());
+            stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, new Value(originalIds));
         }
         return Arrays.asList(stopPlace);
     }
@@ -99,7 +105,8 @@ class StopPlaceUpdater implements DataFetcher {
 
     private StopPlace updateStopPlace(DataFetchingEnvironment environment) {
         StopPlace stopPlace;
-        stopPlace = stopPlaceRepository.findOne((Long)environment.getArgument(ID));
+        String nsrId = environment.getArgument(ID);
+        stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
         if(stopPlace != null) {
             logger.info("Updating StopPlace {}", stopPlace.getId());
 
@@ -115,9 +122,10 @@ class StopPlaceUpdater implements DataFetcher {
 
     private StopPlace updateQuay(DataFetchingEnvironment environment) {
         Preconditions.checkNotNull(environment.getArgument(ID), ID + " cannot be null");
-        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID +" cannot be null");
+        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID + " cannot be null");
 
-        Quay quay = quayRepository.findOne((Long)environment.getArgument(ID));
+        String nsrId = environment.getArgument(ID);
+        Quay quay = quayRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
         if(quay != null) {
             logger.info("Updating Quay {}", quay.getId());
 
@@ -125,7 +133,8 @@ class StopPlaceUpdater implements DataFetcher {
 
             quayRepository.save(quay);
         }
-        return stopPlaceRepository.findOne((Long)environment.getArgument(STOPPLACE_ID));
+        String nsrStopPlaceId = environment.getArgument(STOPPLACE_ID);
+        return stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrStopPlaceId));
     }
 
     private StopPlace createQuay(DataFetchingEnvironment environment) {
@@ -134,7 +143,8 @@ class StopPlaceUpdater implements DataFetcher {
         Preconditions.checkNotNull(environment.getArgument(LATITUDE), LATITUDE+" cannot be null");
         Preconditions.checkNotNull(environment.getArgument(LONGITUDE), LONGITUDE+" cannot be null");
 
-        stopPlace = stopPlaceRepository.findOne((Long)environment.getArgument(STOPPLACE_ID));
+        String nsrId = environment.getArgument(STOPPLACE_ID);
+        stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
         if(stopPlace != null) {
             logger.info("Adding quay to StopPlace {}", stopPlace.getId());
             Quay newQuay = new Quay();

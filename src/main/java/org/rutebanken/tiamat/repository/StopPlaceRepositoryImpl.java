@@ -5,7 +5,10 @@ import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.*;
+import org.hibernate.Criteria;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -19,11 +22,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -149,6 +152,29 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 return null;
             } else {
                 return results.get(0).longValue();
+            }
+        } catch (NoResultException noResultException) {
+            return null;
+        }
+    }
+    public List<Long> searchByKeyValue(String key, String value) {
+
+        Query query = entityManager.createNativeQuery("SELECT stop_place_id " +
+                                                        "FROM stop_place_key_values spkv " +
+                                                          "INNER JOIN value_items v " +
+                                                            "ON spkv.key_values_id = v.value_id " +
+                                                        "WHERE  spkv.key_values_key = :key "+
+                                                        "AND v.items LIKE ( :value ) ");
+
+        query.setParameter("key", key);
+        query.setParameter("value", "%"+value+"%");
+
+        try {
+            List<BigInteger> results = query.getResultList();
+            if(results.isEmpty()) {
+                return null;
+            } else {
+                return results.stream().map(id -> id.longValue()).collect(Collectors.toList());
             }
         } catch (NoResultException noResultException) {
             return null;

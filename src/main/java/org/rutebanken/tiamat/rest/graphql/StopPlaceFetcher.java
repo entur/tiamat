@@ -9,6 +9,8 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
@@ -37,10 +41,24 @@ class StopPlaceFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
-        Page<StopPlace> stopPlaces;
+        Page<StopPlace> stopPlaces = null;
         if (environment.getArgument(ID) != null) {
-            stopPlaceSearchBuilder.setIdList(environment.getArgument(ID));
+            List<String> idList = environment.getArgument(ID);
+
+            stopPlaceSearchBuilder.setIdList(idList
+                    .stream()
+                    .map(nsrId -> NetexIdMapper.getTiamatId(nsrId))
+                    .collect(Collectors.<Long>toList()));
+
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+        } else if (environment.getArgument(IMPORTED_ID_QUERY) != null) {
+
+            List<Long> stopPlaceId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
+
+            if (stopPlaceId != null && !stopPlaceId.isEmpty()) {
+                stopPlaceSearchBuilder.setIdList(stopPlaceId);
+                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+            }
         } else {
             stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOPPLACE_TYPE));
 
@@ -86,8 +104,14 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         }
-        if (isFieldRequested(environment, QUAYS)) {
+        if (stopPlaces != null && isFieldRequested(environment, QUAYS)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
+        }
+        if (stopPlaces != null && isFieldRequested(environment, IMPORTED_ID)) {
+            stopPlaces.getContent().forEach(stopPlace -> {
+                List<String> originalIds = new ArrayList<>(stopPlace.getOriginalIds());
+                stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, new Value(originalIds));
+            });
         }
         return stopPlaces;
     }

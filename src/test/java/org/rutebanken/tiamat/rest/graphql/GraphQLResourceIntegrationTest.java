@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -88,7 +89,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:" + stopPlace.getId() + ") {" +
+                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + getNetexId(stopPlace) + "\\\") {" +
                 "   id " +
                 "   name { value } " +
                 "   quays { " +
@@ -101,7 +102,38 @@ public class GraphQLResourceIntegrationTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
-                .body("data.stopPlace[0].quays.id", hasItems(quay.getId().intValue(), secondQuay.getId().intValue()));
+                .body("data.stopPlace[0].quays.id", hasItems(getNetexId(quay), getNetexId(secondQuay)));
+    }
+
+    @Test
+    public void searchForStopPlaceByOriginalId() throws Exception {
+        String stopPlaceName = "Eselstua";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String originalId = "RUT:Stop:1234";
+        org.rutebanken.tiamat.model.Value value = new org.rutebanken.tiamat.model.Value(originalId);
+        stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value);
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.IMPORTED_ID_QUERY + ":\\\"" + originalId + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    private String getNetexId(EntityStructure entity) {
+        return NetexIdMapper.getNetexId(entity, entity.getId());
     }
 
     @Test
@@ -112,8 +144,9 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " { name { value } " +
-                "}" +
+                " { " +
+                "  name { value } " +
+                " } " +
                 "}\",\"variables\":\"\"}";
 
 
@@ -320,7 +353,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
-                " (id:"+stopPlace.getId()+") {" +
+                " (id:\\\""+ getNetexId(stopPlace) +"\\\") {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -400,7 +433,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.UPDATE_STOPPLACE + " (id:" + stopPlace.getId() +
+                "  stopPlace: " + GraphQLNames.UPDATE_STOPPLACE + " (id:\\\"" + getNetexId(stopPlace) + "\\\""+
                 "          name:\\\"" + updatedName + "\\\" " +
                 "          shortName:\\\"" + updatedShortName + "\\\" " +
                 "          description:\\\"" + updatedDescription + "\\\"" +
@@ -447,7 +480,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (stopPlaceId:" + stopPlace.getId() +
+                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\"" +
                 "          name:\\\"" + name + "\\\" " +
                 "          shortName:\\\"" + shortName + "\\\" " +
                 "          description:\\\"" + description + "\\\"" +
@@ -467,7 +500,7 @@ public class GraphQLResourceIntegrationTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].id", notNullValue())
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .body("data.stopPlace[0].quays[0].id", notNullValue())
                 .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
@@ -503,8 +536,8 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.UPDATE_QUAY + " (id:" + quay.getId() +
-                "          stopPlaceId:" + stopPlace.getId() + " " +
+                "  stopPlace: " + GraphQLNames.UPDATE_QUAY + " (id:\\\"" + getNetexId(quay) + "\\\""+
+                "          stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\" " +
                 "          name:\\\"" + name + "\\\" " +
                 "          shortName:\\\"" + shortName + "\\\" " +
                 "          description:\\\"" + description + "\\\"" +
@@ -526,9 +559,9 @@ public class GraphQLResourceIntegrationTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(quay.getId().intValue()))
+                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
                 .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
                 .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
                 .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
@@ -566,7 +599,7 @@ public class GraphQLResourceIntegrationTest {
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (" +
-                "          stopPlaceId:" + stopPlace.getId() + " " +
+                "          stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\"" +
                 "          name:\\\"" + name + "\\\" " +
                 "          shortName:\\\"" + shortName + "\\\" " +
                 "          description:\\\"" + description + "\\\"" +
@@ -588,11 +621,11 @@ public class GraphQLResourceIntegrationTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getId().intValue()))
+                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .body("data.stopPlace[0].quays", Matchers.hasSize(2))
                 // First Quay - added manually
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(quay.getId().intValue()))
+                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
                 .body("data.stopPlace[0].quays[0].name.", nullValue())
                 .body("data.stopPlace[0].quays[0].shortName", nullValue())
                 .body("data.stopPlace[0].quays[0].description", nullValue())
@@ -600,8 +633,8 @@ public class GraphQLResourceIntegrationTest {
                 .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
                 .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
                 // Second Quay - added using GraphQL
-                .body("data.stopPlace[0].quays[1].id", not(quay.getId()))
-                .body("data.stopPlace[0].quays[1].id", not(stopPlace.getId()))
+                .body("data.stopPlace[0].quays[1].id", not(getNetexId(quay)))
+                .body("data.stopPlace[0].quays[1].id", not(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].quays[1].name.value", equalTo(name))
                 .body("data.stopPlace[0].quays[1].shortName.value", equalTo(shortName))
                 .body("data.stopPlace[0].quays[1].description.value", equalTo(description))

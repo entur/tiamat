@@ -2,10 +2,10 @@ package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.List;
 import java.util.Set;
@@ -30,6 +30,8 @@ public interface StopPlaceRepositoryCustom {
     List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 
     Long findByKeyValue(String key, Set<String> value);
+
+    List<Long> searchByKeyValue(String key, String value);
     
     List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
 
