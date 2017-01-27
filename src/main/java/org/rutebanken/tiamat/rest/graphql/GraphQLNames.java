@@ -11,7 +11,7 @@ public class GraphQLNames {
     static final String SHORT_NAME = "shortName";
     static final String DESCRIPTION = "description";
     static final String IMPORTED_ID = "importedId";
-    static final String IMPORTED_ID_QUERY = "originalIdQuery";
+    static final String IMPORTED_ID_QUERY = "importedId";
     static final String ALL_AREAS_WHEELCHAIR_ACCESSIBLE = "allAreasWheelchairAccessible";
 
     static final String COUNTY_REF = "countyReference";
