@@ -22,13 +22,13 @@ public enum StopTypeEnumeration {
         value = v;
     }
 
-    public static StopTypeEnumeration fromValue(String v) {
-        for (StopTypeEnumeration c : StopTypeEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
+    public static StopTypeEnumeration fromValue(String value) {
+        for (StopTypeEnumeration stopTypeEnumeration : StopTypeEnumeration.values()) {
+            if (stopTypeEnumeration.value.equals(value)) {
+                return stopTypeEnumeration;
             }
         }
-        throw new IllegalArgumentException(v);
+        throw new IllegalArgumentException(value);
     }
 
     public String value() {

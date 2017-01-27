@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Move certain parts of name to description field.
+ * Move certain parts of stop place and quay name to description field.
  */
 @Component
 public class NameToDescriptionMover {

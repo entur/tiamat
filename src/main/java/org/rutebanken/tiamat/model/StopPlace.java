@@ -259,9 +259,10 @@ public class StopPlace
                 .omitNullValues()
                 .add("id", id)
                 .add("name", name)
-                .add("quays", quays)
+                .add("stopPlaceType", stopPlaceType)
                 .add("centroid", centroid)
                 .add("keyValues", getKeyValues())
+                .add("quays", quays)
                 .toString();
     }
 }

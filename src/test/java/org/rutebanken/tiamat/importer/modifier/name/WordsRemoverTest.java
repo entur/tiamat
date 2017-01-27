@@ -5,10 +5,9 @@ import org.rutebanken.tiamat.importer.modifier.name.WordsRemover;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class WordsRemoverTest {
 
-    private final WordsRemover wordsRemover = new WordsRemover();
+    private static final WordsRemover wordsRemover = new WordsRemover();
 
     @Test
     public void removeBoatInSquareBrackets() {
@@ -45,4 +44,11 @@ public class WordsRemoverTest {
         String actual = wordsRemover.remove("Kambosenteret  ");
         assertThat(actual).isEqualTo("Kambosenteret");
     }
+
+    @Test
+    public void removeByBaneStopp() {
+        String actual = wordsRemover.remove("Byparken, bybanestopp");
+        assertThat(actual).isEqualTo("Byparken");
+    }
+
 }

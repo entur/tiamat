@@ -2,11 +2,18 @@ package org.rutebanken.tiamat.importer.modifier.name;
 
 import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Clean stop place and child quay names.
+ */
 @Component
 public class StopPlaceNameCleaner {
+
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceNameCleaner.class);
 
     @Autowired
     private final WordsRemover wordsRemover;
@@ -37,10 +44,12 @@ public class StopPlaceNameCleaner {
     }
 
     private String replaceIfUnclosed(String name, char starChar, char endChar) {
+        String newName = name;
         int startIndex= name.indexOf(starChar);
         if ( startIndex > 0 && name.indexOf(endChar) == -1) {
-            name = name.substring(0, startIndex-1);
+            newName = name.substring(0, startIndex-1);
+            logger.info("Name '{}' contains unclosed parenthesis. Removing. New name: '{}'", name, newName);
         }
-        return name;
+        return newName;
     }
 }
