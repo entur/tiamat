@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.hazelcast;
 
+import com.hazelcast.config.Config;
 import com.hazelcast.core.*;
 
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
@@ -25,5 +26,10 @@ public class ExtendedHazelcastService extends HazelCastService {
     @Autowired
     public ExtendedHazelcastService(ExtendedKubernetesService extendedKubernetesService, HazelcastConfiguration hazelcastConfiguration) {
         super(extendedKubernetesService, hazelcastConfiguration.getHazelcastManagementUrl());
+    }
+
+    @Bean
+    public Config getConfig() {
+        return hazelcast.getConfig();
     }
 }
