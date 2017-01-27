@@ -2,11 +2,14 @@ package org.rutebanken.tiamat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
         @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
@@ -67,6 +70,9 @@ public class StopPlace
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
+    @org.hibernate.annotations.Cache(
+            usage = CacheConcurrencyStrategy.READ_WRITE
+    )
     @OneToMany(cascade = CascadeType.MERGE)
     private Set<Quay> quays = new HashSet<>();
 

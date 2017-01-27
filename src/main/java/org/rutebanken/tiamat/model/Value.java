@@ -1,14 +1,18 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Index;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class Value {
 
@@ -16,6 +20,7 @@ public class Value {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ElementCollection
     @CollectionTable(
             name="value_items",

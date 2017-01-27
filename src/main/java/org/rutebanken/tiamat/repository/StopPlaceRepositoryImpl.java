@@ -87,7 +87,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
-
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 

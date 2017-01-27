@@ -1,7 +1,14 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 
+import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
+
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(indexes = {@Index(name = "parent_topographic_ref_index", columnList = "parent_topographic_ref")})
 public class TopographicPlace
