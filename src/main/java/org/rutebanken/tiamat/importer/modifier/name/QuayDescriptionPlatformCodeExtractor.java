@@ -17,12 +17,18 @@ public class QuayDescriptionPlatformCodeExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayDescriptionPlatformCodeExtractor.class);
 
+    private static final int FALLBACK_DESCRIPTION_GROUP = 1;
+
+    private static final int PLATFORM_GROUP = 3;
+
+    private static final int DESCRIPTION_GROUP = 4;
+
     private final Pattern pattern;
 
     @Autowired
     public QuayDescriptionPlatformCodeExtractor(@Value("${QuayDescriptionPlatformCodeExtractor.terms:hpl,spor,plattform,pl,plf}") String[] terms) {
         String termsPart = String.join("|", terms);
-        pattern = Pattern.compile("(" + termsPart + "\\.?)\\s([\\d\\w]+)[\\s\\-.]*(.*)", Pattern.CASE_INSENSITIVE);
+        pattern = Pattern.compile("(.*)?(" + termsPart + "\\.?)\\s([\\d\\w]+)[\\s\\-.]*(.*)", Pattern.CASE_INSENSITIVE);
         logger.info("Terms: {}. Pattern: {}", terms, pattern);
     }
 
@@ -59,22 +65,11 @@ public class QuayDescriptionPlatformCodeExtractor {
 
             debugLog(matcher);
 
-            if (matcher.groupCount() >= 2) {
-                String platformCode = matcher.group(2);
-                logger.info("Setting quay name to {}: {}", platformCode, quay);
+            if (matcher.groupCount() >= PLATFORM_GROUP) {
+                String platformCode = matcher.group(PLATFORM_GROUP);
+                logger.info("Setting quay name to '{}': {}", platformCode, quay);
                 quay.setName(new EmbeddableMultilingualString(platformCode));
-                if (matcher.groupCount() == 3) {
-                    String newDescription = matcher.group(3).trim();
-                    if (newDescription.isEmpty()) {
-                        quay.setDescription(null);
-                    } else {
-                        logger.info("Setting quay description to {} for quay {}", newDescription, quay);
-                        quay.setDescription(new EmbeddableMultilingualString(newDescription));
-                    }
-
-                } else {
-                    quay.setDescription(null);
-                }
+                setQuayDescriptionFromMatcher(matcher, quay);
             } else {
                 logger.info("Description: '{}' matches but group count is not as expected. ", description);
             }
@@ -82,6 +77,31 @@ public class QuayDescriptionPlatformCodeExtractor {
         } else {
             logger.debug("No match in description {}", description);
         }
+    }
+
+    private void setQuayDescriptionFromMatcher(Matcher matcher, Quay quay) {
+        if (matcher.groupCount() == DESCRIPTION_GROUP) {
+            String newDescription = matcher.group(DESCRIPTION_GROUP).trim();
+            if (newDescription.isEmpty()) {
+                String descriptionBeforePlatformCode = matcher.group(FALLBACK_DESCRIPTION_GROUP).trim();
+                if(!descriptionBeforePlatformCode.isEmpty()) {
+                    setQuayDescription(descriptionBeforePlatformCode, quay);
+                } else {
+                    quay.setDescription(null);
+                }
+
+            } else {
+                setQuayDescription(newDescription, quay);
+            }
+
+        } else {
+            quay.setDescription(null);
+        }
+    }
+
+    private void setQuayDescription(String newDescription, Quay quay) {
+        logger.info("Setting quay description to '{}' for quay {}", newDescription, quay);
+        quay.setDescription(new EmbeddableMultilingualString(newDescription));
     }
 
     private void debugLog(Matcher matcher) {
