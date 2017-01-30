@@ -20,6 +20,10 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
@@ -114,7 +118,7 @@ public class PublicationDeliveryResource {
                     .map(element -> (SiteFrame) element.getValue())
                     .peek(netexSiteFrame -> {
                         MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
-                        logger.info("Publication delivery contains site frame created at ", netexSiteFrame.getCreated());
+                        logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
@@ -183,7 +187,7 @@ public class PublicationDeliveryResource {
                     .map(element -> (SiteFrame) element.getValue())
                     .peek(netexSiteFrame -> {
                         MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
-                        logger.info("Publication delivery contains site frame created at ", netexSiteFrame.getCreated());
+                        logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .findFirst().get();
