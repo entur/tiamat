@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
@@ -29,6 +30,9 @@ public class CoordinatesFixerResource {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -86,7 +90,17 @@ public class CoordinatesFixerResource {
 
 
                             stopPlace.setCentroid(point);
+
+                            if(stopPlace.getQuays() != null) {
+                                stopPlace.getQuays().forEach(quay -> {
+                                    quay.setCentroid(point)
+                                    logger.info("Setting point {} on quay {}", quay);
+                                    quayRepository.save(quay);
+                                });
+                            }
+
                             logger.info("Saving stop place {}", stopPlace);
+
                             stopPlaceRepository.save(stopPlace);
 
                         } else {
