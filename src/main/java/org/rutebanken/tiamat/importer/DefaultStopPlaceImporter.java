@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Qualifier("defaultStopPlaceImporter")
-@Transactional
+@Transactional(propagation = Propagation.MANDATORY)
 public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
@@ -88,7 +89,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
     @Override
-//    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
     public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
                                                                 AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
 
