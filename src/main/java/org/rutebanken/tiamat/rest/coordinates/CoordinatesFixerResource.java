@@ -93,8 +93,8 @@ public class CoordinatesFixerResource {
 
                             if(stopPlace.getQuays() != null) {
                                 stopPlace.getQuays().forEach(quay -> {
-                                    quay.setCentroid(point)
-                                    logger.info("Setting point {} on quay {}", quay);
+                                    quay.setCentroid(point);
+                                    logger.info("Setting point {} on quay {}", point, quay);
                                     quayRepository.save(quay);
                                 });
                             }
