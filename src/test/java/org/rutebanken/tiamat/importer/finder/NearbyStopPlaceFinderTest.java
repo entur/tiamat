@@ -27,4 +27,11 @@ public class NearbyStopPlaceFinderTest {
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
         assertThat(actual).isNull();
     }
+
+    @Test
+    public void nullType() throws Exception {
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS);
+        StopPlace stopPlace = new StopPlace();
+        nearbyStopPlaceFinder.update(stopPlace);
+    }
 }
