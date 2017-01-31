@@ -124,7 +124,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             }
         }
 
-        if (newStopPlace.getTopographicPlaceRef() == null) {
+        /*if (newStopPlace.getTopographicPlaceRef() == null) {
             if (hasTopographicPlaces(siteFrame)) {
                 topographicPlaceCreator.setTopographicReference(newStopPlace,
                         siteFrame.getTopographicPlaces().getTopographicPlace(),
@@ -132,7 +132,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             } else {
                 lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
             }
-        }
+        }*/
         if(newStopPlace.getQuays() != null) {
             Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
             newStopPlace.setQuays(quays);
