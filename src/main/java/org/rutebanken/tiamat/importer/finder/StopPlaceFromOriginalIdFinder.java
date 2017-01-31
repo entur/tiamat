@@ -30,9 +30,9 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
     private Cache<String, Optional<Long>> keyValueCache;
 
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
-                                         @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:20000}") int maximumSize,
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:50000}") int maximumSize,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfter:30}") int expiresAfter,
-                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
         keyValueCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
