@@ -8,20 +8,22 @@ import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.SingleTableEntityPersister;
 import org.hibernate.type.LongType;
-import org.hibernate.type.Type;
+import org.rutebanken.tiamat.config.CreateIdGeneratorFunction;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Optional;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
+
+
 
 /**
  * Generate ID if not already set.
@@ -37,6 +39,13 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     private static final ConcurrentHashMap<String, Long> lastIdsPerTable = new ConcurrentHashMap<>();
     private static final Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
+    private static Boolean isH2 = null;
+
+    private static Set<Long> usedH2Ids = new HashSet<>();
+
+
+    @Autowired
+    private CreateIdGeneratorFunction createIdGeneratorFunction;
 
     @Override
     public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
@@ -129,6 +138,12 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
     private List retrieveIds(String tableName, SessionImpl sessionImpl) {
         Long lastId = lastIdsPerTable.get(tableName);
+
+        if(isH2(sessionImpl)) {
+            // Because of issues using the query below with H2.
+            return generateNextAvailableH2Ids(lastId, ID_FETCH_SIZE);
+        }
+
         logger.trace("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
         String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId.longValue() + ID_FETCH_SIZE) + ") AS generated " +
@@ -157,4 +172,33 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     }
 
 
+    private boolean isH2(SessionImpl sessionImpl) {
+        if(isH2 == null) {
+            try {
+                isH2 = sessionImpl.getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2");
+                logger.info("Detected H2: {}", isH2);
+            } catch (SQLException e) {
+                throw new RuntimeException("Could not determine database provider", e);
+            }
+        }
+        return isH2;
+    }
+
+
+    public static List<Long> generateNextAvailableH2Ids(long lastId, int max)  {
+        List<Long> availableIds = new ArrayList<>();
+
+        Long id = lastId;
+        Long counter = 0L;
+        while(counter < max) {
+            while (usedH2Ids.contains(++id)) {
+                logger.debug("Looking for next available ID. {} is taken", id);
+            }
+            usedH2Ids.add(id);
+            availableIds.add(id);
+            counter++;
+        }
+
+        return availableIds;
+    }
 }
