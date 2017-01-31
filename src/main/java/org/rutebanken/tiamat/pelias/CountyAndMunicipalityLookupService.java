@@ -68,8 +68,8 @@ public class CountyAndMunicipalityLookupService {
                 String.valueOf(point.getX()), 1);
 
         if (reverseLookupResult.getFeatures().isEmpty()) {
-            logger.warn("Got empty features list from Pelias reverse. {},{}", String.valueOf(point.getY()),
-                    String.valueOf(point.getX()));
+            logger.warn("Got empty features list from Pelias reverse. {},{}. {}", String.valueOf(point.getY()),
+                    String.valueOf(point.getX()), stopPlace);
             return null;
         }
 
