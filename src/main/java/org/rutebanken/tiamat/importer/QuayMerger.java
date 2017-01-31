@@ -114,7 +114,7 @@ public class QuayMerger {
         Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
 
         if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
-            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
+            logger.debug("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
             // The incoming quay could for some reason already have multiple imported IDs.
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
             if(changed) {
