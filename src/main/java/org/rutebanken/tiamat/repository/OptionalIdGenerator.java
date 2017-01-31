@@ -8,7 +8,6 @@ import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.SingleTableEntityPersister;
 import org.hibernate.type.LongType;
-import org.rutebanken.tiamat.config.CreateIdGeneratorFunction;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -42,10 +41,6 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     private static Boolean isH2 = null;
 
     private static Set<Long> usedH2Ids = new HashSet<>();
-
-
-    @Autowired
-    private CreateIdGeneratorFunction createIdGeneratorFunction;
 
     @Override
     public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
