@@ -69,7 +69,7 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
     }
 
     public void update(StopPlace savedStopPlace) {
-        if(savedStopPlace.hasCoordinates()) {
+        if(savedStopPlace.hasCoordinates() && savedStopPlace.getStopPlaceType() != null) {
             nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getId()));
         }
     }
