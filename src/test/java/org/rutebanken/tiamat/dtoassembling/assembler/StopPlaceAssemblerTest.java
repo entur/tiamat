@@ -1,9 +1,9 @@
 package org.rutebanken.tiamat.dtoassembling.assembler;
 
+import org.junit.Test;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,11 +27,9 @@ public class StopPlaceAssemblerTest {
         Long id = 123L;
         TopographicPlace municipality = topographicPlace(id, municipalityName);
 
-        TopographicPlaceRefStructure municipalityReference = topographicRef(String.valueOf(municipality.getId()));
+        StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
-
-        when(topographicPlaceRepository.findOne(Long.valueOf(municipalityReference.getRef()))).thenReturn(municipality);
+        when(topographicPlaceRepository.findOne(Long.valueOf(municipality.getId()))).thenReturn(municipality);
 
         List<TopographicPlace> topographicPlaces = new ArrayList<>(Arrays.asList(municipality));
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(municipalityName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN)).thenReturn(topographicPlaces);
@@ -52,21 +50,18 @@ public class StopPlaceAssemblerTest {
         Long id = 124L;
         TopographicPlace municipality = topographicPlace(id, municipalityName);
 
-        TopographicPlaceRefStructure municipalityReference = topographicRef(String.valueOf(municipality.getId()));
+        StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
-
-        when(topographicPlaceRepository.findOne(Long.valueOf(municipalityReference.getRef()))).thenReturn(municipality);
+        when(topographicPlaceRepository.findOne(Long.valueOf(municipality.getId()))).thenReturn(municipality);
 
         String countyName = "Akershus";
 
         Long id2 = 125L;
         TopographicPlace county = topographicPlace(id2, countyName);
-        TopographicPlaceRefStructure countyRef = topographicRef(String.valueOf(county.getId()));
 
-        municipality.setParentTopographicPlaceRef(countyRef);
+        municipality.setParentTopographicPlace(county);
 
-        when(topographicPlaceRepository.findOne(Long.valueOf(countyRef.getRef()))).thenReturn(county);
+        when(topographicPlaceRepository.findOne(county.getId())).thenReturn(county);
 
         List<TopographicPlace> municipalities = new ArrayList<>(Arrays.asList(municipality));
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(municipalityName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN)).thenReturn(municipalities);
@@ -88,11 +83,10 @@ public class StopPlaceAssemblerTest {
 
         TopographicPlace municipality = new TopographicPlace();
         municipality.setId(1L);
-        TopographicPlaceRefStructure municipalityReference = topographicRef(String.valueOf(municipality.getId()));
 
-        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
+        StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findOne(Long.valueOf(municipalityReference.getRef()))).thenReturn(municipality);
+        when(topographicPlaceRepository.findOne(Long.valueOf(municipality.getId()))).thenReturn(municipality);
 
         stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }
@@ -103,19 +97,19 @@ public class StopPlaceAssemblerTest {
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
         StopPlaceAssembler stopPlaceAssembler = new StopPlaceAssembler(mock(PointAssembler.class), topographicPlaceRepository, mock(QuayAssembler.class));
 
-        TopographicPlaceRefStructure municipalityReference = topographicRef("123");
+        TopographicPlace municipality = topographicPlace(123, "Municipality");
 
-        StopPlace stopPlace = stopPlaceWithRef(municipalityReference);
+        StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findOne(Long.valueOf(municipalityReference.getRef()))).thenReturn(null);
+        when(topographicPlaceRepository.findOne(municipality.getId())).thenReturn(null);
 
         stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }
 
 
-    private StopPlace stopPlaceWithRef(TopographicPlaceRefStructure topographicPlaceRefStructure) {
+    private StopPlace stopPlaceWithTopographicPlace(TopographicPlace topographicPlace) {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
+        stopPlace.setTopographicPlace(topographicPlace);
         return stopPlace;
     }
 
@@ -125,7 +119,7 @@ public class StopPlaceAssemblerTest {
         return topographicPlaceRefStructure;
     }
 
-    private TopographicPlace topographicPlace(Long id, String name) {
+    private TopographicPlace topographicPlace(long id, String name) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setId(id);
         municipality.setName(new EmbeddableMultilingualString(name, ""));

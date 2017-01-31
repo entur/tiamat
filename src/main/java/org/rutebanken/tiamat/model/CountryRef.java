@@ -3,10 +3,11 @@ package org.rutebanken.tiamat.model;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.io.Serializable;
 
 
 @Embeddable
-public class CountryRef {
+public class CountryRef implements Serializable{
 
     protected String value;
 

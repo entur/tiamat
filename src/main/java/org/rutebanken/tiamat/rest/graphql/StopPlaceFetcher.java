@@ -107,6 +107,9 @@ class StopPlaceFetcher implements DataFetcher {
         if (stopPlaces != null && isFieldRequested(environment, QUAYS)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setQuays(new HashSet<>(stopPlace.getQuays())));
         }
+        if (stopPlaces != null && isFieldRequested(environment, TOPOGRAPHIC_PLACE)) {
+            stopPlaces.getContent().forEach(stopPlace -> stopPlace.setTopographicPlace(stopPlace.getTopographicPlace()));
+        }
         if (stopPlaces != null && isFieldRequested(environment, IMPORTED_ID)) {
             stopPlaces.getContent().forEach(stopPlace -> {
                 List<String> originalIds = new ArrayList<>(stopPlace.getOriginalIds());

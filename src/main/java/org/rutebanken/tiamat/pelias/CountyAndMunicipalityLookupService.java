@@ -56,7 +56,11 @@ public class CountyAndMunicipalityLookupService {
         stripedSemaphore.acquire();
         try {
             TopographicPlace municipality = populateCountyAndMunicipality(peliasProperties.getCounty(), peliasProperties.getLocaladmin(), topographicPlacesCreatedCounter);
-            createAndSetRef(stopPlace, municipality);
+
+            logger.trace("Setting municipality {} : {} to stop place {}",
+                    municipality.getName(), municipality.getId(), stopPlace.getName());
+
+            stopPlace.setTopographicPlace(municipality);
         } finally {
             logger.debug("Releasing semaphore for region {}", peliasCounty);
             stripedSemaphore.release();
@@ -87,16 +91,6 @@ public class CountyAndMunicipalityLookupService {
             return null;
         }
         return properties;
-    }
-
-    private void createAndSetRef(StopPlace stopPlace, TopographicPlace municipality) {
-        TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-        municipalityRef.setRef(String.valueOf(municipality.getId()));
-
-        logger.trace("Setting reference to municipality {} : {} to stop place {}",
-                municipality.getName(), municipalityRef.getRef(), stopPlace.getName());
-
-        stopPlace.setTopographicPlaceRef(municipalityRef);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -132,17 +126,14 @@ public class CountyAndMunicipalityLookupService {
             municipality = new TopographicPlace();
             municipality.setName(new EmbeddableMultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
-
-            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-            countyRef.setRef(String.valueOf(county.getId()));
-
+            
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);
             municipality.setCountryRef(countryRef);
 
             logger.debug("Adding reference to county {} from municipality {}", region, locality);
 
-            municipality.setParentTopographicPlaceRef(countyRef);
+            municipality.setParentTopographicPlace(county);
             topographicPlaceRepository.saveAndFlush(municipality);
 
             topographicPlacesCreatedCounter.incrementAndGet();

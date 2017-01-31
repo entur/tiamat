@@ -73,6 +73,9 @@ public class StopPlace
     @org.hibernate.annotations.Cache(
             usage = CacheConcurrencyStrategy.READ_WRITE
     )
+    @OneToOne
+    protected TopographicPlace topographicPlace;
+
     @OneToMany(cascade = CascadeType.MERGE)
     private Set<Quay> quays = new HashSet<>();
 
@@ -81,6 +84,14 @@ public class StopPlace
     }
 
     public StopPlace() {
+    }
+
+    public TopographicPlace getTopographicPlace() {
+        return topographicPlace;
+    }
+
+    public void setTopographicPlace(TopographicPlace topographicPlace) {
+        this.topographicPlace = topographicPlace;
     }
 
     public String getPublicCode() {
