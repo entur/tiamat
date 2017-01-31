@@ -31,24 +31,11 @@ public class SiteFrameImporter {
     private static final Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
 
     private final TopographicPlaceCreator topographicPlaceCreator;
-    private final NetexMapper netexMapper;
-    private final StopPlaceNameCleaner stopPlaceNameCleaner;
-    private final NameToDescriptionMover nameToDescriptionMover;
-    private final QuayNameRemover quayNameRemover;
-    private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
-    private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
-    private final CompassBearingRemover compassBearingRemover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor, CompassBearingRemover compassBearingRemover) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator) {
         this.topographicPlaceCreator = topographicPlaceCreator;
-        this.netexMapper = netexMapper;
-        this.stopPlaceNameCleaner = stopPlaceNameCleaner;
-        this.nameToDescriptionMover = nameToDescriptionMover;
-        this.quayNameRemover = quayNameRemover;
-        this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
-        this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
-        this.compassBearingRemover = compassBearingRemover;
+
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -77,13 +64,7 @@ public class SiteFrameImporter {
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
-                        .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
-                        .map(stopPlace -> compassBearingRemover.remove(stopPlace))
-                        .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
-                        .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
-                        .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
-                        .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
-                        .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
+                        .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
@@ -165,7 +146,7 @@ public class SiteFrameImporter {
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
         long duration = System.currentTimeMillis() - startTime;
 
-        MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds);
+        MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds);
         String stopPlacesPerSecond = "NA";
 
         if(duration >= 1000) {
