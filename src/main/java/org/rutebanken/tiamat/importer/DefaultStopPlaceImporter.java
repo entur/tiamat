@@ -103,8 +103,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        logger.info("Import stop place {}", newStopPlace);
-
         final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
         final StopPlace stopPlace;
@@ -138,12 +136,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         if(newStopPlace.getQuays() != null) {
             Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
             newStopPlace.setQuays(quays);
-            logger.info("Importing quays for new stop place {}", newStopPlace);
+            logger.trace("Importing quays for new stop place {}", newStopPlace);
         }
 
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
-        logger.info("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
+        logger.debug("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
         newStopPlace.setVersion("1");
         newStopPlace.setCreated(ZonedDateTime.now());
         newStopPlace.setChanged(ZonedDateTime.now());
@@ -151,7 +149,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
-        logger.info("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
+        logger.debug("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
         boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
@@ -177,7 +175,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     private void incrementVersion(StopPlace stopPlace) {
         Long version = tryParseLong(stopPlace.getVersion());
         version ++;
-        logger.info("Setting version {} for stop place {}", version, stopPlace.getName());
+        logger.debug("Setting version {} for stop place {}", version, stopPlace.getName());
         stopPlace.setVersion(version.toString());
     }
 
