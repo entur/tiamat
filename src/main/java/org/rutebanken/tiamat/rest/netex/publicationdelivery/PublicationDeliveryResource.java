@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.importer.StopPlaceImporter;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +21,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
@@ -35,8 +32,10 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
 @Component
@@ -67,13 +66,14 @@ public class PublicationDeliveryResource {
 
     private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
+    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
     @Autowired
     public PublicationDeliveryResource(SiteFrameImporter siteFrameImporter, NetexMapper netexMapper,
                                        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                        PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
+                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler, SimpleStopPlaceImporter simpleStopPlaceImporter, PublicationDeliveryExporter publicationDeliveryExporter, AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter, CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
 
         this.siteFrameImporter = siteFrameImporter;
         this.netexMapper = netexMapper;
@@ -85,6 +85,7 @@ public class PublicationDeliveryResource {
         this.simpleStopPlaceImporter = simpleStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
+        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
     }
 
 
@@ -102,6 +103,8 @@ public class PublicationDeliveryResource {
         }
     }
 
+    private static final Object IMPORT_LOCK = new Object();
+
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
         if(incomingPublicationDelivery.getDataObjects() == null) {
@@ -110,6 +113,8 @@ public class PublicationDeliveryResource {
             throw new RuntimeException(responseMessage);
         }
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+
+        AtomicInteger topographicPlacesCounter = new AtomicInteger();
 
         try {
             org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStopPlaces = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
@@ -121,7 +126,25 @@ public class PublicationDeliveryResource {
                         logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
                     })
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
-                    .map(tiamatSiteFrame -> siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter))
+                    .map(tiamatSiteFrame -> {
+                        List<org.rutebanken.tiamat.model.StopPlace> stops = tiamatSiteFrame.getStopPlaces().getStopPlace().parallelStream()
+                                .map(stopPlace -> {
+                                    try {
+                                        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCounter);
+                                    } catch (IOException|InterruptedException e) {
+                                        logger.warn("Error looking up county and municipality", e);
+                                    }
+                                    return stopPlace;
+                                }).collect(toList());
+                        tiamatSiteFrame.getStopPlaces().getStopPlace().clear();
+                        tiamatSiteFrame.getStopPlaces().getStopPlace().addAll(stops);
+                        return tiamatSiteFrame;
+                    })
+                    .map(tiamatSiteFrame -> {
+                        synchronized (IMPORT_LOCK) {
+                            return siteFrameImporter.importSiteFrame(tiamatSiteFrame, stopPlaceImporter);
+                        }
+                    })
                     .findFirst().get();
 
             return publicationDeliveryExporter.exportSiteFrame(siteFrameWithProcessedStopPlaces);

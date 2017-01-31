@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.stream.Collectors.toList;
 
 @Component
+@Transactional
 public class SiteFrameImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameImporter.class);
@@ -98,7 +100,7 @@ public class SiteFrameImporter {
                             new StopPlacesInFrame_RelStructure()
                                     .withStopPlace(distinctByIdAndHighestVersion(createdStopPlaces)));
             } else {
-                logger.info("Site frame does not contain any stop places: ", siteFrame);
+                logger.info("Site frame does not contain any stop places: {}", siteFrame);
             }
             return netexSiteFrame;
         } finally {
@@ -107,12 +109,12 @@ public class SiteFrameImporter {
     }
 
     private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
-        String semaphoreKey = getStripedSemaphoreKey(stopPlace);
-        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
+//        String semaphoreKey = getStripedSemaphoreKey(stopPlace);
+//        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
 
         try {
-            semaphore.acquire();
-            logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
+//            semaphore.acquire();
+//            logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
 
             org.rutebanken.netex.model.StopPlace importedStop = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();
@@ -120,12 +122,13 @@ public class SiteFrameImporter {
 
         } catch (Exception e) {
             // When having issues with one stop place, do not fail for all other stop places in publication delivery.
-            logger.error("Caught exception while importing stop place. Semaphore was " + semaphoreKey, e);
-            return null;
-        } finally {
-            semaphore.release();
-            logger.info("Released semaphore '{}'", semaphoreKey);
+//            logger.error("Caught exception while importing stop place. Semaphore was " + semaphoreKey, e);
+            throw new RuntimeException("Could not import stop place "+stopPlace, e);
         }
+//        finally {
+//            semaphore.release();
+//            logger.info("Released semaphore '{}'", semaphoreKey);
+//        }
     }
 
     /**

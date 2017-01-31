@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = TiamatApplication.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ActiveProfiles("geodb")
-//@Transactional
+@Transactional
 public class DefaultStopPlaceImporterWithGeoDBTest {
 
     @Autowired

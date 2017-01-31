@@ -125,12 +125,15 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                 newStopPlace.getQuays().forEach(q -> q.setId(null));
             }
         }
-        if (hasTopographicPlaces(siteFrame)) {
-            topographicPlaceCreator.setTopographicReference(newStopPlace,
-                    siteFrame.getTopographicPlaces().getTopographicPlace(),
-                    topographicPlacesCreatedCounter);
-        } else {
-            lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+
+        if (newStopPlace.getTopographicPlaceRef() == null) {
+            if (hasTopographicPlaces(siteFrame)) {
+                topographicPlaceCreator.setTopographicReference(newStopPlace,
+                        siteFrame.getTopographicPlaces().getTopographicPlace(),
+                        topographicPlacesCreatedCounter);
+            } else {
+                lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
+            }
         }
         if(newStopPlace.getQuays() != null) {
             Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
