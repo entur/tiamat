@@ -30,9 +30,9 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     @Autowired
     public NearbyStopPlaceFinder(StopPlaceRepository stopPlaceRepository,
-                                         @Value("${nearbyStopPlaceFinderCache.maxSize:20000}") int maximumSize,
+                                         @Value("${nearbyStopPlaceFinderCache.maxSize:50000}") int maximumSize,
                                          @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
-                                         @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
+                                         @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
