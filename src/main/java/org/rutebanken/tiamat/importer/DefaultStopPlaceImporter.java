@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Qualifier("defaultStopPlaceImporter")
-@Transactional(propagation = Propagation.MANDATORY)
+@Transactional
 public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
