@@ -169,7 +169,6 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             foundStopPlace.setChanged(ZonedDateTime.now());
         }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
-        foundStopPlace.getQuays().forEach(q -> logger.info("Stop place {}:  Quay {}: {}", foundStopPlace.getId(), q.getId(), q.getName()));
         incrementVersion(foundStopPlace);
 
         return saveAndUpdateCache(foundStopPlace);
