@@ -75,7 +75,7 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
     }
 
     public final String createKey(StopPlace stopPlace, Envelope envelope) {
-        return stopPlace.getName() + "-" + envelope.toString();
+        return stopPlace.getName() + "-" + stopPlace.getStopPlaceType().value() + "-" + envelope.toString();
     }
 
     public final String createKey(StopPlace stopPlace) {
