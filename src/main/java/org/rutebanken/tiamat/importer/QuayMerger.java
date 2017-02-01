@@ -26,6 +26,9 @@ public class QuayMerger {
     @Value("${quayMerger.mergeDistanceMeters:10}")
     public final double MERGE_DISTANCE_METERS = 10;
 
+    @Value("${quayMerger.mergeDistanceMetersExtended:30}")
+    public final double MERGE_DISTANCE_METERS_EXTENDED = 30;
+
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
 
@@ -123,11 +126,18 @@ public class QuayMerger {
     }
 
     private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
+        boolean nameMatch = hasMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
 
-        if (areClose(incomingQuay, alreadyAdded)
-                && hasCloseCompassBearing(incomingQuay, alreadyAdded)
-                && hasMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded)) {
+        if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS)
+                && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
+                && nameMatch) {
             return true;
+        } else if(nameMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
+            logger.debug("Name and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
+
+            if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
+                return true;
+            }
         }
         return false;
     }
@@ -197,8 +207,11 @@ public class QuayMerger {
         return true;
     }
 
-
     public boolean areClose(Quay quay1, Quay quay2) {
+        return areClose(quay1, quay2, MERGE_DISTANCE_METERS);
+    }
+
+    public boolean areClose(Quay quay1, Quay quay2, double mergeDistanceInMeters) {
         if (!quay1.hasCoordinates() || !quay2.hasCoordinates()) {
             return false;
         }
@@ -209,14 +222,16 @@ public class QuayMerger {
                     quay2.getCentroid().getCoordinate(),
                     DefaultGeographicCRS.WGS84);
 
-            return distanceInMeters < MERGE_DISTANCE_METERS;
+            logger.info("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
+
+            return distanceInMeters < mergeDistanceInMeters;
         } catch (TransformException e) {
-            logger.warn("Could not calculate distance", e);
+            logger.warn("Could not calculate distance between quays {} - {}", quay1, quay2, e);
             return false;
         }
     }
 
-    public boolean hasCloseCompassBearing(Quay quay1, Quay quay2) {
+    public boolean haveSimilarOrAnyNullCompassBearing(Quay quay1, Quay quay2) {
 
         if(quay1.getCompassBearing() == null && quay2.getCompassBearing() == null) {
             return true;
@@ -224,6 +239,14 @@ public class QuayMerger {
             return true;
         }
 
+        return haveSimilarCompassBearing(quay1, quay2);
+    }
+
+    private boolean haveSimilarCompassBearing(Quay quay1, Quay quay2) {
+
+        if(quay1.getCompassBearing() == null || quay2.getCompassBearing() == null) {
+            return false;
+        }
         int quayBearing1 = Math.round(quay1.getCompassBearing());
         int quayBearing2 = Math.round(quay2.getCompassBearing());
 
