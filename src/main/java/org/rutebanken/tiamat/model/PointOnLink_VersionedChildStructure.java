@@ -12,7 +12,7 @@ public class PointOnLink_VersionedChildStructure
     protected LinkRefStructure linkRef;
     protected BigDecimal distanceFromStart;
     protected JAXBElement<? extends PointRefStructure> pointRef;
-    protected JAXBElement<? extends Point_VersionStructure> point;
+    protected JAXBElement<? extends Point> point;
     protected BigInteger order;
 
     public MultilingualStringEntity getName() {
@@ -47,11 +47,11 @@ public class PointOnLink_VersionedChildStructure
         this.pointRef = value;
     }
 
-    public JAXBElement<? extends Point_VersionStructure> getPoint() {
+    public JAXBElement<? extends Point> getPoint() {
         return point;
     }
 
-    public void setPoint(JAXBElement<? extends Point_VersionStructure> value) {
+    public void setPoint(JAXBElement<? extends Point> value) {
         this.point = value;
     }
 

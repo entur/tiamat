@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class SitePathLink_VersionStructure
-        extends PathLink_VersionStructure {
+public class SitePathLink_VersionStructure extends PathLink {
 
     protected SiteRefStructure siteRef;
     protected LevelRefStructure levelRef;

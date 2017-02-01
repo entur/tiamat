@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-public class ActivationPoint_VersionStructure
-        extends Point_VersionStructure {
+public class ActivationPoint_
+        extends Point {
 
     protected String activationPointNumber;
     protected MultilingualStringEntity shortName;

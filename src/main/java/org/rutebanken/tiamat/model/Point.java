@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class Point_VersionStructure
+public class Point
         extends DataManagedObjectStructure {
 
     protected MultilingualStringEntity name;
