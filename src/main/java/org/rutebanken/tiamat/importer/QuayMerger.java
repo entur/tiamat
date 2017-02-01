@@ -19,10 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class QuayMerger {
 
+    private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
+
     @Value("${quayMerger.mergeDistanceMeters:10}")
     public final double MERGE_DISTANCE_METERS = 10;
-
-    private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
@@ -161,8 +161,8 @@ public class QuayMerger {
 
         if(quay1.getCompassBearing() == null && quay2.getCompassBearing() == null) {
             return true;
-        } else if (quay1.getCompassBearing() == null && quay2.getCompassBearing() != null || quay1.getCompassBearing() != null && quay2.getCompassBearing() == null) {
-            return false;
+        } else if ((quay1.getCompassBearing() == null && quay2.getCompassBearing() != null) || (quay1.getCompassBearing() != null && quay2.getCompassBearing() == null)) {
+            return true;
         }
 
         int quayBearing1 = Math.round(quay1.getCompassBearing());

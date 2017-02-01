@@ -318,4 +318,30 @@ public class QuayMergerTest {
         assertThat(actual).as("The same quay object as existingQuay should be returned").contains(existingQuay);
     }
 
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-1149
+     */
+    @Test
+    public void twoQuayOneWithCompassBearingAndOtherWithoutShouldMatchIfNearby() {
+
+        Quay first = new Quay();
+        first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        first.setCompassBearing(270f);
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay second = new Quay();
+        second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        // No compass bearing
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(first);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(second);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Number of quays in response should be one. Because one quay lacks compass bearing").hasSize(1);
+    }
+
 }
