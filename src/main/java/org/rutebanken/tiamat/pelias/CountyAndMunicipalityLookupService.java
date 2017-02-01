@@ -4,7 +4,6 @@ package org.rutebanken.tiamat.pelias;
 import com.google.common.util.concurrent.Striped;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.pelias.model.Feature;
 import org.rutebanken.tiamat.pelias.model.Properties;
 import org.rutebanken.tiamat.pelias.model.ReverseLookupResult;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -20,8 +19,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CountyAndMunicipalityLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);
@@ -32,7 +31,7 @@ public class CountyAndMunicipalityLookupService {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
     
-    private Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
+    private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
 
 
     /**
@@ -41,7 +40,11 @@ public class CountyAndMunicipalityLookupService {
      */
     public void populateCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) throws IOException, InterruptedException {
 
-        Point point = stopPlace.getCentroid().getLocation().getGeometryPoint();
+        if(!stopPlace.hasCoordinates()) {
+            return;
+        }
+
+        Point point = stopPlace.getCentroid();
 
         Properties peliasProperties = reverseLookup(point, stopPlace);
         if(peliasProperties == null) {
@@ -96,7 +99,7 @@ public class CountyAndMunicipalityLookupService {
         stopPlace.setTopographicPlaceRef(municipalityRef);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private TopographicPlace populateCountyAndMunicipality(String peliasCounty, String peliasLocalAdmin, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException {
         List<TopographicPlace> counties = topographicPlaceRepository
                 .findByNameValueAndCountryRefRefAndTopographicPlaceType(
@@ -127,7 +130,7 @@ public class CountyAndMunicipalityLookupService {
             logger.debug("Creating new municipality for locality {}", locality);
 
             municipality = new TopographicPlace();
-            municipality.setName(new MultilingualString(locality, "no", ""));
+            municipality.setName(new EmbeddableMultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
@@ -160,7 +163,7 @@ public class CountyAndMunicipalityLookupService {
 
             logger.debug("Creating new county from pelias county: {}", peliasCounty);
             county = new TopographicPlace();
-            county.setName(new MultilingualString(peliasCounty, "no", ""));
+            county.setName(new EmbeddableMultilingualString(peliasCounty, "no"));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
             CountryRef countryRef = new CountryRef();

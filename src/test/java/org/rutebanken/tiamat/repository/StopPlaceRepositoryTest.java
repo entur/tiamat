@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.repository;
 
+import org.junit.Before;
 import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,11 @@ public class StopPlaceRepositoryTest {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Before
+    public void cleanRepositoriey() {
+        stopPlaceRepository.deleteAll();
+    }
+
     @Test
     public void findStopPlacesSortedCorrectly() {
         StopPlace stopPlaceOlder = new StopPlace();
@@ -41,7 +48,9 @@ public class StopPlaceRepositoryTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
+        assertThat(page.getContent().get(0).getId()).isEqualTo(stopPlaceNewer.getId());
         assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+        assertThat(page.getContent().get(1).getId()).isEqualTo(stopPlaceOlder.getId());
         assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
     }
 
@@ -51,10 +60,10 @@ public class StopPlaceRepositoryTest {
         StopPlace stopPlaceNewer = new StopPlace();
 
         stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-        stopPlaceOlder.setName(new MultilingualString("it's older", "en", ""));
+        stopPlaceOlder.setName(new EmbeddableMultilingualString("it's older", "en"));
 
         stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
-        stopPlaceNewer.setName(new MultilingualString("it's newer", "en", ""));
+        stopPlaceNewer.setName(new EmbeddableMultilingualString("it's newer", "en"));
 
         stopPlaceRepository.save(stopPlaceNewer);
         stopPlaceRepository.save(stopPlaceOlder);

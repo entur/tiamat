@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <if condition='property("env").contains("dev")'>
+        <then>
+            <include resource="org/springframework/boot/logging/logback/base.xml" />
+        </then>
+        <else>
+            <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                    <providers>
+                        <!-- provides the timestamp <timestamp/> -->
+                        <!-- provides the version <version/> -->
+                        <!-- provides the fields in the configured pattern -->
+                        <pattern>
+                            <!-- the pattern that defines what to include -->
+                            <pattern>
+                                {
+                                    "serviceContext": {
+                                        "service": "tiamat"
+                                    },
+                                    "eventTime": "%date{\"yyyy-MM-dd'T'HH:mm:ss.SSS'000000Z'\", \"UTC\"}",
+                                    "thread": "%thread",
+                                    "message": "%message\n%ex{full}",
+                                    "severity": "%level",
+                                    "reportLocation": {
+                                        "filePath": "%logger",
+                                        "lineNumber": "%line",
+                                        "functionName": "%method"
+                                    },
+                                    "operation": {
+                                        "id": "%X{importCorrelationId}"
+                                    }
+                                }
+                            </pattern>
+                        </pattern>
+                    </providers>
+                </encoder>
+            </appender>
+
+
+            <logger name="com" level="INFO"/>
+            <logger name="no" level="INFO"/>
+            <logger name="org" level="INFO"/>
+            <logger name="org.apache" level="INFO"/>
+            <logger name="org.hibernate.id" level="DEBUG" />
+            <root level="INFO">
+                <appender-ref ref="console"/>
+            </root>
+        </else>
+    </if>
+</configuration>

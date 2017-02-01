@@ -1,8 +1,8 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
-import org.rutebanken.tiamat.model.MultilingualString;
-import org.rutebanken.tiamat.model.SimplePoint;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -25,7 +25,7 @@ public class StopPlaceDisassembler {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceDisassembler.class);
 
     @Autowired
-    private SimplePointDisassembler simplePointDisassembler;
+    private PointDisassembler pointDisassembler;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -42,10 +42,10 @@ public class StopPlaceDisassembler {
 
         logger.debug("Disassemble simpleStopPlaceDto with id {}", simpleStopPlaceDto.id);
 
-        destination.setName(new MultilingualString(simpleStopPlaceDto.name, "no", ""));
+        destination.setName(new EmbeddableMultilingualString(simpleStopPlaceDto.name, "no"));
         destination.setChanged(ZonedDateTime.now());
-        destination.setShortName(new MultilingualString(simpleStopPlaceDto.shortName, "no", ""));
-        destination.setDescription(new MultilingualString(simpleStopPlaceDto.description, "no", ""));
+        destination.setShortName(new EmbeddableMultilingualString(simpleStopPlaceDto.shortName, "no"));
+        destination.setDescription(new EmbeddableMultilingualString(simpleStopPlaceDto.description, "no"));
 
         destination.setStopPlaceType(Optional.ofNullable(simpleStopPlaceDto.stopPlaceType)
                 .filter(type -> !type.isEmpty())
@@ -53,11 +53,7 @@ public class StopPlaceDisassembler {
                 .orElse(null));
 
         if(simpleStopPlaceDto.centroid != null) {
-            if (destination.getCentroid() == null) {
-                destination.setCentroid(new SimplePoint());
-            }
-
-            destination.setCentroid(simplePointDisassembler.disassemble(simpleStopPlaceDto.centroid));
+            destination.setCentroid(pointDisassembler.disassemble(simpleStopPlaceDto.centroid));
         }
 
         destination.setAllAreasWheelchairAccessible(simpleStopPlaceDto.allAreasWheelchairAccessible);
@@ -67,7 +63,7 @@ public class StopPlaceDisassembler {
                 .stream()
                 .filter(Objects::nonNull)
                 .map(quay -> quayDisassembler.disassemble(quay))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toSet()));
 
        return destination;
 

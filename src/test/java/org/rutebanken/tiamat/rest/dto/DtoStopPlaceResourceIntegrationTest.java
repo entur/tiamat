@@ -4,7 +4,6 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.json.JSONArray;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
@@ -23,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -112,24 +112,24 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void retrieveStopPlaceWithTwoQuays() throws Exception {
         Quay quay = new Quay();
         String firstQuayName = "first quay name";
-        quay.setName(new MultilingualString(firstQuayName));
+        quay.setName(new EmbeddableMultilingualString(firstQuayName));
 
         quayRepository.save(quay);
 
         Quay secondQuay = new Quay();
         String secondQuayName = "second quay";
-        secondQuay.setName(new MultilingualString(secondQuayName));
+        secondQuay.setName(new EmbeddableMultilingualString(secondQuayName));
 
         quayRepository.save(secondQuay);
 
         String stopPlaceName = "StopPlace";
-        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
 
-        stopPlace.setQuays(new ArrayList<>());
+        stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
         stopPlace.getQuays().add(secondQuay);
 
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(5, 60)))));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlaceRepository.save(stopPlace);
 
 
@@ -148,7 +148,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForStopPlaceNoParams() throws Exception {
         String stopPlaceName = "Eselstua";
-        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
         stopPlaceRepository.save(stopPlace);
 
         when()
@@ -164,8 +164,8 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
         String stopPlaceName = "Grytnes";
-        StopPlace stopPlace = new StopPlace(new MultilingualString(stopPlaceName));
-        stopPlace.setCentroid(new SimplePoint(new LocationStructure(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
         stopPlaceRepository.save(stopPlace);
 
         given()
@@ -183,7 +183,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForStopsWithDifferentStopPlaceTypeShouldHaveNoResult() {
 
-        StopPlace stopPlace = new StopPlace(new MultilingualString("Fyrstekakeveien"));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Fyrstekakeveien"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
         stopPlaceRepository.save(stopPlace);
 
@@ -202,7 +202,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForTramStopWithMunicipalityAndCounty() {
 
-        TopographicPlace hordaland = new TopographicPlace(new MultilingualString("Hordaland"));
+        TopographicPlace hordaland = new TopographicPlace(new EmbeddableMultilingualString("Hordaland"));
         topographicPlaceRepository.save(hordaland);
 
         TopographicPlace kvinnherad = createMunicipalityWithCountyRef("Kvinnherad", hordaland);
@@ -229,10 +229,10 @@ public class DtoStopPlaceResourceIntegrationTest {
     @Test
     public void searchForStopsInMunicipalityThenExpectNoResult() {
         // Stop Place not related to municipality
-        StopPlace stopPlace = new StopPlace(new MultilingualString("Nesbru"));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Nesbru"));
         stopPlaceRepository.save(stopPlace);
 
-        TopographicPlace asker = new TopographicPlace(new MultilingualString("Asker"));
+        TopographicPlace asker = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
         topographicPlaceRepository.save(asker);
 
         given()
@@ -248,7 +248,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     @Test
     public void searchForStopInMunicipalityOnly() {
-        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new EmbeddableMultilingualString("Akershus")));
         TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
         createStopPlaceWithMunicipalityRef("Nesbru", asker);
 
@@ -279,8 +279,8 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     @Test
     public void searchForStopsInTwoCountiesAndTwoMunicipalities() {
-        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
-        TopographicPlace buskerud = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Buskerud")));
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new EmbeddableMultilingualString("Akershus")));
+        TopographicPlace buskerud = topographicPlaceRepository.save(new TopographicPlace(new EmbeddableMultilingualString("Buskerud")));
 
         TopographicPlace lier = createMunicipalityWithCountyRef("Lier", buskerud);
         TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
@@ -301,7 +301,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
     @Test
     public void searchForStopsInDifferentMunicipalitiesButSameCounty() {
-        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new MultilingualString("Akershus")));
+        TopographicPlace akershus = topographicPlaceRepository.save(new TopographicPlace(new EmbeddableMultilingualString("Akershus")));
         TopographicPlace asker = createMunicipalityWithCountyRef("Asker", akershus);
         TopographicPlace baerum = createMunicipalityWithCountyRef("Bærum", akershus);
 
@@ -359,7 +359,9 @@ public class DtoStopPlaceResourceIntegrationTest {
     public void createStopPlaceWithNewQuayShouldExposeQuayIds() {
         StopPlaceDto stopPlaceDto = new StopPlaceDto();
         stopPlaceDto.quays = new ArrayList<>(1);
-        stopPlaceDto.quays.add(new QuayDto());
+        QuayDto quayDto = new QuayDto();
+        quayDto.name = "quay 1";
+        stopPlaceDto.quays.add(quayDto);
 
 
         // Create
@@ -370,7 +372,9 @@ public class DtoStopPlaceResourceIntegrationTest {
                 .as(StopPlaceDto.class);
 
         // Add new quay
-        stopPlaceDto.quays.add(new QuayDto());
+        QuayDto anotherQuayDto = new QuayDto();
+        anotherQuayDto.name = "quay 2";
+        stopPlaceDto.quays.add(anotherQuayDto);
 
         // Update
         stopPlaceDto = given()
@@ -381,7 +385,7 @@ public class DtoStopPlaceResourceIntegrationTest {
 
         assertThat(stopPlaceDto.quays)
                 .hasSize(2)
-                .extracting(quayDto -> quayDto.id)
+                .extracting(actualQuayDto -> actualQuayDto.id)
                     .doesNotContain("null")
                     .isNotNull()
                     .isNotEmpty();
@@ -389,7 +393,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
-        StopPlace stopPlace = new StopPlace(new MultilingualString(name));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
         if(municipality != null) {
             TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
@@ -409,7 +413,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     }
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
-        TopographicPlace municipality = new TopographicPlace(new MultilingualString(name));
+        TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
         if(county != null) {
             TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
             countyRef.setRef(county.getId().toString());

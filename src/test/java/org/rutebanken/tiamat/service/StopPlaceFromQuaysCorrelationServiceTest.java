@@ -4,8 +4,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.nvdb.service.NvdbQuayAugmenter;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
+import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -28,13 +29,16 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
+    private CentroidComputer centroidComputer = new CentroidComputer(geometryFactory);
+
     private StopPlaceFromQuaysCorrelationService stopPlaceFromQuaysCorrelationService =
             new StopPlaceFromQuaysCorrelationService(quayRepository,
                     stopPlaceRepository,
                     geometryFactory,
                     mock(CountyAndMunicipalityLookupService.class),
                     mock(NvdbSearchService.class),
-                    mock(NvdbQuayAugmenter.class),
+                    mock(NvdbStopPlaceTypeMapper.class),
+                    centroidComputer,
                     Integer.MAX_VALUE,
                     1);
 
@@ -74,8 +78,7 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
     private Quay quayWithCentroid(double x, double y) {
         Quay quay = new Quay();
-        quay.setCentroid(new SimplePoint());
-        quay.getCentroid().setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(x, y, 0))));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(x, y)));
         return quay;
     }
 
@@ -84,19 +87,19 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
         Quay quayWithSameName1 = quayWithCentroid(10.489552, 59.866439);
         quayWithSameName1.setId(1L);
-        quayWithSameName1.setName(new MultilingualString("name", "no", ""));
+        quayWithSameName1.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithSameName2 = quayWithCentroid(10.489552, 59.866439);
         quayWithSameName2.setId(2L);
-        quayWithSameName2.setName(new MultilingualString("name", "no", ""));
+        quayWithSameName2.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithSameNameButFarAway = quayWithCentroid(4.489552, 59.866439);
         quayWithSameNameButFarAway.setId(3L);
-        quayWithSameNameButFarAway.setName(new MultilingualString("name", "no", ""));
+        quayWithSameNameButFarAway.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithOtherName = quayWithCentroid(10.489552, 59.866439);
         quayWithOtherName.setId(4L);
-        quayWithOtherName.setName(new MultilingualString("othername", "no", ""));
+        quayWithOtherName.setName(new EmbeddableMultilingualString("othername", "no"));
 
         List<Quay> quays = Arrays.asList(quayWithSameName1, quayWithSameName2, quayWithSameNameButFarAway, quayWithOtherName);
 
@@ -120,15 +123,15 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
 
         Quay quay1 = quayWithCentroid(4.0, 59.866439);
         quay1.setId(1L);
-        quay1.setName(new MultilingualString("name", "no", ""));
+        quay1.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quay2 = quayWithCentroid(5.0, 59.866439);
         quay2.setId(2L);
-        quay2.setName(new MultilingualString("name", "no", ""));
+        quay2.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quay3 = quayWithCentroid(6.0, 59.866439);
         quay3.setId(3L);
-        quay3.setName(new MultilingualString("name", "no", ""));
+        quay3.setName(new EmbeddableMultilingualString("name", "no"));
 
         List<Quay> quays = Arrays.asList(quay1, quay2, quay3);
 

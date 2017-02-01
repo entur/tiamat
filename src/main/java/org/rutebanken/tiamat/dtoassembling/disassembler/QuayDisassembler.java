@@ -1,12 +1,13 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.QuayTypeEnumeration;
 
@@ -17,12 +18,12 @@ public class QuayDisassembler {
 
     private QuayRepository quayRepository;
 
-    private SimplePointDisassembler simplePointDisassembler;
+    private PointDisassembler pointDisassembler;
 
     @Autowired
-    public QuayDisassembler(QuayRepository quayRepository, SimplePointDisassembler simplePointDisassembler) {
+    public QuayDisassembler(QuayRepository quayRepository, PointDisassembler pointDisassembler) {
         this.quayRepository = quayRepository;
-        this.simplePointDisassembler = simplePointDisassembler;
+        this.pointDisassembler = pointDisassembler;
     }
 
     public Quay disassemble(QuayDto quayDto) {
@@ -46,13 +47,12 @@ public class QuayDisassembler {
         }
 
 
-        quay.setName(new MultilingualString(quayDto.name, "no", ""));
-        quay.setDescription(new MultilingualString(quayDto.description, "no", ""));
-        quay.setCentroid(simplePointDisassembler.disassemble(quayDto.centroid));
+        quay.setName(new EmbeddableMultilingualString(quayDto.name, "no"));
+        quay.setDescription(new EmbeddableMultilingualString(quayDto.description, "no"));
+        quay.setCentroid(pointDisassembler.disassemble(quayDto.centroid));
 
-        if(quayDto.quayType != null && !quayDto.quayType.isEmpty()) {
-            logger.trace("Setting quay type on quay {} from string value {}", quay.getName(), quayDto.quayType);
-            quay.setQuayType(QuayTypeEnumeration.fromValue(quayDto.quayType));
+        if(quayDto.compassBearing != null) {
+            quay.setCompassBearing(Float.valueOf(quayDto.compassBearing));
         }
 
         logger.trace("Set allAreasWheelchairAccessible {}", quayDto.allAreasWheelchairAccessible);

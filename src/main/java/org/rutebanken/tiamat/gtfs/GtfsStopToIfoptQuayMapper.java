@@ -22,8 +22,8 @@ public class GtfsStopToIfoptQuayMapper {
     public Quay mapToQuay(Stop stop){
     	logger.debug("Mapping data from GTFS stop to IFOPT quay {} - {}", stop.getId(), stop.getName());
     	Quay quay = new Quay();
-    	quay.setName(new MultilingualString(stop.getName(), "no", ""));
-    	quay.setDescription(new MultilingualString(stop.getDesc(), "no", ""));
+    	quay.setName(new EmbeddableMultilingualString(stop.getName(), "no"));
+    	quay.setDescription(new EmbeddableMultilingualString(stop.getDesc(), "no"));
     	
     	centroid(quay, stop);
     	
@@ -31,13 +31,8 @@ public class GtfsStopToIfoptQuayMapper {
     }
 
     public void centroid(Zone_VersionStructure site, Stop stop) {
-        SimplePoint centroid = new SimplePoint();
-
         logger.trace("Setting location for {} latitude: {}, longitude: {}", site.getName(), stop.getLat(), stop.getLon());
-
-        centroid.setLocation(new LocationStructure(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat()))));
-
-        site.setCentroid(centroid);
+        site.setCentroid(geometryFactory.createPoint(new Coordinate(stop.getLon(), stop.getLat())));
     }
 }
 

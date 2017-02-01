@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.rutebanken.superpom</groupId>
         <artifactId>superpom</artifactId>
-        <version>0.0.5</version>
+        <version>0.0.6</version>
     </parent>
 
     <groupId>org.rutebanken</groupId>
@@ -26,14 +26,14 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.2.84</fabric8.version>
         <docker.maven.plugin.version>0.13.9</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.4.0.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>1.4.3.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>1.4.3.RELEASE</spring-boot.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <keycloak.version>1.6.1.Final</keycloak.version>
-        <!-- Version must correspond with hibernate core version from spring -->
         <hibernate-spatial.version>5.1.0.Final</hibernate-spatial.version>
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.7</geodb.version>
+        <geotools.version>16.1</geotools.version>
 
         <!-- Docker & Fabric8 Configs -->
         <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
@@ -66,11 +66,12 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
+        <hazelcast-hibernate5.version>1.2</hazelcast-hibernate5.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>0.0.9-SNAPSHOT</netex-java-model.version>
-
+        <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -87,10 +88,7 @@
             <id>OSGEO GeoTools repo</id>
             <url>http://download.osgeo.org/webdav/geotools</url>
         </repository>
-        <repository>
-            <id>Hibernate Spatial repo</id>
-            <url>http://www.hibernatespatial.org/repository</url>
-        </repository>
+
         <repository>
             <id>geo-solutions.it</id>
             <url>http://maven.geo-solutions.it</url>
@@ -113,16 +111,61 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.rutebanken.helpers</groupId>
+                <artifactId>hazelcast-helper</artifactId>
+                <version>${hazelcast-helper.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
 
     <dependencies>
         <dependency>
+            <groupId>org.rutebanken.helpers</groupId>
+            <artifactId>hazelcast-helper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-hibernate5</artifactId>
+            <version>${hazelcast-hibernate5.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>4.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.7.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.rutebanken</groupId>
             <artifactId>netex-java-model</artifactId>
             <version>${netex-java-model.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rutebanken.helpers</groupId>
+            <artifactId>gcp-storage</artifactId>
+            <version>0.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -211,6 +254,41 @@
             <groupId>org.opengeo</groupId>
             <artifactId>geodb</artifactId>
             <version>${geodb.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <!--
+                https://rutebanken.atlassian.net/browse/NRP-907
+                https://github.com/jboss/xerces/pull/14
+                https://issues.apache.org/jira/browse/XERCESJ-1276
+            -->
+            <version>2.11.0.SP6-RB</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-jts-wrapper</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
 
         <dependency>

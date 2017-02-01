@@ -34,7 +34,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 		EntityGraph<Quay> graph = entityManager.createEntityGraph(Quay.class);
 		graph.addAttributeNodes("alternativeNames");
 		graph.addAttributeNodes("accessibilityAssessment");
-		graph.addAttributeNodes("roadAddress");
+//		graph.addAttributeNodes("roadAddress");
 
 		return entityManager.find(Quay.class, quayId, hints(graph));
 	}
