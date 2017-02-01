@@ -109,6 +109,12 @@ class StopPlaceFetcher implements DataFetcher {
         }
         if (stopPlaces != null && isFieldRequested(environment, TOPOGRAPHIC_PLACE)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setTopographicPlace(stopPlace.getTopographicPlace()));
+
+            if (stopPlaces != null && isFieldRequested(environment, TOPOGRAPHIC_PLACE, PARENT_TOPOGRAPHIC_PLACE)) {
+                stopPlaces.getContent().stream()
+                        .filter(sp -> sp.getTopographicPlace() != null)
+                        .forEach(stopPlace -> stopPlace.getTopographicPlace().setParentTopographicPlace(stopPlace.getTopographicPlace().getParentTopographicPlace()));
+            }
         }
         if (stopPlaces != null && isFieldRequested(environment, IMPORTED_ID)) {
             stopPlaces.getContent().forEach(stopPlace -> {
@@ -119,21 +125,84 @@ class StopPlaceFetcher implements DataFetcher {
         return stopPlaces;
     }
 
-    private boolean isFieldRequested(DataFetchingEnvironment environment, String fieldName) {
-        boolean quaysRequested = false;
+    /**
+     * Returns <code>true</code> if fieldName is requested
+     *
+     * Example:
+     * Given GraphQL-query:
+     * <pre>
+     * stopPlace {
+     *     id
+     *     name {
+     *         value
+     *     }
+     *     topographicPlace {
+     *         name {
+     *             value
+     *         }
+     *         parentTopographicPlace {
+     *             name {
+     *                 value
+     *             }
+     *         }
+     *     }
+     * }
+     * </pre>
+     *
+     * The following returns <code>true</code>:
+     * - isFieldRequested(env, "id")
+     * - isFieldRequested(env, "name")
+     * - isFieldRequested(env, "name", "value")
+     * - isFieldRequested(env, "topographicPlace", "name", "value")
+     * - isFieldRequested(env, "topographicPlace", "parentTopographicPlace", "name", "value")
+     *
+     * The following returns <code>false</code>:
+     * - isFieldRequested(env, "name", "lang")
+     * - isFieldRequested(env, "value")
+     *
+     * @param environment
+     * @param fieldNames
+     * @return true if field is requested
+     */
+    private boolean isFieldRequested(DataFetchingEnvironment environment, String... fieldNames) {
+        boolean fieldRequested = false;
         List<Field> fields = environment.getFields();
         for (Field field : fields) {
             SelectionSet selectionSet = field.getSelectionSet();
-            List<Selection> selections = selectionSet.getSelections();
-            for (Selection selection : selections) {
-                if (selection instanceof  Field) {
-                    Field selectedField = (Field) selection;
-                    if (fieldName.equals(selectedField.getName())) {
-                        quaysRequested = true;
+
+            Field currentField;
+            for (int i = 0; i < fieldNames.length; i++) {
+                currentField = getMatchingField(fieldNames[i], selectionSet);
+                if (currentField != null) {
+                    if ((i == fieldNames.length-1)) {
+                        //last element in field-list - target-field has been found
+                        fieldRequested = true;
+                    } else {
+                        // Prepare for next iteration
+                        selectionSet = currentField.getSelectionSet();
                     }
                 }
             }
         }
-        return quaysRequested;
+        return fieldRequested;
+    }
+
+    /**
+     *
+     * @param fieldName
+     * @param selectionSet
+     * @return Field with matching name - if it exists in selectionSet, otherwise <code>null</code>
+     */
+    private Field getMatchingField(String fieldName, SelectionSet selectionSet) {
+        List<Selection> selections = selectionSet.getSelections();
+        for (Selection selection : selections) {
+            if (selection instanceof Field) {
+                Field selectedField = (Field) selection;
+                if (fieldName.equals(selectedField.getName())) {
+                    return selectedField;
+                }
+            }
+        }
+        return null;
     }
 }
