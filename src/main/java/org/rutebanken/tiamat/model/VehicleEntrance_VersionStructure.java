@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class VehicleEntrance_VersionStructure
-        extends SiteEntrance_VersionStructure {
+        extends SiteEntrance {
 
     protected Boolean _public;
 

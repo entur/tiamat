@@ -1,13 +1,12 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Level;
 
 public class PathLinkEnd {
 
     private Place_VersionStructure place;
 
-    private SiteEntrance_VersionStructure entrance;
+    private SiteEntrance entrance;
 
     private Level level;
 
@@ -19,11 +18,11 @@ public class PathLinkEnd {
         this.place = place;
     }
 
-    public SiteEntrance_VersionStructure getEntrance() {
+    public SiteEntrance getEntrance() {
         return entrance;
     }
 
-    public void setEntrance(SiteEntrance_VersionStructure entrance) {
+    public void setEntrance(SiteEntrance entrance) {
         this.entrance = entrance;
     }
 

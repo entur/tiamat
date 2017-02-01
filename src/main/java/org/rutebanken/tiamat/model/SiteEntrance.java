@@ -3,8 +3,7 @@ package org.rutebanken.tiamat.model;
 import java.math.BigDecimal;
 
 
-public class SiteEntrance_VersionStructure
-        extends SiteComponent_VersionStructure {
+public class SiteEntrance extends SiteComponent_VersionStructure {
 
     protected String publicCode;
     protected MultilingualStringEntity label;

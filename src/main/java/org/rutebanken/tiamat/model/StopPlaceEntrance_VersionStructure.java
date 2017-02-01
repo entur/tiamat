@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public class StopPlaceEntrance_VersionStructure
-        extends SiteEntrance_VersionStructure {
+        extends SiteEntrance {
 
     protected VehicleModeEnumeration transportMode;
     protected AirSubmodeEnumeration airSubmode;
