@@ -322,17 +322,19 @@ public class QuayMergerTest {
      * https://rutebanken.atlassian.net/browse/NRP-1149
      */
     @Test
-    public void twoQuayOneWithCompassBearingAndOtherWithoutShouldMatchIfNearby() {
+    public void twoQuaysOneWithCompassBearingAndOtherWithoutShouldMatchIfNearby() {
 
         Quay first = new Quay();
         first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         first.setCompassBearing(270f);
         first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.setName(new EmbeddableMultilingualString("A"));
 
         Quay second = new Quay();
         second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         // No compass bearing
         second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
+        first.setName(new EmbeddableMultilingualString("A"));
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(first);
@@ -343,5 +345,31 @@ public class QuayMergerTest {
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
         assertThat(result).as("Number of quays in response should be one. Because one quay lacks compass bearing").hasSize(1);
     }
+
+    @Test
+    public void twoQuaysOneWithCompassBearingAndOtherWithoutShouldNotMatchIfNearbyButDifferentName() {
+
+        Quay first = new Quay();
+        first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        first.setCompassBearing(270f);
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.setName(new EmbeddableMultilingualString("A"));
+
+        Quay second = new Quay();
+        second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        // No compass bearing
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
+        second.setName(new EmbeddableMultilingualString("B"));
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(first);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(second);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Number of quays in response should be two. Because name differs.").hasSize(2);
+    }
+
 
 }

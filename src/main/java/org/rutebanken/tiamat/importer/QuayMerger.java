@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importer;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.operation.TransformException;
+import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ public class QuayMerger {
 
             if(!foundMatch) {
                 for (Quay alreadyAdded : result) {
-                    foundMatch = appendIdIfCloseAndSimilarCompassBearing(incomingQuay, alreadyAdded, updatedQuaysCounter);
+                    foundMatch = appendIfMatch(incomingQuay, alreadyAdded, updatedQuaysCounter);
                     if (foundMatch) {
                         break;
                     }
@@ -88,10 +89,12 @@ public class QuayMerger {
         return result;
     }
 
-    private boolean appendIdIfCloseAndSimilarCompassBearing(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+    private boolean appendIfMatch(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
 
-        if (areClose(incomingQuay, alreadyAdded) && hasCloseCompassBearing(incomingQuay, alreadyAdded)) {
-            logger.info("New quay {} is close to existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
+        if (areClose(incomingQuay, alreadyAdded)
+                && hasCloseCompassBearing(incomingQuay, alreadyAdded)
+                && hasMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded)) {
+            logger.info("New quay {} matches existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
             boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
             if (changed) {
                 incomingQuay.setChanged(ZonedDateTime.now());
@@ -138,6 +141,42 @@ public class QuayMerger {
         });
         return strippedIds;
     }
+
+    public boolean hasMatchingNameOrOneIsMissing(Quay quay1, Quay quay2) {
+        boolean quay1HasName = hasNameValue(quay1.getName());
+        boolean quay2HasName = hasNameValue(quay2.getName());
+
+        if(!quay1HasName && !quay2HasName) {
+            logger.debug("None of the quays have name set. Treating as match. {} - {}", quay1.getName(), quay2.getName());
+            return true;
+        }
+
+        if((quay1HasName && !quay2HasName) || (!quay1HasName && quay2HasName)) {
+            logger.debug("Only one of the quays have name set. Treating as match. {} - {}", quay1.getName(), quay2.getName());
+            return true;
+        }
+
+        if(quay1.getName().getValue().equals(quay2.getName().getValue())) {
+            logger.debug("Quay names matches. {} - {}", quay1.getName(), quay2.getName());
+            return true;
+        }
+
+        logger.debug("Both quays does have names, but they do not match. {} - {}", quay1.getName(), quay2.getName());
+        return false;
+    }
+
+    private boolean hasNameValue(MultilingualString multilingualString) {
+
+        if(multilingualString == null) {
+            return false;
+        } else if(multilingualString.getValue() == null) {
+            return false;
+        } else if(multilingualString.getValue().isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
 
     public boolean areClose(Quay quay1, Quay quay2) {
         if (!quay1.hasCoordinates() || !quay2.hasCoordinates()) {
