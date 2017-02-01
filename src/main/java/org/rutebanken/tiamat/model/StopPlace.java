@@ -73,7 +73,7 @@ public class StopPlace
     @org.hibernate.annotations.Cache(
             usage = CacheConcurrencyStrategy.READ_WRITE
     )
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     protected TopographicPlace topographicPlace;
 
     @OneToMany(cascade = CascadeType.MERGE)
