@@ -7,8 +7,8 @@ import java.util.List;
 
 public class PathLink extends Link_VersionStructure {
 
-    protected PathLinkEndStructure from;
-    protected PathLinkEndStructure to;
+    protected PathLinkEnd from;
+    protected PathLinkEnd to;
     protected MultilingualStringEntity description;
     protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
     protected AccessibilityAssessment accessibilityAssessment;
@@ -30,19 +30,19 @@ public class PathLink extends Link_VersionStructure {
     protected BigInteger maximumFlowPerMinute;
     protected TransferDurationStructure transferDuration;
 
-    public PathLinkEndStructure getFrom() {
+    public PathLinkEnd getFrom() {
         return from;
     }
 
-    public void setFrom(PathLinkEndStructure value) {
+    public void setFrom(PathLinkEnd value) {
         this.from = value;
     }
 
-    public PathLinkEndStructure getTo() {
+    public PathLinkEnd getTo() {
         return to;
     }
 
-    public void setTo(PathLinkEndStructure value) {
+    public void setTo(PathLinkEnd value) {
         this.to = value;
     }
 
