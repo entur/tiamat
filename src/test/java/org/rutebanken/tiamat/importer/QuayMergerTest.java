@@ -43,8 +43,7 @@ public class QuayMergerTest {
 
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(quay2);
-
-
+        
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
         assertThat(result).hasSize(1);
     }
@@ -371,5 +370,57 @@ public class QuayMergerTest {
         assertThat(result).as("Number of quays in response should be two. Because name differs.").hasSize(2);
     }
 
+    @Test
+    public void ifTwoQuaysAreMergedKeepName() {
+
+        Quay first = new Quay();
+        first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        first.setCompassBearing(270f);
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay second = new Quay();
+        second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        // No compass bearing
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+        second.setName(new EmbeddableMultilingualString("A"));
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(first);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(second);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Quays should have been merged.").hasSize(1);
+        Quay actual = result.iterator().next();
+        assertThat(actual.getName()).describedAs("name should not be null").isNotNull();
+        assertThat(actual.getName().getValue()).isEqualTo("A");
+    }
+
+
+    @Test
+    public void ifTwoQuaysAreMergedCompassBearing() {
+
+        Quay first = new Quay();
+        first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Quay second = new Quay();
+        second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
+        second.setCompassBearing(270f);
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(first);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(second);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Quays should have been merged.").hasSize(1);
+        Quay actual = result.iterator().next();
+        assertThat(actual.getCompassBearing()).describedAs("compass bearing should not be null").isNotNull();
+        assertThat(actual.getCompassBearing()).isEqualTo(270f);
+    }
 
 }

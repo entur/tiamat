@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,31 +54,20 @@ public class QuayMerger {
     public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
 
         Set<Quay> result = new HashSet<>();
-        if(existingQuays == null) {
-            existingQuays = new HashSet<>();
+        if(existingQuays != null) {
+            result.addAll(existingQuays);
         }
-        result.addAll(existingQuays);
 
         for(Quay incomingQuay : newQuays) {
+            Optional<Quay> matchingQuay = findMatchOnOriginalId(incomingQuay, result);
 
-            boolean foundMatch = false;
-            for(Quay alreadyAdded : result) {
-                foundMatch = appendIdIfMatchingOriginalId(incomingQuay, alreadyAdded, updatedQuaysCounter);
-                if(foundMatch) {
-                    break;
-                }
+            if(!matchingQuay.isPresent()) {
+                matchingQuay = findMatch(incomingQuay, result);
             }
 
-            if(!foundMatch) {
-                for (Quay alreadyAdded : result) {
-                    foundMatch = appendIfMatch(incomingQuay, alreadyAdded, updatedQuaysCounter);
-                    if (foundMatch) {
-                        break;
-                    }
-                }
-            }
-
-            if(!foundMatch) {
+            if(matchingQuay.isPresent()) {
+                updateIfChanged(matchingQuay.get(), incomingQuay, updatedQuaysCounter);
+            } else {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
                 incomingQuay.setCreated(ZonedDateTime.now());
@@ -89,41 +79,71 @@ public class QuayMerger {
         return result;
     }
 
-    private boolean appendIfMatch(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+    private Optional<Quay> findMatch(Quay incomingQuay, Set<Quay> result) {
+        for (Quay alreadyAdded : result) {
+            if (matches(incomingQuay, alreadyAdded)) {
+                return Optional.of(alreadyAdded);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Quay> findMatchOnOriginalId(Quay incomingQuay, Set<Quay> result) {
+        for(Quay alreadyAdded : result) {
+            if(matchesOnOriginalId(incomingQuay, alreadyAdded)) {
+                return Optional.of(alreadyAdded);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void updateIfChanged(Quay alreadyAdded, Quay incomingQuay, AtomicInteger updatedQuaysCounter) {
+        // The incoming quay could for some reason already have multiple imported IDs.
+        boolean idUpdated = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
+        boolean changedByMerge = mergeFields(incomingQuay, alreadyAdded);
+
+        if(idUpdated || changedByMerge) {
+            alreadyAdded.setChanged(ZonedDateTime.now());
+            updatedQuaysCounter.incrementAndGet();
+        }
+    }
+
+    private boolean mergeFields(Quay from, Quay to) {
+        boolean changed = false;
+        if(hasNameValue(from.getName()) && ! hasNameValue(to.getName())) {
+            to.setName(from.getName());
+            changed = true;
+        }
+        if(from.getCompassBearing() != null && to.getCompassBearing() == null) {
+            to.setCompassBearing(from.getCompassBearing());
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
 
         if (areClose(incomingQuay, alreadyAdded)
                 && hasCloseCompassBearing(incomingQuay, alreadyAdded)
                 && hasMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded)) {
-            logger.info("New quay {} matches existing quay {}. Appending it's ID", incomingQuay, alreadyAdded);
-            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
-            if (changed) {
-                incomingQuay.setChanged(ZonedDateTime.now());
-                updatedQuaysCounter.incrementAndGet();
-            }
             return true;
         }
         return false;
     }
 
     /**
-     * If the incoming Quay has an original ID that matches on any original ID on an existing Quay, append Ids.
-     * @param incomingQuay incoming Quay with
-     * @param alreadyAdded
-     * @param updatedQuaysCounter
-     * @return
+     * If the incoming Quay has an original ID that matches on any original ID on an existing Quay.
+     * @param incomingQuay incoming Quay
+     * @param alreadyAdded the quay that is already added to the stop place's list of quays
+     * @return true if found match
      */
-    private boolean appendIdIfMatchingOriginalId(Quay incomingQuay, Quay alreadyAdded, AtomicInteger updatedQuaysCounter) {
+    private boolean matchesOnOriginalId(Quay incomingQuay, Quay alreadyAdded) {
         Set<String> strippedAlreadyAddedIds = removePrefixesFromIds(alreadyAdded.getOriginalIds());
         Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
 
         if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
             logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
-            // The incoming quay could for some reason already have multiple imported IDs.
-            boolean changed = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
-            if(changed) {
-                incomingQuay.setChanged(ZonedDateTime.now());
-                updatedQuaysCounter.incrementAndGet();
-            }
             return true;
         }
         return false;
