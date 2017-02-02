@@ -9,6 +9,7 @@ import org.hibernate.internal.SQLQueryImpl;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.persister.entity.JoinedSubclassEntityPersister;
 import org.hibernate.persister.entity.SingleTableEntityPersister;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.Quay;
@@ -53,7 +54,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                 logger.trace("About to retrieve or set id for: {}", entityStructure);
 
                 SessionImpl sessionImpl = (SessionImpl) session;
-                String tableName = ((SingleTableEntityPersister) (sessionImpl).getSessionFactory().getAllClassMetadata().get(obj.getClass().getCanonicalName())).getTableName();
+                String tableName = ((AbstractEntityPersister) (sessionImpl).getSessionFactory().getAllClassMetadata().get(obj.getClass().getCanonicalName())).getTableName();
 
                 String sql = "SELECT generate_next_available_id('" + tableName + "', " + desiredId + ")";
 

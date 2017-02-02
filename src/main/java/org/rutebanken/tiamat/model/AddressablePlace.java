@@ -1,12 +1,10 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-
+import javax.persistence.*;
 
 @Entity
-public class AddressablePlace extends Place {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class AddressablePlace extends Place {
 
     @Transient
     protected String url;

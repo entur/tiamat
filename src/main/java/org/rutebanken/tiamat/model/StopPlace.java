@@ -11,8 +11,7 @@ import java.util.*;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-@Table(indexes = {@Index(name = "name_value_index", columnList = "name_value"),
-        @Index(name="topographic_place_ref_index", columnList = "topographic_place_ref"),
+@Table(indexes = {
         @Index(name="stop_place_type_index", columnList = "stopPlaceType")})
 public class StopPlace
         extends Site_VersionStructure implements Serializable {

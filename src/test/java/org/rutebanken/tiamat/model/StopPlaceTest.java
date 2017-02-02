@@ -55,6 +55,7 @@ public class StopPlaceTest {
         assertThat(explicitIdStopPlace.getId()).isEqualTo(explicitId);
         assertThat(giveMeAnyId.getId()).isLessThan(explicitId);
         assertThat(giveMeAnyId2.getId()).isLessThan(explicitId);
+
     }
 
     /**

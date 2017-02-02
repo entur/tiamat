@@ -30,7 +30,7 @@ public class StopPlaceRepositoryTest {
     private StopPlaceRepository stopPlaceRepository;
 
     @Before
-    public void cleanRepositoriey() {
+    public void cleanRepositories() {
         stopPlaceRepository.deleteAll();
     }
 
