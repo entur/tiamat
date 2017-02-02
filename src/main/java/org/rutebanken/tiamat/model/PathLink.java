@@ -1,15 +1,24 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Transient;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Entity
 public class PathLink extends Link {
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     protected PathLinkEnd from;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     protected PathLinkEnd to;
+
+    @Embedded
     protected TransferDurationStructure transferDuration;
 
     @Transient

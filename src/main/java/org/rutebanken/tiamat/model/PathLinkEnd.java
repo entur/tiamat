@@ -3,12 +3,21 @@ package org.rutebanken.tiamat.model;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Level;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+@Entity
 public class PathLinkEnd {
+
+    @Id
+    private long id;
 
     private AddressablePlace place;
 
     private SiteEntrance entrance;
 
+    @Transient
     private Level level;
 
     public AddressablePlace getPlace() {
@@ -33,5 +42,13 @@ public class PathLinkEnd {
 
     public void setLevel(Level level) {
         this.level = level;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }
