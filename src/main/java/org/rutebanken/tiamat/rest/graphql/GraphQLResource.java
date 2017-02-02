@@ -1,16 +1,15 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import graphql.execution.ExecutorServiceExecutionStrategy;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,10 +20,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 @Component
 @Path("/graphql")
+@Transactional
 public class GraphQLResource {
 
 	@Autowired
@@ -35,10 +34,7 @@ public class GraphQLResource {
 	
 	@PostConstruct
 	public void init() {
-		graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema,
-				new ExecutorServiceExecutionStrategy(Executors
-						.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("GraphQLExecutor--%d").build())));
-		
+		graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema);
 	}
 
 	private GraphQL graphQL;

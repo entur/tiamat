@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-@Table //(indexes = {@Index(name = "parent_topographic_ref_index", columnList = "parent_topographic_ref")})
+@Table
 public class TopographicPlace
         extends Place_VersionStructure {
 
@@ -23,16 +23,10 @@ public class TopographicPlace
     @Embedded
     protected CountryRef countryRef;
 
-//    @AttributeOverrides({
-//            @AttributeOverride(name = "ref", column = @Column(name = "parent_topographic_ref")),
-//            @AttributeOverride(name = "version", column = @Column(name = "parent_topographic_ref_version"))
-//    })
-//    @Embedded
     @Transient
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
 
     @OneToOne
-    @Embedded
     protected TopographicPlace parentTopographicPlace;
 
     public TopographicPlace(EmbeddableMultilingualString name) {
