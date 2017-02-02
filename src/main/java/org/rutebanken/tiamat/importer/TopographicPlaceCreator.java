@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.Striped;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
+import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
@@ -52,24 +53,31 @@ public class TopographicPlaceCreator {
     /**
      * Find or create topographic place and, if found, set correct reference on provided site.
      */
-    public void setTopographicReference(StopPlace stopPlace,
+    public void setTopographicReference(Site_VersionStructure site,
                                         List<TopographicPlace> incomingTopographicPlaces,
                                         AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
-        if(stopPlace.getTopographicPlaceRef() == null) return;
+        if(site.getTopographicPlaceRef() == null) return;
 
 
         Optional<TopographicPlace> optionalTopographicPlace = findOrCreateTopographicPlace(
                 incomingTopographicPlaces,
-                stopPlace.getTopographicPlaceRef(),
+                site.getTopographicPlaceRef(),
                 topographicPlacesCreatedCounter);
 
         if (!optionalTopographicPlace.isPresent()) {
-            logger.warn("Got no topographic places back for StopPlace {} {}", stopPlace.getName(), stopPlace.getId());
+            logger.warn("Got no topographic places back for site {} {}", site.getName(), site.getId());
         }
 
         optionalTopographicPlace.ifPresent(topographicPlace -> {
-            logger.trace("Setting topographical ref {} on StopPlace {} {}", topographicPlace.getId(), stopPlace.getName(), stopPlace.getId());
-            stopPlace.setTopographicPlace(topographicPlace);
+            logger.trace("Setting topographical ref {} on site {} {}",
+                    topographicPlace.getId(), site.getName(), site.getId());
+            if (site instanceof StopPlace) {
+                ((StopPlace)site).setTopographicPlace(topographicPlace);
+            } else {
+                TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
+                newRef.setRef(String.valueOf(topographicPlace.getId()));
+                site.setTopographicPlaceRef(newRef);
+            }
         });
     }
 
