@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.Transient;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,27 +10,64 @@ public class PathLink extends Link {
 
     protected PathLinkEnd from;
     protected PathLinkEnd to;
-
-    protected MultilingualStringEntity description;
-    protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
-    protected AccessibilityAssessment accessibilityAssessment;
-    protected List<AccessModeEnumeration> accessModes;
-    protected PublicUseEnumeration publicUse;
-    protected CoveredEnumeration covered;
-    protected GatedEnumeration gated;
-    protected LightingEnumeration lighting;
-    protected Boolean allAreasWheelchairAccessible;
-    protected BigInteger personCapacity;
-    protected SiteFacilitySets_RelStructure facilities;
-    protected MultilingualStringEntity towards;
-    protected MultilingualStringEntity back;
-    protected BigInteger numberOfSteps;
-    protected PathDirectionEnumeration allowedUse;
-    protected TransitionEnumeration transition;
-    protected AccessFeatureEnumeration accessFeatureType;
-    protected PassageTypeEnumeration passageType;
-    protected BigInteger maximumFlowPerMinute;
     protected TransferDurationStructure transferDuration;
+
+    @Transient
+    protected MultilingualStringEntity description;
+
+    @Transient
+    protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
+
+    @Transient
+    protected AccessibilityAssessment accessibilityAssessment;
+
+    @Transient
+    protected List<AccessModeEnumeration> accessModes;
+
+    @Transient
+    protected PublicUseEnumeration publicUse;
+
+    @Transient
+    protected CoveredEnumeration covered;
+
+    @Transient
+    protected GatedEnumeration gated;
+
+    @Transient
+    protected LightingEnumeration lighting;
+
+    @Transient
+    protected Boolean allAreasWheelchairAccessible;
+
+    @Transient
+    protected BigInteger personCapacity;
+
+    @Transient
+    protected SiteFacilitySets_RelStructure facilities;
+
+    @Transient
+    protected MultilingualStringEntity towards;
+
+    @Transient
+    protected MultilingualStringEntity back;
+
+    @Transient
+    protected BigInteger numberOfSteps;
+
+    @Transient
+    protected PathDirectionEnumeration allowedUse;
+
+    @Transient
+    protected TransitionEnumeration transition;
+
+    @Transient
+    protected AccessFeatureEnumeration accessFeatureType;
+
+    @Transient
+    protected PassageTypeEnumeration passageType;
+
+    @Transient
+    protected BigInteger maximumFlowPerMinute;
 
     public PathLinkEnd getFrom() {
         return from;
