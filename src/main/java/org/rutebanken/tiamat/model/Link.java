@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import net.opengis.gml._3.LineStringType;
 
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 
@@ -10,9 +11,15 @@ public abstract class Link
 
     protected MultilingualStringEntity name;
     protected BigDecimal distance;
-    protected LinkTypeRefs_RelStructure types;
     protected LineStringType lineString;
+
+    @Transient
+    protected LinkTypeRefs_RelStructure types;
+
+    @Transient
     protected Projections_RelStructure projections;
+
+    @Transient
     protected PointsOnLink_RelStructure passingThrough;
 
     public MultilingualStringEntity getName() {
