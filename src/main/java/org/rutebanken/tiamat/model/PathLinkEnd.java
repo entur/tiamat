@@ -1,20 +1,21 @@
 package org.rutebanken.tiamat.model;
 
+import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Level;
 
 public class PathLinkEnd {
 
-    private Place place;
+    private AddressablePlace place;
 
     private SiteEntrance entrance;
 
     private Level level;
 
-    public Place getPlace() {
+    public AddressablePlace getPlace() {
         return place;
     }
 
-    public void setPlace(Place place) {
+    public void setPlace(AddressablePlace place) {
         this.place = place;
     }
 
