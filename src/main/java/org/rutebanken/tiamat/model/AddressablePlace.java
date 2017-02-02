@@ -5,8 +5,7 @@ import javax.persistence.Transient;
 
 
 @MappedSuperclass
-public class AddressablePlace
-        extends Place {
+public class AddressablePlace extends Place {
 
     @Transient
     protected String url;
@@ -16,7 +15,6 @@ public class AddressablePlace
 
     @Transient
     protected PostalAddress postalAddress;
-
 
     @Transient
     protected RoadAddress roadAddress;
