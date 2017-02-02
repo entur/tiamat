@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.Transient;
-import javax.xml.datatype.Duration;
+import java.time.Duration;
 
 
 public class TransferDurationStructure {
