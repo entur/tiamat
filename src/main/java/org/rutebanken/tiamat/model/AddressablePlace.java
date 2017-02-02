@@ -1,10 +1,11 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 
-@MappedSuperclass
+@Entity
 public class AddressablePlace extends Place {
 
     @Transient

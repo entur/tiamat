@@ -5,6 +5,7 @@ import org.rutebanken.netex.model.Level;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @Entity
@@ -13,8 +14,10 @@ public class PathLinkEnd {
     @Id
     private long id;
 
+    @OneToOne
     private AddressablePlace place;
 
+    @Transient
     private SiteEntrance entrance;
 
     @Transient
