@@ -8,15 +8,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.EntityStructure;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -304,7 +297,7 @@ public class StopPlaceRepositoryImplTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()))
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getId().toString()))
                 .setStopTypeEnumerations(stopTypeEnumerations)
                 .setPageable(pageable)
                 .build());
@@ -322,7 +315,7 @@ public class StopPlaceRepositoryImplTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlaceRef().getRef()))
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getId().toString()))
                 .setPageable(pageable).build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -620,9 +613,7 @@ public class StopPlaceRepositoryImplTest {
         municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
 
         if (parentCounty != null) {
-            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-            countyRef.setRef(parentCounty.getId().toString());
-            municipality.setParentTopographicPlaceRef(countyRef);
+            municipality.setParentTopographicPlace(parentCounty);
         }
 
         topographicPlaceRepository.save(municipality);
@@ -643,9 +634,7 @@ public class StopPlaceRepositoryImplTest {
         stopPlace.setName(new EmbeddableMultilingualString(name, ""));
 
         if (municipality != null) {
-            TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-            municipalityRef.setRef(municipality.getId().toString());
-            stopPlace.setTopographicPlaceRef(municipalityRef);
+            stopPlace.setTopographicPlace(municipality);
         }
 
         stopPlaceRepository.save(stopPlace);

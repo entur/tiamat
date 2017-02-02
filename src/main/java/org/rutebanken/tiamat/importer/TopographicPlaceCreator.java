@@ -8,13 +8,14 @@ import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,9 +71,13 @@ public class TopographicPlaceCreator {
         optionalTopographicPlace.ifPresent(topographicPlace -> {
             logger.trace("Setting topographical ref {} on site {} {}",
                     topographicPlace.getId(), site.getName(), site.getId());
-            TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
-            newRef.setRef(String.valueOf(topographicPlace.getId()));
-            site.setTopographicPlaceRef(newRef);
+            if (site instanceof StopPlace) {
+                ((StopPlace)site).setTopographicPlace(topographicPlace);
+            } else {
+                TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
+                newRef.setRef(String.valueOf(topographicPlace.getId()));
+                site.setTopographicPlaceRef(newRef);
+            }
         });
     }
 
@@ -120,6 +125,20 @@ public class TopographicPlaceCreator {
                             topographicPlaceFromRepo.getTopographicPlaceType());
                     return optionalTopographicPlaceFromRepo;
                 } else {
+                    if (topographicPlaceFromRef.getParentTopographicPlace() != null) {
+                        //If topographic place has parent - check repo for already existing
+                        Optional<TopographicPlace> parentTopographicPlaceInRepo = findTopoGraphicPlaceInRepository(topographicPlaceFromRef.getParentTopographicPlace());
+                        if (parentTopographicPlaceInRepo.isPresent()) {
+                            //Use already existing
+                            topographicPlaceFromRef.setParentTopographicPlace(parentTopographicPlaceInRepo.get());
+                        } else {
+                            // Parent does not exist in repo - create and set
+                            Optional<TopographicPlace> newParent = createNewTopographicPlace(incomingTopographicPlaces, topographicPlaceFromRef.getParentTopographicPlace(), topographicPlacesCreatedCounter);
+                            if (newParent.isPresent()) {
+                                topographicPlaceFromRef.setParentTopographicPlace(newParent.get());
+                            }
+                        }
+                    }
                     return createNewTopographicPlace(incomingTopographicPlaces, topographicPlaceFromRef, topographicPlacesCreatedCounter);
                 }
 
@@ -140,16 +159,22 @@ public class TopographicPlaceCreator {
         TopographicPlace newTopographicPlace = mapperFacade.map(topographicPlaceFromRef, TopographicPlace.class);
         newTopographicPlace.setId(null);
 
-        if(topographicPlaceFromRef.getParentTopographicPlaceRef() != null && !topographicPlaceFromRef.getParentTopographicPlaceRef().getRef().isEmpty()) {
+        if(topographicPlaceFromRef.getParentTopographicPlaceRef() != null && topographicPlaceFromRef.getParentTopographicPlaceRef().getRef() != null ) {
             logger.debug("The topographic place contains reference to parent place '{}'", topographicPlaceFromRef.getParentTopographicPlaceRef().getRef());
+
+            TopographicPlaceRefStructure parentRef = new TopographicPlaceRefStructure();
+            parentRef.setRef(String.valueOf(topographicPlaceFromRef.getParentTopographicPlaceRef().getRef()));
+
             Optional<TopographicPlace> parentTopographicPlace = findOrCreateTopographicPlace(incomingTopographicPlaces,
-                    topographicPlaceFromRef.getParentTopographicPlaceRef(), topographicPlacesCreatedCounter);
+                    parentRef, topographicPlacesCreatedCounter);
+
             parentTopographicPlace.ifPresent(parent -> {
                 logger.debug("Found parent place '{}' for '{}'", parent.getName().getValue(), newTopographicPlace.getName().getValue());
 
-                TopographicPlaceRefStructure parentRef = new TopographicPlaceRefStructure();
                 parentRef.setRef(String.valueOf(parent.getId()));
                 newTopographicPlace.setParentTopographicPlaceRef(parentRef);
+
+                newTopographicPlace.setParentTopographicPlace(parent);
             });
         }
 

@@ -38,7 +38,7 @@ public class GraphQLNames {
     static final String NAME = "name";
     static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     static final String TOPOGRAPHIC_PLACE = "topographicPlace";
-    static final String TOPOGRAPHIC_PARENT_PLACE = "topographicParentPlace";
+    static final String PARENT_TOPOGRAPHIC_PLACE = "parentTopographicPlace";
     static final String VALUE = "value";
     static final String LANG = "lang";
 

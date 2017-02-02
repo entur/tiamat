@@ -1,20 +1,22 @@
 package org.rutebanken.tiamat.model;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
+@Transactional
 public class TopographicPlaceTest {
 
 
@@ -32,18 +34,16 @@ public class TopographicPlaceTest {
 
         topographicPlaceRepository.save(nedreEiker);
 
-        TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
-        topographicPlaceRefStructure.setRef(String.valueOf(nedreEiker.getId()));
-
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Steinberg", "no"));
-        stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
+        stopPlace.setTopographicPlace(nedreEiker);
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
-        assertThat(actualStopPlace.getTopographicPlaceRef()).isNotNull();
-        assertThat(actualStopPlace.getTopographicPlaceRef().getRef()).isEqualTo(topographicPlaceRefStructure.getRef());
+        assertThat(actualStopPlace.getTopographicPlace()).isNotNull();
+        assertThat(actualStopPlace.getTopographicPlace().getId()).isEqualTo(nedreEiker.getId());
+        assertThat(actualStopPlace.getTopographicPlace().getName()).isEqualTo(nedreEiker.getName());
     }
 
     @Test
@@ -55,21 +55,18 @@ public class TopographicPlaceTest {
 
         topographicPlaceRepository.save(buskerud);
 
-        TopographicPlaceRefStructure buskerudReference = new TopographicPlaceRefStructure();
-        buskerudReference.setRef(String.valueOf(buskerud.getId()));
-
         // Municipality
         TopographicPlace nedreEiker = new TopographicPlace();
         nedreEiker.setName(new EmbeddableMultilingualString("Nedre Eiker", "no"));
-        nedreEiker.setParentTopographicPlaceRef(buskerudReference);
+        nedreEiker.setParentTopographicPlace(buskerud);
 
         topographicPlaceRepository.save(nedreEiker);
 
         TopographicPlace actualNedreEiker = topographicPlaceRepository.findOne(nedreEiker.getId());
 
         assertThat(actualNedreEiker).isNotNull();
-        assertThat(actualNedreEiker.getParentTopographicPlaceRef()).isNotNull();
-        assertThat(actualNedreEiker.getParentTopographicPlaceRef().getRef()).isEqualTo(buskerudReference.getRef());
+        assertThat(actualNedreEiker.getParentTopographicPlace()).isNotNull();
+        assertThat(actualNedreEiker.getParentTopographicPlace().getId()).isEqualTo(buskerud.getId());
 
     }
 

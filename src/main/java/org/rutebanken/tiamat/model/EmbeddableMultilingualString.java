@@ -1,9 +1,10 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @Embeddable
-public class EmbeddableMultilingualString extends MultilingualString {
+public class EmbeddableMultilingualString extends MultilingualString implements Serializable {
     public EmbeddableMultilingualString() {
     }
 

@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.dtoassembling.assembler;
 
-import org.rutebanken.tiamat.dtoassembling.dto.CountyOrMunicipalityDto;
-import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
+import org.rutebanken.tiamat.dtoassembling.dto.CountyOrMunicipalityDto;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +23,7 @@ public class CountyOrMunicipalityAssemblerTest {
         TopographicPlace asker = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
         asker.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
 
-        TopographicPlaceRefStructure akershusReference = new TopographicPlaceRefStructure();
-        akershusReference.setRef(akershus.getId().toString());
-
-        asker.setParentTopographicPlaceRef(akershusReference);
+        asker.setParentTopographicPlace(akershus);
 
         List<TopographicPlace> topographicPlaces = new ArrayList<>();
         topographicPlaces.add(asker);

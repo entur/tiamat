@@ -4,6 +4,10 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
@@ -11,10 +15,6 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -396,9 +396,7 @@ public class DtoStopPlaceResourceIntegrationTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
         if(municipality != null) {
-            TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-            municipalityRef.setRef(municipality.getId().toString());
-            stopPlace.setTopographicPlaceRef(municipalityRef);
+            stopPlace.setTopographicPlace(municipality);
         }
         stopPlaceRepository.save(stopPlace);
         return stopPlace;
@@ -415,9 +413,7 @@ public class DtoStopPlaceResourceIntegrationTest {
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
         if(county != null) {
-            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-            countyRef.setRef(county.getId().toString());
-            municipality.setParentTopographicPlaceRef(countyRef);
+            municipality.setParentTopographicPlace(county);
         }
         topographicPlaceRepository.save(municipality);
         return municipality;
