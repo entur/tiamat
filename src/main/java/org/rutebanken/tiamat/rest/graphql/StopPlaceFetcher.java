@@ -110,7 +110,7 @@ class StopPlaceFetcher implements DataFetcher {
         if (stopPlaces != null && isFieldRequested(environment, TOPOGRAPHIC_PLACE)) {
             stopPlaces.getContent().forEach(stopPlace -> stopPlace.setTopographicPlace(stopPlace.getTopographicPlace()));
 
-            if (stopPlaces != null && isFieldRequested(environment, TOPOGRAPHIC_PLACE, PARENT_TOPOGRAPHIC_PLACE)) {
+            if (isFieldRequested(environment, TOPOGRAPHIC_PLACE, PARENT_TOPOGRAPHIC_PLACE)) {
                 stopPlaces.getContent().stream()
                         .filter(sp -> sp.getTopographicPlace() != null)
                         .forEach(stopPlace -> stopPlace.getTopographicPlace().setParentTopographicPlace(stopPlace.getTopographicPlace().getParentTopographicPlace()));

@@ -117,6 +117,20 @@ public class TopographicPlaceCreator {
                             topographicPlaceFromRepo.getTopographicPlaceType());
                     return optionalTopographicPlaceFromRepo;
                 } else {
+                    if (topographicPlaceFromRef.getParentTopographicPlace() != null) {
+                        //If topographic place has parent - check repo for already existing
+                        Optional<TopographicPlace> parentTopographicPlaceInRepo = findTopoGraphicPlaceInRepository(topographicPlaceFromRef.getParentTopographicPlace());
+                        if (parentTopographicPlaceInRepo.isPresent()) {
+                            //Use already existing
+                            topographicPlaceFromRef.setParentTopographicPlace(parentTopographicPlaceInRepo.get());
+                        } else {
+                            // Parent does not exist in repo - create and set
+                            Optional<TopographicPlace> newParent = createNewTopographicPlace(incomingTopographicPlaces, topographicPlaceFromRef.getParentTopographicPlace(), topographicPlacesCreatedCounter);
+                            if (newParent.isPresent()) {
+                                topographicPlaceFromRef.setParentTopographicPlace(newParent.get());
+                            }
+                        }
+                    }
                     return createNewTopographicPlace(incomingTopographicPlaces, topographicPlaceFromRef, topographicPlacesCreatedCounter);
                 }
 
