@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-public class RoadElement_VersionStructure
-        extends InfrastructureLink_VersionStructure {
+public class RoadElement_
+        extends InfrastructureLink_ {
 
     protected RoadPointRefStructure fromPointRef;
     protected RoadPointRefStructure toPointRef;

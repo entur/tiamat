@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-public class WireElement_VersionStructure
-        extends InfrastructureLink_VersionStructure {
+public class WireElement_
+        extends InfrastructureLink_ {
 
     protected WirePointRefStructure fromPointRef;
     protected WirePointRefStructure toPointRef;

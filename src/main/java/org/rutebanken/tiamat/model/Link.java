@@ -5,7 +5,7 @@ import net.opengis.gml._3.LineStringType;
 import java.math.BigDecimal;
 
 
-public abstract class Link_VersionStructure
+public abstract class Link
         extends DataManagedObjectStructure {
 
     protected MultilingualStringEntity name;

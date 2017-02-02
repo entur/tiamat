@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-public class RailwayElement_VersionStructure
-        extends InfrastructureLink_VersionStructure {
+public class RailwayElement_
+        extends InfrastructureLink_ {
 
     protected RailwayPointRefStructure fromPointRef;
     protected RailwayPointRefStructure toPointRef;

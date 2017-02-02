@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class PathLink extends Link_VersionStructure {
+public class PathLink extends Link {
 
     protected PathLinkEnd from;
     protected PathLinkEnd to;
+
     protected MultilingualStringEntity description;
     protected AccessibilityAssessmentRefStructure accessibilityAssessmentRef;
     protected AccessibilityAssessment accessibilityAssessment;

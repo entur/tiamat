@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-public class ActivationLink_VersionStructure
-        extends Link_VersionStructure {
+public class ActivationLink_
+        extends Link {
 
     protected TypeOfActivationRefStructure typeOfActivationRef;
     protected ActivationPointRefStructure fromPointRef;
