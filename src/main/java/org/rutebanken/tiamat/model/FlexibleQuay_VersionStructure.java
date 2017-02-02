@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class FlexibleQuay_VersionStructure
-        extends Place_VersionStructure {
+        extends Place {
 
     protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;

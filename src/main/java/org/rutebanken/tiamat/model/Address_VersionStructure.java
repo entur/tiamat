@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class Address_VersionStructure
-        extends Place_VersionStructure {
+        extends Place {
 
     protected CountryRef countryRef;
     protected MultilingualStringEntity countryName;

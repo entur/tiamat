@@ -6,7 +6,7 @@ import javax.persistence.Transient;
 
 @MappedSuperclass
 public class AddressablePlace_VersionStructure
-        extends Place_VersionStructure {
+        extends Place {
 
     @Transient
     protected String url;

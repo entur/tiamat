@@ -4,17 +4,17 @@ import org.rutebanken.netex.model.Level;
 
 public class PathLinkEnd {
 
-    private Place_VersionStructure place;
+    private Place place;
 
     private SiteEntrance entrance;
 
     private Level level;
 
-    public Place_VersionStructure getPlace() {
+    public Place getPlace() {
         return place;
     }
 
-    public void setPlace(Place_VersionStructure place) {
+    public void setPlace(Place place) {
         this.place = place;
     }
 

@@ -1,14 +1,14 @@
 package org.rutebanken.tiamat.model;
 
-public abstract class Place_VersionStructure
+public abstract class Place
         extends Zone_VersionStructure {
 
     protected TypeOfPlaceRefs_RelStructure placeTypes;
 
-    public Place_VersionStructure() {
+    public Place() {
     }
 
-    public Place_VersionStructure(EmbeddableMultilingualString name) {
+    public Place(EmbeddableMultilingualString name) {
         super(name);
     }
 

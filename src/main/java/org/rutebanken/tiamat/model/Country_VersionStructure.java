@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class Country_VersionStructure
-        extends Place_VersionStructure {
+        extends Place {
 
     protected PrivateCodeStructure uicCode;
     protected MultilingualStringEntity countryName;
