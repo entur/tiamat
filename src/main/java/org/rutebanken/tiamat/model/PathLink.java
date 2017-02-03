@@ -78,6 +78,14 @@ public class PathLink extends Link {
     @Transient
     protected BigInteger maximumFlowPerMinute;
 
+    public PathLink(PathLinkEnd from, PathLinkEnd to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    public PathLink() {
+    }
+
     public PathLinkEnd getFrom() {
         return from;
     }

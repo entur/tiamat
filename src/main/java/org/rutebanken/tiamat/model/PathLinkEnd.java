@@ -1,21 +1,28 @@
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.*;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
+
+import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 @Entity
 public class PathLinkEnd {
 
     @Id
+    @GeneratedValue(generator="idgen")
+    @GenericGenerator(name = "idgen",
+            strategy = "org.rutebanken.tiamat.repository.OptionalIdGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
+            })
     private long id;
 
     @OneToOne
     private StopPlace stopPlace;
 
-    @Transient
-    @OneToOne
+    @ManyToOne
     private Quay quay;
 
     @Transient
@@ -36,20 +43,35 @@ public class PathLinkEnd {
     @Transient
     private Level level;
 
+    public PathLinkEnd(Quay quay) {
+        this.quay = quay;
+    }
+
+    public PathLinkEnd(StopPlace stopPlace) {
+        this.stopPlace = stopPlace;
+    }
+
+    public PathLinkEnd(AccessSpace accessSpace) {
+        this.accessSpace = accessSpace;
+    }
+
+    public PathLinkEnd(SiteEntrance entrance) {
+        this.entrance = entrance;
+    }
+
+    public PathLinkEnd(Level level) {
+        this.level = level;
+    }
+
+    public PathLinkEnd() {
+    }
+
     public SiteEntrance getEntrance() {
         return entrance;
     }
 
-    public void setEntrance(SiteEntrance entrance) {
-        this.entrance = entrance;
-    }
-
     public Level getLevel() {
         return level;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
     }
 
     public long getId() {
@@ -64,15 +86,8 @@ public class PathLinkEnd {
         return stopPlace;
     }
 
-    public void setStopPlace(StopPlace stopPlace) {
-        this.stopPlace = stopPlace;
-    }
-
     public Quay getQuay() {
         return quay;
     }
 
-    public void setQuay(Quay quay) {
-        this.quay = quay;
-    }
 }
