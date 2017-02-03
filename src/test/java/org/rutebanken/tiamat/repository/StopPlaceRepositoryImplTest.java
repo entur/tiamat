@@ -89,6 +89,28 @@ public class StopPlaceRepositoryImplTest {
     }
 
     @Test
+    public void keyValuesForAddressablePlaceNoMixup() {
+        Quay quay = new Quay();
+        quay.getOrCreateValues("key").add("value");
+
+        quayRepository.save(quay);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getOrCreateValues("key").add("value");
+        stopPlaceRepository.save(stopPlace);
+
+
+        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        assertThat(id).isEqualTo(stopPlace.getId());
+        StopPlace actual = stopPlaceRepository.findOne(id);
+        Assertions.assertThat(actual).isNotNull();
+        Assertions.assertThat(actual.getKeyValues()).containsKey("key");
+
+        Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
+    }
+
+
+    @Test
     public void noStopPlaceFromKeyValue() {
         StopPlace firstStopPlace = new StopPlace();
         firstStopPlace.getKeyValues().put("key", new Value("value"));
