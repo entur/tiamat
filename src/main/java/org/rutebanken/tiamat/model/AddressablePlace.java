@@ -1,9 +1,9 @@
 package org.rutebanken.tiamat.model;
 
+
 import javax.persistence.*;
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@MappedSuperclass
 public abstract class AddressablePlace extends Place {
 
     @Transient

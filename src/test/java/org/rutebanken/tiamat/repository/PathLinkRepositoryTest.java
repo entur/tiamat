@@ -36,7 +36,7 @@ public class PathLinkRepositoryTest {
     public void persistPathLinkWithPathLinkEnd() {
         PathLink pathLink = new PathLink();
         PathLinkEnd from = new PathLinkEnd();
-        from.setPlace(createAndSaveStop("A stop place that is references to by a path link"));
+        from.setStopPlace(createAndSaveStop("A stop place that is referenced to by a path link"));
         pathLink.setFrom(from);
 
         pathLinkRepository.save(pathLink);
@@ -44,7 +44,6 @@ public class PathLinkRepositoryTest {
         PathLink actualPathLink = pathLinkRepository.findOne(pathLink.getId());
 
         assertThat(actualPathLink.getFrom()).isNotNull();
-        assertThat(actualPathLink.getFrom().getPlace()).isInstanceOf(StopPlace.class);
     }
 
     private StopPlace createAndSaveStop(String name) {

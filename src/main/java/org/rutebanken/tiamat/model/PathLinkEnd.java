@@ -1,8 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.Level;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -15,21 +12,29 @@ public class PathLinkEnd {
     private long id;
 
     @OneToOne
-    private AddressablePlace place;
+    private StopPlace stopPlace;
+
+    @Transient
+    @OneToOne
+    private Quay quay;
+
+    @Transient
+    @OneToOne
+    private PointOfInterest pointOfInterest;
+
+    @Transient
+    @OneToOne
+    private AccessSpace accessSpace;
+
+    @Transient
+    @OneToOne
+    private PathJunction pathJunction;
 
     @Transient
     private SiteEntrance entrance;
 
     @Transient
     private Level level;
-
-    public AddressablePlace getPlace() {
-        return place;
-    }
-
-    public void setPlace(AddressablePlace place) {
-        this.place = place;
-    }
 
     public SiteEntrance getEntrance() {
         return entrance;
@@ -53,5 +58,21 @@ public class PathLinkEnd {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public StopPlace getStopPlace() {
+        return stopPlace;
+    }
+
+    public void setStopPlace(StopPlace stopPlace) {
+        this.stopPlace = stopPlace;
+    }
+
+    public Quay getQuay() {
+        return quay;
+    }
+
+    public void setQuay(Quay quay) {
+        this.quay = quay;
     }
 }
