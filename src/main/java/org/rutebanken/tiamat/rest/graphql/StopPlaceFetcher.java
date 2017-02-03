@@ -89,7 +89,7 @@ class StopPlaceFetcher implements DataFetcher {
 
                 Long ignoreStopPlaceId = null;
                 if (environment.getArgument(IGNORE_STOPPLACE_ID) != null) {
-                    ignoreStopPlaceId = new Long(environment.getArgument(IGNORE_STOPPLACE_ID));
+                    ignoreStopPlaceId = NetexIdMapper.getTiamatId(environment.getArgument(IGNORE_STOPPLACE_ID));
                 }
 
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
