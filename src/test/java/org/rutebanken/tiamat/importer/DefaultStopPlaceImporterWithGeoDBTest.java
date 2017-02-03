@@ -187,6 +187,7 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
         assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
 
+    //TODO: move test further out, because looking up topographic places is moved.
     @Test
     public void reproduceIssueWithDuplicateCountiesAndMunicipalities() {
 
