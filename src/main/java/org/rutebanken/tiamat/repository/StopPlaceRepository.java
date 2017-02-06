@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -17,11 +18,6 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
     @Override
-//    @CachePut(value = "stopPlace", key = "#p0.getId()", cacheManager = "guavaCacheManager")
-    StopPlace save(StopPlace stopPlace);
-
-    @Override
-//    @Cacheable(value = "stopPlace", key = "#p0", cacheManager = "guavaCacheManager")
     StopPlace findOne(Long stopPlaceId);
 
     @Override
