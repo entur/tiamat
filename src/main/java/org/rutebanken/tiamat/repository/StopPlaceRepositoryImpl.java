@@ -147,6 +147,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setParameter("values", values);
 
         try {
+            @SuppressWarnings("unchecked")
             List<BigInteger> results = query.getResultList();
             if(results.isEmpty()) {
                 return null;
@@ -170,6 +171,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setParameter("value", "%"+value+"%");
 
         try {
+            @SuppressWarnings("unchecked")
             List<BigInteger> results = query.getResultList();
             if(results.isEmpty()) {
                 return null;
@@ -186,6 +188,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN stop_place_quays spq on spq.quays_id = q.quay_id INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
+        @SuppressWarnings("unchecked")
         List<Object[]> result = nativeQuery.getResultList();
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
@@ -196,6 +199,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
         String sql = "select v.items, spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id";
