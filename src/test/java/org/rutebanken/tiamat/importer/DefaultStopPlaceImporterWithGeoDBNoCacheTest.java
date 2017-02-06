@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @TestPropertySource(properties = {
         "stopPlaceFromOriginalIdFinderCache.maxSize = 0",
-        "guavaCacheManager.maxSize = 0",
         "stopPlaceFromOriginalIdFinderCache.maxSize = 0"}
 )
 @ActiveProfiles("geodb")
