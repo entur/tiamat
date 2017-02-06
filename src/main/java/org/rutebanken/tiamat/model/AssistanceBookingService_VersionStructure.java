@@ -12,7 +12,6 @@ public class AssistanceBookingService_VersionStructure
     protected BookingArrangementsStructure bookingArrangements;
     protected AllModesEnumeration vehicleMode;
     protected JAXBElement<? extends OrganisationRefStructure> transportOrganisationRef;
-    protected JAXBElement<? extends LineRefStructure> lineRef;
     protected VersionOfObjectRefStructure bookedObjectRef;
     protected NoticeAssignments_RelStructure noticeAssignmenrts;
 
@@ -62,14 +61,6 @@ public class AssistanceBookingService_VersionStructure
 
     public void setTransportOrganisationRef(JAXBElement<? extends OrganisationRefStructure> value) {
         this.transportOrganisationRef = value;
-    }
-
-    public JAXBElement<? extends LineRefStructure> getLineRef() {
-        return lineRef;
-    }
-
-    public void setLineRef(JAXBElement<? extends LineRefStructure> value) {
-        this.lineRef = value;
     }
 
     public VersionOfObjectRefStructure getBookedObjectRef() {

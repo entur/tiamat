@@ -2,10 +2,11 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 import java.util.Objects;
 
 @MappedSuperclass
-public abstract class MultilingualString {
+public abstract class MultilingualString implements Serializable {
 
     protected String value;
 

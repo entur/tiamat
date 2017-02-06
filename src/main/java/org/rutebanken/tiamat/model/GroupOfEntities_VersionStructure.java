@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.model;
 import javax.persistence.*;
 
 @MappedSuperclass
+@Table(indexes = {@Index(name = "name_value_index", columnList = "name_value")})
 public abstract class GroupOfEntities_VersionStructure
         extends DataManagedObjectStructure {
 

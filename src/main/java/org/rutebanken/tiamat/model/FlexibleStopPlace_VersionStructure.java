@@ -1,14 +1,13 @@
 package org.rutebanken.tiamat.model;
 
 public class FlexibleStopPlace_VersionStructure
-        extends Place_VersionStructure {
+        extends Place {
 
     protected MultilingualStringEntity nameSuffix;
     protected AlternativeNames_RelStructure alternativeNames;
     protected VehicleModeEnumeration transportMode;
     protected String publicCode;
     protected Areas areas;
-    protected LineRefs_RelStructure lines;
 
     public MultilingualStringEntity getNameSuffix() {
         return nameSuffix;
@@ -48,14 +47,6 @@ public class FlexibleStopPlace_VersionStructure
 
     public void setAreas(Areas value) {
         this.areas = value;
-    }
-
-    public LineRefs_RelStructure getLines() {
-        return lines;
-    }
-
-    public void setLines(LineRefs_RelStructure value) {
-        this.lines = value;
     }
 
 }

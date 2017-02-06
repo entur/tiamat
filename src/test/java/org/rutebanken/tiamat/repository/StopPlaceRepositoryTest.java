@@ -29,8 +29,12 @@ public class StopPlaceRepositoryTest {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Autowired
+    private PathLinkRepository pathLinkRepository;
+
     @Before
-    public void cleanRepositoriey() {
+    public void cleanRepositories() {
+        pathLinkRepository.deleteAll();;
         stopPlaceRepository.deleteAll();
     }
 

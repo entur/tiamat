@@ -755,9 +755,7 @@ public class GraphQLResourceIntegrationTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
         if(municipality != null) {
-            TopographicPlaceRefStructure municipalityRef = new TopographicPlaceRefStructure();
-            municipalityRef.setRef(municipality.getId().toString());
-            stopPlace.setTopographicPlaceRef(municipalityRef);
+            stopPlace.setTopographicPlace(municipality);
         }
         stopPlaceRepository.save(stopPlace);
         return stopPlace;
@@ -774,9 +772,7 @@ public class GraphQLResourceIntegrationTest {
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
         if(county != null) {
-            TopographicPlaceRefStructure countyRef = new TopographicPlaceRefStructure();
-            countyRef.setRef(county.getId().toString());
-            municipality.setParentTopographicPlaceRef(countyRef);
+            municipality.setParentTopographicPlace(county);
         }
         topographicPlaceRepository.save(municipality);
         return municipality;

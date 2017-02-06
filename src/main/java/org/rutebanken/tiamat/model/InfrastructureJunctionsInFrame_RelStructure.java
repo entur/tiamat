@@ -7,11 +7,11 @@ import java.util.List;
 public class InfrastructureJunctionsInFrame_RelStructure
         extends ContainmentAggregationStructure {
 
-    protected List<InfrastructurePoint_VersionStructure> railwayJunctionOrRoadJunctionOrWireJunction;
+    protected List<InfrastructurePoint_> railwayJunctionOrRoadJunctionOrWireJunction;
 
-    public List<InfrastructurePoint_VersionStructure> getRailwayJunctionOrRoadJunctionOrWireJunction() {
+    public List<InfrastructurePoint_> getRailwayJunctionOrRoadJunctionOrWireJunction() {
         if (railwayJunctionOrRoadJunctionOrWireJunction == null) {
-            railwayJunctionOrRoadJunctionOrWireJunction = new ArrayList<InfrastructurePoint_VersionStructure>();
+            railwayJunctionOrRoadJunctionOrWireJunction = new ArrayList<InfrastructurePoint_>();
         }
         return this.railwayJunctionOrRoadJunctionOrWireJunction;
     }

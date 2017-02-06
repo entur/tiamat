@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class RoadElement
-        extends RoadElement_VersionStructure {
+        extends RoadElement_ {
 
 
 }

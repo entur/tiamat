@@ -78,6 +78,19 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLString))
                 .build();
 
+        GraphQLObjectType topographicParentPlaceObjectType = newObject()
+                .name(TYPE_TOPOGRAPHIC_PLACE)
+                .field(newFieldDefinition()
+                        .name(ID)
+                        .type(GraphQLLong))
+                .field(newFieldDefinition()
+                        .name(TOPOGRAPHIC_PLACE_TYPE)
+                        .type(topographicPlaceTypeEnum))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .build();
+
         GraphQLObjectType topographicPlaceObjectType = newObject()
                 .name(TYPE_TOPOGRAPHIC_PLACE)
                 .field(newFieldDefinition()
@@ -89,6 +102,15 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(NAME)
                         .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(PARENT_TOPOGRAPHIC_PLACE)
+                        .type(topographicParentPlaceObjectType)
+//                        .dataFetcher(env -> {
+//                                TopographicPlace sp = (TopographicPlace) env.getSource();
+//
+//                                return sp.getParentTopographicPlace();
+//                        })
+                )
                 .build();
 
         GraphQLObjectType locationObjectType = newObject()
@@ -153,14 +175,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE)
                         .type(topographicPlaceObjectType)
-                        .dataFetcher(env -> {
-                            StopPlace sp = (StopPlace) env.getSource();
-                            String ref = sp.getTopographicPlaceRef().getRef();
-                            if (ref != null) {
-                                return topographicPlaceRepository.findOne(Long.valueOf(ref));
-                            }
-                            return null;
-                        }))
+                )
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))

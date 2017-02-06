@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import javax.persistence.CascadeType;
@@ -14,6 +16,8 @@ import java.util.Set;
 @MappedSuperclass
 public abstract class DataManagedObjectStructure
         extends EntityInVersionStructure {
+
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final Map<String, Value> keyValues = new HashMap<>();
 

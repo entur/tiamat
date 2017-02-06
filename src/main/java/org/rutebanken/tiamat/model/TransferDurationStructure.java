@@ -1,13 +1,20 @@
 package org.rutebanken.tiamat.model;
 
-import javax.xml.datatype.Duration;
+import javax.persistence.Transient;
+import java.time.Duration;
 
 
 public class TransferDurationStructure {
 
     protected Duration defaultDuration;
+
+    @Transient
     protected Duration frequentTravellerDuration;
+
+    @Transient
     protected Duration occasionalTravellerDuration;
+
+    @Transient
     protected Duration mobilityRestrictedTravellerDuration;
 
     public Duration getDefaultDuration() {

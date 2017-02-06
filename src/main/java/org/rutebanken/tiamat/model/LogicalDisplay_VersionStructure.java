@@ -5,7 +5,6 @@ public class LogicalDisplay_VersionStructure
 
     protected MultilingualStringEntity name;
     protected MultilingualStringEntity description;
-    protected DisplayAssignments_RelStructure displayAssignments;
 
     public MultilingualStringEntity getName() {
         return name;
@@ -21,14 +20,6 @@ public class LogicalDisplay_VersionStructure
 
     public void setDescription(MultilingualStringEntity value) {
         this.description = value;
-    }
-
-    public DisplayAssignments_RelStructure getDisplayAssignments() {
-        return displayAssignments;
-    }
-
-    public void setDisplayAssignments(DisplayAssignments_RelStructure value) {
-        this.displayAssignments = value;
     }
 
 }

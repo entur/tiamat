@@ -4,7 +4,6 @@ public class SiteConnectionEndStructure {
 
     protected AllVehicleModesOfTransportEnumeration transportMode;
     protected StopAreaRefStructure stopAreaRef;
-    protected ScheduledStopPointRefStructure scheduledStopPointRef;
     protected StopPlaceReference stopPlaceRef;
     protected AccessSpaceRefStructure accessSpaceRef;
     protected BoardingPositionRefStructure boardingPositionRef;
@@ -34,14 +33,6 @@ public class SiteConnectionEndStructure {
 
     public void setStopAreaRef(StopAreaRefStructure value) {
         this.stopAreaRef = value;
-    }
-
-    public ScheduledStopPointRefStructure getScheduledStopPointRef() {
-        return scheduledStopPointRef;
-    }
-
-    public void setScheduledStopPointRef(ScheduledStopPointRefStructure value) {
-        this.scheduledStopPointRef = value;
     }
 
     public StopPlaceReference getStopPlaceRef() {

@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class BeaconPoint
-        extends BeaconPoint_VersionStructure {
+        extends BeaconPoint_ {
 
 
 }

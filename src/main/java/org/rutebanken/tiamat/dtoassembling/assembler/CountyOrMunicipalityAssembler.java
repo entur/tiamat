@@ -36,8 +36,8 @@ public class CountyOrMunicipalityAssembler {
         });
 
         municipalities.forEach(municipality -> {
-            if (municipality.getParentTopographicPlaceRef() != null) {
-                long countyId = Long.parseLong(municipality.getParentTopographicPlaceRef().getRef());
+            if (municipality.getParentTopographicPlace() != null) {
+                long countyId = municipality.getParentTopographicPlace().getId();
                 TopographicPlace county = counties.get(countyId);
                 CountyOrMunicipalityDto admin = map(municipality);
                 if (county != null) {

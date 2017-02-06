@@ -1,11 +1,15 @@
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-@Table(indexes = {@Index(name = "parent_topographic_ref_index", columnList = "parent_topographic_ref")})
+@Table
 public class TopographicPlace
-        extends Place_VersionStructure {
+        extends Place {
 
     protected String isoCode;
 
@@ -19,12 +23,11 @@ public class TopographicPlace
     @Embedded
     protected CountryRef countryRef;
 
-    @AttributeOverrides({
-            @AttributeOverride(name = "ref", column = @Column(name = "parent_topographic_ref")),
-            @AttributeOverride(name = "version", column = @Column(name = "parent_topographic_ref_version"))
-    })
-    @Embedded
+    @Transient
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
+
+    @OneToOne
+    protected TopographicPlace parentTopographicPlace;
 
     public TopographicPlace(EmbeddableMultilingualString name) {
         super(name);
@@ -64,6 +67,15 @@ public class TopographicPlace
 
     public void setParentTopographicPlaceRef(TopographicPlaceRefStructure value) {
         this.parentTopographicPlaceRef = value;
+    }
+
+    public TopographicPlace getParentTopographicPlace() {
+        return parentTopographicPlace;
+    }
+
+
+    public void setParentTopographicPlace(TopographicPlace value) {
+        this.parentTopographicPlace = value;
     }
 
 }

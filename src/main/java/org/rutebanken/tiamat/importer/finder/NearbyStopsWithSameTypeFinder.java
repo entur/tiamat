@@ -107,7 +107,7 @@ public class NearbyStopsWithSameTypeFinder {
                 logger.debug("Found {} nearby matches on type with stop place ID", stopPlacesIds.size());
 
                 if(stopPlacesIds.size() > 1) {
-                    logger.warn("Query for stop places returned more than one. Incoming stop place: {}. Result: ", stopPlace, stopPlacesIds);
+                    logger.warn("Query for stop places returned more than one. Incoming stop place: {}. Result: {}", stopPlace, stopPlacesIds);
                 }
 
                 return stopPlaceRepository.findAll(stopPlacesIds);

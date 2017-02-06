@@ -2,7 +2,9 @@ package org.rutebanken.tiamat.dtoassembling.assembler;
 
 
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,42 +73,23 @@ public class StopPlaceAssembler {
     }
 
     public StopPlaceDto assembleMunicipalityAndCounty(StopPlaceDto stopPlaceDto, StopPlace stopPlace) {
-        TopographicPlaceRefStructure topographicRef = stopPlace.getTopographicPlaceRef();
 
-        if(topographicRef != null) {
-            long municipalityId = toLong(topographicRef.getRef(), stopPlace);
-            if(municipalityId == 0) return stopPlaceDto;
-
-            logger.trace("Found reference from stop place '{}' {} to a topographic place {}", stopPlace.getName(), stopPlace.getId(), topographicRef.getRef());
-
-            TopographicPlace municipality = topographicPlaceRepository.findOne(municipalityId);
-
-            if (municipality == null) {
-                logger.warn("Municipality was null from reference {}", topographicRef.getRef());
-                return stopPlaceDto;
-            }
-
+        if (stopPlace.getTopographicPlace() != null) {
+            TopographicPlace municipality = stopPlace.getTopographicPlace();
             if (municipality.getName() != null) {
                 stopPlaceDto.municipality = municipality.getName().getValue();
             }
 
             logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDto.municipality, stopPlace.getName(), stopPlace.getId());
 
-            TopographicPlaceRefStructure countyRef = municipality.getParentTopographicPlaceRef();
-            if(countyRef != null) {
-
-                long countyId = toLong(countyRef.getRef(), stopPlace);
-                if(countyId == 0 ) return stopPlaceDto;
-                TopographicPlace county = topographicPlaceRepository.findOne(countyId);
+            TopographicPlace county = municipality.getParentTopographicPlace();
+            if(county != null) {
 
                 if(county != null && county.getName() != null) {
                     logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getId(), municipality.getName(), municipality.getId());
                     stopPlaceDto.county = county.getName().getValue();
                 }
-            } else {
-                logger.warn("Found no county reference (parent topographic place ref) from municipality '{}' {}", municipality.getName(), municipality.getId());
             }
-
         }
 
         return stopPlaceDto;

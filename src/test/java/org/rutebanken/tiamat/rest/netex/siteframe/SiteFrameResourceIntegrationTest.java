@@ -4,14 +4,14 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,9 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasXPath;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TiamatTestApplication.class)
@@ -72,25 +70,19 @@ public class SiteFrameResourceIntegrationTest {
 
         topographicPlaceRepository.save(county);
 
-        TopographicPlaceRefStructure countyReference = new TopographicPlaceRefStructure();
-        countyReference.setRef(String.valueOf(county.getId()));
-
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new EmbeddableMultilingualString("Nedre Eiker", "no"));
-        municipality.setParentTopographicPlaceRef(countyReference);
+        municipality.setParentTopographicPlace(county);
         municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
         municipality.setCountryRef(countryRef);
 
         topographicPlaceRepository.save(municipality);
 
-        TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure();
-        topographicPlaceRefStructure.setRef(String.valueOf(municipality.getId()));
-
         StopPlace stopPlace = new StopPlace();
         String firstStopPlaceName = "first stop place name";
         stopPlace.setName(new EmbeddableMultilingualString(firstStopPlaceName, "en"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        stopPlace.setTopographicPlaceRef(topographicPlaceRefStructure);
+        stopPlace.setTopographicPlace(municipality);
 
 
         Quay quay = new Quay();

@@ -66,11 +66,12 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
+        <hazelcast-hibernate5.version>1.2</hazelcast-hibernate5.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>0.0.9-SNAPSHOT</netex-java-model.version>
-
+        <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -110,17 +111,33 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.rutebanken.helpers</groupId>
+                <artifactId>hazelcast-helper</artifactId>
+                <version>${hazelcast-helper.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
 
     <dependencies>
-		<dependency>
-		    <groupId>com.graphql-java</groupId>
-		    <artifactId>graphql-java</artifactId>
-		    <version>2.3.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.rutebanken.helpers</groupId>
+            <artifactId>hazelcast-helper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-hibernate5</artifactId>
+            <version>${hazelcast-hibernate5.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>

@@ -8,7 +8,7 @@ import java.util.List;
 
 
 @MappedSuperclass
-public class EquipmentPlace_VersionStructure extends Place_VersionStructure {
+public class EquipmentPlace_VersionStructure extends Place {
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPosition> equipmentPositions;
 

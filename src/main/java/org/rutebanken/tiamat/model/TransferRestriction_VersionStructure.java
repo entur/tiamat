@@ -6,8 +6,6 @@ public class TransferRestriction_VersionStructure
     protected TypeOfTransferRefStructure typeOfTransferRef;
     protected Boolean bothWays;
     protected TransferConstraintTypeEnumeration restrictionType;
-    protected ScheduledStopPointRefStructure fromPointRef;
-    protected ScheduledStopPointRefStructure toPointRef;
 
     public TypeOfTransferRefStructure getTypeOfTransferRef() {
         return typeOfTransferRef;
@@ -31,22 +29,6 @@ public class TransferRestriction_VersionStructure
 
     public void setRestrictionType(TransferConstraintTypeEnumeration value) {
         this.restrictionType = value;
-    }
-
-    public ScheduledStopPointRefStructure getFromPointRef() {
-        return fromPointRef;
-    }
-
-    public void setFromPointRef(ScheduledStopPointRefStructure value) {
-        this.fromPointRef = value;
-    }
-
-    public ScheduledStopPointRefStructure getToPointRef() {
-        return toPointRef;
-    }
-
-    public void setToPointRef(ScheduledStopPointRefStructure value) {
-        this.toPointRef = value;
     }
 
 }

@@ -6,7 +6,6 @@ public class StopAssignment_VersionStructure
     protected Boolean boardingUse;
     protected Boolean alightingUse;
     protected PrivateCodeStructure privateCode;
-    protected ScheduledStopPointRefStructure scheduledStopPointRef;
 
     public Boolean isBoardingUse() {
         return boardingUse;
@@ -30,14 +29,6 @@ public class StopAssignment_VersionStructure
 
     public void setPrivateCode(PrivateCodeStructure value) {
         this.privateCode = value;
-    }
-
-    public ScheduledStopPointRefStructure getScheduledStopPointRef() {
-        return scheduledStopPointRef;
-    }
-
-    public void setScheduledStopPointRef(ScheduledStopPointRefStructure value) {
-        this.scheduledStopPointRef = value;
     }
 
 }

@@ -1,12 +1,15 @@
 package org.rutebanken.tiamat.importer;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.junit.Ignore;
-import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -127,11 +130,10 @@ public class TopographicPlaceCreatorTest {
         // County
         Long incomingCountyId = 10L;
         TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Incoming, unsaved county");
-        TopographicPlaceRefStructure incomingCountyRef = createTopographicPlaceRef(incomingCounty);
 
         // Municipality
         Long incomingMunicipalityId = 11L;
-        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCountyRef, "Incoming municipality with reference to County");
+        TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCounty, "Incoming municipality with reference to County");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
 
@@ -157,12 +159,12 @@ public class TopographicPlaceCreatorTest {
         assertThat(actualMunicipality).isNotNull();
 
         // Id should have been saved, so it should not be the same as the incoming place.
-        assertThat(actualMunicipality.getParentTopographicPlaceRef()).isNotNull();
-        TopographicPlaceRefStructure actualCountyRef = actualMunicipality.getParentTopographicPlaceRef();
+        assertThat(actualMunicipality.getParentTopographicPlace()).isNotNull();
+        TopographicPlace actualCountyRef = actualMunicipality.getParentTopographicPlace();
 
         assertThat(idCounter.get()).isEqualTo(2);
         assertThat(savedPlaces).hasSize(2);
-        assertThat(savedPlaces).extracting(EntityStructure::getId).contains(Long.valueOf(actualCountyRef.getRef()));
+        assertThat(savedPlaces).extracting(EntityStructure::getId).contains(Long.valueOf(actualCountyRef.getId()));
         assertThat(savedPlaces).extracting(topographicPlace -> topographicPlace.getName().getValue()).contains(incomingCounty.getName().getValue());
     }
 
@@ -180,11 +182,10 @@ public class TopographicPlaceCreatorTest {
         // Incoming county
         Long incomingCountyId = 13L;
         TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Akershus");
-        TopographicPlaceRefStructure incomingCountyRef = createTopographicPlaceRef(incomingCounty);
 
         // Incoming municipality
         Long incomingMunicipalityId = 14L;
-        TopographicPlace incomingMunicipality  = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCountyRef, "Asker");
+        TopographicPlace incomingMunicipality  = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCounty, "Asker");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
         List<TopographicPlace> places = Arrays.asList(incomingMunicipality, incomingCounty);
@@ -193,7 +194,7 @@ public class TopographicPlaceCreatorTest {
         TopographicPlace actualMunicipality = topographicPlaceCreator.findOrCreateTopographicPlace(places, incomingMunicipalityRef, new AtomicInteger()).get();
 
         // Assert
-        assertThat(actualMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(existingCounty.getId().toString());
+        assertThat(actualMunicipality.getParentTopographicPlace().getId()).isEqualTo(existingCounty.getId());
     }
 
 
@@ -272,12 +273,12 @@ public class TopographicPlaceCreatorTest {
     }
 
     private TopographicPlace createTopographicPlace(Long id, CountryRef countryRef,
-                                                    TopographicPlaceRefStructure parentTopographicPlaceRef,
+                                                    TopographicPlace parentTopographicPlace,
                                                     String name) {
         TopographicPlace topographicPlace = new TopographicPlace();
         topographicPlace.setId(id);
         topographicPlace.setName(new EmbeddableMultilingualString(name, "no"));
-        topographicPlace.setParentTopographicPlaceRef(parentTopographicPlaceRef);
+        topographicPlace.setParentTopographicPlace(parentTopographicPlace);
         topographicPlace.setCountryRef(countryRef);
         return topographicPlace;
     }

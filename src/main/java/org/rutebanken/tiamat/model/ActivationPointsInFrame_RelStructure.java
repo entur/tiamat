@@ -8,11 +8,11 @@ import java.util.List;
 public class ActivationPointsInFrame_RelStructure
         extends ContainmentAggregationStructure {
 
-    protected List<JAXBElement<? extends Point_VersionStructure>> activationPoint_;
+    protected List<JAXBElement<? extends Point>> activationPoint_;
 
-    public List<JAXBElement<? extends Point_VersionStructure>> getActivationPoint_() {
+    public List<JAXBElement<? extends Point>> getActivationPoint_() {
         if (activationPoint_ == null) {
-            activationPoint_ = new ArrayList<JAXBElement<? extends Point_VersionStructure>>();
+            activationPoint_ = new ArrayList<JAXBElement<? extends Point>>();
         }
         return this.activationPoint_;
     }

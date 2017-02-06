@@ -41,6 +41,13 @@ public class QuayDescriptionPlatformCodeExtractorTest {
         assertThat(quay.getName().getValue()).isEqualTo("N");
         assertThat(quay.getDescription().getValue()).isEqualTo("mot øst");
     }
+    @Test
+    public void gateterminalenPlf4() {
+        Quay quay = quayWithDescription("gateterminalen plf. 4");
+        assertThat(quay.getName()).describedAs("Name should not be null").isNotNull();
+        assertThat(quay.getName().getValue()).isEqualTo("4");
+        assertThat(quay.getDescription().getValue()).isEqualTo("gateterminalen");
+    }
 
     @Test
     public void ignoreIfDescriptionIsNull() {

@@ -5,8 +5,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import graphql.language.Field;
-import graphql.language.Selection;
-import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.*;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -49,32 +49,7 @@ class StopPlaceUpdater implements DataFetcher {
                 stopPlace = createOrUpdateStopPlace(environment);
             }
         }
-        if (stopPlace != null && isFieldRequested(environment, QUAYS)) {
-            stopPlace.setQuays(new HashSet<>(stopPlace.getQuays()));
-        }
-        if (stopPlace != null && isFieldRequested(environment, IMPORTED_ID)) {
-            List<String> originalIds = new ArrayList<>(stopPlace.getOriginalIds());
-            stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, new Value(originalIds));
-        }
         return Arrays.asList(stopPlace);
-    }
-
-    private boolean isFieldRequested(DataFetchingEnvironment environment, String fieldName) {
-        boolean quaysRequested = false;
-        List<Field> fields = environment.getFields();
-        for (Field field : fields) {
-            SelectionSet selectionSet = field.getSelectionSet();
-            List<Selection> selections = selectionSet.getSelections();
-            for (Selection selection : selections) {
-                if (selection instanceof  Field) {
-                    Field selectedField = (Field) selection;
-                    if (fieldName.equals(selectedField.getName())) {
-                        quaysRequested = true;
-                    }
-                }
-            }
-        }
-        return quaysRequested;
     }
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {

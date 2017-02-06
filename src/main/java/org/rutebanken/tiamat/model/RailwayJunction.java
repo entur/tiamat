@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class RailwayJunction
-        extends RailwayJunction_VersionStructure {
+        extends RailwayJunction_ {
 
 
 }

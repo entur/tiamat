@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -87,7 +88,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
-
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 
@@ -308,14 +308,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     prefix = "(";
                 } else prefix = "";
 
-                wheres.add(prefix + "stopPlace.topographicPlaceRef.ref in :municipalityId");
-                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
+                wheres.add(prefix + "stopPlace.topographicPlace.id in :municipalityId");
+                parameters.put("municipalityId", Lists.transform(stopPlaceSearch.getMunicipalityIds(), Long::valueOf));
             }
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
-                wheres.add("stopPlace.topographicPlaceRef.ref in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
-                parameters.put("countyId", stopPlaceSearch.getCountyIds());
+                wheres.add("stopPlace.topographicPlace.id in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlace.id in :countyId)" + suffix);
+                parameters.put("countyId", Lists.transform(stopPlaceSearch.getCountyIds(), Long::valueOf));
             }
         }
 

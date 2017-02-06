@@ -7,7 +7,6 @@ public class HeadingSignStructure
         extends SignEquipment_VersionStructure {
 
     protected MultilingualStringEntity placeName;
-    protected JAXBElement<? extends LineRefStructure> lineRef;
     protected MultilingualStringEntity lineName;
     protected VehicleModeEnumeration transportMode;
     protected TransportSubmodeStructure transportSubmode;
@@ -23,14 +22,6 @@ public class HeadingSignStructure
 
     public void setPlaceName(MultilingualStringEntity value) {
         this.placeName = value;
-    }
-
-    public JAXBElement<? extends LineRefStructure> getLineRef() {
-        return lineRef;
-    }
-
-    public void setLineRef(JAXBElement<? extends LineRefStructure> value) {
-        this.lineRef = value;
     }
 
     public MultilingualStringEntity getLineName() {

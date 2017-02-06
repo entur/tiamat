@@ -6,7 +6,6 @@ public class PlaceInSequence_VersionedChildStructure
     protected PlaceRefStructure placeRef;
     protected String branchLevel;
     protected MultilingualStringEntity description;
-    protected OnwardLinks onwardLinks;
 
     public PlaceRefStructure getPlaceRef() {
         return placeRef;
@@ -30,14 +29,6 @@ public class PlaceInSequence_VersionedChildStructure
 
     public void setDescription(MultilingualStringEntity value) {
         this.description = value;
-    }
-
-    public OnwardLinks getOnwardLinks() {
-        return onwardLinks;
-    }
-
-    public void setOnwardLinks(OnwardLinks value) {
-        this.onwardLinks = value;
     }
 
 }

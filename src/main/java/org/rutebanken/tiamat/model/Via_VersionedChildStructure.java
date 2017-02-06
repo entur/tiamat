@@ -6,7 +6,6 @@ public class Via_VersionedChildStructure
     protected DestinationDisplayRefStructure destinationDisplayRef;
     protected DestinationDisplayView destinationDisplayView;
     protected MultilingualStringEntity name;
-    protected RoutePointRefStructure routePointRef;
     protected ViaTypeEnumeration viaType;
 
     public DestinationDisplayRefStructure getDestinationDisplayRef() {
@@ -31,14 +30,6 @@ public class Via_VersionedChildStructure
 
     public void setName(MultilingualStringEntity value) {
         this.name = value;
-    }
-
-    public RoutePointRefStructure getRoutePointRef() {
-        return routePointRef;
-    }
-
-    public void setRoutePointRef(RoutePointRefStructure value) {
-        this.routePointRef = value;
     }
 
     public ViaTypeEnumeration getViaType() {

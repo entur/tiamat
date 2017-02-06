@@ -8,7 +8,7 @@ import java.util.List;
 
 @MappedSuperclass
 public abstract class SiteElement_VersionStructure
-        extends AddressablePlace_VersionStructure {
+        extends AddressablePlace {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();

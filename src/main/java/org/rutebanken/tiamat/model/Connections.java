@@ -8,7 +8,6 @@ public class Connections {
 
     protected List<Access> access;
     protected List<Connection> connection;
-    protected List<DefaultConnection> defaultConnection;
     protected List<SiteConnection> siteConnection;
 
     public List<Access> getAccess() {
@@ -23,13 +22,6 @@ public class Connections {
             connection = new ArrayList<Connection>();
         }
         return this.connection;
-    }
-
-    public List<DefaultConnection> getDefaultConnection() {
-        if (defaultConnection == null) {
-            defaultConnection = new ArrayList<DefaultConnection>();
-        }
-        return this.defaultConnection;
     }
 
     public List<SiteConnection> getSiteConnection() {
