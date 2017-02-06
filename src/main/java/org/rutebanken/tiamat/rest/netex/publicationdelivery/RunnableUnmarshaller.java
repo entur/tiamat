@@ -54,11 +54,16 @@ public class RunnableUnmarshaller implements Runnable {
                         StopPlace stopPlace = unmarshaller.unmarshal(xmlEventReader, StopPlace.class).getValue();
                         stops.incrementAndGet();
                         unmarshalResult.getStopPlaceQueue().put(stopPlace);
+
+                        if(stops.get() % 20 == 0) {
+                            logger.info("Unmarshalled stop number {}", stops.get());
+                        }
                     }
                 } else if (xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
                     String localPartOfName = endElement.getName().getLocalPart();
                     if (localPartOfName.equals("stopPlaces")) {
+                        logger.info("End of stop places in incoming XML. Counter ended at {}. Adding poison pill to the queue.", stops.get());
                         unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
                     }
                 }
