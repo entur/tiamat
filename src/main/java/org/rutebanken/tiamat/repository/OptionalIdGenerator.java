@@ -62,7 +62,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             logger.trace("I have these ids available for table {}: {}", tableName, availableIds);
 
             if (entityStructure.getId() != null) {
-                logger.warn("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
+                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
                 availableIds.remove(entityStructure.getId());
                 return entityStructure.getId();
             } else {
