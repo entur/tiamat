@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -21,32 +22,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * When importing site frames with the matching stops concurrently, not thread safe.
+ */
 @Component
+@Transactional
 public class SiteFrameImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameImporter.class);
 
-    private static final Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
-
     private final TopographicPlaceCreator topographicPlaceCreator;
-    private final NetexMapper netexMapper;
-    private final StopPlaceNameCleaner stopPlaceNameCleaner;
-    private final NameToDescriptionMover nameToDescriptionMover;
-    private final QuayNameRemover quayNameRemover;
-    private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
-    private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
-    private final CompassBearingRemover compassBearingRemover;
 
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator, NetexMapper netexMapper, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor, CompassBearingRemover compassBearingRemover) {
+    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator) {
         this.topographicPlaceCreator = topographicPlaceCreator;
-        this.netexMapper = netexMapper;
-        this.stopPlaceNameCleaner = stopPlaceNameCleaner;
-        this.nameToDescriptionMover = nameToDescriptionMover;
-        this.quayNameRemover = quayNameRemover;
-        this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
-        this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
-        this.compassBearingRemover = compassBearingRemover;
+
     }
 
     public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
@@ -75,13 +65,7 @@ public class SiteFrameImporter {
             if(siteFrame.getStopPlaces() != null) {
                 List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
                         .stream()
-                        .peek(stopPlace -> MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds))
-                        .map(stopPlace -> compassBearingRemover.remove(stopPlace))
-                        .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
-                        .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
-                        .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
-                        .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
-                        .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
+                        .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds))
                         .map(stopPlace ->
                                 importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
                         )
@@ -98,7 +82,7 @@ public class SiteFrameImporter {
                             new StopPlacesInFrame_RelStructure()
                                     .withStopPlace(distinctByIdAndHighestVersion(createdStopPlaces)));
             } else {
-                logger.info("Site frame does not contain any stop places: ", siteFrame);
+                logger.info("Site frame does not contain any stop places: {}", siteFrame);
             }
             return netexSiteFrame;
         } finally {
@@ -107,24 +91,14 @@ public class SiteFrameImporter {
     }
 
     private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
-        String semaphoreKey = getStripedSemaphoreKey(stopPlace);
-        Semaphore semaphore = stripedSemaphores.get(semaphoreKey);
 
         try {
-            semaphore.acquire();
-            logger.info("Aquired semaphore '{}' for stop place {}", semaphoreKey, stopPlace);
-
             org.rutebanken.netex.model.StopPlace importedStop = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
             stopPlacesCreated.incrementAndGet();
             return importedStop;
 
         } catch (Exception e) {
-            // When having issues with one stop place, do not fail for all other stop places in publication delivery.
-            logger.error("Caught exception while importing stop place. Semaphore was " + semaphoreKey, e);
-            return null;
-        } finally {
-            semaphore.release();
-            logger.info("Released semaphore '{}'", semaphoreKey);
+            throw new RuntimeException("Could not import stop place "+stopPlace, e);
         }
     }
 
@@ -162,7 +136,7 @@ public class SiteFrameImporter {
     private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
         long duration = System.currentTimeMillis() - startTime;
 
-        MDC.put(PublicationDeliveryResource.IMPORT_CORRELATION_ID, originalIds);
+        MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds);
         String stopPlacesPerSecond = "NA";
 
         if(duration >= 1000) {

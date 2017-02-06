@@ -97,11 +97,11 @@ public class TopographicPlaceCreator {
     private Optional<TopographicPlace> findOrCreate(List<TopographicPlace> incomingTopographicPlaces,
                                                     TopographicPlaceRefStructure topographicPlaceRef,
                                                     AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
-        logger.debug("Waiting for semaphore on ref {}");
+        logger.debug("Waiting for semaphore on ref {}", topographicPlaceRef);
         // Striped locking on the ref string.
         Semaphore semaphore = stripedSemaphores.get(topographicPlaceRef.getRef());
         semaphore.acquire();
-        logger.debug("Got semaphore on ref {}");
+        logger.debug("Got semaphore on ref {}", topographicPlaceRef);
 
         try {
             Optional<TopographicPlace> optionalTopographicPlaceFromRef = topographicPlaceFromRefFinder.findTopographicPlaceFromRef(incomingTopographicPlaces, topographicPlaceRef);

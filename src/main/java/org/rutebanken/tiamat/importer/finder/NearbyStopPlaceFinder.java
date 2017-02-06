@@ -30,9 +30,9 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     @Autowired
     public NearbyStopPlaceFinder(StopPlaceRepository stopPlaceRepository,
-                                         @Value("${nearbyStopPlaceFinderCache.maxSize:20000}") int maximumSize,
+                                         @Value("${nearbyStopPlaceFinderCache.maxSize:50000}") int maximumSize,
                                          @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
-                                         @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:MINUTES}") TimeUnit expiresAfterTimeUnit) {
+                                         @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
@@ -69,13 +69,13 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
     }
 
     public void update(StopPlace savedStopPlace) {
-        if(savedStopPlace.hasCoordinates()) {
+        if(savedStopPlace.hasCoordinates() && savedStopPlace.getStopPlaceType() != null) {
             nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getId()));
         }
     }
 
     public final String createKey(StopPlace stopPlace, Envelope envelope) {
-        return stopPlace.getName() + "-" + envelope.toString();
+        return stopPlace.getName() + "-" + stopPlace.getStopPlaceType().value() + "-" + envelope.toString();
     }
 
     public final String createKey(StopPlace stopPlace) {
