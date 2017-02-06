@@ -4,8 +4,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
@@ -186,61 +188,6 @@ public class DefaultStopPlaceImporterWithGeoDBTest {
 
         assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
-
-    //TODO: move test further out, because looking up topographic places is moved.
-    @Test
-    public void reproduceIssueWithDuplicateCountiesAndMunicipalities() {
-
-        List<StopPlace> stopPlaces = new ArrayList<>();
-
-        for(int i = 0; i < 5; i++) {
-            StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop place " + i));
-            stopPlace.setId(Long.valueOf(i));
-            stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0393763, 59.750071)));
-            stopPlaces.add(stopPlace);
-        }
-
-        stopPlaces.parallelStream()
-                .forEach(stopPlace -> {
-                    try {
-
-                        defaultStopPlaceImporter.importStopPlace(stopPlace, new SiteFrame(), topographicPlacesCounter);
-                    } catch (ExecutionException|InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
-        Iterable<TopographicPlace> topographicPlaces = topographicPlaceRepository.findAll();
-
-        final int[] size = new int[1];
-        topographicPlaces.forEach(tp -> {
-            size[0]++;
-            System.out.println("Topographic place repo contains " + tp.getName());
-        });
-
-        assertThat(size[0])
-                .as("Number of topographic places in the repository is not as expected")
-                .isEqualTo(2);
-
-        List<TopographicPlace> counties = topographicPlaceRepository
-                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
-                        "Buskerud",
-                        IanaCountryTldEnumeration.NO,
-                        TopographicPlaceTypeEnumeration.COUNTY);
-
-        assertThat(counties).hasSize(1);
-
-        List<TopographicPlace> municipalities = topographicPlaceRepository
-                .findByNameValueAndCountryRefRefAndTopographicPlaceType(
-                        "Nedre Eiker",
-                        IanaCountryTldEnumeration.NO,
-                        TopographicPlaceTypeEnumeration.TOWN);
-
-        assertThat(municipalities).hasSize(1);
-
-        assertThat(topographicPlacesCounter.get()).isEqualTo(2);
-    }
-
 
     private Point point(double longitude, double latitude) {
         return 
