@@ -62,8 +62,8 @@ public class PathLinkRepositoryTest {
 
         PathLink actualPathLink = pathLinkRepository.findOne(pathLink.getId());
 
-        assertThat(actualPathLink.getFrom().getId()).isEqualTo(quay1.getId());
-        assertThat(actualPathLink.getTo().getId()).isEqualTo(quay2.getId());
+        assertThat(actualPathLink.getFrom().getQuay().getId()).isEqualTo(quay1.getId());
+        assertThat(actualPathLink.getTo().getQuay().getId()).isEqualTo(quay2.getId());
     }
 
     private StopPlace createAndSaveStop(String name) {
