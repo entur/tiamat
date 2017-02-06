@@ -2,10 +2,12 @@ package org.rutebanken.tiamat.pelias;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +36,15 @@ public class CountyAndMunicipalityLookupServiceTest {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
+
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+    
+    @Before
+    public void cleanRepositories() {
+        stopPlaceRepository.deleteAll();
+        topographicPlaceRepository.deleteAll();
+    }
 
     /**
      * Earlier, there was an issue with duplicate topographic places created when running parallel tests.
