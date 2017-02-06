@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import org.apache.xerces.stax.events.StartElementImpl;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.StopPlace;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -102,11 +103,21 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
         PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller();
 
-        UnmarshalResult publicationDeliveryStructure = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+        UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
 
-        assertThat(publicationDeliveryStructure).isNotNull();
+        assertThat(unmarshalResult).isNotNull();
 
+        int stops = 0;
+        while(true) {
+            StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
+            if(stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
+                System.out.println("Finished importing stops");
+                break;
+            }
+            stops++;
+        }
 
+        assertThat(stops).isEqualTo(1);
 
     }
 
