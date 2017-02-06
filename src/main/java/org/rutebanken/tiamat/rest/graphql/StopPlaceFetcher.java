@@ -47,6 +47,12 @@ class StopPlaceFetcher implements DataFetcher {
 
             stopPlaceSearchBuilder.setIdList(idList
                     .stream()
+                    .map(nsrId -> {
+                        if(!nsrId.startsWith(NetexIdMapper.NSR)) {
+                            throw new IllegalArgumentException("Id does not start with "+NetexIdMapper.NSR +": "+nsrId);
+                        }
+                        return nsrId;
+                    })
                     .map(nsrId -> NetexIdMapper.getTiamatId(nsrId))
                     .collect(Collectors.<Long>toList()));
 
