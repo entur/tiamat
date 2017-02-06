@@ -101,7 +101,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             semaphore.acquire();
 
             while(availableIds.isEmpty()) {
-                List retrievedIds = retrieveIds(tableName, sessionImpl);
+                List<Long> retrievedIds = retrieveIds(tableName, sessionImpl);
                 logger.trace("Inserting {} ids", retrievedIds);
                 insertRetrievedIds(tableName, retrievedIds, sessionImpl);
                 availableIds.addAll(retrievedIds);
@@ -132,7 +132,8 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
         return Optional.empty();
     }
 
-    private List retrieveIds(String tableName, SessionImpl sessionImpl) {
+    @SuppressWarnings(value = "unchecked")
+    private List<Long> retrieveIds(String tableName, SessionImpl sessionImpl) {
         Long lastId = lastIdsPerTable.get(tableName);
 
         if(isH2(sessionImpl)) {
@@ -148,8 +149,8 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
         SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
         sqlQuery.addScalar("generated", LongType.INSTANCE);
-        List list = sqlQuery.list();
 
+        List list = sqlQuery.list();
         return list;
     }
 
