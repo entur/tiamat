@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
 
 import static com.google.common.io.ByteStreams.toByteArray;
 import static javax.xml.bind.JAXBContext.*;
@@ -59,8 +57,7 @@ public class PublicationDeliveryUnmarshaller {
 
         logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
 
-        JAXBElement<PublicationDeliveryStructure> jaxbElement =
-                (JAXBElement<org.rutebanken.netex.model.PublicationDeliveryStructure>) jaxbUnmarshaller.unmarshal(inputStream);
+        JAXBElement<PublicationDeliveryStructure> jaxbElement = jaxbUnmarshaller.unmarshal(new StreamSource(inputStream), PublicationDeliveryStructure.class);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
         return publicationDeliveryStructure;
