@@ -1,12 +1,14 @@
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -19,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.xml.bind.JAXBException;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 @Component
 @Transactional
@@ -38,7 +41,7 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
 
-        if(stopPlaceSearch.isEmpty()) {
+        if (stopPlaceSearch.isEmpty()) {
             return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
         } else {
             return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
@@ -49,6 +52,7 @@ public class PublicationDeliveryExporter {
         return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAll());
     }
 
+    @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure exportSiteFrame(SiteFrame siteFrame) {
         logger.info("Returning publication delivery");
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
@@ -56,9 +60,8 @@ public class PublicationDeliveryExporter {
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withParticipantRef(NetexIdMapper.NSR);
 
-
-            publicationDeliveryStructure.withDataObjects(
-                    new PublicationDeliveryStructure.DataObjects()
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
         return publicationDeliveryStructure;
@@ -77,17 +80,17 @@ public class PublicationDeliveryExporter {
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
-        if(iterableStopPlaces != null) {
+        if (iterableStopPlaces != null) {
             iterableStopPlaces.forEach(stopPlace -> stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace));
             logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
             siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
-            if(siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
+            if (siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
                 siteFrame.setStopPlaces(null);
             }
         }
 
         List<TopographicPlace> allTopographicPlaces = topographicPlaceRepository.findAll();
-        if(!allTopographicPlaces.isEmpty()) {
+        if (!allTopographicPlaces.isEmpty()) {
             Iterator<TopographicPlace> topographicPlaceIterable = allTopographicPlaces.iterator();
 
 
