@@ -41,6 +41,7 @@ public class GraphQLResource {
 
 	
     @POST
+	@SuppressWarnings("unchecked")
     @Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
     public Response getGraphQL (HashMap<String, Object> query) {
