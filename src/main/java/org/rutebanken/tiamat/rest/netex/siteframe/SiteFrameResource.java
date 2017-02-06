@@ -27,6 +27,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Iterator;
 
@@ -107,8 +108,7 @@ public class SiteFrameResource {
         JAXBContext jaxbContext = JAXBContext.newInstance(org.rutebanken.netex.model.SiteFrame.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-        JAXBElement<org.rutebanken.netex.model.SiteFrame> jaxbElement =
-                (JAXBElement<org.rutebanken.netex.model.SiteFrame>) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+        JAXBElement<org.rutebanken.netex.model.SiteFrame> jaxbElement = jaxbUnmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(xml.getBytes())), org.rutebanken.netex.model.SiteFrame.class);
         org.rutebanken.netex.model.SiteFrame receivedNetexSiteFrame = jaxbElement.getValue();
 
         logger.info("Unmarshalled site frame with {} topographical places and {} stop places",
