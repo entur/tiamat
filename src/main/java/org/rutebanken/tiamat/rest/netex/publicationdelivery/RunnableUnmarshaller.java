@@ -41,11 +41,11 @@ public class RunnableUnmarshaller implements Runnable {
 
             xmlEventReader = xmlInputFactory.createXMLEventReader(inputStream);
 
-            XMLEvent xmlEvent = null;
+            while (xmlEventReader.hasNext()) {
 
-            while ((xmlEvent = xmlEventReader.peek()) != null)
+                XMLEvent xmlEvent = xmlEventReader.peek();
 
-            {
+                logger.trace("XmlEvent {}", xmlEvent);
                 if (xmlEvent.isStartElement()) {
                     StartElement startElement = xmlEvent.asStartElement();
                     String localPartOfName = startElement.getName().getLocalPart();
@@ -55,9 +55,10 @@ public class RunnableUnmarshaller implements Runnable {
                         stops.incrementAndGet();
                         unmarshalResult.getStopPlaceQueue().put(stopPlace);
 
-                        if(stops.get() % 20 == 0) {
+                        if (stops.get() % 20 == 0) {
                             logger.info("Unmarshalled stop number {}", stops.get());
                         }
+                        continue;
                     }
                 } else if (xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
@@ -71,7 +72,12 @@ public class RunnableUnmarshaller implements Runnable {
             }
         } catch (XMLStreamException | InterruptedException | JAXBException e) {
 
-            logger.error("Could not read netex from events. " + e.getMessage(), e);
+            logger.error("Could not read netex from events. Stopping. " + e.getMessage(), e);
+            try {
+                unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+            } catch (InterruptedException e2) {
+                logger.warn("Interrupted when adding poison stop place to queue", e2);
+            }
         }
         logger.info("Unmarshalling thread finished after {} stops", stops.get());
     }

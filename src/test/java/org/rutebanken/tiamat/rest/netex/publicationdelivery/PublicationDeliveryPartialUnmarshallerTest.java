@@ -1,26 +1,23 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.apache.xerces.stax.events.StartElementImpl;
 import org.junit.Test;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PublicationDeliveryPartialUnmarshallerTest {
 
+    private PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller();
+
+    public PublicationDeliveryPartialUnmarshallerTest() throws IOException, SAXException {
+    }
+
 
     @Test
-    public void partiallyPublicationDeliveryImport() throws IOException, SAXException, JAXBException, XMLStreamException, InterruptedException, ParserConfigurationException {
+    public void partiallyPublicationDeliveryImport() throws Exception {
 
         String notValidPublicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
@@ -101,26 +98,38 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
         InputStream inputStream = new ByteArrayInputStream(notValidPublicationDeliveryXml.getBytes());
 
-        PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller();
 
         UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
 
         assertThat(unmarshalResult).isNotNull();
 
+
+        readAndVerifyStops(unmarshalResult, 1);
+    }
+
+    @Test
+    public void testImportingPublicationDeliveryFromFile() throws Exception {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("publication_delivery/initial_import.xml").getFile());
+
+        UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(new FileInputStream(file));
+        assertThat(unmarshalResult).isNotNull();
+        readAndVerifyStops(unmarshalResult, 19);
+    }
+
+    private void readAndVerifyStops(UnmarshalResult unmarshalResult, int expectedStopCount) throws InterruptedException {
         int stops = 0;
-        while(true) {
+        while (true) {
             StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
-            if(stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
+            if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                 System.out.println("Finished importing stops");
                 break;
             }
             stops++;
         }
 
-        assertThat(stops).isEqualTo(1);
-
+        assertThat(stops).isEqualTo(expectedStopCount);
     }
-
 
 
 }
