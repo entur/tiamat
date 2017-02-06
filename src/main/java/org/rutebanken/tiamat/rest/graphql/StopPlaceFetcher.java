@@ -66,7 +66,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
-            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOPPLACE_TYPE));
+            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOP_TYPE));
 
             if (environment.getArgument(COUNTY_REF) != null) {
                 stopPlaceSearchBuilder.setCountyIds(

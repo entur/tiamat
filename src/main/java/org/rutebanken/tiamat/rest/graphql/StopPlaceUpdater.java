@@ -9,6 +9,7 @@ import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -21,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
@@ -47,18 +45,8 @@ class StopPlaceUpdater implements DataFetcher {
         List<Field> fields = environment.getFields();
         StopPlace stopPlace = null;
         for (Field field : fields) {
-            if (field.getName().equals(CREATE_QUAY)) {
-
-                stopPlace = createQuay(environment);
-            } else if (field.getName().equals(UPDATE_QUAY)) {
-
-                stopPlace = updateQuay(environment);
-            } else if (field.getName().equals(CREATE_STOPPLACE)) {
-
-                stopPlace = createStopPlace(environment);
-            } else if (field.getName().equals(UPDATE_STOPPLACE)) {
-
-                stopPlace = updateStopPlace(environment);
+            if (field.getName().equals(MUTATE_STOPPLACE)) {
+                stopPlace = createOrUpdateStopPlace(environment);
             }
         }
         if (stopPlace != null && isFieldRequested(environment, QUAYS)) {
@@ -89,162 +77,145 @@ class StopPlaceUpdater implements DataFetcher {
         return quaysRequested;
     }
 
-    private StopPlace createStopPlace(DataFetchingEnvironment environment) {
+    private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
+        StopPlace stopPlace = null;
+        if (environment.getArgument(STOPPLACE) != null) {
+            Map input = environment.getArgument(STOPPLACE);
 
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setCreated(ZonedDateTime.now());
-        boolean hasValuesChanged = updateStopPlaceFromInput(environment, stopPlace);
+            String nsrId = (String) input.get(ID);
+            if (nsrId != null) {
+                stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
+            } else {
+                stopPlace = new StopPlace();
+                stopPlace.setCreated(ZonedDateTime.now());
+            }
 
-        // TODO: Create Quays
+            if (stopPlace != null) {
+                if (stopPlace.getId() != null) {
+                    logger.info("Updating StopPlace {}", stopPlace.getId());
+                } else {
+                    logger.info("Creating new StopPlace");
+                }
 
-        if (hasValuesChanged) {
-            stopPlaceRepository.save(stopPlace);
-        }
-        return stopPlace;
-    }
+                Pair<Boolean, Boolean> hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
 
-    private StopPlace updateStopPlace(DataFetchingEnvironment environment) {
-        StopPlace stopPlace;
-        String nsrId = environment.getArgument(ID);
-        stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
-        if(stopPlace != null) {
-            logger.info("Updating StopPlace {}", stopPlace.getId());
+                if (hasValuesChanged.getLeft()) {
+                    stopPlace.setChanged(ZonedDateTime.now());
+                    stopPlaceRepository.save(stopPlace);
+                }
 
-            boolean hasValuesChanged = updateStopPlaceFromInput(environment, stopPlace);
-
-            if (hasValuesChanged) {
-                stopPlace.setChanged(ZonedDateTime.now());
-                stopPlaceRepository.save(stopPlace);
+                if (hasValuesChanged.getRight() && stopPlace.getQuays() != null) {
+                    quayRepository.save(stopPlace.getQuays());
+                }
             }
         }
         return stopPlace;
     }
 
-    private StopPlace updateQuay(DataFetchingEnvironment environment) {
-        Preconditions.checkNotNull(environment.getArgument(ID), ID + " cannot be null");
-        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID + " cannot be null");
+    /**
+     *
+     * @param input
+     * @param stopPlace
+     * @return Pair- Left: StopPlace is updated, Right: Quays are updated
+     */
+    private Pair<Boolean, Boolean> populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
+        boolean isUpdated = populate(input, stopPlace);
 
-        String nsrId = environment.getArgument(ID);
-        Quay quay = quayRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
-        if(quay != null) {
-            logger.info("Updating Quay {}", quay.getId());
-
-            updateQuayFromInput(environment, quay);
-
-            quayRepository.save(quay);
+        if (input.get(STOP_TYPE) != null) {
+            stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_TYPE));
+            isUpdated = true;
         }
-        String nsrStopPlaceId = environment.getArgument(STOPPLACE_ID);
-        return stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrStopPlaceId));
-    }
 
-    private StopPlace createQuay(DataFetchingEnvironment environment) {
-        StopPlace stopPlace;
-        Preconditions.checkNotNull(environment.getArgument(STOPPLACE_ID), STOPPLACE_ID + " cannot be null");
-        Preconditions.checkNotNull(environment.getArgument(LATITUDE), LATITUDE+" cannot be null");
-        Preconditions.checkNotNull(environment.getArgument(LONGITUDE), LONGITUDE+" cannot be null");
+        boolean isQuaysUpdated = false;
+        if (input.get(QUAYS) != null) {
+            List quays = (List) input.get(QUAYS);
+            for (Object quayObject : quays) {
 
-        String nsrId = environment.getArgument(STOPPLACE_ID);
-        stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
-        if(stopPlace != null) {
-            logger.info("Adding quay to StopPlace {}", stopPlace.getId());
-            Quay newQuay = new Quay();
-            newQuay.setCreated(ZonedDateTime.now());
-            updateQuayFromInput(environment, newQuay);
-
-            stopPlace.getQuays().add(newQuay);
-
-            stopPlaceRepository.save(stopPlace);
-            quayRepository.save(stopPlace.getQuays());
+                Map quayInputMap = (Map) quayObject;
+                if (populateQuayFromInput(stopPlace, quayInputMap)) {
+                    isQuaysUpdated = true;
+                } else {
+                    logger.info("Quay not changed");
+                }
+            }
         }
-        return stopPlace;
-    }
-
-    private boolean updateStopPlaceFromInput(DataFetchingEnvironment environment, StopPlace stopPlace) {
-        boolean hasValuesChanged = setCommonFields(environment, stopPlace);
-        if (environment.getArgument(STOPPLACE_TYPE) != null) {
-            stopPlace.setStopPlaceType(environment.getArgument(STOPPLACE_TYPE));
-            hasValuesChanged = true;
-        }
-        if (environment.getArgument(ALL_AREAS_WHEELCHAIR_ACCESSIBLE) != null) {
-            stopPlace.setAllAreasWheelchairAccessible(environment.getArgument(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
-            hasValuesChanged = true;
-        }
-        if (hasValuesChanged) {
+        if (isUpdated) {
             stopPlace.setChanged(ZonedDateTime.now());
         }
-        return hasValuesChanged;
+
+        return Pair.of(isUpdated, isQuaysUpdated);
     }
 
-    private boolean updateQuayFromInput(DataFetchingEnvironment environment, Quay quay) {
-        boolean hasValuesChanged = setCommonFields(environment, quay);
+    private boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
+        Quay quay;
+        if (quayInputMap.get(ID) != null) {
+            Optional<Quay> existingQuay = stopPlace.getQuays().stream()
+                    .filter(q -> q.getId() != null)
+                    .filter(q -> q.getId().equals(NetexIdMapper.getTiamatId((String) quayInputMap.get(ID)))).findFirst();
 
-        if (environment.getArgument(ALL_AREAS_WHEELCHAIR_ACCESSIBLE) != null) {
-            quay.setAllAreasWheelchairAccessible(environment.getArgument(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
-            hasValuesChanged = true;
+            Preconditions.checkArgument(existingQuay.isPresent(), "Attempting to update Quay (id:{}) on StopPlace (id:{}) , but Quay does not exist on StopPlace", quayInputMap.get(ID), stopPlace.getId());
+
+            quay = existingQuay.get();
+            logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
+        } else {
+            quay = new Quay();
+            quay.setCreated(ZonedDateTime.now());
+
+            logger.info("Creating new Quay");
         }
-        if (environment.getArgument(COMPASS_BEARING) != null) {
-            quay.setCompassBearing(((BigDecimal) environment.getArgument(COMPASS_BEARING)).floatValue());
-            hasValuesChanged = true;
+        boolean isQuayUpdated = populate(quayInputMap, quay);
+
+        if (quayInputMap.get(COMPASS_BEARING) != null) {
+            quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());
+            isQuayUpdated = true;
         }
 
-        if (hasValuesChanged) {
+        if (isQuayUpdated) {
             quay.setChanged(ZonedDateTime.now());
+
+            //If Quay already exists it is not added - ref Quay#equals()
+            return stopPlace.getQuays().add(quay);
         }
-        return hasValuesChanged;
+        return false;
     }
 
-    private boolean setCommonFields(DataFetchingEnvironment environment, GroupOfEntities_VersionStructure entity) {
-        boolean hasValuesChanged = false;
-        if (environment.getArgument(NAME) != null) {
-            EmbeddableMultilingualString name = getCurrentOrNew(entity.getName());
+    private boolean populate(Map input, SiteElement_VersionStructure entity) {
+        boolean isUpdated = false;
 
-            String updatedName = environment.getArgument(NAME);
-            if (!updatedName.equals(name.getValue())) {
-                name.setValue(updatedName);
-                entity.setName(name);
-                hasValuesChanged = true;
-            }
+        if (input.get(NAME) != null) {
+            entity.setName(getEmbeddableString((Map) input.get(NAME)));
+            isUpdated = true;
         }
-        if (environment.getArgument(SHORT_NAME) != null) {
-            EmbeddableMultilingualString shortName = getCurrentOrNew(entity.getShortName());
+        if (input.get(SHORT_NAME) != null) {
+            entity.setShortName(getEmbeddableString((Map) input.get(SHORT_NAME)));
+            isUpdated = true;
+        }
+        if (input.get(DESCRIPTION) != null) {
+            entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
+            isUpdated = true;
+        }
+        if (input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE) != null) {
+            entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
+            isUpdated = true;
+        }
 
-            String updatedName = environment.getArgument(SHORT_NAME);
-            if (!updatedName.equals(shortName.getValue())) {
-                shortName.setValue(updatedName);
-                entity.setShortName(shortName);
-                hasValuesChanged = true;
-            }
+        if (input.get(LOCATION) != null) {
+            entity.setCentroid(createPoint((Map) input.get(LOCATION)));
         }
-        if (environment.getArgument(DESCRIPTION) != null) {
-            EmbeddableMultilingualString description = getCurrentOrNew(entity.getDescription());
-
-            String updatedName = environment.getArgument(DESCRIPTION);
-            if (!updatedName.equals(description.getValue())) {
-                description.setValue(updatedName);
-                entity.setDescription(description);
-                hasValuesChanged = true;
-            }
-        }
-        if (environment.getArgument(LONGITUDE) != null && environment.getArgument(LATITUDE) != null) {
-            ((Zone_VersionStructure)entity).setCentroid(createPoint(environment));
-            hasValuesChanged = true;
-        }
-        return hasValuesChanged;
+        return isUpdated;
     }
 
-    private EmbeddableMultilingualString getCurrentOrNew(EmbeddableMultilingualString embeddableString) {
-        if (embeddableString != null) {
-            return embeddableString;
-        }
-        return new EmbeddableMultilingualString(null, "no");
+    private EmbeddableMultilingualString getEmbeddableString(Map map) {
+        return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
     }
 
-    private Point createPoint(DataFetchingEnvironment environment) {
-        if (environment.getArgument(LONGITUDE) != null && environment.getArgument(LATITUDE) != null) {
-            Double lon = ((BigDecimal) environment.getArgument(LONGITUDE)).doubleValue();
-            Double lat = ((BigDecimal) environment.getArgument(LATITUDE)).doubleValue();
+    private Point createPoint(Map map) {
+        if (map.get(LONGITUDE) != null && map.get(LATITUDE) != null) {
+            Double lon = (Double) map.get(LONGITUDE);
+            Double lat = (Double) map.get(LATITUDE);
             return geometryFactory.createPoint(new Coordinate(lon, lat));
         }
         return null;
     }
+
 }
