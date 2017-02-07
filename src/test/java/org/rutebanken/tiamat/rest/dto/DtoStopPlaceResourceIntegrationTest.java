@@ -114,13 +114,9 @@ public class DtoStopPlaceResourceIntegrationTest {
         String firstQuayName = "first quay name";
         quay.setName(new EmbeddableMultilingualString(firstQuayName));
 
-        quayRepository.save(quay);
-
         Quay secondQuay = new Quay();
         String secondQuayName = "second quay";
         secondQuay.setName(new EmbeddableMultilingualString(secondQuayName));
-
-        quayRepository.save(secondQuay);
 
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
