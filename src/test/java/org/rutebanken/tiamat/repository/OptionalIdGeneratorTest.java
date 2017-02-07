@@ -35,24 +35,24 @@ public class OptionalIdGeneratorTest {
     @Test
     public void testUpdatingStopPlace() {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("test"));
-        stopPlaceRepository.save(stopPlace);
+        stopPlace = stopPlaceRepository.save(stopPlace);
 
         assertThat(stopPlace.getId()).isNotNull();
         Long id = stopPlace.getId();
 
         Quay quay = new Quay(new EmbeddableMultilingualString("quayTest"));
-        quayRepository.save(quay);
+        quay = quayRepository.save(quay);
 
         //Add Quay, and save StopPlace
         stopPlace.getQuays().add(quay);
-        stopPlaceRepository.save(stopPlace);
+        stopPlace = stopPlaceRepository.save(stopPlace);
 
         Quay quay2 = new Quay(new EmbeddableMultilingualString("quay2Test"));
-        quayRepository.save(quay2);
+        quay2 = quayRepository.save(quay2);
 
         //Add another Quay and save StopPlace
         stopPlace.getQuays().add(quay2);
-        stopPlaceRepository.save(stopPlace);
+        stopPlace = stopPlaceRepository.save(stopPlace);
 
         assertEquals(id, stopPlace.getId());
     }
