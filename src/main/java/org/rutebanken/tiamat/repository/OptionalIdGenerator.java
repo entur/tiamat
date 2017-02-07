@@ -45,7 +45,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
     private static Boolean isH2 = null;
 
-    private static Set<Long> usedH2Ids = new HashSet<>();
+    private static final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> usedH2Ids = new ConcurrentHashMap<>(0);
 
     @Override
     public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
@@ -140,7 +140,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
         if(isH2(sessionImpl)) {
             // Because of issues using the query below with H2.
-            return generateNextAvailableH2Ids(lastId, ID_FETCH_SIZE);
+            return generateNextAvailableH2Ids(tableName, lastId, ID_FETCH_SIZE);
         }
 
         logger.trace("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
@@ -188,19 +188,22 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     }
 
 
-    public static List<Long> generateNextAvailableH2Ids(long lastId, int max)  {
+    public static List<Long> generateNextAvailableH2Ids(String tableName, long lastId, int max)  {
         List<Long> availableIds = new ArrayList<>();
+
+        usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
 
         Long id = lastId;
         Long counter = 0L;
         while(counter < max) {
-            while (usedH2Ids.contains(++id)) {
+            while (usedH2Ids.get(tableName).contains(id)) {
                 logger.debug("Looking for next available ID. {} is taken", id);
             }
-            usedH2Ids.add(id);
             availableIds.add(id);
+            id++;
             counter++;
         }
+        usedH2Ids.get(tableName).addAll(availableIds);
 
         return availableIds;
     }
