@@ -61,9 +61,7 @@ public class StopPlaceRepositoryImplTest {
         Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
         stopPlace.getQuays().add(quay);
 
-        quayRepository.save(quay);
-        quayRepository.flush();
-        stopPlaceRepository.save(stopPlace);
+        stopPlace = stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
         BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
