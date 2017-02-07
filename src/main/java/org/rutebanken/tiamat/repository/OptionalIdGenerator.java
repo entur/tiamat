@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import com.google.common.util.concurrent.Striped;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -145,6 +146,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                 "ORDER BY generated";
 
         SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
+        sqlQuery.setFlushMode(FlushMode.MANUAL);
         sqlQuery.addScalar("generated", LongType.INSTANCE);
 
         List list = sqlQuery.list();
@@ -152,7 +154,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     }
 
 
-    private void insertRetrievedIds(String tableName, List list, SessionImpl sessionImpl) {
+    private void insertRetrievedIds(String tableName, List<Long> list, SessionImpl sessionImpl) {
         StringBuilder insertUsedIdsSql = new StringBuilder("INSERT INTO id_generator(table_name, id_value) VALUES");
 
         for (int i = 0; i < list.size(); i++) {
@@ -162,6 +164,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             }
         }
         SQLQuery query = sessionImpl.createSQLQuery(insertUsedIdsSql.toString());
+        query.setFlushMode(FlushMode.MANUAL);
         query.executeUpdate();
     }
 
