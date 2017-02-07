@@ -146,6 +146,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                 "ORDER BY generated";
 
         SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
+        sqlQuery.setFlushMode(FlushMode.COMMIT);
 //        sqlQuery.setFlushMode(FlushMode.MANUAL);
         sqlQuery.addScalar("generated", LongType.INSTANCE);
 
@@ -164,6 +165,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             }
         }
         SQLQuery query = sessionImpl.createSQLQuery(insertUsedIdsSql.toString());
+        query.setFlushMode(FlushMode.COMMIT);
 //        query.setFlushMode(FlushMode.MANUAL);
         query.executeUpdate();
     }
