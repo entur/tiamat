@@ -32,6 +32,11 @@ public class OptionalIdGeneratorTest {
 
     }
 
+    /**
+     * Was implemented under the supsicion that OptionalIdCreator caused a bug.
+     * But it was a matter of keeping the attached returned entity from save (in case the entity was merged)
+     * See NRP-1171
+     */
     @Test
     public void testUpdatingStopPlace() {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("test"));
