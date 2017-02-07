@@ -1,5 +1,9 @@
 package org.rutebanken.tiamat.repository;
 
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
@@ -9,6 +13,10 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,14 +31,41 @@ public class OptionalIdGeneratorTest {
     @Autowired
     private QuayRepository quayRepository;
 
+    @Autowired
+    private HibernateEntityManagerFactory hibernateEntityManagerFactory;
+
     @Test
     public void test() {
-
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
         assertThat(stopPlace.getId()).isNotNull();
-
     }
+
+    @Test
+    public void explicitIdMustBeInserted() {
+
+        OptionalIdGenerator optionalIdGenerator = new OptionalIdGenerator();
+
+        Session session = hibernateEntityManagerFactory.getSessionFactory().openSession();
+
+        long wantedId = 12L;
+
+        Quay quay = new Quay();
+        quay.setId(wantedId);
+
+        Serializable serializable = optionalIdGenerator.generate((SessionImplementor) session, quay);
+        Long gotId = (Long) serializable;
+        assertThat(gotId).isNotNull();
+        assertThat(gotId).isEqualTo(wantedId);
+
+        SQLQuery query = session.createSQLQuery("SELECT id_value FROM id_generator WHERE table_name = 'quay' AND id_value = " + wantedId + "");
+
+        List list = query.list();
+        BigInteger actual = (BigInteger) list.get(0);
+
+        assertThat(actual.longValue()).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
+    }
+
 
     /**
      * Was implemented under the supsicion that OptionalIdCreator caused a bug.

@@ -5,6 +5,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.IntegralDataTypeHolder;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.AbstractEntityPersister;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +68,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             if (entityStructure.getId() != null) {
                 logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
                 availableIds.remove(entityStructure.getId());
+                insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
                 return entityStructure.getId();
             } else {
                 return generateId(tableName, entityStructure, sessionImpl, availableIds);
