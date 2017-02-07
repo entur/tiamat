@@ -135,6 +135,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
         when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.save(firstStopPlace)).thenReturn(firstStopPlace);
 
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, new AtomicInteger());
 
@@ -324,7 +325,7 @@ public class DefaultStopPlaceImporterTest {
         quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         stopPlace.getQuays().add(quay1);
 
-
+        when(stopPlaceRepository.save(stopPlace)).thenReturn(stopPlace);
         StopPlace actual = stopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace, new SiteFrame(), new AtomicInteger());
 
         assertThat(actual.getQuays()).hasSize(1);
