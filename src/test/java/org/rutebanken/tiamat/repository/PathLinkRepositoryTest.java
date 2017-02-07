@@ -47,7 +47,7 @@ public class PathLinkRepositoryTest {
     }
 
     @Test
-    public void pathlinkBetweenQuays() {
+    public void pathLinkBetweenQuays() {
         Quay quay1 = new Quay();
         Quay quay2 = new Quay();
         quayRepository.save(quay1);
@@ -64,6 +64,34 @@ public class PathLinkRepositoryTest {
 
         assertThat(actualPathLink.getFrom().getQuay().getId()).isEqualTo(quay1.getId());
         assertThat(actualPathLink.getTo().getQuay().getId()).isEqualTo(quay2.getId());
+    }
+
+    @Test
+    public void pathLinkWithQuaysAndPathJunction() {
+        Quay quay1 = new Quay();
+        Quay quay2 = new Quay();
+        quayRepository.save(quay1);
+        quayRepository.save(quay2);
+
+        PathJunction pathJunction = new PathJunction();
+
+        PathLinkEnd fromQuay = new PathLinkEnd(quay1);
+        PathLinkEnd toPathJunction = new PathLinkEnd(pathJunction);
+        PathLinkEnd toQuay = new PathLinkEnd(quay2);
+
+        PathLink pathLinkToPathJunction = new PathLink(fromQuay, toPathJunction);
+        PathLink pathLinkToQuay = new PathLink(fromQuay, toPathJunction);
+        pathLinkRepository.save(pathLinkToPathJunction);
+        pathLinkRepository.save(pathLinkToQuay);
+
+        PathLink actualPathLinkToPathJunction = pathLinkRepository.findOne(pathLinkToPathJunction.getId());
+        PathLink actualPathLinkToQuay = pathLinkRepository.findOne(pathLinkToQuay.getId());
+
+        assertThat(actualPathLinkToPathJunction.getFrom().getQuay().getId()).isEqualTo(quay1.getId());
+        assertThat(actualPathLinkToPathJunction.getTo().getPathJunction().getId()).isEqualTo(pathJunction.getId());
+
+        assertThat(actualPathLinkToQuay.getFrom().getPathJunction().getId()).isEqualTo(pathJunction.getId());
+        assertThat(actualPathLinkToQuay.getTo().getQuay().getId()).isEqualTo(toQuay.getId());
     }
 
     private StopPlace createAndSaveStop(String name) {

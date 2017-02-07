@@ -47,6 +47,9 @@ public class PathLinkEnd {
         this.quay = quay;
     }
 
+    public PathLinkEnd() {
+    }
+
     public PathLinkEnd(StopPlace stopPlace) {
         this.stopPlace = stopPlace;
     }
@@ -59,11 +62,10 @@ public class PathLinkEnd {
         this.entrance = entrance;
     }
 
+    public PathLinkEnd(PathJunction pathJunction) { this.pathJunction = pathJunction; }
+
     public PathLinkEnd(Level level) {
         this.level = level;
-    }
-
-    public PathLinkEnd() {
     }
 
     public SiteEntrance getEntrance() {
@@ -90,4 +92,11 @@ public class PathLinkEnd {
         return quay;
     }
 
+    public PathJunction getPathJunction() {
+        return pathJunction;
+    }
+
+    public void setPathJunction(PathJunction pathJunction) {
+        this.pathJunction = pathJunction;
+    }
 }
