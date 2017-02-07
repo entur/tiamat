@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
-
+import java.util.concurrent.locks.Lock;
 
 
 /**
@@ -37,7 +37,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
     private static final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> availableIdsPerTable = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Long> lastIdsPerTable = new ConcurrentHashMap<>();
-    private static final Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(Integer.MAX_VALUE, 1);
+    private static final Striped<Lock> stripedSemaphores = Striped.lock(1024);
 
     private static Boolean isH2 = null;
 
@@ -95,22 +95,19 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
     }
 
     private void generateNewIds(String tableName, SessionImpl sessionImpl, ConcurrentLinkedQueue<Long> availableIds) {
-        final Semaphore semaphore = stripedSemaphores.get(tableName);
+        final Lock lock = stripedSemaphores.get(tableName);
 
         try {
-            semaphore.acquire();
+            lock.lock();
 
             while(availableIds.isEmpty()) {
                 List<Long> retrievedIds = retrieveIds(tableName, sessionImpl);
+                availableIds.addAll(retrievedIds);
                 logger.trace("Inserting {} ids", retrievedIds);
                 insertRetrievedIds(tableName, retrievedIds, sessionImpl);
-                availableIds.addAll(retrievedIds);
             }
-
-        } catch (InterruptedException e) {
-            throw new HibernateException("Intterupted while waiting for semaphore for " + tableName, e);
         } finally {
-            semaphore.release();
+            lock.unlock();
         }
     }
 
