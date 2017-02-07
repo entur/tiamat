@@ -53,9 +53,6 @@ public class DtoStopPlaceResource {
     private StopPlaceDisassembler stopPlaceDisassembler;
 
     @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     @GET
@@ -161,8 +158,7 @@ public class DtoStopPlaceResource {
         StopPlace currentStopPlace = stopPlaceRepository.findOne(Long.valueOf(simpleStopPlaceDto.id));
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDto);
         if(stopPlace != null) {
-            stopPlaceRepository.save(stopPlace);
-            quayRepository.save(stopPlace.getQuays());
+            stopPlace = save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace, true);
         }
 
@@ -184,12 +180,16 @@ public class DtoStopPlaceResource {
 
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
         if(stopPlace != null) {
-            stopPlaceRepository.save(stopPlace);
-            quayRepository.save(stopPlace.getQuays());
-            logger.info("Returning created stop place with id {}", stopPlace.getId());
-            return stopPlaceAssembler.assemble(stopPlace , true);
+            stopPlace = save(stopPlace);
+            return stopPlaceAssembler.assemble(stopPlace, true);
         }
 
         throw new WebApplicationException("Cannot save stop place with name "+ simpleStopPlaceDto.name, 400);
+    }
+
+    private StopPlace save(StopPlace stopPlace) {
+        stopPlace = stopPlaceRepository.save(stopPlace);
+        logger.info("Returning created stop place with id {}", stopPlace.getId());
+        return stopPlace;
     }
 }
