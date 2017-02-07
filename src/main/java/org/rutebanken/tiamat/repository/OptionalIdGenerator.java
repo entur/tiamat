@@ -103,9 +103,9 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
 
             while(availableIds.isEmpty()) {
                 List<Long> retrievedIds = retrieveIds(tableName, sessionImpl);
-                availableIds.addAll(retrievedIds);
                 logger.trace("Inserting {} ids", retrievedIds);
                 insertRetrievedIds(tableName, retrievedIds, sessionImpl);
+                availableIds.addAll(retrievedIds);
             }
         } finally {
             lock.unlock();
@@ -146,7 +146,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
                 "ORDER BY generated";
 
         SQLQuery sqlQuery = sessionImpl.createSQLQuery(sql);
-        sqlQuery.setFlushMode(FlushMode.MANUAL);
+//        sqlQuery.setFlushMode(FlushMode.MANUAL);
         sqlQuery.addScalar("generated", LongType.INSTANCE);
 
         List list = sqlQuery.list();
@@ -164,7 +164,7 @@ public class OptionalIdGenerator extends SequenceStyleGenerator {
             }
         }
         SQLQuery query = sessionImpl.createSQLQuery(insertUsedIdsSql.toString());
-        query.setFlushMode(FlushMode.MANUAL);
+//        query.setFlushMode(FlushMode.MANUAL);
         query.executeUpdate();
     }
 
