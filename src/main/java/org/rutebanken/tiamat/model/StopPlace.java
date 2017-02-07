@@ -75,7 +75,7 @@ public class StopPlace
     @OneToOne(fetch = FetchType.LAZY)
     protected TopographicPlace topographicPlace;
 
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
 
     public StopPlace(EmbeddableMultilingualString name) {
