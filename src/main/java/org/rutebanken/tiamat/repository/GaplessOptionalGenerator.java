@@ -27,11 +27,13 @@ import java.util.concurrent.locks.Lock;
 
 
 /**
- * Generate ID if not already set.
+ * Generate gapless IDs for certain entities.
+ * If matching incoming entity already have ID set, try to use it without genereration.
+ * For other entities, fall back to sequence style generation.
  */
-public class OptionalIdGenerator extends SequenceStyleGenerator {
+public class GaplessOptionalGenerator extends SequenceStyleGenerator {
 
-    private static final Logger logger = LoggerFactory.getLogger(OptionalIdGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(GaplessOptionalGenerator.class);
 
     private static final int ID_FETCH_SIZE = 500;
     private static final long START_LAST_ID = 1L;

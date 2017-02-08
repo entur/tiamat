@@ -17,7 +17,7 @@ public abstract class EntityStructure implements Serializable {
     @Id
     @GeneratedValue(generator="idgen")
     @GenericGenerator(name = "idgen",
-            strategy = "org.rutebanken.tiamat.repository.OptionalIdGenerator",
+            strategy = "org.rutebanken.tiamat.repository.GaplessOptionalGenerator",
             parameters = {
                     @Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
             })

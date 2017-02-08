@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
-public class OptionalIdGeneratorTest {
+public class GaplessOptionalGeneratorTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -44,7 +44,7 @@ public class OptionalIdGeneratorTest {
     @Test
     public void explicitIdMustBeInserted() {
 
-        OptionalIdGenerator optionalIdGenerator = new OptionalIdGenerator();
+        GaplessOptionalGenerator gaplessOptionalGenerator = new GaplessOptionalGenerator();
 
         Session session = hibernateEntityManagerFactory.getSessionFactory().openSession();
 
@@ -53,7 +53,7 @@ public class OptionalIdGeneratorTest {
         Quay quay = new Quay();
         quay.setId(wantedId);
 
-        Serializable serializable = optionalIdGenerator.generate((SessionImplementor) session, quay);
+        Serializable serializable = gaplessOptionalGenerator.generate((SessionImplementor) session, quay);
         Long gotId = (Long) serializable;
         assertThat(gotId).isNotNull();
         assertThat(gotId).isEqualTo(wantedId);
