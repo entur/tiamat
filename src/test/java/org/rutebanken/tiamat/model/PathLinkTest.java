@@ -1,9 +1,12 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.model;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -14,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)
 @ActiveProfiles("geodb")
-public class PathLinkRepositoryTest {
+public class PathLinkTest {
 
     @Autowired
     private PathLinkRepository pathLinkRepository;
