@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -189,14 +188,12 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
-//        if(stopPlace.getId() == null) {
-        stopPlaceRepository.save(stopPlace);
-//        }
-        if(stopPlace.getQuays() != null) {
+        // Keep the attached stop place reference in case it is merged.
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        if (stopPlace.getQuays() != null) {
             for (Quay quay : stopPlace.getQuays()) {
-//                if (quay.getId() == null) {
-                    quayRepository.save(quay);
-//                }
+                quayRepository.save(quay);
             }
         }
 

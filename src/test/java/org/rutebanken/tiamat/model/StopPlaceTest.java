@@ -287,13 +287,16 @@ public class StopPlaceTest {
     public void testAttachingQuaysToStopPlace() throws Exception {
         Quay quay = new Quay();
         quay.setName(new EmbeddableMultilingualString("q", "en"));
-        quayRepository.save(quay);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setQuays(new HashSet<>());
         stopPlace.getQuays().add(quay);
 
         stopPlaceRepository.save(stopPlace);
+
+        assertThat(quay.getId()).isNotNull();
+        Quay actualQuay = quayRepository.findOne(quay.getId());
+        assertThat(actualQuay).isNotNull();
     }
 
     @Test

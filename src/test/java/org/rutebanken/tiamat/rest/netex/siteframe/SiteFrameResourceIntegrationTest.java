@@ -89,7 +89,6 @@ public class SiteFrameResourceIntegrationTest {
         quay.setName(new EmbeddableMultilingualString("quay", "en"));
         quay.setCentroid(geometryFactory.createPoint(new Coordinate(6, 70)));
 
-        quayRepository.save(quay);
         stopPlace.getQuays().add(quay);
         stopPlaceRepository.save(stopPlace);
 

@@ -39,10 +39,6 @@ public class GraphQLResourceIntegrationTest {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-
-    @Autowired
-    private QuayRepository quayRepository;
-
     @Autowired
     private GeometryFactory geometryFactory;
 
@@ -58,7 +54,6 @@ public class GraphQLResourceIntegrationTest {
     @Before
     public void clearRepositories() {
         stopPlaceRepository.deleteAll();
-        quayRepository.deleteAll();
         topographicPlaceRepository.deleteAll();
     }
 
@@ -69,13 +64,10 @@ public class GraphQLResourceIntegrationTest {
         String firstQuayName = "first quay name";
         quay.setName(new EmbeddableMultilingualString(firstQuayName));
 
-        quayRepository.save(quay);
-
         Quay secondQuay = new Quay();
         String secondQuayName = "second quay";
         secondQuay.setName(new EmbeddableMultilingualString(secondQuayName));
 
-        quayRepository.save(secondQuay);
 
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
@@ -522,7 +514,6 @@ public class GraphQLResourceIntegrationTest {
         quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         stopPlace.getQuays().add(quay);
 
-        quayRepository.save(quay);
         stopPlaceRepository.save(stopPlace);
 
         String name = "Testing name ";
@@ -584,7 +575,6 @@ public class GraphQLResourceIntegrationTest {
         quay.setCentroid(point);
         stopPlace.getQuays().add(quay);
 
-        quayRepository.save(quay);
         stopPlaceRepository.save(stopPlace);
 
         String name = "Testing name ";
