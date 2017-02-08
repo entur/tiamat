@@ -13,7 +13,7 @@ public class PathLinkEnd {
     @Id
     @GeneratedValue(generator="idgen")
     @GenericGenerator(name = "idgen",
-            strategy = "org.rutebanken.tiamat.repository.OptionalIdGenerator",
+            strategy = "org.rutebanken.tiamat.repository.GaplessOptionalGenerator",
             parameters = {
                     @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
             })
