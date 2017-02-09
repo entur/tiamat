@@ -8,13 +8,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -377,7 +375,6 @@ public class GraphQLResourceIntegrationTest {
 
 
     @Test
-    @Ignore
     public void testSimpleMutationCreateStopPlace() throws Exception {
 
         String name = "Testing name";
@@ -426,7 +423,6 @@ public class GraphQLResourceIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testSimpleMutationUpdateStopPlace() throws Exception {
 
         StopPlace stopPlace = createStopPlace("Espa");
@@ -483,7 +479,6 @@ public class GraphQLResourceIntegrationTest {
 
 
     @Test
-    @Ignore
     public void testSimpleMutationCreateQuay() throws Exception {
 
         StopPlace stopPlace = createStopPlace("Espa");
@@ -536,7 +531,6 @@ public class GraphQLResourceIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testSimpleMutationUpdateQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
@@ -602,7 +596,6 @@ public class GraphQLResourceIntegrationTest {
 
 
     @Test
-    @Ignore
     public void testSimpleMutationAddSecondQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
@@ -680,7 +673,6 @@ public class GraphQLResourceIntegrationTest {
 
 
     @Test
-    @Ignore
     public void testMutationUpdateStopPlaceCreateQuayAndUpdateQuayQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
@@ -693,7 +685,6 @@ public class GraphQLResourceIntegrationTest {
         quay.setCentroid(point);
         stopPlace.getQuays().add(quay);
 
-        quayRepository.save(quay);
         stopPlaceRepository.save(stopPlace);
 
         String newStopName = "Shell - E6";

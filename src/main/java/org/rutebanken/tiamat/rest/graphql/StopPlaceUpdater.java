@@ -9,7 +9,6 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
@@ -31,11 +34,13 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
     @Autowired
-    private QuayRepository quayRepository;
+    private EntityManager entityManager;
 
     @Autowired
     private GeometryFactory geometryFactory;
+
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -56,35 +61,22 @@ class StopPlaceUpdater implements DataFetcher {
 
             String nsrId = (String) input.get(ID);
             if (nsrId != null) {
+                logger.info("Updating StopPlace {}", nsrId);
                 stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
             } else {
+                logger.info("Creating new StopPlace");
                 stopPlace = new StopPlace();
                 stopPlace.setCreated(ZonedDateTime.now());
             }
 
             if (stopPlace != null) {
-                if (stopPlace.getId() != null) {
-                    logger.info("Updating StopPlace {}", stopPlace.getId());
-                } else {
-                    logger.info("Creating new StopPlace");
-                }
-
                 boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
 
                 if (hasValuesChanged) {
 
                     stopPlace.setChanged(ZonedDateTime.now());
-                    stopPlace = stopPlaceRepository.save(stopPlace);
-
-                    if (stopPlace.getQuays() != null) {
-                        Set<Quay> updatedSet = new HashSet<>();
-
-                        stopPlace.getQuays().forEach(quay -> {
-                            updatedSet.add(quayRepository.save(quay));
-                        });
-                        stopPlace.getQuays().clear();
-                        stopPlace.getQuays().addAll(updatedSet);
-                    }
+                    entityManager.persist(stopPlace);
+//                    stopPlace = stopPlaceRepository.save(stopPlace);
 
                 }
             }
@@ -96,7 +88,7 @@ class StopPlaceUpdater implements DataFetcher {
      *
      * @param input
      * @param stopPlace
-     * @return Pair- Left: StopPlace is updated, Right: Quays are updated
+     * @return true if StopPlace or any og the attached Quays are updated
      */
     private boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
         boolean isUpdated = populate(input, stopPlace);

@@ -296,7 +296,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
             stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
-                //.mutation(stopPlaceRegisterMutation)
+                .mutation(stopPlaceRegisterMutation)
                 .build();
 
     }
