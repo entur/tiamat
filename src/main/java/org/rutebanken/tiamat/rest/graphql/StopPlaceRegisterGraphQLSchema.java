@@ -82,7 +82,11 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(TYPE_TOPOGRAPHIC_PLACE)
                 .field(newFieldDefinition()
                         .name(ID)
-                        .type(GraphQLLong))
+                        .type(GraphQLString)
+                        .dataFetcher(env -> {
+                            TopographicPlace tp = (TopographicPlace) env.getSource();
+                            return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                        }))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE_TYPE)
                         .type(topographicPlaceTypeEnum))
@@ -95,7 +99,11 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(TYPE_TOPOGRAPHIC_PLACE)
                 .field(newFieldDefinition()
                         .name(ID)
-                        .type(GraphQLLong))
+                        .type(GraphQLString)
+                        .dataFetcher(env -> {
+                                TopographicPlace tp = (TopographicPlace) env.getSource();
+                                return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                        }))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE_TYPE)
                         .type(topographicPlaceTypeEnum))
@@ -105,11 +113,6 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(PARENT_TOPOGRAPHIC_PLACE)
                         .type(topographicParentPlaceObjectType)
-//                        .dataFetcher(env -> {
-//                                TopographicPlace sp = (TopographicPlace) env.getSource();
-//
-//                                return sp.getParentTopographicPlace();
-//                        })
                 )
                 .build();
 
@@ -200,29 +203,29 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .description(SIZE_DESCRIPTION_TEXT))
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(new GraphQLList(GraphQLString))
+                                .type(GraphQLString)
                                 .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored."))
                                 //Search
                         .argument(GraphQLArgument.newArgument()
                                 .name(STOP_TYPE)
                                 .type(new GraphQLList(stopPlaceTypeEnum))
-                                .description("Only returns StopPlaces with given StopPlaceType(s)."))
+                                .description("Only return StopPlaces with given StopPlaceType(s)."))
                         .argument(GraphQLArgument.newArgument()
                                 .name(COUNTY_REF)
-                                .type(new GraphQLList(GraphQLInt))
-                                .description("Only returns StopPlaces located in given counties."))
+                                .type(new GraphQLList(GraphQLString))
+                                .description("Only return StopPlaces located in given counties."))
                         .argument(GraphQLArgument.newArgument()
                                 .name(MUNICIPALITY_REF)
-                                .type(new GraphQLList(GraphQLInt))
-                                .description("Only returns StopPlaces located in given municipalities."))
+                                .type(new GraphQLList(GraphQLString))
+                                .description("Only return StopPlaces located in given municipalities."))
                         .argument(GraphQLArgument.newArgument()
                                 .name(QUERY)
                                 .type(GraphQLString)
-                                .description("Searches for StopPlaces by name."))
+                                .description("Searches for StopPlace by name."))
                         .argument(GraphQLArgument.newArgument()
                                 .name(IMPORTED_ID_QUERY)
                                 .type(GraphQLString)
-                                .description("Searches for StopPlaces by importedId."))
+                                .description("Searches for StopPlace by importedId."))
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
@@ -293,7 +296,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
             stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
-                .mutation(stopPlaceRegisterMutation)
+                //.mutation(stopPlaceRegisterMutation)
                 .build();
 
     }

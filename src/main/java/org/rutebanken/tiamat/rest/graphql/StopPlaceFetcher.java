@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,22 +35,14 @@ class StopPlaceFetcher implements DataFetcher {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
 
         Page<StopPlace> stopPlaces = null;
-        if (environment.getArgument(ID) != null) {
-            List<String> idList = environment.getArgument(ID);
+        String id = environment.getArgument(ID);
+        String importedId = environment.getArgument(IMPORTED_ID_QUERY);
+        if (id != null && !id.isEmpty()) {
 
-            stopPlaceSearchBuilder.setIdList(idList
-                    .stream()
-                    .map(nsrId -> {
-                        if(!nsrId.startsWith(NetexIdMapper.NSR)) {
-                            throw new IllegalArgumentException("Id does not start with "+NetexIdMapper.NSR +": "+nsrId);
-                        }
-                        return nsrId;
-                    })
-                    .map(nsrId -> NetexIdMapper.getTiamatId(nsrId))
-                    .collect(Collectors.<Long>toList()));
+            stopPlaceSearchBuilder.setIdList(Arrays.asList(NetexIdMapper.getTiamatId(id)));
 
             stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
-        } else if (environment.getArgument(IMPORTED_ID_QUERY) != null) {
+        } else if (importedId != null && !importedId.isEmpty()) {
 
             List<Long> stopPlaceId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
 
@@ -62,15 +53,21 @@ class StopPlaceFetcher implements DataFetcher {
         } else {
             stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOP_TYPE));
 
-            if (environment.getArgument(COUNTY_REF) != null) {
+            List<String> countyRef = environment.getArgument(COUNTY_REF);
+            if (countyRef != null && !countyRef.isEmpty()) {
                 stopPlaceSearchBuilder.setCountyIds(
-                        Lists.transform(environment.getArgument(COUNTY_REF), Functions.toStringFunction())
+                        countyRef.stream()
+                            .filter(tiamatId -> tiamatId != null && !tiamatId.isEmpty())
+                            .map(tiamatId -> "" + NetexIdMapper.getTiamatId(tiamatId)).collect(Collectors.toList())
                 );
             }
 
-            if (environment.getArgument(MUNICIPALITY_REF) != null) {
+            List<String> municipalityRef = environment.getArgument(MUNICIPALITY_REF);
+            if (municipalityRef != null && !municipalityRef.isEmpty()) {
                 stopPlaceSearchBuilder.setMunicipalityIds(
-                        Lists.transform(environment.getArgument(MUNICIPALITY_REF), Functions.toStringFunction())
+                        municipalityRef.stream()
+                                .filter(tiamatId -> tiamatId != null && !tiamatId.isEmpty())
+                                .map(tiamatId -> "" + NetexIdMapper.getTiamatId(tiamatId)).collect(Collectors.toList())
                 );
             }
 

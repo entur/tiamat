@@ -7,7 +7,6 @@ import com.vividsolutions.jts.geom.Point;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -20,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.*;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -72,15 +69,23 @@ class StopPlaceUpdater implements DataFetcher {
                     logger.info("Creating new StopPlace");
                 }
 
-                Pair<Boolean, Boolean> hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
+                boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
 
-                if (hasValuesChanged.getLeft()) {
+                if (hasValuesChanged) {
+
                     stopPlace.setChanged(ZonedDateTime.now());
-                    stopPlaceRepository.save(stopPlace);
-                }
+                    stopPlace = stopPlaceRepository.save(stopPlace);
 
-                if (hasValuesChanged.getRight() && stopPlace.getQuays() != null) {
-                    quayRepository.save(stopPlace.getQuays());
+                    if (stopPlace.getQuays() != null) {
+                        Set<Quay> updatedSet = new HashSet<>();
+
+                        stopPlace.getQuays().forEach(quay -> {
+                            updatedSet.add(quayRepository.save(quay));
+                        });
+                        stopPlace.getQuays().clear();
+                        stopPlace.getQuays().addAll(updatedSet);
+                    }
+
                 }
             }
         }
@@ -93,7 +98,7 @@ class StopPlaceUpdater implements DataFetcher {
      * @param stopPlace
      * @return Pair- Left: StopPlace is updated, Right: Quays are updated
      */
-    private Pair<Boolean, Boolean> populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
+    private boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
         boolean isUpdated = populate(input, stopPlace);
 
         if (input.get(STOP_TYPE) != null) {
@@ -101,14 +106,13 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
 
-        boolean isQuaysUpdated = false;
         if (input.get(QUAYS) != null) {
             List quays = (List) input.get(QUAYS);
             for (Object quayObject : quays) {
 
                 Map quayInputMap = (Map) quayObject;
                 if (populateQuayFromInput(stopPlace, quayInputMap)) {
-                    isQuaysUpdated = true;
+                    isUpdated = true;
                 } else {
                     logger.info("Quay not changed");
                 }
@@ -118,7 +122,7 @@ class StopPlaceUpdater implements DataFetcher {
             stopPlace.setChanged(ZonedDateTime.now());
         }
 
-        return Pair.of(isUpdated, isQuaysUpdated);
+        return isUpdated;
     }
 
     private boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
@@ -148,10 +152,11 @@ class StopPlaceUpdater implements DataFetcher {
         if (isQuayUpdated) {
             quay.setChanged(ZonedDateTime.now());
 
-            //If Quay already exists it is not added - ref Quay#equals()
-            return stopPlace.getQuays().add(quay);
+            if (quay.getId() == null) {
+                stopPlace.getQuays().add(quay);
+            }
         }
-        return false;
+        return isQuayUpdated;
     }
 
     private boolean populate(Map input, SiteElement_VersionStructure entity) {
