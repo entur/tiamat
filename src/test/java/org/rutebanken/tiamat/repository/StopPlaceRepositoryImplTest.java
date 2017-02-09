@@ -40,6 +40,9 @@ public class StopPlaceRepositoryImplTest {
     private QuayRepository quayRepository;
 
     @Autowired
+    private PathLinkRepository pathLinkRepository;
+
+    @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
@@ -47,6 +50,7 @@ public class StopPlaceRepositoryImplTest {
 
     @Before
     public void before() {
+        pathLinkRepository.deleteAll();
         stopPlaceRepository.deleteAll();
         topographicPlaceRepository.deleteAll();
     }
