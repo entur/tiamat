@@ -11,18 +11,20 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private QuayMerger quayMerger = new QuayMerger();
+    private QuayMerger quayMerger = new QuayMerger(new VersionIncrementor());
 
 
     @Test
@@ -48,6 +50,28 @@ public class QuayMergerTest {
 
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
         assertThat(result).hasSize(1);
+
+        Quay quay = result.iterator().next();
+        assertThat(quay.getVersion()).isNotEmpty();
+    }
+
+    @Test
+    public void versionMustBeSet() {
+
+        Set<Quay> existingQuays = new HashSet<>();
+        Set<Quay> incomingQuays = new HashSet<>();
+
+        Quay quay1 = new Quay();
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(80, 20)));
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("XYZ:StopArea:987654");
+        
+        incomingQuays.add(quay1);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).hasSize(1);
+
+        Quay quay = result.iterator().next();
+        assertThat(quay.getVersion()).isNotEmpty();
     }
 
     @Test
@@ -192,7 +216,7 @@ public class QuayMergerTest {
 
         assertThat(result).hasSize(1);
 
-        for(Quay actualQuay : result) {
+        for (Quay actualQuay : result) {
             assertThat(actualQuay.getOriginalIds()).contains("original-id-1", "another-id");
         }
     }
@@ -315,7 +339,7 @@ public class QuayMergerTest {
         Set<Quay> existingQuays = new HashSet<>(Arrays.asList(existingQuay, unrelatedExistingQuay));
         Set<Quay> newQuays = new HashSet<>(Arrays.asList(unrelatedExistingQuay));
 
-        Set<Quay> actual = quayMerger.addNewQuaysOrAppendImportIds(newQuays, existingQuays, new AtomicInteger(), new AtomicInteger() );
+        Set<Quay> actual = quayMerger.addNewQuaysOrAppendImportIds(newQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
         assertThat(actual).as("The same quay object as existingQuay should be returned").contains(existingQuay);
     }
 
