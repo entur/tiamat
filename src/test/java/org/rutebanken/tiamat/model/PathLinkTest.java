@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.PathJunctionRepository;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -21,6 +22,9 @@ public class PathLinkTest {
 
     @Autowired
     private PathLinkRepository pathLinkRepository;
+
+    @Autowired
+    private PathJunctionRepository pathJunctionRepository;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -71,30 +75,33 @@ public class PathLinkTest {
 
     @Test
     public void pathLinkWithQuaysAndPathJunction() {
-        Quay quay1 = new Quay();
-        Quay quay2 = new Quay();
-        quayRepository.save(quay1);
-        quayRepository.save(quay2);
+        Quay fromQuay = new Quay();
+        Quay toQuay = new Quay();
+        fromQuay = quayRepository.save(fromQuay);
+        toQuay = quayRepository.save(toQuay);
 
         PathJunction pathJunction = new PathJunction();
+        pathJunction = pathJunctionRepository.save(pathJunction);
 
-        PathLinkEnd fromQuay = new PathLinkEnd(quay1);
-        PathLinkEnd toPathJunction = new PathLinkEnd(pathJunction);
-        PathLinkEnd toQuay = new PathLinkEnd(quay2);
 
-        PathLink pathLinkToPathJunction = new PathLink(fromQuay, toPathJunction);
-        PathLink pathLinkToQuay = new PathLink(fromQuay, toPathJunction);
+        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(fromQuay);
+        PathLinkEnd pathLinkEndPathJunction = new PathLinkEnd(pathJunction);
+        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(toQuay);
+
+        PathLink pathLinkToPathJunction = new PathLink(pathLinkEndFromQuay, pathLinkEndPathJunction);
+        PathLink pathLinkToQuay = new PathLink(pathLinkEndPathJunction, pathLinkEndToQuay);
+
         pathLinkRepository.save(pathLinkToPathJunction);
         pathLinkRepository.save(pathLinkToQuay);
 
         PathLink actualPathLinkToPathJunction = pathLinkRepository.findOne(pathLinkToPathJunction.getId());
         PathLink actualPathLinkToQuay = pathLinkRepository.findOne(pathLinkToQuay.getId());
 
-        assertThat(actualPathLinkToPathJunction.getFrom().getQuay().getId()).isEqualTo(quay1.getId());
+        assertThat(actualPathLinkToPathJunction.getFrom().getQuay().getId()).isEqualTo(fromQuay.getId());
         assertThat(actualPathLinkToPathJunction.getTo().getPathJunction().getId()).isEqualTo(pathJunction.getId());
 
         assertThat(actualPathLinkToQuay.getFrom().getPathJunction().getId()).isEqualTo(pathJunction.getId());
-        assertThat(actualPathLinkToQuay.getTo().getQuay().getId()).isEqualTo(toQuay.getId());
+        assertThat(actualPathLinkToQuay.getTo().getQuay().getId()).isEqualTo(pathLinkToQuay.getId());
     }
 
     private StopPlace createAndSaveStop(String name) {

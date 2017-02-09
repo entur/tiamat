@@ -33,8 +33,7 @@ public class PathLinkEnd {
     @OneToOne
     private AccessSpace accessSpace;
 
-    @Transient
-    @OneToOne
+    @ManyToOne
     private PathJunction pathJunction;
 
     @Transient
