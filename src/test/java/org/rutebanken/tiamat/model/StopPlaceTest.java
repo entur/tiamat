@@ -297,6 +297,34 @@ public class StopPlaceTest {
     }
 
     @Test
+    public void saveModifiedStopPlaceWithModifiedQuayAndNewQuay() throws Exception {
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("existing quay"));
+
+//        quayRepository.save(quay);
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("existing stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.getQuays().add(quay);
+
+//        stopPlaceRepository.saveAndFlush(stopPlace);
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace existingStopPlace = stopPlaceRepository.getOne(stopPlace.getId());
+
+        existingStopPlace.getQuays().forEach(q -> q.setDescription(new EmbeddableMultilingualString("a new description for quay")));
+
+        existingStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
+
+        Quay newQuay = new Quay(new EmbeddableMultilingualString("New quay"));
+        existingStopPlace.getQuays().add(newQuay);
+//        quayRepository.save(newQuay);
+
+        stopPlaceRepository.save(existingStopPlace);
+
+    }
+
+
+    @Test
     public void testKeyValueStructure() throws Exception {
         StopPlace stopPlace = new StopPlace();
         List<String> ids = Arrays.asList("OPP:StopArea:123123", "TEL:StopArea:3251321");
