@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Ignore;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.assertj.core.api.Assertions;
@@ -22,11 +23,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class QuayTest {
+public class QuayTest extends CommonSpringJpaTest{
 
     @Autowired
     public QuayRepository quayRepository;

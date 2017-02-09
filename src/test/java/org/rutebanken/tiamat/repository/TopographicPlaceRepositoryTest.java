@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
@@ -13,10 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class TopographicPlaceRepositoryTest {
+public class TopographicPlaceRepositoryTest extends CommonSpringJpaTest {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;

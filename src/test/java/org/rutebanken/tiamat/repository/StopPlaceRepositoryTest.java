@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.junit.Before;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;
@@ -21,10 +22,7 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class StopPlaceRepositoryTest {
+public class StopPlaceRepositoryTest extends CommonSpringJpaTest{
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

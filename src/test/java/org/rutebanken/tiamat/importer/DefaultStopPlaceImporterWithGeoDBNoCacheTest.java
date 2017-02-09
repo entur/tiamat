@@ -32,6 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test stop place importer with geodb and repository.
  * See also {@link DefaultStopPlaceImporterTest}
+ *
+ * TODO: Needs to be reenabled. And needs to run the same config as other tests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TiamatApplication.class)

@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.model;
 
+import org.eclipse.jetty.websocket.jsr356.annotations.JsrParamIdText;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -13,11 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class TopographicPlaceTest {
+public class TopographicPlaceTest extends CommonSpringJpaTest{
 
 
     @Autowired

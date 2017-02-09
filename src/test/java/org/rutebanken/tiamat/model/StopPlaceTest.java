@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 import org.junit.Ignore;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -22,11 +23,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class StopPlaceTest {
+public class StopPlaceTest extends CommonSpringJpaTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
