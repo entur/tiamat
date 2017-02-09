@@ -83,13 +83,13 @@ public class PathLinkTest {
         PathJunction pathJunction = new PathJunction();
         pathJunction = pathJunctionRepository.save(pathJunction);
 
-
         PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(fromQuay);
-        PathLinkEnd pathLinkEndPathJunction = new PathLinkEnd(pathJunction);
+        PathLinkEnd pathLinkEndToPathJunction = new PathLinkEnd(pathJunction);
+        PathLinkEnd pathLinkEndFromPathJunction = new PathLinkEnd(pathJunction);
         PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(toQuay);
 
-        PathLink pathLinkToPathJunction = new PathLink(pathLinkEndFromQuay, pathLinkEndPathJunction);
-        PathLink pathLinkToQuay = new PathLink(pathLinkEndPathJunction, pathLinkEndToQuay);
+        PathLink pathLinkToPathJunction = new PathLink(pathLinkEndFromQuay, pathLinkEndToPathJunction);
+        PathLink pathLinkToQuay = new PathLink(pathLinkEndFromPathJunction, pathLinkEndToQuay);
 
         pathLinkRepository.save(pathLinkToPathJunction);
         pathLinkRepository.save(pathLinkToQuay);
