@@ -19,7 +19,7 @@ public class PathLinkEnd {
             })
     private long id;
 
-    @OneToOne
+    @ManyToOne
     private StopPlace stopPlace;
 
     @ManyToOne
