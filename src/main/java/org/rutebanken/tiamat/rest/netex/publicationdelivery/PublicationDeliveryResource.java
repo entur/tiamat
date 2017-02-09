@@ -108,13 +108,12 @@ public class PublicationDeliveryResource {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
-        logger.info("Returning result of job {}", exportJob);
-        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
-            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
+        if(exportJob == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
-        return Response.ok(inputStream).build();
+        logger.info("Returning job {}", exportJob);
+        return Response.ok(exportJob).build();
     }
 
     @GET
