@@ -56,6 +56,8 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private final NetexMapper netexMapper;
 
+    private final VersionIncrementor versionIncrementor;
+
 
     @Autowired
     public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
@@ -64,7 +66,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
-                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper) {
+                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper, VersionIncrementor versionIncrementor) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
@@ -76,6 +78,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
+        this.versionIncrementor = versionIncrementor;
     }
 
     /**
@@ -166,25 +169,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             foundStopPlace.setChanged(ZonedDateTime.now());
         }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
-        incrementVersion(foundStopPlace);
+        versionIncrementor.incrementVersion(foundStopPlace);
 
         return saveAndUpdateCache(foundStopPlace);
-    }
-
-    private void incrementVersion(StopPlace stopPlace) {
-        Long version = tryParseLong(stopPlace.getVersion());
-        version ++;
-        logger.debug("Setting version {} for stop place {}", version, stopPlace.getName());
-        stopPlace.setVersion(version.toString());
-    }
-
-    private long tryParseLong(String version) {
-        try {
-            return Long.parseLong(version);
-        } catch(NumberFormatException |NullPointerException e) {
-            logger.warn("Could not parse version from string {}. Returning 0", version);
-            return 0L;
-        }
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {

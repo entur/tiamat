@@ -55,14 +55,16 @@ public class DefaultStopPlaceImporterTest {
 
     private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
 
-    private QuayMerger quayMerger = new QuayMerger();
+    private VersionIncrementor versionIncrementor = new VersionIncrementor();
+
+    private QuayMerger quayMerger = new QuayMerger(versionIncrementor);
 
     private NetexMapper netexMapper = new NetexMapper();
 
     private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder = new NearbyStopsWithSameTypeFinder(stopPlaceRepository, new EnvelopeCreator(geometryFactory));
     private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
-            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper);
+            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionIncrementor);
 
     private SiteFrame siteFrame = new SiteFrame();
 
