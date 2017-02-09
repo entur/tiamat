@@ -1,5 +1,11 @@
 package org.rutebanken.tiamat.model;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatApplication;
@@ -10,6 +16,7 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +40,9 @@ public class PathLinkTest {
 
     @Autowired
     private QuayRepository quayRepository;
+
+    @Autowired
+    private GeometryFactory geometryFactory;
 
     @Test
     public void simplePersistTest() {
@@ -104,6 +114,28 @@ public class PathLinkTest {
 
         assertThat(actualPathLinkToQuay.getFrom().getPathJunction().getId()).isEqualTo(pathJunction.getId());
         assertThat(actualPathLinkToQuay.getTo().getQuay().getId()).isEqualTo(pathLinkToQuay.getId());
+    }
+
+    @Test
+    public void pathLinkWithLineString() {
+
+        Coordinate[] coordinates = new Coordinate[2];
+        coordinates[0] = new Coordinate(11, 60);
+        coordinates[1] = new Coordinate(11.1, 60.1);
+
+        CoordinateSequence points = new CoordinateArraySequence(coordinates);
+
+        LineString lineString = new LineString(points, geometryFactory);
+
+        PathLink pathLink = new PathLink();
+        pathLink.setLineString(lineString);
+
+        pathLinkRepository.save(pathLink);
+
+        PathLink actual = pathLinkRepository.findOne(pathLink.getId());
+        assertThat(actual.getLineString()).isNotNull();
+        assertThat(actual.getLineString().getCoordinates()).isEqualTo(coordinates);
+
     }
 
     private StopPlace createAndSaveStop(String name) {
