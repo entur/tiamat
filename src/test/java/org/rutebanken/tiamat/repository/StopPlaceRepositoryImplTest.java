@@ -8,6 +8,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +29,9 @@ import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class StopPlaceRepositoryImplTest {
+@ActiveProfiles("geodb")
+public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

@@ -18,28 +18,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LineStringType complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="LineStringType">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.opengis.net/gml/3.2}AbstractCurveType">
- *       &lt;sequence>
- *         &lt;choice>
- *           &lt;choice maxOccurs="unbounded" minOccurs="2">
- *             &lt;element ref="{http://www.opengis.net/gml/3.2}pos"/>
- *             &lt;element ref="{http://www.opengis.net/gml/3.2}pointProperty"/>
- *           &lt;/choice>
- *           &lt;element ref="{http://www.opengis.net/gml/3.2}posList"/>
- *         &lt;/choice>
- *       &lt;/sequence>
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- * 
+ * @deprecated Not used in internal model for jpa persistance. See {@link com.vividsolutions.jts.geom.LineString}
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -47,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
     "posOrPointProperty",
     "posList"
 })
+@Deprecated
 public class LineStringType
     extends AbstractCurveType
 {

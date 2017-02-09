@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.junit.Before;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -22,7 +23,7 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StopPlaceRepositoryTest extends CommonSpringJpaTest{
+public class StopPlaceRepositoryTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

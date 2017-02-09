@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * Run integration tests for the rest interface without security
  */
+@SpringBootApplication
 @Configuration
 @EnableAutoConfiguration
 @EnableTransactionManagement

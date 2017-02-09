@@ -1,19 +1,40 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Transient;
 import java.math.BigInteger;
 
-
+@Entity
 public class PathJunction extends Point {
 
+    @Transient
     protected ZoneRefStructure parentZoneRef;
+
+    @Transient
     protected PublicUseEnumeration publicUse;
+
+    @Transient
     protected CoveredEnumeration covered;
+
+    @Transient
     protected GatedEnumeration gated;
+
+    @Transient
     protected LightingEnumeration lighting;
+
+    @Transient
     protected Boolean allAreasWheelchairAccessible;
+
+    @Transient
     protected BigInteger personCapacity;
+
+    @Transient
     protected SiteFacilitySets_RelStructure facilities;
+
+    @Transient
     protected MultilingualStringEntity label;
+
+    @Transient
     protected SiteComponentRefStructure siteComponentRef;
 
     public ZoneRefStructure getParentZoneRef() {

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -35,16 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * TODO: Needs to be reenabled. And needs to run the same config as other tests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@TestPropertySource(properties = {
-        "stopPlaceFromOriginalIdFinderCache.maxSize = 0",
-        "stopPlaceFromOriginalIdFinderCache.maxSize = 0"}
-)
-@ActiveProfiles("geodb")
 @Transactional
-public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
+public class DefaultStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringJpaTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
