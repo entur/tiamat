@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * TODO: Needs to be reenabled. And needs to run the same config as other tests
  */
 @Transactional
-public class DefaultStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringJpaTest {
+public class DefaultStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

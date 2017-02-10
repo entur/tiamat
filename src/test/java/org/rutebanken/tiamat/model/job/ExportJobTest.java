@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.model.job;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExportJobTest extends CommonSpringJpaTest {
+public class ExportJobTest extends CommonSpringBootTest {
 
     @Autowired
     private ExportJobRepository exportJobRepository;

@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;

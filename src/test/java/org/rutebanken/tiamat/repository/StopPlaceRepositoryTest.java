@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.repository;
 
 import org.junit.Before;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;

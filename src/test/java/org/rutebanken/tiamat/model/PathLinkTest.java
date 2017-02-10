@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathJunctionRepository;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PathLinkTest extends CommonSpringJpaTest {
+public class PathLinkTest extends CommonSpringBootTest {
 
     @Autowired
     private PathLinkRepository pathLinkRepository;

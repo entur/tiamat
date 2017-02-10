@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Ignore;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.assertj.core.api.Assertions;
@@ -24,7 +24,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class QuayTest extends CommonSpringJpaTest{
+public class QuayTest extends CommonSpringBootTest {
 
     @Autowired
     public QuayRepository quayRepository;

@@ -5,7 +5,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.CommonSpringJpaTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;

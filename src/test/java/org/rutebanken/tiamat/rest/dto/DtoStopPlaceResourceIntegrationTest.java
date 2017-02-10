@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceDto;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -35,10 +36,6 @@ public class DtoStopPlaceResourceIntegrationTest extends CommonSpringBootTest {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-
-    @Autowired
-    private QuayRepository quayRepository;
-
     @Autowired
     private GeometryFactory geometryFactory;
 
@@ -49,13 +46,6 @@ public class DtoStopPlaceResourceIntegrationTest extends CommonSpringBootTest {
     public void configureRestAssured() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
-    }
-
-    @Before
-    public void clearRepositories() {
-        stopPlaceRepository.deleteAll();
-        quayRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
     }
 
     @Test
