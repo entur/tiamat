@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -34,9 +33,6 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private EntityManager entityManager;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -75,8 +71,7 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
 
                     stopPlace.setChanged(ZonedDateTime.now());
-                    entityManager.persist(stopPlace);
-//                    stopPlace = stopPlaceRepository.save(stopPlace);
+                    stopPlace = stopPlaceRepository.save(stopPlace);
 
                 }
             }
