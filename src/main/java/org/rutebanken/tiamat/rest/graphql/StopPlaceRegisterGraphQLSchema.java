@@ -329,7 +329,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(INPUT_TYPE_TOPOGRAPHIC_PLACE)
                 .field(newInputObjectField()
                         .name(ID)
-                        .type(GraphQLLong))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(TOPOGRAPHIC_PLACE_TYPE)
                         .type(topographicPlaceTypeEnum))
