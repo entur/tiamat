@@ -56,7 +56,7 @@ public class GraphQLResource {
 
 			// convert JSON string to Map
 			try {
-				variables = mapper.readValue(s, new TypeReference<Map<String, String>>(){});
+				variables = mapper.readValue(s, new TypeReference<Map<String, Object>>(){});
 			} catch (IOException e) {
 				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
