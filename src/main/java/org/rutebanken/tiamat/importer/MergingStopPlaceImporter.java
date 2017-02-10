@@ -28,11 +28,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-@Qualifier("defaultStopPlaceImporter")
+@Qualifier("mergingStopPlaceImporter")
 @Transactional
-public class DefaultStopPlaceImporter implements StopPlaceImporter {
+public class MergingStopPlaceImporter implements StopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MergingStopPlaceImporter.class);
 
     private final TopographicPlaceCreator topographicPlaceCreator;
 
@@ -60,7 +60,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
 
     @Autowired
-    public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
+    public MergingStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
                                     CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,

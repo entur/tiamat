@@ -45,7 +45,7 @@ public class PublicationDeliveryImporter {
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
                                        CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
-                                       @Qualifier("defaultStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
+                                       @Qualifier("mergingStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
                                        SiteFrameImporter siteFrameImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlaceNameCleaner stopPlaceNameCleaner, NameToDescriptionMover nameToDescriptionMover, QuayNameRemover quayNameRemover, StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover, QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor, CompassBearingRemover compassBearingRemover) {
         this.netexMapper = netexMapper;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;

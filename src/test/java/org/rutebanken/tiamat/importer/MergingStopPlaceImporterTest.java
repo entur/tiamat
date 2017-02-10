@@ -33,9 +33,9 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 /**
  * Test stop place importer with mocked dependencies.
- * See also {@link DefaultStopPlaceImporterWithGeoDBTest}
+ * See also {@link MergingStopPlaceImporterWithGeoDBTest}
  */
-public class DefaultStopPlaceImporterTest {
+public class MergingStopPlaceImporterTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
@@ -62,7 +62,7 @@ public class DefaultStopPlaceImporterTest {
     private NetexMapper netexMapper = new NetexMapper();
 
     private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder = new NearbyStopsWithSameTypeFinder(stopPlaceRepository, new EnvelopeCreator(geometryFactory));
-    private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
+    private MergingStopPlaceImporter stopPlaceImporter = new MergingStopPlaceImporter(topographicPlaceCreator,
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
             nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionIncrementor);
 
@@ -70,7 +70,7 @@ public class DefaultStopPlaceImporterTest {
 
     /**
      * Test that two nearby stops close to each other is treated as the same.
-     * Note that the DB query is mocked. To test this, use DefaultStopPlaceImporterWithGeoDBTest
+     * Note that the DB query is mocked. To test this with h2 use {@link MergingStopPlaceImporterWithGeoDBNoCacheTest}
      */
     @Test
     public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
