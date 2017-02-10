@@ -4,6 +4,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -51,7 +52,13 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
-            stopPlaceSearchBuilder.setStopTypeEnumerations(environment.getArgument(STOP_TYPE));
+            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_TYPE);
+            if (stopTypes != null && !stopTypes.isEmpty()) {
+                stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
+                                .filter(type -> type != null)
+                                .collect(Collectors.toList())
+                );
+            }
 
             List<String> countyRef = environment.getArgument(COUNTY_REF);
             if (countyRef != null && !countyRef.isEmpty()) {
