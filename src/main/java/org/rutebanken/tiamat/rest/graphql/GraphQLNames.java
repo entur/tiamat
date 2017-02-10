@@ -2,12 +2,19 @@ package org.rutebanken.tiamat.rest.graphql;
 
 public class GraphQLNames {
 
-    static final String TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
-    static final String TYPE_STOPPLACE = "StopPlace";
-    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
+    static final String TYPE_TOPOGRAPHIC_PLACE = "TopographicPlaceType";
+    static final String TYPE_STOPPLACE = "StopPlaceType";
+    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualStringType";
+
+    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = "_" + TYPE_TOPOGRAPHIC_PLACE;
+    static final String INPUT_TYPE_STOPPLACE = "_"+TYPE_STOPPLACE;
+    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "_"+TYPE_EMBEDDABLE_MULTILINGUAL_STRING;
+
+
+    static final String STOPPLACE = "StopPlace";
 
     static final String ID = "id";
-    static final String STOPPLACE_TYPE = "stopPlaceType";
+    static final String STOP_TYPE = "stopPlaceType";
     static final String SHORT_NAME = "shortName";
     static final String DESCRIPTION = "description";
     static final String IMPORTED_ID = "importedId";
@@ -26,12 +33,15 @@ public class GraphQLNames {
     static final String LATITUDE_MAX = "latMax";
 
     static final String LOCATION = "location";
+    static final String TYPE_LOCATION = "Location";
+    static final String INPUT_LOCATION = "_" + TYPE_LOCATION;
     static final String LONGITUDE = "longitude";
     static final String LATITUDE = "latitude";
 
     static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     static final String QUAYS = "quays";
     static final String QUAY = "quay";
+    static final String INPUT_TYPE_QUAY = "_" + QUAY;
     static final String COMPASS_BEARING = "compassBearing";
 
     static final String STOPPLACE_ID = "stopPlaceId";
@@ -46,10 +56,6 @@ public class GraphQLNames {
     static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
 
-    static final String CREATE_STOPPLACE = "createStopPlace";
-    static final String UPDATE_STOPPLACE = "updateStopPlace";
-    static final String CREATE_QUAY = "createQuay";
-    static final String UPDATE_QUAY = "updateQuay";
-
+    static final String MUTATE_STOPPLACE = "mutateStopPlace";
 
 }

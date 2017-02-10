@@ -8,12 +8,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,6 +147,25 @@ public class GraphQLResourceIntegrationTest {
     }
 
     @Test
+    public void searchForStopPlaceAllEmptyParams() throws Exception {
+        String stopPlaceName = "Eselstua";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                "(id:\\\"\\\" countyReference:\\\"\\\" municipalityReference:\\\"\\\") " +
+                " { " +
+                "  name { value } " +
+                " } " +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    @Test
     public void searchForStopPlaceByNameContainsCaseInsensitive() throws Exception {
         String stopPlaceName = "Grytnes";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
@@ -213,7 +232,7 @@ public class GraphQLResourceIntegrationTest {
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:" + hordaland.getId() + " municipalityReference:" + kvinnherad.getId() +") { " +
+                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:\\\"" + getNetexId(hordaland) + "\\\" municipalityReference:\\\"" + getNetexId(kvinnherad) +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -236,7 +255,7 @@ public class GraphQLResourceIntegrationTest {
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:" + asker.getId() +") { " +
+                " (municipalityReference:\\\"" + getNetexId(asker) +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -256,7 +275,7 @@ public class GraphQLResourceIntegrationTest {
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:" + asker.getId() +") { " +
+                " (municipalityReference:\\\"" + getNetexId(asker) +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -278,7 +297,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:["+baerum.getId()+","+asker.getId()+"]) {" +
+                " (municipalityReference:[\\\""+getNetexId(baerum)+"\\\",\\\""+getNetexId(asker)+"\\\"]) {" +
                 "id " +
                 "name { value } " +
                 "quays " +
@@ -306,7 +325,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:["+akershus.getId()+","+buskerud.getId()+"] municipalityReference:["+lier.getId()+","+asker.getId()+"]) {" +
+                " (countyReference:[\\\""+getNetexId(akershus)+"\\\",\\\""+getNetexId(buskerud)+"\\\"] municipalityReference:[\\\""+getNetexId(lier)+"\\\",\\\""+getNetexId(asker)+"\\\"]) {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -327,7 +346,7 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:"+akershus.getId()+") {" +
+                " (countyReference:\\\""+getNetexId(akershus)+"\\\") {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -370,15 +389,17 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.CREATE_STOPPLACE + " (" +
-                "          name:\\\"" + name + "\\\" " +
-                "          shortName:\\\"" + shortName + "\\\" " +
-                "          description:\\\"" + description + "\\\"" +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          name: { value:\\\"" + name + "\\\" } " +
+                "          shortName:{ value:\\\"" + shortName + "\\\" } " +
+                "          description:{ value:\\\"" + description + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          longitude:" + lon +
-                "          latitude:" + lat +
+                "          location: {" +
+                "            longitude:" + lon +
+                "            latitude:" + lat +
+                "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
-                ") { " +
+                "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  shortName { value } " +
@@ -425,15 +446,18 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.UPDATE_STOPPLACE + " (id:\\\"" + getNetexId(stopPlace) + "\\\""+
-                "          name:\\\"" + updatedName + "\\\" " +
-                "          shortName:\\\"" + updatedShortName + "\\\" " +
-                "          description:\\\"" + updatedDescription + "\\\"" +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          name: { value:\\\"" + updatedName + "\\\" } " +
+                "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
+                "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          longitude:" + updatedLon +
-                "          latitude:" + updatedLat +
+                "          location: {" +
+                "            longitude:" + updatedLon +
+                "            latitude:" + updatedLat +
+                "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
-                ") { " +
+                "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  shortName { value } " +
@@ -472,13 +496,18 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\"" +
-                "          name:\\\"" + name + "\\\" " +
-                "          shortName:\\\"" + shortName + "\\\" " +
-                "          description:\\\"" + description + "\\\"" +
-                "          longitude:" + lon +
-                "          latitude:" + lat +
-                ") { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          quays: [{ " +
+                "            name: { value:\\\"" + name + "\\\" } " +
+                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
+                "            description:{ value:\\\"" + description + "\\\" }" +
+                "            location: {" +
+                "              longitude:" + lon +
+                "              latitude:" + lat +
+                "             }" +
+                "          }] " +
+                "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  quays {" +
@@ -527,15 +556,20 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.UPDATE_QUAY + " (id:\\\"" + getNetexId(quay) + "\\\""+
-                "          stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\" " +
-                "          name:\\\"" + name + "\\\" " +
-                "          shortName:\\\"" + shortName + "\\\" " +
-                "          description:\\\"" + description + "\\\"" +
-                "          longitude:" + lon +
-                "          latitude:" + lat +
-                "          compassBearing:" + compassBearing +
-                ") { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          quays: [{ " +
+                "            id:\\\"" + getNetexId(quay) + "\\\" " +
+                "            name: { value:\\\"" + name + "\\\" } " +
+                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
+                "            description:{ value:\\\"" + description + "\\\" }" +
+                "            location: {" +
+                "              longitude:" + lon +
+                "              latitude:" + lat +
+                "             }" +
+                "            compassBearing:" + compassBearing +
+                "          }] " +
+                "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  quays {" +
@@ -588,15 +622,19 @@ public class GraphQLResourceIntegrationTest {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.CREATE_QUAY + " (" +
-                "          stopPlaceId:\\\"" + getNetexId(stopPlace) + "\\\"" +
-                "          name:\\\"" + name + "\\\" " +
-                "          shortName:\\\"" + shortName + "\\\" " +
-                "          description:\\\"" + description + "\\\"" +
-                "          longitude:" + lon +
-                "          latitude:" + lat +
-                "          compassBearing:" + compassBearing +
-                ") { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          quays: [{ " +
+                "            name: { value:\\\"" + name + "\\\" } " +
+                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
+                "            description:{ value:\\\"" + description + "\\\" }" +
+                "            location: {" +
+                "              longitude:" + lon +
+                "              latitude:" + lat +
+                "             }" +
+                "            compassBearing:" + compassBearing +
+                "          }] " +
+                "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  quays {" +
@@ -608,7 +646,7 @@ public class GraphQLResourceIntegrationTest {
                 "    compassBearing " +
                 "  } " +
                 "  } " +
-                "}\",\"variables\":\"\"}";
+                "}}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
@@ -633,6 +671,94 @@ public class GraphQLResourceIntegrationTest {
                 .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
     }
 
+
+
+    @Test
+    @Ignore
+    public void testMutationUpdateStopPlaceCreateQuayAndUpdateQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Espa"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        Point point = geometryFactory.createPoint(new Coordinate(11.2, 60.2));
+        quay.setCentroid(point);
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        String newStopName = "Shell - E6";
+        String newQuaydName = "Testing name 1";
+        String newQuayShortName = "Testing shortname 1";
+        String newQuayDescription = "Testing description 1";
+
+        String updatedName = "Testing name 2";
+        String updatedShortName = "Testing shortname 2";
+        String updatedDescription = "Testing description 2";
+
+        Float lon = new Float(10.11111);
+        Float lat = new Float(59.11111);
+
+        Float compassBearing = new Float(180);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          name: { value:\\\"" + newStopName + "\\\" } " +
+                "          quays: [{ " +
+                "            name: { value:\\\"" + newQuaydName + "\\\" } " +
+                "            shortName:{ value:\\\"" + newQuayShortName + "\\\" } " +
+                "            description:{ value:\\\"" + newQuayDescription + "\\\" }" +
+                "            location: {" +
+                "              longitude:" + lon +
+                "              latitude:" + lat +
+                "             }" +
+                "            compassBearing:" + compassBearing +
+                "          } , {" +
+                "            id:\\\"" + getNetexId(quay) + "\\\" " +
+                "            name: { value:\\\"" + updatedName + "\\\" } " +
+                "            shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
+                "            description:{ value:\\\"" + updatedDescription + "\\\" }" +
+                "          }] " +
+                "       }) { " +
+                "  id " +
+                "  name { value } " +
+                "  quays {" +
+                "    id " +
+                "    name { value } " +
+                "    shortName { value } " +
+                "    description { value } " +
+                "    location { longitude latitude } " +
+                "    compassBearing " +
+                "  } " +
+                "  } " +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].name.value", equalTo(newStopName))
+                .body("data.stopPlace[0].quays", Matchers.hasSize(2))
+                        // First Quay - added manually, then updated
+                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
+                .body("data.stopPlace[0].quays[0].name.value", equalTo(updatedName))
+                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(updatedShortName))
+                .body("data.stopPlace[0].quays[0].description.value", equalTo(updatedDescription))
+                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(new Float(point.getX())))
+                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
+                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                        // Second Quay - added using GraphQL
+                .body("data.stopPlace[0].quays[1].id", not(getNetexId(quay)))
+                .body("data.stopPlace[0].quays[1].id", not(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].quays[1].name.value", equalTo(newQuaydName))
+                .body("data.stopPlace[0].quays[1].shortName.value", equalTo(newQuayShortName))
+                .body("data.stopPlace[0].quays[1].description.value", equalTo(newQuayDescription))
+                .body("data.stopPlace[0].quays[1].location.longitude", comparesEqualTo(lon))
+                .body("data.stopPlace[0].quays[1].location.latitude", comparesEqualTo(lat))
+                .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
+    }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
