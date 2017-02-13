@@ -8,6 +8,8 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +29,8 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 class StopPlaceFetcher implements DataFetcher {
 
 
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceFetcher.class);
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
@@ -34,6 +38,8 @@ class StopPlaceFetcher implements DataFetcher {
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
+
+        logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
 
         Page<StopPlace> stopPlaces = null;
         String id = environment.getArgument(ID);
@@ -52,7 +58,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
-            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_TYPE);
+            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
             if (stopTypes != null && !stopTypes.isEmpty()) {
                 stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
                                 .filter(type -> type != null)
@@ -105,7 +111,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
                         boundingBox.yMax, ignoreStopPlaceId, pageable);
             } else {
-                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         }
         return stopPlaces;

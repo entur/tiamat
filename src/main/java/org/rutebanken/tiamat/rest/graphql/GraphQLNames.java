@@ -2,19 +2,25 @@ package org.rutebanken.tiamat.rest.graphql;
 
 public class GraphQLNames {
 
-    static final String TYPE_TOPOGRAPHIC_PLACE = "TopographicPlaceType";
-    static final String TYPE_STOPPLACE = "StopPlaceType";
-    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualStringType";
+    static final String OUTPUT_TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
+    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = "_" + OUTPUT_TYPE_TOPOGRAPHIC_PLACE;
 
-    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = "_" + TYPE_TOPOGRAPHIC_PLACE;
-    static final String INPUT_TYPE_STOPPLACE = "_"+TYPE_STOPPLACE;
-    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "_"+TYPE_EMBEDDABLE_MULTILINGUAL_STRING;
+    static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
+    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "_"+ OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING;
 
+    static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
+    static final String INPUT_TYPE_STOPPLACE = "_"+ OUTPUT_TYPE_STOPPLACE;
 
-    static final String STOPPLACE = "StopPlace";
+    static final String OUTPUT_TYPE_QUAY = "Quay";
+    static final String INPUT_TYPE_QUAY = "_" + OUTPUT_TYPE_QUAY;
+
+    static final String OUTPUT_TYPE_LOCATION = "Location";
+    static final String INPUT_TYPE_LOCATION = "_" + OUTPUT_TYPE_LOCATION;
+
+    static final String OBJECT_TYPE_STOP_PLACE_TYPE = "StopPlaceType";
 
     static final String ID = "id";
-    static final String STOP_TYPE = "stopPlaceType";
+    static final String STOP_PLACE_TYPE = "stopPlaceType";
     static final String SHORT_NAME = "shortName";
     static final String DESCRIPTION = "description";
     static final String IMPORTED_ID = "importedId";
@@ -33,19 +39,15 @@ public class GraphQLNames {
     static final String LATITUDE_MAX = "latMax";
 
     static final String LOCATION = "location";
-    static final String TYPE_LOCATION = "Location";
-    static final String INPUT_LOCATION = "_" + TYPE_LOCATION;
     static final String LONGITUDE = "longitude";
     static final String LATITUDE = "latitude";
 
     static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     static final String QUAYS = "quays";
-    static final String QUAY = "quay";
-    static final String INPUT_TYPE_QUAY = "_" + QUAY;
     static final String COMPASS_BEARING = "compassBearing";
 
-    static final String STOPPLACE_ID = "stopPlaceId";
     static final String NAME = "name";
+    static final String OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE = "TopographicPlaceType";
     static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     static final String TOPOGRAPHIC_PLACE = "topographicPlace";
     static final String PARENT_TOPOGRAPHIC_PLACE = "parentTopographicPlace";

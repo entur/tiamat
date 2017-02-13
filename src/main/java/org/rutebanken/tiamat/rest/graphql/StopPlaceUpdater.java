@@ -52,8 +52,8 @@ class StopPlaceUpdater implements DataFetcher {
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
         StopPlace stopPlace = null;
-        if (environment.getArgument(STOPPLACE) != null) {
-            Map input = environment.getArgument(STOPPLACE);
+        if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
+            Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
 
             String nsrId = (String) input.get(ID);
             if (nsrId != null) {
@@ -88,8 +88,8 @@ class StopPlaceUpdater implements DataFetcher {
     private boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
         boolean isUpdated = populate(input, stopPlace);
 
-        if (input.get(STOP_TYPE) != null) {
-            stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_TYPE));
+        if (input.get(STOP_PLACE_TYPE) != null) {
+            stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));
             isUpdated = true;
         }
 
