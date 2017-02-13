@@ -85,7 +85,11 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLString)
                         .dataFetcher(env -> {
                             TopographicPlace tp = (TopographicPlace) env.getSource();
-                            return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                            if (tp != null) {
+                                return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                            } else {
+                                return null;
+                            }
                         }))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE_TYPE)
@@ -102,7 +106,11 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLString)
                         .dataFetcher(env -> {
                                 TopographicPlace tp = (TopographicPlace) env.getSource();
+                            if (tp != null) {
                                 return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                            } else {
+                                return null;
+                            }
                         }))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE_TYPE)
@@ -135,7 +143,11 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(new GraphQLList(GraphQLString))
                 .dataFetcher(env -> {
                     DataManagedObjectStructure source = (DataManagedObjectStructure) env.getSource();
-                    return source.getOriginalIds();
+                    if (source != null) {
+                        return source.getOriginalIds();
+                    } else {
+                        return null;
+                    }
                 })
                 .build());
         commonFieldsList.add(newFieldDefinition()
@@ -148,11 +160,15 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(locationObjectType)
                 .dataFetcher(env -> {
                     Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
-                    LocationDto dto = new LocationDto();
                     Point point = source.getCentroid();
-                    dto.longitude = point.getX();
-                    dto.latitude = point.getY();
-                    return dto;
+                    if (point != null) {
+                        LocationDto dto = new LocationDto();
+                        dto.longitude = point.getX();
+                        dto.latitude = point.getY();
+                        return dto;
+                    } else {
+                        return null;
+                    }
                 }).build());
 
         GraphQLType quayObjectType = newObject()
