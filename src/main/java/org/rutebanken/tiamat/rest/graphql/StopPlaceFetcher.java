@@ -105,7 +105,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
                         boundingBox.yMax, ignoreStopPlaceId, pageable);
             } else {
-                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         }
         return stopPlaces;

@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import graphql.GraphQLException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,9 @@ public class GraphQLResource {
 			try {
 				variables = mapper.readValue(s, new TypeReference<Map<String, Object>>(){});
 			} catch (IOException e) {
-				return Response.status(Response.Status.BAD_REQUEST).build();
+                HashMap<String, Object> content = new HashMap<>();
+                content.put("errors", e.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(content).build();
 			}
 
 		} else {
@@ -77,34 +80,39 @@ public class GraphQLResource {
 	}
 
 	public Response getGraphQLResponse(String query, Map<String, Object> variables) {
-		ExecutionResult executionResult = graphQL.execute(query, null, null, variables);
-		Response.ResponseBuilder res = Response.status(Response.Status.OK);
-		HashMap<String, Object> content = new HashMap<>();
-		if (!executionResult.getErrors().isEmpty()) {
-			List<GraphQLError> errors = executionResult.getErrors();
+        Response.ResponseBuilder res = Response.status(Response.Status.OK);
+        HashMap<String, Object> content = new HashMap<>();
+        try {
+            ExecutionResult executionResult = graphQL.execute(query, null, null, variables);
 
-			Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
-			for (GraphQLError error : errors) {
-				switch(error.getErrorType()) {
-					case InvalidSyntax:
-						status = Response.Status.BAD_REQUEST;
-						break;
-					case ValidationError:
-						status = Response.Status.BAD_REQUEST;
-						break;
-					case DataFetchingException:
-						status = Response.Status.INTERNAL_SERVER_ERROR;
-						break;
-				}
-			}
+            if (!executionResult.getErrors().isEmpty()) {
+                List<GraphQLError> errors = executionResult.getErrors();
 
-			res = Response.status(status);
+                Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+                for (GraphQLError error : errors) {
+                    switch(error.getErrorType()) {
+                        case InvalidSyntax:
+                            status = Response.Status.BAD_REQUEST;
+                            break;
+                        case ValidationError:
+                            status = Response.Status.BAD_REQUEST;
+                            break;
+                        case DataFetchingException:
+                            status = Response.Status.INTERNAL_SERVER_ERROR;
+                            break;
+                    }
+                }
 
-			content.put("errors", errors);
-		}
-		if (executionResult.getData() != null) {
-			content.put("data", executionResult.getData());
-		}
+                res = Response.status(status);
+
+                content.put("errors", errors);
+            }
+            if (executionResult.getData() != null) {
+                content.put("data", executionResult.getData());
+            }
+        } catch (GraphQLException e) {
+            content.put("errors", e.getMessage());
+        }
 		return res.entity(content).build();
 	}
 
