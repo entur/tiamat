@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Qualifier("mergingStopPlaceImporter")
 @Transactional
-public class MergingStopPlaceImporter implements StopPlaceImporter {
+public class MergingStopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(MergingStopPlaceImporter.class);
 
@@ -90,8 +90,7 @@ public class MergingStopPlaceImporter implements StopPlaceImporter {
      *
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
-    @Override
-    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace) throws InterruptedException, ExecutionException {
 
         logger.debug("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 
@@ -100,23 +99,24 @@ public class MergingStopPlaceImporter implements StopPlaceImporter {
                     + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive());
         }
 
-        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace, topographicPlacesCreatedCounter));
+        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace));
     }
 
-    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace) throws InterruptedException, ExecutionException {
         final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
         final StopPlace stopPlace;
         if (foundStopPlace != null) {
             stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
         } else {
-            stopPlace = handleCompletelyNewStopPlace(newStopPlace, topographicPlacesCreatedCounter);
+            stopPlace = handleCompletelyNewStopPlace(newStopPlace);
+
         }
         return stopPlace;
     }
 
 
-    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace) throws ExecutionException {
 
         if(newStopPlace.getId() != null) {
             newStopPlace.setId(null);

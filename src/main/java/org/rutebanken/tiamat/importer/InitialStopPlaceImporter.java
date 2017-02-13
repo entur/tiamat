@@ -17,16 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Import stop place without taking existing data into account.
- * Suitable for clean databases. Topographical places may already exist,
- * or will be created by the TopoGraphicPlaceCreator.
+ * Suitable for clean databases.
  */
 @Component
-@Qualifier("cleanStopPlaceImporter")
-public class SimpleStopPlaceImporter implements StopPlaceImporter {
+public class InitialStopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleStopPlaceImporter.class);
-
-    private final TopographicPlaceCreator topographicPlaceCreator;
+    private static final Logger logger = LoggerFactory.getLogger(InitialStopPlaceImporter.class);
 
     private final QuayRepository quayRepository;
 
@@ -34,18 +30,18 @@ public class SimpleStopPlaceImporter implements StopPlaceImporter {
 
     private final NetexMapper netexMapper;
 
+    private final TopographicPlaceCreator topographicPlaceCreator;
 
     @Autowired
-    public SimpleStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator, QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
-        this.topographicPlaceCreator = topographicPlaceCreator;
+    public InitialStopPlaceImporter(QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper, TopographicPlaceCreator topographicPlaceCreator) {
         this.quayRepository = quayRepository;
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
+        this.topographicPlaceCreator = topographicPlaceCreator;
     }
 
-    @Override
-    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace stopPlace, SiteFrame siteFrame,
-                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger topographicPlacesCreatedCounter, SiteFrame siteFrame, StopPlace stopPlace) throws InterruptedException, ExecutionException {
+
         if(siteFrame.getTopographicPlaces() != null) {
             topographicPlaceCreator.setTopographicReference(stopPlace,
                     siteFrame.getTopographicPlaces().getTopographicPlace(),

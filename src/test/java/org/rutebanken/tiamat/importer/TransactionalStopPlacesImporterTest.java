@@ -10,31 +10,18 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SiteFrameImporterTest extends CommonSpringBootTest {
+public class TransactionalStopPlacesImporterTest extends CommonSpringBootTest {
 
     @Autowired
     private GeometryFactory geometryFactory;
 
     @Autowired
-    private SiteFrameImporter siteFrameImporter;
-
-    @Autowired
-    private MergingStopPlaceImporter stopPlaceImporter;
-
-
-
-    @Test
-    public void noStopPlacesInSiteFrameShouldNotCauseNullpointer() {
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrameImporter.importStopPlaces(siteFrame, stopPlaceImporter);
-    }
+    private TransactionalStopPlacesImporter siteFrameImporter;
 
     /**
      * This test is implemented to reproduce an issue we had with lazy initialization exception
@@ -47,30 +34,21 @@ public class SiteFrameImporterTest extends CommonSpringBootTest {
         int stopPlaces = 2;
         Random random = new Random();
 
-        List<SiteFrame> siteFrames = new ArrayList<>();
+        List<StopPlace> stopPlacesCreated = new ArrayList<>();
 
-        for(int siteFrameIndex = 0; siteFrameIndex < 2; siteFrameIndex++) {
-            SiteFrame siteFrame = new SiteFrame();
-            siteFrame.setStopPlaces(new StopPlacesInFrame_RelStructure());
+        for (int stopPlaceIndex = 0; stopPlaceIndex < stopPlaces; stopPlaceIndex++) {
 
-            for (int stopPlaceIndex = 0; stopPlaceIndex < stopPlaces; stopPlaceIndex++) {
+            StopPlace stopPlace = new StopPlace();
+            stopPlace.setId(stopPlaceIndex * Math.abs(random.nextLong()));
 
-                StopPlace stopPlace = new StopPlace();
-                stopPlace.setId(stopPlaceIndex * Math.abs(random.nextLong()));
+            double longitude = 39.61441 * Math.abs(random.nextDouble());
+            double latitude = -144.22765 * Math.abs(random.nextDouble());
 
-                double longitude = 39.61441 * Math.abs(random.nextDouble());
-                double latitude = -144.22765 * Math.abs(random.nextDouble());
-
-                stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
-
-                siteFrame.getStopPlaces().getStopPlace().add(stopPlace);
-            }
-
-            siteFrames.add(siteFrame);
+            stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
+            stopPlacesCreated.add(stopPlace);
         }
 
-        siteFrameImporter.importStopPlaces(siteFrames.get(0), stopPlaceImporter);
-        siteFrameImporter.importStopPlaces(siteFrames.get(1), stopPlaceImporter);
+        siteFrameImporter.importStopPlaces(stopPlacesCreated, new AtomicInteger());
     }
 
 

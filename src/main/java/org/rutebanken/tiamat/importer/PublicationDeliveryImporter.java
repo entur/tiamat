@@ -2,11 +2,11 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
-import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,8 +29,7 @@ public class PublicationDeliveryImporter {
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
     private static final Object STOP_PLACE_IMPORT_LOCK = new Object();
 
-    private final StopPlaceImporter stopPlaceImporter;
-    private final SiteFrameImporter siteFrameImporter;
+    private final TransactionalStopPlacesImporter siteFrameImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
     private final StopPlacePreSteps stopPlacePreSteps;
@@ -38,11 +38,8 @@ public class PublicationDeliveryImporter {
 
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
-                                       @Qualifier("mergingStopPlaceImporter") StopPlaceImporter stopPlaceImporter,
-                                       SiteFrameImporter siteFrameImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter) {
+                                       TransactionalStopPlacesImporter siteFrameImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter) {
         this.netexMapper = netexMapper;
-
-        this.stopPlaceImporter = stopPlaceImporter;
         this.siteFrameImporter = siteFrameImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
@@ -61,30 +58,34 @@ public class PublicationDeliveryImporter {
 
         AtomicInteger stopPlacesCreated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCounter = new AtomicInteger(0);
-
         SiteFrame netexSiteFrame = findSiteFrame(incomingPublicationDelivery);
+
+        String requestId = netexSiteFrame.getId();
 
         Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreated, numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
 
         try {
+            SiteFrame responseSiteframe = new SiteFrame();
 
-            MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
+            MDC.put(IMPORT_CORRELATION_ID, requestId);
             logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
 
             List<StopPlace> tiamatStops = netexMapper.mapToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
             tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
 
-
+            Collection<org.rutebanken.netex.model.StopPlace> stopPlaces;
             synchronized (STOP_PLACE_IMPORT_LOCK) {
-                return siteFrameImporter.importStopPlaces(tiamatStops, stopPlaceImporter, stopPlacesCreated);
+                 stopPlaces = siteFrameImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
             }
+            logger.info("Saved {} stop places", stopPlacesCreated);
 
-//            List<PathLink> pathLinks = netexMapper,
+            responseSiteframe.withId(requestId+"-response").withVersion("1");
 
+            responseSiteframe.withStopPlaces(
+                    new StopPlacesInFrame_RelStructure()
+                            .withStopPlace(stopPlaces));
 
-           // TODO originalIds+"-response
-            // TODO site frame version
-            return publicationDeliveryExporter.exportSiteFrame(siteFrameWithProcessedStopPlaces);
+            return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();

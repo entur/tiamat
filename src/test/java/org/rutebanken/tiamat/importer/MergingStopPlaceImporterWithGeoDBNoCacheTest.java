@@ -80,7 +80,7 @@ public class MergingStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringBo
                 quay.setCentroid(randomPoint);
                 stopPlace.getQuays().add(quay);
                 try {
-                    StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace, new SiteFrame(), new AtomicInteger());
+                    StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace);
                     if (response != null) {
                         imports.incrementAndGet();
                     }
@@ -92,7 +92,7 @@ public class MergingStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringBo
 
         executeNTimes(sameStopImportedCount, executorService, () -> {
             try {
-                StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
+                StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop());
                 if(response != null) {
                     imports.incrementAndGet();
                 }
@@ -105,7 +105,7 @@ public class MergingStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringBo
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.MINUTES);
         assertThat(imports.get()).isEqualTo(sameStopImportedCount + (eachQuayImportedCount*uniqueQuays));
-        StopPlace importedStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop());
         assertThat(importedStopPlace.getQuays()).hasSize(uniqueQuays)
                 .as("Regardless of how many times similar stop with two different quays as imported. We must end up with a stop place with two quays.");
     }

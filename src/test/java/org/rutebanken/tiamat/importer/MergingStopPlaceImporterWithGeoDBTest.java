@@ -40,8 +40,6 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    private final AtomicInteger topographicPlacesCounter = new AtomicInteger();
-
 
     @Before
     public void cleanRepositories() {
@@ -71,7 +69,7 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
-        StopPlace firstImportResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace firstImportResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace);
 
         StopPlace secondStopPlace = createStopPlace(name,
                 stopPlaceLongitude, stopPlaceLatitude, null);
@@ -80,7 +78,7 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
 
 
         // Import second stop place
-        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(firstImportResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
@@ -100,13 +98,13 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
-        mergingStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+        mergingStopPlaceImporter.importStopPlace(firstStopPlace);
 
         StopPlace secondStopPlace = createStopPlace(name, longitude, latitude, null);
         secondStopPlace.getQuays().add(createQuay(name, longitude, latitude, null));
 
         // Import second stop place
-        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
@@ -124,12 +122,12 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         SiteFrame siteFrame = new SiteFrame();
 
-        mergingStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+        mergingStopPlaceImporter.importStopPlace(firstStopPlace);
 
         StopPlace secondStopPlace = createStopPlace("Filipstad ferjeterminal", 10.709707, 59.908737, null);
         secondStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
-        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getName().getValue()).isEqualTo(firstStopPlace.getName().getValue());
@@ -140,10 +138,10 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         String name = "Skillebekkgata";
         StopPlace firstStopPlace = createStopPlaceWithQuay(name,
                 6, 60, 11063200L, 11063200L);
-        mergingStopPlaceImporter.importStopPlace(firstStopPlace, new SiteFrame(), topographicPlacesCounter);
+        mergingStopPlaceImporter.importStopPlace(firstStopPlace);
         StopPlace secondStopPlace = createStopPlaceWithQuay(name,
                 6, 60.0001, 11063198L, 11063198L);
-        mergingStopPlaceImporter.importStopPlace(secondStopPlace, new SiteFrame(), topographicPlacesCounter);
+        mergingStopPlaceImporter.importStopPlace(secondStopPlace);
     }
 
     /**
@@ -165,13 +163,13 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
-        mergingStopPlaceImporter.importStopPlace(firstStopPlace, siteFrame, topographicPlacesCounter);
+        mergingStopPlaceImporter.importStopPlace(firstStopPlace);
 
         StopPlace secondStopPlace = createStopPlaceWithQuay(name,
                 longitude, latitude, stopPlaceId, quayId);
 
         // Import second stop place with a quay with the same coordinates as second stop place
-        StopPlace actualStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, topographicPlacesCounter);
+        StopPlace actualStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
