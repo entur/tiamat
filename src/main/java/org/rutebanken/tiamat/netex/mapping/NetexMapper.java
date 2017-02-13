@@ -4,11 +4,14 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -84,8 +87,11 @@ public class NetexMapper {
         return mapperFactory.getMapperFacade().map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
     }
 
-    public List<org.rutebanken.tiamat.model.StopPlace> mapToTiamatModel(List<StopPlace> stopPlaces) {
+    public List<org.rutebanken.tiamat.model.StopPlace> mapStopsToTiamatModel(List<StopPlace> stopPlaces) {
         return mapperFactory.getMapperFacade().mapAsList(stopPlaces, org.rutebanken.tiamat.model.StopPlace.class);
+    }
+    public List<org.rutebanken.tiamat.model.PathLink> mapPathLinksToTiamatModel(List<PathLink> pathLinks) {
+        return mapperFactory.getMapperFacade().mapAsList(pathLinks, org.rutebanken.tiamat.model.PathLink.class);
     }
 
     public org.rutebanken.tiamat.model.SiteFrame mapToTiamatModel(SiteFrame netexSiteFrame) {
@@ -103,5 +109,9 @@ public class NetexMapper {
 
     public Quay mapToNetexModel(org.rutebanken.tiamat.model.Quay tiamatQuay) {
         return mapperFactory.getMapperFacade().map(tiamatQuay, Quay.class);
+    }
+
+    public PathLink mapToNetexModel(org.rutebanken.tiamat.model.PathLink pathLink) {
+        return mapperFactory.getMapperFacade().map(pathLink, PathLink.class);
     }
 }

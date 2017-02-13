@@ -1,12 +1,11 @@
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
+import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ public class PublicationDeliveryImporter {
             MDC.put(IMPORT_CORRELATION_ID, requestId);
             logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
 
-            List<StopPlace> tiamatStops = netexMapper.mapToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
+            List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
             tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
 
             Collection<org.rutebanken.netex.model.StopPlace> stopPlaces;
@@ -84,6 +83,15 @@ public class PublicationDeliveryImporter {
             responseSiteframe.withStopPlaces(
                     new StopPlacesInFrame_RelStructure()
                             .withStopPlace(stopPlaces));
+
+            List<PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
+            List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
+            responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
+            )
+            // map path links
+            // save them
+            // map them back to netex
+
 
             return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);
         } finally {
