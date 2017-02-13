@@ -75,8 +75,7 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
 
                     stopPlace.setChanged(ZonedDateTime.now());
-                    entityManager.persist(stopPlace);
-//                    stopPlace = stopPlaceRepository.save(stopPlace);
+                    stopPlace = stopPlaceRepository.save(stopPlace);
 
                 }
             }
