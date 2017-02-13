@@ -151,17 +151,4 @@ public class SiteFrameImporter {
                 topographicPlacesCreated);
 
     }
-
-
-    private String getStripedSemaphoreKey(StopPlace stopPlace) {
-        final String semaphoreKey;
-//        if (stopPlace.getName() != null
-//                && stopPlace.getName().getValue() != null
-//                && !stopPlace.getName().getValue().isEmpty()) {
-//            semaphoreKey = "name-" + stopPlace.getName().getValue();
-//        } else {
-            semaphoreKey = "all";
-//        }
-        return semaphoreKey;
-    }
 }
