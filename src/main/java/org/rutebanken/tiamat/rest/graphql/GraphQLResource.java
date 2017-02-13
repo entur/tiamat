@@ -111,6 +111,7 @@ public class GraphQLResource {
                 content.put("data", executionResult.getData());
             }
         } catch (GraphQLException e) {
+            res = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             content.put("errors", e.getMessage());
         }
 		return res.entity(content).build();
