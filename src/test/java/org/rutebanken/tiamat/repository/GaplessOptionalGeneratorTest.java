@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -64,6 +65,26 @@ public class GaplessOptionalGeneratorTest {
         BigInteger actual = (BigInteger) list.get(0);
 
         assertThat(actual.longValue()).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
+    }
+
+    @Test
+    public void generateIdAfterExplicitIDs() {
+
+        GaplessOptionalGenerator gaplessOptionalGenerator = new GaplessOptionalGenerator();
+
+        SessionImplementor session = (SessionImplementor) hibernateEntityManagerFactory.getSessionFactory().openSession();
+
+        // Use first 500 IDs
+        for(long explicitId = 1; explicitId <= 500; explicitId ++) {
+            Quay quay = new Quay();
+            quay.setId(explicitId);
+            gaplessOptionalGenerator.generate(session, quay);
+        }
+
+        // Get next ID which should be 501
+        Serializable serializable = gaplessOptionalGenerator.generate(session, new Quay());
+        Long gotId = (Long) serializable;
+        assertThat(gotId).isEqualTo(501);
     }
 
 

@@ -68,6 +68,10 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
                 logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
                 availableIds.remove(entityStructure.getId());
                 insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
+                if(isH2(sessionImpl)) {
+                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
+                    usedH2Ids.get(tableName).add(entityStructure.getId());
+                }
                 return entityStructure.getId();
             } else {
                 return generateId(tableName, entityStructure, sessionImpl, availableIds);
@@ -204,22 +208,23 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
     /**
      * Generate new in-memory IDs for H2.
      */
-    private List<Long> generateNextAvailableH2Ids(String tableName, long lastId, int max) {
+    private List<Long> generateNextAvailableH2Ids(String tableName, long lastId, int fetchSize) {
         List<Long> availableIds = new ArrayList<>();
 
         usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
 
         Long id = lastId;
         Long counter = 0L;
-        while (counter < max) {
+        while (counter < fetchSize) {
             while (usedH2Ids.get(tableName).contains(id)) {
                 logger.debug("Looking for next available ID. {} is taken", id);
+                id++;
             }
+            usedH2Ids.get(tableName).add(id);
+            logger.debug("Found available ID {}", id);
             availableIds.add(id);
-            id++;
             counter++;
         }
-        usedH2Ids.get(tableName).addAll(availableIds);
 
         return availableIds;
     }
