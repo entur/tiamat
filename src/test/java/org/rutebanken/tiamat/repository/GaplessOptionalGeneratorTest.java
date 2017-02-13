@@ -75,7 +75,7 @@ public class GaplessOptionalGeneratorTest {
         SessionImplementor session = (SessionImplementor) hibernateEntityManagerFactory.getSessionFactory().openSession();
 
         // Use first 500 IDs
-        for(long explicitId = 1; explicitId <= 500; explicitId ++) {
+        for(long explicitId = 1; explicitId <= 600; explicitId ++) {
             Quay quay = new Quay();
             quay.setId(explicitId);
             gaplessOptionalGenerator.generate(session, quay);
@@ -84,9 +84,8 @@ public class GaplessOptionalGeneratorTest {
         // Get next ID which should be 501
         Serializable serializable = gaplessOptionalGenerator.generate(session, new Quay());
         Long gotId = (Long) serializable;
-        assertThat(gotId).isEqualTo(501);
+        assertThat(gotId).isEqualTo(601);
     }
-
 
     /**
      * Was implemented under the supsicion that OptionalIdCreator caused a bug.

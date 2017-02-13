@@ -122,12 +122,15 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
         try {
             lock.lock();
 
-            while (availableIds.isEmpty()) {
-                List<Long> retrievedIds = retrieveIds(tableName, sessionImpl);
-                logger.trace("Inserting {} ids", retrievedIds);
-                insertRetrievedIds(tableName, retrievedIds, sessionImpl);
-                availableIds.addAll(retrievedIds);
+            List<Long> retrievedIds = new ArrayList<>();
+            while (retrievedIds.isEmpty()) {
+                logger.trace("Retrieving new IDs");
+                retrievedIds.addAll(retrieveIds(tableName, sessionImpl));
             }
+            logger.trace("Inserting {} ids", retrievedIds);
+            insertRetrievedIds(tableName, retrievedIds, sessionImpl);
+            availableIds.addAll(retrievedIds);
+            lastIdsPerTable.put(tableName,retrievedIds.get(retrievedIds.size()-1));
         } finally {
             lock.unlock();
         }
@@ -156,16 +159,16 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
      */
     @SuppressWarnings(value = "unchecked")
     private List<Long> retrieveIds(String tableName, SessionImpl sessionImpl) {
-        Long lastId = lastIdsPerTable.get(tableName);
+        long lastId = lastIdsPerTable.get(tableName);
 
         if (isH2(sessionImpl)) {
             // Because of issues using the query below or query with system range with H2.
-            return generateNextAvailableH2Ids(tableName, lastId, ID_FETCH_SIZE);
+            return generateNextAvailableH2Ids(tableName, ID_FETCH_SIZE);
         }
 
         logger.trace("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId.longValue() + ID_FETCH_SIZE) + ") AS generated " +
+        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + ID_FETCH_SIZE) + ") AS generated " +
                 "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " +
                 "ORDER BY generated";
 
@@ -179,6 +182,10 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
 
 
     private void insertRetrievedIds(String tableName, List<Long> list, SessionImpl sessionImpl) {
+        if(list.isEmpty()) {
+            throw new IllegalArgumentException("No IDs to insert");
+        }
+
         StringBuilder insertUsedIdsSql = new StringBuilder("INSERT INTO id_generator(table_name, id_value) VALUES");
 
         for (int i = 0; i < list.size(); i++) {
@@ -208,21 +215,24 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
     /**
      * Generate new in-memory IDs for H2.
      */
-    private List<Long> generateNextAvailableH2Ids(String tableName, long lastId, int fetchSize) {
+    private List<Long> generateNextAvailableH2Ids(String tableName, int fetchSize) {
         List<Long> availableIds = new ArrayList<>();
 
         usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
 
-        Long id = lastId;
+
+
+        Long id = lastIdsPerTable.get(tableName);
         Long counter = 0L;
-        while (counter < fetchSize) {
-            while (usedH2Ids.get(tableName).contains(id)) {
+        outer : while (counter < fetchSize) {
+            if (usedH2Ids.get(tableName).contains(id)) {
                 logger.debug("Looking for next available ID. {} is taken", id);
-                id++;
+            } else {
+                availableIds.add(id);
             }
-            usedH2Ids.get(tableName).add(id);
-            logger.debug("Found available ID {}", id);
-            availableIds.add(id);
+
+            lastIdsPerTable.put(tableName, id);
+            id++;
             counter++;
         }
 
