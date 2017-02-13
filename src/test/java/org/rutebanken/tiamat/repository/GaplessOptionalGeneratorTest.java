@@ -36,7 +36,7 @@ public class GaplessOptionalGeneratorTest {
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
 
     @Test
-    public void test() {
+    public void verifyStopPlaceIsAssignedId() {
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
         assertThat(stopPlace.getId()).isNotNull();
