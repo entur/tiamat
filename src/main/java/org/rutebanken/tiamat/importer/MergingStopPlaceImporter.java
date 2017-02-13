@@ -91,8 +91,7 @@ public class MergingStopPlaceImporter implements StopPlaceImporter {
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
     @Override
-    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
-                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
 
         logger.debug("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 
@@ -101,23 +100,23 @@ public class MergingStopPlaceImporter implements StopPlaceImporter {
                     + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive());
         }
 
-        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, topographicPlacesCreatedCounter));
+        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace, topographicPlacesCreatedCounter));
     }
 
-    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
         final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
         final StopPlace stopPlace;
         if (foundStopPlace != null) {
             stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
         } else {
-            stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
+            stopPlace = handleCompletelyNewStopPlace(newStopPlace, topographicPlacesCreatedCounter);
         }
         return stopPlace;
     }
 
 
-    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
 
         if(newStopPlace.getId() != null) {
             newStopPlace.setId(null);
@@ -190,19 +189,19 @@ public class MergingStopPlaceImporter implements StopPlaceImporter {
         return stopPlace;
     }
 
-    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
-        return siteFrame.getTopographicPlaces() != null
-                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
-                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
-    }
-
-    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
-        try {
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
-        } catch (IOException | InterruptedException e) {
-            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
-        }
-    }
+//    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
+//        return siteFrame.getTopographicPlaces() != null
+//                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
+//                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
+//    }
+//
+//    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
+//        try {
+//            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
+//        } catch (IOException | InterruptedException e) {
+//            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
+//        }
+//    }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
         final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);

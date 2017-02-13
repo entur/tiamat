@@ -1,14 +1,11 @@
 package org.rutebanken.tiamat.importer;
 
-import com.google.common.util.concurrent.Striped;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.importer.modifier.CompassBearingRemover;
-import org.rutebanken.tiamat.importer.modifier.name.*;
+import org.rutebanken.tiamat.importer.log.ImportLogger;
+import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
@@ -31,69 +27,28 @@ public class SiteFrameImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteFrameImporter.class);
 
-    private final TopographicPlaceCreator topographicPlaceCreator;
-
     @Autowired
-    public SiteFrameImporter(TopographicPlaceCreator topographicPlaceCreator) {
-        this.topographicPlaceCreator = topographicPlaceCreator;
-
+    public SiteFrameImporter() {
     }
 
-    public org.rutebanken.netex.model.SiteFrame importSiteFrame(SiteFrame siteFrame, StopPlaceImporter stopPlaceImporter) {
-        long startTime = System.currentTimeMillis();
-        AtomicInteger stopPlacesCreated = new AtomicInteger(0);
-        AtomicInteger topographicPlacesCreated = new AtomicInteger(0);
+    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> stopPlaces,
+                                                                       StopPlaceImporter stopPlaceImporter,
+                                                                       AtomicInteger stopPlacesCreated) {
 
-        logger.info("Received site frame for import: {}", siteFrame);
+        List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = stopPlaces
+                .stream()
+                .map(stopPlace ->
+                        importStopPlace(stopPlaceImporter, stopPlace, stopPlacesCreated)
+                )
+                .filter(Objects::nonNull)
+                .collect(toList());
 
-        final String originalIds = siteFrame.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).toString();
-
-        Timer timer = new Timer(this.getClass().getName()+"-logger");
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                logStatus(stopPlacesCreated, startTime, siteFrame, topographicPlacesCreated, originalIds);
-            }
-        };
-        timer.scheduleAtFixedRate(timerTask, 2000, 2000);
-
-        try {
-            org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
-            netexSiteFrame
-                    .withId(originalIds+"-response")
-                    .withVersion("1");
-            if(siteFrame.getStopPlaces() != null) {
-                List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = siteFrame.getStopPlaces().getStopPlace()
-                        .stream()
-                        .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds))
-                        .map(stopPlace ->
-                                importStopPlace(stopPlaceImporter, stopPlace, siteFrame, topographicPlacesCreated, stopPlacesCreated)
-                        )
-                        .filter(Objects::nonNull)
-                        .collect(toList());
-
-                logger.info("Saved {} topographical places and {} stop places", topographicPlacesCreated, stopPlacesCreated);
-
-
-
-                topographicPlaceCreator.invalidateCache();
-
-                netexSiteFrame.withStopPlaces(
-                            new StopPlacesInFrame_RelStructure()
-                                    .withStopPlace(distinctByIdAndHighestVersion(createdStopPlaces)));
-            } else {
-                logger.info("Site frame does not contain any stop places: {}", siteFrame);
-            }
-            return netexSiteFrame;
-        } finally {
-            timer.cancel();
-        }
+        return distinctByIdAndHighestVersion(createdStopPlaces));
     }
 
-    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, AtomicInteger stopPlacesCreated) {
-
+    private org.rutebanken.netex.model.StopPlace importStopPlace(StopPlaceImporter stopPlaceImporter, StopPlace stopPlace, AtomicInteger stopPlacesCreated) {
         try {
-            org.rutebanken.netex.model.StopPlace importedStop = stopPlaceImporter.importStopPlace(stopPlace, siteFrame, topographicPlacesCreated);
+            org.rutebanken.netex.model.StopPlace importedStop = stopPlaceImporter.importStopPlace(stopPlace);
             stopPlacesCreated.incrementAndGet();
             return importedStop;
 
@@ -133,22 +88,5 @@ public class SiteFrameImporter {
         }
     }
 
-    private void logStatus(AtomicInteger stopPlacesCreated, long startTime, SiteFrame siteFrame, AtomicInteger topographicPlacesCreated, String originalIds) {
-        long duration = System.currentTimeMillis() - startTime;
 
-        MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, originalIds);
-        String stopPlacesPerSecond = "NA";
-
-        if(duration >= 1000) {
-
-            stopPlacesPerSecond = String.valueOf(stopPlacesCreated.get() / (duration / 1000f));
-        }
-        int total = siteFrame.getStopPlaces().getStopPlace().size();
-        logger.info("Stop place {}/{} - {}% - {} spl/sec - {} topographic places", stopPlacesCreated.get(),
-                siteFrame.getStopPlaces().getStopPlace().size(),
-                (stopPlacesCreated.get() * 100f) / total,
-                stopPlacesPerSecond,
-                topographicPlacesCreated);
-
-    }
 }

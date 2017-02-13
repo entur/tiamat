@@ -117,7 +117,7 @@ public class SiteFrameResource {
 
         SiteFrame siteFrame = netexMapper.mapToTiamatModel(receivedNetexSiteFrame);
 
-        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
+        org.rutebanken.netex.model.SiteFrame siteFrameWithProcessedStops = siteFrameImporter.importStopPlaces(siteFrame, stopPlaceImporter);
 
         return "Imported "+siteFrameWithProcessedStops.getStopPlaces().getStopPlace().size() + " stop places";
     }

@@ -33,7 +33,7 @@ public class SiteFrameImporterTest extends CommonSpringBootTest {
     @Test
     public void noStopPlacesInSiteFrameShouldNotCauseNullpointer() {
         SiteFrame siteFrame = new SiteFrame();
-        siteFrameImporter.importSiteFrame(siteFrame, stopPlaceImporter);
+        siteFrameImporter.importStopPlaces(siteFrame, stopPlaceImporter);
     }
 
     /**
@@ -69,8 +69,8 @@ public class SiteFrameImporterTest extends CommonSpringBootTest {
             siteFrames.add(siteFrame);
         }
 
-        siteFrameImporter.importSiteFrame(siteFrames.get(0), stopPlaceImporter);
-        siteFrameImporter.importSiteFrame(siteFrames.get(1), stopPlaceImporter);
+        siteFrameImporter.importStopPlaces(siteFrames.get(0), stopPlaceImporter);
+        siteFrameImporter.importStopPlaces(siteFrames.get(1), stopPlaceImporter);
     }
 
 
