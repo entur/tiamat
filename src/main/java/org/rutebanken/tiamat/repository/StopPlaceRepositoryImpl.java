@@ -318,7 +318,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
-                wheres.add("stopPlace.topographicPlace.id in (select concat('', municipality.id) from TopographicPlace municipality where municipality.parentTopographicPlace.id in :countyId)" + suffix);
+                wheres.add("stopPlace.topographicPlace.id in (select municipality.id from TopographicPlace municipality where municipality.parentTopographicPlace.id in :countyId)" + suffix);
                 parameters.put("countyId", Lists.transform(stopPlaceSearch.getCountyIds(), Long::valueOf));
             }
         }
