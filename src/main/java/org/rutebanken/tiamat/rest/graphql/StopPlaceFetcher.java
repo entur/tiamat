@@ -58,7 +58,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
-            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_TYPE);
+            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
             if (stopTypes != null && !stopTypes.isEmpty()) {
                 stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
                                 .filter(type -> type != null)

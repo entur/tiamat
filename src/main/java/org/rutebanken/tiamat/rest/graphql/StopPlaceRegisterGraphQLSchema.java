@@ -42,13 +42,13 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher stopPlaceUpdater;
 
     private static GraphQLEnumType topographicPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(TOPOGRAPHIC_PLACE_TYPE)
+            .name(OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE)
             .value(TopographicPlaceTypeEnumeration.COUNTY.value(), TopographicPlaceTypeEnumeration.COUNTY)
             .value(TopographicPlaceTypeEnumeration.TOWN.value(), TopographicPlaceTypeEnumeration.TOWN)
             .build();
 
     private static GraphQLEnumType stopPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(STOP_TYPE)
+            .name(OBJECT_TYPE_STOP_PLACE_TYPE)
             .value("onstreetBus", StopTypeEnumeration.ONSTREET_BUS)
             .value("onstreetTram", StopTypeEnumeration.ONSTREET_TRAM)
             .value("airport", StopTypeEnumeration.AIRPORT)
@@ -69,7 +69,7 @@ public class StopPlaceRegisterGraphQLSchema {
     public void init() {
 
         GraphQLObjectType embeddableMultilingualStringObjectType = newObject()
-                .name(TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
+                .name(OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
                 .field(newFieldDefinition()
                         .name(VALUE)
                         .type(GraphQLString))
@@ -79,7 +79,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         GraphQLObjectType topographicParentPlaceObjectType = newObject()
-                .name(TYPE_TOPOGRAPHIC_PLACE)
+                .name(OUTPUT_TYPE_TOPOGRAPHIC_PLACE)
                 .field(newFieldDefinition()
                         .name(ID)
                         .type(GraphQLString)
@@ -96,7 +96,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         GraphQLObjectType topographicPlaceObjectType = newObject()
-                .name(TYPE_TOPOGRAPHIC_PLACE)
+                .name(OUTPUT_TYPE_TOPOGRAPHIC_PLACE)
                 .field(newFieldDefinition()
                         .name(ID)
                         .type(GraphQLString)
@@ -117,7 +117,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         GraphQLObjectType locationObjectType = newObject()
-                .name(TYPE_LOCATION)
+                .name(OUTPUT_TYPE_LOCATION)
                 .field(newFieldDefinition()
                         .name(LONGITUDE)
                         .type(GraphQLBigDecimal))
@@ -156,7 +156,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 }).build());
 
         GraphQLType quayObjectType = newObject()
-                .name(QUAY)
+                .name(OUTPUT_TYPE_QUAY)
                 .fields(commonFieldsList)
                 .field(newFieldDefinition()
                         .name(COMPASS_BEARING)
@@ -167,10 +167,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         GraphQLObjectType stopPlaceObjectType  = newObject()
-                .name(TYPE_STOPPLACE)
+                .name(OUTPUT_TYPE_STOPPLACE)
                 .fields(commonFieldsList)
                 .field(newFieldDefinition()
-                        .name(STOP_TYPE)
+                        .name(STOP_PLACE_TYPE)
                         .type(stopPlaceTypeEnum))
                 .field(newFieldDefinition()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
@@ -207,7 +207,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored."))
                                 //Search
                         .argument(GraphQLArgument.newArgument()
-                                .name(STOP_TYPE)
+                                .name(STOP_PLACE_TYPE)
                                 .type(new GraphQLList(stopPlaceTypeEnum))
                                 .description("Only return StopPlaces with given StopPlaceType(s)."))
                         .argument(GraphQLArgument.newArgument()
@@ -290,7 +290,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(stopPlaceObjectType))
                         .name(MUTATE_STOPPLACE)
                         .description("Create new or update existing StopPlace")
-                        .argument(GraphQLArgument.newArgument().name(STOPPLACE).type(createStopPlaceObjectInputType()))
+                        .argument(GraphQLArgument.newArgument().name(OUTPUT_TYPE_STOPPLACE).type(createStopPlaceObjectInputType()))
                         .dataFetcher(stopPlaceUpdater))
                 .build();
 
@@ -304,7 +304,7 @@ public class StopPlaceRegisterGraphQLSchema {
     private GraphQLInputType createStopPlaceObjectInputType() {
 
         GraphQLInputObjectType locationInputType = GraphQLInputObjectType.newInputObject()
-                .name(INPUT_LOCATION)
+                .name(INPUT_TYPE_LOCATION)
                 .field(newInputObjectField()
                         .name("latitude")
                         .type(new GraphQLNonNull(Scalars.GraphQLFloat))
@@ -360,7 +360,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(INPUT_TYPE_STOPPLACE)
                 .fields(commonInputFieldsList)
                 .field(newInputObjectField()
-                        .name(STOP_TYPE)
+                        .name(STOP_PLACE_TYPE)
                         .type(stopPlaceTypeEnum))
                 .field(newInputObjectField()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
