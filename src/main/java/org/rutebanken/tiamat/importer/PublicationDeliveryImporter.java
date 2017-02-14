@@ -84,9 +84,11 @@ public class PublicationDeliveryImporter {
                     new StopPlacesInFrame_RelStructure()
                             .withStopPlace(stopPlaces));
 
+            /*
             List<PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
             List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
             responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
+            */
 
 
             return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);
