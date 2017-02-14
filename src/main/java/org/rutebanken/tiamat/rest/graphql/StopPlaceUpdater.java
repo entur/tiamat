@@ -9,14 +9,13 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import java.util.Optional;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
-@Transactional
 class StopPlaceUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceUpdater.class);
@@ -36,7 +34,7 @@ class StopPlaceUpdater implements DataFetcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private QuayRepository quayRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -73,7 +71,19 @@ class StopPlaceUpdater implements DataFetcher {
                 boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
 
                 if (hasValuesChanged) {
-
+                    if (stopPlace.getQuays() != null) {
+                        /*
+                         * Explicitly saving new Quays  when updating and creating new Quays in the same request.
+                         * Already existing quays are attempted to be inserted causing ConstraintViolationException.
+                         *
+                         * It is necessary to call saveAndFlush(quay) to enforce database-constraints and updating
+                         * references on StopPlace-object.
+                         *
+                         */
+                        stopPlace.getQuays().stream()
+                                .filter(quay -> quay.getId() == null)
+                                .forEach(quay -> quayRepository.saveAndFlush(quay));
+                    }
                     stopPlace.setChanged(ZonedDateTime.now());
                     stopPlace = stopPlaceRepository.save(stopPlace);
 
@@ -172,6 +182,7 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (input.get(LOCATION) != null) {
             entity.setCentroid(createPoint((Map) input.get(LOCATION)));
+            isUpdated = true;
         }
         return isUpdated;
     }
