@@ -180,6 +180,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                         .type(GraphQLBoolean))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .build();
 
         GraphQLObjectType stopPlaceObjectType  = newObject()
@@ -193,8 +196,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLBoolean))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE)
-                        .type(topographicPlaceObjectType)
-                )
+                        .type(topographicPlaceObjectType))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))
