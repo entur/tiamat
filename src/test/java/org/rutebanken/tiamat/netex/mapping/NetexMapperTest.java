@@ -2,10 +2,18 @@ package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.PathLinkEndStructure;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -249,7 +257,7 @@ public class NetexMapperTest {
     }
 
     @Test
-    public void mapCountyRefsFromMunicipalities() {
+    public void mapCountyRefsFromMunicipalitiesFromTiamatToNetex() {
         SiteFrame tiamatSiteFrame = new SiteFrame();
 
         CountryRef countryRef = new CountryRef();
@@ -281,8 +289,49 @@ public class NetexMapperTest {
 
         org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
         assertThat(netexMunicipality).isNotNull();
-        assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topigraphic place").isNotNull();
+        assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(county, county.getId()));
+    }
+
+    @Test
+    public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+        netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
+
+        org.rutebanken.netex.model.CountryRef countryRef = new org.rutebanken.netex.model.CountryRef();
+        countryRef.setRef(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
+
+        org.rutebanken.netex.model.TopographicPlace county = new org.rutebanken.netex.model.TopographicPlace();
+        county.setId("NSR:TopographicPlace:1");
+        county.setName(new MultilingualString().withValue("Akershus"));
+        county.withCountryRef(countryRef);
+
+        org.rutebanken.netex.model.TopographicPlace municipality = new org.rutebanken.netex.model.TopographicPlace();
+        municipality.setId("NSR:TopographicPlace:2");
+        municipality.setName(new MultilingualString().withValue("Asker"));
+        municipality.withParentTopographicPlaceRef(
+                new org.rutebanken.netex.model.TopographicPlaceRefStructure().withRef(county.getId())
+        );
+
+        netexSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(municipality);
+
+        netexSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(county);
+
+        SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
+
+        assertThat(netexSiteFrame).isNotNull();
+        assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
+
+        TopographicPlace tiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(tiamatMunicipality).isNotNull();
+        assertThat(tiamatMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
+        assertThat(tiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
     }
 
     @Test
