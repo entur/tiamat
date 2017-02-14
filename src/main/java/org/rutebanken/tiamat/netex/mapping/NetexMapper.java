@@ -41,6 +41,7 @@ public class NetexMapper {
         mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
         mapperFactory.getConverterFactory().registerConverter(new SimplePointVersionStructureConverter());
         mapperFactory.getConverterFactory().registerConverter(new KeyValuesToKeyListConverter());
+        mapperFactory.getConverterFactory().registerConverter(new PathLinkConverter());
 
         mapperFactory.registerMapper(new KeyListToKeyValuesMapMapper());
 
