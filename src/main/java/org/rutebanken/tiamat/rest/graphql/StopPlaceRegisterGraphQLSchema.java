@@ -42,13 +42,13 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher stopPlaceUpdater;
 
     private static GraphQLEnumType topographicPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE)
+            .name(TOPOGRAPHIC_PLACE_TYPE_ENUM)
             .value(TopographicPlaceTypeEnumeration.COUNTY.value(), TopographicPlaceTypeEnumeration.COUNTY)
             .value(TopographicPlaceTypeEnumeration.TOWN.value(), TopographicPlaceTypeEnumeration.TOWN)
             .build();
 
     private static GraphQLEnumType stopPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(OBJECT_TYPE_STOP_PLACE_TYPE)
+            .name(STOP_PLACE_TYPE_ENUM)
             .value("onstreetBus", StopTypeEnumeration.ONSTREET_BUS)
             .value("onstreetTram", StopTypeEnumeration.ONSTREET_TRAM)
             .value("airport", StopTypeEnumeration.AIRPORT)

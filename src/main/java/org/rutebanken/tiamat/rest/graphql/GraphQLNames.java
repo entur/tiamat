@@ -19,7 +19,7 @@ public class GraphQLNames {
     static final String OUTPUT_TYPE_LOCATION = "Location";
     static final String INPUT_TYPE_LOCATION = OUTPUT_TYPE_LOCATION + INPUT_TYPE_POSTFIX;
 
-    static final String OBJECT_TYPE_STOP_PLACE_TYPE = "StopPlaceType";
+    static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
 
     static final String ID = "id";
     static final String STOP_PLACE_TYPE = "stopPlaceType";
@@ -50,7 +50,7 @@ public class GraphQLNames {
     static final String COMPASS_BEARING = "compassBearing";
 
     static final String NAME = "name";
-    static final String OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE = "TopographicPlaceType";
+    static final String TOPOGRAPHIC_PLACE_TYPE_ENUM = "TopographicPlaceType";
     static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     static final String TOPOGRAPHIC_PLACE = "topographicPlace";
     static final String PARENT_TOPOGRAPHIC_PLACE = "parentTopographicPlace";
