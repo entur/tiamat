@@ -4,9 +4,11 @@ import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.CheckConstraints_RelStructure;
 import org.rutebanken.tiamat.model.CheckConstraint;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class CheckConstraintsConverter extends BidirectionalConverter<List<CheckConstraint>, CheckConstraints_RelStructure> {
 
     @Override

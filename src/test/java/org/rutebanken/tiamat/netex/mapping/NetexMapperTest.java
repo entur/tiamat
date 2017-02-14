@@ -14,7 +14,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexI
 
 public class NetexMapperTest {
 
-    private NetexMapper netexMapper = new NetexMapper();
+    private static NetexMapper netexMapper = new NetexMapper();
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {

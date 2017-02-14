@@ -1,49 +1,43 @@
 package org.rutebanken.tiamat.netex.mapping;
 
-import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.*;
+import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.Type;
-import ma.glasnost.orika.metadata.TypeBuilder;
+import org.glassfish.jersey.internal.inject.Custom;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.TopographicPlaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class NetexMapper {
-
-    private static final MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
     private static final Logger logger = LoggerFactory.getLogger(NetexMapper.class);
+    private final MapperFactory mapperFactory;
 
-    static {
+    @Autowired
+    public NetexMapper(List<Converter> converters, List<Mapper> mappers, DataManagedObjectStructureIdMapper dataManagedObjectStructureIdMapper) {
+        logger.info("Setting up netexMapper with DI");
+
+        mapperFactory = new DefaultMapperFactory.Builder().build();
         logger.info("Creating netex mapper");
-        mapperFactory.getConverterFactory().registerConverter(new AccessSpacesConverter());
-        mapperFactory.getConverterFactory().registerConverter(new LevelsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new QuayListConverter());
-        mapperFactory.getConverterFactory().registerConverter(new AlternativeNamesConverter());
-        mapperFactory.getConverterFactory().registerConverter(new EquipmentPlacesConverter());
-        mapperFactory.getConverterFactory().registerConverter(new ValidityConditionsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new BoardinPositionsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new CheckConstraintsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new DestinationDisplayViewsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new ZonedDateTimeConverter());
-        mapperFactory.getConverterFactory().registerConverter(new OffsetDateTimeZonedDateTimeConverter());
-        mapperFactory.getConverterFactory().registerConverter(new SimplePointVersionStructureConverter());
-        mapperFactory.getConverterFactory().registerConverter(new KeyValuesToKeyListConverter());
-        mapperFactory.getConverterFactory().registerConverter(new PathLinkConverter());
 
-        mapperFactory.registerMapper(new KeyListToKeyValuesMapMapper());
+        mappers.forEach(mapper -> mapperFactory.registerMapper(mapper));
+        converters.forEach(converter -> mapperFactory.getConverterFactory().registerConverter(converter));
 
         mapperFactory.classMap(SiteFrame.class, org.rutebanken.tiamat.model.SiteFrame.class)
                 .byDefault()
@@ -63,16 +57,43 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
-//                .field()
                 .fieldBToA("keyValues", "keyList")
-                .customize(new DataManagedObjectStructureIdMapper())
+                .customize(dataManagedObjectStructureIdMapper)
                 .exclude("id")
                 .exclude("keyList")
                 .exclude("keyValues")
                 .byDefault()
                 .register();
+    }
 
+    public NetexMapper() {
+        this(getDefaultConverters(), getDefaultMappers(), new DataManagedObjectStructureIdMapper());
+        logger.info("Setting up netexMapper without DI");
+    }
 
+    public static List<Converter> getDefaultConverters() {
+        List<Converter> converters = new ArrayList<>();
+        converters.add(new AccessSpacesConverter());
+        converters.add(new LevelsConverter());
+        converters.add(new QuayListConverter());
+        converters.add(new AlternativeNamesConverter());
+        converters.add(new EquipmentPlacesConverter());
+        converters.add(new ValidityConditionsConverter());
+        converters.add(new BoardingPositionsConverter());
+        converters.add(new CheckConstraintsConverter());
+        converters.add(new DestinationDisplayViewsConverter());
+        converters.add(new ZonedDateTimeConverter());
+        converters.add(new OffsetDateTimeZonedDateTimeConverter());
+        converters.add(new SimplePointVersionStructureConverter());
+        converters.add(new KeyValuesToKeyListConverter());
+        converters.add(new PathLinkConverter());
+        return converters;
+    }
+
+    public static List<Mapper> getDefaultMappers() {
+        List<Mapper> mappers = new ArrayList<>();
+        mappers.add(new KeyListToKeyValuesMapMapper());
+        return mappers;
     }
 
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
