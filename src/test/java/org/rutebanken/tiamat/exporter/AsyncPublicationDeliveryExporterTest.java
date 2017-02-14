@@ -2,8 +2,7 @@ package org.rutebanken.tiamat.exporter;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.job.ExportJob;
@@ -12,9 +11,6 @@ import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -26,11 +22,7 @@ import java.io.IOException;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class AsyncPublicationDeliveryExporterTest {
+public class AsyncPublicationDeliveryExporterTest extends CommonSpringBootTest {
 
     @Autowired
     private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;

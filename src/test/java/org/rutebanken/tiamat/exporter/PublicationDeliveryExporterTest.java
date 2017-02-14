@@ -3,24 +3,17 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class PublicationDeliveryExporterTest {
+public class PublicationDeliveryExporterTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

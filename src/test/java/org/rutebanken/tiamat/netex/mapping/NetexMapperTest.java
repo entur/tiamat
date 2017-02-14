@@ -4,11 +4,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
 public class NetexMapperTest {
 
@@ -133,10 +135,10 @@ public class NetexMapperTest {
         String originalId = "OPP:StopArea:123";
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace()
                 .withKeyList(
-                    new KeyListStructure().withKeyValue(
-                            new KeyValueStructure()
-                                    .withKey(ORIGINAL_ID_KEY)
-                                    .withValue(originalId)));
+                        new KeyListStructure().withKeyValue(
+                                new KeyValueStructure()
+                                        .withKey(ORIGINAL_ID_KEY)
+                                        .withValue(originalId)));
 
         StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
         assertThat(tiamatStopPlace.getKeyValues()).isNotNull();
@@ -192,9 +194,9 @@ public class NetexMapperTest {
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
         tiamatQuay.setId(1234567L);
 
-        org.rutebanken.netex.model.Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
+        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
-        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
     }
 
     @Test
@@ -214,7 +216,7 @@ public class NetexMapperTest {
                 .findFirst()
                 .get();
 
-        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
 
     }
 
@@ -244,7 +246,32 @@ public class NetexMapperTest {
         assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
 
 
+    }
 
+    @Test
+    public void mapPathLinkToNetex() {
+        Quay quay = new Quay();
+        quay.setId(10L);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(11L);
+
+        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        pathLink.setId(123L);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+
+        assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
+        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
+        verifyPathLinkEnd(netexPathLink.getFrom(), quay.getId(), quay, "PathlinkEnd from");
+        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace.getId(), stopPlace, "PathLinkEnd to");
+
+    }
+
+    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
+        assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(entityStructure, entityId));
     }
 
 }

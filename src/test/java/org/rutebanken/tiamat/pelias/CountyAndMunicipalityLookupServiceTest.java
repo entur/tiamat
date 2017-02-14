@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -22,11 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@ActiveProfiles("geodb")
-public class CountyAndMunicipalityLookupServiceTest {
+public class CountyAndMunicipalityLookupServiceTest extends CommonSpringBootTest {
 
     @Autowired
     private GeometryFactory geometryFactory;

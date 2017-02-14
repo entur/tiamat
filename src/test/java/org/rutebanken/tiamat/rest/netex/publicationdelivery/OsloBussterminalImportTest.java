@@ -1,20 +1,10 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,10 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests related to importing Oslo Bussterminal.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class OsloBussterminalImportTest {
+public class OsloBussterminalImportTest extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;

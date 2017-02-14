@@ -9,27 +9,20 @@ import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles("geodb")
-public class GraphQLResourceIntegrationTest {
+public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
     private static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
 
     @Autowired

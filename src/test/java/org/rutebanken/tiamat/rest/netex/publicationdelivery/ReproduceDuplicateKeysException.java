@@ -29,6 +29,7 @@ public class ReproduceDuplicateKeysException {
 
     private static final String TIAMAT_URL = "http://localhost:1997/jersey/publication_delivery";
 
+    @SuppressWarnings("unchecked")
     @Ignore
     @Test
     public void reproduceDuplicateKeyIssue() throws JAXBException, IOException, SAXException, InterruptedException {
