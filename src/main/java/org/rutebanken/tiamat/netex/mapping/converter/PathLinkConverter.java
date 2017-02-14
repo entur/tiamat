@@ -9,6 +9,8 @@ import org.rutebanken.netex.model.PlaceRef;
 import org.rutebanken.netex.model.PlaceRefStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.AddressablePlace;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,28 @@ import java.util.Optional;
 public class PathLinkConverter extends BidirectionalConverter<PathLink, org.rutebanken.tiamat.model.PathLink> {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkConverter.class);
-
+    
     @Override
-    public org.rutebanken.tiamat.model.PathLink convertTo(PathLink pathLink, Type<org.rutebanken.tiamat.model.PathLink> type) {
+    public org.rutebanken.tiamat.model.PathLink convertTo(PathLink netexPathLink, Type<org.rutebanken.tiamat.model.PathLink> type) {
+
+
+        org.rutebanken.tiamat.model.PathLink tiamatPathLink = new org.rutebanken.tiamat.model.PathLink(new org.rutebanken.tiamat.model.PathLinkEnd(), new org.rutebanken.tiamat.model.PathLinkEnd());
+        PlaceRefStructure fromRef = netexPathLink.getFrom().getPlaceRef();
+
+
+        if(fromRef.getRef().contains(StopPlace.class.getSimpleName())) {
+            long tiamatId = NetexIdMapper.getTiamatId(fromRef.getRef());
+        } else if (fromRef.getRef().contains(Quay.class.getSimpleName())) {
+            long tiamatId = NetexIdMapper.getTiamatId(fromRef.getRef());
+        }
+
+
+
+
+
+
+
+
         return null;
     }
 
@@ -37,7 +58,6 @@ public class PathLinkConverter extends BidirectionalConverter<PathLink, org.rute
             netexPathLink.setCreated(tiamatPathLink.getCreated().toOffsetDateTime());
         }
         netexPathLink.setId(NetexIdMapper.getNetexId(tiamatPathLink, tiamatPathLink.getId()));
-
 
         netexPathLink.setFrom(mapPathLinkEndToNetex(tiamatPathLink.getFrom()));
         netexPathLink.setTo(mapPathLinkEndToNetex(tiamatPathLink.getTo()));
