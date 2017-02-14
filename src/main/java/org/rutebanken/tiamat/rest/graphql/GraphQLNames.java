@@ -2,20 +2,22 @@ package org.rutebanken.tiamat.rest.graphql;
 
 public class GraphQLNames {
 
+    private static final String INPUT_TYPE_POSTFIX = "Input";
+
     static final String OUTPUT_TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
-    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = "_" + OUTPUT_TYPE_TOPOGRAPHIC_PLACE;
+    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = OUTPUT_TYPE_TOPOGRAPHIC_PLACE + INPUT_TYPE_POSTFIX;
 
     static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
-    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "_"+ OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING;
+    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
     static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
-    static final String INPUT_TYPE_STOPPLACE = "_"+ OUTPUT_TYPE_STOPPLACE;
+    static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
     static final String OUTPUT_TYPE_QUAY = "Quay";
-    static final String INPUT_TYPE_QUAY = "_" + OUTPUT_TYPE_QUAY;
+    static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
     static final String OUTPUT_TYPE_LOCATION = "Location";
-    static final String INPUT_TYPE_LOCATION = "_" + OUTPUT_TYPE_LOCATION;
+    static final String INPUT_TYPE_LOCATION = OUTPUT_TYPE_LOCATION + INPUT_TYPE_POSTFIX;
 
     static final String OBJECT_TYPE_STOP_PLACE_TYPE = "StopPlaceType";
 

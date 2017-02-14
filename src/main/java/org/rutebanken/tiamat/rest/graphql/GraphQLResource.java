@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Path("/graphql")
@@ -105,7 +106,7 @@ public class GraphQLResource {
 
                 res = Response.status(status);
 
-                content.put("errors", errors);
+                content.put("errors", errors.stream().map(error -> error.getMessage()).collect(Collectors.toList()));
             }
             if (executionResult.getData() != null) {
                 content.put("data", executionResult.getData());

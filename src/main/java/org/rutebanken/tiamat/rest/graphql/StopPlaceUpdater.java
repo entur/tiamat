@@ -61,6 +61,9 @@ class StopPlaceUpdater implements DataFetcher {
             if (nsrId != null) {
                 logger.info("Updating StopPlace {}", nsrId);
                 stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
+
+                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", nsrId);
+
             } else {
                 logger.info("Creating new StopPlace");
                 stopPlace = new StopPlace();
@@ -133,7 +136,7 @@ class StopPlaceUpdater implements DataFetcher {
                     .filter(q -> q.getId() != null)
                     .filter(q -> q.getId().equals(NetexIdMapper.getTiamatId((String) quayInputMap.get(ID)))).findFirst();
 
-            Preconditions.checkArgument(existingQuay.isPresent(), "Attempting to update Quay (id:{}) on StopPlace (id:{}) , but Quay does not exist on StopPlace", quayInputMap.get(ID), stopPlace.getId());
+            Preconditions.checkArgument(existingQuay.isPresent(), "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace", quayInputMap.get(ID), stopPlace.getId());
 
             quay = existingQuay.get();
             logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
