@@ -87,10 +87,6 @@ public class PublicationDeliveryImporter {
             List<PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
             List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
             responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
-            )
-            // map path links
-            // save them
-            // map them back to netex
 
 
             return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);
