@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -34,7 +35,7 @@ public class GaplessOptionalGeneratorTest extends CommonSpringBootTest {
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
 
     @Test
-    public void test() {
+    public void verifyStopPlaceIsAssignedId() {
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
         assertThat(stopPlace.getId()).isNotNull();
@@ -65,6 +66,25 @@ public class GaplessOptionalGeneratorTest extends CommonSpringBootTest {
         assertThat(actual.longValue()).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
     }
 
+    @Test
+    public void generateIdAfterExplicitIDs() {
+
+        GaplessOptionalGenerator gaplessOptionalGenerator = new GaplessOptionalGenerator();
+
+        SessionImplementor session = (SessionImplementor) hibernateEntityManagerFactory.getSessionFactory().openSession();
+
+        // Use first 500 IDs
+        for(long explicitId = 1; explicitId <= 600; explicitId ++) {
+            Quay quay = new Quay();
+            quay.setId(explicitId);
+            gaplessOptionalGenerator.generate(session, quay);
+        }
+
+        // Get next ID which should be 501
+        Serializable serializable = gaplessOptionalGenerator.generate(session, new Quay());
+        Long gotId = (Long) serializable;
+        assertThat(gotId).isEqualTo(601);
+    }
 
     /**
      * Was implemented under the supsicion that OptionalIdCreator caused a bug.

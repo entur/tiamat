@@ -2,12 +2,27 @@ package org.rutebanken.tiamat.rest.graphql;
 
 public class GraphQLNames {
 
-    static final String TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
-    static final String TYPE_STOPPLACE = "StopPlace";
-    static final String TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
+    private static final String INPUT_TYPE_POSTFIX = "Input";
+
+    static final String OUTPUT_TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
+    static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = OUTPUT_TYPE_TOPOGRAPHIC_PLACE + INPUT_TYPE_POSTFIX;
+
+    static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
+    static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
+
+    static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
+    static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
+
+    static final String OUTPUT_TYPE_QUAY = "Quay";
+    static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
+
+    static final String OUTPUT_TYPE_LOCATION = "Location";
+    static final String INPUT_TYPE_LOCATION = OUTPUT_TYPE_LOCATION + INPUT_TYPE_POSTFIX;
+
+    static final String OBJECT_TYPE_STOP_PLACE_TYPE = "StopPlaceType";
 
     static final String ID = "id";
-    static final String STOPPLACE_TYPE = "stopPlaceType";
+    static final String STOP_PLACE_TYPE = "stopPlaceType";
     static final String SHORT_NAME = "shortName";
     static final String DESCRIPTION = "description";
     static final String IMPORTED_ID = "importedId";
@@ -31,11 +46,10 @@ public class GraphQLNames {
 
     static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     static final String QUAYS = "quays";
-    static final String QUAY = "quay";
     static final String COMPASS_BEARING = "compassBearing";
 
-    static final String STOPPLACE_ID = "stopPlaceId";
     static final String NAME = "name";
+    static final String OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE = "TopographicPlaceType";
     static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     static final String TOPOGRAPHIC_PLACE = "topographicPlace";
     static final String PARENT_TOPOGRAPHIC_PLACE = "parentTopographicPlace";
@@ -46,10 +60,6 @@ public class GraphQLNames {
     static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
 
-    static final String CREATE_STOPPLACE = "createStopPlace";
-    static final String UPDATE_STOPPLACE = "updateStopPlace";
-    static final String CREATE_QUAY = "createQuay";
-    static final String UPDATE_QUAY = "updateQuay";
-
+    static final String MUTATE_STOPPLACE = "mutateStopPlace";
 
 }
