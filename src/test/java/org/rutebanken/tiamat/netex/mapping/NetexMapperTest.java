@@ -249,6 +249,43 @@ public class NetexMapperTest {
     }
 
     @Test
+    public void mapCountyRefsFromMunicipalities() {
+        SiteFrame tiamatSiteFrame = new SiteFrame();
+
+        CountryRef countryRef = new CountryRef();
+        countryRef.setRef(IanaCountryTldEnumeration.ZM);
+
+        TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("Akershus"));
+        county.setCountryRef(countryRef);
+        county.setId(1L);
+
+        TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
+        municipality.setParentTopographicPlace(county);
+        municipality.setId(2L);
+
+        tiamatSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(municipality);
+
+        tiamatSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(county);
+
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
+
+
+        assertThat(netexSiteFrame).isNotNull();
+        assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
+
+        org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(netexMunicipality).isNotNull();
+        assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topigraphic place").isNotNull();
+        assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(county, county.getId()));
+    }
+
+    @Test
     public void mapPathLinkToNetex() {
         Quay quay = new Quay();
         quay.setId(10L);
