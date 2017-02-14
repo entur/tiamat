@@ -136,7 +136,10 @@ class StopPlaceUpdater implements DataFetcher {
                     .filter(q -> q.getId() != null)
                     .filter(q -> q.getId().equals(NetexIdMapper.getTiamatId((String) quayInputMap.get(ID)))).findFirst();
 
-            Preconditions.checkArgument(existingQuay.isPresent(), "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace", quayInputMap.get(ID), stopPlace.getId());
+            Preconditions.checkArgument(existingQuay.isPresent(),
+                    "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace",
+                    quayInputMap.get(ID),
+                    NetexIdMapper.getNetexId(stopPlace, stopPlace.getId()));
 
             quay = existingQuay.get();
             logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
