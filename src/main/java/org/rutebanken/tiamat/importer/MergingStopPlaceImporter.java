@@ -28,11 +28,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-@Qualifier("defaultStopPlaceImporter")
+@Qualifier("mergingStopPlaceImporter")
 @Transactional
-public class DefaultStopPlaceImporter implements StopPlaceImporter {
+public class MergingStopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultStopPlaceImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MergingStopPlaceImporter.class);
 
     private final TopographicPlaceCreator topographicPlaceCreator;
 
@@ -56,15 +56,17 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
 
     private final NetexMapper netexMapper;
 
+    private final VersionIncrementor versionIncrementor;
+
 
     @Autowired
-    public DefaultStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
+    public MergingStopPlaceImporter(TopographicPlaceCreator topographicPlaceCreator,
                                     CountyAndMunicipalityLookupService countyAndMunicipalityLookupService,
                                     QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository,
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
-                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper) {
+                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper, VersionIncrementor versionIncrementor) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
@@ -76,6 +78,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
+        this.versionIncrementor = versionIncrementor;
     }
 
     /**
@@ -87,9 +90,7 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
      *
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
-    @Override
-    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace, SiteFrame siteFrame,
-                                                                AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(StopPlace newStopPlace) throws InterruptedException, ExecutionException {
 
         logger.debug("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 
@@ -98,23 +99,24 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
                     + "TransactionSynchronizationManager.isActualTransactionActive(): " + TransactionSynchronizationManager.isActualTransactionActive());
         }
 
-        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, topographicPlacesCreatedCounter));
+        return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace));
     }
 
-    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws InterruptedException, ExecutionException {
+    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace) throws InterruptedException, ExecutionException {
         final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
 
         final StopPlace stopPlace;
         if (foundStopPlace != null) {
             stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
         } else {
-            stopPlace = handleCompletelyNewStopPlace(newStopPlace, siteFrame, topographicPlacesCreatedCounter);
+            stopPlace = handleCompletelyNewStopPlace(newStopPlace);
+
         }
         return stopPlace;
     }
 
 
-    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace, SiteFrame siteFrame, AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
+    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace) throws ExecutionException {
 
         if(newStopPlace.getId() != null) {
             newStopPlace.setId(null);
@@ -166,25 +168,9 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
             foundStopPlace.setChanged(ZonedDateTime.now());
         }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
-        incrementVersion(foundStopPlace);
+        versionIncrementor.incrementVersion(foundStopPlace);
 
         return saveAndUpdateCache(foundStopPlace);
-    }
-
-    private void incrementVersion(StopPlace stopPlace) {
-        Long version = tryParseLong(stopPlace.getVersion());
-        version ++;
-        logger.debug("Setting version {} for stop place {}", version, stopPlace.getName());
-        stopPlace.setVersion(version.toString());
-    }
-
-    private long tryParseLong(String version) {
-        try {
-            return Long.parseLong(version);
-        } catch(NumberFormatException |NullPointerException e) {
-            logger.warn("Could not parse version from string {}. Returning 0", version);
-            return 0L;
-        }
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
@@ -203,19 +189,19 @@ public class DefaultStopPlaceImporter implements StopPlaceImporter {
         return stopPlace;
     }
 
-    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
-        return siteFrame.getTopographicPlaces() != null
-                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
-                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
-    }
-
-    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
-        try {
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
-        } catch (IOException | InterruptedException e) {
-            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
-        }
-    }
+//    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
+//        return siteFrame.getTopographicPlaces() != null
+//                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
+//                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
+//    }
+//
+//    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
+//        try {
+//            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
+//        } catch (IOException | InterruptedException e) {
+//            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
+//        }
+//    }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
         final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);

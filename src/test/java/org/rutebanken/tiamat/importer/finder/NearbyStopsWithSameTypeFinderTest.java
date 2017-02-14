@@ -6,19 +6,14 @@ import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
-import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.geom.Point2D;
@@ -26,11 +21,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class NearbyStopsWithSameTypeFinderTest {
+public class NearbyStopsWithSameTypeFinderTest extends CommonSpringBootTest {
 
     private static final Coordinate OSL_GARDERMOEN = new Coordinate(60.190448, 11.106292);
 

@@ -1,14 +1,10 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
@@ -27,10 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class PublicationDeliveryResourceTest {
+public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;

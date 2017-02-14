@@ -6,18 +6,12 @@ import com.vividsolutions.jts.geom.Point;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
@@ -31,18 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test stop place importer with geodb and repository.
- * See also {@link DefaultStopPlaceImporterTest}
+ * See also {@link MergingStopPlaceImporterTest}
+ *
+ * TODO: Needs to be reenabled. And needs to run the same config as other tests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@TestPropertySource(properties = {
-        "stopPlaceFromOriginalIdFinderCache.maxSize = 0",
-        "stopPlaceFromOriginalIdFinderCache.maxSize = 0"}
-)
-@ActiveProfiles("geodb")
 @Transactional
-public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
+public class MergingStopPlaceImporterWithGeoDBNoCacheTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -54,7 +42,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
     private GeometryFactory geometryFactory;
 
     @Autowired
-    private DefaultStopPlaceImporter defaultStopPlaceImporter;
+    private MergingStopPlaceImporter mergingStopPlaceImporter;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -92,7 +80,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
                 quay.setCentroid(randomPoint);
                 stopPlace.getQuays().add(quay);
                 try {
-                    StopPlace response = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace, new SiteFrame(), new AtomicInteger());
+                    StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace);
                     if (response != null) {
                         imports.incrementAndGet();
                     }
@@ -104,7 +92,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
 
         executeNTimes(sameStopImportedCount, executorService, () -> {
             try {
-                StopPlace response = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
+                StopPlace response = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop());
                 if(response != null) {
                     imports.incrementAndGet();
                 }
@@ -117,7 +105,7 @@ public class DefaultStopPlaceImporterWithGeoDBNoCacheTest {
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.MINUTES);
         assertThat(imports.get()).isEqualTo(sameStopImportedCount + (eachQuayImportedCount*uniqueQuays));
-        StopPlace importedStopPlace = defaultStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop(), new SiteFrame(), new AtomicInteger());
+        StopPlace importedStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(createStop());
         assertThat(importedStopPlace.getQuays()).hasSize(uniqueQuays)
                 .as("Regardless of how many times similar stop with two different quays as imported. We must end up with a stop place with two quays.");
     }

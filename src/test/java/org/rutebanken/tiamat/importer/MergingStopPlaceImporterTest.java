@@ -33,9 +33,9 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 /**
  * Test stop place importer with mocked dependencies.
- * See also {@link DefaultStopPlaceImporterWithGeoDBTest}
+ * See also {@link MergingStopPlaceImporterWithGeoDBTest}
  */
-public class DefaultStopPlaceImporterTest {
+public class MergingStopPlaceImporterTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
@@ -55,20 +55,22 @@ public class DefaultStopPlaceImporterTest {
 
     private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
 
-    private QuayMerger quayMerger = new QuayMerger();
+    private VersionIncrementor versionIncrementor = new VersionIncrementor();
+
+    private QuayMerger quayMerger = new QuayMerger(versionIncrementor);
 
     private NetexMapper netexMapper = new NetexMapper();
 
     private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder = new NearbyStopsWithSameTypeFinder(stopPlaceRepository, new EnvelopeCreator(geometryFactory));
-    private DefaultStopPlaceImporter stopPlaceImporter = new DefaultStopPlaceImporter(topographicPlaceCreator,
+    private MergingStopPlaceImporter stopPlaceImporter = new MergingStopPlaceImporter(topographicPlaceCreator,
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
-            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper);
+            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionIncrementor);
 
     private SiteFrame siteFrame = new SiteFrame();
 
     /**
      * Test that two nearby stops close to each other is treated as the same.
-     * Note that the DB query is mocked. To test this, use DefaultStopPlaceImporterWithGeoDBTest
+     * Note that the DB query is mocked. To test this with h2 use {@link MergingStopPlaceImporterWithGeoDBNoCacheTest}
      */
     @Test
     public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
@@ -106,7 +108,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findAll(anyCollection())).thenReturn(Arrays.asList(firstStopPlace));
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(firstStopId);
         assertThat(importResult.getVersion()).isEqualTo("2");
@@ -137,7 +139,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
         when(stopPlaceRepository.save(firstStopPlace)).thenReturn(firstStopPlace);
 
-        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(firstStopId);
         assertThat(importResult.getStopPlaceType()).isEqualTo(StopTypeEnumeration.ONSTREET_BUS);
@@ -177,7 +179,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(2);
@@ -208,7 +210,7 @@ public class DefaultStopPlaceImporterTest {
             return stopPlace;
         });
 
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace);
 
 
         when(stopPlaceRepository.findByKeyValue(anyString(), anySet()))
@@ -219,7 +221,7 @@ public class DefaultStopPlaceImporterTest {
 
         when(stopPlaceRepository.findOne(anyLong())).then(invocationOnMock -> importedStopPlace1);
 
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
 
         assertThat(importedStopPlace2.getId())
@@ -262,7 +264,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(importResult.getId());
         assertThat(importResult.getQuays()).hasSize(1);
@@ -300,7 +302,7 @@ public class DefaultStopPlaceImporterTest {
         when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
-        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace, siteFrame, new AtomicInteger());
+        StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getId()).isEqualTo(savedStopPlaceId);
         // Expect only one quay when two quays have the same coordinates
@@ -326,7 +328,7 @@ public class DefaultStopPlaceImporterTest {
         stopPlace.getQuays().add(quay1);
 
         when(stopPlaceRepository.save(stopPlace)).thenReturn(stopPlace);
-        StopPlace actual = stopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace, new SiteFrame(), new AtomicInteger());
+        StopPlace actual = stopPlaceImporter.importStopPlaceWithoutNetexMapping(stopPlace);
 
         assertThat(actual.getQuays()).hasSize(1);
     }

@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,13 @@ public class QuayMerger {
 
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
+
+    private final VersionIncrementor versionIncrementor;
+
+    @Autowired
+    public QuayMerger(VersionIncrementor versionIncrementor) {
+        this.versionIncrementor = versionIncrementor;
+    }
 
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
@@ -75,6 +83,7 @@ public class QuayMerger {
                 result.add(incomingQuay);
                 incomingQuay.setCreated(ZonedDateTime.now());
                 incomingQuay.setChanged(ZonedDateTime.now());
+                versionIncrementor.incrementVersion(incomingQuay);
                 addedQuaysCounter.incrementAndGet();
             }
         }
@@ -108,6 +117,7 @@ public class QuayMerger {
         if(idUpdated || changedByMerge) {
             alreadyAdded.setChanged(ZonedDateTime.now());
             updatedQuaysCounter.incrementAndGet();
+            versionIncrementor.incrementVersion(alreadyAdded);
         }
     }
 
