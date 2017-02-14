@@ -8,7 +8,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
@@ -674,7 +673,6 @@ public class GraphQLResourceIntegrationTest {
 
 
     @Test
-    @Ignore
     public void testMutationUpdateStopPlaceCreateQuayAndUpdateQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
