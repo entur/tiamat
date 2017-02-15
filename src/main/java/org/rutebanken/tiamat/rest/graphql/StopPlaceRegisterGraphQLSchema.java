@@ -69,8 +69,8 @@ public class StopPlaceRegisterGraphQLSchema {
             .build();
 
     GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", "List of coordinate-pairs as specified in GeoJSON-standard. <br />" +
-            " [[9.1234, 60.1234]] for type=Point. <br />" +
-            " [[9.1234, 60.1234], [9.1235, 60.1235], [9.1236, 60.1236]] for type=LineString.", new Coercing() {
+            " [[9.1234, 60.1234]] for type=\"Point\". <br />" +
+            " [[9.1234, 60.1234], [9.1235, 60.1235], [9.1236, 60.1236]] for type=\"LineString\".", new Coercing() {
         @Override
         public List<List<Double>> serialize(Object input) {
             if (input instanceof Coordinate[]) {

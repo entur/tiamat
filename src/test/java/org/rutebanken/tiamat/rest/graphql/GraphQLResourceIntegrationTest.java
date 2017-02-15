@@ -386,9 +386,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "          shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "          description:{ value:\\\"" + description + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          location: {" +
-                "            longitude:" + lon +
-                "            latitude:" + lat +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + lon + "," + lat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
                 "       }) { " +
@@ -398,7 +398,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "  description { value } " +
                 "  stopPlaceType " +
                 "  allAreasWheelchairAccessible " +
-                "  location { longitude latitude } " +
+                "  geometry { type coordinates } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
@@ -409,8 +409,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                    .body("location.longitude", comparesEqualTo(lon))
-                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
 
 
@@ -445,9 +446,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
                 "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          location: {" +
-                "            longitude:" + updatedLon +
-                "            latitude:" + updatedLat +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
                 "       }) { " +
@@ -457,7 +458,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "  description { value } " +
                 "  stopPlaceType " +
                 "  allAreasWheelchairAccessible " +
-                "  location { longitude latitude } " +
+                "  geometry { type coordinates } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
@@ -467,8 +468,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                    .body("location.longitude", comparesEqualTo(updatedLon))
-                    .body("location.latitude", comparesEqualTo(updatedLat))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
     }
 
@@ -496,11 +498,11 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
-                "          }] " +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + "," + lat + "]] " +
+                "            }" +
+                "            }] " +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
@@ -509,7 +511,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "  } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
@@ -522,8 +524,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("location.longitude", comparesEqualTo(lon))
-                    .body("location.latitude", comparesEqualTo(lat));
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat));
     }
 
     @Test
@@ -558,10 +561,10 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + lon + "," + lat + "]] " +
+                "          }" +
                 "            compassBearing:" + compassBearing +
                 "          }] " +
                 "       }) { " +
@@ -572,7 +575,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
@@ -586,8 +589,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("location.longitude", comparesEqualTo(lon))
-                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
@@ -624,10 +628,10 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + "," + lat + "]] " +
+                "            }" +
                 "            compassBearing:" + compassBearing +
                 "          }] " +
                 "       }) { " +
@@ -638,7 +642,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
@@ -656,16 +660,18 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("name", nullValue())
                     .body("shortName", nullValue())
                     .body("description", nullValue())
-                    .body("location.longitude", comparesEqualTo(new Float(point.getX())))
-                    .body("location.latitude", comparesEqualTo(new Float(point.getY())))
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(new Float(point.getX())))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(new Float(point.getY())))
                     .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
                         // Second Quay - added using GraphQL
                 .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("location.longitude", comparesEqualTo(lon))
-                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
