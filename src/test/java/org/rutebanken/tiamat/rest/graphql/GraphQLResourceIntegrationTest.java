@@ -703,9 +703,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "            name: { value:\\\"" + newQuaydName + "\\\" } " +
                 "            shortName:{ value:\\\"" + newQuayShortName + "\\\" } " +
                 "            description:{ value:\\\"" + newQuayDescription + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + ","+ lat + "]]" +
                 "             }" +
                 "            compassBearing:" + compassBearing +
                 "          } , {" +
@@ -722,7 +722,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
@@ -737,8 +737,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 .body("data.stopPlace[0].quays[0].name.value", equalTo(updatedName))
                 .body("data.stopPlace[0].quays[0].shortName.value", equalTo(updatedShortName))
                 .body("data.stopPlace[0].quays[0].description.value", equalTo(updatedDescription))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(new Float(point.getX())))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
+                .body("data.stopPlace[0].quays[0].geometry.type",  equalTo(point.getGeometryType()))
+                .body("data.stopPlace[0].quays[0].geometry.coordinates[0][0]", comparesEqualTo(new Float(point.getX())))
+                .body("data.stopPlace[0].quays[0].geometry.coordinates[0][1]", comparesEqualTo(new Float(point.getY())))
                 .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
                         // Second Quay - added using GraphQL
                 .body("data.stopPlace[0].quays[1].id", not(getNetexId(quay)))
@@ -746,8 +747,9 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 .body("data.stopPlace[0].quays[1].name.value", equalTo(newQuaydName))
                 .body("data.stopPlace[0].quays[1].shortName.value", equalTo(newQuayShortName))
                 .body("data.stopPlace[0].quays[1].description.value", equalTo(newQuayDescription))
-                .body("data.stopPlace[0].quays[1].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[1].location.latitude", comparesEqualTo(lat))
+                .body("data.stopPlace[0].quays[1].geometry.type", equalTo(point.getGeometryType()))
+                .body("data.stopPlace[0].quays[1].geometry.coordinates[0][0]", comparesEqualTo(lon))
+                .body("data.stopPlace[0].quays[1].geometry.coordinates[0][1]", comparesEqualTo(lat))
                 .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
     }
 

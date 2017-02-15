@@ -19,6 +19,9 @@ public class GraphQLNames {
     static final String OUTPUT_TYPE_LOCATION = "Location";
     static final String INPUT_TYPE_LOCATION = OUTPUT_TYPE_LOCATION + INPUT_TYPE_POSTFIX;
 
+    static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
+    static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
+
     static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
 
     static final String ID = "id";
@@ -40,6 +43,10 @@ public class GraphQLNames {
     static final String LATITUDE_MIN = "latMin";
     static final String LONGITUDE_MAX = "lonMax";
     static final String LATITUDE_MAX = "latMax";
+
+    static final String GEOMETRY = "geometry";
+    static final String TYPE = "type";
+    static final String COORDINATES = "coordinates";
 
     static final String LOCATION = "location";
     static final String LONGITUDE = "longitude";
