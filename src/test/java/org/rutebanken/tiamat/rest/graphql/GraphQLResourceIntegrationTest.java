@@ -6,7 +6,6 @@ import com.jayway.restassured.response.ValidatableResponse;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -404,14 +403,15 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", notNullValue())
-                .body("data.stopPlace[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                .body("data.stopPlace[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
+                .root("data.stopPlace[0]")
+                    .body("id", notNullValue())
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                    .body("location.longitude", comparesEqualTo(lon))
+                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
 
 
     }
@@ -462,13 +462,14 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].name.value", equalTo(updatedName))
-                .body("data.stopPlace[0].shortName.value", equalTo(updatedShortName))
-                .body("data.stopPlace[0].description.value", equalTo(updatedDescription))
-                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                .body("data.stopPlace[0].location.longitude", comparesEqualTo(updatedLon))
-                .body("data.stopPlace[0].location.latitude", comparesEqualTo(updatedLat))
-                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
+                .root("data.stopPlace[0]")
+                    .body("name.value", equalTo(updatedName))
+                    .body("shortName.value", equalTo(updatedShortName))
+                    .body("description.value", equalTo(updatedDescription))
+                    .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                    .body("location.longitude", comparesEqualTo(updatedLon))
+                    .body("location.latitude", comparesEqualTo(updatedLat))
+                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
     }
 
 
@@ -516,12 +517,13 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", notNullValue())
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays[0].id", notNullValue())
-                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat));
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("location.longitude", comparesEqualTo(lon))
+                    .body("location.latitude", comparesEqualTo(lat));
     }
 
     @Test
@@ -579,13 +581,14 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(compassBearing));
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", comparesEqualTo(getNetexId(quay)))
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("location.longitude", comparesEqualTo(lon))
+                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
 
@@ -648,20 +651,22 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .body("data.stopPlace[0].quays", hasSize(2))
-                // First Quay - added manually
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.name", nullValue())
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.shortName", nullValue())
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.description", nullValue())
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.location.longitude", comparesEqualTo(new Float(point.getX())))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.location.latitude", comparesEqualTo(new Float(point.getY())))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.compassBearing", comparesEqualTo(quay.getCompassBearing()))
-                // Second Quay - added using GraphQL
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.name.value", equalTo(name))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.description.value", equalTo(description))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.compassBearing", comparesEqualTo(compassBearing));
+                        // First Quay - added manually
+                .root("data.stopPlace[0].quays.find { it.id == '" + manuallyAddedQuayId + "'}")
+                    .body("name", nullValue())
+                    .body("shortName", nullValue())
+                    .body("description", nullValue())
+                    .body("location.longitude", comparesEqualTo(new Float(point.getX())))
+                    .body("location.latitude", comparesEqualTo(new Float(point.getY())))
+                    .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                        // Second Quay - added using GraphQL
+                .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("location.longitude", comparesEqualTo(lon))
+                    .body("location.latitude", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
 
@@ -737,20 +742,25 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 .body("data.stopPlace[0].name.value", equalTo(newStopName))
                 .body("data.stopPlace[0].quays", hasSize(2))
                         // First Quay - added manually, then updated
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.name.value", equalTo(updatedName))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.shortName.value", equalTo(updatedShortName))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.description.value", equalTo(updatedDescription))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.location.longitude", comparesEqualTo(new Float(point.getX())))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.location.latitude", comparesEqualTo(new Float(point.getY())))
-                .body("data.stopPlace[0].quays.find { it.id == '"+manuallyAddedQuayId+"'}.compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                .root("data.stopPlace[0].quays.find { it.id == '" + manuallyAddedQuayId + "'}")
+                    .body("name.value", equalTo(updatedName))
+                    .body("shortName.value", equalTo(updatedShortName))
+                    .body("description.value", equalTo(updatedDescription))
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(new Float(point.getX())))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(new Float(point.getY())))
+                    .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
+
                         // Second Quay - added using GraphQL
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.id", not(getNetexId(stopPlace)))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.name.value", equalTo(newQuaydName))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.shortName.value", equalTo(newQuayShortName))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.description.value", equalTo(newQuayDescription))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays.find { it.id != '"+manuallyAddedQuayId+"'}.compassBearing", comparesEqualTo(compassBearing));
+                .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
+                    .body("id", not(getNetexId(stopPlace)))
+                    .body("name.value", equalTo(newQuaydName))
+                    .body("shortName.value", equalTo(newQuayShortName))
+                    .body("description.value", equalTo(newQuayDescription))
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
