@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.operation.TransformException;
@@ -13,10 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -136,13 +134,15 @@ public class QuayMerger {
     }
 
     private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
-        boolean nameMatch = hasMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
+        boolean nameMatch = haveMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
+        boolean plateCodeMatch = haveMatchingPlateCode(incomingQuay, alreadyAdded);
 
         if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS)
                 && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
-                && nameMatch) {
+                && nameMatch
+                && plateCodeMatch) {
             return true;
-        } else if(nameMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
+        } else if(nameMatch && plateCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
             logger.debug("Name and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
             if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
@@ -182,7 +182,7 @@ public class QuayMerger {
         return strippedIds;
     }
 
-    public boolean hasMatchingNameOrOneIsMissing(Quay quay1, Quay quay2) {
+    public boolean haveMatchingNameOrOneIsMissing(Quay quay1, Quay quay2) {
         boolean quay1HasName = hasNameValue(quay1.getName());
         boolean quay2HasName = hasNameValue(quay2.getName());
 
@@ -206,15 +206,7 @@ public class QuayMerger {
     }
 
     private boolean hasNameValue(MultilingualString multilingualString) {
-
-        if(multilingualString == null) {
-            return false;
-        } else if(multilingualString.getValue() == null) {
-            return false;
-        } else if(multilingualString.getValue().isEmpty()) {
-            return false;
-        }
-        return true;
+        return multilingualString != null && !Strings.isNullOrEmpty(multilingualString.getValue());
     }
 
     public boolean areClose(Quay quay1, Quay quay2) {
@@ -269,6 +261,10 @@ public class QuayMerger {
 
         logger.debug("Compass bearings for quays has less difference than the limit {}. {} {}", difference, quay1, quay2);
         return true;
+    }
+
+    private boolean haveMatchingPlateCode(Quay quay1, Quay quay2) {
+        return Objects.equals(quay1.getPlateCode(), quay2.getPlateCode());
     }
 
     private int getAngle(Integer bearing, Integer heading) {
