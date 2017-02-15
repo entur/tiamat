@@ -5,18 +5,18 @@ import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
-import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.JAXBElement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -102,11 +102,28 @@ public class PublicationDeliveryImporter {
         return netexSiteFrame.getStopPlaces().getStopPlace().size();
     }
 
-    private SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
-        return incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()
+    public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
+
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<SiteFrame> optionalSiteframe = compositeFrameOrCommonFrame
                 .stream()
                 .filter(element -> element.getValue() instanceof SiteFrame)
                 .map(element -> (SiteFrame) element.getValue())
-                .findFirst().get();
+                .findFirst();
+
+        if (optionalSiteframe.isPresent()) {
+            return optionalSiteframe.get();
+        }
+
+        return compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(compositeFrame -> compositeFrame.getFrames())
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
+                .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
+                .findAny().get();
     }
 }
