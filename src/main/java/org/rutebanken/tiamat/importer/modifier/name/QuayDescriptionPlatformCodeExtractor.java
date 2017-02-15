@@ -67,8 +67,8 @@ public class QuayDescriptionPlatformCodeExtractor {
 
             if (matcher.groupCount() >= PLATFORM_GROUP) {
                 String platformCode = matcher.group(PLATFORM_GROUP);
-                logger.info("Setting quay name to '{}': {}", platformCode, quay);
-                quay.setName(new EmbeddableMultilingualString(platformCode));
+                logger.info("Setting plate code to '{}': {}", platformCode, quay);
+                quay.setPlateCode(platformCode);
                 setQuayDescriptionFromMatcher(matcher, quay);
             } else {
                 logger.info("Description: '{}' matches but group count is not as expected. ", description);
