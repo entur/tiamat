@@ -82,10 +82,9 @@ public class OsloBussterminalImportTest extends CommonSpringBootTest {
         assertThat(actualQuays).isNotNull().as("quays should not be null");
 
         assertThat(actualQuays.stream()
-                .filter(quay -> quay.getName() != null)
-                .filter(quay -> quay.getName().getValue() != null)
-                .filter(quay -> quay.getName().getValue().equals("17"))
-                .findAny()).describedAs("There should be a quay with matching name").isPresent();
+                .filter(quay -> quay.getPlateCode() != null)
+                .filter(quay -> quay.getPlateCode().equals("17"))
+                .findAny()).describedAs("There should be a quay with matching platecode").isPresent();
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getDescription() != null)

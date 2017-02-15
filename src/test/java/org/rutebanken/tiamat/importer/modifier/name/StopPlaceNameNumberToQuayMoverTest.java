@@ -22,7 +22,7 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("13");
+        assertThat(stopPlace.getQuays().iterator().next().getPlateCode()).isEqualTo("13");
     }
 
     @Test
@@ -37,7 +37,7 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Bussterminalen");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("6");
+        assertThat(stopPlace.getQuays().iterator().next().getPlateCode()).isEqualTo("6");
     }
 
     @Test
@@ -51,11 +51,11 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Sandnes rb.st");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("20");
+        assertThat(stopPlace.getQuays().iterator().next().getPlateCode()).isEqualTo("20");
     }
 
     @Test
-    public void originalQuayNameMustBeEqualToStopPlaceNameInOrderToChangeQuayName() throws Exception {
+    public void quayNameIsUnchanged() throws Exception {
 
         final String originalStopPlaceName = "Stavanger hpl. 13";
         final String originalQuayName = "Another quay name";
@@ -84,6 +84,6 @@ public class StopPlaceNameNumberToQuayMoverTest {
 
         assertThat(stopPlace.getName().getValue()).isEqualTo("Stavanger");
 
-        assertThat(stopPlace.getQuays().iterator().next().getName().getValue()).isEqualTo("13");
+        assertThat(stopPlace.getQuays().iterator().next().getPlateCode()).isEqualTo("13");
     }
 }

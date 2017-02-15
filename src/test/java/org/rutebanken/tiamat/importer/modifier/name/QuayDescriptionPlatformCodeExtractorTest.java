@@ -13,13 +13,13 @@ public class QuayDescriptionPlatformCodeExtractorTest {
     @Test
     public void plattform25() {
         Quay quay = quayWithDescription("Plattform 25");
-        assertThat(quay.getName().getValue()).isEqualTo("25");
+        assertThat(quay.getPlateCode()).isEqualTo("25");
     }
 
     @Test
     public void plattform19b() {
         Quay quay = quayWithDescription("Plattform 19b");
-        assertThat(quay.getName().getValue()).isEqualTo("19b");
+        assertThat(quay.getPlateCode()).isEqualTo("19b");
     }
 
     @Test
@@ -31,21 +31,20 @@ public class QuayDescriptionPlatformCodeExtractorTest {
     @Test
     public void plfAWithDescriptikon() {
         Quay quay = quayWithDescription("Plf. A  ved apoteket");
-        assertThat(quay.getName().getValue()).isEqualTo("A");
+        assertThat(quay.getPlateCode()).isEqualTo("A");
         assertThat(quay.getDescription().getValue()).isEqualTo("ved apoteket");
     }
 
     @Test
     public void plfNWithDashAndDescriptikon() {
         Quay quay = quayWithDescription("Plf. N - mot øst");
-        assertThat(quay.getName().getValue()).isEqualTo("N");
+        assertThat(quay.getPlateCode()).isEqualTo("N");
         assertThat(quay.getDescription().getValue()).isEqualTo("mot øst");
     }
     @Test
     public void gateterminalenPlf4() {
         Quay quay = quayWithDescription("gateterminalen plf. 4");
-        assertThat(quay.getName()).describedAs("Name should not be null").isNotNull();
-        assertThat(quay.getName().getValue()).isEqualTo("4");
+        assertThat(quay.getPlateCode()).isEqualTo("4");
         assertThat(quay.getDescription().getValue()).isEqualTo("gateterminalen");
     }
 
@@ -58,7 +57,7 @@ public class QuayDescriptionPlatformCodeExtractorTest {
     @Test
     public void plfG() {
         Quay quay = quayWithDescription("Plattform G");
-        assertThat(quay.getName().getValue()).isEqualTo("G");
+        assertThat(quay.getPlateCode()).isEqualTo("G");
     }
 
     private Quay quayWithDescription(String description) {
