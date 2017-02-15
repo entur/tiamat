@@ -80,7 +80,16 @@ public class OsloBussterminalImportTest extends CommonSpringBootTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(1).getName().getValue()).isEqualTo("17");
-        assertThat(actualQuays.get(0).getDescription().getValue()).contains("avstigning");
+
+        assertThat(actualQuays.stream()
+                .filter(quay -> quay.getPlateCode() != null)
+                .filter(quay -> quay.getPlateCode().equals("17"))
+                .findAny()).describedAs("There should be a quay with matching platecode").isPresent();
+
+        assertThat(actualQuays.stream()
+                .filter(quay -> quay.getDescription() != null)
+                .filter(quay -> quay.getDescription().getValue() != null)
+                .filter(quay -> quay.getDescription().getValue().equals("avstigning"))
+                .findAny()).describedAs("Quay should contain description").isPresent();
     }
 }
