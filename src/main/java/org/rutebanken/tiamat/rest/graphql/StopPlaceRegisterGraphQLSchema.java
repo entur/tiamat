@@ -279,7 +279,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(VERSION)
                         .type(GraphQLString))
                 .field(newFieldDefinition()
-                        .name(PLATE_CODE)
+                        .name(PUBLIC_CODE)
                         .type(GraphQLString))
                 .build();
 
@@ -488,7 +488,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                         .type(GraphQLBoolean))
                 .field(newInputObjectField()
-                        .name(PLATE_CODE)
+                        .name(PUBLIC_CODE)
                         .type(GraphQLString))
                 .build();
 

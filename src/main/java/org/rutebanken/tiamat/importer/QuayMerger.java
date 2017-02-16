@@ -135,14 +135,14 @@ public class QuayMerger {
 
     private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
         boolean nameMatch = haveMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
-        boolean plateCodeMatch = haveMatchingPlateCode(incomingQuay, alreadyAdded);
+        boolean publicCodeMatch = haveMatchingPublicCode(incomingQuay, alreadyAdded);
 
         if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS)
                 && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
                 && nameMatch
-                && plateCodeMatch) {
+                && publicCodeMatch) {
             return true;
-        } else if(nameMatch && plateCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
+        } else if(nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
             logger.debug("Name and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
             if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
@@ -263,8 +263,8 @@ public class QuayMerger {
         return true;
     }
 
-    private boolean haveMatchingPlateCode(Quay quay1, Quay quay2) {
-        return Objects.equals(quay1.getPlateCode(), quay2.getPlateCode());
+    private boolean haveMatchingPublicCode(Quay quay1, Quay quay2) {
+        return Objects.equals(quay1.getPublicCode(), quay2.getPublicCode());
     }
 
     private int getAngle(Integer bearing, Integer heading) {

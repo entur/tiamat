@@ -30,7 +30,7 @@ public class GraphQLNames {
     static final String DESCRIPTION = "description";
     static final String IMPORTED_ID = "importedId";
     static final String VERSION = "version";
-    static final String PLATE_CODE = "plateCode";
+    static final String PUBLIC_CODE = "publicCode";
     static final String ALL_AREAS_WHEELCHAIR_ACCESSIBLE = "allAreasWheelchairAccessible";
 
     static final String IMPORTED_ID_QUERY = "importedId";

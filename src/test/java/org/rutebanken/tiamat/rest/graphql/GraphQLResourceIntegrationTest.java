@@ -485,7 +485,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
         String name = "Testing name ";
         String shortName = "Testing shortname ";
         String description = "Testing description ";
-        String plateCode = "plateCode 2";
+        String publicCode = "publicCode 2";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -499,7 +499,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            plateCode:\\\"" + plateCode + "\\\"" +
+                "            publicCode:\\\"" + publicCode + "\\\"" +
                 "            geometry: {" +
                 "              type: \\\"Point\\\"" +
                 "              coordinates: [[" + lon + "," + lat + "]] " +
@@ -510,7 +510,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "  name { value } " +
                 "  quays {" +
                 "    id " +
-                "    plateCode " +
+                "    publicCode " +
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
@@ -527,7 +527,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("plateCode", equalTo(plateCode))
+                    .body("publicCode", equalTo(publicCode))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat));

@@ -51,8 +51,8 @@ public class StavangerImportTest  extends CommonSpringBootTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(0).getPlateCode()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getPlateCode()).isEqualTo("12");
+        assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
+        assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("12");
     }
 
     /**
@@ -88,7 +88,7 @@ public class StavangerImportTest  extends CommonSpringBootTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(0).getPlateCode()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getPlateCode()).isEqualTo("2");
+        assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
+        assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("2");
     }
 }
