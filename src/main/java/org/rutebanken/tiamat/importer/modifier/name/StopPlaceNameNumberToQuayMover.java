@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer.modifier.name;
 
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -45,9 +44,9 @@ public class StopPlaceNameNumberToQuayMover {
         if (matcher.matches()) {
             if (matcher.groupCount() == 3) {
                 String newStopPlaceName = matcher.group(1);
-                String newPlateCode = matcher.group(3);
+                String newPublicCode = matcher.group(3);
 
-                setQuayPlateCode(stopPlace, newPlateCode);
+                setQuayPublicCode(stopPlace, newPublicCode);
 
                 stopPlace.getName().setValue(newStopPlaceName);
                 logger.info("Changing stop place name from '{}' to '{}'. {}", originalStopPlaceName, newStopPlaceName, stopPlace);
@@ -63,24 +62,24 @@ public class StopPlaceNameNumberToQuayMover {
         return stopPlace;
     }
 
-    private void setQuayPlateCode(StopPlace stopPlace, String plateCode) {
+    private void setQuayPublicCode(StopPlace stopPlace, String publicCode) {
 
         if (stopPlace.getQuays().isEmpty()) {
-            logger.warn("No quays for stop place. Cannot set quay plate code to '{}'. {}", plateCode, stopPlace);
+            logger.warn("No quays for stop place. Cannot set quay public code to '{}'. {}", publicCode, stopPlace);
             return;
         }
         if (stopPlace.getQuays().size() > 1) {
-            logger.warn("This stop place contains multiple quays. Cannot set plate code to '{}'. {}", plateCode, stopPlace);
+            logger.warn("This stop place contains multiple quays. Cannot set public code to '{}'. {}", publicCode, stopPlace);
             return;
         }
 
-        // We cannot update more than one quay with the same plate code.
+        // We cannot update more than one quay with the same public code.
         Quay quay = stopPlace.getQuays().iterator().next();
-        if(quay.getPlateCode() != null && !quay.getPlateCode().isEmpty()) {
-            logger.warn("Quay plate code '{}' is already set. Cannot set quay plate code to '{}'.", quay.getPlateCode(), plateCode);
+        if(quay.getPublicCode() != null && !quay.getPublicCode().isEmpty()) {
+            logger.warn("Quay public code '{}' is already set. Cannot set quay public code to '{}'.", quay.getPublicCode(), publicCode);
         } else {
-            logger.info("Quay plate code is empty. Will set it to '{}'. {}", plateCode, quay);
-            quay.setPlateCode(plateCode);
+            logger.info("Quay public code is empty. Will set it to '{}'. {}", publicCode, quay);
+            quay.setPublicCode(publicCode);
         }
 
     }

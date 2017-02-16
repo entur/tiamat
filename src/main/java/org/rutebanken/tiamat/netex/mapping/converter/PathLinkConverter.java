@@ -14,11 +14,13 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class PathLinkConverter extends BidirectionalConverter<PathLink, org.rutebanken.tiamat.model.PathLink> {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkConverter.class);
