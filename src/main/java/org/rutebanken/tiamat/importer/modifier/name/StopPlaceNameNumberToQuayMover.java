@@ -45,9 +45,9 @@ public class StopPlaceNameNumberToQuayMover {
         if (matcher.matches()) {
             if (matcher.groupCount() == 3) {
                 String newStopPlaceName = matcher.group(1);
-                String newQuayName = matcher.group(3);
+                String newPlateCode = matcher.group(3);
 
-                setQuayName(stopPlace, originalStopPlaceName, newQuayName);
+                setQuayPlateCode(stopPlace, newPlateCode);
 
                 stopPlace.getName().setValue(newStopPlaceName);
                 logger.info("Changing stop place name from '{}' to '{}'. {}", originalStopPlaceName, newStopPlaceName, stopPlace);
@@ -63,29 +63,24 @@ public class StopPlaceNameNumberToQuayMover {
         return stopPlace;
     }
 
-    private void setQuayName(StopPlace stopPlace, String originalStopPlaceName, String newQuayName) {
+    private void setQuayPlateCode(StopPlace stopPlace, String plateCode) {
 
         if (stopPlace.getQuays().isEmpty()) {
-            logger.warn("No quays for stop place. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            logger.warn("No quays for stop place. Cannot set quay plate code to '{}'. {}", plateCode, stopPlace);
             return;
         }
         if (stopPlace.getQuays().size() > 1) {
-            logger.warn("This stop place contains multiple quays. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            logger.warn("This stop place contains multiple quays. Cannot set plate code to '{}'. {}", plateCode, stopPlace);
             return;
         }
 
+        // We cannot update more than one quay with the same plate code.
         Quay quay = stopPlace.getQuays().iterator().next();
-        if(quay.getName() == null) {
-            logger.info("Quay name is empty. Will set it to '{}'. Stop Place: {}", newQuayName, stopPlace);
-            quay.setName(new EmbeddableMultilingualString(newQuayName));
+        if(quay.getPlateCode() != null && !quay.getPlateCode().isEmpty()) {
+            logger.warn("Quay plate code '{}' is already set. Cannot set quay plate code to '{}'.", quay.getPlateCode(), plateCode);
         } else {
-            String originalQuayName = quay.getName().getValue();
-            if (originalQuayName.equals(originalStopPlaceName)) {
-                quay.getName().setValue(newQuayName);
-                logger.info("Changing quay name from '{}' to '{}'. Quay: {}", originalQuayName, newQuayName, quay);
-            } else {
-                logger.warn("Original quay name '{}' is not equal to original stop place name '{}'. Cannot set quay name to '{}'.", originalQuayName, originalStopPlaceName, newQuayName);
-            }
+            logger.info("Quay plate code is empty. Will set it to '{}'. {}", plateCode, quay);
+            quay.setPlateCode(plateCode);
         }
 
     }

@@ -6,10 +6,12 @@ import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_RelStructure> {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayListConverter.class);

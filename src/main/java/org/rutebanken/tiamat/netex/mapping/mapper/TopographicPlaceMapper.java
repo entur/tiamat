@@ -8,7 +8,9 @@ import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStruc
 import org.rutebanken.netex.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.rutebanken.tiamat.model.TopographicPlace> {
 
     @Autowired

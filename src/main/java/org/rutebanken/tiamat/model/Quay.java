@@ -66,12 +66,15 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.compassBearing, other.compassBearing)
+                && Objects.equals(this.plateCode, other.plateCode)
                 && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, centroid, compassBearing, getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
+        return Objects.hash(name, centroid,
+                compassBearing, plateCode,
+                getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
@@ -82,6 +85,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("name", name)
                 .add("centroid", centroid)
                 .add("bearing", compassBearing)
+                .add("plateCode", plateCode)
                 .add("keyValues", getKeyValues())
                 .toString();
     }
