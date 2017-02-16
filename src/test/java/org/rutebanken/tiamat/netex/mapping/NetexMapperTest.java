@@ -4,6 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.EntityStructure;
@@ -15,14 +16,16 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
-public class NetexMapperTest {
+public class NetexMapperTest extends CommonSpringBootTest {
 
-    private static NetexMapper netexMapper = new NetexMapper();
+    @Autowired
+    private NetexMapper netexMapper;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
