@@ -278,6 +278,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(VERSION)
                         .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(PLATE_CODE)
+                        .type(GraphQLString))
                 .build();
 
         GraphQLObjectType stopPlaceObjectType  = newObject()
@@ -484,6 +487,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                         .type(GraphQLBoolean))
+                .field(newInputObjectField()
+                        .name(PLATE_CODE)
+                        .type(GraphQLString))
                 .build();
 
         GraphQLInputObjectType stopPlaceObjectInputType  = GraphQLInputObjectType.newInputObject()

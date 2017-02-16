@@ -156,6 +156,10 @@ class StopPlaceUpdater implements DataFetcher {
             quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());
             isQuayUpdated = true;
         }
+        if (quayInputMap.get(PLATE_CODE) != null) {
+            quay.setPlateCode((String)quayInputMap.get(PLATE_CODE));
+            isQuayUpdated = true;
+        }
 
         if (isQuayUpdated) {
             quay.setChanged(ZonedDateTime.now());
