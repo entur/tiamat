@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -82,9 +84,9 @@ public class OsloBussterminalImportTest extends CommonSpringBootTest {
         assertThat(actualQuays).isNotNull().as("quays should not be null");
 
         assertThat(actualQuays.stream()
-                .filter(quay -> quay.getPlateCode() != null)
-                .filter(quay -> quay.getPlateCode().equals("17"))
-                .findAny()).describedAs("There should be a quay with matching platecode").isPresent();
+                .filter(quay -> quay.getPublicCode() != null)
+                .filter(quay -> quay.getPublicCode().equals("17"))
+                .findAny()).describedAs("There should be a quay with matching public code").isPresent();
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getDescription() != null)

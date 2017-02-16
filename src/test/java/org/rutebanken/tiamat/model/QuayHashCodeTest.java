@@ -25,12 +25,12 @@ public class QuayHashCodeTest {
     }
 
     @Test
-    public void quaysWithDifferentPlateCodeShouldNotHaveEqualHashCode() {
+    public void quaysWithDifferentPublicCodeShouldNotHaveEqualHashCode() {
         Quay first = new Quay();
-        first.setPlateCode("X");
+        first.setPublicCode("X");
 
         Quay second = new Quay();
-        second.setPlateCode("Y");
+        second.setPublicCode("Y");
         assertThat(first.hashCode()).isNotEqualTo(second.hashCode());
     }
 }

@@ -18,7 +18,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
-    protected String plateCode;
+    protected String publicCode;
 
     /**
      * TODO: reconsider data type for compass bearing.
@@ -33,12 +33,12 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     public Quay() {
     }
 
-    public String getPlateCode() {
-        return plateCode;
+    public String getPublicCode() {
+        return publicCode;
     }
 
-    public void setPlateCode(String value) {
-        this.plateCode = value;
+    public void setPublicCode(String value) {
+        this.publicCode = value;
     }
 
     public Float getCompassBearing() {
@@ -66,14 +66,14 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.compassBearing, other.compassBearing)
-                && Objects.equals(this.plateCode, other.plateCode)
+                && Objects.equals(this.publicCode, other.publicCode)
                 && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, centroid,
-                compassBearing, plateCode,
+                compassBearing, publicCode,
                 getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
@@ -85,7 +85,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("name", name)
                 .add("centroid", centroid)
                 .add("bearing", compassBearing)
-                .add("plateCode", plateCode)
+                .add("publicCode", publicCode)
                 .add("keyValues", getKeyValues())
                 .toString();
     }

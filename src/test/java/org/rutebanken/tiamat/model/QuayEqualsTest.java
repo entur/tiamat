@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.model;
 
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -111,12 +112,12 @@ public class QuayEqualsTest {
     }
 
     @Test
-    public void quaysWithDifferentPlateCodeIsNotEqual() {
+    public void quaysWithDifferentPublicCodeIsNotEqual() {
         Quay first = new Quay();
-        first.setPlateCode("X");
+        first.setPublicCode("X");
 
         Quay second = new Quay();
-        second.setPlateCode("Y");
+        second.setPublicCode("Y");
         assertThat(first).isNotEqualTo(second);
     }
 }

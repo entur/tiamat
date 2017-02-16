@@ -504,16 +504,16 @@ public class QuayMergerTest {
     }
 
     @Test
-    public void twoQuaysWithDifferentPlateCodeShouldNotBeMerged()  {
+    public void twoQuaysWithDifferentPublicCodeShouldNotBeMerged()  {
 
         Quay first = new Quay();
         Point firstQuayPoint = geometryFactory.createPoint(new Coordinate(60, 11));
         first.setCentroid(firstQuayPoint);
-        first.setPlateCode("X");
+        first.setPublicCode("X");
 
         Quay second = new Quay();
         second.setCentroid(firstQuayPoint);
-        second.setPlateCode("Y");
+        second.setPublicCode("Y");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(first);
@@ -522,7 +522,7 @@ public class QuayMergerTest {
         incomingQuays.add(second);
 
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
-        assertThat(result).as("Quays should NOT have been merged. Plate Code is different").hasSize(2);
+        assertThat(result).as("Quays should NOT have been merged. Public Code is different").hasSize(2);
     }
 
 
