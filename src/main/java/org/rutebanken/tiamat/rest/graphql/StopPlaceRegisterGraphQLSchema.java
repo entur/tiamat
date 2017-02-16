@@ -1,10 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import graphql.Scalars;
-import graphql.language.ArrayValue;
-import graphql.language.FloatValue;
 import graphql.schema.*;
 import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
 import org.rutebanken.tiamat.model.*;
@@ -22,6 +19,8 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.scalars.Scalars.GraphQLGeoJSONCoordinates;
+
 @Component
 public class StopPlaceRegisterGraphQLSchema {
 
@@ -67,59 +66,6 @@ public class StopPlaceRegisterGraphQLSchema {
             .value("vehicleRailInterchange", StopTypeEnumeration.VEHICLE_RAIL_INTERCHANGE)
             .value("other", StopTypeEnumeration.OTHER)
             .build();
-
-    GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", "List of coordinate-pairs as specified in GeoJSON-standard. <br />" +
-            " [[9.1234, 60.1234]] for type=\"Point\". <br />" +
-            " [[9.1234, 60.1234], [9.1235, 60.1235], [9.1236, 60.1236]] for type=\"LineString\".", new Coercing() {
-        @Override
-        public List<List<Double>> serialize(Object input) {
-            if (input instanceof Coordinate[]) {
-                Coordinate[] coordinates = ((Coordinate[]) input);
-                List<List<Double>> coordinateList = new ArrayList<>();
-                for (Coordinate coordinate : coordinates) {
-                    List<Double> coordinatePair = new ArrayList<>();
-                    coordinatePair.add(coordinate.x);
-                    coordinatePair.add(coordinate.y);
-
-                    coordinateList.add(coordinatePair);
-                }
-                return coordinateList;
-            }
-            return null;
-        }
-
-        @Override
-        public Coordinate[] parseValue(Object input) {
-            List<List<Double>> coordinateList = (List<List<Double>>) input;
-
-            Coordinate[] coordinates = new Coordinate[coordinateList.size()];
-
-            for (int i = 0; i < coordinateList.size(); i++) {
-                coordinates[i] = new Coordinate(coordinateList.get(i).get(0), coordinateList.get(i).get(1));
-            }
-
-            return coordinates;
-        }
-
-        @Override
-        public Object parseLiteral(Object input) {
-            if (input instanceof ArrayValue) {
-                ArrayList<ArrayValue> coordinateList = (ArrayList) ((ArrayValue) input).getValues();
-                Coordinate[] coordinates = new Coordinate[coordinateList.size()];
-
-                for (int i = 0; i < coordinateList.size(); i++) {
-                    ArrayValue v = coordinateList.get(i);
-
-                    FloatValue longitude = (FloatValue) v.getValues().get(0);
-                    FloatValue latitude = (FloatValue) v.getValues().get(1);
-                    coordinates[i] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
-
-                }
-                return coordinates;
-            }
-            return null;
-        }
-    });
 
     @PostConstruct
     public void init() {
