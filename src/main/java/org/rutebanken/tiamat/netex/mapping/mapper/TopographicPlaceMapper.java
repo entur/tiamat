@@ -5,7 +5,9 @@ import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.rutebanken.tiamat.model.TopographicPlace> {
 
     @Override

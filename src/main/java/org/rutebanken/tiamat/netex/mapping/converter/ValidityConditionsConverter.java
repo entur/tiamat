@@ -6,9 +6,11 @@ import org.rutebanken.netex.model.ValidityConditions_RelStructure;
 import org.rutebanken.tiamat.model.ValidityCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class ValidityConditionsConverter extends BidirectionalConverter<List<ValidityCondition>, ValidityConditions_RelStructure> {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidityConditionsConverter.class);

@@ -6,9 +6,11 @@ import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class KeyListToKeyValuesMapMapper extends CustomMapper<KeyListStructure, Map<String, Value>> {
     @Override
     public void mapAtoB(KeyListStructure keyListStructure, Map<String, Value> stringValueMap, MappingContext context) {
