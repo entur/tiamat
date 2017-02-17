@@ -29,13 +29,18 @@ public class NetexIdMapper {
             logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
-            netexEntity.setId(getNetexId(internalEntity, internalEntity.getId()));
+            netexEntity.setId(getNetexId(internalEntity));
         }
     }
 
     public static String getNetexId(EntityStructure internalEntity, Long id) {
         return "NSR:" + determineIdType(internalEntity) +":" + id;
     }
+
+    public static String getNetexId(EntityStructure internalEntity) {
+        return getNetexId(internalEntity, internalEntity.getId());
+    }
+
 
     public static String getNetexId(String idType, String id) {
         return "NSR:" + idType +":" + id;
