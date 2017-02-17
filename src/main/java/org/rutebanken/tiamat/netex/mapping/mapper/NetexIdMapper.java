@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
@@ -18,8 +20,6 @@ public class NetexIdMapper {
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
     public static final String ORIGINAL_ID_KEY = "imported-id";
-
-    private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
 
     // TODO: make it configurable
     public static final String NSR = "NSR";
@@ -96,6 +96,20 @@ public class NetexIdMapper {
     public static long getTiamatId(String netexId) {
         Long longValue = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
         return longValue;
+    }
+
+    private static boolean isInternalTiamatId(String netexId) {
+        return netexId.contains(NetexIdMapper.NSR);
+    }
+
+    public static Optional<Long> getOptionalTiamatId(String netexId) {
+        Optional<Long> tiamatId;
+        if (isInternalTiamatId(netexId)) {
+            logger.debug("Detected tiamat ID from {}", netexId);
+            return Optional.of(getTiamatId(netexId));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static String determineIdType(EntityStructure entityStructure) {
