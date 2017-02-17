@@ -13,7 +13,6 @@ import org.hibernate.Session;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,9 +39,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
     private GeometryFactory geometryFactory;
-
-    @Autowired
-    private NetexMapper netexMapper;
 
     @Override
     public StopPlace findStopPlaceDetailed(Long stopPlaceId) {
@@ -215,17 +211,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
-    public static final org.rutebanken.netex.model.StopPlace POISON_PILL = new org.rutebanken.netex.model.StopPlace();
+    public static final StopPlace POISON_PILL = new StopPlace();
     static {
-        POISON_PILL.setId("POISON");
+        POISON_PILL.setId(-200L);
     }
 
     @Override
-    public BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces() throws InterruptedException {
+    public BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException {
 
         final int fetchSize = 100;
 
-        BlockingQueue<org.rutebanken.netex.model.StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
+        BlockingQueue<StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
 
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
@@ -248,7 +244,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     }
 
 
-                    blockingQueue.put(netexMapper.mapToNetexModel(stopPlace));
+                    blockingQueue.put(stopPlace);
                 }
             } catch (InterruptedException e) {
                 logger.warn("Got interupted while scrolling stop place results", e);

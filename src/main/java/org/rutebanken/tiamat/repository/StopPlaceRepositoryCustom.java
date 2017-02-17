@@ -37,7 +37,7 @@ public interface StopPlaceRepositoryCustom {
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
 
-    BlockingQueue<org.rutebanken.netex.model.StopPlace> scrollStopPlaces() throws InterruptedException;
+    BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException;
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 }
