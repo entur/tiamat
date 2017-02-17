@@ -6,7 +6,7 @@ import java.util.List;
 
 @MappedSuperclass
 public abstract class SiteComponent_VersionStructure
-        extends SiteElement_VersionStructure {
+        extends SiteElement {
 
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "site_ref")),

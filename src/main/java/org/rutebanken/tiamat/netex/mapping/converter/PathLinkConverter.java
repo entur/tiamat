@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.*;
@@ -12,41 +14,98 @@ import org.rutebanken.tiamat.model.AddressablePlace;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Component
 public class PathLinkConverter extends BidirectionalConverter<PathLink, org.rutebanken.tiamat.model.PathLink> {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkConverter.class);
+
+
+    private StopPlaceRepository stopPlaceRepository;
+
+    private QuayRepository quayRepository;
+
+    @Autowired
+    public PathLinkConverter(StopPlaceRepository stopPlaceRepository, QuayRepository quayRepository) {
+        this.stopPlaceRepository = stopPlaceRepository;
+        this.quayRepository = quayRepository;
+    }
+
+    public PathLinkConverter() {
+
+    }
     
     @Override
     public org.rutebanken.tiamat.model.PathLink convertTo(PathLink netexPathLink, Type<org.rutebanken.tiamat.model.PathLink> type) {
 
 
-        org.rutebanken.tiamat.model.PathLink tiamatPathLink = new org.rutebanken.tiamat.model.PathLink(new org.rutebanken.tiamat.model.PathLinkEnd(), new org.rutebanken.tiamat.model.PathLinkEnd());
-        PlaceRefStructure fromRef = netexPathLink.getFrom().getPlaceRef();
+        logger.debug("Converting path link from netex to tiamat model: {}", netexPathLink);
+        org.rutebanken.tiamat.model.PathLink tiamatPathLink = new org.rutebanken.tiamat.model.PathLink();
 
+        tiamatPathLink.setFrom(resolvePathLinkEndFromNetexPlaceRef(netexPathLink.getFrom().getPlaceRef()));
+        tiamatPathLink.setTo(resolvePathLinkEndFromNetexPlaceRef(netexPathLink.getTo().getPlaceRef()));
 
-        if(fromRef.getRef().contains(StopPlace.class.getSimpleName())) {
-            long tiamatId = NetexIdMapper.getTiamatId(fromRef.getRef());
-        } else if (fromRef.getRef().contains(Quay.class.getSimpleName())) {
-            long tiamatId = NetexIdMapper.getTiamatId(fromRef.getRef());
+        return tiamatPathLink;
+    }
+
+    private PathLinkEnd resolvePathLinkEndFromNetexPlaceRef(PlaceRefStructure placeRefStructure) {
+
+        if(Strings.isNullOrEmpty(placeRefStructure.getNameOfMemberClass())) {
+            logger.warn("Received place ref without name of member class: {}", placeRefStructure);
+            return null;
+        }
+        PathLinkEnd pathLinkEnd = new PathLinkEnd();
+
+        Optional<Long> tiamatId;
+        if(isInternalTiamatId(placeRefStructure.getRef())) {
+            tiamatId = Optional.of(NetexIdMapper.getTiamatId(placeRefStructure.getRef()));
+            logger.debug("Tiamat ID in ref {}", placeRefStructure.getRef());
+        } else {
+            tiamatId = Optional.empty();
         }
 
 
+        if(placeRefStructure.getNameOfMemberClass().equals(org.rutebanken.netex.model.StopPlace.class.getSimpleName())) {
+            StopPlace tiamatStopPlace;
 
+            if(tiamatId.isPresent()) {
+                tiamatStopPlace = stopPlaceRepository.findOne(tiamatId.get());
+            } else {
+                long idFromOriginalId = stopPlaceRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
+                tiamatStopPlace = stopPlaceRepository.findOne(idFromOriginalId);
+            }
 
+            logger.info("Found stop place {}", tiamatStopPlace);
+            pathLinkEnd.setStopPlace(tiamatStopPlace);
 
+        } else if(placeRefStructure.getNameOfMemberClass().equals(org.rutebanken.netex.model.Quay.class.getSimpleName())) {
+            logger.info("Reference to Quay: {}", placeRefStructure);
+            Quay tiamatQuay;
 
+            if(tiamatId.isPresent()) {
+                tiamatQuay = quayRepository.findOne(tiamatId.get());
+            } else {
+                long idFromOriginalId = quayRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
+                tiamatQuay = quayRepository.findOne(idFromOriginalId);
+            }
 
+            logger.info("Found quay {}", tiamatQuay);
+            pathLinkEnd.setQuay(tiamatQuay);
+        }
+        return pathLinkEnd;
+    }
 
-        return null;
+    private boolean isInternalTiamatId(String ref) {
+        return ref.contains(NetexIdMapper.NSR);
     }
 
     @Override

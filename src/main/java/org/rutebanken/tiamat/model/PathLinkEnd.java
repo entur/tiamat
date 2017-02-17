@@ -1,17 +1,15 @@
 package org.rutebanken.tiamat.model;
 
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
 
 @Entity
 public class PathLinkEnd {
 
     @Id
-    @GeneratedValue(generator="idgen")
+    @GeneratedValue(generator = "idgen")
     @GenericGenerator(name = "idgen",
             strategy = "org.rutebanken.tiamat.repository.GaplessOptionalGenerator",
             parameters = {
@@ -61,7 +59,9 @@ public class PathLinkEnd {
         this.entrance = entrance;
     }
 
-    public PathLinkEnd(PathJunction pathJunction) { this.pathJunction = pathJunction; }
+    public PathLinkEnd(PathJunction pathJunction) {
+        this.pathJunction = pathJunction;
+    }
 
     public PathLinkEnd(Level level) {
         this.level = level;
@@ -71,8 +71,16 @@ public class PathLinkEnd {
         return entrance;
     }
 
+    public void setEntrance(SiteEntrance entrance) {
+        this.entrance = entrance;
+    }
+
     public Level getLevel() {
         return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
     }
 
     public long getId() {
@@ -87,8 +95,16 @@ public class PathLinkEnd {
         return stopPlace;
     }
 
+    public void setStopPlace(StopPlace stopPlace) {
+        this.stopPlace = stopPlace;
+    }
+
     public Quay getQuay() {
         return quay;
+    }
+
+    public void setQuay(Quay quay) {
+        this.quay = quay;
     }
 
     public PathJunction getPathJunction() {
@@ -97,5 +113,13 @@ public class PathLinkEnd {
 
     public void setPathJunction(PathJunction pathJunction) {
         this.pathJunction = pathJunction;
+    }
+
+    public void setPointOfInterest(PointOfInterest pointOfInterest) {
+        this.pointOfInterest = pointOfInterest;
+    }
+
+    public void setAccessSpace(AccessSpace accessSpace) {
+        this.accessSpace = accessSpace;
     }
 }

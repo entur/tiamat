@@ -154,6 +154,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             return null;
         }
     }
+
     public List<Long> searchByKeyValue(String key, String value) {
 
         Query query = entityManager.createNativeQuery("SELECT stop_place_id " +

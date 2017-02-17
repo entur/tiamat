@@ -7,8 +7,7 @@ import java.util.List;
 
 
 @MappedSuperclass
-public abstract class SiteElement_VersionStructure
-        extends AddressablePlace {
+public abstract class SiteElement extends AddressablePlace {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
@@ -43,11 +42,11 @@ public abstract class SiteElement_VersionStructure
     @Transient
     protected SiteFacilitySets_RelStructure facilities;
 
-    public SiteElement_VersionStructure(EmbeddableMultilingualString name) {
+    public SiteElement(EmbeddableMultilingualString name) {
         super(name);
     }
 
-    public SiteElement_VersionStructure() {
+    public SiteElement() {
     }
 
     public AccessibilityAssessment getAccessibilityAssessment() {
