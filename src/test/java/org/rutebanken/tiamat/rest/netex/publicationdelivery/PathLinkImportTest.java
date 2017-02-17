@@ -58,6 +58,7 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(toStopPlace.getId())
+                                                .withVersion("1")
                                                 .withNameOfMemberClass(toStopPlace.getClass().getSimpleName())));
 
 
