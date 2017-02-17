@@ -1,13 +1,9 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,10 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Import tests for different cases in Stavanger.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class StavangerImportTest {
+public class StavangerImportTest  extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
@@ -58,8 +51,8 @@ public class StavangerImportTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(0).getName()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("12");
+        assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
+        assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("12");
     }
 
     /**
@@ -95,7 +88,7 @@ public class StavangerImportTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(0).getName()).describedAs("Quay name should not be null").isNotNull();
-        assertThat(actualQuays.get(0).getName().getValue()).isEqualTo("2");
+        assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
+        assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("2");
     }
 }

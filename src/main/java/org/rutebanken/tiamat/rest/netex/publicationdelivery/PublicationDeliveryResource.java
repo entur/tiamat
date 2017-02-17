@@ -8,9 +8,8 @@ import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
-import org.rutebanken.tiamat.importer.SimpleStopPlaceImporter;
+import org.rutebanken.tiamat.importer.InitialStopPlaceImporter;
 import org.rutebanken.tiamat.model.job.ExportJob;
-import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
@@ -51,7 +50,7 @@ public class PublicationDeliveryResource {
 
     private final StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
-    private final SimpleStopPlaceImporter simpleStopPlaceImporter;
+    private final InitialStopPlaceImporter initialStopPlaceImporter;
 
     private final PublicationDeliveryExporter publicationDeliveryExporter;
 
@@ -66,7 +65,7 @@ public class PublicationDeliveryResource {
                                        PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller,
                                        PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                        StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
-                                       SimpleStopPlaceImporter simpleStopPlaceImporter,
+                                       InitialStopPlaceImporter initialStopPlaceImporter,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter, PublicationDeliveryImporter publicationDeliveryImporter) {
 
@@ -75,7 +74,7 @@ public class PublicationDeliveryResource {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
-        this.simpleStopPlaceImporter = simpleStopPlaceImporter;
+        this.initialStopPlaceImporter = initialStopPlaceImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
@@ -172,6 +171,8 @@ public class PublicationDeliveryResource {
                     .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
                     .findFirst().get();
 
+
+
             logger.info("Importing stops");
             int stopPlacesImported = 0;
             while(true) {
@@ -180,7 +181,7 @@ public class PublicationDeliveryResource {
                     logger.info("Finished importing stops");
                     break;
                 }
-                simpleStopPlaceImporter.importStopPlace(netexMapper.mapToTiamatModel(stopPlace), siteFrame, topographicPlacesCounter);
+                initialStopPlaceImporter.importStopPlace(topographicPlacesCounter, siteFrame, netexMapper.mapToTiamatModel(stopPlace));
                 stopPlacesImported++;
             }
 

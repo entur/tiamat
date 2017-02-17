@@ -4,9 +4,11 @@ import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.tiamat.model.EquipmentPlace;
 import org.rutebanken.netex.model.EquipmentPlaces_RelStructure;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class EquipmentPlacesConverter extends BidirectionalConverter<List<EquipmentPlace>, EquipmentPlaces_RelStructure> {
 
     @Override

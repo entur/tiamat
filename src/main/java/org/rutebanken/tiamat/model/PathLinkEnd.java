@@ -19,7 +19,7 @@ public class PathLinkEnd {
             })
     private long id;
 
-    @OneToOne
+    @ManyToOne
     private StopPlace stopPlace;
 
     @ManyToOne
@@ -33,8 +33,7 @@ public class PathLinkEnd {
     @OneToOne
     private AccessSpace accessSpace;
 
-    @Transient
-    @OneToOne
+    @ManyToOne
     private PathJunction pathJunction;
 
     @Transient
@@ -45,6 +44,9 @@ public class PathLinkEnd {
 
     public PathLinkEnd(Quay quay) {
         this.quay = quay;
+    }
+
+    public PathLinkEnd() {
     }
 
     public PathLinkEnd(StopPlace stopPlace) {
@@ -59,11 +61,10 @@ public class PathLinkEnd {
         this.entrance = entrance;
     }
 
+    public PathLinkEnd(PathJunction pathJunction) { this.pathJunction = pathJunction; }
+
     public PathLinkEnd(Level level) {
         this.level = level;
-    }
-
-    public PathLinkEnd() {
     }
 
     public SiteEntrance getEntrance() {
@@ -90,4 +91,11 @@ public class PathLinkEnd {
         return quay;
     }
 
+    public PathJunction getPathJunction() {
+        return pathJunction;
+    }
+
+    public void setPathJunction(PathJunction pathJunction) {
+        this.pathJunction = pathJunction;
+    }
 }

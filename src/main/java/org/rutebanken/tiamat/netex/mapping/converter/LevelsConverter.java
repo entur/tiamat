@@ -6,9 +6,11 @@ import org.rutebanken.netex.model.Levels_RelStructure;
 import org.rutebanken.tiamat.model.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class LevelsConverter extends BidirectionalConverter<List<Level>, Levels_RelStructure> {
     private static final Logger logger = LoggerFactory.getLogger(LevelsConverter.class);
 

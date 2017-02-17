@@ -2,17 +2,30 @@ package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
-public class NetexMapperTest {
+public class NetexMapperTest extends CommonSpringBootTest {
 
-    private NetexMapper netexMapper = new NetexMapper();
+    @Autowired
+    private NetexMapper netexMapper;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
@@ -133,10 +146,10 @@ public class NetexMapperTest {
         String originalId = "OPP:StopArea:123";
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace()
                 .withKeyList(
-                    new KeyListStructure().withKeyValue(
-                            new KeyValueStructure()
-                                    .withKey(ORIGINAL_ID_KEY)
-                                    .withValue(originalId)));
+                        new KeyListStructure().withKeyValue(
+                                new KeyValueStructure()
+                                        .withKey(ORIGINAL_ID_KEY)
+                                        .withValue(originalId)));
 
         StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
         assertThat(tiamatStopPlace.getKeyValues()).isNotNull();
@@ -192,9 +205,9 @@ public class NetexMapperTest {
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
         tiamatQuay.setId(1234567L);
 
-        org.rutebanken.netex.model.Quay netexQuay  = netexMapper.mapToNetexModel(tiamatQuay);
+        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
-        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
     }
 
     @Test
@@ -214,7 +227,7 @@ public class NetexMapperTest {
                 .findFirst()
                 .get();
 
-        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:"+1234567);
+        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
 
     }
 
@@ -244,7 +257,110 @@ public class NetexMapperTest {
         assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
 
 
+    }
 
+    @Test
+    public void mapCountyRefsFromMunicipalitiesFromTiamatToNetex() {
+        SiteFrame tiamatSiteFrame = new SiteFrame();
+
+        CountryRef countryRef = new CountryRef();
+        countryRef.setRef(IanaCountryTldEnumeration.ZM);
+
+        TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("Akershus"));
+        county.setCountryRef(countryRef);
+        county.setId(1L);
+
+        TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
+        municipality.setParentTopographicPlace(county);
+        municipality.setId(2L);
+
+        tiamatSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(municipality);
+
+        tiamatSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(county);
+
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
+
+
+        assertThat(netexSiteFrame).isNotNull();
+        assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
+
+        org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(netexMunicipality).isNotNull();
+        assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
+        assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(county, county.getId()));
+    }
+
+    @Test
+    public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+        netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
+
+        org.rutebanken.netex.model.CountryRef countryRef = new org.rutebanken.netex.model.CountryRef();
+        countryRef.setRef(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
+
+        org.rutebanken.netex.model.TopographicPlace county = new org.rutebanken.netex.model.TopographicPlace();
+        county.setId("NSR:TopographicPlace:1");
+        county.setName(new MultilingualString().withValue("Akershus"));
+        county.withCountryRef(countryRef);
+
+        org.rutebanken.netex.model.TopographicPlace municipality = new org.rutebanken.netex.model.TopographicPlace();
+        municipality.setId("NSR:TopographicPlace:2");
+        municipality.setName(new MultilingualString().withValue("Asker"));
+        municipality.withParentTopographicPlaceRef(
+                new org.rutebanken.netex.model.TopographicPlaceRefStructure().withRef(county.getId())
+        );
+
+        netexSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(municipality);
+
+        netexSiteFrame
+                .getTopographicPlaces()
+                .getTopographicPlace()
+                .add(county);
+
+        SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
+
+        assertThat(netexSiteFrame).isNotNull();
+        assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
+
+        TopographicPlace tiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(tiamatMunicipality).isNotNull();
+        assertThat(tiamatMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
+        assertThat(tiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
+    }
+
+    @Test
+    public void mapPathLinkToNetex() {
+        Quay quay = new Quay();
+        quay.setId(10L);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(11L);
+
+        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        pathLink.setId(123L);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+
+        assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
+        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
+        verifyPathLinkEnd(netexPathLink.getFrom(), quay.getId(), quay, "PathlinkEnd from");
+        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace.getId(), stopPlace, "PathLinkEnd to");
+
+    }
+
+    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
+        assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(entityStructure, entityId));
     }
 
 }

@@ -1,17 +1,29 @@
 package org.rutebanken.tiamat.model;
 
+import com.vividsolutions.jts.geom.LineString;
 import net.opengis.gml._3.LineStringType;
 
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
 
+@MappedSuperclass
+public abstract class Link extends DataManagedObjectStructure {
 
-public abstract class Link
-        extends DataManagedObjectStructure {
+    private LineString lineString;
 
+    public Link() {
+    }
+
+    public Link(LineString lineString) {
+        this.lineString = lineString;
+    }
+
+    @Transient
     protected MultilingualStringEntity name;
+
+    @Transient
     protected BigDecimal distance;
-    protected LineStringType lineString;
 
     @Transient
     protected LinkTypeRefs_RelStructure types;
@@ -46,12 +58,12 @@ public abstract class Link
         this.types = value;
     }
 
-    public LineStringType getLineString() {
+    public LineString getLineString() {
         return lineString;
     }
 
-    public void setLineString(LineStringType value) {
-        this.lineString = value;
+    public void setLineString(LineString lineString) {
+        this.lineString = lineString;
     }
 
     public Projections_RelStructure getProjections() {

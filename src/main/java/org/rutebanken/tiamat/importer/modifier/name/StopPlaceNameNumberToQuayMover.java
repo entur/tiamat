@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer.modifier.name;
 
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -45,9 +44,9 @@ public class StopPlaceNameNumberToQuayMover {
         if (matcher.matches()) {
             if (matcher.groupCount() == 3) {
                 String newStopPlaceName = matcher.group(1);
-                String newQuayName = matcher.group(3);
+                String newPublicCode = matcher.group(3);
 
-                setQuayName(stopPlace, originalStopPlaceName, newQuayName);
+                setQuayPublicCode(stopPlace, newPublicCode);
 
                 stopPlace.getName().setValue(newStopPlaceName);
                 logger.info("Changing stop place name from '{}' to '{}'. {}", originalStopPlaceName, newStopPlaceName, stopPlace);
@@ -63,29 +62,24 @@ public class StopPlaceNameNumberToQuayMover {
         return stopPlace;
     }
 
-    private void setQuayName(StopPlace stopPlace, String originalStopPlaceName, String newQuayName) {
+    private void setQuayPublicCode(StopPlace stopPlace, String publicCode) {
 
         if (stopPlace.getQuays().isEmpty()) {
-            logger.warn("No quays for stop place. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            logger.warn("No quays for stop place. Cannot set quay public code to '{}'. {}", publicCode, stopPlace);
             return;
         }
         if (stopPlace.getQuays().size() > 1) {
-            logger.warn("This stop place contains multiple quays. Cannot set quay name to '{}'. {}", newQuayName, stopPlace);
+            logger.warn("This stop place contains multiple quays. Cannot set public code to '{}'. {}", publicCode, stopPlace);
             return;
         }
 
+        // We cannot update more than one quay with the same public code.
         Quay quay = stopPlace.getQuays().iterator().next();
-        if(quay.getName() == null) {
-            logger.info("Quay name is empty. Will set it to '{}'. Stop Place: {}", newQuayName, stopPlace);
-            quay.setName(new EmbeddableMultilingualString(newQuayName));
+        if(quay.getPublicCode() != null && !quay.getPublicCode().isEmpty()) {
+            logger.warn("Quay public code '{}' is already set. Cannot set quay public code to '{}'.", quay.getPublicCode(), publicCode);
         } else {
-            String originalQuayName = quay.getName().getValue();
-            if (originalQuayName.equals(originalStopPlaceName)) {
-                quay.getName().setValue(newQuayName);
-                logger.info("Changing quay name from '{}' to '{}'. Quay: {}", originalQuayName, newQuayName, quay);
-            } else {
-                logger.warn("Original quay name '{}' is not equal to original stop place name '{}'. Cannot set quay name to '{}'.", originalQuayName, originalStopPlaceName, newQuayName);
-            }
+            logger.info("Quay public code is empty. Will set it to '{}'. {}", publicCode, quay);
+            quay.setPublicCode(publicCode);
         }
 
     }

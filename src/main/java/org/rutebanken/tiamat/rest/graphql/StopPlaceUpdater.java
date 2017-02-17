@@ -3,18 +3,19 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.google.api.client.util.Preconditions;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -26,13 +27,15 @@ import java.util.Optional;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
-@Transactional
 class StopPlaceUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceUpdater.class);
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
 
     @Autowired
     private GeometryFactory geometryFactory;
@@ -59,6 +62,9 @@ class StopPlaceUpdater implements DataFetcher {
             if (nsrId != null) {
                 logger.info("Updating StopPlace {}", nsrId);
                 stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
+
+                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", nsrId);
+
             } else {
                 logger.info("Creating new StopPlace");
                 stopPlace = new StopPlace();
@@ -69,7 +75,19 @@ class StopPlaceUpdater implements DataFetcher {
                 boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
 
                 if (hasValuesChanged) {
-
+                    if (stopPlace.getQuays() != null) {
+                        /*
+                         * Explicitly saving new Quays  when updating and creating new Quays in the same request.
+                         * Already existing quays are attempted to be inserted causing ConstraintViolationException.
+                         *
+                         * It is necessary to call saveAndFlush(quay) to enforce database-constraints and updating
+                         * references on StopPlace-object.
+                         *
+                         */
+                        stopPlace.getQuays().stream()
+                                .filter(quay -> quay.getId() == null)
+                                .forEach(quay -> quayRepository.saveAndFlush(quay));
+                    }
                     stopPlace.setChanged(ZonedDateTime.now());
                     stopPlace = stopPlaceRepository.save(stopPlace);
 
@@ -119,7 +137,10 @@ class StopPlaceUpdater implements DataFetcher {
                     .filter(q -> q.getId() != null)
                     .filter(q -> q.getId().equals(NetexIdMapper.getTiamatId((String) quayInputMap.get(ID)))).findFirst();
 
-            Preconditions.checkArgument(existingQuay.isPresent(), "Attempting to update Quay (id:{}) on StopPlace (id:{}) , but Quay does not exist on StopPlace", quayInputMap.get(ID), stopPlace.getId());
+            Preconditions.checkArgument(existingQuay.isPresent(),
+                    "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace",
+                    quayInputMap.get(ID),
+                    NetexIdMapper.getNetexId(stopPlace, stopPlace.getId()));
 
             quay = existingQuay.get();
             logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
@@ -133,6 +154,10 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (quayInputMap.get(COMPASS_BEARING) != null) {
             quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());
+            isQuayUpdated = true;
+        }
+        if (quayInputMap.get(PUBLIC_CODE) != null) {
+            quay.setPublicCode((String) quayInputMap.get(PUBLIC_CODE));
             isQuayUpdated = true;
         }
 
@@ -168,8 +193,34 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (input.get(LOCATION) != null) {
             entity.setCentroid(createPoint((Map) input.get(LOCATION)));
+            isUpdated = true;
+        }
+
+        if (input.get(GEOMETRY) != null) {
+            entity.setCentroid(createGeoJsonPoint((Map) input.get(GEOMETRY)));
+            isUpdated = true;
         }
         return isUpdated;
+    }
+
+    private Point createGeoJsonPoint(Map map) {
+        if (map.get("type") != null && map.get("coordinates") != null) {
+            if ("Point".equals(map.get("type"))) {
+                Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
+                return geometryFactory.createPoint(coordinates[0]);
+            }
+        }
+        return null;
+    }
+
+    private LineString createGeoJsonLineString(Map map) {
+        if (map.get("type") != null && map.get("coordinates") != null) {
+            if ("LineString".equals(map.get("type"))) {
+                Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
+                return geometryFactory.createLineString(coordinates);
+            }
+        }
+        return null;
     }
 
     private EmbeddableMultilingualString getEmbeddableString(Map map) {

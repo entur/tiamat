@@ -1,20 +1,12 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,10 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests related to importing Oslo Bussterminal.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
-public class OsloBussterminalImportTest {
+public class OsloBussterminalImportTest extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
@@ -93,7 +82,16 @@ public class OsloBussterminalImportTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).isNotNull().as("quays should not be null");
-        assertThat(actualQuays.get(1).getName().getValue()).isEqualTo("17");
-        assertThat(actualQuays.get(0).getDescription().getValue()).contains("avstigning");
+
+        assertThat(actualQuays.stream()
+                .filter(quay -> quay.getPublicCode() != null)
+                .filter(quay -> quay.getPublicCode().equals("17"))
+                .findAny()).describedAs("There should be a quay with matching public code").isPresent();
+
+        assertThat(actualQuays.stream()
+                .filter(quay -> quay.getDescription() != null)
+                .filter(quay -> quay.getDescription().getValue() != null)
+                .filter(quay -> quay.getDescription().getValue().equals("avstigning"))
+                .findAny()).describedAs("Quay should contain description").isPresent();
     }
 }

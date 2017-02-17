@@ -8,29 +8,21 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles("geodb")
-public class GraphQLResourceIntegrationTest {
+public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
     private static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
 
     @Autowired
@@ -394,9 +386,9 @@ public class GraphQLResourceIntegrationTest {
                 "          shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "          description:{ value:\\\"" + description + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          location: {" +
-                "            longitude:" + lon +
-                "            latitude:" + lat +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + lon + "," + lat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
                 "       }) { " +
@@ -406,19 +398,21 @@ public class GraphQLResourceIntegrationTest {
                 "  description { value } " +
                 "  stopPlaceType " +
                 "  allAreasWheelchairAccessible " +
-                "  location { longitude latitude } " +
+                "  geometry { type coordinates } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", notNullValue())
-                .body("data.stopPlace[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                .body("data.stopPlace[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
+                .root("data.stopPlace[0]")
+                    .body("id", notNullValue())
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
 
 
     }
@@ -452,9 +446,9 @@ public class GraphQLResourceIntegrationTest {
                 "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
                 "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          location: {" +
-                "            longitude:" + updatedLon +
-                "            latitude:" + updatedLat +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
                 "       }) { " +
@@ -464,18 +458,20 @@ public class GraphQLResourceIntegrationTest {
                 "  description { value } " +
                 "  stopPlaceType " +
                 "  allAreasWheelchairAccessible " +
-                "  location { longitude latitude } " +
+                "  geometry { type coordinates } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].name.value", equalTo(updatedName))
-                .body("data.stopPlace[0].shortName.value", equalTo(updatedShortName))
-                .body("data.stopPlace[0].description.value", equalTo(updatedDescription))
-                .body("data.stopPlace[0].stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
-                .body("data.stopPlace[0].location.longitude", comparesEqualTo(updatedLon))
-                .body("data.stopPlace[0].location.latitude", comparesEqualTo(updatedLat))
-                .body("data.stopPlace[0].allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
+                .root("data.stopPlace[0]")
+                    .body("name.value", equalTo(updatedName))
+                    .body("shortName.value", equalTo(updatedShortName))
+                    .body("description.value", equalTo(updatedDescription))
+                    .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
+                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
     }
 
 
@@ -489,6 +485,7 @@ public class GraphQLResourceIntegrationTest {
         String name = "Testing name ";
         String shortName = "Testing shortname ";
         String description = "Testing description ";
+        String publicCode = "publicCode 2";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -502,20 +499,22 @@ public class GraphQLResourceIntegrationTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
-                "          }] " +
+                "            publicCode:\\\"" + publicCode + "\\\"" +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + "," + lat + "]] " +
+                "            }" +
+                "            }] " +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  quays {" +
                 "    id " +
+                "    publicCode " +
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "  } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
@@ -523,12 +522,15 @@ public class GraphQLResourceIntegrationTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", notNullValue())
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays[0].id", notNullValue())
-                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat));
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("publicCode", equalTo(publicCode))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat));
     }
 
     @Test
@@ -563,10 +565,10 @@ public class GraphQLResourceIntegrationTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
+                "          geometry: {" +
+                "            type: \\\"Point\\\"" +
+                "            coordinates: [[" + lon + "," + lat + "]] " +
+                "          }" +
                 "            compassBearing:" + compassBearing +
                 "          }] " +
                 "       }) { " +
@@ -577,7 +579,7 @@ public class GraphQLResourceIntegrationTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
@@ -586,13 +588,15 @@ public class GraphQLResourceIntegrationTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[0].name.value", equalTo(name))
-                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays[0].description.value", equalTo(description))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(compassBearing));
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", comparesEqualTo(getNetexId(quay)))
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
 
@@ -628,10 +632,10 @@ public class GraphQLResourceIntegrationTest {
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
-                "             }" +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + "," + lat + "]] " +
+                "            }" +
                 "            compassBearing:" + compassBearing +
                 "          }] " +
                 "       }) { " +
@@ -642,39 +646,42 @@ public class GraphQLResourceIntegrationTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
                 "}}\",\"variables\":\"\"}";
 
+        String manuallyAddedQuayId = getNetexId(quay);
+
+
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
-                .body("data.stopPlace[0].quays", Matchers.hasSize(2))
-                // First Quay - added manually
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[0].name.", nullValue())
-                .body("data.stopPlace[0].quays[0].shortName", nullValue())
-                .body("data.stopPlace[0].quays[0].description", nullValue())
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(new Float(point.getX())))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
-                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
-                // Second Quay - added using GraphQL
-                .body("data.stopPlace[0].quays[1].id", not(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[1].id", not(getNetexId(stopPlace)))
-                .body("data.stopPlace[0].quays[1].name.value", equalTo(name))
-                .body("data.stopPlace[0].quays[1].shortName.value", equalTo(shortName))
-                .body("data.stopPlace[0].quays[1].description.value", equalTo(description))
-                .body("data.stopPlace[0].quays[1].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[1].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
+                .body("data.stopPlace[0].quays", hasSize(2))
+                        // First Quay - added manually
+                .root("data.stopPlace[0].quays.find { it.id == '" + manuallyAddedQuayId + "'}")
+                    .body("name", nullValue())
+                    .body("shortName", nullValue())
+                    .body("description", nullValue())
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(new Float(point.getX())))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(new Float(point.getY())))
+                    .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                        // Second Quay - added using GraphQL
+                .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
+                    .body("name.value", equalTo(name))
+                    .body("shortName.value", equalTo(shortName))
+                    .body("description.value", equalTo(description))
+                    .body("geometry.type", equalTo("Point"))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
 
 
     @Test
-    @Ignore
     public void testMutationUpdateStopPlaceCreateQuayAndUpdateQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
@@ -712,9 +719,9 @@ public class GraphQLResourceIntegrationTest {
                 "            name: { value:\\\"" + newQuaydName + "\\\" } " +
                 "            shortName:{ value:\\\"" + newQuayShortName + "\\\" } " +
                 "            description:{ value:\\\"" + newQuayDescription + "\\\" }" +
-                "            location: {" +
-                "              longitude:" + lon +
-                "              latitude:" + lat +
+                "            geometry: {" +
+                "              type: \\\"Point\\\"" +
+                "              coordinates: [[" + lon + ","+ lat + "]]" +
                 "             }" +
                 "            compassBearing:" + compassBearing +
                 "          } , {" +
@@ -731,33 +738,39 @@ public class GraphQLResourceIntegrationTest {
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
-                "    location { longitude latitude } " +
+                "    geometry { type coordinates } " +
                 "    compassBearing " +
                 "  } " +
                 "  } " +
                 "}}\",\"variables\":\"\"}";
 
+        String manuallyAddedQuayId = getNetexId(quay);
+
+
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
                 .body("data.stopPlace[0].name.value", equalTo(newStopName))
-                .body("data.stopPlace[0].quays", Matchers.hasSize(2))
+                .body("data.stopPlace[0].quays", hasSize(2))
                         // First Quay - added manually, then updated
-                .body("data.stopPlace[0].quays[0].id", comparesEqualTo(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[0].name.value", equalTo(updatedName))
-                .body("data.stopPlace[0].quays[0].shortName.value", equalTo(updatedShortName))
-                .body("data.stopPlace[0].quays[0].description.value", equalTo(updatedDescription))
-                .body("data.stopPlace[0].quays[0].location.longitude", comparesEqualTo(new Float(point.getX())))
-                .body("data.stopPlace[0].quays[0].location.latitude", comparesEqualTo(new Float(point.getY())))
-                .body("data.stopPlace[0].quays[0].compassBearing", comparesEqualTo(quay.getCompassBearing()))
+                .root("data.stopPlace[0].quays.find { it.id == '" + manuallyAddedQuayId + "'}")
+                    .body("name.value", equalTo(updatedName))
+                    .body("shortName.value", equalTo(updatedShortName))
+                    .body("description.value", equalTo(updatedDescription))
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(new Float(point.getX())))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(new Float(point.getY())))
+                    .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
+
                         // Second Quay - added using GraphQL
-                .body("data.stopPlace[0].quays[1].id", not(getNetexId(quay)))
-                .body("data.stopPlace[0].quays[1].id", not(getNetexId(stopPlace)))
-                .body("data.stopPlace[0].quays[1].name.value", equalTo(newQuaydName))
-                .body("data.stopPlace[0].quays[1].shortName.value", equalTo(newQuayShortName))
-                .body("data.stopPlace[0].quays[1].description.value", equalTo(newQuayDescription))
-                .body("data.stopPlace[0].quays[1].location.longitude", comparesEqualTo(lon))
-                .body("data.stopPlace[0].quays[1].location.latitude", comparesEqualTo(lat))
-                .body("data.stopPlace[0].quays[1].compassBearing", comparesEqualTo(compassBearing));
+                .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
+                    .body("id", not(getNetexId(stopPlace)))
+                    .body("name.value", equalTo(newQuaydName))
+                    .body("shortName.value", equalTo(newQuayShortName))
+                    .body("description.value", equalTo(newQuayDescription))
+                    .body("geometry.type", equalTo(point.getGeometryType()))
+                    .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {

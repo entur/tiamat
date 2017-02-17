@@ -3,7 +3,9 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DataManagedObjectStructureIdMapper extends CustomMapper<DataManagedObjectStructure, org.rutebanken.tiamat.model.DataManagedObjectStructure> {
 
     private NetexIdMapper netexIdMapper = new NetexIdMapper();

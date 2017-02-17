@@ -503,6 +503,28 @@ public class QuayMergerTest {
         assertThat(actual.getCentroid()).isEqualTo(first.getCentroid());
     }
 
+    @Test
+    public void twoQuaysWithDifferentPublicCodeShouldNotBeMerged()  {
+
+        Quay first = new Quay();
+        Point firstQuayPoint = geometryFactory.createPoint(new Coordinate(60, 11));
+        first.setCentroid(firstQuayPoint);
+        first.setPublicCode("X");
+
+        Quay second = new Quay();
+        second.setCentroid(firstQuayPoint);
+        second.setPublicCode("Y");
+
+        Set<Quay> existingQuays = new HashSet<>();
+        existingQuays.add(first);
+
+        Set<Quay> incomingQuays = new HashSet<>();
+        incomingQuays.add(second);
+
+        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        assertThat(result).as("Quays should NOT have been merged. Public Code is different").hasSize(2);
+    }
+
 
     private Point getOffsetPoint(Point point, int offsetMeters, int azimuth) {
         GeodeticCalculator calc = new GeodeticCalculator();

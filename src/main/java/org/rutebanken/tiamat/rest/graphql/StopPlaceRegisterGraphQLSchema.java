@@ -1,7 +1,10 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import graphql.Scalars;
+import graphql.language.ArrayValue;
+import graphql.language.FloatValue;
 import graphql.schema.*;
 import org.rutebanken.tiamat.dtoassembling.dto.LocationDto;
 import org.rutebanken.tiamat.model.*;
@@ -42,13 +45,13 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher stopPlaceUpdater;
 
     private static GraphQLEnumType topographicPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(OBJECT_TYPE_TOPOGRAPHIC_PLACE_TYPE)
+            .name(TOPOGRAPHIC_PLACE_TYPE_ENUM)
             .value(TopographicPlaceTypeEnumeration.COUNTY.value(), TopographicPlaceTypeEnumeration.COUNTY)
             .value(TopographicPlaceTypeEnumeration.TOWN.value(), TopographicPlaceTypeEnumeration.TOWN)
             .build();
 
     private static GraphQLEnumType stopPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(OBJECT_TYPE_STOP_PLACE_TYPE)
+            .name(STOP_PLACE_TYPE_ENUM)
             .value("onstreetBus", StopTypeEnumeration.ONSTREET_BUS)
             .value("onstreetTram", StopTypeEnumeration.ONSTREET_TRAM)
             .value("airport", StopTypeEnumeration.AIRPORT)
@@ -64,6 +67,59 @@ public class StopPlaceRegisterGraphQLSchema {
             .value("vehicleRailInterchange", StopTypeEnumeration.VEHICLE_RAIL_INTERCHANGE)
             .value("other", StopTypeEnumeration.OTHER)
             .build();
+
+    GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", "List of coordinate-pairs as specified in GeoJSON-standard. <br />" +
+            " [[9.1234, 60.1234]] for type=\"Point\". <br />" +
+            " [[9.1234, 60.1234], [9.1235, 60.1235], [9.1236, 60.1236]] for type=\"LineString\".", new Coercing() {
+        @Override
+        public List<List<Double>> serialize(Object input) {
+            if (input instanceof Coordinate[]) {
+                Coordinate[] coordinates = ((Coordinate[]) input);
+                List<List<Double>> coordinateList = new ArrayList<>();
+                for (Coordinate coordinate : coordinates) {
+                    List<Double> coordinatePair = new ArrayList<>();
+                    coordinatePair.add(coordinate.x);
+                    coordinatePair.add(coordinate.y);
+
+                    coordinateList.add(coordinatePair);
+                }
+                return coordinateList;
+            }
+            return null;
+        }
+
+        @Override
+        public Coordinate[] parseValue(Object input) {
+            List<List<Double>> coordinateList = (List<List<Double>>) input;
+
+            Coordinate[] coordinates = new Coordinate[coordinateList.size()];
+
+            for (int i = 0; i < coordinateList.size(); i++) {
+                coordinates[i] = new Coordinate(coordinateList.get(i).get(0), coordinateList.get(i).get(1));
+            }
+
+            return coordinates;
+        }
+
+        @Override
+        public Object parseLiteral(Object input) {
+            if (input instanceof ArrayValue) {
+                ArrayList<ArrayValue> coordinateList = (ArrayList) ((ArrayValue) input).getValues();
+                Coordinate[] coordinates = new Coordinate[coordinateList.size()];
+
+                for (int i = 0; i < coordinateList.size(); i++) {
+                    ArrayValue v = coordinateList.get(i);
+
+                    FloatValue longitude = (FloatValue) v.getValues().get(0);
+                    FloatValue latitude = (FloatValue) v.getValues().get(1);
+                    coordinates[i] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
+
+                }
+                return coordinates;
+            }
+            return null;
+        }
+    });
 
     @PostConstruct
     public void init() {
@@ -134,10 +190,48 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLBigDecimal))
                 .build();
 
+        GraphQLObjectType geoJsonPointObjectType = newObject()
+                .name(OUTPUT_TYPE_GEO_JSON)
+                .field(newFieldDefinition()
+                        .name("type")
+                        .type(GraphQLString)
+                        .staticValue("Point")
+                )
+                .field(newFieldDefinition()
+                        .name("coordinates")
+                        .type(GraphQLGeoJSONCoordinates))
+                .build();
+
+        GraphQLObjectType geoJsonLineStringObjectType = newObject()
+                .name(OUTPUT_TYPE_GEO_JSON)
+                .field(newFieldDefinition()
+                        .name("type")
+                        .type(GraphQLString)
+                        .staticValue("LineString")
+                )
+                .field(newFieldDefinition()
+                        .name("coordinates")
+                        .type(GraphQLGeoJSONCoordinates))
+                .build();
+
+
         List<GraphQLFieldDefinition> commonFieldsList = new ArrayList<>();
         commonFieldsList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
+
+        commonFieldsList.add(newFieldDefinition()
+                .name(GEOMETRY)
+                .type(geoJsonPointObjectType)
+                .dataFetcher(env -> {
+                    if (env.getSource() instanceof Zone_VersionStructure) {
+                        Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
+                        return source.getCentroid();
+                    }
+                    return null;
+                })
+                .build());
+
         commonFieldsList.add(newFieldDefinition()
                 .name(IMPORTED_ID)
                 .type(new GraphQLList(GraphQLString))
@@ -158,6 +252,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition()
                 .name(LOCATION)
                 .type(locationObjectType)
+                .deprecate("Use geometry-object instead")
                 .dataFetcher(env -> {
                     Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
                     Point point = source.getCentroid();
@@ -180,6 +275,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                         .type(GraphQLBoolean))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(PUBLIC_CODE)
+                        .type(GraphQLString))
                 .build();
 
         GraphQLObjectType stopPlaceObjectType  = newObject()
@@ -193,8 +294,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLBoolean))
                 .field(newFieldDefinition()
                         .name(TOPOGRAPHIC_PLACE)
-                        .type(topographicPlaceObjectType)
-                )
+                        .type(topographicPlaceObjectType))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))
@@ -322,12 +425,25 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType locationInputType = GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_LOCATION)
                 .field(newInputObjectField()
-                        .name("latitude")
+                        .name(LATITUDE)
                         .type(new GraphQLNonNull(Scalars.GraphQLFloat))
                         .build())
                 .field(newInputObjectField()
-                        .name("longitude")
+                        .name(LONGITUDE)
                         .type(new GraphQLNonNull(Scalars.GraphQLFloat))
+                        .build())
+                .build();
+
+        GraphQLInputObjectType geoJsonPointInputType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_GEO_JSON)
+                .field(newInputObjectField()
+                        .name(TYPE)
+                        .type(new GraphQLNonNull(GraphQLString))
+                        .description("Type of geometry. Valid inputs are 'Point' or 'LineString'.")
+                        .build())
+                .field(newInputObjectField()
+                        .name(COORDINATES)
+                        .type(new GraphQLNonNull(GraphQLGeoJSONCoordinates))
                         .build())
                 .build();
 
@@ -360,6 +476,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(LOCATION).type(locationInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonPointInputType).build());
 
         GraphQLInputObjectType createQuayObjectInputType = GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_QUAY)
@@ -370,6 +487,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(ALL_AREAS_WHEELCHAIR_ACCESSIBLE)
                         .type(GraphQLBoolean))
+                .field(newInputObjectField()
+                        .name(PUBLIC_CODE)
+                        .type(GraphQLString))
                 .build();
 
         GraphQLInputObjectType stopPlaceObjectInputType  = GraphQLInputObjectType.newInputObject()

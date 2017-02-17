@@ -6,6 +6,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
@@ -22,9 +23,7 @@ import java.util.List;
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-public class GaplessOptionalGeneratorTest {
+public class GaplessOptionalGeneratorTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;

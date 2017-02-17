@@ -4,9 +4,11 @@ import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.DestinationDisplayViews_RelStructure;
 import org.rutebanken.tiamat.model.DestinationDisplayView;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class DestinationDisplayViewsConverter extends BidirectionalConverter<List<DestinationDisplayView>, DestinationDisplayViews_RelStructure> {
 
     @Override

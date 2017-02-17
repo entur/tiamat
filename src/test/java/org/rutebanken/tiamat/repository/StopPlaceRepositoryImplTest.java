@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,9 @@ import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TiamatApplication.class)
-@ActiveProfiles("geodb")
 @Transactional
-public class StopPlaceRepositoryImplTest {
+@ActiveProfiles("geodb")
+public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -469,7 +468,7 @@ public class StopPlaceRepositoryImplTest {
 
     /**
      * Expect no result beacuse stop type is not matching.
-     * https://test.rutebanken.org/apiman-gateway/rutebanken/tiamat/1.0/stop_place/?stopPlaceType=onstreetBus&countyReference=33&municipalityReference=2&
+     * https://test.rutebanken.org/api/tiamat/1.0/stop_place/?stopPlaceType=onstreetBus&countyReference=33&municipalityReference=2&
      */
     @Test
     public void findStopPlaceByCountyAndMunicipalityAndStopPlaceType() throws Exception {
@@ -493,7 +492,7 @@ public class StopPlaceRepositoryImplTest {
 
     /**
      * Expect no result because name should be anded with other parts of query
-     * https://test.rutebanken.org/apiman-gateway/rutebanken/tiamat/1.0/stop_place/?q=lomsdalen&municipalityReference=2&countyReference=33
+     * https://test.rutebanken.org/api/tiamat/1.0/stop_place/?q=lomsdalen&municipalityReference=2&countyReference=33
      */
     @Test
     public void findStopPlaceByCountyAndMunicipalityAndNameExpectNoResult() throws Exception {

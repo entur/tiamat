@@ -23,4 +23,14 @@ public class QuayHashCodeTest {
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
         assertThat(quay1.hashCode()).isEqualTo(quay2.hashCode());
     }
+
+    @Test
+    public void quaysWithDifferentPublicCodeShouldNotHaveEqualHashCode() {
+        Quay first = new Quay();
+        first.setPublicCode("X");
+
+        Quay second = new Quay();
+        second.setPublicCode("Y");
+        assertThat(first.hashCode()).isNotEqualTo(second.hashCode());
+    }
 }

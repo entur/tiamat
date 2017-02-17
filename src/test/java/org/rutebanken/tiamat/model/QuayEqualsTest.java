@@ -110,4 +110,14 @@ public class QuayEqualsTest {
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude + 0.01, quayLatitude + 0.01)));
         assertThat(quay1).isNotEqualTo(quay2);
     }
+
+    @Test
+    public void quaysWithDifferentPublicCodeIsNotEqual() {
+        Quay first = new Quay();
+        first.setPublicCode("X");
+
+        Quay second = new Quay();
+        second.setPublicCode("Y");
+        assertThat(first).isNotEqualTo(second);
+    }
 }
