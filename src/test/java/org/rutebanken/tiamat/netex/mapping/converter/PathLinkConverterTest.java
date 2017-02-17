@@ -1,16 +1,12 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceRef;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.AddressablePlace;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SiteElement;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +104,43 @@ public class PathLinkConverterTest extends CommonSpringBootTest {
         assertPathLinkEnds(actualPathLink, fromTiamatQuay, fromId, toTiamatQuay, toId);
     }
 
+    @Test
+    public void mapPathLinkWithInternalIdsFromNetexToTiamat() {
+        StopPlace fromTiamatStop = new StopPlace();
+        stopPlaceRepository.save(fromTiamatStop);
+        String fromStopPlaceId = NetexIdMapper.getNetexId(fromTiamatStop);
+
+        org.rutebanken.netex.model.StopPlace fromStopPlace = new org.rutebanken.netex.model.StopPlace();
+        fromStopPlace.withId(fromStopPlaceId);
+
+        Quay toTiamatQuay = new Quay();
+        quayRepository.save(toTiamatQuay);
+        String toId = NetexIdMapper.getNetexId(toTiamatQuay);
+        org.rutebanken.netex.model.Quay toQuay = new org.rutebanken.netex.model.Quay();
+
+        toQuay.withId(toId);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = new org.rutebanken.netex.model.PathLink()
+                .withFrom(
+                        new PathLinkEndStructure()
+                                .withPlaceRef(
+                                        new PlaceRef()
+                                                .withRef(fromStopPlace.getId())
+                                                .withNameOfMemberClass(fromStopPlace.getClass().getSimpleName())))
+                .withTo(
+                        new PathLinkEndStructure()
+                                .withPlaceRef(
+                                        new PlaceRef()
+                                                .withRef(toQuay.getId())
+                                                .withNameOfMemberClass(toQuay.getClass().getSimpleName())));
+
+        List<PathLink> actual = netexMapper.mapPathLinksToTiamatModel(Arrays.asList(netexPathLink));
+        assertThat(actual).hasSize(1);
+
+        PathLink actualPathLink = actual.get(0);
+        assertPathLinkEnds(actualPathLink, fromTiamatStop, null, toTiamatQuay, null);
+    }
+
     private void assertPathLinkEnds(PathLink actualPathLinkEnd, SiteElement fromPlace, String expectedOriginalFromId, SiteElement toPlace, String expectedOriginalToId) {
         assertPathLinkEndEqualTo(actualPathLinkEnd.getFrom(), fromPlace, expectedOriginalFromId);
         assertPathLinkEndEqualTo(actualPathLinkEnd.getTo(), toPlace, expectedOriginalToId);
@@ -117,7 +150,9 @@ public class PathLinkConverterTest extends CommonSpringBootTest {
         assertThat(actualPathLinkEnd).isNotNull();
         AddressablePlace place = getPlaceFromPathLinkEnd(actualPathLinkEnd);
         assertThat(place.getId()).isEqualTo(expectedPlace.getId());
-        assertThat(place.getOriginalIds().iterator().next()).isEqualTo(expectedOriginalId);
+        if(expectedOriginalId != null) {
+            assertThat(place.getOriginalIds().iterator().next()).isEqualTo(expectedOriginalId);
+        }
     }
 
     private SiteElement getPlaceFromPathLinkEnd(PathLinkEnd pathLinkEnd) {
