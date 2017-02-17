@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.InitialStopPlaceImporter;
 import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
@@ -120,6 +121,10 @@ public class PublicationDeliveryResource {
     public Response getJobContents(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+
+        if(exportJob == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
         logger.info("Returning result of job {}", exportJob);
         if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
