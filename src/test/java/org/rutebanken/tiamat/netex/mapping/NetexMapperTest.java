@@ -2,29 +2,17 @@ package org.rutebanken.tiamat.netex.mapping;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.PlaceRef;
+import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.EntityStructure;
-import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SiteFrame;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
 public class NetexMapperTest extends CommonSpringBootTest {
 
@@ -339,32 +327,6 @@ public class NetexMapperTest extends CommonSpringBootTest {
         assertThat(tiamatMunicipality).isNotNull();
         assertThat(tiamatMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
         assertThat(tiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
-    }
-
-    @Test
-    public void mapPathLinkToNetex() {
-        Quay quay = new Quay();
-        quay.setId(10L);
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setId(11L);
-
-        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
-        pathLink.setId(123L);
-
-        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
-
-        assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
-        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
-        verifyPathLinkEnd(netexPathLink.getFrom(), quay.getId(), quay, "PathlinkEnd from");
-        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace.getId(), stopPlace, "PathLinkEnd to");
-
-    }
-
-    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
-        assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
-        assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
-        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(entityStructure, entityId));
     }
 
 }

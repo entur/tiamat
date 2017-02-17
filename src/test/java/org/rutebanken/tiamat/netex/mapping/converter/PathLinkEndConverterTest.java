@@ -18,9 +18,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
 @Transactional
-public class PathLinkConverterTest extends CommonSpringBootTest {
+public class PathLinkEndConverterTest extends CommonSpringBootTest {
 
     @Autowired
     private NetexMapper netexMapper;
@@ -139,6 +140,33 @@ public class PathLinkConverterTest extends CommonSpringBootTest {
 
         PathLink actualPathLink = actual.get(0);
         assertPathLinkEnds(actualPathLink, fromTiamatStop, null, toTiamatQuay, null);
+    }
+
+
+    @Test
+    public void mapPathLinkToNetex() {
+        Quay quay = new Quay();
+        quay.setId(10L);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(11L);
+
+        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        pathLink.setId(123L);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+
+        assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
+        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
+        verifyPathLinkEnd(netexPathLink.getFrom(), quay.getId(), quay, "PathlinkEnd from");
+        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace.getId(), stopPlace, "PathLinkEnd to");
+
+    }
+
+    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
+        assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
+        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(entityStructure, entityId));
     }
 
     private void assertPathLinkEnds(PathLink actualPathLinkEnd, SiteElement fromPlace, String expectedOriginalFromId, SiteElement toPlace, String expectedOriginalToId) {
