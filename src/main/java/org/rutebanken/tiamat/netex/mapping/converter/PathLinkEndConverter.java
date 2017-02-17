@@ -127,6 +127,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
     private PlaceRefStructure setRefValues(PlaceRefStructure placeRef, Place place) {
         return placeRef.withRef(NetexIdMapper.getNetexId(place, place.getId()))
                 .withVersion(Strings.isNullOrEmpty(place.getVersion()) ? "any" : place.getVersion())
+                .withNameOfMemberClass(place.getClass().getSimpleName())
                 .withCreated(OffsetDateTime.now());
     }
 

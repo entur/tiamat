@@ -71,7 +71,8 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         List<PathLink> result = publicationDeliveryTestHelper.extractPathLinks(response);
         assertThat(result).as("Expecting path link in return").hasSize(1);
         assertThat(result.get(0).getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
-
+        assertThat(result.get(0).getFrom().getPlaceRef().getNameOfMemberClass()).isEqualTo(fromStopPlace.getClass().getSimpleName());
+        assertThat(result.get(0).getTo().getPlaceRef().getNameOfMemberClass()).isEqualTo(toStopPlace.getClass().getSimpleName());
 
     }
 }
