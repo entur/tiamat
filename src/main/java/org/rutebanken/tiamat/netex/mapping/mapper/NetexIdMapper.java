@@ -94,8 +94,12 @@ public class NetexIdMapper {
      * @return long value
      */
     public static long getTiamatId(String netexId) {
-        Long longValue = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
-        return longValue;
+        try {
+            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
+        }
+
     }
 
     private static boolean isInternalTiamatId(String netexId) {
@@ -103,7 +107,6 @@ public class NetexIdMapper {
     }
 
     public static Optional<Long> getOptionalTiamatId(String netexId) {
-        Optional<Long> tiamatId;
         if (isInternalTiamatId(netexId)) {
             logger.debug("Detected tiamat ID from {}", netexId);
             return Optional.of(getTiamatId(netexId));
