@@ -10,6 +10,7 @@ import org.rutebanken.netex.model.PlaceRef;
 import org.rutebanken.netex.model.PlaceRefStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.netex.model.PathLinkEndStructure;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingException;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -28,6 +29,9 @@ import java.util.Optional;
 public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStructure, org.rutebanken.tiamat.model.PathLinkEnd> {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkEndConverter.class);
+
+    private static final String STOP_PLACE_NAME = "StopPlace";
+    private static final String QUAY_PLACE_NAME = "Quay";
 
     private StopPlaceRepository stopPlaceRepository;
 
@@ -56,7 +60,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
 
         Optional<Long> tiamatId = NetexIdMapper.getOptionalTiamatId(placeRefStructure.getRef());
 
-        if(placeRefStructure.getNameOfMemberClass().equals(org.rutebanken.netex.model.StopPlace.class.getSimpleName())) {
+        if(placeRefStructure.getNameOfMemberClass().equals(STOP_PLACE_NAME)) {
             StopPlace tiamatStopPlace;
 
             if(tiamatId.isPresent()) {
@@ -69,7 +73,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
             logger.info("Found stop place {}", tiamatStopPlace);
             pathLinkEnd.setStopPlace(tiamatStopPlace);
 
-        } else if(placeRefStructure.getNameOfMemberClass().equals(org.rutebanken.netex.model.Quay.class.getSimpleName())) {
+        } else if(placeRefStructure.getNameOfMemberClass().equals(QUAY_PLACE_NAME)) {
             logger.info("Reference to Quay: {}", placeRefStructure);
             Quay tiamatQuay;
 
@@ -82,6 +86,8 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
 
             logger.info("Found quay {}", tiamatQuay);
             pathLinkEnd.setQuay(tiamatQuay);
+        } else {
+            throw new NetexMappingException("Cannot map placeRefStructure with value: "+placeRefStructure.getNameOfMemberClass());
         }
         return pathLinkEnd;
     }
