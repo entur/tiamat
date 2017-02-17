@@ -52,8 +52,8 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
         PlaceRefStructure placeRefStructure = netexPathLinkEnd.getPlaceRef();
 
         if(Strings.isNullOrEmpty(placeRefStructure.getNameOfMemberClass())) {
-            logger.warn("Received place ref without name of member class: {}", placeRefStructure);
-            return null;
+            throw new NetexMappingException("Received place ref without name of member class: " + placeRefStructure +". Cannot determine type.");
+
         }
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
 
