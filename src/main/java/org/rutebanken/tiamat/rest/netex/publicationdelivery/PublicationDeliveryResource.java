@@ -104,7 +104,7 @@ public class PublicationDeliveryResource {
 
     @GET
     @Path(ASYNC_JOB_URL+"/{id}")
-    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+    public Response getJob(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
@@ -114,6 +114,21 @@ public class PublicationDeliveryResource {
 
         logger.info("Returning job {}", exportJob);
         return Response.ok(exportJob).build();
+    }
+
+    @GET
+    @Path(ASYNC_JOB_URL+"/{id}/content")
+    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+
+        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+
+        logger.info("Returning result of job {}", exportJob);
+        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
+        }
+
+        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
+        return Response.ok(inputStream).build();
     }
 
     @GET
