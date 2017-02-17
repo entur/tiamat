@@ -163,6 +163,29 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
 
     }
 
+    @Test
+    public void mapPathLinkToNetexAndVerifyVersion() {
+        Quay quay = new Quay();
+        quay.setId(10L);
+        quay.setVersion("123");
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setId(11L);
+        stopPlace.setVersion("321");
+
+        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        pathLink.setId(123L);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+
+        assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
+        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
+
+        assertThat(netexPathLink.getFrom().getPlaceRef().getVersion()).isEqualTo(quay.getVersion());
+        assertThat(netexPathLink.getTo().getPlaceRef().getVersion()).isEqualTo(stopPlace.getVersion());
+
+    }
+
     private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
         assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
         assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
