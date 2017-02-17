@@ -8,6 +8,8 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -41,6 +43,10 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         PathLink netexPathLink = new PathLink()
                 .withId("NRI:ConnectionLink:762130479_762130479")
                 .withVersion("1")
+                .withAllowedUse(PathDirectionEnumeration.TWO_WAY)
+//                .withTransferDuration(new TransferDurationStructure()
+//                        .withDefaultDuration(DatatypeFactory. {
+//                        }))
                 .withFrom(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
@@ -63,6 +69,7 @@ public class PathLinkImportTest extends CommonSpringBootTest {
 
         List<PathLink> result = publicationDeliveryTestHelper.extractPathLinks(response);
         assertThat(result).as("Expecting path link in return").hasSize(1);
+        assertThat(result.get(0).getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
 
 
     }
