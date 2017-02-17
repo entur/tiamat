@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,10 @@ public class PublicationDeliveryTestHelper {
         return publicationDelivery;
     }
 
+    public void addPathLinks(PublicationDeliveryStructure publicationDeliveryStructure, PathLink... pathLink) {
+        findSiteFrame(publicationDeliveryStructure)
+                .withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLink));
+    }
 
     public void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
         assertThat(object).isNotNull();
@@ -79,14 +85,18 @@ public class PublicationDeliveryTestHelper {
         assertThat(originalIdString).isEqualTo(expectedId);
     }
 
-    public List<StopPlace> extractStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return  publicationDeliveryStructure.getDataObjects()
-                .getCompositeFrameOrCommonFrame()
-                .stream()
-                .map(JAXBElement::getValue)
-                .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
-                .collect(toList());
+    public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
+        return findSiteFrame(publicationDeliveryStructure).getStopPlaces().getStopPlace();
+    }
+
+    public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
+
+        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getPathLink() != null) {
+            return siteFrame.getPathLinks().getPathLink();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public List<Quay> extractQuays(StopPlace stopPlace) {
@@ -153,5 +163,30 @@ public class PublicationDeliveryTestHelper {
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
         return publicationDeliveryResource.receivePublicationDelivery(inputStream);
+    }
+
+    public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {
+
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<SiteFrame> optionalSiteframe = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof SiteFrame)
+                .map(element -> (SiteFrame) element.getValue())
+                .findFirst();
+
+        if (optionalSiteframe.isPresent()) {
+            return optionalSiteframe.get();
+        }
+
+        return compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(compositeFrame -> compositeFrame.getFrames())
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
+                .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
+                .findAny().get();
     }
 }

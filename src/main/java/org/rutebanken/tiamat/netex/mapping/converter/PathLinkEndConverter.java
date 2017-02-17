@@ -99,7 +99,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
         Optional<AddressablePlace> optionalPlace = getPlace(tiamatPathLinkEnd);
         Optional<SiteEntrance> optionalSiteEntrance = Optional.ofNullable(tiamatPathLinkEnd.getEntrance());
         if(optionalPlace.isPresent()) {
-            PlaceRef placeRef = new PlaceRef();
+            PlaceRefStructure placeRef = new PlaceRefStructure();
             setRefValues(placeRef, optionalPlace.get());
             netexPathLinkEnd.setPlaceRef(placeRef);
         } else if (optionalSiteEntrance.isPresent()){

@@ -62,7 +62,7 @@ public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
 
 
-        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlace(response);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
@@ -120,7 +120,7 @@ public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlace(response);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place twice").hasSize(1);
         String importedIds = result.get(0).getKeyList().getKeyValue()
