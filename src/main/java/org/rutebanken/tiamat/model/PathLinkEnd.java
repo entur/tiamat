@@ -1,11 +1,14 @@
 package org.rutebanken.tiamat.model;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
 
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLinkEnd {
 
     @Id

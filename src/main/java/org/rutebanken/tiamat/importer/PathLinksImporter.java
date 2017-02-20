@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,12 +43,17 @@ public class PathLinksImporter {
         return pathLinks.stream()
                 .peek(pathLink -> logger.debug("Importing path link {}", pathLink))
                 .map(pathLink -> {
-                    Optional<PathLink> existingPathLink = findExistingPathLinkIfPresent(pathLink);
-                    if(existingPathLink.isPresent()) {
-                        keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existingPathLink.get());
-                        return existingPathLink.get();
+                    Optional<PathLink> optionalPathLink = findExistingPathLinkIfPresent(pathLink);
+                    if(optionalPathLink.isPresent()) {
+                        PathLink existing = optionalPathLink.get();
+                        boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing));
+                        if(changed) {
+                            existing.setChanged(ZonedDateTime.now());
+                        }
+                        return existing;
                     } else {
                         logger.debug("No existing path link. Using incoming {}", pathLink);
+                        pathLink.setCreated(ZonedDateTime.now());
                         return pathLink;
                     }
                 })
