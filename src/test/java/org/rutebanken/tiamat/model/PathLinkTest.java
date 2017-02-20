@@ -24,8 +24,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Transactional
 public class PathLinkTest extends CommonSpringBootTest {
 
     @Autowired
@@ -135,6 +139,19 @@ public class PathLinkTest extends CommonSpringBootTest {
         assertThat(actual.getLineString()).isNotNull();
         assertThat(actual.getLineString().getCoordinates()).isEqualTo(coordinates);
 
+    }
+
+    @Test
+    public void testKeyValueStructure() throws Exception {
+        PathLink pathLink = new PathLink();
+        List<String> ids = Arrays.asList("OPP:PathLink:123123", "TEL:PathLink:3251321");
+        Value value = new Value(ids);
+        pathLink.getKeyValues().put("ORIGINAL_ID", value);
+
+        pathLinkRepository.save(pathLink);
+        PathLink actual = pathLinkRepository.findOne(pathLink.getId());
+
+        assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems().containsAll(ids));
     }
 
     private StopPlace createAndSaveStop(String name) {
