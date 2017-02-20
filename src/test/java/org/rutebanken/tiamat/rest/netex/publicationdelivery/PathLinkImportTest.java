@@ -45,13 +45,14 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                                 .withLatitude(new BigDecimal("9.6"))
                                 .withLongitude(new BigDecimal("76"))));
 
+        Duration duration = datatypeFactory.newDuration(10000);
 
         PathLink netexPathLink = new PathLink()
                 .withId("NRI:ConnectionLink:762130479_762130479")
                 .withVersion("1")
                 .withAllowedUse(PathDirectionEnumeration.TWO_WAY)
                 .withTransferDuration(new TransferDurationStructure()
-                        .withDefaultDuration(datatypeFactory.newDuration(10000)))
+                        .withDefaultDuration(duration))
                 .withFrom(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
@@ -78,6 +79,6 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         assertThat(result.get(0).getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
         assertThat(result.get(0).getFrom().getPlaceRef().getNameOfMemberClass()).isEqualTo(fromStopPlace.getClass().getSimpleName());
         assertThat(result.get(0).getTo().getPlaceRef().getNameOfMemberClass()).isEqualTo(toStopPlace.getClass().getSimpleName());
-
+        assertThat(result.get(0).getTransferDuration().getDefaultDuration()).isEqualTo(duration);
     }
 }
