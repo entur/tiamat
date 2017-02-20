@@ -20,17 +20,17 @@ import javax.xml.bind.annotation.XmlValue;
 
 
 /**
- * posList instances (and other instances with the content model specified by DirectPositionListType) hold the coordinates for a sequence of direct positions within the same coordinate reference system (CRS).
+ * posList instances (and other instances with the content model specified by DeprecatedDirectPositionListType) hold the coordinates for a sequence of direct positions within the same coordinate reference system (CRS).
  * if no srsName attribute is given, the CRS shall be specified as part of the larger context this geometry element is part of, typically a geometric object like a point, curve, etc. 
  * The optional attribute count specifies the number of direct positions in the list. If the attribute count is present then the attribute srsDimension shall be present, too.
  * The number of entries in the list is equal to the product of the dimensionality of the coordinate reference system (i.e. it is a derived value of the coordinate reference system definition) and the number of direct positions.
  * 
- * <p>Java class for DirectPositionListType complex type.
+ * <p>Java class for DeprecatedDirectPositionListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="DirectPositionListType">
+ * &lt;complexType name="DeprecatedDirectPositionListType">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.opengis.net/gml/3.2>doubleList">
  *       &lt;attGroup ref="{http://www.opengis.net/gml/3.2}SRSReferenceGroup"/>
@@ -43,10 +43,11 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "DirectPositionListType", propOrder = {
+@XmlType(name = "DeprecatedDirectPositionListType", propOrder = {
     "value"
 })
-public class DirectPositionListType {
+@Deprecated
+public class DeprecatedDirectPositionListType {
 
     @XmlValue
     protected List<Double> value;

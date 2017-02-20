@@ -1,9 +1,11 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import net.opengis.gml._3.DeprecatedDirectPositionListType;
+import net.opengis.gml._3.DirectPositionListType;
+import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PlaceRef;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +49,22 @@ public class PathLinkImportTest extends CommonSpringBootTest {
 
         Duration duration = datatypeFactory.newDuration(10000);
 
+        LineStringType lineStringType = new LineStringType()
+                .withId("LineString")
+                .withPosList(new DirectPositionListType()
+                        .withSrsName("WGS84")
+                        .withValue(9.1,
+                                71.1,
+                                9.5,
+                                74.1));
+
         PathLink netexPathLink = new PathLink()
                 .withId("NRI:ConnectionLink:762130479_762130479")
                 .withVersion("1")
                 .withAllowedUse(PathDirectionEnumeration.TWO_WAY)
                 .withTransferDuration(new TransferDurationStructure()
                         .withDefaultDuration(duration))
+                .withLineString(lineStringType)
                 .withFrom(
                         new PathLinkEndStructure()
                                 .withPlaceRef(

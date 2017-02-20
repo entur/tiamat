@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-import net.opengis.gml._3.LineStringType;
+import net.opengis.gml._3.DeprecatedLineStringType;
 
 import java.math.BigDecimal;
 
@@ -11,7 +11,7 @@ public class LinkSequenceProjection_VersionStructure
     protected LinkSequenceRefStructure projectedLinkSequenceRef;
     protected BigDecimal distance;
     protected PointRefs_RelStructure points;
-    protected LineStringType lineString;
+    protected DeprecatedLineStringType lineString;
 
     public LinkSequenceRefStructure getProjectedLinkSequenceRef() {
         return projectedLinkSequenceRef;
@@ -37,11 +37,11 @@ public class LinkSequenceProjection_VersionStructure
         this.points = value;
     }
 
-    public LineStringType getLineString() {
+    public DeprecatedLineStringType getLineString() {
         return lineString;
     }
 
-    public void setLineString(LineStringType value) {
+    public void setLineString(DeprecatedLineStringType value) {
         this.lineString = value;
     }
 

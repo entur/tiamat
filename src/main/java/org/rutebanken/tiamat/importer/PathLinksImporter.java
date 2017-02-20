@@ -46,7 +46,7 @@ public class PathLinksImporter {
                     Optional<PathLink> optionalPathLink = findExistingPathLinkIfPresent(pathLink);
                     if(optionalPathLink.isPresent()) {
                         PathLink existing = optionalPathLink.get();
-                        boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing));
+                        boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing);
                         if(changed) {
                             existing.setChanged(ZonedDateTime.now());
                         }
