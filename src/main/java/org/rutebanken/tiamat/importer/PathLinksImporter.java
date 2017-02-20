@@ -39,8 +39,6 @@ public class PathLinksImporter {
 
     public List<org.rutebanken.netex.model.PathLink> importPathLinks(List<PathLink> pathLinks) {
 
-
-
         return pathLinks.stream()
                 .peek(pathLink -> logger.debug("Importing path link {}", pathLink))
                 .map(pathLink -> {

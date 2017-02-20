@@ -8,6 +8,7 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import java.math.BigDecimal;
@@ -19,6 +20,11 @@ public class PathLinkImportTest extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
+
+    private DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
+
+    public PathLinkImportTest() throws DatatypeConfigurationException {
+    }
 
     @Test
     public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
@@ -44,9 +50,8 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                 .withId("NRI:ConnectionLink:762130479_762130479")
                 .withVersion("1")
                 .withAllowedUse(PathDirectionEnumeration.TWO_WAY)
-//                .withTransferDuration(new TransferDurationStructure()
-//                        .withDefaultDuration(DatatypeFactory. {
-//                        }))
+                .withTransferDuration(new TransferDurationStructure()
+                        .withDefaultDuration(datatypeFactory.newDuration(10000)))
                 .withFrom(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
