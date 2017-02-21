@@ -29,7 +29,7 @@ public class PathLinkImportTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
+    public void publicationDeliveryWithPathLink() throws Exception {
 
         StopPlace fromStopPlace = new StopPlace()
                 .withId("RUT:StopPlace:123123")
@@ -52,7 +52,6 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         LineStringType lineStringType = new LineStringType()
                 .withId("LineString")
                 .withPosList(new DirectPositionListType()
-                        .withSrsName("WGS84")
                         .withValue(9.1,
                                 71.1,
                                 9.5,
@@ -79,8 +78,6 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                                                 .withVersion("1")
                                                 .withNameOfMemberClass(toStopPlace.getClass().getSimpleName())));
 
-
-
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(fromStopPlace, toStopPlace);
         publicationDeliveryTestHelper.addPathLinks(publicationDelivery, netexPathLink);
 
@@ -88,9 +85,14 @@ public class PathLinkImportTest extends CommonSpringBootTest {
 
         List<PathLink> result = publicationDeliveryTestHelper.extractPathLinks(response);
         assertThat(result).as("Expecting path link in return").hasSize(1);
-        assertThat(result.get(0).getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
-        assertThat(result.get(0).getFrom().getPlaceRef().getNameOfMemberClass()).isEqualTo(fromStopPlace.getClass().getSimpleName());
-        assertThat(result.get(0).getTo().getPlaceRef().getNameOfMemberClass()).isEqualTo(toStopPlace.getClass().getSimpleName());
-        assertThat(result.get(0).getTransferDuration().getDefaultDuration()).isEqualTo(duration);
+        PathLink importedPathLink = result.get(0);
+        assertThat(importedPathLink.getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
+        assertThat(importedPathLink.getFrom().getPlaceRef().getNameOfMemberClass()).isEqualTo(fromStopPlace.getClass().getSimpleName());
+        assertThat(importedPathLink.getTo().getPlaceRef().getNameOfMemberClass()).isEqualTo(toStopPlace.getClass().getSimpleName());
+        assertThat(importedPathLink.getTransferDuration().getDefaultDuration()).isEqualTo(duration);
+
+        assertThat(importedPathLink.getLineString()).isNotNull();
+        assertThat(importedPathLink.getLineString().getPosList()).isNotNull();
+        assertThat(importedPathLink.getLineString().getPosList().getValue()).hasSize(4);
     }
 }
