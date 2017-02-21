@@ -8,12 +8,14 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +54,7 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         LineStringType lineStringType = new LineStringType()
                 .withId("LineString")
                 .withPosList(new DirectPositionListType()
+                        .withSrsDimension(BigInteger.valueOf(new GeometryFactoryConfig().geometryFactory().getSRID()))
                         .withValue(9.1,
                                 71.1,
                                 9.5,

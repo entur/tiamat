@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.util.List;
 
-import static java.lang.Math.abs;
-
 @Component
 public class LineStringConverter extends BidirectionalConverter<LineStringType, LineString> {
 
@@ -35,12 +32,10 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
     @Override
     public LineString convertTo(LineStringType lineStringType, Type<LineString> type) {
 
+
+
         if(lineStringType.getPosList() != null) {
-            if(lineStringType.getPosList().getSrsDimension() == null || lineStringType.getPosList().getSrsDimension().intValue() != geometryFactory.getSRID()) {
-                throw new NetexMappingException("Cannot parse position list with SRS ID: "
-                        + lineStringType.getPosList().getSrsDimension()
-                        + " Expected " + geometryFactory.getSRID());
-            }
+            checkSrsDimension(lineStringType);
 
             List<Double> values = lineStringType.getPosList().getValue();
             Coordinate[] coordinates = new Coordinate[values.size()/2];
@@ -58,6 +53,18 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
 
         return null;
     }
+
+    private void checkSrsDimension(LineStringType lineStringType) {
+        boolean lineStringContains = lineStringType.getSrsDimension() != null && lineStringType.getSrsDimension().intValue() == geometryFactory.getSRID();
+        boolean posListContains = lineStringType.getPosList() != null && lineStringType.getPosList().getSrsDimension().intValue() == geometryFactory.getSRID();
+
+        if (!lineStringContains && !posListContains) {
+            throw new NetexMappingException("SRS ID is not provided or has the wrong value for LineStringType or PosList: "
+                    + " Expected " + geometryFactory.getSRID());
+        }
+    }
+
+
 
     @Override
     public LineStringType convertFrom(LineString lineString, Type<LineStringType> type) {
