@@ -11,6 +11,8 @@ import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
+import java.math.BigInteger;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class LineStringConverterTest {
@@ -44,11 +46,8 @@ public class LineStringConverterTest {
         LineStringType lineStringType = new LineStringType()
                 .withId("LineString")
                 .withPosList(new DirectPositionListType()
-                        .withSrsName("WGS84")
-                        .withValue(9.1,
-                                71.1,
-                                9.5,
-                                74.1));
+                        .withSrsDimension(BigInteger.valueOf(geometryFactory.getSRID()))
+                        .withValue(9.1, 71.1, 9.5, 4.1));
 
         LineString lineString = lineStringConverter.convertTo(lineStringType, new TypeBuilder<LineString>(){}.build());
         assertThat(lineString).isNotNull();
