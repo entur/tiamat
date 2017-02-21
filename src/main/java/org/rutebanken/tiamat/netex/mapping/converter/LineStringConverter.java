@@ -32,8 +32,6 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
     @Override
     public LineString convertTo(LineStringType lineStringType, Type<LineString> type) {
 
-
-
         if(lineStringType.getPosList() != null) {
             checkSrsDimension(lineStringType);
 
@@ -64,8 +62,6 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
         }
     }
 
-
-
     @Override
     public LineStringType convertFrom(LineString lineString, Type<LineStringType> type) {
 
@@ -83,7 +79,8 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
             directPositionListType.setCount(BigInteger.valueOf(positions.size()));
             directPositionListType.setSrsDimension(BigInteger.valueOf(lineString.getSRID()));
         }
-        lineStringType.withPosList(directPositionListType);
+        lineStringType.setPosList(directPositionListType);
+        lineStringType.setId(LineString.class.getSimpleName());
 
         return lineStringType;
     }

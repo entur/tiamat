@@ -36,8 +36,8 @@ public class LineStringConverterTest {
         assertThat(gisLineString).isNotNull();
         assertThat(gisLineString.getPosList().getCount().intValue()).isEqualTo(4);
         assertThat(gisLineString.getPosList().getSrsDimension().intValue()).isEqualTo(geometryFactory.getSRID());
+        assertThat(gisLineString.getId()).isNotEmpty();
         // assertThat(gisLineString.getPosList().getSrsName()).isEqualTo("WGS84");
-
     }
 
     @Test
