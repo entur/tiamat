@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -34,4 +35,18 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
         assertThat(actualNetexPathLink.getTo().getPlaceRef()).isNotNull();
     }
 
+    @Test
+    public void shouldNotSaveDuplicatePathLinks() throws Exception {
+        PathLink pathLink = new PathLink();
+        pathLink.getOriginalIds().add("originalID");
+        List<org.rutebanken.netex.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
+
+        PathLink pathLink2 = new PathLink();
+        pathLink2.getOriginalIds().add("originalID");
+        List<org.rutebanken.netex.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2));
+
+        assertThat(firsts).hasSize(1);
+        assertThat(seconds).hasSize(1);
+        assertThat(firsts.get(0).getId()).isEqualTo(seconds.get(0).getId());
+    }
 }

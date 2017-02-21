@@ -67,10 +67,10 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlace = stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
-        BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
-        org.rutebanken.netex.model.StopPlace actual = stopPlaces.take();
-        assertThat(actual.getId()).contains(String.valueOf(stopPlace.getId()));
-        org.rutebanken.netex.model.StopPlace poison = stopPlaces.take();
+        BlockingQueue<StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
+        StopPlace actual = stopPlaces.take();
+        assertThat(actual.getId()).isEqualTo(stopPlace.getId());
+        StopPlace poison = stopPlaces.take();
         assertThat(poison.getId()).isEqualTo(StopPlaceRepositoryImpl.POISON_PILL.getId());
     }
 

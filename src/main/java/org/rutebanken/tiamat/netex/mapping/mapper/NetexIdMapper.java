@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
@@ -19,8 +21,6 @@ public class NetexIdMapper {
 
     public static final String ORIGINAL_ID_KEY = "imported-id";
 
-    private KeyValueListAppender keyValueListAppender = new KeyValueListAppender();
-
     // TODO: make it configurable
     public static final String NSR = "NSR";
 
@@ -29,13 +29,18 @@ public class NetexIdMapper {
             logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
-            netexEntity.setId(getNetexId(internalEntity, internalEntity.getId()));
+            netexEntity.setId(getNetexId(internalEntity));
         }
     }
 
     public static String getNetexId(EntityStructure internalEntity, Long id) {
         return "NSR:" + determineIdType(internalEntity) +":" + id;
     }
+
+    public static String getNetexId(EntityStructure internalEntity) {
+        return getNetexId(internalEntity, internalEntity.getId());
+    }
+
 
     public static String getNetexId(String idType, String id) {
         return "NSR:" + idType +":" + id;
@@ -94,8 +99,25 @@ public class NetexIdMapper {
      * @return long value
      */
     public static long getTiamatId(String netexId) {
-        Long longValue = Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
-        return longValue;
+        try {
+            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
+        }
+
+    }
+
+    private static boolean isInternalTiamatId(String netexId) {
+        return netexId.contains(NetexIdMapper.NSR);
+    }
+
+    public static Optional<Long> getOptionalTiamatId(String netexId) {
+        if (isInternalTiamatId(netexId)) {
+            logger.debug("Detected tiamat ID from {}", netexId);
+            return Optional.of(getTiamatId(netexId));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static String determineIdType(EntityStructure entityStructure) {

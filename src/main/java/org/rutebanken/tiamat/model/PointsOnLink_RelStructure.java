@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-import net.opengis.gml._3.LineStringType;
+import net.opengis.gml._3.DeprecatedLineStringType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class PointsOnLink_RelStructure
         extends StrictContainmentAggregationStructure {
 
     protected List<PointOnLink> pointOnLink;
-    protected LineStringType lineString;
+    protected DeprecatedLineStringType lineString;
 
     public List<PointOnLink> getPointOnLink() {
         if (pointOnLink == null) {
@@ -19,11 +19,11 @@ public class PointsOnLink_RelStructure
         return this.pointOnLink;
     }
 
-    public LineStringType getLineString() {
+    public DeprecatedLineStringType getLineString() {
         return lineString;
     }
 
-    public void setLineString(LineStringType value) {
+    public void setLineString(DeprecatedLineStringType value) {
         this.lineString = value;
     }
 

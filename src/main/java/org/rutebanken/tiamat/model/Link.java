@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.LineString;
-import net.opengis.gml._3.LineStringType;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;

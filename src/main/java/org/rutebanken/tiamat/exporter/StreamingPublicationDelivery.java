@@ -2,13 +2,14 @@ package org.rutebanken.tiamat.exporter;
 
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -24,6 +25,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
  * Stream data objects inside already serialized publication delivery.
  * To be able to export many stop places wihtout keeping them all in memory.
  */
+@Transactional
 @Component
 public class StreamingPublicationDelivery {
 
@@ -61,7 +63,7 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
         stream(publicationDeliveryStructureXml, stopPlacesQueue, outputStream);
     }
@@ -79,7 +81,7 @@ public class StreamingPublicationDelivery {
      * In order to not hold all stop places in memory at once, we need to marshal stop places from a queue.
      * Requires a publication delivery xml that contains newlines.
      */
-    public void stream(String publicationDeliveryStructureXml, BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(String publicationDeliveryStructureXml, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
         BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
@@ -126,7 +128,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    public void marshalStops(BlockingQueue<org.rutebanken.netex.model.StopPlace> stopPlacesQueue,
+    public void marshalStops(BlockingQueue<StopPlace> stopPlacesQueue,
                              BufferedWriter bufferedWriter,
                              Marshaller stopPlaceMarshaller,
                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
@@ -134,7 +136,7 @@ public class StreamingPublicationDelivery {
 
         int count = 0;
         while (true) {
-            org.rutebanken.netex.model.StopPlace stopPlace = stopPlacesQueue.take();
+            StopPlace stopPlace = stopPlacesQueue.take();
 
             if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
                 logger.info("Got poison pill from stop place queue. Finished marshaling {} stop places.", count);
@@ -148,7 +150,8 @@ public class StreamingPublicationDelivery {
 
             ++count;
             logger.debug("Marshalling stop place {}: {}", count, stopPlace);
-            JAXBElement<StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(stopPlace);
+            org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+            JAXBElement<org.rutebanken.netex.model.StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
             stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
             bufferedWriter.write(lineSeparator);
         }

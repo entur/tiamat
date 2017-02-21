@@ -3,12 +3,7 @@ package org.rutebanken.tiamat.netex.mapping;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureIdMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
@@ -62,6 +57,15 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
+                .byDefault()
+                .register();
+
+
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
                 .customize(dataManagedObjectStructureIdMapper)
@@ -94,7 +98,7 @@ public class NetexMapper {
         converters.add(new OffsetDateTimeZonedDateTimeConverter());
         converters.add(new SimplePointVersionStructureConverter());
         converters.add(new KeyValuesToKeyListConverter());
-        converters.add(new PathLinkConverter());
+        converters.add(new PathLinkEndConverter());
         return converters;
     }
 

@@ -56,7 +56,7 @@ public class LinearRingType
         @XmlElement(name = "pointProperty", type = PointPropertyType.class)
     })
     protected List<Object> posOrPointProperty;
-    protected DirectPositionListType posList;
+    protected DeprecatedDirectPositionListType posList;
 
     /**
      * Gets the value of the posOrPointProperty property.
@@ -93,10 +93,10 @@ public class LinearRingType
      * 
      * @return
      *     possible object is
-     *     {@link DirectPositionListType }
+     *     {@link DeprecatedDirectPositionListType }
      *     
      */
-    public DirectPositionListType getPosList() {
+    public DeprecatedDirectPositionListType getPosList() {
         return posList;
     }
 
@@ -105,10 +105,10 @@ public class LinearRingType
      * 
      * @param value
      *     allowed object is
-     *     {@link DirectPositionListType }
+     *     {@link DeprecatedDirectPositionListType }
      *     
      */
-    public void setPosList(DirectPositionListType value) {
+    public void setPosList(DeprecatedDirectPositionListType value) {
         this.posList = value;
     }
 

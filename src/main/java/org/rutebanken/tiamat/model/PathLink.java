@@ -8,8 +8,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLink extends Link {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

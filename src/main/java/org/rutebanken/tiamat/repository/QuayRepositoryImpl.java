@@ -12,13 +12,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import org.rutebanken.tiamat.model.Quay;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom
@@ -64,4 +64,30 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 		return new PageImpl<>(quays, pageable, quays.size());
 	}
 
+	@Override
+	public Long findByKeyValue(String key, Set<String> values) {
+
+		Query query = entityManager.createNativeQuery("SELECT quay_id " +
+				"FROM quay_key_values qkv " +
+					"INNER JOIN value_items v " +
+						"ON qkv.key_values_id = v.value_id " +
+				"WHERE  qkv.key_values_key = :key " +
+					"AND v.items IN ( :values ) ");
+
+		query.setParameter("key", key);
+		query.setParameter("values", values);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<BigInteger> results = query.getResultList();
+			if(results.isEmpty()) {
+				return null;
+			} else {
+				return results.get(0).longValue();
+			}
+		} catch (NoResultException noResultException) {
+			return null;
+		}
+	}
+	
 }

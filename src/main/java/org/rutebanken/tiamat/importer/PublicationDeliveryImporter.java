@@ -28,7 +28,7 @@ public class PublicationDeliveryImporter {
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
     private static final Object STOP_PLACE_IMPORT_LOCK = new Object();
 
-    private final TransactionalStopPlacesImporter siteFrameImporter;
+    private final TransactionalStopPlacesImporter transactionalStopPlacesImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
     private final StopPlacePreSteps stopPlacePreSteps;
@@ -37,9 +37,9 @@ public class PublicationDeliveryImporter {
 
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
-                                       TransactionalStopPlacesImporter siteFrameImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter) {
+                                       TransactionalStopPlacesImporter transactionalStopPlacesImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter) {
         this.netexMapper = netexMapper;
-        this.siteFrameImporter = siteFrameImporter;
+        this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
         this.pathLinksImporter = pathLinksImporter;
@@ -74,7 +74,7 @@ public class PublicationDeliveryImporter {
 
             Collection<org.rutebanken.netex.model.StopPlace> stopPlaces;
             synchronized (STOP_PLACE_IMPORT_LOCK) {
-                 stopPlaces = siteFrameImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
+                 stopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
             }
             logger.info("Saved {} stop places", stopPlacesCreated);
 
@@ -84,11 +84,14 @@ public class PublicationDeliveryImporter {
                     new StopPlacesInFrame_RelStructure()
                             .withStopPlace(stopPlaces));
 
-            /*
-            List<PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
-            List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
-            responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
-            */
+
+            if(netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
+                List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
+                tiamatPathLinks.forEach(tiamatPathLink -> logger.debug("Received path link: {}", tiamatPathLink));
+
+                List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
+                responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
+            }
 
 
             return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);

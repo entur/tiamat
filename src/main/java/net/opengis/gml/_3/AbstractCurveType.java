@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AbstractCurveType")
 @XmlSeeAlso({
-    LineStringType.class
+    DeprecatedLineStringType.class
 })
 public abstract class AbstractCurveType
     extends AbstractGeometricPrimitiveType

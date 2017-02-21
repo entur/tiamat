@@ -171,7 +171,7 @@ class StopPlaceUpdater implements DataFetcher {
         return isQuayUpdated;
     }
 
-    private boolean populate(Map input, SiteElement_VersionStructure entity) {
+    private boolean populate(Map input, SiteElement entity) {
         boolean isUpdated = false;
 
         if (input.get(NAME) != null) {

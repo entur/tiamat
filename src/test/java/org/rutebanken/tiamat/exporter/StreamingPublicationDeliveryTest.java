@@ -3,7 +3,8 @@ package org.rutebanken.tiamat.exporter;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
@@ -39,8 +40,8 @@ public class StreamingPublicationDeliveryTest {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        StopPlace stopPlace = new StopPlace().withName(new MultilingualString().withValue("stop place in publication delivery"));
-        stopPlace.setId("10");
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
+        stopPlace.setId(10L);
 
         BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
         stopPlaces.put(stopPlace);
@@ -82,8 +83,8 @@ public class StreamingPublicationDeliveryTest {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        StopPlace stopPlace = new StopPlace().withName(new MultilingualString().withValue("stop place in publication delivery"));
-        stopPlace.setId("10");
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
+        stopPlace.setId(10L);
 
         BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
         stopPlaces.put(stopPlace);
@@ -127,8 +128,8 @@ public class StreamingPublicationDeliveryTest {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        StopPlace stopPlace = new StopPlace().withName(new MultilingualString().withValue("stop place in publication delivery"));
-        stopPlace.setId("16");
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
+        stopPlace.setId(16L);
         stopPlace.setVersion("2");
 
         BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);

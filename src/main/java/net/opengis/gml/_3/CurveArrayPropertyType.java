@@ -70,7 +70,7 @@ public class CurveArrayPropertyType {
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link JAXBElement }{@code <}{@link AbstractCurveType }{@code >}
-     * {@link JAXBElement }{@code <}{@link LineStringType }{@code >}
+     * {@link JAXBElement }{@code <}{@link DeprecatedLineStringType }{@code >}
      * 
      * 
      */
