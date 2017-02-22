@@ -20,7 +20,6 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-
 import static org.rutebanken.tiamat.rest.graphql.scalars.Scalars.GraphQLGeoJSONCoordinates;
 
 @Component
@@ -41,6 +40,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher pathLinkFetcher;
+
+    @Autowired
+    DataFetcher pathLinkUpdater;
 
     @Autowired
     DataFetcher topographicPlaceFetcher;
@@ -381,6 +383,10 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType topographicPlaceInputObjectType = createTopographicPlaceInputObjectType(embeddableMultiLingualStringInputObjectType);
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList, topographicPlaceInputObjectType, quayInputObjectType);
 
+        GraphQLInputObjectType transferDurationInputObjectType = createTransferDurationInputObjectType();
+        GraphQLInputObjectType pathLinkObjectInputType = createPathLinkInputObjectType(quayInputObjectType, transferDurationInputObjectType);
+
+
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
                 .description("Create and edit stopplaces")
@@ -390,11 +396,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing StopPlace")
                         .argument(GraphQLArgument.newArgument().name(OUTPUT_TYPE_STOPPLACE).type(stopPlaceInputObjectType))
                         .dataFetcher(stopPlaceUpdater))
+                .field(newFieldDefinition()
+                        .type(new GraphQLList(pathLinkObjectType))
+                        .name("mutatePathlink")
+                        .description("Create new or update existing PathLink")
+                        .argument(GraphQLArgument.newArgument().name("PathLink").type(pathLinkObjectInputType))
+                        .dataFetcher(pathLinkUpdater))
                 .build();
-
-        GraphQLInputObjectType transferDurationInputObjectType = createTransferDurationInputObjectType();
-        GraphQLInputObjectType pathLinkObjectInputType = createPathLinkInputObjectType(quayInputObjectType, transferDurationInputObjectType);
-
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
