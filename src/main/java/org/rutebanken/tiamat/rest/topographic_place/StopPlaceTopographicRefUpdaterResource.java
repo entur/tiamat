@@ -75,6 +75,7 @@ public class StopPlaceTopographicRefUpdaterResource {
                             logger.info("Stop Place does not have reference to topographic place: {}", stopPlace);
                             try {
                                 countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
+                                stopPlaceRepository.save(stopPlace);
                                 updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
                             } catch (IOException e) {
                                 logger.info("Issue looking up county and municipality for stop {}", stopPlace, e);
@@ -82,6 +83,9 @@ public class StopPlaceTopographicRefUpdaterResource {
                         }
                     } catch (InterruptedException e) {
                         logger.info("Interrupted getting stop place from queue. Done.");
+                        executorService.shutdownNow();
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             });
