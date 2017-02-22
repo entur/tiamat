@@ -32,7 +32,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
-    private GeometryFactory geometryFactory;
+    protected GeometryFactory geometryFactory;
 
     @Value("${local.server.port}")
     private int port;
@@ -196,7 +196,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 .body("data.stopPlace", Matchers.hasSize(0));
     }
 
-    private ValidatableResponse executeGraphQL(String graphQlJsonQuery) {
+    protected ValidatableResponse executeGraphQL(String graphQlJsonQuery) {
         return given()
                 .port(port)
                 .contentType(ContentType.JSON)

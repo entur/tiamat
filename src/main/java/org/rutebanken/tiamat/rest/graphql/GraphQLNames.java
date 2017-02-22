@@ -74,7 +74,7 @@ public class GraphQLNames {
     static final String FIND_STOPPLACE = "stopPlace";
     static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
+    static final String FIND_PATH_LINK = "pathLink";
 
     static final String MUTATE_STOPPLACE = "mutateStopPlace";
-
 }

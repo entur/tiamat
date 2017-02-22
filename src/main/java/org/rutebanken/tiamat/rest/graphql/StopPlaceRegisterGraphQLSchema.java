@@ -407,7 +407,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .description("Searches for TopographicPlaces by name."))
                         .dataFetcher(topographicPlaceFetcher))
                 .field(newFieldDefinition()
-                        .name("PathLink")
+                        .name(FIND_PATH_LINK)
                         .type(new GraphQLList(pathLinkObjectType))
                         .description("Find path links")
                         .argument(GraphQLArgument.newArgument()
