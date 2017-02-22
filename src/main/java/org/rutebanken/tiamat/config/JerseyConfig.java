@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
 import org.rutebanken.tiamat.rest.dto.DtoTopographicPlaceResource;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryResource;
+import org.rutebanken.tiamat.rest.topographic_place.StopPlaceTopographicRefUpdaterResource;
 import org.springframework.context.annotation.Configuration;
 
 import javax.ws.rs.ApplicationPath;
@@ -21,5 +22,6 @@ public class JerseyConfig extends ResourceConfig {
         register(DtoTopographicPlaceResource.class);
         register(PublicationDeliveryResource.class);
         register(GraphQLResource.class);
+        register(StopPlaceTopographicRefUpdaterResource.class);
     }
 }
