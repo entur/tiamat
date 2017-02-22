@@ -532,12 +532,20 @@ public class StopPlaceRegisterGraphQLSchema {
 
     private GraphQLInputObjectType createPathLinkInputObjectType(GraphQLInputObjectType quayObjectInputType, GraphQLInputObjectType transferDurationInputObjectType) {
 
+        GraphQLInputObjectType quayIdReferenceInputObjectType = GraphQLInputObjectType
+                .newInputObject()
+                .name(INPUT_TYPE_QUAY)
+                .field(newInputObjectField()
+                    .name(ID)
+                    .type(GraphQLString))
+                .build();
+
 
         GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()
                 .name("PathLinkEndInput")
                 .field(newInputObjectField()
                         .name("quay")
-                        .type(quayObjectInputType))
+                        .type(quayIdReferenceInputObjectType))
                 .build();
 
         GraphQLInputObjectType pathLinkInputObjectType = GraphQLInputObjectType.newInputObject()
