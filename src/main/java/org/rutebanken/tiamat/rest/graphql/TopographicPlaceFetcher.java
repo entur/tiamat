@@ -4,6 +4,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -27,8 +28,9 @@ class TopographicPlaceFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         Example<TopographicPlace> example = getTopographicPlaceExample(environment);
 
-        if (environment.getArgument(ID) != null) {
-            return Arrays.asList(topographicPlaceRepository.findOne(environment.<Long>getArgument(ID)));
+        String nsrId = environment.getArgument(ID);
+        if (nsrId != null) {
+            return Arrays.asList(topographicPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId)));
         }
         return topographicPlaceRepository.findAll(example);
 
