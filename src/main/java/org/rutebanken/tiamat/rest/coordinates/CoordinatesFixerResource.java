@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Transactional
@@ -40,9 +41,10 @@ public class CoordinatesFixerResource {
 
     @POST
     @Consumes("text/plain")
-    public Response fixCoordinates(InputStream inputStream) throws IOException {
+    public Set<String> fixCoordinates(InputStream inputStream) throws IOException {
 
         logger.info("Received request to fix coordinates");
+        Set<String> updatedStopPlaceIds = new HashSet<>();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -100,7 +102,7 @@ public class CoordinatesFixerResource {
                             }
 
                             logger.info("Saving stop place {}", stopPlace);
-
+                            updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
                             stopPlaceRepository.save(stopPlace);
 
                         } else {
@@ -115,7 +117,8 @@ public class CoordinatesFixerResource {
 
        }
 
-       return Response.ok("").build();
+       logger.info("Returning list of updated stop place IDs {}", updatedStopPlaceIds);
+       return updatedStopPlaceIds;
     }
 
 }
