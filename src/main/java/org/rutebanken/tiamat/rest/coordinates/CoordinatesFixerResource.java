@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Transactional
 @Component
@@ -38,15 +40,21 @@ public class CoordinatesFixerResource {
     @Autowired
     private GeometryFactory geometryFactory;
 
+    @Autowired
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
 
     @POST
     @Consumes("text/plain")
+    @Produces("application/json")
     public Set<String> fixCoordinates(InputStream inputStream) throws IOException {
 
         logger.info("Received request to fix coordinates");
         Set<String> updatedStopPlaceIds = new HashSet<>();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        AtomicInteger topographicPlacesCreated = new AtomicInteger();
 
         while(bufferedReader.ready()) {
 
@@ -69,9 +77,13 @@ public class CoordinatesFixerResource {
 
                 logger.info("Inspecting stop place: {}", stopPlace);
 
-                if(stopPlace.getCentroid() == null) {
+                boolean containsQuaysWithoutCoordinates =
+                        stopPlace.getQuays() == null ? false : stopPlace.getQuays().stream()
+                                .anyMatch(quay -> quay.getCentroid() == null);
 
-                    logger.info("Found stop place without centroid... {}", stopPlace);
+                if(stopPlace.getCentroid() == null || containsQuaysWithoutCoordinates) {
+
+                    logger.info("Found stop place or quay without centroid... {}", stopPlace);
 
                     Set<String> originalIds = stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
                     logger.info("Found original Ids for stop: {}", originalIds);
@@ -101,6 +113,12 @@ public class CoordinatesFixerResource {
                                 });
                             }
 
+                            try {
+                                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
+                            } catch (InterruptedException e) {
+                                logger.warn("Interruped while looking up count and municipality", e);
+                            }
+
                             logger.info("Saving stop place {}", stopPlace);
                             updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
                             stopPlaceRepository.save(stopPlace);
@@ -117,7 +135,7 @@ public class CoordinatesFixerResource {
 
        }
 
-       logger.info("Returning list of updated stop place IDs {}", updatedStopPlaceIds);
+       logger.info("Returning list of updated stop place IDs {}. Topographic places created: {}", updatedStopPlaceIds, topographicPlacesCreated);
        return updatedStopPlaceIds;
     }
 
