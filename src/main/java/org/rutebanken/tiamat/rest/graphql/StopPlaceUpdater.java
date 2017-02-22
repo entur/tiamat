@@ -190,12 +190,6 @@ class StopPlaceUpdater implements DataFetcher {
             entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
             isUpdated = true;
         }
-
-        if (input.get(LOCATION) != null) {
-            entity.setCentroid(createPoint((Map) input.get(LOCATION)));
-            isUpdated = true;
-        }
-
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(createGeoJsonPoint((Map) input.get(GEOMETRY)));
             isUpdated = true;
@@ -225,15 +219,6 @@ class StopPlaceUpdater implements DataFetcher {
 
     private EmbeddableMultilingualString getEmbeddableString(Map map) {
         return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
-    }
-
-    private Point createPoint(Map map) {
-        if (map.get(LONGITUDE) != null && map.get(LATITUDE) != null) {
-            Double lon = (Double) map.get(LONGITUDE);
-            Double lat = (Double) map.get(LATITUDE);
-            return geometryFactory.createPoint(new Coordinate(lon, lat));
-        }
-        return null;
     }
 
 }

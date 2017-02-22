@@ -9,7 +9,7 @@ import graphql.schema.GraphQLScalarType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Scalars {
+public class CustomScalars {
 
     public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", "List of coordinate-pairs as specified in GeoJSON-standard. \n" +
             " [[9.1234, 60.1234]] for type=\"Point\".\n" +
