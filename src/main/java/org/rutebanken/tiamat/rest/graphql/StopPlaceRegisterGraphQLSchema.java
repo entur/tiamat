@@ -40,6 +40,9 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher stopPlaceFetcher;
 
     @Autowired
+    DataFetcher pathLinkFetcher;
+
+    @Autowired
     DataFetcher topographicPlaceFetcher;
 
     @Autowired
@@ -409,7 +412,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Find path links")
                         .argument(GraphQLArgument.newArgument()
                                 .name(ID)
-                                .type(GraphQLString)))
+                                .type(GraphQLString))
+                        .dataFetcher(pathLinkFetcher))
                 .build();
 
         GraphQLInputObjectType embeddableMultiLingualStringInputObjectType = createEmbeddableMultiLingualStringInputObjectType();
@@ -462,14 +466,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(ID)
                         .type(GraphQLString)
-                        .dataFetcher(env -> {
-                            PathLink pathLink = (PathLink) env.getSource();
-                            if (pathLink != null) {
-                                return NetexIdMapper.getNetexId(new PathLink(), pathLink.getId());
-                            } else {
-                                return null;
-                            }
-                        }))
+                        .dataFetcher(env -> NetexIdMapper.getNetexId((EntityStructure) env.getSource())))
                 .field(newFieldDefinition()
                         .name("from")
                         .type(pathLinkEndObjecttype))
