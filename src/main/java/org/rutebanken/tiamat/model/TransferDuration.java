@@ -4,7 +4,7 @@ import javax.persistence.Transient;
 import java.time.Duration;
 
 
-public class TransferDurationStructure {
+public class TransferDuration {
 
     protected Duration defaultDuration;
 

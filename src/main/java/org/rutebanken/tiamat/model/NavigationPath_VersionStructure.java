@@ -13,7 +13,7 @@ public class NavigationPath_VersionStructure
     protected AccessibilityAssessment accessibilityAssessment;
     protected List<AccessModeEnumeration> accessModes;
     protected AccessSummaries_RelStructure summaries;
-    protected TransferDurationStructure transferDuration;
+    protected TransferDuration transferDuration;
     protected PublicUseEnumeration publicUse;
     protected CoveredEnumeration covered;
     protected GatedEnumeration gated;
@@ -66,11 +66,11 @@ public class NavigationPath_VersionStructure
         this.summaries = value;
     }
 
-    public TransferDurationStructure getTransferDuration() {
+    public TransferDuration getTransferDuration() {
         return transferDuration;
     }
 
-    public void setTransferDuration(TransferDurationStructure value) {
+    public void setTransferDuration(TransferDuration value) {
         this.transferDuration = value;
     }
 

@@ -19,7 +19,7 @@ public class PathLink extends Link {
     protected PathLinkEnd to;
 
     @Embedded
-    protected TransferDurationStructure transferDuration;
+    protected TransferDuration transferDuration;
 
     @Transient
     protected MultilingualStringEntity description;
@@ -253,11 +253,11 @@ public class PathLink extends Link {
         this.maximumFlowPerMinute = value;
     }
 
-    public TransferDurationStructure getTransferDuration() {
+    public TransferDuration getTransferDuration() {
         return transferDuration;
     }
 
-    public void setTransferDuration(TransferDurationStructure value) {
+    public void setTransferDuration(TransferDuration value) {
         this.transferDuration = value;
     }
 

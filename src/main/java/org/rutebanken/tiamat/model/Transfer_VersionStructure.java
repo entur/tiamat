@@ -10,8 +10,8 @@ public abstract class Transfer_VersionStructure
     protected TypeOfTransferRefStructure typeOfTransferRef;
     protected MultilingualStringEntity description;
     protected BigDecimal distance;
-    protected TransferDurationStructure transferDuration;
-    protected TransferDurationStructure walkTransferDuration;
+    protected TransferDuration transferDuration;
+    protected TransferDuration walkTransferDuration;
     protected Boolean bothWays;
 
     public MultilingualStringEntity getName() {
@@ -46,19 +46,19 @@ public abstract class Transfer_VersionStructure
         this.distance = value;
     }
 
-    public TransferDurationStructure getTransferDuration() {
+    public TransferDuration getTransferDuration() {
         return transferDuration;
     }
 
-    public void setTransferDuration(TransferDurationStructure value) {
+    public void setTransferDuration(TransferDuration value) {
         this.transferDuration = value;
     }
 
-    public TransferDurationStructure getWalkTransferDuration() {
+    public TransferDuration getWalkTransferDuration() {
         return walkTransferDuration;
     }
 
-    public void setWalkTransferDuration(TransferDurationStructure value) {
+    public void setWalkTransferDuration(TransferDuration value) {
         this.walkTransferDuration = value;
     }
 
