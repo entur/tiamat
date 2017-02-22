@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +33,19 @@ public class NetexIdMapper {
     }
 
     public static String getNetexId(EntityStructure internalEntity, Long id) {
-        return "NSR:" + determineIdType(internalEntity) +":" + id;
+        return getNetexId(determineIdType(internalEntity), String.valueOf(id));
     }
 
     public static String getNetexId(EntityStructure internalEntity) {
         return getNetexId(internalEntity, internalEntity.getId());
     }
 
+    public static String getNetexId(PathLinkEnd pathLinkEnd) {
+        return getNetexId("PathLinkEnd", String.valueOf(pathLinkEnd.getId()));
+    }
 
-    public static String getNetexId(String idType, String id) {
-        return "NSR:" + idType +":" + id;
+    public static String getNetexId(String type, String id) {
+        return NSR + ":" + type + ":" + id;
     }
 
     public void toTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {

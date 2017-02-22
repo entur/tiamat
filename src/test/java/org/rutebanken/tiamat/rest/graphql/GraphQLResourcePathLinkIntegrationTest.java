@@ -74,10 +74,12 @@ public class GraphQLResourcePathLinkIntegrationTest extends GraphQLResourceInteg
                 .root("data.pathLink[0]")
                     .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink)))
                 .root("data.pathLink[0].from")
-                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(firstQuay)))
-                    .body("description.value", equalTo(firstQuay.getDescription().getValue()))
+                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getFrom())))
+                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(firstQuay)))
+                    .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
                 .root("data.pathLink[0].to")
-                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(secondQuay)))
-                    .body("description.value", equalTo(secondQuay.getDescription().getValue()));
+                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getTo())))
+                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(secondQuay)))
+                    .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
     }
 }

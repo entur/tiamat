@@ -21,6 +21,7 @@ import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component
@@ -144,9 +145,9 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(ID)
                         .type(GraphQLString)
                         .dataFetcher(env -> {
-                            TopographicPlace tp = (TopographicPlace) env.getSource();
-                            if (tp != null) {
-                                return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                            TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
+                            if (topographicPlace != null) {
+                                return getNetexId(topographicPlace);
                             } else {
                                 return null;
                             }
@@ -167,7 +168,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(env -> {
                             TopographicPlace tp = (TopographicPlace) env.getSource();
                             if (tp != null) {
-                                return NetexIdMapper.getNetexId(new TopographicPlace(), tp.getId());
+                                return getNetexId(tp);
                             } else {
                                 return null;
                             }
@@ -248,11 +249,21 @@ public class StopPlaceRegisterGraphQLSchema {
                     }
                 })
                 .build());
-        commonFieldsList.add(newFieldDefinition()
+
+        GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
                 .name(ID)
                 .type(GraphQLString)
-                .dataFetcher(env -> NetexIdMapper.getNetexId((EntityStructure) env.getSource(), ((EntityStructure) env.getSource()).getId()))
-                .build());
+                .dataFetcher(env -> {
+                    if(env.getSource() instanceof EntityStructure) {
+                        return NetexIdMapper.getNetexId((EntityStructure) env.getSource());
+                    } else if(env.getSource() instanceof PathLinkEnd) {
+                        return NetexIdMapper.getNetexId((PathLinkEnd) env.getSource());
+                    }
+                    return null;
+                })
+                .build();
+
+        commonFieldsList.add(netexIdFieldDefinition);
         commonFieldsList.add(newFieldDefinition()
                 .name(LOCATION)
                 .type(locationObjectType)
@@ -307,8 +318,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(quayObjectType)))
                 .build();
 
-        GraphQLObjectType pathLinkEndObjectType = createPathLinkEndObjectType(quayObjectType, stopPlaceObjectType);
-        GraphQLObjectType pathLinkObjectType = createPathLinkObjectType(pathLinkEndObjectType);
+        GraphQLObjectType pathLinkEndObjectType = createPathLinkEndObjectType(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkObjectType = createPathLinkObjectType(pathLinkEndObjectType, netexIdFieldDefinition);
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name("StopPlaceRegister")
@@ -445,12 +456,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private GraphQLObjectType createPathLinkEndObjectType(GraphQLObjectType quayObjectType, GraphQLObjectType stopPlaceObjectType) {
+    private GraphQLObjectType createPathLinkEndObjectType(GraphQLObjectType quayObjectType, GraphQLObjectType stopPlaceObjectType, GraphQLFieldDefinition netexIdFieldDefinition) {
         return newObject()
                 .name("PathLinkEnd")
-                .field(newFieldDefinition()
-                        .name(ID)
-                        .type(GraphQLString))
+                .field(netexIdFieldDefinition)
                 .field(newFieldDefinition()
                         .name("quay")
                         .type(quayObjectType))
@@ -460,13 +469,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private GraphQLObjectType createPathLinkObjectType(GraphQLObjectType pathLinkEndObjecttype) {
+    private GraphQLObjectType createPathLinkObjectType(GraphQLObjectType pathLinkEndObjecttype, GraphQLFieldDefinition netexIdFieldDefinition) {
         return newObject()
                 .name(OUTPUT_TYPE_PATH_LINK)
-                .field(newFieldDefinition()
-                        .name(ID)
-                        .type(GraphQLString)
-                        .dataFetcher(env -> NetexIdMapper.getNetexId((EntityStructure) env.getSource())))
+                .field(netexIdFieldDefinition)
                 .field(newFieldDefinition()
                         .name("from")
                         .type(pathLinkEndObjecttype))
