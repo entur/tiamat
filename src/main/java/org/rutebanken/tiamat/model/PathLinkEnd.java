@@ -3,13 +3,14 @@ package org.rutebanken.tiamat.model;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
 
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class PathLinkEnd {
+public class PathLinkEnd implements IdentifiedEntity {
 
     @Id
     @GeneratedValue(generator = "idgen")
@@ -18,7 +19,7 @@ public class PathLinkEnd {
             parameters = {
                     @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
             })
-    private long id;
+    private Long id;
 
     @ManyToOne
     private StopPlace stopPlace;
@@ -86,11 +87,13 @@ public class PathLinkEnd {
         this.level = level;
     }
 
-    public long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 
