@@ -13,16 +13,16 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 
 @Component
-public class PathLinkResolver {
+public class PathLinkMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(PathLinkResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(PathLinkMapper.class);
 
 
     private final GeometryResolver geometryResolver;
     private final IdResolver idResolver;
 
     @Autowired
-    public PathLinkResolver(GeometryResolver geometryResolver, IdResolver idResolver) {
+    public PathLinkMapper(GeometryResolver geometryResolver, IdResolver idResolver) {
         this.geometryResolver = geometryResolver;
         this.idResolver = idResolver;
     }

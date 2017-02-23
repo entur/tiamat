@@ -5,7 +5,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.rest.graphql.resolver.PathLinkResolver;
+import org.rutebanken.tiamat.rest.graphql.resolver.PathLinkMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ class PathLinkUpdater implements DataFetcher {
     private PathLinkRepository pathLinkRepository;
 
     @Autowired
-    private PathLinkResolver pathLinkResolver;
+    private PathLinkMapper pathLinkMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -43,7 +43,7 @@ class PathLinkUpdater implements DataFetcher {
 
                     if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
                         Map input = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
-                        PathLink pathLink = pathLinkResolver.map(input);
+                        PathLink pathLink = pathLinkMapper.map(input);
                         logger.info("Got {}", pathLink);
 
                         createOrUpdatePathLink(pathLink);
@@ -77,6 +77,7 @@ class PathLinkUpdater implements DataFetcher {
             }
 
             logger.info("Found existing path link: {}", existingPathLink);
+
 
 
 
