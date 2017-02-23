@@ -44,6 +44,11 @@ public class PathLinkMapper {
             pathLink.setLineString(geometryResolver.createGeoJsonLineString(input));
         }
 
+        // TODO
+        // transfer duration
+        // allowed use
+
+
         return pathLink;
     }
 
