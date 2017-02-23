@@ -1,11 +1,12 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.google.common.collect.Sets;
-import graphql.language.*;
+import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -19,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_LINK;
 
 @Service("pathLinkUpdater")
 @Transactional
@@ -44,7 +46,7 @@ class PathLinkUpdater implements DataFetcher {
 
         List<Field> fields = environment.getFields();
 
-        logger.info("Got fields {}", fields);
+        logger.trace("Got fields {}", fields);
 
 //        try {
 
@@ -54,7 +56,7 @@ class PathLinkUpdater implements DataFetcher {
                     if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
                         Map input = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
                         PathLink pathLink = pathLinkMapper.map(input);
-                        logger.info("Got {}", pathLink);
+                        logger.debug("Mapped {}", pathLink);
 
                         createOrUpdatePathLink(pathLink);
 
@@ -77,10 +79,12 @@ class PathLinkUpdater implements DataFetcher {
 
         PathLink resultPathLink;
 
+        boolean updatedExisting;
+
         if(incomingPathLink.getId() != null) {
             // Update?
 
-            logger.info("Looking for PathLink with ID: {}", incomingPathLink.getId());
+            logger.debug("Looking for PathLink with ID: {}", incomingPathLink.getId());
 
             PathLink existingPathLink = pathLinkRepository.findOne(incomingPathLink.getId());
 
@@ -89,17 +93,19 @@ class PathLinkUpdater implements DataFetcher {
                 return null;
             }
 
-            logger.info("Found existing path link: {}", existingPathLink);
+            logger.debug("Found existing path link: {}", existingPathLink);
 
             existingPathLink.setLineString(incomingPathLink.getLineString());
             existingPathLink.setAllowedUse(incomingPathLink.getAllowedUse());
             existingPathLink.setTransferDuration(incomingPathLink.getTransferDuration());
 
             resultPathLink = existingPathLink;
+            updatedExisting = true;
 
         } else {
-            logger.info("New path link {}", incomingPathLink.getId());
+            logger.info("New incoming path link {}", incomingPathLink);
             resultPathLink = incomingPathLink;
+            updatedExisting = false;
         }
 
 
@@ -114,6 +120,7 @@ class PathLinkUpdater implements DataFetcher {
 
         pathLinkRepository.save(resultPathLink);
 
+        logger.info("{} {}", updatedExisting ? "Updated" : "Created", resultPathLink);
 
         return resultPathLink;
 
@@ -126,7 +133,7 @@ class PathLinkUpdater implements DataFetcher {
 
             Quay quay = quayRepository.findOne(pathLinkEnd.getQuay().getId());
             if(quay != null) {
-                logger.info("Found quay {}", quay);
+                logger.debug("Found quay {}", quay);
                 pathLinkEnd.setQuay(quay);
                 return pathLinkEnd;
             }
