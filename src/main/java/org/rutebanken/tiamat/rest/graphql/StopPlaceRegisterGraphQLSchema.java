@@ -4,6 +4,8 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,12 @@ public class StopPlaceRegisterGraphQLSchema {
     private final String SIZE_DESCRIPTION_TEXT = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public GraphQLSchema stopPlaceRegisterSchema;
+
+    @Autowired
+    private PathLinkEndObjectTypeCreator pathLinkEndObjectTypeCreator;
+
+    @Autowired
+    private PathLinkObjectTypeCreator pathLinkObjectTypeCreator;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -87,9 +95,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType);
 
-        GraphQLObjectType pathLinkEndObjectType = createPathLinkEndObjectType(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
 
-        GraphQLObjectType pathLinkObjectType = createPathLinkObjectType(pathLinkEndObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition);
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name("StopPlaceRegister")
@@ -266,35 +274,6 @@ public class StopPlaceRegisterGraphQLSchema {
                             .name(PUBLIC_CODE)
                             .type(GraphQLString))
                     .build();
-    }
-
-    private GraphQLObjectType createPathLinkEndObjectType(GraphQLObjectType quayObjectType, GraphQLObjectType stopPlaceObjectType, GraphQLFieldDefinition netexIdFieldDefinition) {
-        return newObject()
-                .name("PathLinkEnd")
-                .field(netexIdFieldDefinition)
-                .field(newFieldDefinition()
-                        .name("quay")
-                        .type(quayObjectType))
-                .field(newFieldDefinition()
-                        .name("stopPlace")
-                        .type(stopPlaceObjectType))
-                .build();
-    }
-
-    private GraphQLObjectType createPathLinkObjectType(GraphQLObjectType pathLinkEndObjecttype, GraphQLFieldDefinition netexIdFieldDefinition) {
-        return newObject()
-                .name(OUTPUT_TYPE_PATH_LINK)
-                .field(netexIdFieldDefinition)
-                .field(newFieldDefinition()
-                        .name("from")
-                        .type(pathLinkEndObjecttype))
-                .field(newFieldDefinition()
-                        .name("to")
-                        .type(pathLinkEndObjecttype))
-                .field(newFieldDefinition()
-                        .name(GEOMETRY)
-                        .type(geoJsonObjectType))
-                .build();
     }
 
     private GraphQLInputObjectType createStopPlaceInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList,

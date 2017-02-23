@@ -179,6 +179,7 @@ public class CustomGraphQLTypes {
                     .type(GraphQLInt)
                     .description("Occasional traveller duration in seconds"))
             .build();
+    
     public static GraphQLInputObjectType quayIdReferenceInputObjectType = GraphQLInputObjectType
             .newInputObject()
             .name("Quay_id")
@@ -188,7 +189,7 @@ public class CustomGraphQLTypes {
             .build();
 
     public static GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()
-            .name("PathLinkEndInput")
+            .name(INPUT_TYPE_PATH_LINK_END)
             .field(newInputObjectField()
                     .name("quay")
                     .type(quayIdReferenceInputObjectType))
@@ -200,10 +201,10 @@ public class CustomGraphQLTypes {
                     .name(ID)
                     .type(GraphQLString))
             .field(newInputObjectField()
-                    .name("from")
+                    .name(PATH_LINK_FROM)
                     .type(pathLinkEndInputObjectType))
             .field(newInputObjectField()
-                    .name("to")
+                    .name(PATH_LINK_TO)
                     .type(pathLinkEndInputObjectType))
             .field(newInputObjectField()
                     .name("transferDuration")

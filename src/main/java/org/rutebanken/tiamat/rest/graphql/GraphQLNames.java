@@ -10,6 +10,12 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PATH_LINK = "PathLink";
     public static final String INPUT_TYPE_PATH_LINK = OUTPUT_TYPE_PATH_LINK + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_PATH_LINK_END = "PathLinkEnd";
+    public static final String INPUT_TYPE_PATH_LINK_END = OUTPUT_TYPE_PATH_LINK_END + INPUT_TYPE_POSTFIX;
+
+    public static final String PATH_LINK_FROM = "from";
+    public static final String PATH_LINK_TO = "to";
+
     public static final String OUTPUT_TYPE_TRANSFER_DURATION = "TransferDuration";
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
 
