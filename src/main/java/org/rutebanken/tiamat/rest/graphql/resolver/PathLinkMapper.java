@@ -2,12 +2,14 @@ package org.rutebanken.tiamat.rest.graphql.resolver;
 
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.Quay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
@@ -41,7 +43,7 @@ public class PathLinkMapper {
         }
 
         if(input.get(GEOMETRY) != null) {
-            pathLink.setLineString(geometryResolver.createGeoJsonLineString(input));
+            pathLink.setLineString(geometryResolver.createGeoJsonLineString((Map) input.get(GEOMETRY)));
         }
 
         // TODO
@@ -63,6 +65,19 @@ public class PathLinkMapper {
     private PathLinkEnd mapToPathLinkEnd(Map input) {
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
         idResolver.extractAndSetId(ID, input, pathLinkEnd);
+
+        if(input.get("quay") != null) {
+            Optional<Long> quayId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
+            if(quayId.isPresent()) {
+                Quay quay = new Quay();
+                quay.setId(quayId.get());
+                pathLinkEnd.setQuay(quay);
+            }
+        } else {
+            logger.warn("Could not resolve Quay. Stop Place is not supported yet. Input was: {}", input);
+        }
+
+        logger.trace("Mapped {}", pathLinkEnd);
         return pathLinkEnd;
     }
 }
