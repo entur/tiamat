@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 
@@ -26,9 +27,9 @@ class PathLinkFetcher implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
-        Long tiamatId = idResolver.extractIdIfPresent(ID, environment.getArguments());
-        if (tiamatId != null) {
-            return Arrays.asList(pathLinkRepository.findOne(tiamatId));
+        Optional<Long> tiamatId = idResolver.extractIdIfPresent(ID, environment.getArguments());
+        if (tiamatId.isPresent()) {
+            return Arrays.asList(pathLinkRepository.findOne(tiamatId.get()));
         }
         return pathLinkRepository.findAll();
 
