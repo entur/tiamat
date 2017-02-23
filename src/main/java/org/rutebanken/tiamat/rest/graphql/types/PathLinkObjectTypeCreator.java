@@ -14,7 +14,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJso
 @Component
 public class PathLinkObjectTypeCreator {
 
-    public GraphQLObjectType create(GraphQLObjectType pathLinkEndObjecttype, GraphQLFieldDefinition netexIdFieldDefinition) {
+    public GraphQLObjectType create(GraphQLObjectType pathLinkEndObjecttype, GraphQLFieldDefinition netexIdFieldDefinition, GraphQLFieldDefinition geometryFieldDefinition) {
         return newObject()
                 .name(OUTPUT_TYPE_PATH_LINK)
                 .field(netexIdFieldDefinition)
@@ -24,9 +24,7 @@ public class PathLinkObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(PATH_LINK_TO)
                         .type(pathLinkEndObjecttype))
-                .field(newFieldDefinition()
-                        .name(GEOMETRY)
-                        .type(geoJsonObjectType))
+                .field(geometryFieldDefinition)
                 .build();
     }
 }
