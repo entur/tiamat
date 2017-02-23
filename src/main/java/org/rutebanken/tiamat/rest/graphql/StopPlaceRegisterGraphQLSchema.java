@@ -23,8 +23,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
-    private final String PAGE_DESCRIPTION_TEXT = "Pagenumber when using pagination - default is " + DEFAULT_PAGE_VALUE;
-    private final String SIZE_DESCRIPTION_TEXT = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public GraphQLSchema stopPlaceRegisterSchema;
 
@@ -185,18 +183,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
     private List<GraphQLArgument> createFindStopPlaceArguments() {
         List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(PAGE)
-                .type(GraphQLInt)
-                .defaultValue(DEFAULT_PAGE_VALUE)
-                .description(PAGE_DESCRIPTION_TEXT)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(SIZE)
-                .type(GraphQLInt)
-                .defaultValue(DEFAULT_SIZE_VALUE)
-                .description(SIZE_DESCRIPTION_TEXT)
-                .build());
+        arguments.addAll(createPageAndSizeArguments());
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
@@ -233,19 +220,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
     private List<GraphQLArgument> createBboxArguments() {
         List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(PAGE)
-                .type(GraphQLInt)
-                .defaultValue(DEFAULT_PAGE_VALUE)
-                .description(PAGE_DESCRIPTION_TEXT)
-                .build());
-
-        arguments.add(GraphQLArgument.newArgument()
-                .name(SIZE)
-                .type(GraphQLInt)
-                .defaultValue(DEFAULT_SIZE_VALUE)
-                .description(SIZE_DESCRIPTION_TEXT)
-                .build());
+        arguments.addAll(createPageAndSizeArguments());
                 //BoundingBox
         arguments.add(GraphQLArgument.newArgument()
                 .name(LONGITUDE_MIN)
@@ -274,6 +249,24 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build());
         return arguments;
     }
+
+    private List<GraphQLArgument> createPageAndSizeArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(PAGE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_PAGE_VALUE)
+                .description("Pagenumber when using pagination - default is " + DEFAULT_PAGE_VALUE)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(SIZE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_SIZE_VALUE)
+                .description("Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE)
+                .build());
+        return arguments;
+    }
+
 
     private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
         return newObject()
