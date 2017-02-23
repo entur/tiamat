@@ -37,7 +37,7 @@ public class PathLinkMapper {
         }
 
         if(input.get("to") != null) {
-            pathLink.setFrom(mapToPathLinkEnd("to", input));
+            pathLink.setTo(mapToPathLinkEnd("to", input));
         }
 
         if(input.get(GEOMETRY) != null) {
