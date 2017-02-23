@@ -98,102 +98,26 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(stopPlaceObjectType))
                         .name(FIND_STOPPLACE)
                         .description("Search for StopPlaces")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(PAGE)
-                                .type(GraphQLInt)
-                                .defaultValue(DEFAULT_PAGE_VALUE)
-                                .description(PAGE_DESCRIPTION_TEXT))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(SIZE)
-                                .type(GraphQLInt)
-                                .defaultValue(DEFAULT_SIZE_VALUE)
-                                .description(SIZE_DESCRIPTION_TEXT))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(ID)
-                                .type(GraphQLString)
-                                .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored."))
-                                //Search
-                        .argument(GraphQLArgument.newArgument()
-                                .name(STOP_PLACE_TYPE)
-                                .type(new GraphQLList(stopPlaceTypeEnum))
-                                .description("Only return StopPlaces with given StopPlaceType(s)."))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(COUNTY_REF)
-                                .type(new GraphQLList(GraphQLString))
-                                .description("Only return StopPlaces located in given counties."))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(MUNICIPALITY_REF)
-                                .type(new GraphQLList(GraphQLString))
-                                .description("Only return StopPlaces located in given municipalities."))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(QUERY)
-                                .type(GraphQLString)
-                                .description("Searches for StopPlace by name."))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(IMPORTED_ID_QUERY)
-                                .type(GraphQLString)
-                                .description("Searches for StopPlace by importedId."))
+                        .argument(createFindStopPlaceArguments())
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
                         .type(new GraphQLList(stopPlaceObjectType))
                         .name(FIND_STOPPLACE_BY_BBOX)
                         .description("Find StopPlaces within given BoundingBox.")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(PAGE)
-                                .type(GraphQLInt)
-                                .defaultValue(DEFAULT_PAGE_VALUE)
-                                .description(PAGE_DESCRIPTION_TEXT))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(SIZE)
-                                .type(GraphQLInt)
-                                .defaultValue(DEFAULT_SIZE_VALUE)
-                                .description(SIZE_DESCRIPTION_TEXT))
-                                //BoundingBox
-                        .argument(GraphQLArgument.newArgument()
-                                .name(LONGITUDE_MIN)
-                                .description("Bottom left longitude (xMin).")
-                                .type(new GraphQLNonNull(GraphQLBigDecimal)))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(LATITUDE_MIN)
-                                .description("Bottom left latitude (yMin).")
-                                .type(new GraphQLNonNull(GraphQLBigDecimal)))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(LONGITUDE_MAX)
-                                .description("Top right longitude (xMax).")
-                                .type(new GraphQLNonNull(GraphQLBigDecimal)))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(LATITUDE_MAX)
-                                .description("Top right longitude (yMax).")
-                                .type(new GraphQLNonNull(GraphQLBigDecimal)))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(IGNORE_STOPPLACE_ID)
-                                .type(GraphQLString)
-                                .description("ID of StopPlace to excluded from result."))
+                        .argument(createBboxArguments())
                         .dataFetcher(stopPlaceFetcher))
                 .field(newFieldDefinition()
                         .name(FIND_TOPOGRAPHIC_PLACE)
                         .type(new GraphQLList(topographicPlaceObjectType))
                         .description("Find topographic places")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(ID)
-                                .type(GraphQLString))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(TOPOGRAPHIC_PLACE_TYPE)
-                                .type(topographicPlaceTypeEnum)
-                                .description("Limits results to specified placeType."))
-                        .argument(GraphQLArgument.newArgument()
-                                .name(QUERY)
-                                .type(GraphQLString)
-                                .description("Searches for TopographicPlaces by name."))
+                        .argument(createFindTopographicPlaceArguments())
                         .dataFetcher(topographicPlaceFetcher))
                 .field(newFieldDefinition()
                         .name(FIND_PATH_LINK)
                         .type(new GraphQLList(pathLinkObjectType))
                         .description("Find path links")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(ID)
-                                .type(GraphQLString))
+                        .argument(createFindPathLinkArguments())
                         .dataFetcher(pathLinkFetcher))
                 .build();
 
@@ -211,13 +135,17 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(stopPlaceObjectType))
                         .name(MUTATE_STOPPLACE)
                         .description("Create new or update existing StopPlace")
-                        .argument(GraphQLArgument.newArgument().name(OUTPUT_TYPE_STOPPLACE).type(stopPlaceInputObjectType))
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_STOPPLACE)
+                                .type(stopPlaceInputObjectType))
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name("mutatePathlink")
                         .description("Create new or update existing PathLink")
-                        .argument(GraphQLArgument.newArgument().name("PathLink").type(pathLinkObjectInputType))
+                        .argument(GraphQLArgument.newArgument()
+                                .name("PathLink")
+                                .type(pathLinkObjectInputType))
                         .dataFetcher(pathLinkUpdater))
                 .build();
 
@@ -225,6 +153,126 @@ public class StopPlaceRegisterGraphQLSchema {
                 .query(stopPlaceRegisterQuery)
                 .mutation(stopPlaceRegisterMutation)
                 .build();
+    }
+
+    private List<GraphQLArgument> createFindPathLinkArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindTopographicPlaceArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(TOPOGRAPHIC_PLACE_TYPE)
+                .type(topographicPlaceTypeEnum)
+                .description("Limits results to specified placeType.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
+                .type(GraphQLString)
+                .description("Searches for TopographicPlaces by name.")
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindStopPlaceArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(PAGE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_PAGE_VALUE)
+                .description(PAGE_DESCRIPTION_TEXT)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(SIZE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_SIZE_VALUE)
+                .description(SIZE_DESCRIPTION_TEXT)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.")
+                .build());
+                //Search
+        arguments.add(GraphQLArgument.newArgument()
+                .name(STOP_PLACE_TYPE)
+                .type(new GraphQLList(stopPlaceTypeEnum))
+                .description("Only return StopPlaces with given StopPlaceType(s).")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(COUNTY_REF)
+                .type(new GraphQLList(GraphQLString))
+                .description("Only return StopPlaces located in given counties.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(MUNICIPALITY_REF)
+                .type(new GraphQLList(GraphQLString))
+                .description("Only return StopPlaces located in given municipalities.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
+                .type(GraphQLString)
+                .description("Searches for StopPlace by name.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(IMPORTED_ID_QUERY)
+                .type(GraphQLString)
+                .description("Searches for StopPlace by importedId.")
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createBboxArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(PAGE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_PAGE_VALUE)
+                .description(PAGE_DESCRIPTION_TEXT)
+                .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(SIZE)
+                .type(GraphQLInt)
+                .defaultValue(DEFAULT_SIZE_VALUE)
+                .description(SIZE_DESCRIPTION_TEXT)
+                .build());
+                //BoundingBox
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LONGITUDE_MIN)
+                .description("Bottom left longitude (xMin).")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LATITUDE_MIN)
+                .description("Bottom left latitude (yMin).")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LONGITUDE_MAX)
+                .description("Top right longitude (xMax).")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LATITUDE_MAX)
+                .description("Top right longitude (yMax).")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(IGNORE_STOPPLACE_ID)
+                .type(GraphQLString)
+                .description("ID of StopPlace to excluded from result.")
+                .build());
+        return arguments;
     }
 
     private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
