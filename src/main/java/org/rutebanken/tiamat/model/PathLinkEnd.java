@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
@@ -127,5 +128,18 @@ public class PathLinkEnd implements IdentifiedEntity {
 
     public void setAccessSpace(AccessSpace accessSpace) {
         this.accessSpace = accessSpace;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("quay", quay)
+                .add("stopPlace", stopPlace)
+                .add("pathJunction", pathJunction)
+                .add("level", level)
+                .add("entrace", entrance)
+                .toString();
     }
 }
