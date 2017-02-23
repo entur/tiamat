@@ -42,6 +42,10 @@ class StopPlaceFetcher implements DataFetcher {
         logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
 
         Page<StopPlace> stopPlaces = null;
+
+        PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
+        stopPlaceSearchBuilder.setPageable(pageable);
+
         String id = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
         if (id != null && !id.isEmpty()) {
@@ -85,9 +89,6 @@ class StopPlaceFetcher implements DataFetcher {
             }
 
             stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
-
-            PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
-            stopPlaceSearchBuilder.setPageable(pageable);
 
             if (environment.getArgument(LONGITUDE_MIN) != null) {
                 BoundingBoxDto boundingBox = new BoundingBoxDto();
