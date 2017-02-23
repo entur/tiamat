@@ -12,6 +12,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ class StopPlaceUpdater implements DataFetcher {
     private QuayRepository quayRepository;
 
     @Autowired
-    private GeometryFactory geometryFactory;
+    private GeometryResolver geometryResolver;
 
 
     @Override
@@ -140,7 +141,7 @@ class StopPlaceUpdater implements DataFetcher {
             Preconditions.checkArgument(existingQuay.isPresent(),
                     "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace",
                     quayInputMap.get(ID),
-                    NetexIdMapper.getNetexId(stopPlace, stopPlace.getId()));
+                    NetexIdMapper.getNetexId(stopPlace));
 
             quay = existingQuay.get();
             logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
@@ -191,30 +192,10 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
         if (input.get(GEOMETRY) != null) {
-            entity.setCentroid(createGeoJsonPoint((Map) input.get(GEOMETRY)));
+            entity.setCentroid(geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY)));
             isUpdated = true;
         }
         return isUpdated;
-    }
-
-    private Point createGeoJsonPoint(Map map) {
-        if (map.get("type") != null && map.get("coordinates") != null) {
-            if ("Point".equals(map.get("type"))) {
-                Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
-                return geometryFactory.createPoint(coordinates[0]);
-            }
-        }
-        return null;
-    }
-
-    private LineString createGeoJsonLineString(Map map) {
-        if (map.get("type") != null && map.get("coordinates") != null) {
-            if ("LineString".equals(map.get("type"))) {
-                Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
-                return geometryFactory.createLineString(coordinates);
-            }
-        }
-        return null;
     }
 
     private EmbeddableMultilingualString getEmbeddableString(Map map) {
