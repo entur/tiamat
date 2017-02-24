@@ -26,7 +26,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
     private static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
