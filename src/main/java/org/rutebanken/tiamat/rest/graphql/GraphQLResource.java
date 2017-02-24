@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Path("/graphql")
+@Transactional
 public class GraphQLResource {
 
 	@Autowired
