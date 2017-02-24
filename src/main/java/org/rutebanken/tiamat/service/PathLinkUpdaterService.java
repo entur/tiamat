@@ -13,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
+
 @Transactional
 @Service
 public class PathLinkUpdaterService {
@@ -91,6 +95,7 @@ public class PathLinkUpdaterService {
                 pathLinkEnd.setQuay(quay);
                 return pathLinkEnd;
             }
+            throw new NoSuchElementException("Cannot find path link end reference to quay " + getNetexId(pathLinkEnd.getQuay()));
         }
 
         if(pathLinkEnd.getStopPlace() != null) {
@@ -100,9 +105,11 @@ public class PathLinkUpdaterService {
                 pathLinkEnd.setStopPlace(stopPlace);
                 return pathLinkEnd;
             }
+            throw new NoSuchElementException("Cannot find path link end reference to stop place " + getNetexId(pathLinkEnd.getStopPlace()));
         }
 
-        return null;
+        throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end " + pathLinkEnd);
+
         // TODO entrance/level
     }
 
