@@ -10,6 +10,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
@@ -40,6 +42,11 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private GeometryResolver geometryResolver;
+
+    @Autowired
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
+    private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
 
 
     @Override
@@ -193,6 +200,16 @@ class StopPlaceUpdater implements DataFetcher {
         }
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY)));
+
+            if (entity instanceof StopPlace) {
+                try {
+                    countyAndMunicipalityLookupService.populateCountyAndMunicipality((StopPlace) entity, createdTopographicPlaceCounter);
+                } catch (Exception e) {
+                    logger.warn("Setting TopographicPlace on StopPlace failed", e);
+                }
+            }
+
+            
             isUpdated = true;
         }
         return isUpdated;
