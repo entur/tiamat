@@ -397,6 +397,7 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
+                "  topographicPlace { id topographicPlaceType } " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  } " +
@@ -408,6 +409,8 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
+                    .body("topographicPlace.id", notNullValue())
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
