@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import graphql.GraphQL;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -15,13 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
 
-public class GraphQLResourcePathLinkIntegrationTest extends GraphQLResourceIntegrationTest {
+public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     private QuayRepository quayRepository;
-
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
 
     @Test
     public void retrievePathLinkReferencingTwoQuays() throws Exception {

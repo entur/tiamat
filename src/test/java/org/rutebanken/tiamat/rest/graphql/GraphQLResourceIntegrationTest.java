@@ -1,54 +1,18 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.ValidatableResponse;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashSet;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
-    private static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
-
-    @Autowired
-    protected StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    protected GeometryFactory geometryFactory;
-
-    @Value("${local.server.port}")
-    private int port;
-
-    @Before
-    public void configureRestAssured() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-    }
-
-    @Before
-    public void clearRepositories() {
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
-    }
-
+public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
     public void retrieveStopPlaceWithTwoQuays() throws Exception {
@@ -195,20 +159,6 @@ public class GraphQLResourceIntegrationTest extends CommonSpringBootTest {
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
     }
-
-    protected ValidatableResponse executeGraphQL(String graphQlJsonQuery) {
-        return given()
-                .port(port)
-                .contentType(ContentType.JSON)
-                .body(graphQlJsonQuery)
-        .when()
-                .post(BASE_URI_GRAPHQL)
-                .then()
-                .log().body()
-                .statusCode(200)
-                .assertThat();
-    }
-
 
     @Test
     public void searchForTramStopWithMunicipalityAndCounty() {
