@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_LINK;
 
 @Service("pathLinkUpdater")
-@Transactional
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 class PathLinkUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkUpdater.class);
@@ -48,7 +49,7 @@ class PathLinkUpdater implements DataFetcher {
 
         logger.trace("Got fields {}", fields);
 
-        try {
+
             for (Field field : fields) {
                 if (field.getName().equals(MUTATE_PATH_LINK)) {
 
@@ -66,10 +67,7 @@ class PathLinkUpdater implements DataFetcher {
 
                 }
             }
-        } catch (RuntimeException e) {
-            logger.warn("Caught exception when updating path link", e);
-            throw e;
-        }
+
         return pathLinkRepository.findAll();
     }
 }
