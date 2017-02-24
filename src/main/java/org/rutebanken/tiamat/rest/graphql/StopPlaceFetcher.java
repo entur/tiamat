@@ -12,12 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +43,7 @@ class StopPlaceFetcher implements DataFetcher {
 
         logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
 
-        Page<StopPlace> stopPlaces = null;
+        Page<StopPlace> stopPlaces = new PageImpl<>(new ArrayList<>());
 
         PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
         stopPlaceSearchBuilder.setPageable(pageable);
@@ -50,9 +52,14 @@ class StopPlaceFetcher implements DataFetcher {
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
         if (id != null && !id.isEmpty()) {
 
-            stopPlaceSearchBuilder.setIdList(Arrays.asList(NetexIdMapper.getTiamatId(id)));
+            try {
+                long tiamatId = NetexIdMapper.getTiamatId(id);
+                stopPlaceSearchBuilder.setIdList(Arrays.asList(tiamatId));
 
-            stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+            } catch (NumberFormatException nfe) {
+                logger.info("Attempted to find stopPlace with invalid id [{}]", id);
+            }
         } else if (importedId != null && !importedId.isEmpty()) {
 
             List<Long> stopPlaceId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
