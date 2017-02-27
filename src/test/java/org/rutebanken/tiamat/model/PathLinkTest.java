@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -139,6 +140,31 @@ public class PathLinkTest extends CommonSpringBootTest {
         assertThat(actual.getLineString()).isNotNull();
         assertThat(actual.getLineString().getCoordinates()).isEqualTo(coordinates);
 
+    }
+
+    @Test
+    public void pathLinkWithTransferDuration() {
+
+        PathLink pathLink = new PathLink();
+
+        TransferDuration transferDuration = new TransferDuration();
+        transferDuration.setDefaultDuration(Duration.ofMillis(10000));
+        transferDuration.setOccasionalTravellerDuration(Duration.ofMillis(20000));
+        transferDuration.setMobilityRestrictedTravellerDuration(Duration.ofMillis(30000));
+        transferDuration.setFrequentTravellerDuration(Duration.ofMillis(5000));
+
+        pathLink.setTransferDuration(transferDuration);
+
+        pathLinkRepository.save(pathLink);
+
+        PathLink actual = pathLinkRepository.findOne(pathLink.getId());
+
+
+        assertThat(actual.getTransferDuration()).isNotNull();
+        assertThat(actual.getTransferDuration().getDefaultDuration()).isEqualTo(transferDuration.getDefaultDuration());
+        assertThat(actual.getTransferDuration().getFrequentTravellerDuration()).isEqualTo(transferDuration.getFrequentTravellerDuration());
+        assertThat(actual.getTransferDuration().getOccasionalTravellerDuration()).isEqualTo(transferDuration.getOccasionalTravellerDuration());
+        assertThat(actual.getTransferDuration().getMobilityRestrictedTravellerDuration()).isEqualTo(transferDuration.getMobilityRestrictedTravellerDuration());
     }
 
     @Test
