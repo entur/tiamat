@@ -1,9 +1,7 @@
 package org.rutebanken.tiamat.service;
 
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -13,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
@@ -47,15 +46,50 @@ public class PathLinkUpdaterService {
             PathLink existingPathLink = pathLinkRepository.findOne(incomingPathLink.getId());
 
             if(existingPathLink == null) {
-                logger.warn("Specified path link with ID: {} does not exist", incomingPathLink.getId());
-                return null;
+                throw new NoSuchElementException("Specified path link with ID: " + NetexIdMapper.getNetexId(incomingPathLink) + " does not exist");
             }
 
             logger.debug("Found existing path link: {}", existingPathLink);
 
-            existingPathLink.setLineString(incomingPathLink.getLineString());
-            existingPathLink.setAllowedUse(incomingPathLink.getAllowedUse());
-            existingPathLink.setTransferDuration(incomingPathLink.getTransferDuration());
+            boolean changed = false;
+            if(incomingPathLink.getLineString() != null) {
+                existingPathLink.setLineString(incomingPathLink.getLineString());
+                changed = true;
+            }
+            if(incomingPathLink.getAllowedUse() != null) {
+                existingPathLink.setAllowedUse(incomingPathLink.getAllowedUse());
+                changed = true;
+            }
+            if(incomingPathLink.getTransferDuration() != null) {
+                TransferDuration incomingTransferDuration = incomingPathLink.getTransferDuration();
+
+                if(existingPathLink.getTransferDuration() != null) {
+                    if (incomingTransferDuration.getDefaultDuration() != null) {
+                        existingPathLink.getTransferDuration().setDefaultDuration(incomingTransferDuration.getDefaultDuration());
+                        changed = true;
+                    }
+                    if (incomingTransferDuration.getFrequentTravellerDuration() != null) {
+                        existingPathLink.getTransferDuration().setFrequentTravellerDuration(incomingTransferDuration.getFrequentTravellerDuration());
+                        changed = true;
+                    }
+                    if (incomingTransferDuration.getOccasionalTravellerDuration() != null) {
+                        existingPathLink.getTransferDuration().setOccasionalTravellerDuration(incomingTransferDuration.getOccasionalTravellerDuration());
+                        changed = true;
+                    }
+                    if (incomingTransferDuration.getMobilityRestrictedTravellerDuration() != null) {
+                        existingPathLink.getTransferDuration().setMobilityRestrictedTravellerDuration(incomingTransferDuration.getMobilityRestrictedTravellerDuration());
+                        changed = true;
+                    }
+                } else {
+                    existingPathLink.setTransferDuration(incomingTransferDuration);
+                    changed = true;
+                }
+
+                if(changed) {
+                    logger.debug("Existing pathLink changed");
+                    existingPathLink.setChanged(ZonedDateTime.now());
+                }
+            }
 
             resultPathLink = existingPathLink;
             updatedExisting = true;
