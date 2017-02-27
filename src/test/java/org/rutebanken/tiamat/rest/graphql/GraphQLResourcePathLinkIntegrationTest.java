@@ -7,12 +7,11 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -187,5 +186,60 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                     .body("id", notNullValue())
                     .body("quay.id", equalTo(NetexIdMapper.getNetexId(secondQuay)))
                     .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
+    }
+
+    @Test
+    public void updatePathLinkWithTransferDurationWithoutClearingLineString() throws Exception {
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: { " +
+                "       geometry: {" +
+                "           type: \\\"LineString\\\", coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
+                "       }" +
+                "   }) {" +
+                "   id " +
+                "   geometry {" +
+                "        type" +
+                "        coordinates" +
+                "       }" +
+                "  }" +
+                "}\",\"variables\":\"\"}";
+
+        String pathLinkId = executeGraphQL(graphQlJsonQuery)
+                .root("data.pathLink[0]")
+                    .body("id", notNullValue())
+                    .body("geometry", notNullValue())
+                    .extract().path("data.pathLink[0].id");
+
+        System.out.println("Got path link ID: "+ pathLinkId);
+
+        String secondGraphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: { " +
+                "       id: \\\""+pathLinkId+"\\\"," +
+                "       "+TRANSFER_DURATION+": {" +
+                "           " + DEFAULT_DURATION + ": 1," +
+                "           " + FREQUENT_TRAVELLER_DURATION + ": 2" +
+                "       }" +
+                "   }) {" +
+                "   id " +
+                "   geometry {" +
+                "        type" +
+                "        coordinates" +
+                "       }" +
+                "   " + TRANSFER_DURATION + " { " + DEFAULT_DURATION + " " + FREQUENT_TRAVELLER_DURATION + " }" +
+                "  }" +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(secondGraphQlJsonQuery)
+                .root("data.pathLink[0]")
+                    .body("id", notNullValue())
+                    .body("geometry", notNullValue())
+                    .body("transferDuration", notNullValue())
+                    .body("transferDuration." + DEFAULT_DURATION, notNullValue())
+                    .body("transferDuration." + FREQUENT_TRAVELLER_DURATION, notNullValue())
+                .extract().path("id");
+
     }
 }
