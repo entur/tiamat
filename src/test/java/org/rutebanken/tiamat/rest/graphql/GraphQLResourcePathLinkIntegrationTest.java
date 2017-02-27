@@ -145,13 +145,13 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: { " +
+                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
                 "       from: {quay: {id: \\\"" + NetexIdMapper.getNetexId(firstQuay) + "\\\"}}, " +
                 "       to: {quay: {id: \\\"" + NetexIdMapper.getNetexId(secondQuay) + "\\\"}}, " +
                 "       geometry: {" +
                 "           type: \\\"LineString\\\", coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
                 "       }" +
-                "   }) {" +
+                "   }]) {" +
                 "   id " +
                 "   geometry {" +
                 "        type" +
@@ -193,11 +193,11 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: { " +
+                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
                 "       geometry: {" +
                 "           type: \\\"LineString\\\", coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
                 "       }" +
-                "   }) {" +
+                "   }]) {" +
                 "   id " +
                 "   geometry {" +
                 "        type" +

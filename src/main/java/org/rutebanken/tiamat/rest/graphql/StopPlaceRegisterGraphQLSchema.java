@@ -156,10 +156,9 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(MUTATE_PATH_LINK)
                         .description("Create new or update existing PathLink")
                         .argument(GraphQLArgument.newArgument()
-                                .name("PathLink")
-                                .type(pathLinkObjectInputType))
+                                .name(OUTPUT_TYPE_PATH_LINK)
+                                .type(new GraphQLList(pathLinkObjectInputType)))
                         .description("Create new or update existing "+OUTPUT_TYPE_PATH_LINK)
-                        .argument(GraphQLArgument.newArgument().name(OUTPUT_TYPE_PATH_LINK).type(pathLinkObjectInputType))
                         .dataFetcher(pathLinkUpdater))
                 .build();
 
