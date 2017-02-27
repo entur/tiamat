@@ -4,12 +4,7 @@ import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.PathLinkMapper;
 import org.rutebanken.tiamat.service.PathLinkUpdaterService;
 import org.slf4j.Logger;
@@ -50,23 +45,23 @@ class PathLinkUpdater implements DataFetcher {
         logger.trace("Got fields {}", fields);
 
 
-            for (Field field : fields) {
-                if (field.getName().equals(MUTATE_PATH_LINK)) {
+        for (Field field : fields) {
+            if (field.getName().equals(MUTATE_PATH_LINK)) {
 
-                    if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
-                        Map input = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
-                        PathLink pathLink = pathLinkMapper.map(input);
-                        logger.debug("Mapped {}", pathLink);
+                if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
+                    Map input = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
+                    PathLink pathLink = pathLinkMapper.map(input);
+                    logger.debug("Mapped {}", pathLink);
 
-                        PathLink importedPathLink = pathLinkUpdaterService.createOrUpdatePathLink(pathLink);
-                        return Arrays.asList(importedPathLink);
+                    PathLink importedPathLink = pathLinkUpdaterService.createOrUpdatePathLink(pathLink);
+                    return Arrays.asList(importedPathLink);
 
-                    } else {
-                        logger.warn("Could not find argument {}", OUTPUT_TYPE_PATH_LINK);
-                    }
-
+                } else {
+                    logger.warn("Could not find argument {}", OUTPUT_TYPE_PATH_LINK);
                 }
+
             }
+        }
 
         return pathLinkRepository.findAll();
     }
