@@ -4,6 +4,7 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,13 @@ public class StreamingPublicationDelivery {
     private static final JAXBContext stopPlaceContext = createContext(org.rutebanken.netex.model.StopPlace.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
 
+    private final StopPlaceRepository stopPlaceRepository;
+
     private final NetexMapper netexMapper;
 
     @Autowired
-    public StreamingPublicationDelivery(NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
+        this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
     }
 
@@ -63,9 +67,9 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
-        stream(publicationDeliveryStructureXml, stopPlacesQueue, outputStream);
+        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(), outputStream);
     }
 
     public Marshaller createStopPlaceMarshaller() throws JAXBException {

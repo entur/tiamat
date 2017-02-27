@@ -5,8 +5,8 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.xml.sax.SAXException;
 
@@ -19,10 +19,14 @@ import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class StreamingPublicationDeliveryTest {
 
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(new NetexMapper());
+    private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
+
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, new NetexMapper());
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
@@ -46,6 +50,8 @@ public class StreamingPublicationDeliveryTest {
         BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
         stopPlaces.put(stopPlace);
         stopPlaces.put(StopPlaceRepositoryImpl.POISON_PILL);
+
+        when(stopPlaceRepository.scrollStopPlaces()).thenReturn(stopPlaces);
 
         streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces, byteArrayOutputStream);
 
@@ -89,6 +95,8 @@ public class StreamingPublicationDeliveryTest {
         BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
         stopPlaces.put(stopPlace);
         stopPlaces.put(StopPlaceRepositoryImpl.POISON_PILL);
+
+        when(stopPlaceRepository.scrollStopPlaces()).thenReturn(stopPlaces);
 
         streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces, byteArrayOutputStream);
 
