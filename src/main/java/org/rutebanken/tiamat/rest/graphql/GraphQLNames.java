@@ -20,9 +20,16 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
 
     public static final String TRANSFER_DURATION = "transferDuration";
+    public static final String TRANSFER_DURATION_DESCRIPTION = "Transfer durations in seconds";
+
     public static final String DEFAULT_DURATION = "defaultDuration";
+    public static final String DEFAULT_DURATION_DESCRIPTION = "Default duration in seconds";
+
     public static final String FREQUENT_TRAVELLER_DURATION = "frequentTravellerDuration";
+    public static final String FREQUENT_TRAVELLER_DURATION_DESCRIPTION = "Frequent traveller duration in seconds";
+
     public static final String OCCASIONAL_TRAVELLER_DURATION = "occasionalTravellerDuration";
+    public static final String OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION = "Occasional traveller duration in seconds";
 
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;

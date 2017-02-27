@@ -163,22 +163,22 @@ public class CustomGraphQLTypes {
 
     public static GraphQLInputObjectType transferDurationInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_TRANSFER_DURATION)
-            .description("Transfer durations in seconds")
+            .description(TRANSFER_DURATION_DESCRIPTION)
             .field(newInputObjectField()
                     .name(ID)
                     .type(GraphQLString))
             .field(newInputObjectField()
                     .name(DEFAULT_DURATION)
                     .type(GraphQLInt)
-                    .description("Default duration in seconds"))
+                    .description(DEFAULT_DURATION_DESCRIPTION))
             .field(newInputObjectField()
                     .name(FREQUENT_TRAVELLER_DURATION)
                     .type(GraphQLInt)
-                    .description("Frequent traveller duration in seconds"))
+                    .description(FREQUENT_TRAVELLER_DURATION_DESCRIPTION))
             .field(newInputObjectField()
                     .name(OCCASIONAL_TRAVELLER_DURATION)
                     .type(GraphQLInt)
-                    .description("Occasional traveller duration in seconds"))
+                    .description(OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION))
             .build();
     
     public static GraphQLInputObjectType quayIdReferenceInputObjectType = GraphQLInputObjectType
