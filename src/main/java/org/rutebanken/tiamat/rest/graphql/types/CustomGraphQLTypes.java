@@ -179,6 +179,10 @@ public class CustomGraphQLTypes {
                     .name(OCCASIONAL_TRAVELLER_DURATION)
                     .type(GraphQLInt)
                     .description(OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION))
+            .field(newInputObjectField()
+                    .name(MOBILITY_RESTRICTED_TRAVELLER_DURATION)
+                    .type(GraphQLInt)
+                    .description(MOBILITY_RESTRICTED_TRAVELLER_DURATION_DESCRIPTION))
             .build();
     
     public static GraphQLInputObjectType quayIdReferenceInputObjectType = GraphQLInputObjectType
