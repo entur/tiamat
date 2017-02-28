@@ -94,7 +94,7 @@ public class AsyncPublicationDeliveryExporter {
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
                                         streamingPublicationDelivery.stream(publicationDeliveryStructure, zipOutputStream);
                                         zipOutputStream.closeEntry();
-                                    } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
+                                    } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);
                                         String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getMessage();
                                         logger.error(message + " " + exportJob, e);
