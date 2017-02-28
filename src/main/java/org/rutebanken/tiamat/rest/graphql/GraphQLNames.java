@@ -46,7 +46,8 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
 
-    public static final String GEOMETRY_TYPE_ENUM = "Type";
+    public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
+
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
 
     public static final String ID = "id";
