@@ -40,16 +40,28 @@ public class CustomGraphQLTypes {
             .value("other", StopTypeEnumeration.OTHER)
             .build();
 
+    public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
+            .name(GEOMETRY_TYPE_ENUM)
+            .value("Point")
+            .value("LineString")
+            .value("Polygon")
+            .value("MultiPoint")
+            .value("MultiLineString")
+            .value("MultiPolygon")
+            .value("GeometryCollection")
+            .build();
+
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
+            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
             .field(newFieldDefinition()
                     .name("type")
-                    .type(GraphQLString)
+                    .type(geometryTypeEnum)
                     .dataFetcher(env -> {
-                        if (env.getSource() instanceof Geometry) {
-                            return env.getSource().getClass().getSimpleName();
-                        }
-                        return null;
+                            if (env.getSource() instanceof Geometry) {
+                                    return env.getSource().getClass().getSimpleName();
+                            }
+                            return null;
                     }))
             .field(newFieldDefinition()
                     .name("coordinates")
@@ -58,10 +70,10 @@ public class CustomGraphQLTypes {
 
     public static GraphQLInputObjectType geoJsonInputType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_GEO_JSON)
+            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
             .field(newInputObjectField()
                     .name(TYPE)
-                    .type(new GraphQLNonNull(GraphQLString))
-                    .description("Type of geometry. Valid inputs are 'Point' or 'LineString'.")
+                    .type(new GraphQLNonNull(geometryTypeEnum))
                     .build())
             .field(newInputObjectField()
                     .name(COORDINATES)

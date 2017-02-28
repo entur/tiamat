@@ -11,9 +11,7 @@ import java.util.List;
 
 public class CustomScalars {
 
-    public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", "List of coordinate-pairs as specified in GeoJSON-standard. \n" +
-            " [[9.1234, 60.1234]] for type=\"Point\".\n" +
-            " [[9.1234, 60.1234], [9.1235, 60.1235], [9.1236, 60.1236]] for type=\"LineString\".", new Coercing() {
+    public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", null, new Coercing() {
         @Override
         public List<List<Double>> serialize(Object input) {
             if (input instanceof Coordinate[]) {

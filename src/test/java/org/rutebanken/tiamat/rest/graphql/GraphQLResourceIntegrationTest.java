@@ -9,7 +9,6 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.util.HashSet;
 
-import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
@@ -337,7 +336,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "          description:{ value:\\\"" + description + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
                 "          geometry: {" +
-                "            type: \\\"Point\\\"" +
+                "            type: Point" +
                 "            coordinates: [[" + lon + "," + lat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
@@ -400,7 +399,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
                 "          geometry: {" +
-                "            type: \\\"Point\\\"" +
+                "            type: Point" +
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
@@ -454,7 +453,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            description:{ value:\\\"" + description + "\\\" }" +
                 "            publicCode:\\\"" + publicCode + "\\\"" +
                 "            geometry: {" +
-                "              type: \\\"Point\\\"" +
+                "              type: Point" +
                 "              coordinates: [[" + lon + "," + lat + "]] " +
                 "            }" +
                 "            }] " +
@@ -519,7 +518,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
                 "          geometry: {" +
-                "            type: \\\"Point\\\"" +
+                "            type: Point" +
                 "            coordinates: [[" + lon + "," + lat + "]] " +
                 "          }" +
                 "            compassBearing:" + compassBearing +
@@ -586,7 +585,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
                 "            geometry: {" +
-                "              type: \\\"Point\\\"" +
+                "              type: Point" +
                 "              coordinates: [[" + lon + "," + lat + "]] " +
                 "            }" +
                 "            compassBearing:" + compassBearing +
@@ -673,7 +672,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            shortName:{ value:\\\"" + newQuayShortName + "\\\" } " +
                 "            description:{ value:\\\"" + newQuayDescription + "\\\" }" +
                 "            geometry: {" +
-                "              type: \\\"Point\\\"" +
+                "              type: Point" +
                 "              coordinates: [[" + lon + ","+ lat + "]]" +
                 "             }" +
                 "            compassBearing:" + compassBearing +
