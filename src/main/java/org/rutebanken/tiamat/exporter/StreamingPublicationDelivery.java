@@ -1,9 +1,11 @@
 package org.rutebanken.tiamat.exporter;
 
+import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -35,10 +38,13 @@ public class StreamingPublicationDelivery {
     private static final JAXBContext stopPlaceContext = createContext(org.rutebanken.netex.model.StopPlace.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
 
+    private final StopPlaceRepository stopPlaceRepository;
+
     private final NetexMapper netexMapper;
 
     @Autowired
-    public StreamingPublicationDelivery(NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
+        this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
     }
 
@@ -63,9 +69,9 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
-        stream(publicationDeliveryStructureXml, stopPlacesQueue, outputStream);
+        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(), outputStream);
     }
 
     public Marshaller createStopPlaceMarshaller() throws JAXBException {
@@ -81,7 +87,7 @@ public class StreamingPublicationDelivery {
      * In order to not hold all stop places in memory at once, we need to marshal stop places from a queue.
      * Requires a publication delivery xml that contains newlines.
      */
-    public void stream(String publicationDeliveryStructureXml, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(String publicationDeliveryStructureXml, Iterator<StopPlace> stopPlaceIterator, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
         BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
@@ -105,7 +111,7 @@ public class StreamingPublicationDelivery {
                         bufferedWriter.write(modifiedLine);
                         bufferedWriter.write(lineSeparator);
 
-                        marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                        marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
 
                         bufferedWriter.write("</SiteFrame>");
                         bufferedWriter.write(lineSeparator);
@@ -118,7 +124,7 @@ public class StreamingPublicationDelivery {
                 }
                 if (publicationDeliveryLine.contains("</SiteFrame>")) {
                     // Marhsal stops after other nodes, such as topographic places
-                    marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                    marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
                 }
                 bufferedWriter.write(publicationDeliveryLine);
                 bufferedWriter.write(lineSeparator);
@@ -128,20 +134,16 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    public void marshalStops(BlockingQueue<StopPlace> stopPlacesQueue,
+    public void marshalStops(Iterator<StopPlace> iterableStopPlaces,
                              BufferedWriter bufferedWriter,
                              Marshaller stopPlaceMarshaller,
                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
         logger.info("Marshaling stops");
 
         int count = 0;
-        while (true) {
-            StopPlace stopPlace = stopPlacesQueue.take();
 
-            if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
-                logger.info("Got poison pill from stop place queue. Finished marshaling {} stop places.", count);
-                break;
-            }
+        while (iterableStopPlaces.hasNext()) {
+            StopPlace stopPlace = iterableStopPlaces.next();
 
             if(count == 0) {
                 bufferedWriter.write("<stopPlaces>");
@@ -160,27 +162,4 @@ public class StreamingPublicationDelivery {
             bufferedWriter.write(lineSeparator);
         }
     }
-
-//
-//    public void nonamespacewriter() throws XMLStreamException {
-//
-//        ByteArrayOutputStream stopPlaceOutputStream = new ByteArrayOutputStream();
-//        XMLStreamWriter writer = new XMLOutputFactoryImpl().createXMLStreamWriter(stopPlaceOutputStream);
-//        writer.setNamespaceContext(new NamespaceContext() {
-//            public Iterator getPrefixes(String namespaceURI) {
-//                return null;
-//            }
-//
-//            public String getPrefix(String namespaceURI) {
-//                return "";
-//            }
-//
-//            public String getNamespaceURI(String prefix) {
-//                return null;
-//            }
-//        });
-//        writer.setDefaultNamespace("");
-//
-//    }
-
 }

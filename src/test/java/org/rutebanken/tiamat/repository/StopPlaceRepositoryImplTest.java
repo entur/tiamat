@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -67,11 +68,12 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlace = stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
-        BlockingQueue<StopPlace> stopPlaces = stopPlaceRepository.scrollStopPlaces();
-        StopPlace actual = stopPlaces.take();
+        Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces();
+        assertThat(iterator.hasNext()).isTrue();
+        StopPlace actual = iterator.next();
         assertThat(actual.getId()).isEqualTo(stopPlace.getId());
-        StopPlace poison = stopPlaces.take();
-        assertThat(poison.getId()).isEqualTo(StopPlaceRepositoryImpl.POISON_PILL.getId());
+        assertThat(iterator.hasNext()).isFalse();
+
     }
 
     @Test

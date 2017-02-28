@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -47,15 +48,12 @@ public class AsyncPublicationDeliveryExporter {
 
     private final StreamingPublicationDelivery streamingPublicationDelivery;
 
-    private final StopPlaceRepository stopPlaceRepository;
-
     @Autowired
-    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery, StopPlaceRepository stopPlaceRepository) {
+    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery) {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
-        this.stopPlaceRepository = stopPlaceRepository;
     }
 
     /**
@@ -94,11 +92,11 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceRepository.scrollStopPlaces(), zipOutputStream);
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, zipOutputStream);
                                         zipOutputStream.closeEntry();
-                                    } catch (JAXBException | IOException | InterruptedException | XMLStreamException e) {
+                                    } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);
-                                        String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getMessage();
+                                        String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
                                         logger.error(message + " " + exportJob, e);
                                         exportJob.setMessage(message);
                                         if (e instanceof InterruptedException) {
