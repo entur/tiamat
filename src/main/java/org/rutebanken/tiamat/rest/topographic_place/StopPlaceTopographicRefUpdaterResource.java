@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,13 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Path("/topopgraphic_place_updater")
+@Transactional
 public class StopPlaceTopographicRefUpdaterResource {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceTopographicRefUpdaterResource.class);
-
-    private static final int WORKERS = 5;
-
-    private static final int PARTITION_SIZE = 200;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -47,19 +45,9 @@ public class StopPlaceTopographicRefUpdaterResource {
 
         final AtomicInteger topographicPlacesCreated = new AtomicInteger();
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(WORKERS);
-
         List<Long> stopPlaceIds = stopPlaceRepository.getAllStopPlaceIds();
 
-        List<List<Long>> partitionedStopPlaceList = Lists.partition(stopPlaceIds, PARTITION_SIZE);
-        logger.info("Creating {} workers with partitions of {} stop place IDs", WORKERS, PARTITION_SIZE);
-        for (List<Long> stopPlaceList : partitionedStopPlaceList) {
-            executorService.execute(() -> stopPlaceTopographicRefUpdater.update(stopPlaceList, topographicPlacesCreated, updatedStopPlaceIds));
-        }
-
-        executorService.shutdown();
-        logger.info("Awaiting termination");
-        executorService.awaitTermination(40, TimeUnit.SECONDS);
+        stopPlaceTopographicRefUpdater.update(stopPlaceIds, topographicPlacesCreated, updatedStopPlaceIds);
 
         logger.info("Returning list of updated stop place IDs {}. Topographic places created: {}", updatedStopPlaceIds, topographicPlacesCreated);
         return updatedStopPlaceIds;

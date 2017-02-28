@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
 public class StopPlaceTopographicRefUpdater {
 
@@ -49,7 +48,7 @@ public class StopPlaceTopographicRefUpdater {
                 }
             }
         } catch (InterruptedException e) {
-            logger.info("Interrupted getting stop place from queue. Done.");
+            logger.info("Interrupted getting stop place from queue.", e);
             Thread.currentThread().interrupt();
         }
     }
