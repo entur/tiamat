@@ -17,13 +17,16 @@ public class KeyValuesToKeyListConverter extends CustomConverter<Map<String, Val
             KeyListStructure keyListStructure = new KeyListStructure();
             for (String key : stringValueMap.keySet()) {
                 Value values = stringValueMap.get(key);
-                if(values != null) {
-                    String value = String.join(",", stringValueMap.get(key).getItems());
+                if(values != null && values.getItems() != null) {
+                    String value = String.join(",", values.getItems());
                     keyListStructure.getKeyValue().add(new KeyValueStructure().withKey(key).withValue(value));
                 } else {
                     // No values
                     keyListStructure.getKeyValue().add(new KeyValueStructure().withKey(key));
                 }
+            }
+            if(keyListStructure.getKeyValue().isEmpty()) {
+                return null;
             }
             return keyListStructure;
         }
