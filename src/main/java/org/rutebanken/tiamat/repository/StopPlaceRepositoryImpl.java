@@ -10,10 +10,12 @@ import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,16 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 @Repository
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
     @Autowired
     private EntityManager entityManager;
@@ -213,69 +212,47 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
-    public static final StopPlace POISON_PILL = new StopPlace();
-    static {
-        POISON_PILL.setId(-200L);
+    @Override
+    public List<Long> getAllStopPlaceIds() {
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<BigInteger> results = entityManager.createNativeQuery("select id from stop_place").getResultList();
+            if(results.isEmpty()) {
+                return new ArrayList<>();
+            } else {
+                return results.stream().map(id -> id.longValue()).collect(Collectors.toList());
+            }
+        } catch (NoResultException noResultException) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
-    public BlockingQueue<StopPlace> scrollStopPlaces() throws InterruptedException {
+    public Iterator<StopPlace> scrollStopPlaces() throws InterruptedException {
+        return scrollStopPlaces(null);
+    }
+
+    @Override
+    public Iterator<StopPlace> scrollStopPlaces(List<Long> stopPlaceIds) throws InterruptedException {
 
         final int fetchSize = 100;
-
-        BlockingQueue<StopPlace> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
 
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
         Criteria query = session.createCriteria(StopPlace.class);
+        if(stopPlaceIds != null) {
+            query.add(Restrictions.in("id", stopPlaceIds));
+        }
 
         query.setReadOnly(true);
         query.setFetchSize(fetchSize);
 
         ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 
-        Thread thread = new Thread(() -> {
-            int counter = 0;
-            boolean wasInterrupted = false;
-            try {
-                while (results.next()) {
-                    Object row = results.get()[0];
-                    StopPlace stopPlace = (StopPlace) row;
+        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, fetchSize);
 
-                    if(++counter % fetchSize == 0) {
-                        logger.info("Scrolling stop places. Counter is currently at {}", counter);
-                    }
-
-                    blockingQueue.put(stopPlace);
-                }
-            } catch (InterruptedException e) {
-                logger.warn("Got interupted while scrolling stop place results", e);
-                wasInterrupted = true;
-            } catch (Exception e) {
-                logger.warn("Got exception while scrolling stop place results", e);
-            } finally {
-                logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
-                wasInterrupted = addPoisonPill(blockingQueue) || wasInterrupted;
-                results.close();
-                if(wasInterrupted) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-        });
-        thread.setName("scroll-results");
-        thread.start();
-        return blockingQueue;
-    }
-
-    private boolean addPoisonPill(BlockingQueue<StopPlace> blockingQueue) {
-        try {
-            blockingQueue.put(POISON_PILL);
-        } catch (InterruptedException e) {
-            logger.warn("Got interrupted while adding posion pill to queue", e);
-            return true;
-        }
-        return false;
+        return stopPlaceEntityIterator;
     }
 
     @Override

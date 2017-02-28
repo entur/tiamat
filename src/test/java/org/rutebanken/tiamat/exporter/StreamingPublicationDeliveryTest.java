@@ -14,6 +14,8 @@ import javax.xml.bind.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -47,13 +49,10 @@ public class StreamingPublicationDeliveryTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setId(10L);
 
-        BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
-        stopPlaces.put(stopPlace);
-        stopPlaces.put(StopPlaceRepositoryImpl.POISON_PILL);
+        List<StopPlace> stopPlaces = new ArrayList<>(2);
+        stopPlaces.add(stopPlace);
 
-        when(stopPlaceRepository.scrollStopPlaces()).thenReturn(stopPlaces);
-
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces, byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -92,13 +91,10 @@ public class StreamingPublicationDeliveryTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setId(10L);
 
-        BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
-        stopPlaces.put(stopPlace);
-        stopPlaces.put(StopPlaceRepositoryImpl.POISON_PILL);
+        List<StopPlace> stopPlaces = new ArrayList<>(2);
+        stopPlaces.add(stopPlace);
 
-        when(stopPlaceRepository.scrollStopPlaces()).thenReturn(stopPlaces);
-
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces, byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -140,11 +136,10 @@ public class StreamingPublicationDeliveryTest {
         stopPlace.setId(16L);
         stopPlace.setVersion("2");
 
-        BlockingQueue<StopPlace> stopPlaces = new ArrayBlockingQueue<>(2);
-        stopPlaces.put(stopPlace);
-        stopPlaces.put(StopPlaceRepositoryImpl.POISON_PILL);
+        List<StopPlace> stopPlaces = new ArrayList<>(1);
+        stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces, byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
         System.out.println(xml);

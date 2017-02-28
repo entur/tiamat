@@ -6,7 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.rutebanken.tiamat.model.StopPlace;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Iterator;
+import java.util.List;
 
 public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, StopPlaceRepositoryCustom {
 
@@ -20,7 +21,10 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     StopPlace findOne(Long stopPlaceId);
 
     @Override
-    BlockingQueue<StopPlace> scrollStopPlaces();
+    Iterator<StopPlace> scrollStopPlaces();
+
+    @Override
+    Iterator<StopPlace> scrollStopPlaces(List<Long> stopPlaceIds);
 
 }
 

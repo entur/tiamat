@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.exporter;
 
+import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -18,6 +19,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -85,7 +87,7 @@ public class StreamingPublicationDelivery {
      * In order to not hold all stop places in memory at once, we need to marshal stop places from a queue.
      * Requires a publication delivery xml that contains newlines.
      */
-    public void stream(String publicationDeliveryStructureXml, BlockingQueue<StopPlace> stopPlacesQueue, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(String publicationDeliveryStructureXml, Iterator<StopPlace> stopPlaceIterator, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
         BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
@@ -109,7 +111,7 @@ public class StreamingPublicationDelivery {
                         bufferedWriter.write(modifiedLine);
                         bufferedWriter.write(lineSeparator);
 
-                        marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                        marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
 
                         bufferedWriter.write("</SiteFrame>");
                         bufferedWriter.write(lineSeparator);
@@ -122,7 +124,7 @@ public class StreamingPublicationDelivery {
                 }
                 if (publicationDeliveryLine.contains("</SiteFrame>")) {
                     // Marhsal stops after other nodes, such as topographic places
-                    marshalStops(stopPlacesQueue, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                    marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
                 }
                 bufferedWriter.write(publicationDeliveryLine);
                 bufferedWriter.write(lineSeparator);
@@ -132,20 +134,16 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    public void marshalStops(BlockingQueue<StopPlace> stopPlacesQueue,
+    public void marshalStops(Iterator<StopPlace> iterableStopPlaces,
                              BufferedWriter bufferedWriter,
                              Marshaller stopPlaceMarshaller,
                              String lineSeparator) throws InterruptedException, JAXBException, IOException {
         logger.info("Marshaling stops");
 
         int count = 0;
-        while (true) {
-            StopPlace stopPlace = stopPlacesQueue.take();
 
-            if (stopPlace.getId().equals(StopPlaceRepositoryImpl.POISON_PILL.getId())) {
-                logger.info("Got poison pill from stop place queue. Finished marshaling {} stop places.", count);
-                break;
-            }
+        while (iterableStopPlaces.hasNext()) {
+            StopPlace stopPlace = iterableStopPlaces.next();
 
             if(count == 0) {
                 bufferedWriter.write("<stopPlaces>");
