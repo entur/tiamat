@@ -96,7 +96,7 @@ public class AsyncPublicationDeliveryExporter {
                                         zipOutputStream.closeEntry();
                                     } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);
-                                        String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getMessage();
+                                        String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
                                         logger.error(message + " " + exportJob, e);
                                         exportJob.setMessage(message);
                                         if (e instanceof InterruptedException) {
