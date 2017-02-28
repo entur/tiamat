@@ -13,7 +13,7 @@ import java.util.Map;
 public class KeyValuesToKeyListConverter extends CustomConverter<Map<String, Value>, KeyListStructure> {
     @Override
     public KeyListStructure convert(Map<String, Value> stringValueMap, Type<? extends KeyListStructure> type) {
-        if(stringValueMap != null && !stringValueMap.isEmpty()) {
+        if(stringValueMap != null) {
             KeyListStructure keyListStructure = new KeyListStructure();
             for (String key : stringValueMap.keySet()) {
                 String value = String.join(",", stringValueMap.get(key).getItems());

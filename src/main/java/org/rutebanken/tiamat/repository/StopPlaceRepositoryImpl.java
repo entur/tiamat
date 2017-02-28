@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 @Repository
@@ -235,6 +236,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Thread thread = new Thread(() -> {
             int counter = 0;
+            boolean wasInterrupted = false;
             try {
                 while (results.next()) {
                     Object row = results.get()[0];
@@ -244,24 +246,36 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                         logger.info("Scrolling stop places. Counter is currently at {}", counter);
                     }
 
-
                     blockingQueue.put(stopPlace);
                 }
             } catch (InterruptedException e) {
                 logger.warn("Got interupted while scrolling stop place results", e);
-                Thread.currentThread().interrupt();
-                return;
+                wasInterrupted = true;
             } catch (Exception e) {
                 logger.warn("Got exception while scrolling stop place results", e);
             } finally {
                 logger.info("Closing scrollable results and adding poison pill to queue. Counter ended at {}", counter);
+                wasInterrupted = addPoisonPill(blockingQueue) || wasInterrupted;
                 results.close();
-                blockingQueue.add(POISON_PILL);
+                if(wasInterrupted) {
+                    Thread.currentThread().interrupt();
+                }
             }
+
         });
         thread.setName("scroll-results");
         thread.start();
         return blockingQueue;
+    }
+
+    private boolean addPoisonPill(BlockingQueue<StopPlace> blockingQueue) {
+        try {
+            blockingQueue.put(POISON_PILL);
+        } catch (InterruptedException e) {
+            logger.warn("Got interrupted while adding posion pill to queue", e);
+            return true;
+        }
+        return false;
     }
 
     @Override
