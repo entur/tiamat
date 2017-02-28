@@ -18,7 +18,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
 
     @Override
     public Quays_RelStructure convertTo(Set<Quay> quays, Type<Quays_RelStructure> type) {
-        if(quays == null) {
+        if(quays == null || quays.isEmpty()) {
             return null;
         }
 
