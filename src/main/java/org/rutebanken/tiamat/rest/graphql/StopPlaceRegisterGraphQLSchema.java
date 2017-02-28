@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import graphql.language.FieldDefinition;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -61,17 +63,21 @@ public class StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
 
-        commonFieldsList.add(newFieldDefinition()
+        GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
                 .name(GEOMETRY)
                 .type(geoJsonObjectType)
                 .dataFetcher(env -> {
-                    if (env.getSource() instanceof Zone_VersionStructure) {
-                        Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
-                        return source.getCentroid();
-                    }
-                    return null;
-                })
-                .build());
+                            if (env.getSource() instanceof Zone_VersionStructure) {
+                                Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
+                                return source.getCentroid();
+                            } else if(env.getSource() instanceof Link) {
+                                Link link = (Link) env.getSource();
+                                return link.getLineString();
+                            }
+                            return null;
+                        }).build();
+
+        commonFieldsList.add(geometryFieldDefinition);
 
         commonFieldsList.add(newFieldDefinition()
                 .name(IMPORTED_ID)
@@ -95,7 +101,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
 
-        GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name("StopPlaceRegister")
@@ -147,14 +153,12 @@ public class StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
-                        .name("mutatePathlink")
+                        .name(MUTATE_PATH_LINK)
                         .description("Create new or update existing PathLink")
                         .argument(GraphQLArgument.newArgument()
-                                .name("PathLink")
-                                .type(pathLinkObjectInputType))
-                        .name(MUTATE_PATH_LINK)
+                                .name(OUTPUT_TYPE_PATH_LINK)
+                                .type(new GraphQLList(pathLinkObjectInputType)))
                         .description("Create new or update existing "+OUTPUT_TYPE_PATH_LINK)
-                        .argument(GraphQLArgument.newArgument().name(OUTPUT_TYPE_PATH_LINK).type(pathLinkObjectInputType))
                         .dataFetcher(pathLinkUpdater))
                 .build();
 
@@ -168,6 +172,10 @@ public class StopPlaceRegisterGraphQLSchema {
         List<GraphQLArgument> arguments = new ArrayList<>();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
                 .build());
         return arguments;

@@ -11,11 +11,9 @@ import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,11 +22,6 @@ public class PathLinkImportTest extends CommonSpringBootTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
-
-    private DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-
-    public PathLinkImportTest() throws DatatypeConfigurationException {
-    }
 
     @Test
     public void publicationDeliveryWithPathLink() throws Exception {
@@ -49,8 +42,6 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                                 .withLatitude(new BigDecimal("9.6"))
                                 .withLongitude(new BigDecimal("76"))));
 
-        Duration duration = datatypeFactory.newDuration(10000);
-
         LineStringType lineStringType = new LineStringType()
                 .withId("LineString")
                 .withPosList(new DirectPositionListType()
@@ -59,6 +50,8 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                                 71.1,
                                 9.5,
                                 74.1));
+
+        Duration duration = Duration.ofMillis(10000);
 
         PathLink netexPathLink = new PathLink()
                 .withId("NRI:ConnectionLink:762130479_762130479")

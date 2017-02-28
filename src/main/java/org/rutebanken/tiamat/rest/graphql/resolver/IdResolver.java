@@ -18,9 +18,9 @@ public class IdResolver {
     public Optional<Long> extractIdIfPresent(String field, Map input) {
         if(input.get(field) != null) {
             String nsrId = (String) input.get(field);
-            logger.info("Detected ID {}", nsrId);
+            logger.debug("Detected ID {}", nsrId);
             if(nsrId.isEmpty()) {
-                logger.info("The ID provided is empty '{}'", nsrId);
+                logger.debug("The ID provided is empty '{}'", nsrId);
                 return null;
             }
             return NetexIdMapper.getOptionalTiamatId(nsrId);

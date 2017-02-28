@@ -1,12 +1,10 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.GraphQLError;
-import graphql.GraphQLException;
+import graphql.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Component
@@ -99,7 +98,12 @@ public class GraphQLResource {
                             status = Response.Status.BAD_REQUEST;
                             break;
                         case DataFetchingException:
-                            status = Response.Status.INTERNAL_SERVER_ERROR;
+                            ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
+                            if(exceptionWhileDataFetching.getException() != null) {
+                                status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
+                                break;
+                            }
+                            status = Response.Status.OK;
                             break;
                     }
                 }
@@ -117,5 +121,14 @@ public class GraphQLResource {
         }
 		return res.entity(content).build();
 	}
+
+
+	private Response.Status getStatusCodeFromThrowable(Throwable e) {
+        if(e instanceof DataIntegrityViolationException) {
+            return Response.Status.INTERNAL_SERVER_ERROR;
+        }
+
+        return Response.Status.OK;
+    }
 
 }

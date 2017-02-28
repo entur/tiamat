@@ -8,13 +8,10 @@ public class TransferDuration {
 
     protected Duration defaultDuration;
 
-    @Transient
     protected Duration frequentTravellerDuration;
 
-    @Transient
     protected Duration occasionalTravellerDuration;
 
-    @Transient
     protected Duration mobilityRestrictedTravellerDuration;
 
     public Duration getDefaultDuration() {

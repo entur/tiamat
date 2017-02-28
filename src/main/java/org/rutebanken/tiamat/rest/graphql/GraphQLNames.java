@@ -19,6 +19,21 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_TRANSFER_DURATION = "TransferDuration";
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
 
+    public static final String TRANSFER_DURATION = "transferDuration";
+    public static final String TRANSFER_DURATION_DESCRIPTION = "Transfer durations in seconds";
+
+    public static final String DEFAULT_DURATION = "defaultDuration";
+    public static final String DEFAULT_DURATION_DESCRIPTION = "Default duration in seconds";
+
+    public static final String FREQUENT_TRAVELLER_DURATION = "frequentTravellerDuration";
+    public static final String FREQUENT_TRAVELLER_DURATION_DESCRIPTION = "Frequent traveller duration in seconds";
+
+    public static final String OCCASIONAL_TRAVELLER_DURATION = "occasionalTravellerDuration";
+    public static final String OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION = "Occasional traveller duration in seconds";
+
+    public static final String MOBILITY_RESTRICTED_TRAVELLER_DURATION = "mobilityRestrictedTravellerDuration";
+    public static final String MOBILITY_RESTRICTED_TRAVELLER_DURATION_DESCRIPTION = "Mobility restriced traveller duration in seconds";
+
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
@@ -73,6 +88,8 @@ public class GraphQLNames {
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";
+
+    public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";

@@ -7,8 +7,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
@@ -30,13 +33,42 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
         try {
             @SuppressWarnings("unchecked")
             List<BigInteger> results = query.getResultList();
-            if(results.isEmpty()) {
+            if (results.isEmpty()) {
                 return null;
             } else {
                 return results.get(0).longValue();
             }
         } catch (NoResultException noResultException) {
             return null;
+        }
+    }
+
+    @Override
+    public List<Long> findByStopPlaceId(long stopPlaceId) {
+
+        String sql = "SELECT pl.id " +
+                "FROM path_link pl " +
+                "       INNER JOIN path_link_end ple " +
+                "               ON pl.from_id = ple.id " +
+                "                  OR pl.to_id = ple.id " +
+                "       INNER JOIN quay q " +
+                "               ON q.id = ple.quay_id " +
+                "WHERE q.id IN (SELECT spq.quays_id " +
+                "                FROM stop_place_quays spq " +
+                "                WHERE spq.stop_place_id = :stopPlaceId)";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("stopPlaceId", stopPlaceId);
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<BigInteger> results = query.getResultList();
+            return results.stream()
+                    .map(bigInteger -> bigInteger.longValue())
+                    .collect(toList());
+
+        } catch (NoResultException noResultException) {
+            return new ArrayList<>();
         }
     }
 }

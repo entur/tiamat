@@ -2,15 +2,18 @@ package org.rutebanken.tiamat.rest.graphql.resolver;
 
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.TransferDuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component
 public class PathLinkMapper {
@@ -32,24 +35,42 @@ public class PathLinkMapper {
         PathLink pathLink = new PathLink();
         idResolver.extractAndSetId(ID, input, pathLink);
 
-        if(input.get("from") != null) {
-            pathLink.setFrom(mapToPathLinkEnd("from", input));
+        if(input.get(PATH_LINK_FROM) != null) {
+            pathLink.setFrom(mapToPathLinkEnd(PATH_LINK_FROM, input));
         }
 
-        if(input.get("to") != null) {
-            pathLink.setFrom(mapToPathLinkEnd("to", input));
+        if(input.get(PATH_LINK_TO) != null) {
+            pathLink.setTo(mapToPathLinkEnd(PATH_LINK_TO, input));
         }
 
         if(input.get(GEOMETRY) != null) {
-            pathLink.setLineString(geometryResolver.createGeoJsonLineString(input));
+            pathLink.setLineString(geometryResolver.createGeoJsonLineString((Map) input.get(GEOMETRY)));
         }
 
+        if(input.get(TRANSFER_DURATION) != null) {
+            pathLink.setTransferDuration(mapToTransferDuration((Map) input.get(TRANSFER_DURATION)));
+        }
         // TODO
-        // transfer duration
         // allowed use
 
 
         return pathLink;
+    }
+
+    private TransferDuration mapToTransferDuration(Map input) {
+        TransferDuration transferDuration = new TransferDuration();
+        transferDuration.setFrequentTravellerDuration(ofSeconds(input, FREQUENT_TRAVELLER_DURATION));
+        transferDuration.setMobilityRestrictedTravellerDuration(ofSeconds(input, MOBILITY_RESTRICTED_TRAVELLER_DURATION));
+        transferDuration.setOccasionalTravellerDuration(ofSeconds(input, OCCASIONAL_TRAVELLER_DURATION));
+        transferDuration.setDefaultDuration(ofSeconds(input, DEFAULT_DURATION));
+        return transferDuration;
+    }
+
+    private Duration ofSeconds(Map input, String field) {
+        if(input.get(field) != null) {
+            return Duration.ofSeconds((Integer) input.get(field));
+        }
+        return null;
     }
 
     private PathLinkEnd mapToPathLinkEnd(String field, Map input) {
@@ -63,6 +84,19 @@ public class PathLinkMapper {
     private PathLinkEnd mapToPathLinkEnd(Map input) {
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
         idResolver.extractAndSetId(ID, input, pathLinkEnd);
+
+        if(input.get("quay") != null) {
+            Optional<Long> quayId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
+            if(quayId.isPresent()) {
+                Quay quay = new Quay();
+                quay.setId(quayId.get());
+                pathLinkEnd.setQuay(quay);
+            }
+        } else {
+            logger.warn("Could not resolve Quay. Stop Place is not supported yet. Input was: {}", input);
+        }
+
+        logger.trace("Mapped {}", pathLinkEnd);
         return pathLinkEnd;
     }
 }
