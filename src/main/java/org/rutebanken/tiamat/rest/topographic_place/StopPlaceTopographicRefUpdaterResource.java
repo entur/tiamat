@@ -16,7 +16,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -35,9 +34,9 @@ public class StopPlaceTopographicRefUpdaterResource {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceTopographicRefUpdaterResource.class);
 
-    private static final int WORKERS = 10;
+    private static final int WORKERS = 5;
 
-    private static final int BATCH_SIZE = 100;
+    private static final int PARTITION_SIZE = 200;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -57,10 +56,9 @@ public class StopPlaceTopographicRefUpdaterResource {
 
         List<Long> stopPlaceIds = stopPlaceRepository.getAllStopPlaceIds();
 
-        List<List<Long>> partitionedStopPlaceList = Lists.partition(stopPlaceIds, BATCH_SIZE);
-
+        List<List<Long>> partitionedStopPlaceList = Lists.partition(stopPlaceIds, PARTITION_SIZE);
+        logger.info("Creating {} workers with partitions of {} stop place IDs", WORKERS, PARTITION_SIZE);
         for(List<Long> stopPlaceList : partitionedStopPlaceList) {
-            logger.info("Creating worker with {} stop place IDs", stopPlaceList.size());
             executorService.execute(new TopographicPlaceUpdaterWorker(stopPlaceList, updatedStopPlaceIds, topographicPlacesCreated));
         }
 

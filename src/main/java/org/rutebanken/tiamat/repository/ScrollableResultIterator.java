@@ -41,7 +41,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
 
         if (next.isPresent()) {
             if (++counter % fetchSize == 0) {
-                logger.info("Scrolling stop places. Counter is currently at {}", counter);
+                logger.debug("Scrolling stop places. Counter is currently at {}", counter);
             }
             return next.get();
         }
@@ -51,7 +51,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     }
 
     private void close() {
-        logger.info("Closing result set. Counter ended at {}", counter);
+        logger.info("Closing results. Counter ended at {}", counter);
         scrollableResults.close();
     }
 
