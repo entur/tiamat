@@ -16,8 +16,14 @@ public class KeyValuesToKeyListConverter extends CustomConverter<Map<String, Val
         if(stringValueMap != null) {
             KeyListStructure keyListStructure = new KeyListStructure();
             for (String key : stringValueMap.keySet()) {
-                String value = String.join(",", stringValueMap.get(key).getItems());
-                keyListStructure.getKeyValue().add(new KeyValueStructure().withKey(key).withValue(value));
+                Value values = stringValueMap.get(key);
+                if(values != null) {
+                    String value = String.join(",", stringValueMap.get(key).getItems());
+                    keyListStructure.getKeyValue().add(new KeyValueStructure().withKey(key).withValue(value));
+                } else {
+                    // No values
+                    keyListStructure.getKeyValue().add(new KeyValueStructure().withKey(key));
+                }
             }
             return keyListStructure;
         }
