@@ -2,21 +2,17 @@ package org.rutebanken.tiamat.rest.topographic_place;
 
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.util.ConcurrentHashSet;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.StopPlaceTopographicRefUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Look up topographic place references for already persisted stops.
  */
-@Transactional
 @Component
 @Path("/topopgraphic_place_updater")
 public class StopPlaceTopographicRefUpdaterResource {
@@ -42,7 +37,7 @@ public class StopPlaceTopographicRefUpdaterResource {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private StopPlaceTopographicRefUpdater stopPlaceTopographicRefUpdater;
 
     @GET
     @Produces("application/json")
@@ -58,8 +53,8 @@ public class StopPlaceTopographicRefUpdaterResource {
 
         List<List<Long>> partitionedStopPlaceList = Lists.partition(stopPlaceIds, PARTITION_SIZE);
         logger.info("Creating {} workers with partitions of {} stop place IDs", WORKERS, PARTITION_SIZE);
-        for(List<Long> stopPlaceList : partitionedStopPlaceList) {
-            executorService.execute(new TopographicPlaceUpdaterWorker(stopPlaceList, updatedStopPlaceIds, topographicPlacesCreated));
+        for (List<Long> stopPlaceList : partitionedStopPlaceList) {
+            executorService.execute(() -> stopPlaceTopographicRefUpdater.update(stopPlaceList, topographicPlacesCreated, updatedStopPlaceIds));
         }
 
         executorService.shutdown();
@@ -70,41 +65,4 @@ public class StopPlaceTopographicRefUpdaterResource {
         return updatedStopPlaceIds;
     }
 
-    class TopographicPlaceUpdaterWorker implements Runnable {
-
-        private final List<Long> stopPlaceIds;
-        private final AtomicInteger topographicPlacesCreated;
-        private final Set<String> updatedStopPlaceIds;
-
-        public TopographicPlaceUpdaterWorker(List<Long> stopPlaceIds, Set<String> updatedStopPlaceIds, AtomicInteger topographicPlacesCreated) {
-            this.stopPlaceIds = stopPlaceIds;
-            this.topographicPlacesCreated = topographicPlacesCreated;
-            this.updatedStopPlaceIds = updatedStopPlaceIds;
-        }
-
-        @Override
-        public void run() {
-            try {
-                Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces(stopPlaceIds);
-
-                while (iterator.hasNext()) {
-                    StopPlace stopPlace = iterator.next();
-
-                    if (stopPlace.getTopographicPlace() == null) {
-                        logger.info("Stop Place does not have reference to topographic place: {}", stopPlace);
-                        try {
-                            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
-                            stopPlaceRepository.save(stopPlace);
-                            updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
-                        } catch (IOException e) {
-                            logger.info("Issue looking up county and municipality for stop {}", stopPlace, e);
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                logger.info("Interrupted getting stop place from queue. Done.");
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
 }
