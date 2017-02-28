@@ -32,9 +32,6 @@ public class StopPlaceTopographicRefUpdaterResource {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceTopographicRefUpdaterResource.class);
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
     private StopPlaceTopographicRefUpdater stopPlaceTopographicRefUpdater;
 
     @GET
@@ -45,9 +42,7 @@ public class StopPlaceTopographicRefUpdaterResource {
 
         final AtomicInteger topographicPlacesCreated = new AtomicInteger();
 
-        List<Long> stopPlaceIds = stopPlaceRepository.getAllStopPlaceIds();
-
-        stopPlaceTopographicRefUpdater.update(stopPlaceIds, topographicPlacesCreated, updatedStopPlaceIds);
+        stopPlaceTopographicRefUpdater.update(topographicPlacesCreated, updatedStopPlaceIds);
 
         logger.info("Returning list of updated stop place IDs {}. Topographic places created: {}", updatedStopPlaceIds, topographicPlacesCreated);
         return updatedStopPlaceIds;

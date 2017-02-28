@@ -28,10 +28,10 @@ public class StopPlaceTopographicRefUpdater {
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
-    public void update(List<Long> stopPlaceIds, AtomicInteger topographicPlacesCreated, Set<String> updatedStopPlaceIds) {
+    public void update(AtomicInteger topographicPlacesCreated, Set<String> updatedStopPlaceIds) {
         try {
 
-            Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces(stopPlaceIds);
+            Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces();
 
             while (iterator.hasNext()) {
                 StopPlace stopPlace = iterator.next();
