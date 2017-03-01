@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.finder;
 
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class TopographicPlaceFromRefFinder {
                 .stream()
                 .filter(topographicPlace -> topographicPlace.getId() != null)
                 .filter(topographicPlace -> {
-                    Long reference = Long.valueOf(topographicPlaceRef.getRef());
+                    Long reference = Long.valueOf(NetexIdMapper.getTiamatId(topographicPlaceRef.getRef()));
                     return topographicPlace.getId().equals(reference);
                 })
                 .peek(topographicPlace -> logger.trace("Looking at topographical place with name {} and id {}", topographicPlace.getName(), topographicPlace.getId()))
