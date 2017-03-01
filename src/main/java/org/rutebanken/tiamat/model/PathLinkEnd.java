@@ -14,12 +14,7 @@ import javax.persistence.Entity;
 public class PathLinkEnd implements IdentifiedEntity {
 
     @Id
-    @GeneratedValue(generator = "idgen")
-    @GenericGenerator(name = "idgen",
-            strategy = "org.rutebanken.tiamat.repository.GaplessOptionalGenerator",
-            parameters = {
-                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.CONFIG_PREFER_SEQUENCE_PER_ENTITY, value = "true")
-            })
+    @GeneratedValue(generator = "sequence_per_table_generator")
     private Long id;
 
     @ManyToOne

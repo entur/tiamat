@@ -11,8 +11,7 @@ import java.util.List;
 
 
 @Entity
-@SequenceGenerator(initialValue = 1, name = "idgen", sequenceName = "seq_navigation_paths_rel_structure" )
-public class NavigationPaths_RelStructure        extends ContainmentAggregationStructure {
+public class NavigationPaths_RelStructure extends ContainmentAggregationStructure {
 
     @ManyToAny(metaColumn = @Column(name = "item_type"))
     @AnyMetaDef(
