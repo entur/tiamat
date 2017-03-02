@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.rutebanken.tiamat.model.AccessSpace;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AccessSpaceRepository extends JpaRepository<AccessSpace, Long> {
+public interface AccessSpaceRepository extends JpaRepository<AccessSpace, Long>, IdentifiedEntityRepository<AccessSpace> {
+
+    AccessSpace findByNetexId(String netexId);
 }

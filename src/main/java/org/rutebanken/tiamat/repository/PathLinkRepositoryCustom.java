@@ -12,5 +12,5 @@ public interface PathLinkRepositoryCustom {
      * @param stopPlaceId
      * @return list of path links referencing to quays, which belong to stop place.
      */
-    List<Long> findByStopPlaceId(long stopPlaceId);
+    List<Long> findByStopPlaceNetexId(String netexStopPlaceId);
 }

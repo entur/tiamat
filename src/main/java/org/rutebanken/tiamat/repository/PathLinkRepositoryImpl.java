@@ -44,7 +44,7 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
     }
 
     @Override
-    public List<Long> findByStopPlaceId(long stopPlaceId) {
+    public List<Long> findByStopPlaceNetexId(String netexStopPlaceId) {
 
         String sql = "SELECT pl.id " +
                 "FROM path_link pl " +
@@ -55,10 +55,11 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
                 "               ON q.id = ple.quay_id " +
                 "WHERE q.id IN (SELECT spq.quays_id " +
                 "                FROM stop_place_quays spq " +
-                "                WHERE spq.stop_place_id = :stopPlaceId)";
+                "                   INNER join stop_place s on s.id = spq.stop_place_id " +
+                "                WHERE s.netex_id = :netexStopPlaceId)";
 
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("stopPlaceId", stopPlaceId);
+        query.setParameter("netexStopPlaceId", netexStopPlaceId);
 
         try {
             @SuppressWarnings("unchecked")
