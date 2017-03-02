@@ -18,15 +18,15 @@ public class CountyOrMunicipalityAssembler {
     private static final TopographicPlaceTypeEnumeration MUNICIPALITY_TYPE = TopographicPlaceTypeEnumeration.TOWN;
 
     public List<CountyOrMunicipalityDto> assemble(Iterable<TopographicPlace> places) {
-        Map<Long, TopographicPlace> counties = new HashMap<>();
+        Map<String, TopographicPlace> counties = new HashMap<>();
         List<TopographicPlace> municipalities = new ArrayList<>();
         List<CountyOrMunicipalityDto> countyOrMunicipalityDtos = new ArrayList<>();
 
         places.forEach(place -> {
             if(place.getTopographicPlaceType() == null) {
-                logger.warn("TopographicPlace has type null", place.getId());
+                logger.warn("TopographicPlace has type null: {}", place.getNetexId());
             } else if (place.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY)) {
-                counties.put(place.getId(), place);
+                counties.put(place.getNetexId(), place);
                 countyOrMunicipalityDtos.add(map(place));
             } else if (place.getTopographicPlaceType().equals(MUNICIPALITY_TYPE)) {
                 municipalities.add(place);
@@ -37,7 +37,7 @@ public class CountyOrMunicipalityAssembler {
 
         municipalities.forEach(municipality -> {
             if (municipality.getParentTopographicPlace() != null) {
-                long countyId = municipality.getParentTopographicPlace().getId();
+                String countyId = municipality.getParentTopographicPlace().getNetexId();
                 TopographicPlace county = counties.get(countyId);
                 CountyOrMunicipalityDto admin = map(municipality);
                 if (county != null) {
@@ -47,7 +47,7 @@ public class CountyOrMunicipalityAssembler {
                     logger.warn("No county with ID {}", countyId);
                 }
             } else {
-                logger.warn("Found topographic place {} of type {} without parent place ref.", municipality.getId(), MUNICIPALITY_TYPE);
+                logger.warn("Found topographic place {} of type {} without parent place ref.", municipality.getNetexId(), MUNICIPALITY_TYPE);
             }
         });
         return countyOrMunicipalityDtos;
@@ -56,7 +56,7 @@ public class CountyOrMunicipalityAssembler {
 
     private CountyOrMunicipalityDto map(TopographicPlace place) {
         CountyOrMunicipalityDto admin = new CountyOrMunicipalityDto();
-        admin.ref = String.valueOf(place.getId());
+        admin.ref = String.valueOf(place.getNetexId());
         admin.name = place.getName().getValue();
         admin.type = place.getTopographicPlaceType().value();
         return admin;

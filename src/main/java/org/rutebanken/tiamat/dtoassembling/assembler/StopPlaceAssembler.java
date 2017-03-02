@@ -24,20 +24,17 @@ public class StopPlaceAssembler {
 
     private PointAssembler pointAssembler;
 
-    private TopographicPlaceRepository topographicPlaceRepository;
-
     private QuayAssembler quayAssembler;
 
     @Autowired
-    public StopPlaceAssembler(PointAssembler pointAssembler, TopographicPlaceRepository topographicPlaceRepository, QuayAssembler quayAssembler) {
+    public StopPlaceAssembler(PointAssembler pointAssembler, QuayAssembler quayAssembler) {
         this.pointAssembler = pointAssembler;
-        this.topographicPlaceRepository = topographicPlaceRepository;
         this.quayAssembler = quayAssembler;
     }
 
     public StopPlaceDto assemble(StopPlace stopPlace, boolean assembleQuays) {
         StopPlaceDto stopPlaceDto = new StopPlaceDto();
-        stopPlaceDto.id = String.valueOf(stopPlace.getId());
+        stopPlaceDto.id = stopPlace.getNetexId();
 
         stopPlaceDto.name = multiLingualStringValue(stopPlace.getName());
         stopPlaceDto.shortName = multiLingualStringValue(stopPlace.getShortName());
@@ -80,13 +77,13 @@ public class StopPlaceAssembler {
                 stopPlaceDto.municipality = municipality.getName().getValue();
             }
 
-            logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDto.municipality, stopPlace.getName(), stopPlace.getId());
+            logger.trace("Set municipality name '{}' on stop place '{}' {}", stopPlaceDto.municipality, stopPlace.getName(), stopPlace.getNetexId());
 
             TopographicPlace county = municipality.getParentTopographicPlace();
             if(county != null) {
 
                 if(county != null && county.getName() != null) {
-                    logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getId(), municipality.getName(), municipality.getId());
+                    logger.trace("Found county '{}' {} from municipality '{}' {}", county.getName(), county.getNetexId(), municipality.getName(), municipality.getNetexId());
                     stopPlaceDto.county = county.getName().getValue();
                 }
             }

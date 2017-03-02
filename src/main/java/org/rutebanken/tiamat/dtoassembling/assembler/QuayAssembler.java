@@ -19,7 +19,7 @@ public class QuayAssembler {
     public QuayDto assemble(Quay quay) {
         QuayDto quayDto = new QuayDto();
 
-        quayDto.id = String.valueOf(quay.getId());
+        quayDto.id = String.valueOf(quay.getNetexId());
         if(quay.getName() != null) quayDto.name = quay.getName().getValue();
 
         quayDto.centroid = pointAssembler.assemble(quay.getCentroid());
