@@ -68,8 +68,8 @@ public class PathLinksImporter {
 
     private Optional<PathLink> findExistingPathLinkIfPresent(PathLink incomingPathLink) {
         Optional<PathLink> existingPathLink = Optional.empty();
-        if(incomingPathLink.getId() != null) {
-            existingPathLink = Optional.of(pathLinkRepository.findOne(incomingPathLink.getId()));
+        if(incomingPathLink.getNetexId() != null) {
+            existingPathLink = Optional.of(pathLinkRepository.findByNetexId(incomingPathLink.getNetexId()));
             logger.info("Found existing existing path link from incoming ID {}", existingPathLink);
 
         } else if(!incomingPathLink.getOriginalIds().isEmpty()) {
