@@ -2,11 +2,13 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Random;
 
 /**
  * Note: Implemented because of an issue with using
@@ -24,43 +26,25 @@ public class NetexIdMapper {
     public static final String NSR = "NSR";
 
     public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
-        if(internalEntity.getId() == null) {
-            logger.warn("Id for internal model is null. Mapping to null value. Object: {}", internalEntity);
+        if(internalEntity.getNetexId() == null) {
+            logger.warn("Netex ID for internal model object is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
         } else {
-            netexEntity.setId(getNetexId(internalEntity));
+            netexEntity.setId(internalEntity.getNetexId());
         }
-    }
-
-    public static String getNetexId(EntityStructure internalEntity, Long id) {
-        return getNetexId(determineIdType(internalEntity), String.valueOf(id));
-    }
-
-    public static String getNetexId(EntityStructure internalEntity) {
-        return getNetexId(internalEntity, internalEntity.getId());
-    }
-
-    public static String getNetexId(PathLinkEnd pathLinkEnd) {
-        return getNetexId("PathLinkEnd", String.valueOf(pathLinkEnd.getId()));
-    }
-
-    public static String getNetexId(String type, String id) {
-        return NSR + ":" + type + ":" + id;
     }
 
     public void toTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
 
         if(netexEntity.getId() == null) {
-            tiamatEntity.setId(null);
+            tiamatEntity.setNetexId(null);
         } else if(netexEntity.getId().startsWith(NSR)) {
             logger.debug("Detected tiamat ID: {}. ", netexEntity.getId());
-            String netexId = netexEntity.getId();
-            Long tiamatId = getTiamatId(netexId);
-            tiamatEntity.setId(tiamatId);
+            tiamatEntity.setNetexId(netexEntity.getId());
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
-            tiamatEntity.setId(null);
+            tiamatEntity.setNetexId(null);
         }
         logger.debug("Copy key values to tiamat model");
         copyKeyValuesToTiamatModel(netexEntity, tiamatEntity);
@@ -100,13 +84,24 @@ public class NetexIdMapper {
      * @param netexId Id with long value after last colon.
      * @return long value
      */
-    public static long getTiamatId(String netexId) {
+    public static long getTiamatPublicId(String netexId) {
         try {
             return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
         }
+    }
 
+    public static String getNetexId(String type, String id) {
+        return NSR + ":" + type + ":" + id;
+    }
+
+    public static long getNetexIdPostfix(String netexId) {
+        return Long.parseLong(netexId.substring(netexId.lastIndexOf(",")));
+    }
+
+    public static String generateNetexId(IdentifiedEntity identifiedEntity) {
+        return getNetexId(determineIdType(identifiedEntity), String.valueOf(new Random().nextInt()));
     }
 
     private static boolean isInternalTiamatId(String netexId) {
@@ -116,22 +111,24 @@ public class NetexIdMapper {
     public static Optional<Long> getOptionalTiamatId(String netexId) {
         if (isInternalTiamatId(netexId)) {
             logger.debug("Detected tiamat ID from {}", netexId);
-            return Optional.of(getTiamatId(netexId));
+            return Optional.of(getTiamatPublicId(netexId));
         } else {
             return Optional.empty();
         }
     }
 
-    private static String determineIdType(EntityStructure entityStructure) {
+    private static String determineIdType(IdentifiedEntity identifiedEntity) {
 
-        if(entityStructure instanceof StopPlace) {
+        if(identifiedEntity instanceof StopPlace) {
             return "StopPlace";
-        } else if (entityStructure instanceof Quay){
+        } else if (identifiedEntity instanceof Quay){
             return "Quay";
-        } else if (entityStructure instanceof SiteFrame){
+        } else if (identifiedEntity instanceof SiteFrame) {
             return "SiteFrame";
+        } else if (identifiedEntity instanceof PathLinkEnd) {
+            return "PathLinkEnd";
         } else {
-            return entityStructure.getClass().getSimpleName();
+            return identifiedEntity.getClass().getSimpleName();
         }
     }
 
