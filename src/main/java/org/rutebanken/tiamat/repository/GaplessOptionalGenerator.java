@@ -51,32 +51,32 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
 
         if (object == null) throw new HibernateException(new NullPointerException());
 
-        Optional<EntityStructure> optionalEntityStructure = entityStructure(object);
-        if (optionalEntityStructure.isPresent()) {
-
-            EntityStructure entityStructure = optionalEntityStructure.get();
-
-            SessionImpl sessionImpl = (SessionImpl) session;
-            String tableName = determineTableName(sessionImpl, object);
-            availableIdsPerTable.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
-            lastIdsPerTable.putIfAbsent(tableName, START_LAST_ID);
-            ConcurrentLinkedQueue<Long> availableIds = availableIdsPerTable.get(tableName);
-
-            logger.trace("I have these ids available for table {}: {}", tableName, availableIds);
-
-            if (entityStructure.getId() != null) {
-                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
-                availableIds.remove(entityStructure.getId());
-                insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
-                if(isH2(sessionImpl)) {
-                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
-                    usedH2Ids.get(tableName).add(entityStructure.getId());
-                }
-                return entityStructure.getId();
-            } else {
-                return generateId(tableName, entityStructure, sessionImpl, availableIds);
-            }
-        }
+//        Optional<EntityStructure> optionalEntityStructure = entityStructure(object);
+//        if (optionalEntityStructure.isPresent()) {
+//
+//            EntityStructure entityStructure = optionalEntityStructure.get();
+//
+//            SessionImpl sessionImpl = (SessionImpl) session;
+//            String tableName = determineTableName(sessionImpl, object);
+//            availableIdsPerTable.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
+//            lastIdsPerTable.putIfAbsent(tableName, START_LAST_ID);
+//            ConcurrentLinkedQueue<Long> availableIds = availableIdsPerTable.get(tableName);
+//
+//            logger.trace("I have these ids available for table {}: {}", tableName, availableIds);
+//
+//            if (entityStructure.getId() != null) {
+//                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
+//                availableIds.remove(entityStructure.getId());
+//                insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
+//                if(isH2(sessionImpl)) {
+//                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
+//                    usedH2Ids.get(tableName).add(entityStructure.getId());
+//                }
+//                return entityStructure.getId();
+//            } else {
+//                return generateId(tableName, entityStructure, sessionImpl, availableIds);
+//            }
+//        }
         Serializable id = super.generate(session, object);
         logger.trace("Generated id {}", id);
         return id;
