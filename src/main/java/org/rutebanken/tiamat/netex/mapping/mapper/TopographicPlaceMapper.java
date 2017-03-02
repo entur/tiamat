@@ -22,7 +22,7 @@ public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.r
 
         TopographicPlaceRefStructure parentTopographicPlaceRef = netexTopographicPlace.getParentTopographicPlaceRef();
         if (parentTopographicPlaceRef != null && parentTopographicPlaceRef.getRef() != null) {
-            org.rutebanken.tiamat.model.TopographicPlace parentTopographicPlace = topographicPlaceRepository.findOne(NetexIdMapper.getTiamatId(parentTopographicPlaceRef.getRef()));
+            org.rutebanken.tiamat.model.TopographicPlace parentTopographicPlace = topographicPlaceRepository.findByNetexId(parentTopographicPlaceRef.getRef());
 
             tiamatTopographicPlace.setParentTopographicPlace(parentTopographicPlace);
         }
@@ -41,8 +41,7 @@ public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.r
         if (tiamatTopographicPlace.getParentTopographicPlace() != null) {
             TopographicPlaceRefStructure parentTopographicPlaceRef =  new TopographicPlaceRefStructure();
             parentTopographicPlaceRef.withRef(
-                    NetexIdMapper.getNetexId(tiamatTopographicPlace.getParentTopographicPlace(), tiamatTopographicPlace.getParentTopographicPlace().getId())
-            );
+                    tiamatTopographicPlace.getParentTopographicPlace().getNetexId());
 
             netexTopographicPlace.withParentTopographicPlaceRef(parentTopographicPlaceRef);
         }
