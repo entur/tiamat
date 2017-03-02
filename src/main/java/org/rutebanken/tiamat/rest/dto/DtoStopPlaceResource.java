@@ -136,7 +136,7 @@ public class DtoStopPlaceResource {
 
         List<StopPlaceDto> stopPlaces = stopPlaceAssembler.assemble(stopPlaceRepository
                 .findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
-                        boundingBox.yMax, Long.valueOf(stopPlaceBBoxSearchDTO.ignoreStopPlaceId), pageable),
+                        boundingBox.yMax, stopPlaceBBoxSearchDTO.ignoreStopPlaceId, pageable),
                         ASSEMBLE_QUAYS_WHEN_MULTIPLE_STOP_PLACES);
         logger.debug("Returning {} nearby stop places", stopPlaces.size());
         return stopPlaces;
@@ -189,7 +189,7 @@ public class DtoStopPlaceResource {
 
     private StopPlace save(StopPlace stopPlace) {
         stopPlace = stopPlaceRepository.save(stopPlace);
-        logger.info("Returning created stop place with id {}", stopPlace.getId());
+        logger.info("Returning created stop place with id {}", stopPlace.getNetexId());
         return stopPlace;
     }
 }
