@@ -58,7 +58,7 @@ public class CountyAndMunicipalityLookupService {
             TopographicPlace municipality = populateCountyAndMunicipality(peliasProperties.getCounty(), peliasProperties.getLocaladmin(), topographicPlacesCreatedCounter);
 
             logger.trace("Setting municipality {} : {} to stop place {}",
-                    municipality.getName(), municipality.getId(), stopPlace.getName());
+                    municipality.getName(), municipality.getNetexId(), stopPlace.getName());
 
             stopPlace.setTopographicPlace(municipality);
         } finally {
@@ -137,11 +137,11 @@ public class CountyAndMunicipalityLookupService {
             topographicPlaceRepository.saveAndFlush(municipality);
 
             topographicPlacesCreatedCounter.incrementAndGet();
-            logger.info("Created municipality {} with id: {}, referencing county {}", locality, municipality.getId(), county.getId());
+            logger.info("Created municipality {} with id: {}, referencing county {}", locality, municipality.getNetexId(), county.getNetexId());
 
         } else {
             municipality = municipalities.get(0);
-            logger.debug("Found existing municipality {} with id {}", municipality.getName(), municipality.getId());
+            logger.debug("Found existing municipality {} with id {}", municipality.getName(), municipality.getNetexId());
         }
         return municipality;
     }
@@ -164,10 +164,10 @@ public class CountyAndMunicipalityLookupService {
             topographicPlaceRepository.saveAndFlush(county);
 
             topographicPlacesCreatedCounter.incrementAndGet();
-            logger.info("Created county {} with id: {}", peliasCounty, county.getId());
+            logger.info("Created county {} with id: {}", peliasCounty, county.getNetexId());
         } else {
             county = counties.get(0);
-            logger.debug("Found existing county for region {}: {}", peliasCounty, county.getId());
+            logger.debug("Found existing county for region {}: {}", peliasCounty, county.getNetexId());
         }
         return county;
     }
