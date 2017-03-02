@@ -5,8 +5,6 @@ import com.google.common.collect.Sets;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.EntranceRefStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PlaceRef;
 import org.rutebanken.netex.model.PlaceRefStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.netex.model.PathLinkEndStructure;
@@ -125,7 +123,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
     }
 
     private PlaceRefStructure setRefValues(PlaceRefStructure placeRef, Place place) {
-        return placeRef.withRef(NetexIdMapper.getNetexId(place, place.getId()))
+        return placeRef.withRef(place.getNetexId())
                 .withVersion(Strings.isNullOrEmpty(place.getVersion()) ? "any" : place.getVersion())
                 .withNameOfMemberClass(place.getClass().getSimpleName())
                 .withCreated(OffsetDateTime.now());
