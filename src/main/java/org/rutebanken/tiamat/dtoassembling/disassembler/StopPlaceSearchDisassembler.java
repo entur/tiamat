@@ -37,16 +37,15 @@ public class StopPlaceSearchDisassembler {
         }
 
         if(stopPlaceSearchDto.idList != null) {
-            stopPlaceSearchBuilder.setIdList(stopPlaceSearchDto.idList.stream()
+            stopPlaceSearchBuilder.setNetexIdList(stopPlaceSearchDto.idList.stream()
                     .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
                     .filter(nsrId -> nsrId.toLowerCase().contains(StopPlace.class.getSimpleName().toLowerCase()))
-                    .map(nsrId -> netexIdMapper.getTiamatId(nsrId))
                     .collect(Collectors.toList()));
         }
-        stopPlaceSearchBuilder.setCountyIds(stopPlaceSearchDto.countyReferences);
-        stopPlaceSearchBuilder.setMunicipalityIds(stopPlaceSearchDto.municipalityReferences);
-        stopPlaceSearchBuilder.setQuery(stopPlaceSearchDto.query);
-        stopPlaceSearchBuilder.setPageable(new PageRequest(stopPlaceSearchDto.page, stopPlaceSearchDto.size));
+        stopPlaceSearchBuilder.setCountyIds(stopPlaceSearchDto.countyReferences)
+                        .setMunicipalityIds(stopPlaceSearchDto.municipalityReferences)
+                        .setQuery(stopPlaceSearchDto.query)
+                        .setPageable(new PageRequest(stopPlaceSearchDto.page, stopPlaceSearchDto.size));
 
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
         logger.info("Disassembled stop place search '{}'", stopPlaceSearch);
