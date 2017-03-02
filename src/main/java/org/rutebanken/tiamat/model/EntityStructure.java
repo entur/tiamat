@@ -13,21 +13,6 @@ import java.io.Serializable;
 
 
 @MappedSuperclass
-public abstract class EntityStructure implements Serializable, IdentifiedEntity {
-
-    @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
-    protected Long id;
-
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    @JsonIgnore
-    public void setId(Long id) {
-        this.id = id;
-    }
+public abstract class EntityStructure extends IdentifiedEntity implements Serializable {
 
 }

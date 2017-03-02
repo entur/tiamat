@@ -11,11 +11,7 @@ import javax.persistence.Entity;
 
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class PathLinkEnd implements IdentifiedEntity {
-
-    @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
-    private Long id;
+public class PathLinkEnd extends IdentifiedEntity {
 
     @ManyToOne
     private StopPlace stopPlace;
@@ -81,16 +77,6 @@ public class PathLinkEnd implements IdentifiedEntity {
 
     public void setLevel(Level level) {
         this.level = level;
-    }
-
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public StopPlace getStopPlace() {
