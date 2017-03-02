@@ -64,8 +64,8 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
             if(tiamatId.isPresent()) {
                 tiamatStopPlace = stopPlaceRepository.findOne(tiamatId.get());
             } else {
-                long idFromOriginalId = stopPlaceRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
-                tiamatStopPlace = stopPlaceRepository.findOne(idFromOriginalId);
+                String idFromOriginalId = stopPlaceRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
+                tiamatStopPlace = stopPlaceRepository.findByNetexId(idFromOriginalId);
             }
 
             logger.info("Found stop place {}", tiamatStopPlace);
