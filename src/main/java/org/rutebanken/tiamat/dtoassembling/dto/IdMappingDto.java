@@ -5,19 +5,17 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import java.math.BigInteger;
 
 public class IdMappingDto {
-    public String idType;
     public String originalId;
-    public String id;
+    public String netexId;
 
 
-    public IdMappingDto(String idType, String originalId, BigInteger id) {
+    public IdMappingDto(String originalId, String netexId) {
         this.originalId = originalId;
-        this.idType = idType;
-        this.id = id.toString();
+        this.netexId = netexId;
     }
 
     public String toCsvString() {
-        return originalId + "," + NetexIdMapper.getNetexId(idType, id);
+        return originalId + "," + netexId;
     }
 
 }
