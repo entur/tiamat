@@ -5,7 +5,6 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.io.BufferedReader;
 import java.util.List;
 
 public class StopPlaceSearch {
@@ -14,17 +13,17 @@ public class StopPlaceSearch {
     private List<String> municipalityIds;
     private List<String> countyIds;
     private List<StopTypeEnumeration> stopTypeEnumerations;
-    private List<Long> idList;
+    private List<String> netexIdList;
     private Pageable pageable;
 
     public StopPlaceSearch() {}
 
-    private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations, List<Long> idList, Pageable pageable) {
+    private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations, List<String> netexIdList, Pageable pageable) {
         this.query = query;
         this.municipalityIds = municipalityIds;
         this.countyIds = countyIds;
         this.stopTypeEnumerations = stopTypeEnumerations;
-        this.idList = idList;
+        this.netexIdList = netexIdList;
         this.pageable = pageable;
     }
 
@@ -69,12 +68,12 @@ public class StopPlaceSearch {
     }
 
 
-    public List<Long> getIdList() {
-        return idList;
+    public List<String> getNetexIdList() {
+        return netexIdList;
     }
 
-    public void setIdList(List<Long> idList) {
-        this.idList = idList;
+    public void setNetexIdList(List<String> netexIdList) {
+        this.netexIdList = netexIdList;
     }
 
     public boolean isEmpty() {
@@ -90,7 +89,7 @@ public class StopPlaceSearch {
                 .add("municipalityReferences", getMunicipalityIds())
                 .add("countyReference", getCountyIds())
                 .add("stopPlaceType", getStopTypeEnumerations())
-                .add("idList", getIdList())
+                .add("netexIdList", getNetexIdList())
                 .add("page", getPageable().getPageNumber())
                 .add("size", getPageable().getPageSize())
                 .toString();
@@ -102,7 +101,7 @@ public class StopPlaceSearch {
         private List<String> municipalityIds;
         private List<String> countyIds;
         private List<StopTypeEnumeration> stopTypeEnumerations;
-        private List<Long> idList;
+        private List<String> idList;
         private Pageable pageable = new PageRequest(0, 20);
 
         public Builder setQuery(String query) {
@@ -125,8 +124,8 @@ public class StopPlaceSearch {
             return this;
         }
 
-        public Builder setIdList(List<Long> idList) {
-            this.idList = idList;
+        public Builder setNetexIdList(List<String> netexIdList) {
+            this.idList = netexIdList;
             return this;
         }
 
