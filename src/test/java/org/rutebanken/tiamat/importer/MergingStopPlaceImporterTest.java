@@ -74,17 +74,17 @@ public class MergingStopPlaceImporterTest {
     @Test
     public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
 
-        Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
+        String firstStopId = NetexIdMapper.generateNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
-        firstStopPlace.setId(firstStopId);
+        firstStopPlace.setNetexId(firstStopId);
         firstStopPlace.setVersion("1");
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("Filipstad"));
-        terminal1.setId(2L);
+        terminal1.setNetexId(NetexIdMapper.generateNetexId(firstStopPlace));
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
 
         firstStopPlace.getQuays().add(terminal1);
@@ -98,7 +98,7 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal2 = new Quay();
         terminal2.setName(new EmbeddableMultilingualString("Filipstad ferjeterminal"));
-        terminal2.setId(3L);
+        terminal2.setNetexId(NetexIdMapper.generateNetexId(terminal2));
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(10.709707, 59.908737)));
         secondStopPlace.getQuays().add(terminal2);
 
@@ -109,7 +109,7 @@ public class MergingStopPlaceImporterTest {
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(firstStopId);
+        assertThat(importResult.getNetexId()).isEqualTo(firstStopId);
         assertThat(importResult.getVersion()).isEqualTo("2");
     }
 
@@ -121,11 +121,11 @@ public class MergingStopPlaceImporterTest {
 
         Point point = geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885));
 
-        Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
+        String firstStopId = NetexIdMapper.generateNetexId(firstStopPlace);
         firstStopPlace.setCentroid(point);
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
-        firstStopPlace.setId(firstStopId);
+        firstStopPlace.setNetexId(firstStopId);
         firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id");
         firstStopPlace.setVersion("1");
 
@@ -135,29 +135,29 @@ public class MergingStopPlaceImporterTest {
         newStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
-        when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findByNetexId(firstStopId)).thenReturn(firstStopPlace);
         when(stopPlaceRepository.save(firstStopPlace)).thenReturn(firstStopPlace);
 
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(firstStopId);
+        assertThat(importResult.getNetexId()).isEqualTo(firstStopId);
         assertThat(importResult.getStopPlaceType()).isEqualTo(StopTypeEnumeration.ONSTREET_BUS);
     }
 
     @Test
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
 
-        Long firstStopId = 1L;
         StopPlace firstStopPlace = new StopPlace();
+        String firstStopId = NetexIdMapper.generateNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
-        firstStopPlace.setId(firstStopId);
+        firstStopPlace.setNetexId(firstStopId);
         firstStopPlace.setVersion("1");
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("terminal 1"));
-        terminal1.setId(2L);
+        terminal1.setNetexId(NetexIdMapper.generateNetexId(terminal1));
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
 
         firstStopPlace.getQuays().add(terminal1);
@@ -169,64 +169,20 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal2 = new Quay();
         terminal2.setName(new EmbeddableMultilingualString("terminal 2"));
-        terminal2.setId(3L);
+        terminal2.setNetexId(NetexIdMapper.generateNetexId(terminal2));
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(60.01, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
 
         mockStopPlaceSave(firstStopId, firstStopPlace);
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
-        when(stopPlaceRepository.findOne(firstStopId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findByNetexId(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getNetexId()).isEqualTo(importResult.getNetexId());
         assertThat(importResult.getQuays()).hasSize(2);
         assertThat(importResult.getVersion()).isEqualTo("2");
-    }
-
-
-    @Test
-    public void handleDuplicateStopPlacesBasedOnId() throws ExecutionException, InterruptedException {
-
-
-        StopPlace firstStopPlace = new StopPlace();
-        firstStopPlace.setId(1L);
-        firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        firstStopPlace.setName(new EmbeddableMultilingualString("skjeberg", "no"));
-
-        StopPlace secondStopPlace = new StopPlace();
-        secondStopPlace.setId(firstStopPlace.getId());
-        secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
-        secondStopPlace.setName(new EmbeddableMultilingualString("skjeberg", "no"));
-
-
-        Long savedId = 2L;
-
-        when(stopPlaceRepository.save(firstStopPlace)).then(invocationOnMock -> {
-            StopPlace stopPlace = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlace.setId(savedId);
-            return stopPlace;
-        });
-
-        StopPlace importedStopPlace1 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace);
-
-
-        when(stopPlaceRepository.findByKeyValue(anyString(), anySet()))
-                .then(invocationOnMock -> {
-                    System.out.println("Returning the first stop place");
-                    return importedStopPlace1;
-                });
-
-        when(stopPlaceRepository.findOne(anyLong())).then(invocationOnMock -> importedStopPlace1);
-
-        StopPlace importedStopPlace2 = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
-
-
-        assertThat(importedStopPlace2.getId())
-                .isEqualTo(importedStopPlace1.getId())
-                .isEqualTo(savedId)
-                .as("The same stop place should be returned as they have the same chouette id");
     }
 
     /**
@@ -234,11 +190,12 @@ public class MergingStopPlaceImporterTest {
      */
     @Test
     public void detectAndMergeQuaysForExistingStopPlace() throws ExecutionException, InterruptedException {
-        final Long savedStopPlaceId = 1L;
         final String chouetteId = "OPP:StopArea:321";
         final String chouetteQuayId = "OPP:Quays:3333";
 
         StopPlace firstStopPlace = new StopPlace();
+        String savedStopPlaceId = NetexIdMapper.generateNetexId(firstStopPlace);
+        firstStopPlace.setNetexId(savedStopPlaceId);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
         firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
@@ -260,12 +217,12 @@ public class MergingStopPlaceImporterTest {
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
         when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
-        when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findByNetexId(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getNetexId()).isEqualTo(savedStopPlaceId);
         assertThat(importResult.getQuays()).hasSize(1);
     }
 
@@ -274,12 +231,12 @@ public class MergingStopPlaceImporterTest {
      */
     @Test
     public void detectTwoMatchingQuaysInTwoSeparateStopPlaces() throws ExecutionException, InterruptedException {
-        final Long savedStopPlaceId = 1L;
         final String chouetteId = "OPP:StopArea:123123";
 
         StopPlace firstStopPlace = new StopPlace();
+        String savedStopPlaceId = NetexIdMapper.generateNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
-        firstStopPlace.setId(savedStopPlaceId);
+        firstStopPlace.setNetexId(savedStopPlaceId);
 
         Quay terminal1 = new Quay();
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
@@ -298,12 +255,12 @@ public class MergingStopPlaceImporterTest {
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
         when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
-        when(stopPlaceRepository.findOne(savedStopPlaceId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findByNetexId(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(savedStopPlaceId);
+        assertThat(importResult.getNetexId()).isEqualTo(savedStopPlaceId);
         // Expect only one quay when two quays have the same coordinates
         assertThat(importResult.getQuays()).hasSize(1);
         assertThat(importResult.getQuays()).contains(terminal1);
@@ -333,10 +290,10 @@ public class MergingStopPlaceImporterTest {
     }
 
 
-    private void mockStopPlaceSave(Long persistedStopPlaceId, StopPlace stopPlace) {
+    private void mockStopPlaceSave(String persistedStopPlaceId, StopPlace stopPlace) {
         when(stopPlaceRepository.save(stopPlace)).then(invocationOnMock -> {
             StopPlace stopPlaceToSave = (StopPlace) invocationOnMock.getArguments()[0];
-            stopPlaceToSave.setId(persistedStopPlaceId);
+            stopPlaceToSave.setNetexId(persistedStopPlaceId);
             return stopPlaceToSave;
         });
     }

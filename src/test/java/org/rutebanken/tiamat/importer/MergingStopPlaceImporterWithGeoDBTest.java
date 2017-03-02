@@ -66,7 +66,6 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
                 stopPlaceLongitude, stopPlaceLatitude, null);
         firstStopPlace.getQuays().add(createQuay(name, quayLongitude, quayLatitude, null));
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        SiteFrame siteFrame = new SiteFrame();
 
         // Import first stop place.
         StopPlace firstImportResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(firstStopPlace);
@@ -80,7 +79,7 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         // Import second stop place
         StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(firstImportResult.getId());
+        assertThat(importResult.getNetexId()).isEqualTo(firstImportResult.getNetexId());
         assertThat(importResult.getQuays()).hasSize(1);
 
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
@@ -106,7 +105,7 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
         // Import second stop place
         StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getNetexId()).isEqualTo(importResult.getNetexId());
         assertThat(importResult.getQuays()).hasSize(1);
 
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
@@ -129,18 +128,16 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
 
         StopPlace importResult = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
-        assertThat(importResult.getId()).isEqualTo(importResult.getId());
+        assertThat(importResult.getNetexId()).isEqualTo(importResult.getNetexId());
         assertThat(importResult.getName().getValue()).isEqualTo(firstStopPlace.getName().getValue());
     }
 
     @Test
     public void reproduceIssueWithCollectionNotAssosiatedWithAnySession() throws ExecutionException, InterruptedException {
         String name = "Skillebekkgata";
-        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
-                6, 60, 11063200L, 11063200L);
+        StopPlace firstStopPlace = createStopPlaceWithQuay(name, 6, 60, "11063200", "11063200");
         mergingStopPlaceImporter.importStopPlace(firstStopPlace);
-        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
-                6, 60.0001, 11063198L, 11063198L);
+        StopPlace secondStopPlace = createStopPlaceWithQuay(name, 6, 60.0001, "11063198", "11063198");
         mergingStopPlaceImporter.importStopPlace(secondStopPlace);
     }
 
@@ -154,8 +151,8 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
 
         double latitude = 59.32262902417035;
         double longitude = 5.447071920203443;
-        long stopPlaceId = 11463484L;
-        long quayId = 11463483L;
+        String stopPlaceId = "11463484";
+        String quayId = "11463483";
 
         StopPlace firstStopPlace = createStopPlaceWithQuay(name,
                 longitude, latitude, stopPlaceId, quayId);
@@ -180,24 +177,24 @@ public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest 
                         new Coordinate(longitude, latitude));
     }
 
-    private StopPlace createStopPlaceWithQuay(String name, double longitude, double latitude, Long stopPlaceId, Long quayId) {
+    private StopPlace createStopPlaceWithQuay(String name, double longitude, double latitude, String stopPlaceId, String quayId) {
         StopPlace stopPlace = createStopPlace(name, longitude, latitude, stopPlaceId);
         stopPlace.getQuays().add(createQuay(name, longitude, latitude, quayId));
         return stopPlace;
     }
 
-    private StopPlace createStopPlace(String name, double longitude, double latitude, Long stopPlaceId) {
+    private StopPlace createStopPlace(String name, double longitude, double latitude, String stopPlaceId) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point(longitude, latitude));
         stopPlace.setName(new EmbeddableMultilingualString(name, ""));
-        stopPlace.setId(stopPlaceId);
+        stopPlace.setNetexId(stopPlaceId);
         return stopPlace;
     }
 
-    private Quay createQuay(String name, double longitude, double latitude, Long id) {
+    private Quay createQuay(String name, double longitude, double latitude, String id) {
         Quay quay = new Quay();
         quay.setName(new EmbeddableMultilingualString(name, ""));
-        quay.setId(id);
+        quay.setNetexId(id);
         quay.setCentroid(point(longitude, latitude));
         return quay;
     }

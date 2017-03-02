@@ -32,12 +32,12 @@ public class QuayAssemblerTest {
     @Test
     public void assembleQuayAndVerifyIdInReturn() {
         Quay quay = new Quay();
-        quay.setId(123L);
+        quay.setNetexId("123");
 
         QuayDto quayDto = quayAssembler.assemble(quay);
 
         assertThat(quayDto.id).isNotEmpty();
-        assertThat(quayDto.id).contains(quay.getId().toString());
+        assertThat(quayDto.id).contains(quay.getNetexId().toString());
     }
 
     @Test

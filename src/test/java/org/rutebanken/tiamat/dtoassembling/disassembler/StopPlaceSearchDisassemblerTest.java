@@ -26,7 +26,7 @@ public class StopPlaceSearchDisassemblerTest {
                 .build();
 
         StopPlaceSearch stopPlaceSearch = stopPlaceDisassembler.disassemble(stopPlaceSearchDto);
-        assertThat(stopPlaceSearch.getIdList()).contains(123L, 321L);
+        assertThat(stopPlaceSearch.getNetexIdList()).containsAll(ids);
     }
 
     @Test

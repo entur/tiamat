@@ -49,13 +49,13 @@ public class QuayDisassemblerTest {
         quayDto.id = "12333";
 
         Quay quay = new Quay();
-        quay.setId(Long.valueOf(quayDto.id));
+        quay.setNetexId(quayDto.id);
 
-        when(quayRepository.findOne(Long.valueOf(quayDto.id))).thenReturn(quay);
+        when(quayRepository.findByNetexId(quayDto.id)).thenReturn(quay);
 
         Quay actualQuay = quayDisassembler.disassemble(quayDto);
 
-        assertThat(actualQuay.getId().toString()).isEqualTo(quayDto.id);
+        assertThat(actualQuay.getNetexId().toString()).isEqualTo(quayDto.id);
     }
 
     @Test

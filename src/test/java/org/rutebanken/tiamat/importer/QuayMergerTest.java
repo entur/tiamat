@@ -34,7 +34,7 @@ public class QuayMergerTest {
         AtomicInteger createQuaysCounter = new AtomicInteger();
 
         Quay quay1 = new Quay();
-        quay1.setId(123L);
+        quay1.setNetexId("123");
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
         quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("BRA:StopArea:123123");
 
@@ -81,7 +81,7 @@ public class QuayMergerTest {
         AtomicInteger createQuaysCounter = new AtomicInteger();
 
         Quay quay1 = new Quay();
-        quay1.setId(123L);
+        quay1.setNetexId("123");
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
         quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
@@ -228,12 +228,12 @@ public class QuayMergerTest {
     @Test
     public void idsMustNotBeAddedToOtherQuayEvenIfTheyAreClose() {
         Quay existingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
-        existingQuay1.setId(1L);
+        existingQuay1.setNetexId("123");
         existingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.142897636770531, 59.83297022041692)));
         existingQuay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
 
         Quay existingQuay2 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
-        existingQuay2.setId(2L);
+        existingQuay2.setNetexId("2");
         existingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.142676854561447, 59.83314448493502)));
         existingQuay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
 

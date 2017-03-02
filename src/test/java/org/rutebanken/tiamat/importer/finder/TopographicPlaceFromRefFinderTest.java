@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,19 +21,19 @@ public class TopographicPlaceFromRefFinderTest {
     public void findTopographicPlaceFromListWhenPresent() throws Exception {
         List<TopographicPlace> topographicPlacelist = new ArrayList<>();
 
-        Long id = 22L;
+        TopographicPlace topographicPlace = new TopographicPlace();
+        String topographicNetexId = NetexIdMapper.generateNetexId(topographicPlace);
+        topographicPlace.setNetexId(topographicNetexId);
 
         TopographicPlaceRefStructure topographicPlaceRef = new TopographicPlaceRefStructure();
-        topographicPlaceRef.setRef(String.valueOf(id));
+        topographicPlaceRef.setRef(topographicNetexId);
 
-        TopographicPlace topographicPlace = new TopographicPlace();
-        topographicPlace.setId(id);
 
         topographicPlacelist.add(topographicPlace);
 
         Optional<TopographicPlace> actual = topographicPlaceFromRefFinder.findTopographicPlaceFromRef(topographicPlacelist, topographicPlaceRef);
         assertThat(actual).isPresent();
-        assertThat(actual.get().getId()).isEqualTo(id);
+        assertThat(actual.get().getNetexId()).isEqualTo(topographicNetexId);
     }
 
     @Test

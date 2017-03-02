@@ -54,9 +54,9 @@ public class QuayTest extends CommonSpringBootTest {
 
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
         assertThat(actualQuay).isNotNull();
-        assertThat(actualQuay.getId()).isEqualTo(quay.getId());
+        assertThat(actualQuay.getNetexId()).isEqualTo(quay.getNetexId());
         String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created", "shortName.value", "covered", "description.value",
                 "label.value"};
@@ -69,7 +69,7 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setCompassBearing(new Float(0.01));
         quayRepository.save(quay);
 
-        Quay actual = quayRepository.findOne(quay.getId());
+        Quay actual = quayRepository.findByNetexId(quay.getNetexId());
         assertThat(actual.getCompassBearing()).isEqualTo(quay.getCompassBearing());
     }
 
@@ -85,10 +85,10 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setRoadAddress(roadAddress);
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getRoadAddress()).isNotNull();
-        assertThat(actualQuay.getRoadAddress().getId()).isEqualTo(quay.getRoadAddress().getId());
+        assertThat(actualQuay.getRoadAddress().getNetexId()).isEqualTo(quay.getRoadAddress().getNetexId());
         assertThat(actualQuay.getRoadAddress().getVersion()).isEqualTo(quay.getRoadAddress().getVersion());
         assertThat(actualQuay.getRoadAddress().getRoadName().getValue()).isEqualTo(quay.getRoadAddress().getRoadName().getValue());
         assertThat(actualQuay.getRoadAddress().getBearingCompass()).isEqualTo(quay.getRoadAddress().getBearingCompass());
@@ -104,7 +104,7 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setCentroid(geometryFactory.createPoint(new Coordinate(longitude, latitude)));
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay).isNotNull();
         assertThat(actualQuay.getCentroid()).isNotNull();
@@ -122,14 +122,14 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
         AccessibilityAssessment actualAccessibilityAssessment = actualQuay.getAccessibilityAssessment();
 
         assertThat(actualAccessibilityAssessment.getVersion()).isEqualTo(accessibilityAssessment.getVersion());
         assertThat(actualAccessibilityAssessment.getMobilityImpairedAccess()).isEqualTo(actualAccessibilityAssessment.getMobilityImpairedAccess());
-        assertThat(actualAccessibilityAssessment.getId()).isEqualTo(actualAccessibilityAssessment.getId());
+        assertThat(actualAccessibilityAssessment.getNetexId()).isEqualTo(actualAccessibilityAssessment.getNetexId());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setAccessibilityAssessment(accessibilityAssessment);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getAccessibilityAssessment()).isNotNull();
         List<AccessibilityLimitation> actualAccessibilityLimitations = actualQuay.getAccessibilityAssessment().getLimitations();
@@ -171,7 +171,7 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setLevelRef(levelRefStructure);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getLevelRef()).isNotNull();
         assertThat(actualQuay.getLevelRef().getRef()).isEqualTo(levelRefStructure.getRef());
@@ -188,7 +188,7 @@ public class QuayTest extends CommonSpringBootTest {
         quay.setSiteRef(siteRefStructure);
 
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getSiteRef()).isNotNull();
         assertThat(actualQuay.getSiteRef().getRef()).isEqualTo(siteRefStructure.getRef());
@@ -224,7 +224,7 @@ public class QuayTest extends CommonSpringBootTest {
 
         // act
         quayRepository.save(quay);
-        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         // assert
         assertThat(actualQuay.getEquipmentPlaces()).isNotNull();
@@ -253,7 +253,7 @@ public class QuayTest extends CommonSpringBootTest {
 
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getCheckConstraints()).isNotNull();
         assertThat(actualQuay.getCheckConstraints()).isNotEmpty();
@@ -274,10 +274,10 @@ public class QuayTest extends CommonSpringBootTest {
 
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findQuayDetailed(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
         assertThat(actualQuay.getAlternativeNames()).isNotEmpty();
         AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().get(0);
-        assertThat(actualAlternativeName.getId()).isEqualTo(actualAlternativeName.getId());
+        assertThat(actualAlternativeName.getNetexId()).isEqualTo(actualAlternativeName.getNetexId());
         assertThat(actualAlternativeName.getName().getValue()).isEqualTo(alternativeName.getName().getValue());
         assertThat(actualAlternativeName.getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }
@@ -293,7 +293,7 @@ public class QuayTest extends CommonSpringBootTest {
 
         quayRepository.save(quay);
 
-        Quay actualQuay = quayRepository.findOne(quay.getId());
+        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
 
         assertThat(actualQuay.getBoardingPositions()).isNotEmpty();
     }

@@ -8,7 +8,6 @@ import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -285,7 +284,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
         org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
         assertThat(netexMunicipality).isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
-        assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(county, county.getId()));
+        assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getNetexId());
     }
 
     @Test

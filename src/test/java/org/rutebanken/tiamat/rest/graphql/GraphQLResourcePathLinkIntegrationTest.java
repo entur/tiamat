@@ -44,7 +44,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (id:\\\"" + NetexIdMapper.getNetexId(pathLink) + "\\\") {" +
+                "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (id:\\\"" + pathLink.getNetexId() + "\\\") {" +
                 "   id " +
                 "    from {" +
                 "      id" +
@@ -65,14 +65,14 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         executeGraphQL(graphQlJsonQuery)
                 .root("data.pathLink[0]")
-                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink)))
+                    .body("id", comparesEqualTo(pathLink.getNetexId()))
                 .root("data.pathLink[0].from")
-                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getFrom())))
-                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(firstQuay)))
+                    .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
+                    .body("quay.id", equalTo(firstQuay.getNetexId()))
                     .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
                 .root("data.pathLink[0].to")
-                    .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getTo())))
-                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(secondQuay)))
+                    .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
+                    .body("quay.id", equalTo(secondQuay.getNetexId()))
                     .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
     }
 
@@ -98,7 +98,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (stopPlaceId:\\\"" + NetexIdMapper.getNetexId(stopPlace) + "\\\") {" +
+                "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (stopPlaceId:\\\"" + stopPlace.getNetexId() + "\\\") {" +
                 "   id " +
                 "    from {" +
                 "      id" +
@@ -119,14 +119,14 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         executeGraphQL(graphQlJsonQuery)
                 .root("data.pathLink[0]")
-                .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink)))
+                .body("id", comparesEqualTo(pathLink.getNetexId()))
                 .root("data.pathLink[0].from")
-                .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getFrom())))
-                .body("quay.id", equalTo(NetexIdMapper.getNetexId(firstQuay)))
+                .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
+                .body("quay.id", equalTo(firstQuay.getNetexId()))
                 .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
                 .root("data.pathLink[0].to")
-                .body("id", comparesEqualTo(NetexIdMapper.getNetexId(pathLink.getTo())))
-                .body("quay.id", equalTo(NetexIdMapper.getNetexId(secondQuay)))
+                .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
+                .body("quay.id", equalTo(secondQuay.getNetexId()))
                 .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
 
     }
@@ -146,8 +146,8 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
-                "       from: {quay: {id: \\\"" + NetexIdMapper.getNetexId(firstQuay) + "\\\"}}, " +
-                "       to: {quay: {id: \\\"" + NetexIdMapper.getNetexId(secondQuay) + "\\\"}}, " +
+                "       from: {quay: {id: \\\"" + firstQuay.getNetexId() + "\\\"}}, " +
+                "       to: {quay: {id: \\\"" + secondQuay.getNetexId() + "\\\"}}, " +
                 "       geometry: {" +
                 "           type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
                 "       }" +
@@ -180,11 +180,11 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                     .body("geometry", notNullValue())
                 .root("data.pathLink[0].from")
                     .body("id", notNullValue())
-                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(firstQuay)))
+                    .body("quay.id", equalTo(firstQuay.getNetexId()))
                     .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
                 .root("data.pathLink[0].to")
                     .body("id", notNullValue())
-                    .body("quay.id", equalTo(NetexIdMapper.getNetexId(secondQuay)))
+                    .body("quay.id", equalTo(secondQuay.getNetexId()))
                     .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
     }
 

@@ -50,9 +50,9 @@ public class StopPlaceRepositoryTest extends CommonSpringBootTest {
         Pageable pageable = new PageRequest(0, 2);
         Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
-        assertThat(page.getContent().get(0).getId()).isEqualTo(stopPlaceNewer.getId());
+        assertThat(page.getContent().get(0).getNetexId()).isEqualTo(stopPlaceNewer.getNetexId());
         assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
-        assertThat(page.getContent().get(1).getId()).isEqualTo(stopPlaceOlder.getId());
+        assertThat(page.getContent().get(1).getNetexId()).isEqualTo(stopPlaceOlder.getNetexId());
         assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
     }
 
@@ -89,8 +89,8 @@ public class StopPlaceRepositoryTest extends CommonSpringBootTest {
             Future<String> future = service.submit(() -> {
                 StopPlace stopPlace = new StopPlace();
                 stopPlaceRepository.save(stopPlace);
-                //System.out.println("Saved: " + stopPlace.getId());
-                return stopPlace.getId();
+                //System.out.println("Saved: " + stopPlace.getNetexId());
+                return stopPlace.getNetexId();
             });
             futures.add(future);
         }

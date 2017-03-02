@@ -36,7 +36,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
-                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + getNetexId(stopPlace) + "\\\") {" +
+                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + stopPlace.getNetexId() + "\\\") {" +
                 "   id " +
                 "   name { value } " +
                 "   quays { " +
@@ -49,7 +49,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
-                .body("data.stopPlace[0].quays.id", hasItems(getNetexId(quay), getNetexId(secondQuay)));
+                .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
     }
 
     @Test
@@ -75,12 +75,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", equalTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
-    }
-
-    private String getNetexId(EntityStructure entity) {
-        return NetexIdMapper.getNetexId(entity, entity.getId());
     }
 
     @Test
@@ -173,7 +169,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:\\\"" + getNetexId(hordaland) + "\\\" municipalityReference:\\\"" + getNetexId(kvinnherad) +"\\\") { " +
+                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:\\\"" + hordaland.getNetexId() + "\\\" municipalityReference:\\\"" + kvinnherad.getNetexId() +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -196,7 +192,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:\\\"" + getNetexId(asker) +"\\\") { " +
+                " (municipalityReference:\\\"" + asker.getNetexId() +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -216,7 +212,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{" +
                 "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:\\\"" + getNetexId(asker) +"\\\") { " +
+                " (municipalityReference:\\\"" + asker.getNetexId() +"\\\") { " +
                 "    name {value} " +
                 "  } " +
                 "}\"," +
@@ -238,7 +234,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:[\\\""+getNetexId(baerum)+"\\\",\\\""+getNetexId(asker)+"\\\"]) {" +
+                " (municipalityReference:[\\\""+baerum.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
                 "id " +
                 "name { value } " +
                 "quays " +
@@ -266,7 +262,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:[\\\""+getNetexId(akershus)+"\\\",\\\""+getNetexId(buskerud)+"\\\"] municipalityReference:[\\\""+getNetexId(lier)+"\\\",\\\""+getNetexId(asker)+"\\\"]) {" +
+                " (countyReference:[\\\""+akershus.getNetexId()+"\\\",\\\""+buskerud.getNetexId()+"\\\"] municipalityReference:[\\\""+lier.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -287,7 +283,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:\\\""+getNetexId(akershus)+"\\\") {" +
+                " (countyReference:\\\""+akershus.getNetexId()+"\\\") {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -305,7 +301,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
-                " (id:\\\""+ getNetexId(stopPlace) +"\\\") {" +
+                " (id:\\\""+ stopPlace.getNetexId() +"\\\") {" +
                 "id " +
                 "name { value } " +
                 "}" +
@@ -393,7 +389,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
                 "          name: { value:\\\"" + updatedName + "\\\" } " +
                 "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
                 "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
@@ -446,7 +442,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
                 "          quays: [{ " +
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
@@ -511,9 +507,9 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
                 "          quays: [{ " +
-                "            id:\\\"" + getNetexId(quay) + "\\\" " +
+                "            id:\\\"" + quay.getNetexId() + "\\\" " +
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
@@ -538,10 +534,10 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .root("data.stopPlace[0].quays[0]")
-                    .body("id", comparesEqualTo(getNetexId(quay)))
+                    .body("id", comparesEqualTo(quay.getNetexId()))
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
@@ -579,7 +575,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
                 "          quays: [{ " +
                 "            name: { value:\\\"" + name + "\\\" } " +
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
@@ -604,11 +600,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  } " +
                 "}}\",\"variables\":\"\"}";
 
-        String manuallyAddedQuayId = getNetexId(quay);
+        String manuallyAddedQuayId = quay.getNetexId();
 
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .body("data.stopPlace[0].quays", hasSize(2))
                         // First Quay - added manually
@@ -665,7 +661,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + getNetexId(stopPlace) + "\\\"" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
                 "          name: { value:\\\"" + newStopName + "\\\" } " +
                 "          quays: [{ " +
                 "            name: { value:\\\"" + newQuaydName + "\\\" } " +
@@ -677,7 +673,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "             }" +
                 "            compassBearing:" + compassBearing +
                 "          } , {" +
-                "            id:\\\"" + getNetexId(quay) + "\\\" " +
+                "            id:\\\"" + quay.getNetexId() + "\\\" " +
                 "            name: { value:\\\"" + updatedName + "\\\" } " +
                 "            shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
                 "            description:{ value:\\\"" + updatedDescription + "\\\" }" +
@@ -696,11 +692,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  } " +
                 "}}\",\"variables\":\"\"}";
 
-        String manuallyAddedQuayId = getNetexId(quay);
+        String manuallyAddedQuayId = quay.getNetexId();
 
 
         executeGraphQL(graphQlJsonQuery)
-                .body("data.stopPlace[0].id", comparesEqualTo(getNetexId(stopPlace)))
+                .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(newStopName))
                 .body("data.stopPlace[0].quays", hasSize(2))
                         // First Quay - added manually, then updated
@@ -715,7 +711,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
                         // Second Quay - added using GraphQL
                 .root("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
-                    .body("id", not(getNetexId(stopPlace)))
+                    .body("id", not(stopPlace.getNetexId()))
                     .body("name.value", equalTo(newQuaydName))
                     .body("shortName.value", equalTo(newQuayShortName))
                     .body("description.value", equalTo(newQuayDescription))

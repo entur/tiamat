@@ -11,7 +11,7 @@ public class NetexIdMapperTest {
     @Test
     public void siteFrameIdMapping() throws Exception {
         SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setId(123123L);
+        siteFrame.setNetexId(NetexIdMapper.generateNetexId(siteFrame));
 
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         new NetexIdMapper().toNetexModel(siteFrame, netexSiteFrame);
@@ -23,7 +23,7 @@ public class NetexIdMapperTest {
     @Test
     public void accessibilityAssesmentIdMapping() throws Exception {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
-        accessibilityAssessment.setId(123124L);
+        accessibilityAssessment.setNetexId(NetexIdMapper.generateNetexId(accessibilityAssessment));
 
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         new NetexIdMapper().toNetexModel(accessibilityAssessment, netexSiteFrame);

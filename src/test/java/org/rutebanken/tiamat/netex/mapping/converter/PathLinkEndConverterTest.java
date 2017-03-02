@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
 @Transactional
 public class PathLinkEndConverterTest extends CommonSpringBootTest {
@@ -108,15 +107,17 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     @Test
     public void mapPathLinkWithInternalIdsFromNetexToTiamat() {
         StopPlace fromTiamatStop = new StopPlace();
+        String fromStopPlaceId = NetexIdMapper.generateNetexId(fromTiamatStop);
+        fromTiamatStop.setNetexId(fromStopPlaceId);
         stopPlaceRepository.save(fromTiamatStop);
-        String fromStopPlaceId = NetexIdMapper.getNetexId(fromTiamatStop);
 
         org.rutebanken.netex.model.StopPlace fromStopPlace = new org.rutebanken.netex.model.StopPlace();
         fromStopPlace.withId(fromStopPlaceId);
 
         Quay toTiamatQuay = new Quay();
+        String toId = NetexIdMapper.generateNetexId(toTiamatQuay);
+        toTiamatQuay.setNetexId(toId);
         quayRepository.save(toTiamatQuay);
-        String toId = NetexIdMapper.getNetexId(toTiamatQuay);
         org.rutebanken.netex.model.Quay toQuay = new org.rutebanken.netex.model.Quay();
 
         toQuay.withId(toId);
@@ -157,9 +158,9 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
 
         assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
-        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
-        verifyPathLinkEnd(netexPathLink.getFrom(), quay.getId(), quay, "PathlinkEnd from");
-        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace.getId(), stopPlace, "PathLinkEnd to");
+        assertThat(netexPathLink.getId()).isEqualTo(pathLink.getNetexId());
+        verifyPathLinkEnd(netexPathLink.getFrom(), quay, "PathlinkEnd from");
+        verifyPathLinkEnd(netexPathLink.getTo(), stopPlace, "PathLinkEnd to");
 
     }
 
@@ -179,17 +180,17 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
 
         assertThat(netexPathLink).describedAs("Mapped path link shall not be null").isNotNull();
-        assertThat(netexPathLink.getId()).isEqualTo(getNetexId(pathLink, pathLink.getId()));
+        assertThat(netexPathLink.getId()).isEqualTo(pathLink.getNetexId());
 
         assertThat(netexPathLink.getFrom().getPlaceRef().getVersion()).isEqualTo(quay.getVersion());
         assertThat(netexPathLink.getTo().getPlaceRef().getVersion()).isEqualTo(stopPlace.getVersion());
 
     }
 
-    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, long entityId, EntityStructure entityStructure, String describedAs) {
+    private void verifyPathLinkEnd(PathLinkEndStructure pathLinkEndStructure, EntityStructure entityStructure, String describedAs) {
         assertThat(pathLinkEndStructure).describedAs(describedAs).isNotNull();
         assertThat(pathLinkEndStructure.getPlaceRef()).describedAs(describedAs).isNotNull();
-        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(NetexIdMapper.getNetexId(entityStructure, entityId));
+        assertThat(pathLinkEndStructure.getPlaceRef().getRef()).isEqualTo(entityStructure.getNetexId());
     }
 
     private void assertPathLinkEnds(PathLink actualPathLinkEnd, SiteElement fromPlace, String expectedOriginalFromId, SiteElement toPlace, String expectedOriginalToId) {

@@ -24,11 +24,12 @@ public class PublicationDeliveryExporterTest extends CommonSpringBootTest {
     @Test
     public void exportPublicationDeliveryWithStopPlace() throws JAXBException {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:987");
         stopPlaceRepository.save(stopPlace);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportAllStopPlaces();
 
-        String expectedId = "NSR:StopPlace:"+stopPlace.getId();
+        String expectedId = "NSR:StopPlace:987";
         StopPlace actual = findStopPlace(publicationDeliveryStructure, expectedId);
         assertThat(actual).isNotNull();
     }

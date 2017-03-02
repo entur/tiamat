@@ -17,7 +17,7 @@ public class CountyOrMunicipalityAssemblerTest {
     public void municipalityMustContainCountyReference() {
 
         TopographicPlace akershus = new TopographicPlace(new EmbeddableMultilingualString("Akershus"));
-        akershus.setId(123456L);
+        akershus.setNetexId("123456");
         akershus.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
         TopographicPlace asker = new TopographicPlace(new EmbeddableMultilingualString("Asker"));

@@ -6,6 +6,7 @@ import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.xml.sax.SAXException;
@@ -47,7 +48,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setId(10L);
+        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -89,7 +90,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setId(10L);
+        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -133,7 +134,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setId(16L);
+        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
         stopPlace.setVersion("2");
 
         List<StopPlace> stopPlaces = new ArrayList<>(1);

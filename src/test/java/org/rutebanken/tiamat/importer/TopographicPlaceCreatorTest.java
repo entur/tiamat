@@ -43,12 +43,12 @@ public class TopographicPlaceCreatorTest {
         String municipalityName = "Asker";
 
         // Already saved municipality.
-        Long existingMunicipalityId = 1L;
+        String existingMunicipalityId = "1";
         TopographicPlace existingMunicipality = createTopographicPlace(existingMunicipalityId, countryRef, null, municipalityName);
         mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingMunicipality);
 
         // Incoming municipality
-        Long incomingMunicipalityId = 2L;
+        String incomingMunicipalityId = "2";
         TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, countryRef, null, municipalityName);
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
         mockSaveAnyTopographicPlace(topographicPlaceRepository, new AtomicLong());
@@ -67,10 +67,10 @@ public class TopographicPlaceCreatorTest {
         assertThat(actualMunicipality.getName().getValue()).isEqualTo(incomingMunicipality.getName().getValue());
 
         // Assert that the ID of the municipality is not the same as the ID from import.
-        assertThat(actualMunicipality.getId()).isNotEqualTo(incomingMunicipality.getId());
+        assertThat(actualMunicipality.getNetexId()).isNotEqualTo(incomingMunicipality.getNetexId());
 
         // Assert that the topographic place that was returned has the ID of the already saved municipality
-        assertThat(actualMunicipality.getId()).isEqualTo(existingMunicipality.getId());
+        assertThat(actualMunicipality.getNetexId()).isEqualTo(existingMunicipality.getNetexId());
     }
 
     /**
@@ -81,7 +81,7 @@ public class TopographicPlaceCreatorTest {
         // Arrange
         TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
         TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
-        Long incomingMunicipalityId = 1L;
+        String incomingMunicipalityId = "1";
         TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), null, "Incoming municipality");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
@@ -95,9 +95,9 @@ public class TopographicPlaceCreatorTest {
         assertThat(actualMunicipality).isNotNull();
 
         // Id should have been saved, hence not same as incoming.
-        assertThat(actualMunicipality.getId()).isNotEqualTo(incomingMunicipality.getId());
-        assertThat(actualMunicipality.getId()).isNotNull();
-        assertThat(actualMunicipality.getId()).isNotEqualTo(0L);
+        assertThat(actualMunicipality.getNetexId()).isNotEqualTo(incomingMunicipality.getNetexId());
+        assertThat(actualMunicipality.getNetexId()).isNotNull();
+        assertThat(actualMunicipality.getNetexId()).isNotEqualTo(0L);
     }
 
     @Test
@@ -128,11 +128,11 @@ public class TopographicPlaceCreatorTest {
         AtomicLong idCounter = new AtomicLong();
 
         // County
-        Long incomingCountyId = 10L;
+        String incomingCountyId = "10";
         TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Incoming, unsaved county");
 
         // Municipality
-        Long incomingMunicipalityId = 11L;
+        String incomingMunicipalityId = "11";
         TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCounty, "Incoming municipality with reference to County");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
@@ -143,7 +143,7 @@ public class TopographicPlaceCreatorTest {
 
                     TopographicPlace topographicPlace = (TopographicPlace) invocationOnMock.getArguments()[0];
                     System.out.println("Saving topographical place '" + topographicPlace.getName()+"'");
-                    topographicPlace.setId(idCounter.incrementAndGet());
+                    topographicPlace.setNetexId(String.valueOf(idCounter.incrementAndGet()));
                     savedPlaces.add(topographicPlace);
                     return topographicPlace;
                 });
@@ -164,7 +164,7 @@ public class TopographicPlaceCreatorTest {
 
         assertThat(idCounter.get()).isEqualTo(2);
         assertThat(savedPlaces).hasSize(2);
-        assertThat(savedPlaces).extracting(EntityStructure::getId).contains(Long.valueOf(actualCountyRef.getId()));
+        assertThat(savedPlaces).extracting(EntityStructure::getNetexId).contains(actualCountyRef.getNetexId());
         assertThat(savedPlaces).extracting(topographicPlace -> topographicPlace.getName().getValue()).contains(incomingCounty.getName().getValue());
     }
 
@@ -175,16 +175,16 @@ public class TopographicPlaceCreatorTest {
         TopographicPlaceCreator topographicPlaceCreator = topographicPlaceCreator(topographicPlaceRepository);
 
         // Existing county
-        Long existingCountyId = 11L;
+        String existingCountyId = "11";
         TopographicPlace existingCounty = createTopographicPlace(existingCountyId, createCountryRef(), null, "Akershus");
         mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingCounty);
 
         // Incoming county
-        Long incomingCountyId = 13L;
+        String incomingCountyId = "13";
         TopographicPlace incomingCounty = createTopographicPlace(incomingCountyId, createCountryRef(), null, "Akershus");
 
         // Incoming municipality
-        Long incomingMunicipalityId = 14L;
+        String incomingMunicipalityId = "14";
         TopographicPlace incomingMunicipality  = createTopographicPlace(incomingMunicipalityId, createCountryRef(), incomingCounty, "Asker");
         TopographicPlaceRefStructure incomingMunicipalityRef = createTopographicPlaceRef(incomingMunicipality);
 
@@ -194,7 +194,7 @@ public class TopographicPlaceCreatorTest {
         TopographicPlace actualMunicipality = topographicPlaceCreator.findOrCreateTopographicPlace(places, incomingMunicipalityRef, new AtomicInteger()).get();
 
         // Assert
-        assertThat(actualMunicipality.getParentTopographicPlace().getId()).isEqualTo(existingCounty.getId());
+        assertThat(actualMunicipality.getParentTopographicPlace().getNetexId()).isEqualTo(existingCounty.getNetexId());
     }
 
 
@@ -210,11 +210,11 @@ public class TopographicPlaceCreatorTest {
         String municipalityName = "Asker";
 
         // Already saved municipality.
-        Long existingCountyId = 11L;
+        String existingCountyId = "11";
         TopographicPlace existingMunicipality = createTopographicPlace(existingCountyId, countryRef, null, municipalityName);
         mockFindByNameValueAndCountryRefRefAndTopographicPlaceType(topographicPlaceRepository, existingMunicipality);
 
-        Long incomingMunicipalityId = 14L;
+        String incomingMunicipalityId = "14";
         TopographicPlace incomingMunicipality = createTopographicPlace(incomingMunicipalityId, countryRef, null, municipalityName);
 
         List<TopographicPlace> places = singletonList(incomingMunicipality);
@@ -259,7 +259,7 @@ public class TopographicPlaceCreatorTest {
 
                     TopographicPlace topographicPlace = (TopographicPlace) invocationOnMock.getArguments()[0];
                     System.out.println("Saving topographical place '" + topographicPlace.getName()+"'");
-                    topographicPlace.setId(idCounter.incrementAndGet());
+                    topographicPlace.setNetexId(String.valueOf(idCounter.incrementAndGet()));
                     return topographicPlace;
                 });
     }
@@ -272,11 +272,11 @@ public class TopographicPlaceCreatorTest {
                 .thenReturn(singletonList(topographicPlace));
     }
 
-    private TopographicPlace createTopographicPlace(Long id, CountryRef countryRef,
+    private TopographicPlace createTopographicPlace(String id, CountryRef countryRef,
                                                     TopographicPlace parentTopographicPlace,
                                                     String name) {
         TopographicPlace topographicPlace = new TopographicPlace();
-        topographicPlace.setId(id);
+        topographicPlace.setNetexId(id);
         topographicPlace.setName(new EmbeddableMultilingualString(name, "no"));
         topographicPlace.setParentTopographicPlace(parentTopographicPlace);
         topographicPlace.setCountryRef(countryRef);
@@ -285,7 +285,7 @@ public class TopographicPlaceCreatorTest {
 
     private TopographicPlaceRefStructure createTopographicPlaceRef(TopographicPlace county) {
         TopographicPlaceRefStructure topographicPlaceRef = new TopographicPlaceRefStructure();
-        topographicPlaceRef.setRef(String.valueOf(county.getId()));
+        topographicPlaceRef.setRef(String.valueOf(county.getNetexId()));
         return topographicPlaceRef;
     }
 
