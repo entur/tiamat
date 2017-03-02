@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import static graphql.Scalars.GraphQLInt;
@@ -99,7 +100,7 @@ public class CustomGraphQLTypes {
                     .dataFetcher(env -> {
                         TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
                         if (topographicPlace != null) {
-                            return getNetexId(topographicPlace);
+                            return topographicPlace.getNetexId();
                         } else {
                             return null;
                         }
@@ -118,9 +119,9 @@ public class CustomGraphQLTypes {
                     .name(ID)
                     .type(GraphQLString)
                     .dataFetcher(env -> {
-                        TopographicPlace tp = (TopographicPlace) env.getSource();
-                        if (tp != null) {
-                            return getNetexId(tp);
+                        TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
+                        if (topographicPlace != null) {
+                            return topographicPlace.getNetexId();
                         } else {
                             return null;
                         }
@@ -141,10 +142,8 @@ public class CustomGraphQLTypes {
             .name(ID)
             .type(GraphQLString)
             .dataFetcher(env -> {
-                if (env.getSource() instanceof EntityStructure) {
-                    return NetexIdMapper.getNetexId((EntityStructure) env.getSource());
-                } else if (env.getSource() instanceof PathLinkEnd) {
-                    return NetexIdMapper.getNetexId((PathLinkEnd) env.getSource());
+                if (env.getSource() instanceof IdentifiedEntity) {
+                    return ((IdentifiedEntity) env.getSource()).getNetexId();
                 }
                 return null;
             })

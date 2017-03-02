@@ -33,7 +33,7 @@ public class PathLinkMapper {
     public PathLink map(Map input) {
 
         PathLink pathLink = new PathLink();
-        idResolver.extractAndSetId(ID, input, pathLink);
+        idResolver.extractAndSetNetexId(ID, input, pathLink);
 
         if(input.get(PATH_LINK_FROM) != null) {
             pathLink.setFrom(mapToPathLinkEnd(PATH_LINK_FROM, input));
@@ -83,13 +83,13 @@ public class PathLinkMapper {
 
     private PathLinkEnd mapToPathLinkEnd(Map input) {
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
-        idResolver.extractAndSetId(ID, input, pathLinkEnd);
+        idResolver.extractAndSetNetexId(ID, input, pathLinkEnd);
 
         if(input.get("quay") != null) {
-            Optional<Long> quayId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
-            if(quayId.isPresent()) {
+            Optional<String> quayNetexId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
+            if(quayNetexId.isPresent()) {
                 Quay quay = new Quay();
-                quay.setId(quayId.get());
+                quay.setNetexId(quayNetexId.get());
                 pathLinkEnd.setQuay(quay);
             }
         } else {

@@ -15,23 +15,23 @@ public class IdResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(IdResolver.class);
 
-    public Optional<Long> extractIdIfPresent(String field, Map input) {
+    public Optional<String> extractIdIfPresent(String field, Map input) {
         if(input.get(field) != null) {
-            String nsrId = (String) input.get(field);
-            logger.debug("Detected ID {}", nsrId);
-            if(nsrId.isEmpty()) {
-                logger.debug("The ID provided is empty '{}'", nsrId);
-                return null;
+            String netexId = (String) input.get(field);
+            logger.debug("Detected ID {}", netexId);
+            if(netexId.isEmpty()) {
+                logger.debug("The ID provided is empty '{}'", netexId);
+                return Optional.empty();
             }
-            return NetexIdMapper.getOptionalTiamatId(nsrId);
+            return Optional.of(netexId);
 
         }
         return Optional.empty();
     }
 
-    public void extractAndSetId(String field, Map input, IdentifiedEntity identifiedEntity) {
+    public void extractAndSetNetexId(String field, Map input, IdentifiedEntity identifiedEntity) {
 
         extractIdIfPresent(field, input)
-                .ifPresent(id -> identifiedEntity.setId(id));
+                .ifPresent(netexId -> identifiedEntity.setNetexId(netexId));
     }
 }

@@ -48,24 +48,23 @@ class StopPlaceFetcher implements DataFetcher {
         PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
         stopPlaceSearchBuilder.setPageable(pageable);
 
-        String id = environment.getArgument(ID);
+        String netexId = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
-        if (id != null && !id.isEmpty()) {
+        if (netexId != null && !netexId.isEmpty()) {
 
             try {
-                long tiamatId = NetexIdMapper.getTiamatId(id);
-                stopPlaceSearchBuilder.setIdList(Arrays.asList(tiamatId));
+                stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
 
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             } catch (NumberFormatException nfe) {
-                logger.info("Attempted to find stopPlace with invalid id [{}]", id);
+                logger.info("Attempted to find stopPlace with invalid id [{}]", netexId);
             }
         } else if (importedId != null && !importedId.isEmpty()) {
 
-            List<Long> stopPlaceId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
+            List<String> stopPlaceNetexId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
 
-            if (stopPlaceId != null && !stopPlaceId.isEmpty()) {
-                stopPlaceSearchBuilder.setIdList(stopPlaceId);
+            if (stopPlaceNetexId != null && !stopPlaceNetexId.isEmpty()) {
+                stopPlaceSearchBuilder.setNetexIdList(stopPlaceNetexId);
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
@@ -81,8 +80,8 @@ class StopPlaceFetcher implements DataFetcher {
             if (countyRef != null && !countyRef.isEmpty()) {
                 stopPlaceSearchBuilder.setCountyIds(
                         countyRef.stream()
-                            .filter(tiamatId -> tiamatId != null && !tiamatId.isEmpty())
-                            .map(tiamatId -> "" + NetexIdMapper.getTiamatId(tiamatId)).collect(Collectors.toList())
+                            .filter(countyRefValue -> countyRefValue != null && !countyRefValue.isEmpty())
+                            .collect(Collectors.toList())
                 );
             }
 
@@ -90,8 +89,8 @@ class StopPlaceFetcher implements DataFetcher {
             if (municipalityRef != null && !municipalityRef.isEmpty()) {
                 stopPlaceSearchBuilder.setMunicipalityIds(
                         municipalityRef.stream()
-                                .filter(tiamatId -> tiamatId != null && !tiamatId.isEmpty())
-                                .map(tiamatId -> "" + NetexIdMapper.getTiamatId(tiamatId)).collect(Collectors.toList())
+                                .filter(municipalityRefValue -> municipalityRefValue != null && !municipalityRefValue.isEmpty())
+                                .collect(Collectors.toList())
                 );
             }
 
@@ -111,9 +110,9 @@ class StopPlaceFetcher implements DataFetcher {
                     throw rte;
                 }
 
-                Long ignoreStopPlaceId = null;
+                String ignoreStopPlaceId = null;
                 if (environment.getArgument(IGNORE_STOPPLACE_ID) != null) {
-                    ignoreStopPlaceId = NetexIdMapper.getTiamatId(environment.getArgument(IGNORE_STOPPLACE_ID));
+                    ignoreStopPlaceId = environment.getArgument(IGNORE_STOPPLACE_ID);
                 }
 
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,

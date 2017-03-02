@@ -1,10 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -68,12 +64,12 @@ class StopPlaceUpdater implements DataFetcher {
         if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
             Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
 
-            String nsrId = (String) input.get(ID);
-            if (nsrId != null) {
-                logger.info("Updating StopPlace {}", nsrId);
-                stopPlace = stopPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId));
+            String netexId = (String) input.get(ID);
+            if (netexId != null) {
+                logger.info("Updating StopPlace {}", netexId);
+                stopPlace = stopPlaceRepository.findByNetexId(netexId);
 
-                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", nsrId);
+                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
 
             } else {
                 logger.info("Creating new StopPlace");
@@ -95,7 +91,7 @@ class StopPlaceUpdater implements DataFetcher {
                          *
                          */
                         stopPlace.getQuays().stream()
-                                .filter(quay -> quay.getId() == null)
+                                .filter(quay -> quay.getNetexId() == null)
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
                     stopPlace.setChanged(ZonedDateTime.now());
@@ -144,16 +140,16 @@ class StopPlaceUpdater implements DataFetcher {
         Quay quay;
         if (quayInputMap.get(ID) != null) {
             Optional<Quay> existingQuay = stopPlace.getQuays().stream()
-                    .filter(q -> q.getId() != null)
-                    .filter(q -> q.getId().equals(NetexIdMapper.getTiamatId((String) quayInputMap.get(ID)))).findFirst();
+                    .filter(q -> q.getNetexId() != null)
+                    .filter(q -> q.getNetexId().equals(quayInputMap.get(ID))).findFirst();
 
             Preconditions.checkArgument(existingQuay.isPresent(),
                     "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace",
                     quayInputMap.get(ID),
-                    NetexIdMapper.getNetexId(stopPlace));
+                    stopPlace.getNetexId());
 
             quay = existingQuay.get();
-            logger.info("Updating Quay {} for StopPlace {}", quay.getId(), stopPlace.getId());
+            logger.info("Updating Quay {} for StopPlace {}", quay.getNetexId(), stopPlace.getNetexId());
         } else {
             quay = new Quay();
             quay.setCreated(ZonedDateTime.now());
@@ -174,7 +170,7 @@ class StopPlaceUpdater implements DataFetcher {
         if (isQuayUpdated) {
             quay.setChanged(ZonedDateTime.now());
 
-            if (quay.getId() == null) {
+            if (quay.getNetexId() == null) {
                 stopPlace.getQuays().add(quay);
             }
         }

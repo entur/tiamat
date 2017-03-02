@@ -30,7 +30,7 @@ class TopographicPlaceFetcher implements DataFetcher {
 
         String nsrId = environment.getArgument(ID);
         if (nsrId != null) {
-            return Arrays.asList(topographicPlaceRepository.findOne(NetexIdMapper.getTiamatId(nsrId)));
+            return Arrays.asList(topographicPlaceRepository.findByNetexId(nsrId));
         }
         return topographicPlaceRepository.findAll(example);
 

@@ -89,7 +89,7 @@ public class CoordinatesFixerResource {
                     logger.info("Found original Ids for stop: {}", originalIds);
 
                     for(String originalId : originalIds) {
-                        logger.info("The stop place with ID {} contains original ID: {}", stopPlace.getId(), originalId);
+                        logger.info("The stop place with ID {} contains original ID: {}", stopPlace.getNetexId(), originalId);
 
                         if(originalId.startsWith(prefix)) {
                             logger.info("The original ID {} starts with the prefix {}", originalId, prefix);
@@ -120,7 +120,7 @@ public class CoordinatesFixerResource {
                             }
 
                             logger.info("Saving stop place {}", stopPlace);
-                            updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
+                            updatedStopPlaceIds.add(stopPlace.getNetexId());
                             stopPlaceRepository.save(stopPlace);
 
                         } else {
