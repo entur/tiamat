@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,6 +34,6 @@ public class TopographicPlaceRepositoryTest extends CommonSpringBootTest {
         topographicPlaceRepository.save(akershus);
 
         List<TopographicPlace> places = topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType("Akershus", IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.COUNTY);
-        assertThat(places).extracting("id", Long.class).contains(akershus.getId());
+        assertThat(places).extracting(IdentifiedEntity::getNetexId).contains(akershus.getNetexId());
     }
 }
