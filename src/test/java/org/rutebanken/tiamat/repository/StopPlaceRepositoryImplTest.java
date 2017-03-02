@@ -7,17 +7,14 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -59,7 +55,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
     @Test
     public void scrollableResult() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));
-
+        stopPlace.setNetexId("NSR:StopPlace:123");
         stopPlace.getKeyValues().put("key", new Value("value"));
 
         Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
@@ -71,7 +67,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces();
         assertThat(iterator.hasNext()).isTrue();
         StopPlace actual = iterator.next();
-        assertThat(actual.getId()).isEqualTo(stopPlace.getId());
+        assertThat(actual.getNetexId()).isEqualTo(stopPlace.getNetexId());
         assertThat(iterator.hasNext()).isFalse();
 
     }
@@ -83,8 +79,8 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
-        StopPlace actual = stopPlaceRepository.findOne(id);
+        String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        StopPlace actual = stopPlaceRepository.findByNetexId(netexId);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
 
@@ -103,9 +99,9 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlaceRepository.save(stopPlace);
 
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
-        assertThat(id).isEqualTo(stopPlace.getId());
-        StopPlace actual = stopPlaceRepository.findOne(id);
+        String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        assertThat(netexId).isEqualTo(stopPlace.getNetexId());
+        StopPlace actual = stopPlaceRepository.findByNetexId(netexId);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
 
@@ -119,7 +115,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         firstStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(firstStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("anotherValue"));
+        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("anotherValue"));
         assertThat(id).isNull();
     }
 
@@ -127,17 +123,19 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
     public void findCorrectStopPlaceFromKeyValue() {
         StopPlace anotherStopPlaceWithAnotherValue = new StopPlace();
         anotherStopPlaceWithAnotherValue.getKeyValues().put("key", new Value("anotherValue"));
+        anotherStopPlaceWithAnotherValue.setNetexId("y");
         stopPlaceRepository.save(anotherStopPlaceWithAnotherValue);
 
         StopPlace matchingStopPlace = new StopPlace();
+        matchingStopPlace.setNetexId("x");
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
 
-        assertThat(id).isEqualTo(matchingStopPlace.getId());
+        assertThat(id).isEqualTo(matchingStopPlace.getNetexId());
 
-        StopPlace actual = stopPlaceRepository.findOne(id);
+        StopPlace actual = stopPlaceRepository.findByNetexId(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
@@ -149,11 +147,11 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlaceWithSomeValues.getKeyValues().put("key", new Value("One value", "Second value", "Third value"));
         stopPlaceRepository.save(stopPlaceWithSomeValues);
 
-        Long id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("Third value"));
+        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("Third value"));
 
-        assertThat(id).isEqualTo(stopPlaceWithSomeValues.getId());
+        assertThat(id).isEqualTo(stopPlaceWithSomeValues.getNetexId());
 
-        StopPlace actual = stopPlaceRepository.findOne(id);
+        StopPlace actual = stopPlaceRepository.findByNetexId(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("Third value");
@@ -174,7 +172,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         Pageable pageable = new PageRequest(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
-        assertThat(result.getContent()).extracting(EntityStructure::getId).contains(stopPlace.getId());
+        assertThat(result.getContent()).extracting(EntityStructure::getNetexId).contains(stopPlace.getNetexId());
     }
 
     @Test
@@ -193,7 +191,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
 
-        assertThat(result.getContent()).extracting(EntityStructure::getId).doesNotContain(stopPlace.getId());
+        assertThat(result.getContent()).extracting(IdentifiedEntity::getNetexId).doesNotContain(stopPlace.getNetexId());
     }
 
     @Test
@@ -209,12 +207,12 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, stopPlace.getId(), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, stopPlace.getNetexId(), pageable);
 
         assertThat(result.getContent())
-                .extracting(EntityStructure::getId)
+                .extracting(IdentifiedEntity::getNetexId)
                 .as("Ignored stop place shall not be part of the result")
-                .doesNotContain(stopPlace.getId());
+                .doesNotContain(stopPlace.getNetexId());
     }
 
     @Test
@@ -234,13 +232,13 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Pageable pageable = new PageRequest(0, 10);
 
-        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, ignoredStopPlace.getId(), pageable);
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, ignoredStopPlace.getNetexId(), pageable);
 
         assertThat(result.getContent())
-                .extracting(EntityStructure::getId)
+                .extracting(IdentifiedEntity::getNetexId)
                 .as("Ignored stop place shall not be part of the result")
-                .doesNotContain(ignoredStopPlace.getId())
-                .contains(otherStopPlace.getId());
+                .doesNotContain(ignoredStopPlace.getNetexId())
+                .contains(otherStopPlace.getNetexId());
     }
 
 
@@ -255,9 +253,9 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
-        StopPlace actual = stopPlaceRepository.findOne(result);
+        StopPlace actual = stopPlaceRepository.findByNetexId(result);
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
@@ -271,7 +269,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -286,7 +284,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist", StopTypeEnumeration.ONSTREET_BUS);
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
     }
 
@@ -304,7 +302,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
-        Long result = stopPlaceRepository.findNearbyStopPlace(envelope, "name", StopTypeEnumeration.ONSTREET_BUS);
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, "name", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
     }
 
@@ -322,7 +320,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getId().toString()))
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
                 .setStopTypeEnumerations(stopTypeEnumerations)
                 .setPageable(pageable)
                 .build());
@@ -340,7 +338,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getId().toString()))
+                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
                 .setPageable(pageable).build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -396,8 +394,8 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .setPageable(pageable)
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
@@ -417,7 +415,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
@@ -439,8 +437,8 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         TopographicPlace buskerud = createCounty("Buskerud");
 
-        List<String> countyRefs = Arrays.asList(buskerud.getId().toString());
-        List<String> municipalityRefs = Arrays.asList(municipality.getId().toString());
+        List<String> countyRefs = Arrays.asList(buskerud.getNetexId().toString());
+        List<String> municipalityRefs = Arrays.asList(municipality.getNetexId().toString());
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
@@ -451,7 +449,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
-        assertThat(result).extracting(actual -> actual.getId()).contains(stopPlace.getId());
+        assertThat(result).extracting(actual -> actual.getNetexId()).contains(stopPlace.getNetexId());
     }
 
     @Test
@@ -482,8 +480,8 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         createStopPlaceWithMunicipality("Does not matter", municipality);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
                 .build();
 
@@ -508,8 +506,8 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery("Name")
-                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
@@ -529,7 +527,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery("Somewhere else")
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
@@ -542,7 +540,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery("Somewhere else")
-                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
+                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
@@ -552,24 +550,26 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
     public void findStopPlacesByListOfIds() throws Exception {
 
         StopPlace stopPlace1 = new StopPlace();
+        stopPlace1.setNetexId("1");
         stopPlaceRepository.save(stopPlace1);
 
         StopPlace stopPlace2 = new StopPlace();
+        stopPlace2.setNetexId("2");
         stopPlaceRepository.save(stopPlace2);
 
         StopPlace stopPlaceThatShouldNotBeReturned = new StopPlace();
         stopPlaceRepository.save(stopPlaceThatShouldNotBeReturned);
 
-        List<Long> stopPlaceIds = Arrays.asList(stopPlace1.getId(), stopPlace2.getId());
+        List<String> stopPlaceIds = Arrays.asList(stopPlace1.getNetexId(), stopPlace2.getNetexId());
 
-        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setNetexIdList(stopPlaceIds).build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         assertThat(result).hasSize(2);
         assertThat(result)
-                .extracting(StopPlace::getId)
-                .contains(stopPlace1.getId(), stopPlace2.getId())
-                .doesNotContain(stopPlaceThatShouldNotBeReturned.getId());
+                .extracting(StopPlace::getNetexId)
+                .contains(stopPlace1.getNetexId(), stopPlace2.getNetexId())
+                .doesNotContain(stopPlaceThatShouldNotBeReturned.getNetexId());
     }
 
     @Test
@@ -581,9 +581,9 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         StopPlace stopPlace2 = new StopPlace();
         stopPlaceRepository.save(stopPlace2);
 
-        List<Long> stopPlaceIds = new ArrayList<>();
+        List<String> stopPlaceIds = new ArrayList<>();
 
-        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setIdList(stopPlaceIds).build();
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setNetexIdList(stopPlaceIds).build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         assertThat(result).isNotEmpty();
@@ -601,14 +601,14 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlace.setName(new EmbeddableMultilingualString("OnlyThis"));
         stopPlaceRepository.save(stopPlace);
 
-        List<Long> stopPlaceIds = new ArrayList<>();
-        stopPlaceIds.add(stopPlace.getId());
+        List<String> stopPlaceIds = new ArrayList<>();
+        stopPlaceIds.add(stopPlace.getNetexId());
 
         StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
                 .setQuery("FromMu")
-                .setIdList(stopPlaceIds)
-                .setMunicipalityIds(Arrays.asList(municipality.getId().toString()))
-                .setCountyIds(Arrays.asList(county.getId().toString()))
+                .setNetexIdList(stopPlaceIds)
+                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
                 .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
