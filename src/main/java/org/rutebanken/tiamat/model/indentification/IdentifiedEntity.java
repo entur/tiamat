@@ -2,12 +2,10 @@ package org.rutebanken.tiamat.model.indentification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
 @MappedSuperclass
+@Table(indexes = {@Index(name = "netex_id_index", columnList = "netex_id")})
 public abstract class IdentifiedEntity {
 
     @Id
