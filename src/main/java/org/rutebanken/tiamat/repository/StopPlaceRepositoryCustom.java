@@ -23,7 +23,7 @@ public interface StopPlaceRepositoryCustom {
 
     String findByKeyValue(String key, Set<String> value);
 
-    List<Long> searchByKeyValue(String key, String value);
+    List<String> searchByKeyValue(String key, String value);
     
     List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
 

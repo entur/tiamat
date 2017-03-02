@@ -24,7 +24,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -136,7 +135,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
-    public List<Long> searchByKeyValue(String key, String value) {
+    public List<String> searchByKeyValue(String key, String value) {
 
         Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
                                                         "FROM stop_place_key_values spkv " +
@@ -152,11 +151,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         try {
             @SuppressWarnings("unchecked")
-            List<BigInteger> results = query.getResultList();
+            List<String> results = query.getResultList();
             if(results.isEmpty()) {
                 return null;
             } else {
-                return results.stream().map(id -> id.longValue()).collect(Collectors.toList());
+                return results.stream().map(netexId -> netexId).collect(Collectors.toList());
             }
         } catch (NoResultException noResultException) {
             return null;
