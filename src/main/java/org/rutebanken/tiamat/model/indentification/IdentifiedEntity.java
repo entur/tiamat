@@ -17,12 +17,12 @@ public abstract class IdentifiedEntity {
     @Column(unique = true)
     protected String netexId;
 
-    public Long getId() {
+    private Long getId() {
         return id;
     }
 
     @JsonIgnore
-    public void setId(Long id) {
+    private void setId(Long id) {
         this.id = id;
     }
 
