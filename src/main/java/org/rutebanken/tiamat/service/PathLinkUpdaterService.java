@@ -38,15 +38,15 @@ public class PathLinkUpdaterService {
 
         boolean updatedExisting;
 
-        if(incomingPathLink.getId() != null) {
+        if(incomingPathLink.getNetexId() != null) {
             // Update?
 
-            logger.debug("Looking for PathLink with ID: {}", incomingPathLink.getId());
+            logger.debug("Looking for PathLink with ID: {}", incomingPathLink.getNetexId());
 
-            PathLink existingPathLink = pathLinkRepository.findOne(incomingPathLink.getId());
+            PathLink existingPathLink = pathLinkRepository.findByNetexId(incomingPathLink.getNetexId());
 
             if(existingPathLink == null) {
-                throw new NoSuchElementException("Specified path link with ID: " + NetexIdMapper.getNetexId(incomingPathLink) + " does not exist");
+                throw new NoSuchElementException("Specified path link with ID: " + incomingPathLink.getNetexId() + " does not exist");
             }
 
             logger.debug("Found existing path link: {}", existingPathLink);
@@ -123,23 +123,23 @@ public class PathLinkUpdaterService {
         if(pathLinkEnd.getQuay() != null) {
             // Quay is only mapped with ID. Need to look it up and replace the reference.
 
-            Quay quay = quayRepository.findOne(pathLinkEnd.getQuay().getId());
+            Quay quay = quayRepository.findByNetexId(pathLinkEnd.getQuay().getNetexId());
             if(quay != null) {
                 logger.debug("Found quay {}", quay);
                 pathLinkEnd.setQuay(quay);
                 return pathLinkEnd;
             }
-            throw new NoSuchElementException("Cannot find path link end reference to quay " + getNetexId(pathLinkEnd.getQuay()));
+            throw new NoSuchElementException("Cannot find path link end reference to quay " + pathLinkEnd.getQuay().getNetexId());
         }
 
         if(pathLinkEnd.getStopPlace() != null) {
-            StopPlace stopPlace = stopPlaceRepository.findOne(pathLinkEnd.getStopPlace().getId());
+            StopPlace stopPlace = stopPlaceRepository.findByNetexId(pathLinkEnd.getStopPlace().getNetexId());
             if(stopPlace != null) {
                 logger.info("Found stop place {}", stopPlace);
                 pathLinkEnd.setStopPlace(stopPlace);
                 return pathLinkEnd;
             }
-            throw new NoSuchElementException("Cannot find path link end reference to stop place " + getNetexId(pathLinkEnd.getStopPlace()));
+            throw new NoSuchElementException("Cannot find path link end reference to stop place " + pathLinkEnd.getStopPlace().getNetexId());
         }
 
         throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end " + pathLinkEnd);

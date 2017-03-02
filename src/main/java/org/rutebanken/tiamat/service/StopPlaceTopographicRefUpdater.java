@@ -41,7 +41,7 @@ public class StopPlaceTopographicRefUpdater {
                     try {
                         countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
                         stopPlaceRepository.save(stopPlace);
-                        updatedStopPlaceIds.add(NetexIdMapper.getNetexId(stopPlace));
+                        updatedStopPlaceIds.add(stopPlace.getNetexId());
                     } catch (IOException e) {
                         logger.info("Issue looking up county and municipality for stop {}", stopPlace, e);
                     }
