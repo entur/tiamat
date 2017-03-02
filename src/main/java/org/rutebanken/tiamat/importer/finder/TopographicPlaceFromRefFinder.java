@@ -17,12 +17,11 @@ public class TopographicPlaceFromRefFinder {
     public Optional<TopographicPlace> findTopographicPlaceFromRef(List<TopographicPlace> incomingTopographicPlaces, TopographicPlaceRefStructure topographicPlaceRef) {
         return incomingTopographicPlaces
                 .stream()
-                .filter(topographicPlace -> topographicPlace.getId() != null)
+                .filter(topographicPlace -> topographicPlace.getNetexId() != null)
                 .filter(topographicPlace -> {
-                    Long reference = Long.valueOf(topographicPlaceRef.getRef());
-                    return topographicPlace.getId().equals(reference);
+                    return topographicPlace.getNetexId().equals(topographicPlaceRef.getRef());
                 })
-                .peek(topographicPlace -> logger.trace("Looking at topographical place with name {} and id {}", topographicPlace.getName(), topographicPlace.getId()))
+                .peek(topographicPlace -> logger.trace("Looking at topographical place with name {} and id {}", topographicPlace.getName(), topographicPlace.getNetexId()))
                 .findFirst();
     }
 

@@ -27,7 +27,7 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
 
     private StopPlaceRepository stopPlaceRepository;
 
-    private Cache<String, Optional<Long>> keyValueCache;
+    private Cache<String, Optional<String>> keyValueCache;
 
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:50000}") int maximumSize,
@@ -50,36 +50,36 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
         StopPlace existingStopPlace = findByKeyValue(originalIds);
 
         if (existingStopPlace != null) {
-            logger.debug("Found stop place {} from original ID", existingStopPlace.getId());
+            logger.debug("Found stop place {} from original ID", existingStopPlace.getNetexId());
             return existingStopPlace;
         }
         return null;
     }
 
     public void update(StopPlace stopPlace) {
-        if(stopPlace.getId() == null) {
+        if(stopPlace.getNetexId() == null) {
             logger.warn("Attempt to update cache when stop place does not have any ID! stop place: {}", stopPlace);
             return;
         }
         for(String originalId : stopPlace.getOrCreateValues(ORIGINAL_ID_KEY)) {
-            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getId()));
+            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getNetexId()));
         }
     }
 
     private StopPlace findByKeyValue(Set<String> originalIds) {
         for(String originalId : originalIds) {
             String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
-            Optional<Long> matchingStopPlaceId = keyValueCache.getIfPresent(cacheKey);
-            if(matchingStopPlaceId != null && matchingStopPlaceId.isPresent()) {
-                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceId.get());
-                return stopPlaceRepository.findOne(matchingStopPlaceId.get());
+            Optional<String> matchingStopPlaceNetexId = keyValueCache.getIfPresent(cacheKey);
+            if(matchingStopPlaceNetexId != null && matchingStopPlaceNetexId.isPresent()) {
+                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId.get());
+                return stopPlaceRepository.findByNetexId(matchingStopPlaceNetexId.get());
             }
         }
 
         // No cache match
-        Long stopPlaceId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
-        if(stopPlaceId != null) {
-            return stopPlaceRepository.findOne(stopPlaceId);
+        String stopPlaceNetexId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
+        if(stopPlaceNetexId != null) {
+            return stopPlaceRepository.findByNetexId(stopPlaceNetexId);
         }
         return null;
     }

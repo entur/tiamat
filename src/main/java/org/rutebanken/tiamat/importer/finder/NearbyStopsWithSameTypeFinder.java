@@ -102,15 +102,15 @@ public class NearbyStopsWithSameTypeFinder {
             int limit = getLimit(stopPlace);
 
             Envelope envelope = envelopeCreator.createFromPoint(stopPlace.getCentroid(), limit);
-            List<Long> stopPlacesIds = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getStopPlaceType());
-            if(!stopPlacesIds.isEmpty()) {
-                logger.debug("Found {} nearby matches on type with stop place ID", stopPlacesIds.size());
+            List<String> stopPlacesNetexIds = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getStopPlaceType());
+            if(!stopPlacesNetexIds.isEmpty()) {
+                logger.debug("Found {} nearby matches on type with stop place ID", stopPlacesNetexIds.size());
 
-                if(stopPlacesIds.size() > 1) {
-                    logger.warn("Query for stop places returned more than one. Incoming stop place: {}. Result: {}", stopPlace, stopPlacesIds);
+                if(stopPlacesNetexIds.size() > 1) {
+                    logger.warn("Query for stop places returned more than one. Incoming stop place: {}. Result: {}", stopPlace, stopPlacesNetexIds);
                 }
 
-                return stopPlaceRepository.findAll(stopPlacesIds);
+                return stopPlaceRepository.findAll(stopPlacesNetexIds);
             }
 
             logger.debug("Could not find any stop places with type {} and envelope {}", stopPlace.getStopPlaceType(), envelope);
