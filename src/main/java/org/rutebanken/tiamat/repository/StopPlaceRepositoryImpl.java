@@ -244,11 +244,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
 
-        boolean hasIdFilter = stopPlaceSearch.getIdList() != null && !stopPlaceSearch.getIdList().isEmpty();
+        boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
         if(hasIdFilter) {
-            wheres.add("stopPlace.id in :idList");
-            parameters.put("idList", stopPlaceSearch.getIdList());
+            wheres.add("stopPlace.netexId in :idList");
+            parameters.put("idList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
                 parameters.put("query", stopPlaceSearch.getQuery());
@@ -314,6 +314,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<StopPlace> stopPlaces = typedQuery.getResultList();
         return new PageImpl<>(stopPlaces, stopPlaceSearch.getPageable(), stopPlaces.size());
 
+    }
+
+    @Override
+    public List<StopPlace> findAll(List<String> stopPlacesNetexIds) {
+        final String queryString = "select stopPlace from StopPlace stopPlace WHERE netexId = IN(:netexIds)";
+        final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString, StopPlace.class);
+        typedQuery.setParameter("netexIds", stopPlacesNetexIds);
+        return typedQuery.getResultList();
     }
 
 }

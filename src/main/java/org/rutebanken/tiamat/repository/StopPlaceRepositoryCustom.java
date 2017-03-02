@@ -34,4 +34,6 @@ public interface StopPlaceRepositoryCustom {
     Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException;
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
+
+    List<StopPlace> findAll(List<String> stopPlacesNetexIds);
 }
