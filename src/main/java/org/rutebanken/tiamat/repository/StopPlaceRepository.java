@@ -18,13 +18,10 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
 
     @Override
-    StopPlace findOne(Long stopPlaceId);
-
-    @Override
     Iterator<StopPlace> scrollStopPlaces();
 
     @Override
-    Iterator<StopPlace> scrollStopPlaces(List<Long> stopPlaceIds);
+    Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceIds);
 
     @Override
     StopPlace findByNetexId(String netexId);

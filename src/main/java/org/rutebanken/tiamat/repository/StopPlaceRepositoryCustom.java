@@ -14,22 +14,14 @@ import java.util.Set;
 
 public interface StopPlaceRepositoryCustom {
 
-    /**
-     * Find stop place by id and load it with eager fetching on relations.
-     * Used for testing and to be able to export a more complete graph.
-     *
-     * @param id the stop place id
-     * @return the stop place with relations fetched.
-     */
-    StopPlace findStopPlaceDetailed(Long id);
 
-    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable);
+    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable);
 
-    Long findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
+    String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
 
-    List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
+    List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 
-    Long findByKeyValue(String key, Set<String> value);
+    String findByKeyValue(String key, Set<String> value);
 
     List<Long> searchByKeyValue(String key, String value);
     
@@ -37,11 +29,9 @@ public interface StopPlaceRepositoryCustom {
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
 
-    List<Long> getAllStopPlaceIds();
-
     Iterator<StopPlace> scrollStopPlaces() throws InterruptedException;
 
-    Iterator<StopPlace> scrollStopPlaces(List<Long> stopPlaceIds) throws InterruptedException;
+    Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException;
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 }

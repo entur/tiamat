@@ -40,46 +40,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Autowired
     private GeometryFactory geometryFactory;
 
-    @Override
-    public StopPlace findStopPlaceDetailed(Long stopPlaceId) {
-
-        EntityGraph<StopPlace> graph = entityManager.createEntityGraph(StopPlace.class);
-
-        graph.addAttributeNodes("accessSpaces");
-        graph.addAttributeNodes("equipmentPlaces");
-//        graph.addAttributeNodes("validityConditions");
-        graph.addAttributeNodes("accessibilityAssessment");
-//        graph.addAttributeNodes("levels");
-        graph.addAttributeNodes("alternativeNames");
-//        graph.addAttributeNodes("otherTransportModes");
-//        graph.addAttributeNodes("roadAddress");
-        graph.addAttributeNodes("parentSiteRef");
-
-        // Be aware of https://hibernate.atlassian.net/browse/HHH-10261
-
-        return entityManager.find(StopPlace.class, stopPlaceId, hints(graph));
-    }
-
-    private Map<String, Object> hints(EntityGraph<StopPlace> graph) {
-        Map<String, Object> hints = new HashMap<>();
-        hints.put("javax.persistence.loadgraph", graph);
-        return hints;
-    }
-
-
     /**
      * Find nearby stop places, specifying a bounding box.
      * Optionally, a stop place ID to ignore can be defined.
      */
     @Override
-    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, Long ignoreStopPlaceId, Pageable pageable) {
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable) {
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String queryString = "SELECT s FROM StopPlace s " +
                 "WHERE within(s.centroid, :filter) = true " +
-                "AND (:ignoreStopPlaceId IS NULL OR s.id != :ignoreStopPlaceId)";
+                "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId)";
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
@@ -92,19 +65,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Long findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration) {
+    public String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<Long> query = entityManager
-                .createQuery("SELECT s.id FROM StopPlace s " +
+        TypedQuery<String> query = entityManager
+                .createQuery("SELECT s.netexId FROM StopPlace s " +
                              "WHERE within(s.centroid, :filter) = true " +
                             "AND s.name.value = :name " +
-                            "AND s.stopPlaceType = :stopPlaceType", Long.class);
+                            "AND s.stopPlaceType = :stopPlaceType", String.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration);
         query.setParameter("name", name);
         try {
-            List<Long> resultList = query.getResultList();
+            List<String> resultList = query.getResultList();
             return  resultList.isEmpty() ? null : resultList.get(0);
         } catch (NoResultException e) {
             return null;
@@ -112,31 +85,39 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public List<Long> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
+    public List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<Long> query = entityManager
-                .createQuery("SELECT s.id FROM StopPlace s " +
+        TypedQuery<String> query = entityManager
+                .createQuery("SELECT s.netexId FROM StopPlace s " +
                         "WHERE within(s.centroid, :filter) = true " +
-                        "AND s.stopPlaceType = :stopPlaceType", Long.class);
+                        "AND s.stopPlaceType = :stopPlaceType", String.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration);
         try {
-            List<Long> resultList = query.getResultList();
+            List<String> resultList = query.getResultList();
             return resultList;
         } catch (NoResultException e) {
             return null;
         }
     }
 
+    /**
+     * Find stop place's netex ID by key value
+     * @param key key in key values for stop
+     * @param values list of values to check for
+     * @return stop place's netex ID
+     */
     @Override
-    public Long findByKeyValue(String key, Set<String> values) {
+    public String findByKeyValue(String key, Set<String> values) {
 
-        Query query = entityManager.createNativeQuery("SELECT stop_place_id " +
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
                                                         "FROM stop_place_key_values spkv " +
                                                             "INNER JOIN value_items v " +
-                                                            "ON spkv.key_values_id = v.value_id " +
-                                                        "WHERE  spkv.key_values_key = :key " +
+                                                                "ON spkv.key_values_id = v.value_id " +
+                                                            "INNER JOIN stop_place s " +
+                                                                "ON spkv.stop_place_id s.id " +
+                                                        "WHERE spkv.key_values_key = :key " +
                                                             "AND v.items IN ( :values ) ");
 
         query.setParameter("key", key);
@@ -144,11 +125,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         try {
             @SuppressWarnings("unchecked")
-            List<BigInteger> results = query.getResultList();
+            List<String> results = query.getResultList();
             if(results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0).longValue();
+                return results.get(0);
             }
         } catch (NoResultException noResultException) {
             return null;
@@ -157,10 +138,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     public List<Long> searchByKeyValue(String key, String value) {
 
-        Query query = entityManager.createNativeQuery("SELECT stop_place_id " +
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
                                                         "FROM stop_place_key_values spkv " +
                                                           "INNER JOIN value_items v " +
                                                             "ON spkv.key_values_id = v.value_id " +
+                                                          "INNER JOIN stop_place s " +
+                                                            "ON spkv.stop_place_id = s.id " +
                                                         "WHERE  spkv.key_values_key = :key "+
                                                         "AND v.items LIKE ( :value ) ");
 
@@ -182,7 +165,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.quay_id FROM quay_key_values q INNER JOIN stop_place_quays spq on spq.quays_id = q.quay_id INNER JOIN value_items vi ON q.key_values_id = vi.value_id ORDER BY q.quay_id";
+        String sql = "SELECT vi.items, q.netex_id " +
+                            "FROM quay_key_values qkv " +
+                            "INNER JOIN stop_place_quays spq " +
+                                "ON spq.quays_id = qkv.quay_id " +
+                            "INNER JOIN quay q " +
+                                "ON spq.quays_id = q.id " +
+                            "INNER JOIN value_items vi " +
+                                "ON qkv.key_values_id = vi.value_id " +
+                        "ORDER BY q.netexId";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
         @SuppressWarnings("unchecked")
@@ -190,7 +181,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto("Quay", (String)row[0], (BigInteger)row[1]));
+            mappingResult.add(new IdMappingDto((String)row[0], (String)row[1]));
         }
 
         return mappingResult;
@@ -199,34 +190,24 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "select v.items, spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id";
+        String sql = "SELECT v.items, s.netex_id " +
+                        "FROM stop_place_key_values spkv " +
+                        "INNER JOIN value_items v " +
+                            "ON spkv.key_values_id = v.value_id " +
+                        "INNER JOIN stop_place s " +
+                            "ON s.id = spkv.stop_place_id";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
         List<Object[]> result = nativeQuery.getResultList();
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto("StopPlace", (String)row[0], (BigInteger)row[1]));
+            mappingResult.add(new IdMappingDto((String)row[0], (String)row[1]));
         }
 
         return mappingResult;
     }
 
-    @Override
-    public List<Long> getAllStopPlaceIds() {
-
-        try {
-            @SuppressWarnings("unchecked")
-            List<BigInteger> results = entityManager.createNativeQuery("select id from stop_place").getResultList();
-            if(results.isEmpty()) {
-                return new ArrayList<>();
-            } else {
-                return results.stream().map(id -> id.longValue()).collect(Collectors.toList());
-            }
-        } catch (NoResultException noResultException) {
-            return new ArrayList<>();
-        }
-    }
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces() throws InterruptedException {
@@ -234,15 +215,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Iterator<StopPlace> scrollStopPlaces(List<Long> stopPlaceIds) throws InterruptedException {
+    public Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException {
 
         final int fetchSize = 100;
 
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
         Criteria query = session.createCriteria(StopPlace.class);
-        if(stopPlaceIds != null) {
-            query.add(Restrictions.in("id", stopPlaceIds));
+        if(stopPlaceNetexIds != null) {
+            query.add(Restrictions.in("netex_id", stopPlaceNetexIds));
         }
 
         query.setReadOnly(true);
