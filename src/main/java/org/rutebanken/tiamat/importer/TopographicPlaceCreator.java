@@ -65,17 +65,17 @@ public class TopographicPlaceCreator {
                 topographicPlacesCreatedCounter);
 
         if (!optionalTopographicPlace.isPresent()) {
-            logger.warn("Got no topographic places back for site {} {}", site.getName(), site.getId());
+            logger.warn("Got no topographic places back for site {} {}", site.getName(), site.getNetexId());
         }
 
         optionalTopographicPlace.ifPresent(topographicPlace -> {
             logger.trace("Setting topographical ref {} on site {} {}",
-                    topographicPlace.getId(), site.getName(), site.getId());
+                    topographicPlace.getNetexId(), site.getName(), site.getNetexId());
             if (site instanceof StopPlace) {
                 ((StopPlace)site).setTopographicPlace(topographicPlace);
             } else {
                 TopographicPlaceRefStructure newRef = new TopographicPlaceRefStructure();
-                newRef.setRef(String.valueOf(topographicPlace.getId()));
+                newRef.setRef(topographicPlace.getNetexId());
                 site.setTopographicPlaceRef(newRef);
             }
         });
@@ -157,7 +157,6 @@ public class TopographicPlaceCreator {
                                                                  AtomicInteger topographicPlacesCreatedCounter) throws ExecutionException {
 
         TopographicPlace newTopographicPlace = mapperFacade.map(topographicPlaceFromRef, TopographicPlace.class);
-        newTopographicPlace.setId(null);
 
         if(topographicPlaceFromRef.getParentTopographicPlaceRef() != null && topographicPlaceFromRef.getParentTopographicPlaceRef().getRef() != null ) {
             logger.debug("The topographic place contains reference to parent place '{}'", topographicPlaceFromRef.getParentTopographicPlaceRef().getRef());
@@ -171,7 +170,7 @@ public class TopographicPlaceCreator {
             parentTopographicPlace.ifPresent(parent -> {
                 logger.debug("Found parent place '{}' for '{}'", parent.getName().getValue(), newTopographicPlace.getName().getValue());
 
-                parentRef.setRef(String.valueOf(parent.getId()));
+                parentRef.setRef(parent.getNetexId());
                 newTopographicPlace.setParentTopographicPlaceRef(parentRef);
 
                 newTopographicPlace.setParentTopographicPlace(parent);
