@@ -118,10 +118,13 @@ public class MergingStopPlaceImporter {
 
     public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace) throws ExecutionException {
 
-        if(newStopPlace.getId() != null) {
-            newStopPlace.setId(null);
+        if(newStopPlace.getNetexId() != null) {
+            // This should not be necesarry.
+            // Because this is a completely new stop.
+            // And original netex ID should have been moved to key values.
+            newStopPlace.setNetexId(null);
             if(newStopPlace.getQuays() != null) {
-                newStopPlace.getQuays().forEach(q -> q.setId(null));
+                newStopPlace.getQuays().forEach(q -> q.setNetexId(null));
             }
         }
 
@@ -212,7 +215,7 @@ public class MergingStopPlaceImporter {
         if (newStopPlace.getName() != null) {
             final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
             if (nearbyStopPlace != null) {
-                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getId());
+                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getNetexId());
                 return nearbyStopPlace;
             }
         }
