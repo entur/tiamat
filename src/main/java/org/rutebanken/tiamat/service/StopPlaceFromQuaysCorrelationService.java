@@ -8,7 +8,6 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.nvdb.service.NvdbSearchService;
-import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
+@Deprecated
 public class StopPlaceFromQuaysCorrelationService {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromQuaysCorrelationService.class);
 
@@ -99,7 +99,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
         logger.info("Got {} distinct quays based on name", distinctQuays.size());
 
-        List<Long> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
+        List<String> quaysAlreadyProcessed = Collections.synchronizedList(new ArrayList<>());
 
         boolean stop = createStopPlaceFromQuays(distinctQuays, quaysAlreadyProcessed);
         if (stop) {
@@ -138,7 +138,7 @@ public class StopPlaceFromQuaysCorrelationService {
      * @return true if max limit has been reached.
      */
     public boolean createStopPlaceFromQuays(Map<String, List<Quay>> distinctQuays,
-                                            List<Long> quaysAlreadyProcessed) throws InterruptedException, ExecutionException {
+                                            List<String> quaysAlreadyProcessed) throws InterruptedException, ExecutionException {
 /*
         return distinctQuays.keySet()
                 .parallelStream()
@@ -177,13 +177,13 @@ public class StopPlaceFromQuaysCorrelationService {
 
 
     public Map<String, List<Quay>> findRemaining(ConcurrentMap<String, List<Quay>> distinctQuays,
-                                                 List<Long> quaysAlreadyProcessed) {
+                                                 List<String> quaysAlreadyProcessed) {
 
         Map<String, List<Quay>> remaining = new HashMap<>();
 
         for(String group : distinctQuays.keySet()) {
             distinctQuays.get(group).stream()
-                    .filter(quay -> !quaysAlreadyProcessed.contains(quay.getId()))
+                    .filter(quay -> !quaysAlreadyProcessed.contains(quay.getNetexId()))
                     .forEach(quay -> {
 
                         List<Quay> list = remaining.get(group);
@@ -198,7 +198,7 @@ public class StopPlaceFromQuaysCorrelationService {
         return remaining;
     }
 
-    public boolean createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<Long> quaysAlreadyProcessed) {
+    public boolean createStopPlaceFromQuays(List<Quay> quays, String quayGroupName, List<String> quaysAlreadyProcessed) {
         logger.trace("Processing quay with name {}", quayGroupName);
 
         if (stopPlaceCounter.get() >= maxLimit) {
@@ -215,9 +215,9 @@ public class StopPlaceFromQuaysCorrelationService {
 
             boolean addQuay = false;
 
-            if (quaysAlreadyProcessed.contains(quay.getId())) {
+            if (quaysAlreadyProcessed.contains(quay.getNetexId())) {
 
-                logger.debug("Already created quay with name {} and id {}", quay.getName(), quay.getId());
+                logger.debug("Already created quay with name {} and id {}", quay.getName(), quay.getNetexId());
 
             } else if (stopPlace.getQuays().isEmpty()) {
 
@@ -235,7 +235,7 @@ public class StopPlaceFromQuaysCorrelationService {
             }
 
             if (addQuay) {
-                logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getId());
+                logger.trace("About to add Quay with name {} and id {} to stop place", quay.getName(), quay.getNetexId());
 
                 try {
                     VegObjekt vegObjekt = nvdbSearchService.search(quay.getName().getValue(), createEnvelopeForQuay(quay));
@@ -248,7 +248,7 @@ public class StopPlaceFromQuaysCorrelationService {
 
                 stopPlace.getQuays().add(quay);
 
-                quaysAlreadyProcessed.add(quay.getId());
+                quaysAlreadyProcessed.add(quay.getNetexId());
 
                 quayRepository.save(quay);
             }
@@ -256,7 +256,7 @@ public class StopPlaceFromQuaysCorrelationService {
         });
 
         if (stopPlace.getQuays().isEmpty()) {
-            logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getId());
+            logger.debug("No quays were added to stop place {} {}. Skipping...", stopPlace.getName(), stopPlace.getNetexId());
         } else {
             stopPlace.setCentroid(centroidComputer.computeCentroidForStopPlace(stopPlace.getQuays()).get());
 
@@ -269,7 +269,7 @@ public class StopPlaceFromQuaysCorrelationService {
             try {
                 stopPlaceRepository.save(stopPlace);
                 logger.debug("Created stop place number {} with name {} and {} quays (id {})",
-                        stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getId());
+                        stopPlaceCounter.incrementAndGet(), stopPlace.getName(), stopPlace.getQuays().size(), stopPlace.getNetexId());
                 if (stopPlaceCounter.get() % 100 == 0) {
                     logger.info("Stop place {}", stopPlaceCounter.get());
                 }
