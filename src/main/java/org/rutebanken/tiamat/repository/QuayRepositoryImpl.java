@@ -30,22 +30,6 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	private GeometryFactory geometryFactory;
 
 	@Override
-	public Quay findQuayDetailed(Long quayId) {
-		EntityGraph<Quay> graph = entityManager.createEntityGraph(Quay.class);
-		graph.addAttributeNodes("alternativeNames");
-		graph.addAttributeNodes("accessibilityAssessment");
-//		graph.addAttributeNodes("roadAddress");
-
-		return entityManager.find(Quay.class, quayId, hints(graph));
-	}
-
-	private Map<String, Object> hints(EntityGraph<Quay> graph) {
-		Map<String, Object> hints = new HashMap<>();
-		hints.put("javax.persistence.loadgraph", graph);
-		return hints;
-	}
-
-	@Override
 	public Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
 		Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
