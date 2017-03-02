@@ -46,7 +46,7 @@ public class QuayMerger {
         AtomicInteger updatedQuays = new AtomicInteger();
         AtomicInteger addedQuays = new AtomicInteger();
 
-        logger.debug("About to compare quays for {}", existingStopPlace.getId());
+        logger.debug("About to compare quays for {}", existingStopPlace.getNetexId());
 
         if (newStopPlace.getQuays() == null) {
             newStopPlace.setQuays(new HashSet<>());
@@ -163,7 +163,7 @@ public class QuayMerger {
         Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
 
         if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
-            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getId());
+            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getNetexId());
             return true;
         }
         return false;
