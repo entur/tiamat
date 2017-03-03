@@ -107,7 +107,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getId().toString()).isEqualTo(stopPlaceId);
+        assertThat(tiamatStopPlace.getNetexId()).isEqualTo(stopPlaceId);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
     @Test
     public void mapStopPlaceInternalIdToNetexId() {
         StopPlace tiamatStopPlace = new StopPlace();
-        tiamatStopPlace.setId(123456L);
+        tiamatStopPlace.setNetexId("NSR:StopPlace:123456");
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
 
@@ -187,26 +187,28 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
         org.rutebanken.tiamat.model.Quay tiamatQuay = netexMapper.mapToTiamatModel(netexQuay);
 
-        assertThat(tiamatQuay.getId()).isEqualTo(12345L);
+        assertThat(tiamatQuay.getNetexId()).isEqualTo("NSR:Quay:12345");
     }
 
     @Test
     public void mapInternalQuayIdToNetex() {
 
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
-        tiamatQuay.setId(1234567L);
+        String netexId = "NSR:Quay:" + 1234567;
+        tiamatQuay.setNetexId(netexId);
 
         org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
-        assertThat(netexQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
+        assertThat(netexQuay.getId()).isEqualTo(netexId);
     }
 
     @Test
     public void mapStopPlaceWithQuayToNetex() {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new StopPlace();
 
+        String netexId = "NSR:Quay:" + 1234567;
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
-        tiamatQuay.setId(1234567L);
+        tiamatQuay.setNetexId(netexId);
 
         stopPlace.getQuays().add(tiamatQuay);
 
@@ -218,7 +220,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
                 .findFirst()
                 .get();
 
-        assertThat(actualQuay.getId()).isEqualTo("NSR:Quay:" + 1234567);
+        assertThat(actualQuay.getId()).isEqualTo(netexId);
 
     }
 
@@ -227,7 +229,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
         SiteFrame tiamatSiteFrame = new SiteFrame();
         TopographicPlace topographicPlace = new TopographicPlace();
 
-        topographicPlace.setId(1L);
+        topographicPlace.setNetexId("1");
         CountryRef countryRef = new CountryRef();
         countryRef.setRef(IanaCountryTldEnumeration.ZM);
         topographicPlace.setCountryRef(countryRef);
@@ -259,11 +261,11 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
         TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("Akershus"));
         county.setCountryRef(countryRef);
-        county.setId(1L);
+        county.setNetexId("1L");
 
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
         municipality.setParentTopographicPlace(county);
-        municipality.setId(2L);
+        municipality.setNetexId("2L");
 
         tiamatSiteFrame
                 .getTopographicPlaces()

@@ -23,15 +23,15 @@ public class StopPlaceFromOriginalIdFinderTest {
         StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setId(100L);
+        stopPlace.setNetexId("100L");
         stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("some-original-id");
         stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("another-original-id");
         stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("the-one-original-id");
 
-        when(stopPlaceRepository.findOne(stopPlace.getId())).thenReturn(stopPlace);
+        when(stopPlaceRepository.findByNetexId(stopPlace.getNetexId())).thenReturn(stopPlace);
         when(stopPlaceRepository
                 .findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getKeyValues().get(ORIGINAL_ID_KEY).getItems()))
-                .thenReturn(stopPlace.getId());
+                .thenReturn(stopPlace.getNetexId());
 
         StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
         assertThat(actual).isNotNull();
@@ -44,7 +44,7 @@ public class StopPlaceFromOriginalIdFinderTest {
         StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setId(101L);
+        stopPlace.setNetexId("101L");
 
         StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
 

@@ -39,9 +39,9 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findOne(stopPlace.getId());
+        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
         assertThat(actualStopPlace.getTopographicPlace()).isNotNull();
-        assertThat(actualStopPlace.getTopographicPlace().getId()).isEqualTo(nedreEiker.getId());
+        assertThat(actualStopPlace.getTopographicPlace().getNetexId()).isEqualTo(nedreEiker.getNetexId());
         assertThat(actualStopPlace.getTopographicPlace().getName()).isEqualTo(nedreEiker.getName());
     }
 
@@ -61,11 +61,11 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         topographicPlaceRepository.save(nedreEiker);
 
-        TopographicPlace actualNedreEiker = topographicPlaceRepository.findOne(nedreEiker.getId());
+        TopographicPlace actualNedreEiker = topographicPlaceRepository.findByNetexId(nedreEiker.getNetexId());
 
         assertThat(actualNedreEiker).isNotNull();
         assertThat(actualNedreEiker.getParentTopographicPlace()).isNotNull();
-        assertThat(actualNedreEiker.getParentTopographicPlace().getId()).isEqualTo(buskerud.getId());
+        assertThat(actualNedreEiker.getParentTopographicPlace().getNetexId()).isEqualTo(buskerud.getNetexId());
 
     }
 
@@ -81,7 +81,7 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         topographicPlaceRepository.save(akershus);
 
-        TopographicPlace actual = topographicPlaceRepository.findOne(akershus.getId());
+        TopographicPlace actual = topographicPlaceRepository.findByNetexId(akershus.getNetexId());
         assertThat(actual.getCountryRef()).isNotNull();
         assertThat(actual.getCountryRef().getRef()).isEqualTo(IanaCountryTldEnumeration.NO);
     }

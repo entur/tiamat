@@ -86,19 +86,19 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     public void correlateFourQuaysAndExpectThreeStopPlacesSaved() throws ExecutionException, InterruptedException {
 
         Quay quayWithSameName1 = quayWithCentroid(10.489552, 59.866439);
-        quayWithSameName1.setId(1L);
+        quayWithSameName1.setNetexId("1");
         quayWithSameName1.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithSameName2 = quayWithCentroid(10.489552, 59.866439);
-        quayWithSameName2.setId(2L);
+        quayWithSameName2.setNetexId("2");
         quayWithSameName2.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithSameNameButFarAway = quayWithCentroid(4.489552, 59.866439);
-        quayWithSameNameButFarAway.setId(3L);
+        quayWithSameNameButFarAway.setNetexId("3");
         quayWithSameNameButFarAway.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quayWithOtherName = quayWithCentroid(10.489552, 59.866439);
-        quayWithOtherName.setId(4L);
+        quayWithOtherName.setNetexId("4");
         quayWithOtherName.setName(new EmbeddableMultilingualString("othername", "no"));
 
         List<Quay> quays = Arrays.asList(quayWithSameName1, quayWithSameName2, quayWithSameNameButFarAway, quayWithOtherName);
@@ -122,15 +122,15 @@ public class StopPlaceFromQuaysCorrelationServiceTest {
     public void threeQuaysWithSameNameButDifferentLocationExpectThreeStopPlaces() throws ExecutionException, InterruptedException {
 
         Quay quay1 = quayWithCentroid(4.0, 59.866439);
-        quay1.setId(1L);
+        quay1.setNetexId("1");
         quay1.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quay2 = quayWithCentroid(5.0, 59.866439);
-        quay2.setId(2L);
+        quay2.setNetexId("2");
         quay2.setName(new EmbeddableMultilingualString("name", "no"));
 
         Quay quay3 = quayWithCentroid(6.0, 59.866439);
-        quay3.setId(3L);
+        quay3.setNetexId("3");
         quay3.setName(new EmbeddableMultilingualString("name", "no"));
 
         List<Quay> quays = Arrays.asList(quay1, quay2, quay3);

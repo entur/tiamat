@@ -147,13 +147,13 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     @Test
     public void mapPathLinkToNetex() {
         Quay quay = new Quay();
-        quay.setId(10L);
+        quay.setNetexId("netexId");
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setId(11L);
+        stopPlace.setNetexId("netexId for stop place");
 
         PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
-        pathLink.setId(123L);
+        pathLink.setNetexId("path link netex id");
 
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
 
@@ -167,15 +167,15 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     @Test
     public void mapPathLinkToNetexAndVerifyVersion() {
         Quay quay = new Quay();
-        quay.setId(10L);
+        quay.setNetexId("10");
         quay.setVersion("123");
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setId(11L);
+        stopPlace.setNetexId("11");
         stopPlace.setVersion("321");
 
         PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
-        pathLink.setId(123L);
+        pathLink.setNetexId("123");
 
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
 
@@ -201,7 +201,7 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     private void assertPathLinkEndEqualTo(PathLinkEnd actualPathLinkEnd, SiteElement expectedPlace, String expectedOriginalId) {
         assertThat(actualPathLinkEnd).isNotNull();
         AddressablePlace place = getPlaceFromPathLinkEnd(actualPathLinkEnd);
-        assertThat(place.getId()).isEqualTo(expectedPlace.getId());
+        assertThat(place.getNetexId()).isEqualTo(expectedPlace.getNetexId());
         if(expectedOriginalId != null) {
             assertThat(place.getOriginalIds().iterator().next()).isEqualTo(expectedOriginalId);
         }

@@ -102,9 +102,7 @@ public class QuayEqualsTest {
 
         String name = "Name";
         Quay quay1 = new Quay(new EmbeddableMultilingualString(name));
-        quay1.setId(987987L); // The ID should not influence the equals method.
         Quay quay2 = new Quay(new EmbeddableMultilingualString(name));
-        quay2.setId(987987L);
 
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude, quayLatitude)));
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(quayLongitude + 0.01, quayLatitude + 0.01)));
