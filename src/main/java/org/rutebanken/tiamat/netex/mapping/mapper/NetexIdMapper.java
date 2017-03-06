@@ -108,10 +108,10 @@ public class NetexIdMapper {
         return netexId.contains(NetexIdMapper.NSR);
     }
 
-    public static Optional<Long> getOptionalTiamatId(String netexId) {
+    public static Optional<String> getOptionalTiamatId(String netexId) {
         if (isInternalTiamatId(netexId)) {
             logger.debug("Detected tiamat ID from {}", netexId);
-            return Optional.of(getTiamatPublicId(netexId));
+            return Optional.of(netexId);
         } else {
             return Optional.empty();
         }
