@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.netex.id;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;

@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.util.concurrent.Striped;
 import org.hibernate.FlushMode;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
