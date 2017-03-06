@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import javax.persistence.*;
 
@@ -14,6 +15,12 @@ public abstract class IdentifiedEntity {
 
     @Column(unique = true)
     protected String netexId;
+
+
+    @PrePersist
+    public void assignNetexId() {
+        this.netexId = NetexIdMapper.generateNetexId(this);
+    }
 
     private Long getId() {
         return id;
