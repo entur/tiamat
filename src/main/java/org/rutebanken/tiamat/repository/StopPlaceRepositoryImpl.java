@@ -110,7 +110,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public String findByKeyValue(String key, Set<String> values) {
 
-        Query query = entityManager.createNativeQuery("SELECT s.netexId " +
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
                                                         "FROM stop_place s " +
                                                             "INNER JOIN stop_place_key_values spkv " +
                                                                 "ON spkv.stop_place_id = s.id " +
@@ -137,7 +137,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     public List<String> searchByKeyValue(String key, String value) {
 
-        Query query = entityManager.createNativeQuery("SELECT s.netexId " +
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
                                                         "FROM stop_place_key_values spkv " +
                                                           "INNER JOIN value_items v " +
                                                             "ON spkv.key_values_id = v.value_id " +
@@ -254,12 +254,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 parameters.put("query", stopPlaceSearch.getQuery());
 
                 if (stopPlaceSearch.getQuery().length() <= 3) {
-                    wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
+                    wheres.add("(lower(stopPlace.name.value) like concat(lower(:query), '%')");
                 } else {
-                    wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+                    wheres.add("(lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
                 }
-                wheres.add("netexId like concat('%', :query, '%')");
                 operators.add("or");
+                wheres.add("netexId like concat('%', :query, '%'))");
                 operators.add("and");
             }
 
