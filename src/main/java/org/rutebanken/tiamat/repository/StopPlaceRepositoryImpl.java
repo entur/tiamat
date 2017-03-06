@@ -318,7 +318,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public List<StopPlace> findAll(List<String> stopPlacesNetexIds) {
-        final String queryString = "select stopPlace from StopPlace stopPlace WHERE netexId = IN(:netexIds)";
+        final String queryString = "SELECT stopPlace FROM StopPlace stopPlace WHERE stopPlace.netexId IN :netexIds";
         final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString, StopPlace.class);
         typedQuery.setParameter("netexIds", stopPlacesNetexIds);
         return typedQuery.getResultList();
