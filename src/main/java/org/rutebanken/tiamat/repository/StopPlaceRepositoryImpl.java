@@ -111,11 +111,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public String findByKeyValue(String key, Set<String> values) {
 
         Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
-                                                        "FROM stop_place_key_values spkv " +
+                                                        "FROM stop_place s " +
+                                                            "INNER JOIN stop_place_key_values spkv " +
+                                                                "ON spkv.stop_place_id = s.id " +
                                                             "INNER JOIN value_items v " +
                                                                 "ON spkv.key_values_id = v.value_id " +
-                                                            "INNER JOIN stop_place s " +
-                                                                "ON spkv.stop_place_id s.id " +
                                                         "WHERE spkv.key_values_key = :key " +
                                                             "AND v.items IN ( :values ) ");
 
@@ -247,20 +247,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
         if(hasIdFilter) {
-            wheres.add("stopPlace.netexId in :idList");
-            parameters.put("idList", stopPlaceSearch.getNetexIdList());
+            wheres.add("stopPlace.netexId in :netexIdList");
+            parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
                 parameters.put("query", stopPlaceSearch.getQuery());
-                if (Longs.tryParse(stopPlaceSearch.getQuery()) != null) {
-                    wheres.add("concat('', id) like concat('%', :query, '%')");
+
+                if (stopPlaceSearch.getQuery().length() <= 3) {
+                    wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
                 } else {
-                    if (stopPlaceSearch.getQuery().length() <= 3) {
-                        wheres.add("lower(stopPlace.name.value) like concat(lower(:query), '%')");
-                    } else {
-                        wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
-                    }
+                    wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
                 }
+                wheres.add("netex_id like concat('%', :query, '%')");
+                operators.add("or");
                 operators.add("and");
             }
 
