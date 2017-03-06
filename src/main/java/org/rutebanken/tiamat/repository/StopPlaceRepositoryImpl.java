@@ -110,7 +110,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public String findByKeyValue(String key, Set<String> values) {
 
-        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
+        Query query = entityManager.createNativeQuery("SELECT s.netexId " +
                                                         "FROM stop_place s " +
                                                             "INNER JOIN stop_place_key_values spkv " +
                                                                 "ON spkv.stop_place_id = s.id " +
@@ -137,7 +137,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     public List<String> searchByKeyValue(String key, String value) {
 
-        Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
+        Query query = entityManager.createNativeQuery("SELECT s.netexId " +
                                                         "FROM stop_place_key_values spkv " +
                                                           "INNER JOIN value_items v " +
                                                             "ON spkv.key_values_id = v.value_id " +
@@ -164,7 +164,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.netex_id " +
+        String sql = "SELECT vi.items, q.netexId " +
                             "FROM quay_key_values qkv " +
                             "INNER JOIN stop_place_quays spq " +
                                 "ON spq.quays_id = qkv.quay_id " +
@@ -189,7 +189,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT v.items, s.netex_id " +
+        String sql = "SELECT v.items, s.netexId " +
                         "FROM stop_place_key_values spkv " +
                         "INNER JOIN value_items v " +
                             "ON spkv.key_values_id = v.value_id " +
@@ -222,7 +222,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Criteria query = session.createCriteria(StopPlace.class);
         if(stopPlaceNetexIds != null) {
-            query.add(Restrictions.in("netex_id", stopPlaceNetexIds));
+            query.add(Restrictions.in("netexId", stopPlaceNetexIds));
         }
 
         query.setReadOnly(true);
@@ -258,7 +258,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 } else {
                     wheres.add("lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
                 }
-                wheres.add("netex_id like concat('%', :query, '%')");
+                wheres.add("netexId like concat('%', :query, '%')");
                 operators.add("or");
                 operators.add("and");
             }
@@ -279,14 +279,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     prefix = "(";
                 } else prefix = "";
 
-                wheres.add(prefix + "stopPlace.topographicPlace.id in :municipalityId");
-                parameters.put("municipalityId", Lists.transform(stopPlaceSearch.getMunicipalityIds(), Long::valueOf));
+                wheres.add(prefix + "stopPlace.topographicPlace.netexId in :municipalityId");
+                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
             }
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
-                wheres.add("stopPlace.topographicPlace.id in (select municipality.id from TopographicPlace municipality where municipality.parentTopographicPlace.id in :countyId)" + suffix);
-                parameters.put("countyId", Lists.transform(stopPlaceSearch.getCountyIds(), Long::valueOf));
+                wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlace.netexId in :countyId)" + suffix);
+                parameters.put("countyId", stopPlaceSearch.getCountyIds());
             }
         }
 
