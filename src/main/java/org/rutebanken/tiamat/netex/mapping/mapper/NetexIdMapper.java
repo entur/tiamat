@@ -84,7 +84,7 @@ public class NetexIdMapper {
      * @param netexId Id with long value after last colon.
      * @return long value
      */
-    public static long getTiamatPublicId(String netexId) {
+    public static long getNetexIdPostfix(String netexId) {
         try {
             return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
         } catch (NumberFormatException e) {
@@ -94,10 +94,6 @@ public class NetexIdMapper {
 
     public static String getNetexId(String type, String id) {
         return NSR + ":" + type + ":" + id;
-    }
-
-    public static long getNetexIdPostfix(String netexId) {
-        return Long.parseLong(netexId.substring(netexId.lastIndexOf(":")+1));
     }
 
     public static String generateNetexId(IdentifiedEntity identifiedEntity) {
