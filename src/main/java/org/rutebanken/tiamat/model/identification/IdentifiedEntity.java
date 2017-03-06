@@ -19,7 +19,9 @@ public abstract class IdentifiedEntity {
 
     @PrePersist
     public void assignNetexId() {
-        this.netexId = NetexIdMapper.generateNetexId(this);
+        if(this.netexId == null) {
+            this.netexId = NetexIdMapper.generateNetexId(this);
+        }
     }
 
     private Long getId() {
