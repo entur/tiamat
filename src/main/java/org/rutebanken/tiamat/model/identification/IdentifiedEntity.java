@@ -1,11 +1,15 @@
 package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.rutebanken.tiamat.netex.id.NetexIdAssigner;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.IdentifiedEntityListener;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 
 @MappedSuperclass
+@EntityListeners(IdentifiedEntityListener.class)
 @Table(indexes = {@Index(name = "netex_id_index", columnList = "netex_id")})
 public abstract class IdentifiedEntity {
 
@@ -16,13 +20,6 @@ public abstract class IdentifiedEntity {
     @Column(unique = true)
     protected String netexId;
 
-
-    @PrePersist
-    public void assignNetexId() {
-        if(this.netexId == null) {
-            this.netexId = NetexIdMapper.generateNetexId(this);
-        }
-    }
 
     private Long getId() {
         return id;
