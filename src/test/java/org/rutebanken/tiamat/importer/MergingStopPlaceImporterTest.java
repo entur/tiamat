@@ -65,8 +65,6 @@ public class MergingStopPlaceImporterTest {
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
             nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionIncrementor);
 
-    private SiteFrame siteFrame = new SiteFrame();
-
     /**
      * Test that two nearby stops close to each other is treated as the same.
      * Note that the DB query is mocked. To test this with h2 use {@link MergingStopPlaceImporterWithGeoDBNoCacheTest}
@@ -104,7 +102,8 @@ public class MergingStopPlaceImporterTest {
 
 
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(StopTypeEnumeration.class))).thenReturn(Arrays.asList(firstStopId));
-        when(stopPlaceRepository.findAll(anyCollection())).thenReturn(Arrays.asList(firstStopPlace));
+//        when(stopPlaceRepository.findAll(anyCollection())).thenReturn(Arrays.asList(firstStopPlace));
+        when(stopPlaceRepository.findAll(anyListOf(String.class))).thenReturn(Arrays.asList(firstStopPlace));
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
