@@ -291,6 +291,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
     }
 
     @Test
+    @Ignore
     public void saveModifiedStopPlaceWithModifiedQuayAndNewQuay() throws Exception {
         Quay quay = new Quay();
         quay.setName(new EmbeddableMultilingualString("existing quay"));
