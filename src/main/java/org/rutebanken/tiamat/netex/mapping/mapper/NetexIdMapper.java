@@ -97,7 +97,7 @@ public class NetexIdMapper {
     }
 
     public static long getNetexIdPostfix(String netexId) {
-        return Long.parseLong(netexId.substring(netexId.lastIndexOf(",")));
+        return Long.parseLong(netexId.substring(netexId.lastIndexOf(":")+1));
     }
 
     public static String generateNetexId(IdentifiedEntity identifiedEntity) {
