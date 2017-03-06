@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
@@ -26,7 +27,8 @@ import static com.jayway.restassured.RestAssured.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class DtoStopPlaceResourceIntegrationTest extends CommonSpringBootTest {
+@Ignore
+public class DtoStopPlaceResourceIntegrationTest {
 
 //    private static final String BASE_URI_STOP_PLACE = "/jersey/stop_place/";
 //
