@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

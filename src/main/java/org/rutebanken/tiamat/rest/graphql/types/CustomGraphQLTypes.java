@@ -3,15 +3,13 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
 

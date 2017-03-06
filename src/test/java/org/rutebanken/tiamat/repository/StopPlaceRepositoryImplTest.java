@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.model.indentification;
+package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

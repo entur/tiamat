@@ -3,8 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import org.rutebanken.tiamat.model.indentification.IdentifiedEntity;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
