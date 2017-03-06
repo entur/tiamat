@@ -11,7 +11,7 @@ public class NetexIdMapperTest {
     @Test
     public void siteFrameIdMapping() throws Exception {
         SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setNetexId(NetexIdMapper.generateNetexId(siteFrame));
+        siteFrame.setNetexId("NSR:SiteFrame:123123");
 
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         new NetexIdMapper().toNetexModel(siteFrame, netexSiteFrame);
@@ -23,13 +23,13 @@ public class NetexIdMapperTest {
     @Test
     public void accessibilityAssesmentIdMapping() throws Exception {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
-        accessibilityAssessment.setNetexId(NetexIdMapper.generateNetexId(accessibilityAssessment));
+        accessibilityAssessment.setNetexId("NSR:AccessibilityAssesment:123124");
 
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
-        new NetexIdMapper().toNetexModel(accessibilityAssessment, netexSiteFrame);
+        org.rutebanken.netex.model.AccessibilityAssessment netexAccessibilityAssesment = new org.rutebanken.netex.model.AccessibilityAssessment();
+        new NetexIdMapper().toNetexModel(accessibilityAssessment, netexAccessibilityAssesment);
 
-        assertThat(netexSiteFrame.getId()).isNotEmpty();    
-        assertThat(netexSiteFrame.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssessment:123124");
+        assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
+        assertThat(netexAccessibilityAssesment.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssesment:123124");
     }
 
 
