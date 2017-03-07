@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * Assign Netex ID to IdentifiedObject.
- * Does not generate the ID.
  */
 @Component("netexIdAssigner")
 public class NetexIdAssigner {
@@ -25,7 +24,6 @@ public class NetexIdAssigner {
     public void assignNetexId(IdentifiedEntity identifiedEntity) {
 
         if(identifiedEntity.getNetexId() == null) {
-            logger.debug("No ID set on {}", identifiedEntity);
             try {
                 String netexId = netexIdProvider.getGeneratedId(identifiedEntity);
                 identifiedEntity.setNetexId(netexId);
@@ -40,6 +38,4 @@ public class NetexIdAssigner {
             netexIdProvider.claimId(identifiedEntity);
         }
     }
-
-
 }
