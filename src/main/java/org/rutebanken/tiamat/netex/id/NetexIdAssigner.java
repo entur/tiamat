@@ -1,15 +1,15 @@
 package org.rutebanken.tiamat.netex.id;
 
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
+/**
+ * Assign Netex ID to IdentifiedObject.
+ * Does not generate the ID.
+ */
 @Component("netexIdAssigner")
 public class NetexIdAssigner {
 
@@ -27,7 +27,7 @@ public class NetexIdAssigner {
         if(identifiedEntity.getNetexId() == null) {
             logger.debug("No ID set on {}", identifiedEntity);
             try {
-                String netexId = netexIdProvider.getId(identifiedEntity);
+                String netexId = netexIdProvider.getGeneratedId(identifiedEntity);
                 identifiedEntity.setNetexId(netexId);
                 logger.debug("Assigned ID {} to entity", netexId);
             } catch (InterruptedException e) {
