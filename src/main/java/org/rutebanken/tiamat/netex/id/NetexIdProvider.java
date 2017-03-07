@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class NetexIdProvider {
@@ -32,19 +33,21 @@ public class NetexIdProvider {
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        // Race conditions?
-
         if(!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
-            throw new IdGeneratorException("Cannot claim ID " + identifiedEntity.getNetexId());
+            throw new IdGeneratorException("Cannot claim invalid ID " + identifiedEntity.getNetexId());
         }
 
-        if(generatedIdState.getQueueForEntity(key(identifiedEntity)).remove(identifiedEntity.getNetexId())) {
+        Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
+
+        BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(key(identifiedEntity));
+
+        if(availableIds.remove(longId)) {
             logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
         }
 
         // The ID was not in the list of available IDS.
         // Which means that it has to be inserted into the helper table.
-        Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
+
         if(generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
             logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
         }
