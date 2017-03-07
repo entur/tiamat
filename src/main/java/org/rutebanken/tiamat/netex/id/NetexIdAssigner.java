@@ -4,21 +4,40 @@ import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component("netexIdAssigner")
 public class NetexIdAssigner {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdAssigner.class);
 
+    private NetexIdProvider netexIdProvider;
+
+    @Autowired
+    public NetexIdAssigner(NetexIdProvider netexIdProvider) {
+        this.netexIdProvider = netexIdProvider;
+    }
+
     public void assignNetexId(IdentifiedEntity identifiedEntity) {
 
         if(identifiedEntity.getNetexId() == null) {
-            logger.info("No ID set on {}", identifiedEntity);
-            String netexId = NetexIdMapper.generateNetexId(identifiedEntity);
-            identifiedEntity.setNetexId(netexId);
+            logger.debug("No ID set on {}", identifiedEntity);
+            try {
+                String netexId = netexIdProvider.getId(identifiedEntity);
+                identifiedEntity.setNetexId(netexId);
+                logger.debug("Assigned ID {} to entity", netexId);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Error generating new ID for entity: "+identifiedEntity, e);
+            }
+
         } else {
-            logger.info("Object does already have ID set: {}", identifiedEntity);
+            logger.debug("Incoming object claims explicit netex ID {}.", identifiedEntity.getNetexId());
+
+            netexIdProvider.claimId(identifiedEntity);
         }
     }
 

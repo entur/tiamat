@@ -100,12 +100,12 @@ public class NetexIdMapper {
         return getNetexId(determineIdType(identifiedEntity), String.valueOf(new Random().nextInt()));
     }
 
-    private static boolean isInternalTiamatId(String netexId) {
+    public static boolean isNsrId(String netexId) {
         return netexId.contains(NetexIdMapper.NSR);
     }
 
     public static Optional<String> getOptionalTiamatId(String netexId) {
-        if (isInternalTiamatId(netexId)) {
+        if (isNsrId(netexId)) {
             logger.debug("Detected tiamat ID from {}", netexId);
             return Optional.of(netexId);
         } else {

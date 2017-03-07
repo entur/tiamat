@@ -4,22 +4,21 @@ import com.google.common.util.concurrent.Striped;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.type.LongType;
 import org.rutebanken.tiamat.model.EntityStructure;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
@@ -30,55 +29,77 @@ import java.util.concurrent.locks.Lock;
  * If matching incoming entity already have ID set, try to use it without genereration.
  * For other entities, fall back to sequence style generation.
  */
-public class GaplessOptionalGenerator extends SequenceStyleGenerator {
+@Component
+public class GaplessIdGenerator {
 
-    private static final Logger logger = LoggerFactory.getLogger(GaplessOptionalGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(GaplessIdGenerator.class);
 
     private static final int ID_FETCH_SIZE = 500;
     private static final long START_LAST_ID = 1L;
 
-    private static final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> availableIdsPerTable = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, Long> lastIdsPerTable = new ConcurrentHashMap<>();
-    private static final Striped<Lock> locks = Striped.lock(1024);
+    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> availableIdsPerTable = new ConcurrentHashMap<>();
 
-    private static Boolean isH2 = null;
+    private final ConcurrentHashMap<String, Long> lastIdsPerTable = new ConcurrentHashMap<>();
 
-    private static final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> usedH2Ids = new ConcurrentHashMap<>(0);
+    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> usedH2Ids = new ConcurrentHashMap<>(0);
 
-    @Override
-    public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
+    private final Striped<Lock> locks = Striped.lock(1024);
 
-        if (object == null) throw new HibernateException(new NullPointerException());
+    private Boolean isH2 = null;
 
-//        Optional<EntityStructure> optionalEntityStructure = entityStructure(object);
-//        if (optionalEntityStructure.isPresent()) {
-//
-//            EntityStructure entityStructure = optionalEntityStructure.get();
-//
-//            SessionImpl sessionImpl = (SessionImpl) session;
-//            String tableName = determineTableName(sessionImpl, object);
-//            availableIdsPerTable.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
-//            lastIdsPerTable.putIfAbsent(tableName, START_LAST_ID);
-//            ConcurrentLinkedQueue<Long> availableIds = availableIdsPerTable.get(tableName);
-//
-//            logger.trace("I have these ids available for table {}: {}", tableName, availableIds);
-//
-//            if (entityStructure.getId() != null) {
-//                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
-//                availableIds.remove(entityStructure.getId());
-//                insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
-//                if(isH2(sessionImpl)) {
-//                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
-//                    usedH2Ids.get(tableName).add(entityStructure.getId());
-//                }
-//                return entityStructure.getId();
-//            } else {
-//                return generateId(tableName, entityStructure, sessionImpl, availableIds);
-//            }
-//        }
-        Serializable id = super.generate(session, object);
-        logger.trace("Generated id {}", id);
-        return id;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    private final List<String> entityTypeNames = new ArrayList<>();
+
+    public GaplessIdGenerator() {
+        entityManager.getMetamodel().getEntities().forEach(entityType -> entityTypeNames.add(entityType.getBindableJavaType().getSimpleName()));
+        logger.info("Found these types to generate IDs for: {}", entityTypeNames);
+
+        entityTypeNames.forEach(entityTypeName -> {
+            availableIdsPerTable.putIfAbsent(entityTypeName, new ConcurrentLinkedQueue<>());
+            lastIdsPerTable.putIfAbsent(entityTypeName, START_LAST_ID);
+
+        });
+    }
+
+    public void generate() {
+
+        entityTypeNames.forEach(tableName -> {
+            logger.debug("About to generate IDs for entity type: {}", tableName);
+
+            availableIdsPerTable.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
+            lastIdsPerTable.putIfAbsent(tableName, START_LAST_ID);
+
+            ConcurrentLinkedQueue<Long> availableIds = availableIdsPerTable.get(tableName);
+
+            logger.trace("I have these ids available for table {}: {}", tableName, availableIds);
+
+            if(availableIds.size() < 1000) {
+                generateNewIds(tableName, entityManager, availableIds);
+            }
+
+
+            if (entityStructure.getId() != null) {
+                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getId(), entityStructure);
+                availableIds.remove(entityStructure.getId());
+                insertRetrievedIds(tableName, Arrays.asList(entityStructure.getId()), sessionImpl);
+                if(isH2(sessionImpl)) {
+                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
+                    usedH2Ids.get(tableName).add(entityStructure.getId());
+                }
+                return entityStructure.getId();
+            } else {
+                return generateId(tableName, entityStructure, sessionImpl, availableIds);
+            }
+
+
+            logger.trace("Generated id {}", id);
+
+        });
+
+
     }
 
     private long generateId(String tableName, EntityStructure entityStructure, SessionImpl sessionImpl, ConcurrentLinkedQueue<Long> availableIds) {
@@ -124,31 +145,14 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
             List<Long> retrievedIds = new ArrayList<>();
             while (retrievedIds.isEmpty()) {
                 logger.trace("Retrieving new IDs");
-                retrievedIds.addAll(retrieveIds(tableName, sessionImpl));
+                retrievedIds.addAll(retrieveIds(tableName));
             }
             logger.trace("Inserting {} ids", retrievedIds);
-            insertRetrievedIds(tableName, retrievedIds, sessionImpl);
+            insertRetrievedIds(tableName, retrievedIds);
             availableIds.addAll(retrievedIds);
         } finally {
             lock.unlock();
         }
-    }
-
-    private String determineTableName(SessionImpl sessionImpl, Object object) {
-        return ((AbstractEntityPersister) sessionImpl.getSessionFactory().getAllClassMetadata().get(object.getClass().getCanonicalName())).getTableName();
-    }
-
-    private Optional<EntityStructure> entityStructure(Object object) {
-        if (object instanceof EntityStructure) {
-            EntityStructure entityStructure = (EntityStructure) object;
-
-            logger.trace("{} is instance of entity structre", entityStructure);
-
-            if ((entityStructure instanceof StopPlace || entityStructure instanceof Quay)) {
-                return Optional.of(entityStructure);
-            }
-        }
-        return Optional.empty();
     }
 
     /**
@@ -156,15 +160,15 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
      * @return list of available IDs for table.
      */
     @SuppressWarnings(value = "unchecked")
-    private List<Long> retrieveIds(String tableName, SessionImpl sessionImpl) {
+    private List<Long> retrieveIds(String tableName) {
         long lastId = lastIdsPerTable.get(tableName);
 
         List<Long> retrievedIds;
-        if (isH2(sessionImpl)) {
+        if (isH2()) {
             // Because of issues using the query below or query with system range with H2.
             retrievedIds = generateNextAvailableH2Ids(tableName, lastId, ID_FETCH_SIZE);
         } else {
-            retrievedIds = selectNextAvailableIds(tableName, lastId, ID_FETCH_SIZE, sessionImpl);
+            retrievedIds = selectNextAvailableIds(tableName, lastId, ID_FETCH_SIZE);
         }
 
         if(retrievedIds.isEmpty()) {
@@ -176,7 +180,7 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
     }
 
 
-    private void insertRetrievedIds(String tableName, List<Long> list, SessionImpl sessionImpl) {
+    private void insertRetrievedIds(String tableName, List<Long> list) {
         if(list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
         }
@@ -189,30 +193,26 @@ public class GaplessOptionalGenerator extends SequenceStyleGenerator {
                 insertUsedIdsSql.append(',');
             }
         }
-        SQLQuery query = sessionImpl.createSQLQuery(insertUsedIdsSql.toString());
-        query.setFlushMode(FlushMode.COMMIT);
+        Query query = entityManager.createNativeQuery(insertUsedIdsSql.toString());
         query.executeUpdate();
     }
 
-    private List<Long> selectNextAvailableIds(String tableName, long lastId, int fetchSize, SessionImpl session) {
+    private List<Long> selectNextAvailableIds(String tableName, long lastId, int fetchSize) {
         logger.trace("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
         String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + ID_FETCH_SIZE) + ") AS generated " +
                 "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " +
                 "ORDER BY generated";
 
-        SQLQuery sqlQuery = session.createSQLQuery(sql);
-        sqlQuery.setFlushMode(FlushMode.COMMIT);
-        sqlQuery.addScalar("generated", LongType.INSTANCE);
+        Query sqlQuery = entityManager.createNativeQuery(sql);
 
-        List list = sqlQuery.list();
-        return list;
+        return sqlQuery.getResultList();
     }
 
-    private boolean isH2(SessionImpl sessionImpl) {
+    private boolean isH2() {
         if (isH2 == null) {
             try {
-                isH2 = sessionImpl.getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2");
+                isH2 = entityManager.unwrap(SessionImpl.class).getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2");
                 logger.info("Detected H2: {}", isH2);
             } catch (SQLException e) {
                 throw new RuntimeException("Could not determine database provider", e);

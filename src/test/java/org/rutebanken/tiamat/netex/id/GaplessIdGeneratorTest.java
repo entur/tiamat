@@ -23,7 +23,7 @@ import java.util.List;
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GaplessOptionalGeneratorTest extends CommonSpringBootTest {
+public class GaplessIdGeneratorTest extends CommonSpringBootTest {
 
 //    @Autowired
 //    private StopPlaceRepository stopPlaceRepository;
