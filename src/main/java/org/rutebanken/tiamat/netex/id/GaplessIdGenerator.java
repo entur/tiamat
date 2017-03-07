@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.util.concurrent.Striped;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -15,9 +15,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
@@ -35,13 +33,15 @@ public class GaplessIdGenerator {
 
     private static final int ID_FETCH_SIZE = GeneratedIdState.QUEUE_CAPACITY;
     private static final long START_LAST_ID = 1L;
-    public static final int LOW_LEVEL_AVAILABLE_IDS = 100;
+    public static final int LOW_LEVEL_AVAILABLE_IDS = ID_FETCH_SIZE;
 
     private final Striped<Lock> locks = Striped.lock(1024);
 
     private Boolean isH2 = null;
 
     private EntityManagerFactory entityManagerFactory;
+
+    private final ExecutorService executorService;
 
     private final GeneratedIdState generatedIdState;
 
@@ -58,28 +58,50 @@ public class GaplessIdGenerator {
         });
         logger.info("Found these types to generate IDs for: {}", entityTypeNames);
 
+        executorService = Executors.newFixedThreadPool(entityTypeNames.size(), new ThreadFactoryBuilder().setNameFormat("id-generator-%d").build());
+
         entityTypeNames.forEach(entityTypeName -> {
             generatedIdState.registerEntityTypeName(entityTypeName, START_LAST_ID);
         });
     }
 
 
+    @PostConstruct
+    public void startExecutorService() {
+        entityTypeNames.forEach(entityTypeName -> executorService.submit(() -> run(entityTypeName)));
+    }
 
-    public void run() {
+
+    public void run(String entityTypeName) {
         while (true) {
             try {
-                entityTypeNames.forEach(entityTypeName -> {
-                    logger.debug("About to generate IDs for entity type: {}", entityTypeName);
+                ConcurrentLinkedQueue<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+                BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
-                    BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+                if (!claimedIdQueueForEntity.isEmpty()) {
+                    logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
+                    // This should already have happened in NetexIdProvider.
+                    availableIds.removeAll(claimedIdQueueForEntity);
+                    insertClaimedIds(entityTypeName, claimedIdQueueForEntity);
 
+                }
+
+                if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
                     logger.debug("I have these ids available for table {}: {}", entityTypeName, availableIds);
+                    generateNewIds(entityTypeName, availableIds);
+                }
 
-                    if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                        generateNewIds(entityTypeName, availableIds);
-                    } else {
-                        logger.info("We currently have enough available Ids for {}: {}", entityTypeName, availableIds.size());
-                    }
+                try {
+                    // Sleep between queue size checks.
+                    // It is a blocking queue and could use the blocking feature to add new IDs.
+                    // But it might keep the transaction open longer than we want.
+                    // And the transaction should be commited before adding generated IDs to the queue and releasing the lock.
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    logger.warn("Interruped", e);
+                    Thread.currentThread().interrupt();
+                }
+
 
 //            if (entityStructure.getGeneratedId() != null) {
 //                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getGeneratedId(), entityStructure);
@@ -95,39 +117,53 @@ public class GaplessIdGenerator {
 //            }
 
 
-                });
             } catch (Throwable t) {
                 logger.error("Caught throwable when generating IDs", t);
             }
         }
+
     }
 
 
-
-    /**
-     * All previously fetched IDs are taken for this table. Generate new IDs.
-     * Will lock per entity type to avoid fetching and inserting IDs concurrently from the database.
-     * But there might be a potential issue with inserting reserved IDs during the transaction,
-     * because another transaction would not see those IDs in the database until the first transaction commits/flushes.
-     * <p>
-     * On the other hand, we have these available IDs in a a ConcurrentLinkedQueue. So IDs would be available to the next
-     * transaction/thread when lock is unlocked, even though the transaction is not commited. But what about multiple instances?
-     * One opportunity is to use Hazelcast to share memory fetched IDs amongst instances and use map locks.
-     *
-     * @param sessionImpl    session to use for fetching and inserting reserved IDs
-     * @param entityTypeName table to generate IDs for
-     * @param availableIds   The (empty) queue of available IDs to fill
-     */
-    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) {
-        logger.info("Time to generate new IDs for {}", entityTypeName);
+    private void insertClaimedIds(String entityTypeName, ConcurrentLinkedQueue<Long> claimedIdQueueForEntity) {
+        logger.info("Inserting claimed IDs {}. Aquiring lock.", entityTypeName);
         final Lock lock = locks.get(entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
 
         try {
-            transaction.begin();
             lock.lock();
+            transaction.begin();
+            insertRetrievedIds(entityTypeName, claimedIdQueueForEntity.stream().collect(toList()), entityManager);
+            transaction.commit();
+
+        } catch (RuntimeException e) {
+            closeTransaction(transaction, e);
+        } finally {
+            entityManager.close();
+            lock.unlock();
+        }
+    }
+
+
+    /**
+     * All previously fetched IDs are taken for this entity. Generate new IDs.
+     * Will lock per entity type to avoid fetching and inserting IDs concurrently from the database.
+     *
+     * @param entityTypeName table to generate IDs for
+     * @param availableIds   The (empty) queue of available IDs to fill
+     */
+    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) {
+        logger.info("Time to generate new IDs for {}. Aquiring lock.", entityTypeName);
+        final Lock lock = locks.get(entityTypeName);
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
+        try {
+            lock.lock();
+            transaction.begin();
 
             List<Long> retrievedIds = new ArrayList<>();
 
@@ -135,22 +171,20 @@ public class GaplessIdGenerator {
                 retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
             }
 
-            logger.trace("Inserting {} ids", retrievedIds);
             insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
 
             transaction.commit();
 
-            for(long retrievedId : retrievedIds) {
+            for (long retrievedId : retrievedIds) {
                 availableIds.put(retrievedId);
             }
 
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             logger.warn("Interrupted.", e);
             Thread.currentThread().interrupt();
 
         } catch (RuntimeException e) {
-            if (transaction != null && transaction.isActive()) transaction.rollback();
-            throw e;
+            closeTransaction(transaction, e);
         } finally {
             entityManager.close();
             lock.unlock();
@@ -206,7 +240,7 @@ public class GaplessIdGenerator {
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + ID_FETCH_SIZE-1) + ") AS generated " +
+        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + ID_FETCH_SIZE - 1) + ") AS generated " +
                 "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " +
                 "ORDER BY generated";
 
@@ -261,5 +295,10 @@ public class GaplessIdGenerator {
         }
 
         return availableIds;
+    }
+
+    private void closeTransaction(EntityTransaction transaction, RuntimeException e) {
+        if (transaction != null && transaction.isActive()) transaction.rollback();
+        throw e;
     }
 }
