@@ -155,7 +155,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             if(results.isEmpty()) {
                 return null;
             } else {
-                return results.stream().map(netexId -> netexId).collect(Collectors.toList());
+                return results;
             }
         } catch (NoResultException noResultException) {
             return null;
