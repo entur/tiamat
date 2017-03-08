@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.util.concurrent.Striped;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -90,13 +92,14 @@ public class GaplessIdGenerator {
                             insertClaimedIdList.add(claimedId);
                         }
                     }
-                    insertClaimedIds(entityTypeName, insertClaimedIdList);
-                    claimedIdQueueForEntity.removeAll(insertClaimedIdList);
+                    if(!isH2()) {
+                        insertClaimedIds(entityTypeName, insertClaimedIdList);
+                        claimedIdQueueForEntity.removeAll(insertClaimedIdList);
+                    }
 
                 }
 
                 if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                    logger.debug("I have these ids available for table {}: {}", entityTypeName, availableIds);
                     generateNewIds(entityTypeName, availableIds);
                 }
 
@@ -111,23 +114,9 @@ public class GaplessIdGenerator {
                     Thread.currentThread().interrupt();
                 }
 
-
-//            if (entityStructure.getGeneratedId() != null) {
-//                logger.debug("Incoming object claims explicit entity ID {}. {}", entityStructure.getGeneratedId(), entityStructure);
-//                availableIds.remove(entityStructure.getGeneratedId());
-//                insertRetrievedIds(entityTypeName, Arrays.asList(entityStructure.getGeneratedId()), sessionImpl);
-//                if(isH2(sessionImpl)) {
-//                    usedH2Ids.putIfAbsent(tableName, new ConcurrentLinkedQueue<>());
-//                    usedH2Ids.get(entityTypeName).add(entityStructure.getGeneratedId());
-//                }
-//                return entityStructure.getGeneratedId();
-//            } else {
-//                return generateId(entityTypeName, entityStructure, sessionImpl, availableIds);
-//            }
-
-
-            } catch (Throwable t) {
-                logger.error("Caught throwable when generating IDs", t);
+            } catch (Exception e) {
+                logger.error("Caught exception when generating IDs for entity "+entityTypeName, e);
+                return;
             }
         }
 
@@ -144,7 +133,9 @@ public class GaplessIdGenerator {
         try {
             lock.lock();
             transaction.begin();
+
             insertRetrievedIds(entityTypeName, claimedIdList, entityManager);
+
             transaction.commit();
 
         } catch (RuntimeException e) {
@@ -180,7 +171,9 @@ public class GaplessIdGenerator {
                 retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
             }
 
-            insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
+            if(!isH2()) {
+                insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
+            }
 
             transaction.commit();
 
@@ -265,15 +258,16 @@ public class GaplessIdGenerator {
     }
 
     private boolean isH2() {
-//        if (isH2 == null) {
-//            try {
-//                isH2 = entityManager.unwrap(SessionImpl.class).getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2");
-//                logger.info("Detected H2: {}", isH2);
-//            } catch (SQLException e) {
-//                throw new RuntimeException("Could not determine database provider", e);
-//            }
-//        }
-        return false;
+        if (isH2 == null) {
+            try {
+                EntityManager entityManager = entityManagerFactory.createEntityManager();
+                isH2 = entityManager.unwrap(SessionImpl.class).getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2");
+                logger.info("Detected H2: {}", isH2);
+            } catch (SQLException e) {
+                throw new RuntimeException("Could not determine database provider", e);
+            }
+        }
+        return isH2;
     }
 
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> usedH2Ids = new ConcurrentHashMap<>(0);
@@ -285,7 +279,7 @@ public class GaplessIdGenerator {
     private List<Long> generateNextAvailableH2Ids(String entityTypeName) {
 
         logger.info("H2: About to retrieve new IDs for {}", entityTypeName);
-        List<Long> availableIds = new ArrayList<>();
+        List<Long> retrievedIds = new ArrayList<>();
 
         usedH2Ids.putIfAbsent(entityTypeName, new ConcurrentLinkedQueue<>());
 
@@ -297,14 +291,13 @@ public class GaplessIdGenerator {
             if (usedH2Ids.get(entityTypeName).contains(id)) {
                 logger.debug("Looking for next available ID. {} is taken", id);
             } else {
-                availableIds.add(id);
+                retrievedIds.add(id);
             }
 
             id++;
             counter++;
         }
-
-        return availableIds;
+        return retrievedIds;
     }
 
     private void closeTransaction(EntityTransaction transaction, RuntimeException e) {
