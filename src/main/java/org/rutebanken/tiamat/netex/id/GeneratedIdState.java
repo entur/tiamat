@@ -2,16 +2,17 @@ package org.rutebanken.tiamat.netex.id;
 
 import org.eclipse.jetty.util.ConcurrentArrayQueue;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Component
+@Service
 public class GeneratedIdState {
 
-    public static final int QUEUE_CAPACITY = 10;
+    public static final int QUEUE_CAPACITY = 100;
 
 
     private final ConcurrentHashMap<String, BlockingQueue<Long>> availableIdsPerEntity = new ConcurrentHashMap<>();
