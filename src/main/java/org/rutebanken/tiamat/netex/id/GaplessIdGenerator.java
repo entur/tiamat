@@ -80,9 +80,18 @@ public class GaplessIdGenerator {
 
                 if (!claimedIdQueueForEntity.isEmpty()) {
                     logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
-                    // This should already have happened in NetexIdProvider.
-                    availableIds.removeAll(claimedIdQueueForEntity);
-                    insertClaimedIds(entityTypeName, claimedIdQueueForEntity);
+
+                    List<Long> insertClaimedIdList = new ArrayList<>();
+                    for(long claimedId : claimedIdQueueForEntity) {
+                        // Only insert claimed IDs which are not already in available id list, as they are already inserted.
+                        if(availableIds.contains(claimedId)) {
+                            availableIds.remove(claimedId);
+                        } else {
+                            insertClaimedIdList.add(claimedId);
+                        }
+                    }
+                    insertClaimedIds(entityTypeName, insertClaimedIdList);
+                    claimedIdQueueForEntity.removeAll(insertClaimedIdList);
 
                 }
 
@@ -125,8 +134,8 @@ public class GaplessIdGenerator {
     }
 
 
-    private void insertClaimedIds(String entityTypeName, ConcurrentLinkedQueue<Long> claimedIdQueueForEntity) {
-        logger.info("Inserting claimed IDs {}. Aquiring lock.", entityTypeName);
+    private void insertClaimedIds(String entityTypeName, List<Long> claimedIdList) {
+        logger.info("Inserting {} claimed IDs {}. Aquiring lock.", claimedIdList.size(), entityTypeName);
         final Lock lock = locks.get(entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -135,7 +144,7 @@ public class GaplessIdGenerator {
         try {
             lock.lock();
             transaction.begin();
-            insertRetrievedIds(entityTypeName, claimedIdQueueForEntity.stream().collect(toList()), entityManager);
+            insertRetrievedIds(entityTypeName, claimedIdList, entityManager);
             transaction.commit();
 
         } catch (RuntimeException e) {
@@ -232,6 +241,7 @@ public class GaplessIdGenerator {
                 insertUsedIdsSql.append(',');
             }
         }
+        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING");
         Query query = entityManager.createNativeQuery(insertUsedIdsSql.toString());
         query.executeUpdate();
         entityManager.flush();
