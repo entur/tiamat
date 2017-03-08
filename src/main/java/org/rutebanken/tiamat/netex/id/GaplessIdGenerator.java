@@ -6,9 +6,14 @@ import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -33,13 +38,13 @@ public class GaplessIdGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(GaplessIdGenerator.class);
 
-    private static final int ID_FETCH_SIZE = GeneratedIdState.QUEUE_CAPACITY;
+    private static final int ID_FETCH_SIZE = 10;
     private static final long START_LAST_ID = 1L;
     public static final int LOW_LEVEL_AVAILABLE_IDS = ID_FETCH_SIZE;
 
     private final Striped<Lock> locks = Striped.lock(1024);
 
-    private Boolean isH2 = null;
+    private volatile Boolean isH2 = null;
 
     private EntityManagerFactory entityManagerFactory;
 
@@ -70,9 +75,20 @@ public class GaplessIdGenerator {
 
     @PostConstruct
     public void startExecutorService() {
+        logger.info("Starting ID generator threads");
         entityTypeNames.forEach(entityTypeName -> executorService.submit(() -> run(entityTypeName)));
     }
 
+    @PreDestroy
+    public void preDestroy() {
+        logger.info("Pre destroy. Shutting down executor service");
+        executorService.shutdownNow();
+        try {
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+        }
+    }
 
     public void run(String entityTypeName) {
         while (true) {
@@ -110,12 +126,13 @@ public class GaplessIdGenerator {
                     // And the transaction should be commited before adding generated IDs to the queue and releasing the lock.
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    logger.warn("Interruped", e);
+                    logger.info("Stopping");
                     Thread.currentThread().interrupt();
+                    return;
                 }
 
             } catch (Exception e) {
-                logger.error("Caught exception when generating IDs for entity "+entityTypeName, e);
+                logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
                 return;
             }
         }
@@ -139,7 +156,7 @@ public class GaplessIdGenerator {
             transaction.commit();
 
         } catch (RuntimeException e) {
-            closeTransaction(transaction, e);
+            rollbackAndThrow(transaction, e);
         } finally {
             entityManager.close();
             lock.unlock();
@@ -154,7 +171,7 @@ public class GaplessIdGenerator {
      * @param entityTypeName table to generate IDs for
      * @param availableIds   The (empty) queue of available IDs to fill
      */
-    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) {
+    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) throws InterruptedException {
         logger.info("Time to generate new IDs for {}. Aquiring lock.", entityTypeName);
         final Lock lock = locks.get(entityTypeName);
 
@@ -181,12 +198,11 @@ public class GaplessIdGenerator {
                 availableIds.put(retrievedId);
             }
 
-        } catch (InterruptedException e) {
-            logger.warn("Interrupted.", e);
-            Thread.currentThread().interrupt();
-
         } catch (RuntimeException e) {
-            closeTransaction(transaction, e);
+            rollbackAndThrow(transaction, e);
+        } catch (InterruptedException e) {
+            transaction.commit();
+            throw e;
         } finally {
             entityManager.close();
             lock.unlock();
@@ -297,11 +313,14 @@ public class GaplessIdGenerator {
             id++;
             counter++;
         }
+        logger.info("Created {} Ids for {}", retrievedIds.size(), entityTypeName);
         return retrievedIds;
     }
 
-    private void closeTransaction(EntityTransaction transaction, RuntimeException e) {
+    private void rollbackAndThrow(EntityTransaction transaction, RuntimeException e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
         throw e;
     }
+
+
 }
