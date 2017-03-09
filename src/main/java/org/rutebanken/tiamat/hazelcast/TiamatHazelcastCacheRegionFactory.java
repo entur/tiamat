@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.hazelcast;
 
 
+import com.hazelcast.core.HazelcastInstance;
 import org.hibernate.cache.spi.RegionFactory;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.HazelcastCacheRegionFactory implements RegionFactory{
 
     private static final Logger logger = LoggerFactory.getLogger(TiamatHazelcastCacheRegionFactory.class);
+
+    private static final ExtendedHazelcastService extendedHazelcastService = initHazelcastService();
 
     private static ExtendedHazelcastService initHazelcastService() {
 
@@ -38,6 +41,10 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
         }
     }
 
+    public static HazelcastInstance getHazelCastInstance() {
+        return extendedHazelcastService.getHazelcastInstance();
+    }
+
     private static String getProperty(String key, boolean required) {
         String value = System.getProperty(key);
         logger.info("Loaded {}: {}", key, value);
@@ -58,7 +65,7 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
      * spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
      */
     public TiamatHazelcastCacheRegionFactory() {
-        super(initHazelcastService().getHazelcastInstance());
+        super(extendedHazelcastService.getHazelcastInstance());
         logger.info("Created factory with: {}", getHazelcastInstance());
     }
 
