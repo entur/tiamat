@@ -12,8 +12,8 @@ public class HazelcastConfiguration {
      * To be able to use hazelcast instance in other parts of the application, expose it as spring bean here.
      */
     @Bean
-    public HazelcastInstance hazelcastInstance() {
-        return TiamatHazelcastCacheRegionFactory.getHazelCastInstance();
+    public HazelcastInstance getHazelcastInstanceFromTiamatHazelcastCacheRegionFactory() {
+        return TiamatHazelcastCacheRegionFactory.initOrGetHazelcastInstance();
     }
 
 }
