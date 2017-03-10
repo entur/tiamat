@@ -57,7 +57,7 @@ public class GaplessIdGenerator implements Serializable {
 
         if(!Hazelcast.getAllHazelcastInstances().stream()
                 .flatMap(hzInstance -> hzInstance.getDistributedObjects().stream())
-                .peek(distributedObject -> logger.info("{}", distributedObject))
+                .peek(distributedObject -> logger.trace("{}", distributedObject))
                 .filter(distributedObject -> distributedObject.getName().equals(EXECUTOR_NAME))
                 .findAny().isPresent()) {
             this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);

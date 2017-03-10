@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
 @ActiveProfiles("geodb")
+@TestExecutionListeners(TestCleanUpExecutionListener.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class CommonSpringBootTest {
 
