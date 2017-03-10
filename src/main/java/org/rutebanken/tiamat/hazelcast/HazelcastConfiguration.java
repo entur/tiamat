@@ -13,7 +13,7 @@ public class HazelcastConfiguration {
      */
     @Bean
     public HazelcastInstance getHazelcastInstanceFromTiamatHazelcastCacheRegionFactory() {
-        return TiamatHazelcastCacheRegionFactory.initOrGetHazelcastInstance();
+        return TiamatHazelcastCacheRegionFactory.getHazelCastInstance();
     }
 
 }
