@@ -30,24 +30,28 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     public static final int LOW_LEVEL_AVAILABLE_IDS = ID_FETCH_SIZE;
 
-    private final GeneratedIdState generatedIdState;
     private final String entityTypeName;
     private final boolean isH2;
     private EntityManagerFactory entityManagerFactory;
 
 
     private transient HazelcastInstance hazelcastInstance;
+    private GeneratedIdState generatedIdState;
 
-    public GaplessIdGeneratorTask(GeneratedIdState generatedIdState, String entityTypeName, boolean isH2, EntityManagerFactory entityManagerFactory) {
-        this.generatedIdState = generatedIdState;
+    public GaplessIdGeneratorTask(String entityTypeName, boolean isH2, EntityManagerFactory entityManagerFactory) {
         this.entityTypeName = entityTypeName;
         this.isH2 = isH2;
         this.entityManagerFactory = entityManagerFactory;
     }
 
     @Override
+    public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
+        this.hazelcastInstance = hazelcastInstance;
+        this.generatedIdState = new GeneratedIdState(hazelcastInstance);
+    }
+
+    @Override
     public void run() {
-        while (true) {
             try {
                 List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
                 BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
@@ -91,7 +95,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
                 return;
             }
-        }
+
 
     }
 
@@ -270,8 +274,5 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     }
 
 
-    @Override
-    public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
-        this.hazelcastInstance = hazelcastInstance;
-    }
+
 }

@@ -1,16 +1,17 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.*;
 
 @Service
-public class GeneratedIdState {
+public class GeneratedIdState implements Serializable{
 
-    public static final int QUEUE_CAPACITY = 100;
     public static final String LAST_IDS_FOR_ENTITY = "lastIdsForEntities";
     public static final String CLAIMED_IDS_FOR_ENTITY_PREFIX = "claimedIdsForEntities";
 
@@ -25,7 +26,7 @@ public class GeneratedIdState {
         hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY).putIfAbsent(entityTypeName, startLastId);
     }
 
-    public BlockingQueue<Long> getQueueForEntity(String entityTypeName) {
+    public IQueue<Long> getQueueForEntity(String entityTypeName) {
         return hazelcastInstance.getQueue(entityTypeName);
     }
 
