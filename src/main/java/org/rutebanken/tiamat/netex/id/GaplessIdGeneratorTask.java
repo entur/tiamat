@@ -233,11 +233,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 .collect(toList());
     }
 
-
-
-    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<Long>> usedH2Ids = new ConcurrentHashMap<>(0);
-
-
     /**
      * Generate new in-memory IDs for H2.
      */
@@ -246,22 +241,25 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         logger.info("H2: About to retrieve new IDs for {}", entityTypeName);
         List<Long> retrievedIds = new ArrayList<>();
 
-        usedH2Ids.putIfAbsent(entityTypeName, new ConcurrentLinkedQueue<>());
+        List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-"+entityTypeName);
 
-
-        Long id = generatedIdState.getLastIdForEntity(entityTypeName);
+        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        usedH2Ids.addAll(claimedIdQueueForEntity);
+        Long idCandidate = generatedIdState.getLastIdForEntity(entityTypeName);
         Long counter = 0L;
-        outer:
+
         while (counter < ID_FETCH_SIZE) {
-            if (usedH2Ids.get(entityTypeName).contains(id)) {
-                logger.debug("Looking for next available ID. {} is taken", id);
+            if (usedH2Ids.contains(idCandidate) || claimedIdQueueForEntity.contains(idCandidate)) {
+                logger.info("Looking for next available ID. {} is taken", idCandidate);
             } else {
-                retrievedIds.add(id);
+                retrievedIds.add(idCandidate);
+                usedH2Ids.add(idCandidate);
             }
 
-            id++;
+            idCandidate++;
             counter++;
         }
+
         logger.info("Created {} Ids for {}", retrievedIds.size(), entityTypeName);
         return retrievedIds;
     }
