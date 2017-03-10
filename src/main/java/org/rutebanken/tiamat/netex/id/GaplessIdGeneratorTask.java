@@ -24,22 +24,22 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     private static final String LOCK_PREFIX = "entity_lock_";
 
-    private static final int ID_FETCH_SIZE = 10;
-
-    public static final int LOW_LEVEL_AVAILABLE_IDS = ID_FETCH_SIZE;
+    public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
 
     private final String entityTypeName;
     private final boolean isH2;
+    private final int fetchSize;
     private EntityManagerFactory entityManagerFactory;
 
 
     private transient HazelcastInstance hazelcastInstance;
     private GeneratedIdState generatedIdState;
 
-    public GaplessIdGeneratorTask(String entityTypeName, boolean isH2, EntityManagerFactory entityManagerFactory) {
+    public GaplessIdGeneratorTask(String entityTypeName, boolean isH2, EntityManagerFactory entityManagerFactory, int fetchSize) {
         this.entityTypeName = entityTypeName;
         this.isH2 = isH2;
         this.entityManagerFactory = entityManagerFactory;
+        this.fetchSize = fetchSize;
     }
 
     @Override
@@ -61,12 +61,12 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 lock.unlock();
             }
         } else {
-            logger.info("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
+            logger.debug("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
         }
     }
 
     private void generate() throws InterruptedException {
-        logger.info("Generating new available IDs for {}", entityTypeName);
+        logger.debug("Generating new available IDs for {}", entityTypeName);
         List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
@@ -113,15 +113,13 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     }
 
     /**
-     * All previously fetched IDs are taken for this entity. Generate new IDs.
+     * Generate new IDs for entity.
      * Will lock per entity type to avoid fetching and inserting IDs concurrently from the database.
      *
      * @param entityTypeName table to generate IDs for
      * @param availableIds   The (empty) queue of available IDs to fill
      */
     private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds, EntityManager entityManager) throws InterruptedException {
-        logger.info("Time to generate new IDs for {}.", entityTypeName);
-
         List<Long> retrievedIds = new ArrayList<>();
 
         while (retrievedIds.isEmpty()) {
@@ -156,7 +154,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         logger.info("Generated for {}: {}", entityTypeName, retrievedIds);
 
         if (retrievedIds.isEmpty()) {
-            generatedIdState.setLastIdForEntity(entityTypeName, lastId + ID_FETCH_SIZE);
+            generatedIdState.setLastIdForEntity(entityTypeName, lastId + fetchSize);
         } else {
             generatedIdState.setLastIdForEntity(entityTypeName, retrievedIds.get(retrievedIds.size() - 1));
         }
@@ -186,7 +184,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + ID_FETCH_SIZE - 1) + ") AS generated " +
+        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + fetchSize - 1) + ") AS generated " +
                 "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " +
                 "ORDER BY generated";
 
@@ -205,7 +203,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
      */
     private List<Long> generateNextAvailableH2Ids(String entityTypeName) {
 
-        logger.info("H2: About to retrieve new IDs for {}", entityTypeName);
+        logger.debug("H2: About to retrieve new IDs for {}", entityTypeName);
         List<Long> retrievedIds = new ArrayList<>();
 
         List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-" + entityTypeName);
@@ -215,9 +213,9 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         Long idCandidate = generatedIdState.getLastIdForEntity(entityTypeName);
         Long counter = 0L;
 
-        while (counter < ID_FETCH_SIZE) {
+        while (counter < fetchSize) {
             if (usedH2Ids.contains(idCandidate) || claimedIdQueueForEntity.contains(idCandidate)) {
-                logger.info("Looking for next available ID. {} is taken", idCandidate);
+                logger.debug("Looking for next available ID for {}. {} is taken", entityTypeName, idCandidate);
             } else {
                 retrievedIds.add(idCandidate);
                 usedH2Ids.add(idCandidate);
@@ -227,7 +225,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
             counter++;
         }
 
-        logger.info("Created {} Ids for {}", retrievedIds.size(), entityTypeName);
+        logger.info("H2: Created {} Ids for {}", retrievedIds.size(), entityTypeName);
         return retrievedIds;
     }
 

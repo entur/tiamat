@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.hazelcast.core.IQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,10 @@ public class GeneratedIdState implements Serializable{
     public long getLastIdForEntity(String entityTypeName) {
         ConcurrentMap<String, Long> lastIdMap = hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
         return lastIdMap.get(entityTypeName);
+    }
+
+    public IMap<String, Long> getLastIdForEntityMap() {
+        return hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
     }
 
     public List<Long> getClaimedIdQueueForEntity(String entityTypeName) {

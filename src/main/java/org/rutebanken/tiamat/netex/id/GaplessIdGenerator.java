@@ -34,7 +34,13 @@ public class GaplessIdGenerator implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(GaplessIdGenerator.class);
 
+    private static final String EXECUTOR_NAME = "id-generator";
+
     private static final long START_LAST_ID = 1L;
+
+    private static final int INITIAL_FETCH_SIZE = 5;
+
+    private static final int FETCH_SIZE = 20;
 
     private volatile Boolean isH2 = null;
 
@@ -53,7 +59,7 @@ public class GaplessIdGenerator implements Serializable {
         this.generatedIdState = generatedIdState;
         this.entityManagerFactory = entityManagerFactory;
         this.hazelcastInstance = hazelcastInstance;
-        this.executorService = hazelcastInstance.getExecutorService("id-generator");
+        this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);
     }
 
     @PostConstruct
@@ -75,14 +81,14 @@ public class GaplessIdGenerator implements Serializable {
                 @Override
                 public void itemRemoved(ItemEvent<Long> itemEvent) {
                     if(queue.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                        logger.info("Low number of IDs for {}", entityTypeName);
-                        executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory));
+                        logger.debug("Low number of IDs for {}", entityTypeName);
+                        executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory, FETCH_SIZE));
                     }
                 }
             }, true);
 
             // First time generation.
-            executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory));
+            executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory, INITIAL_FETCH_SIZE));
         });
     }
 
@@ -99,6 +105,10 @@ public class GaplessIdGenerator implements Serializable {
         return isH2;
     }
 
+    public List<String> getEntityTypeNames() {
+        return entityTypeNames;
+    }
+
     @PreDestroy
     public void preDestroy() {
         logger.info("Pre destroy. Shutting down executor service");
@@ -108,6 +118,9 @@ public class GaplessIdGenerator implements Serializable {
         } catch (InterruptedException e) {
            Thread.currentThread().interrupt();
         }
+
+//        hazelcastInstance.getExecutorService(EXECUTOR_NAME).destroy();
+        logger.info("Destroyed");
     }
 
 }
