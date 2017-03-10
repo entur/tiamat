@@ -70,14 +70,28 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
-        handleClaimedIds(claimedIdQueueForEntity, availableIds);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
 
-        if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-            generateNewIds(entityTypeName, availableIds);
+        try {
+            transaction.begin();
+
+            handleClaimedIds(claimedIdQueueForEntity, availableIds, entityManager);
+
+            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
+                generateNewIds(entityTypeName, availableIds, entityManager);
+            }
+
+            transaction.commit();
+
+        } catch (RuntimeException e) {
+            rollbackAndThrow(transaction, e);
+        } finally {
+            entityManager.close();
         }
     }
 
-    private void handleClaimedIds(List<Long> claimedIdListForEntity, BlockingQueue<Long> availableIds) {
+    private void handleClaimedIds(List<Long> claimedIdListForEntity, BlockingQueue<Long> availableIds, EntityManager entityManager) {
         if (!claimedIdListForEntity.isEmpty()) {
             logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdListForEntity.size());
 
@@ -91,34 +105,11 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 }
             }
             if (!isH2) {
-                insertClaimedIds(entityTypeName, insertClaimedIdList);
+                logger.info("Inserting {} claimed IDs {}.", insertClaimedIdList.size(), entityTypeName);
+                insertRetrievedIds(entityTypeName, insertClaimedIdList, entityManager);
                 claimedIdListForEntity.removeAll(insertClaimedIdList);
             }
         }
-    }
-
-    private void insertClaimedIds(String entityTypeName, List<Long> claimedIdList) {
-        logger.info("Inserting {} claimed IDs {}.", claimedIdList.size(), entityTypeName);
-
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
-
-        try {
-            transaction.begin();
-
-            insertRetrievedIds(entityTypeName, claimedIdList, entityManager);
-
-            transaction.commit();
-
-        } catch (RuntimeException e) {
-            rollbackAndThrow(transaction, e);
-        } finally {
-            entityManager.close();
-        }
-    }
-
-    private String entityLockString(String entityTypeName) {
-        return LOCK_PREFIX + entityTypeName;
     }
 
     /**
@@ -128,38 +119,21 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
      * @param entityTypeName table to generate IDs for
      * @param availableIds   The (empty) queue of available IDs to fill
      */
-    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) throws InterruptedException {
+    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds, EntityManager entityManager) throws InterruptedException {
         logger.info("Time to generate new IDs for {}.", entityTypeName);
 
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
+        List<Long> retrievedIds = new ArrayList<>();
 
-        try {
-            transaction.begin();
+        while (retrievedIds.isEmpty()) {
+            retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
+        }
 
-            List<Long> retrievedIds = new ArrayList<>();
+        if (!isH2) {
+            insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
+        }
 
-            while (retrievedIds.isEmpty()) {
-                retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
-            }
-
-            if (!isH2) {
-                insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
-            }
-
-            transaction.commit();
-
-            for (long retrievedId : retrievedIds) {
-                availableIds.put(retrievedId);
-            }
-
-        } catch (RuntimeException e) {
-            rollbackAndThrow(transaction, e);
-        } catch (InterruptedException e) {
-            transaction.commit();
-            throw e;
-        } finally {
-            entityManager.close();
+        for (long retrievedId : retrievedIds) {
+            availableIds.put(retrievedId);
         }
     }
 
@@ -189,7 +163,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         return retrievedIds;
     }
 
-
     private void insertRetrievedIds(String tableName, List<Long> list, EntityManager entityManager) {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
@@ -208,6 +181,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         query.executeUpdate();
         entityManager.flush();
     }
+
 
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
@@ -260,6 +234,10 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     private void rollbackAndThrow(EntityTransaction transaction, RuntimeException e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
         throw e;
+    }
+
+    private String entityLockString(String entityTypeName) {
+        return LOCK_PREFIX + entityTypeName;
     }
 
 
