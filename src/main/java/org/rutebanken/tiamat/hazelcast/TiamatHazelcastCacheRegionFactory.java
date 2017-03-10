@@ -24,7 +24,7 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
             logger.info("initHazelcastService");
             String kubernetesUrl = getProperty("rutebanken.kubernetes.url", false);
 
-            boolean kuberentesEnabled = getBooleanProperty("rutebanken.kubernetes.enabled", true);
+            boolean kuberentesEnabled = getBooleanProperty("rutebanken.kubernetes.enabled", false);
             String namespace = getProperty("rutebanken.kubernetes.namespace", false);
             String hazelcastManagementUrl = getProperty("rutebanken.hazelcast.management.url", false);
 
@@ -51,7 +51,7 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
         if(required && value == null) {
             throw new RuntimeException("Property " + key + " cannot be null");
         }
-        return value;
+        return String.valueOf(value);
     }
 
     private static boolean getBooleanProperty(String key, boolean required) {
