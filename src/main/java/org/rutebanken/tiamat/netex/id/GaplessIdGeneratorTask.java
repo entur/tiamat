@@ -14,8 +14,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
@@ -52,51 +50,36 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     @Override
     public void run() {
-            try {
-                List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
-                BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+        try {
+            List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+            BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
-                if (!claimedIdQueueForEntity.isEmpty()) {
-                    logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
+            if (!claimedIdQueueForEntity.isEmpty()) {
+                logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
 
-                    List<Long> insertClaimedIdList = new ArrayList<>();
-                    for(long claimedId : claimedIdQueueForEntity) {
-                        // Only insert claimed IDs which are not already in available id list, as they are already inserted.
-                        if(availableIds.contains(claimedId)) {
-                            availableIds.remove(claimedId);
-                        } else {
-                            insertClaimedIdList.add(claimedId);
-                        }
+                List<Long> insertClaimedIdList = new ArrayList<>();
+                for (long claimedId : claimedIdQueueForEntity) {
+                    // Only insert claimed IDs which are not already in available id list, as they are already inserted.
+                    if (availableIds.contains(claimedId)) {
+                        availableIds.remove(claimedId);
+                    } else {
+                        insertClaimedIdList.add(claimedId);
                     }
-                    if(!isH2) {
-                        insertClaimedIds(entityTypeName, insertClaimedIdList);
-                        claimedIdQueueForEntity.removeAll(insertClaimedIdList);
-                    }
-
+                }
+                if (!isH2) {
+                    insertClaimedIds(entityTypeName, insertClaimedIdList);
+                    claimedIdQueueForEntity.removeAll(insertClaimedIdList);
                 }
 
-                if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                    generateNewIds(entityTypeName, availableIds);
-                }
-
-                try {
-                    // Sleep between queue size checks.
-                    // It is a blocking queue and could use the blocking feature to add new IDs.
-                    // But it might keep the transaction open longer than we want.
-                    // And the transaction should be commited before adding generated IDs to the queue and releasing the lock.
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    logger.info("Stopping");
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-
-            } catch (Exception e) {
-                logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
-                return;
             }
 
-
+            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
+                generateNewIds(entityTypeName, availableIds);
+            }
+        } catch (Exception e) {
+            logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
+            return;
+        }
     }
 
     private void insertClaimedIds(String entityTypeName, List<Long> claimedIdList) {
@@ -126,6 +109,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     private String entityLockString(String entityTypeName) {
         return LOCK_PREFIX + entityTypeName;
     }
+
     /**
      * All previously fetched IDs are taken for this entity. Generate new IDs.
      * Will lock per entity type to avoid fetching and inserting IDs concurrently from the database.
@@ -151,7 +135,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
             }
 
-            if(!isH2) {
+            if (!isH2) {
                 insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
             }
 
@@ -245,7 +229,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         logger.info("H2: About to retrieve new IDs for {}", entityTypeName);
         List<Long> retrievedIds = new ArrayList<>();
 
-        List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-"+entityTypeName);
+        List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-" + entityTypeName);
 
         List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
         usedH2Ids.addAll(claimedIdQueueForEntity);
@@ -272,7 +256,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         if (transaction != null && transaction.isActive()) transaction.rollback();
         throw e;
     }
-
 
 
 }
