@@ -1,10 +1,7 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IQueue;
-import com.hazelcast.core.ItemEvent;
-import com.hazelcast.core.ItemListener;
+import com.hazelcast.core.*;
 import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,24 +43,34 @@ public class GaplessIdGenerator implements Serializable {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    private final ExecutorService executorService;
+    private ExecutorService executorService = null;
 
     private final GeneratedIdState generatedIdState;
 
     private final List<String> entityTypeNames = new ArrayList<>();
 
-    private final HazelcastInstance hazelcastInstance;
-
     @Autowired
     public GaplessIdGenerator(GeneratedIdState generatedIdState, EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance) {
         this.generatedIdState = generatedIdState;
         this.entityManagerFactory = entityManagerFactory;
-        this.hazelcastInstance = hazelcastInstance;
-        this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);
+
+
+        if(!Hazelcast.getAllHazelcastInstances().stream()
+                .flatMap(hzInstance -> hzInstance.getDistributedObjects().stream())
+                .peek(distributedObject -> logger.info("{}", distributedObject))
+                .filter(distributedObject -> distributedObject.getName().equals(EXECUTOR_NAME))
+                .findAny().isPresent()) {
+            this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);
+        } else {
+            logger.warn("ExecutorService {} seems to already be created", EXECUTOR_NAME);
+        }
     }
 
     @PostConstruct
     public void postConstruct() {
+        if(executorService == null) {
+            return;
+        }
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getMetamodel().getEntities().forEach(entityType -> {
             entityTypeNames.add(entityType.getBindableJavaType().getSimpleName());
@@ -111,16 +118,18 @@ public class GaplessIdGenerator implements Serializable {
 
     @PreDestroy
     public void preDestroy() {
-        logger.info("Pre destroy. Shutting down executor service");
-        executorService.shutdownNow();
-        try {
-            executorService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-           Thread.currentThread().interrupt();
-        }
+        if(executorService != null) {
+            logger.info("Pre destroy. Shutting down executor service");
+            executorService.shutdownNow();
+            try {
+                executorService.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
 //        hazelcastInstance.getExecutorService(EXECUTOR_NAME).destroy();
-        logger.info("Destroyed");
+            logger.info("Destroyed");
+        }
     }
 
 }
