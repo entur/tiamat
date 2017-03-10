@@ -46,8 +46,7 @@ public class PeliasReverseLookupClient {
                 .append('?')
                 .append("point.lat=").append(latitude)
                 .append("&point.lon=").append(longitude)
-                .append("&size=").append(size)
-                .append("&layers=kartverket-address");
+                .append("&size=").append(size);
 
         logger.info("Request to Pelias on {}", url.toString());
 

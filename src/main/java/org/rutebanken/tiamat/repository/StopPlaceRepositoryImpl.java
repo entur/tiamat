@@ -227,10 +227,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         query.setReadOnly(true);
         query.setFetchSize(fetchSize);
-
+        query.setCacheable(false);
         ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 
-        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, fetchSize);
+        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, fetchSize, session);
 
         return stopPlaceEntityIterator;
     }

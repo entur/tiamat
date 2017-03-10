@@ -55,7 +55,7 @@ public class CountyAndMunicipalityLookupService {
         Semaphore stripedSemaphore = stripedSemaphores.get(peliasCounty);
         stripedSemaphore.acquire();
         try {
-            TopographicPlace municipality = populateCountyAndMunicipality(peliasProperties.getCounty(), peliasProperties.getLocaladmin(), topographicPlacesCreatedCounter);
+            TopographicPlace municipality = populateCountyAndMunicipality(peliasProperties.getCounty(), peliasProperties.getLocality(), topographicPlacesCreatedCounter);
 
             logger.trace("Setting municipality {} : {} to stop place {}",
                     municipality.getName(), municipality.getNetexId(), stopPlace.getName());
@@ -79,14 +79,14 @@ public class CountyAndMunicipalityLookupService {
 
         Properties properties = reverseLookupResult.getFeatures().get(0).getProperties();
 
-        logger.trace("Got county {} and locality {}", properties.getCounty(), properties.getLocaladmin());
+        logger.trace("Got county {} and locality {}", properties.getCounty(), properties.getLocality());
 
         if (properties.getCounty() == null) {
             logger.warn("County was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
             return null;
         }
 
-        if (properties.getLocaladmin() == null) {
+        if (properties.getLocality() == null) {
             logger.warn("Localadmin was null from Pelias for stop place {}. Ignoring.", stopPlace.getName());
             return null;
         }
