@@ -35,23 +35,22 @@ public class NetexIdProvider {
 
         if(!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
             logger.warn("Detected non NSR ID: " + identifiedEntity.getNetexId());
+        } else {
+            Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
+
+            BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(key(identifiedEntity));
+
+            if (availableIds.remove(longId)) {
+                logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
+            }
+
+            // The ID was not in the list of available IDS.
+            // Which means that it has to be inserted into the helper table.
+
+            if (generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
+                logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
+            }
         }
-
-        Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
-
-        BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(key(identifiedEntity));
-
-        if(availableIds.remove(longId)) {
-            logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
-        }
-
-        // The ID was not in the list of available IDS.
-        // Which means that it has to be inserted into the helper table.
-
-        if(generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
-            logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
-        }
-
     }
 
     private String key(IdentifiedEntity identifiedEntity) {
