@@ -50,48 +50,53 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     @Override
     public void run() {
-        try {
-            List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
-            BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+        String lockString = entityLockString(entityTypeName);
+        final Lock lock = hazelcastInstance.getLock(lockString);
+        if (lock.tryLock()) {
+            try {
 
-            if (!claimedIdQueueForEntity.isEmpty()) {
-                logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
+                logger.info("Generating new available IDs for {}", entityTypeName);
+                List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+                BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
-                List<Long> insertClaimedIdList = new ArrayList<>();
-                for (long claimedId : claimedIdQueueForEntity) {
-                    // Only insert claimed IDs which are not already in available id list, as they are already inserted.
-                    if (availableIds.contains(claimedId)) {
-                        availableIds.remove(claimedId);
-                    } else {
-                        insertClaimedIdList.add(claimedId);
+                if (!claimedIdQueueForEntity.isEmpty()) {
+                    logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
+
+                    List<Long> insertClaimedIdList = new ArrayList<>();
+                    for (long claimedId : claimedIdQueueForEntity) {
+                        // Only insert claimed IDs which are not already in available id list, as they are already inserted.
+                        if (availableIds.contains(claimedId)) {
+                            availableIds.remove(claimedId);
+                        } else {
+                            insertClaimedIdList.add(claimedId);
+                        }
+                    }
+                    if (!isH2) {
+                        insertClaimedIds(entityTypeName, insertClaimedIdList);
+                        claimedIdQueueForEntity.removeAll(insertClaimedIdList);
                     }
                 }
-                if (!isH2) {
-                    insertClaimedIds(entityTypeName, insertClaimedIdList);
-                    claimedIdQueueForEntity.removeAll(insertClaimedIdList);
+                if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
+                    generateNewIds(entityTypeName, availableIds);
                 }
 
+            } catch (Exception e) {
+                logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
+            } finally {
+                lock.unlock();
             }
-
-            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                generateNewIds(entityTypeName, availableIds);
-            }
-        } catch (Exception e) {
-            logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
-            return;
+        } else {
+            logger.info("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
         }
     }
 
     private void insertClaimedIds(String entityTypeName, List<Long> claimedIdList) {
-        String lockString = entityLockString(entityTypeName);
-        logger.info("Inserting {} claimed IDs {}. Aquiring lock.", claimedIdList.size(), lockString);
-        final Lock lock = hazelcastInstance.getLock(LOCK_PREFIX + lockString);
+        logger.info("Inserting {} claimed IDs {}.", claimedIdList.size(), entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
 
         try {
-            lock.lock();
             transaction.begin();
 
             insertRetrievedIds(entityTypeName, claimedIdList, entityManager);
@@ -102,7 +107,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
             rollbackAndThrow(transaction, e);
         } finally {
             entityManager.close();
-            lock.unlock();
         }
     }
 
@@ -118,15 +122,12 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
      * @param availableIds   The (empty) queue of available IDs to fill
      */
     private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds) throws InterruptedException {
-        String lockString = entityLockString(entityTypeName);
-        logger.info("Time to generate new IDs for {}. Aquiring lock.", lockString);
-        final Lock lock = hazelcastInstance.getLock(lockString);
+        logger.info("Time to generate new IDs for {}.", entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
 
         try {
-            lock.lock();
             transaction.begin();
 
             List<Long> retrievedIds = new ArrayList<>();
@@ -152,7 +153,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
             throw e;
         } finally {
             entityManager.close();
-            lock.unlock();
         }
     }
 
@@ -163,8 +163,6 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
      */
     @SuppressWarnings(value = "unchecked")
     private List<Long> retrieveIds(String entityTypeName, EntityManager entityManager) {
-        logger.info("About to retrieve new IDs for {}", entityTypeName);
-
         long lastId = generatedIdState.getLastIdForEntity(entityTypeName);
 
         List<Long> retrievedIds;
