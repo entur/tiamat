@@ -34,7 +34,7 @@ public class NetexIdProvider {
     public void claimId(IdentifiedEntity identifiedEntity) {
 
         if(!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
-            throw new IdGeneratorException("Cannot claim invalid ID " + identifiedEntity.getNetexId());
+            logger.warn("Detected non NSR ID: " + identifiedEntity.getNetexId());
         }
 
         Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
