@@ -54,32 +54,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         final Lock lock = hazelcastInstance.getLock(lockString);
         if (lock.tryLock()) {
             try {
-
-                logger.info("Generating new available IDs for {}", entityTypeName);
-                List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
-                BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
-
-                if (!claimedIdQueueForEntity.isEmpty()) {
-                    logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdQueueForEntity.size());
-
-                    List<Long> insertClaimedIdList = new ArrayList<>();
-                    for (long claimedId : claimedIdQueueForEntity) {
-                        // Only insert claimed IDs which are not already in available id list, as they are already inserted.
-                        if (availableIds.contains(claimedId)) {
-                            availableIds.remove(claimedId);
-                        } else {
-                            insertClaimedIdList.add(claimedId);
-                        }
-                    }
-                    if (!isH2) {
-                        insertClaimedIds(entityTypeName, insertClaimedIdList);
-                        claimedIdQueueForEntity.removeAll(insertClaimedIdList);
-                    }
-                }
-                if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                    generateNewIds(entityTypeName, availableIds);
-                }
-
+                generate();
             } catch (Exception e) {
                 logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
             } finally {
@@ -87,6 +62,38 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
             }
         } else {
             logger.info("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
+        }
+    }
+
+    private void generate() throws InterruptedException {
+        logger.info("Generating new available IDs for {}", entityTypeName);
+        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+
+        handleClaimedIds(claimedIdQueueForEntity, availableIds);
+
+        if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
+            generateNewIds(entityTypeName, availableIds);
+        }
+    }
+
+    private void handleClaimedIds(List<Long> claimedIdListForEntity, BlockingQueue<Long> availableIds) {
+        if (!claimedIdListForEntity.isEmpty()) {
+            logger.debug("Found {} claimed IDs. Removing them from available IDs", claimedIdListForEntity.size());
+
+            List<Long> insertClaimedIdList = new ArrayList<>();
+            for (long claimedId : claimedIdListForEntity) {
+                // Only insert claimed IDs which are not already in available id list, as they are already inserted.
+                if (availableIds.contains(claimedId)) {
+                    availableIds.remove(claimedId);
+                } else {
+                    insertClaimedIdList.add(claimedId);
+                }
+            }
+            if (!isH2) {
+                insertClaimedIds(entityTypeName, insertClaimedIdList);
+                claimedIdListForEntity.removeAll(insertClaimedIdList);
+            }
         }
     }
 

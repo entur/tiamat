@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorTask.LOW_LEVEL_AVAILABLE_IDS;
+
 
 /**
  * Generate gapless IDs for certain entities.
@@ -72,9 +74,8 @@ public class GaplessIdGenerator implements Serializable {
 
                 @Override
                 public void itemRemoved(ItemEvent<Long> itemEvent) {
-                    if(queue.size() < 10) {
-                        logger.info("Level is low for {}.", entityTypeName);
-
+                    if(queue.size() < LOW_LEVEL_AVAILABLE_IDS) {
+                        logger.info("Low number of IDs for {}", entityTypeName);
                         executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory));
                     }
                 }
