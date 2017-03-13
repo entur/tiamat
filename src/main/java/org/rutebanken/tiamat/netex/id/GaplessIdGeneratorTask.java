@@ -100,13 +100,13 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 // Only insert claimed IDs which are not already in available id list, as they are already inserted.
                 if (availableIds.contains(claimedId)) {
                     availableIds.remove(claimedId);
-                    logger.info("Removed claimed ID from list of available IDs: {}", claimedId);
+                    logger.debug("Removed claimed ID from list of available IDs: {}", claimedId);
                 } else {
                     insertClaimedIdList.add(claimedId);
                 }
             }
             if (!isH2) {
-                logger.info("Inserting {} claimed IDs {}.", insertClaimedIdList.size(), entityTypeName);
+                logger.debug("Inserting {} claimed IDs {}.", insertClaimedIdList.size(), entityTypeName);
                 insertRetrievedIds(entityTypeName, insertClaimedIdList, entityManager);
                 claimedIdListForEntity.removeAll(insertClaimedIdList);
             }
@@ -152,7 +152,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         } else {
             retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
         }
-        logger.info("Generated for {}: {}", entityTypeName, retrievedIds);
+        logger.debug("Generated for {}: {}", entityTypeName, retrievedIds);
 
         if (retrievedIds.isEmpty()) {
             generatedIdState.setLastIdForEntity(entityTypeName, lastId + fetchSize);
