@@ -44,7 +44,7 @@ public class GeneratedIdState implements Serializable{
         return hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
     }
 
-    public List<Long> getClaimedIdQueueForEntity(String entityTypeName) {
+    public List<Long> getClaimedIdListForEntity(String entityTypeName) {
         return hazelcastInstance.getList(CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityTypeName);
     }
 }

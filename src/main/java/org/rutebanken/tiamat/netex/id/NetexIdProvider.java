@@ -30,7 +30,7 @@ public class NetexIdProvider {
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
         String entityTypeName = key(identifiedEntity);
 
-        List<Long> claimedIds = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
         executeInLock(() -> availableIds.removeAll(claimedIds), entityTypeName);
@@ -54,7 +54,7 @@ public class NetexIdProvider {
                 if (availableIds.remove(longId)) {
                     logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
                 }
-                if (generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
+                if (generatedIdState.getClaimedIdListForEntity(entityTypeName).add(longId)) {
                     logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
                 }
             }, entityTypeName);

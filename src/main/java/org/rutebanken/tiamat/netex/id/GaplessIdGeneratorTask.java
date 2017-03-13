@@ -67,7 +67,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     private void generate() throws InterruptedException {
         logger.debug("Generating new available IDs for {}", entityTypeName);
-        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdListForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -209,7 +209,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
         List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-" + entityTypeName);
 
-        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdListForEntity(entityTypeName);
         usedH2Ids.addAll(claimedIdQueueForEntity);
         Long idCandidate = generatedIdState.getLastIdForEntity(entityTypeName);
         Long counter = 0L;
