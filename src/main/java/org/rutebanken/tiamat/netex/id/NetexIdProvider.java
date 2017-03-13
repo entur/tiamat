@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,8 +27,13 @@ public class NetexIdProvider {
 
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
-        String entityTypeName = identifiedEntity.getClass().getSimpleName();
-        long longId = generatedIdState.getQueueForEntity(entityTypeName).take();
+        String entityTypeName = key(identifiedEntity);
+
+        List<Long> claimedIds = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
+        BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+        availableIds.removeAll(claimedIds);
+        long longId = availableIds.take();
+
         return NetexIdMapper.getNetexId(entityTypeName, String.valueOf(longId));
     }
 

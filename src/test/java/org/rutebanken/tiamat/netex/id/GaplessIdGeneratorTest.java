@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.netex.id;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -62,13 +60,14 @@ public class GaplessIdGeneratorTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void generateIdAfterExplicitIDs() {
+    public void generateIdAfterExplicitIDs() throws InterruptedException {
 
         // Use first 500 IDs
         for(long explicitId = 1; explicitId <= 600; explicitId ++) {
             Quay quay = new Quay();
             quay.setNetexId(NetexIdMapper.getNetexId(Quay.class.getSimpleName(), String.valueOf(explicitId)));
             quayRepository.save(quay);
+            System.out.println("Saved quay: " + quay.getNetexId());
         }
 
         Quay quay = new Quay();
