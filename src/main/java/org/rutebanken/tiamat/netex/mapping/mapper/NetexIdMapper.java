@@ -96,6 +96,10 @@ public class NetexIdMapper {
         return NSR + ":" + type + ":" + id;
     }
 
+    /**
+     * Creates random NSR-ID.
+     * TODO: Move to test
+     */
     public static String generateNetexId(IdentifiedEntity identifiedEntity) {
         return getNetexId(determineIdType(identifiedEntity), String.valueOf(new Random().nextInt()));
     }
