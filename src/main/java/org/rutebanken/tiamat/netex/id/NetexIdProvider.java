@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.netex.id;
 
-import org.eclipse.jetty.util.ConcurrentArrayQueue;
+import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
@@ -10,28 +10,31 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
 
 @Component
 public class NetexIdProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdProvider.class);
 
-     private GeneratedIdState generatedIdState;
+    private final GeneratedIdState generatedIdState;
+
+    private final HazelcastInstance hazelcastInstance;
 
     @Autowired
-    public NetexIdProvider(GeneratedIdState generatedIdState) {
+    public NetexIdProvider(GeneratedIdState generatedIdState, HazelcastInstance hazelcastInstance) {
         this.generatedIdState = generatedIdState;
+        this.hazelcastInstance = hazelcastInstance;
     }
-
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
         String entityTypeName = key(identifiedEntity);
 
         List<Long> claimedIds = generatedIdState.getClaimedIdQueueForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
-        availableIds.removeAll(claimedIds);
+
+        executeInLock(() -> availableIds.removeAll(claimedIds), entityTypeName);
+
         long longId = availableIds.take();
 
         return NetexIdMapper.getNetexId(entityTypeName, String.valueOf(longId));
@@ -39,23 +42,32 @@ public class NetexIdProvider {
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        if(!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
+        if (!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
             logger.warn("Detected non NSR ID: " + identifiedEntity.getNetexId());
         } else {
             Long longId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
 
-            BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(key(identifiedEntity));
+            String entityTypeName = key(identifiedEntity);
+            BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
 
-            if (availableIds.remove(longId)) {
-                logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
-            }
+            executeInLock(() -> {
+                if (availableIds.remove(longId)) {
+                    logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
+                }
+                if (generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
+                    logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
+                }
+            }, entityTypeName);
+        }
+    }
 
-            // The ID was not in the list of available IDS.
-            // Which means that it has to be inserted into the helper table.
-
-            if (generatedIdState.getClaimedIdQueueForEntity(key(identifiedEntity)).add(longId)) {
-                logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
-            }
+    private void executeInLock(Runnable runnable, String entityTypeName) {
+        Lock lock = hazelcastInstance.getLock(GaplessIdGeneratorTask.entityLockString(entityTypeName));
+        lock.lock();
+        try {
+            runnable.run();
+        } finally {
+            lock.unlock();
         }
     }
 

@@ -235,7 +235,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         throw e;
     }
 
-    private String entityLockString(String entityTypeName) {
+    public static String entityLockString(String entityTypeName) {
         return LOCK_PREFIX + entityTypeName;
     }
 
