@@ -1,9 +1,12 @@
 package org.rutebanken.tiamat;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.rutebanken.tiamat.netex.id.GaplessIdGenerator;
+import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -29,16 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
 @ActiveProfiles("geodb")
-@TestExecutionListeners(listeners = {
-        ServletTestExecutionListener.class,
-        DirtiesContextBeforeModesTestExecutionListener.class,
-        TransactionalTestExecutionListener.class,
-        SqlScriptsTestExecutionListener.class,
-        ResetMocksTestExecutionListener.class,
-        RestDocsTestExecutionListener.class,
-        MockitoTestExecutionListener.class,
-        DependencyInjectionTestExecutionListener.class,
-        TestCleanUpExecutionListener.class })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class CommonSpringBootTest {
 
@@ -54,11 +47,28 @@ public abstract class CommonSpringBootTest {
     @Autowired
     private QuayRepository quayRepository;
 
+    @Autowired
+    private GeneratedIdState generatedIdState;
+
+    @Autowired
+    private GaplessIdGenerator gaplessIdGenerator;
+
+    @Autowired
+    private HazelcastInstance hazelcastInstance;
+
     @Before
     public void clearRepositories() {
         pathLinkRepository.deleteAll();
         stopPlaceRepository.deleteAll();
         quayRepository.deleteAll();
         topographicPlaceRepository.deleteAll();
+
+        gaplessIdGenerator.getEntityTypeNames().forEach(entityTypeName -> {
+            generatedIdState.getClaimedIdQueueForEntity(entityTypeName).clear();
+            generatedIdState.getLastIdForEntityMap().put(entityTypeName, 1L);
+            generatedIdState.getQueueForEntity(entityTypeName).clear();
+            hazelcastInstance.getList("used-h2-ids-by-entity-" + entityTypeName).clear();
+
+        });
     }
 }

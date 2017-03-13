@@ -100,6 +100,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 // Only insert claimed IDs which are not already in available id list, as they are already inserted.
                 if (availableIds.contains(claimedId)) {
                     availableIds.remove(claimedId);
+                    logger.info("Removed claimed ID from list of available IDs: {}", claimedId);
                 } else {
                     insertClaimedIdList.add(claimedId);
                 }

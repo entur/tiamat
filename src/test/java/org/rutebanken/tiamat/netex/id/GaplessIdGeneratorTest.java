@@ -71,7 +71,6 @@ public class GaplessIdGeneratorTest extends CommonSpringBootTest {
             quayRepository.save(quay);
         }
 
-        // Get next ID which should be 501
         Quay quay = new Quay();
         quayRepository.save(quay);
         assertThat(NetexIdMapper.getNetexIdPostfix(quay.getNetexId())).isEqualTo(601);
