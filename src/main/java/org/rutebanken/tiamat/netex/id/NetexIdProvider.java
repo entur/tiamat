@@ -53,8 +53,9 @@ public class NetexIdProvider {
             executeInLock(() -> {
                 if (availableIds.remove(longId)) {
                     logger.debug("ID: {} removed from list of available IDs", identifiedEntity.getNetexId());
-                }
-                if (generatedIdState.getClaimedIdListForEntity(entityTypeName).add(longId)) {
+                    // If the claimed ID was already in the list of avaiable IDs, it has already been inserted.
+                    // Do not add it to the list of claimed IDs, because then it will be attempted inserted again.
+                } else if (generatedIdState.getClaimedIdListForEntity(entityTypeName).add(longId)) {
                     logger.debug("ID {} added to list of claimed IDs", identifiedEntity.getNetexId());
                 }
             }, entityTypeName);
