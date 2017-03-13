@@ -1,7 +1,7 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.initial;
 
 
-import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.importer.TopographicPlaceCreator;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -10,13 +10,10 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Import stop place without taking existing data into account.
@@ -43,7 +40,7 @@ public class InitialStopPlaceImporter {
         this.topographicPlaceCreator = topographicPlaceCreator;
     }
 
-    public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger topographicPlacesCreatedCounter, SiteFrame siteFrame, StopPlace stopPlace) throws InterruptedException, ExecutionException {
+    public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger stopPlacesImported, AtomicInteger topographicPlacesCreatedCounter, SiteFrame siteFrame, StopPlace stopPlace) throws InterruptedException, ExecutionException {
 
         if(siteFrame.getTopographicPlaces() != null) {
             topographicPlaceCreator.setTopographicReference(stopPlace,
@@ -64,6 +61,7 @@ public class InitialStopPlaceImporter {
 
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getNetexId());
+        stopPlacesImported.incrementAndGet();
         return netexMapper.mapToNetexModel(stopPlace);
     }
 
