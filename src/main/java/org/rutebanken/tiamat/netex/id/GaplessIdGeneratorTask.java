@@ -175,7 +175,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
                 insertUsedIdsSql.append(',');
             }
         }
-        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING");
+//        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING"); // psql version in carbon does not support this.
         Query query = entityManager.createNativeQuery(insertUsedIdsSql.toString());
         query.executeUpdate();
         entityManager.flush();
