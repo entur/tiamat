@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.netex.id;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hazelcast.core.*;
 import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
@@ -16,9 +15,12 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorTask.LOW_LEVEL_AVAILABLE_IDS;
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorTask.USED_H2_IDS_BY_ENTITY;
 
 
 /**
@@ -49,47 +51,85 @@ public class GaplessIdGenerator implements Serializable {
 
     private final List<String> entityTypeNames = new ArrayList<>();
 
+    private final HazelcastInstance hazelcastInstance;
+
     @Autowired
     public GaplessIdGenerator(GeneratedIdState generatedIdState, EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance) {
         this.generatedIdState = generatedIdState;
         this.entityManagerFactory = entityManagerFactory;
+        this.hazelcastInstance = hazelcastInstance;
 
-
-        if(!Hazelcast.getAllHazelcastInstances().stream()
-                .flatMap(hzInstance -> hzInstance.getDistributedObjects().stream())
-                .peek(distributedObject -> logger.trace("{}", distributedObject))
-                .filter(distributedObject -> distributedObject.getName().equals(EXECUTOR_NAME))
-                .findAny().isPresent()) {
-            this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);
-        } else {
-            logger.warn("ExecutorService {} seems to already be created", EXECUTOR_NAME);
-        }
-    }
-
-    @PostConstruct
-    public void postConstruct() {
-        if(executorService == null) {
-            return;
-        }
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getMetamodel().getEntities().forEach(entityType -> {
             entityTypeNames.add(entityType.getBindableJavaType().getSimpleName());
         });
         logger.info("Found these types to generate IDs for: {}", entityTypeNames);
 
+        resetAndShutdownPreexisingInstance(entityTypeNames);
+
+        logger.info("Starting up {}", EXECUTOR_NAME);
+
+        if (!Hazelcast.getAllHazelcastInstances().stream()
+                .flatMap(hzInstance -> hzInstance.getDistributedObjects().stream())
+                .peek(distributedObject -> logger.trace("{}", distributedObject))
+                .filter(distributedObject -> distributedObject.getName().equals(EXECUTOR_NAME))
+                .findAny().isPresent()) {
+            this.executorService = hazelcastInstance.getExecutorService(EXECUTOR_NAME);
+        } else {
+            throw new IllegalStateException("ExecutorService {} seems to already be created " + EXECUTOR_NAME);
+        }
+    }
+
+    /**
+     * If there is an instance of the hazelcast executor already, it needs to be shutdown in case spring instansiated this bean again.
+     * Also, the state of the generated IDs will be reset.
+     * @param resetQueuesForEntities the entities to reset queues for
+     */
+    private void resetAndShutdownPreexisingInstance(List<String> resetQueuesForEntities) {
+
+        logger.info("Resetting queues for entities: {}", resetQueuesForEntities);
+        resetQueuesForEntities.forEach(entityTypeName -> {
+            generatedIdState.getClaimedIdListForEntity(entityTypeName).clear();
+            generatedIdState.getLastIdForEntityMap().put(entityTypeName, 1L);
+            generatedIdState.getQueueForEntity(entityTypeName).clear();
+            hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName).clear();
+        });
+
+        Optional<IExecutorService> optionalExecutorService = Hazelcast.getAllHazelcastInstances().stream()
+                .flatMap(hzInstance -> hzInstance.getDistributedObjects().stream())
+                .peek(distributedObject -> logger.trace("{}", distributedObject))
+                .filter(distributedObject -> distributedObject.getName().equals(EXECUTOR_NAME))
+                .filter(distributedObject -> distributedObject instanceof IExecutorService)
+                .map(distributedObject -> (IExecutorService) distributedObject)
+                .findAny();
+
+        if(optionalExecutorService.isPresent()) {
+            logger.warn("Found existing executor service from hazelcast. Destroying it.");
+            IExecutorService preExistingExecutorSerivce = optionalExecutorService.get();
+            shutDown(preExistingExecutorSerivce);
+        }
+    }
+
+    @PostConstruct
+    public void postConstruct() {
         entityTypeNames.forEach(entityTypeName -> {
             generatedIdState.registerEntityTypeName(entityTypeName, START_LAST_ID);
 
             final IQueue<Long> queue = generatedIdState.getQueueForEntity(entityTypeName);
             queue.addItemListener(new ItemListener<Long>() {
                 @Override
-                public void itemAdded(ItemEvent<Long> itemEvent) {}
+                public void itemAdded(ItemEvent<Long> itemEvent) {
+                }
 
                 @Override
                 public void itemRemoved(ItemEvent<Long> itemEvent) {
-                    if(queue.size() < LOW_LEVEL_AVAILABLE_IDS) {
+                    if (queue.size() < LOW_LEVEL_AVAILABLE_IDS) {
                         logger.debug("Low number of IDs for {}", entityTypeName);
-                        executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory, FETCH_SIZE));
+                        if(!executorService.isShutdown()) {
+                            executorService.submit(new GaplessIdGeneratorTask(entityTypeName, isH2(), entityManagerFactory, FETCH_SIZE));
+                        } else {
+                            logger.debug("Executor service is shut down. Not generating IDs");
+                        }
                     }
                 }
             }, true);
@@ -118,18 +158,20 @@ public class GaplessIdGenerator implements Serializable {
 
     @PreDestroy
     public void preDestroy() {
-        if(executorService != null) {
-            logger.info("Pre destroy. Shutting down executor service");
-            executorService.shutdownNow();
-            try {
-                executorService.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        shutDown(executorService);
+    }
 
-//        hazelcastInstance.getExecutorService(EXECUTOR_NAME).destroy();
-            logger.info("Destroyed");
+    public void shutDown(ExecutorService executorService) {
+        logger.info("Shutdown. Shutting down executor service");
+        executorService.shutdownNow();
+        try {
+            executorService.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+        hazelcastInstance.getExecutorService(EXECUTOR_NAME).destroy();
+        logger.info("Destroyed");
     }
 
 }

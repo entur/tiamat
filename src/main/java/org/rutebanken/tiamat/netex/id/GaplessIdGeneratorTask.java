@@ -25,6 +25,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     private static final String LOCK_PREFIX = "entity_lock_";
 
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
+    public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
     private final String entityTypeName;
     private final boolean isH2;
@@ -207,7 +208,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
         logger.debug("H2: About to retrieve new IDs for {}", entityTypeName);
         List<Long> retrievedIds = new ArrayList<>();
 
-        List<Long> usedH2Ids = hazelcastInstance.getList("used-h2-ids-by-entity-" + entityTypeName);
+        List<Long> usedH2Ids = hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName);
 
         List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdListForEntity(entityTypeName);
         usedH2Ids.addAll(claimedIdQueueForEntity);
