@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.netex.id;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
@@ -13,12 +15,16 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.USED_H2_IDS_BY_ENTITY;
 
 public class GaplessIdGeneratorServiceTest extends CommonSpringBootTest {
 
@@ -30,6 +36,21 @@ public class GaplessIdGeneratorServiceTest extends CommonSpringBootTest {
 
     @Autowired
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
+
+    @Autowired
+    private GeneratedIdState generatedIdState;
+
+    @Autowired
+    private HazelcastInstance hazelcastInstance;
+
+    @Before
+    public void clearGeneratedIds() {
+        Arrays.asList(StopPlace.class.getSimpleName(), Quay.class.getSimpleName()).forEach(entityTypeName -> {
+            generatedIdState.setLastIdForEntity(entityTypeName, INITIAL_LAST_ID);
+            generatedIdState.getQueueForEntity(entityTypeName).clear();
+            hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName).clear();
+        });
+    }
 
     @Test
     public void verifyNetexIdAssignedToStop() {
