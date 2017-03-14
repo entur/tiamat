@@ -13,7 +13,6 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +55,16 @@ public class GaplessIdGeneratorService {
         lock.lock();
         try {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
-            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS || claimedId > 0) {
+            List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
+
+            if(claimedId > 0) {
+                if (availableIds.remove(claimedId)) {
+                    logger.trace("Removed claimed ID {} from list of available IDs for entity{}: {}", claimedId, entityTypeName, availableIds.stream().collect(toList()));
+                } else if(! claimedIds.contains(claimedId)){
+                    claimedIds.add(claimedId);
+                }
+            }
+            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
                 generateInTransaction(entityTypeName, claimedId);
             }
 
@@ -76,6 +84,7 @@ public class GaplessIdGeneratorService {
 
     private void generateInTransaction(String entityTypeName, long claimedId) throws InterruptedException {
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
+        List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
@@ -83,12 +92,12 @@ public class GaplessIdGeneratorService {
         try {
             transaction.begin();
 
-            handleClaimedId(claimedId, availableIds, entityManager, entityTypeName);
-
-            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
-                logger.debug("Generating new available IDs for {}", entityTypeName);
-                generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
+            if(!isH2() && !claimedIds.isEmpty()) {
+                insertIds(entityTypeName, claimedIds, entityManager);
+                claimedIds.clear();
             }
+            logger.info("Generating new available IDs for {}", entityTypeName);
+            generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
 
             transaction.commit();
 
@@ -96,19 +105,6 @@ public class GaplessIdGeneratorService {
             rollbackAndThrow(transaction, e);
         } finally {
             entityManager.close();
-        }
-    }
-
-    private void handleClaimedId(long claimedId, BlockingQueue<Long> availableIds, EntityManager entityManager, String entityTypeName) {
-        if (claimedId > 0) {
-            // Only insert claimed IDs which are not already in available id list, as they are already inserted.
-
-            if (availableIds.remove(claimedId)) {
-                logger.debug("Removed claimed ID {} from list of available IDs: {}", claimedId, availableIds.stream().collect(toList()));
-            } else if (!isH2()) {
-                logger.debug("Inserting claimed ID {} {}. list {}", claimedId, entityTypeName, availableIds);
-                insertRetrievedIds(entityTypeName, Arrays.asList(claimedId), entityManager);
-            }
         }
     }
 
@@ -127,7 +123,9 @@ public class GaplessIdGeneratorService {
         }
 
         if (!isH2()) {
-            insertRetrievedIds(entityTypeName, retrievedIds, entityManager);
+            logger.info("Inserting retrieved IDs: {}", retrievedIds);
+
+            insertIds(entityTypeName, retrievedIds, entityManager);
         }
 
         for (long retrievedId : retrievedIds) {
@@ -163,7 +161,7 @@ public class GaplessIdGeneratorService {
         return retrievedIds;
     }
 
-    private void insertRetrievedIds(String tableName, List<Long> list, EntityManager entityManager) {
+    private void insertIds(String tableName, List<Long> list, EntityManager entityManager) {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
         }

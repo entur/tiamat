@@ -27,13 +27,13 @@ public class NetexIdAssigner {
             try {
                 String netexId = netexIdProvider.getGeneratedId(identifiedEntity);
                 identifiedEntity.setNetexId(netexId);
-                logger.debug("Assigned ID {} to entity", netexId);
+                logger.trace("Assigned ID {} to entity", netexId);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Error generating new ID for entity: "+identifiedEntity, e);
             }
 
         } else {
-            logger.debug("Incoming object claims explicit netex ID {}.", identifiedEntity.getNetexId());
+            logger.trace("Incoming object claims explicit netex ID {}.", identifiedEntity.getNetexId());
 
             netexIdProvider.claimId(identifiedEntity);
         }

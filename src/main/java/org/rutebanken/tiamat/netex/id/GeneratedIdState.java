@@ -16,6 +16,7 @@ import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_L
 public class GeneratedIdState implements Serializable{
 
     public static final String LAST_IDS_FOR_ENTITY = "lastIdsForEntities";
+    public static final String CLAIMED_IDS_FOR_ENTITY_PREFIX = "claimedIdsForEntities";
 
     private final HazelcastInstance hazelcastInstance;
 
@@ -37,5 +38,9 @@ public class GeneratedIdState implements Serializable{
         ConcurrentMap<String, Long> lastIdMap = hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
         lastIdMap.putIfAbsent(entityTypeName, INITIAL_LAST_ID);
         return lastIdMap.get(entityTypeName);
+    }
+
+    public List<Long> getClaimedIdListForEntity(String entityTypeName) {
+        return hazelcastInstance.getList(CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityTypeName);
     }
 }
