@@ -37,6 +37,7 @@ public class GeneratedIdState implements Serializable{
 
     public long getLastIdForEntity(String entityTypeName) {
         ConcurrentMap<String, Long> lastIdMap = hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
+        lastIdMap.putIfAbsent(entityTypeName, 1L);
         return lastIdMap.get(entityTypeName);
     }
 

@@ -22,7 +22,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     private static final Logger logger = LoggerFactory.getLogger(GaplessIdGeneratorTask.class);
 
-    private static final String LOCK_PREFIX = "entity_lock_";
+    public static final String REENTRANT_LOCK_PREFIX = "entity_lock_";
 
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
@@ -51,22 +51,23 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
 
     @Override
     public void run() {
-        String lockString = entityLockString(entityTypeName);
-        final Lock lock = hazelcastInstance.getLock(lockString);
-        if (lock.tryLock()) {
-            try {
-                generate();
-            } catch (Exception e) {
-                logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
-            } finally {
-                lock.unlock();
-            }
-        } else {
-            logger.debug("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
-        }
+//        String lockString = entityLockString(entityTypeName);
+//        final Lock lock = hazelcastInstance.getLock(lockString);
+//        if (lock.tryLock()) {
+//            try {
+//                generate();
+//            } catch (Exception e) {
+//                logger.error("Caught exception when generating IDs for entity {}", entityTypeName, e);
+//            } finally {
+//                lock.unlock();
+//            }
+//        } else {
+//            logger.debug("Could not get lock for generating IDs for {}. Exiting.", entityTypeName);
+//        }
+
     }
 
-    private void generate() throws InterruptedException {
+    public void generate() throws InterruptedException {
         logger.debug("Generating new available IDs for {}", entityTypeName);
         List<Long> claimedIdQueueForEntity = generatedIdState.getClaimedIdListForEntity(entityTypeName);
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
@@ -237,7 +238,7 @@ public class GaplessIdGeneratorTask implements Runnable, Serializable, Hazelcast
     }
 
     public static String entityLockString(String entityTypeName) {
-        return LOCK_PREFIX + entityTypeName;
+        return REENTRANT_LOCK_PREFIX + entityTypeName;
     }
 
 

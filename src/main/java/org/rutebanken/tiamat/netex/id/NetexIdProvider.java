@@ -21,10 +21,13 @@ public class NetexIdProvider {
 
     private final HazelcastInstance hazelcastInstance;
 
+    private final GaplessIdGenerator gaplessIdGenerator;
+
     @Autowired
-    public NetexIdProvider(GeneratedIdState generatedIdState, HazelcastInstance hazelcastInstance) {
+    public NetexIdProvider(GeneratedIdState generatedIdState, HazelcastInstance hazelcastInstance, GaplessIdGenerator gaplessIdGenerator) {
         this.generatedIdState = generatedIdState;
         this.hazelcastInstance = hazelcastInstance;
+        this.gaplessIdGenerator = gaplessIdGenerator;
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
@@ -35,7 +38,7 @@ public class NetexIdProvider {
 
         executeInLock(() -> availableIds.removeAll(claimedIds), entityTypeName);
 
-        long longId = availableIds.take();
+        long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
         return NetexIdMapper.getNetexId(entityTypeName, String.valueOf(longId));
     }
