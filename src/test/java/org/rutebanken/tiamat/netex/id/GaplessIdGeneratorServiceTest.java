@@ -20,7 +20,7 @@ import java.util.List;
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GaplessIdGeneratorTest extends CommonSpringBootTest {
+public class GaplessIdGeneratorServiceTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -63,7 +63,7 @@ public class GaplessIdGeneratorTest extends CommonSpringBootTest {
     public void generateIdAfterExplicitIDs() throws InterruptedException {
 
         // Use first 500 IDs
-        for(long explicitId = 1; explicitId <= 600; explicitId ++) {
+        for(long explicitId = 1; explicitId <= 30; explicitId ++) {
             Quay quay = new Quay();
             quay.setNetexId(NetexIdMapper.getNetexId(Quay.class.getSimpleName(), String.valueOf(explicitId)));
             quayRepository.save(quay);
@@ -72,7 +72,7 @@ public class GaplessIdGeneratorTest extends CommonSpringBootTest {
 
         Quay quay = new Quay();
         quayRepository.save(quay);
-        assertThat(NetexIdMapper.getNetexIdPostfix(quay.getNetexId())).isEqualTo(601);
+        assertThat(NetexIdMapper.getNetexIdPostfix(quay.getNetexId())).isEqualTo(31);
     }
 
     /**

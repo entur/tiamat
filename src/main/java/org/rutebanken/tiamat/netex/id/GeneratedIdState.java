@@ -10,11 +10,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
+
 @Service
 public class GeneratedIdState implements Serializable{
 
     public static final String LAST_IDS_FOR_ENTITY = "lastIdsForEntities";
-    public static final String CLAIMED_IDS_FOR_ENTITY_PREFIX = "claimedIdsForEntities";
 
     private final HazelcastInstance hazelcastInstance;
 
@@ -23,9 +24,6 @@ public class GeneratedIdState implements Serializable{
         this.hazelcastInstance = hazelcastInstance;
     }
 
-    public void registerEntityTypeName(String entityTypeName, long startLastId) {
-        hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY).putIfAbsent(entityTypeName, startLastId);
-    }
 
     public IQueue<Long> getQueueForEntity(String entityTypeName) {
         return hazelcastInstance.getQueue(entityTypeName);
@@ -37,15 +35,7 @@ public class GeneratedIdState implements Serializable{
 
     public long getLastIdForEntity(String entityTypeName) {
         ConcurrentMap<String, Long> lastIdMap = hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
-        lastIdMap.putIfAbsent(entityTypeName, 1L);
+        lastIdMap.putIfAbsent(entityTypeName, INITIAL_LAST_ID);
         return lastIdMap.get(entityTypeName);
-    }
-
-    public IMap<String, Long> getLastIdForEntityMap() {
-        return hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
-    }
-
-    public List<Long> getClaimedIdListForEntity(String entityTypeName) {
-        return hazelcastInstance.getList(CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityTypeName);
     }
 }
