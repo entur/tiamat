@@ -211,6 +211,16 @@ This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will b
 curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/jersey/publication_delivery/initial_import
 ```
 
+### Initial import from previously exported tiamat data with kubernetes
+```
+kc exec -i $pod -- bash -c 'cat > /tmp/import' < tiamat-export-124268-20170313-160049.xml
+kc exec -it $pod bash
+cd /tmp
+curl -XPOST -H "Content-type: application/xml" -d@import http://localhost:8777/jersey/publication_delivery/initial_import
+```
+See https://github.com/rutebanken/devsetup/blob/master/docs/stolon.md#stolon-tiamat-setup
+
+
 ### Import NeTEx file without *NSR* IDs
 This NeTEx file should not contain NSR ID.
 * Tiamat will match existing stops based on name and coordinates.
@@ -235,3 +245,4 @@ https://test.rutebanken.org/admin/nsr/jersey/graphql
 ```
 
 Tip: GraphiQL UI available on https://test.rutebanken.org/admin/shamash-nsr/ 
+
