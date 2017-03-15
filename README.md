@@ -213,6 +213,7 @@ curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-
 
 ### Initial import from previously exported tiamat data with kubernetes
 ```
+pod=`kc get pods  |grep tiamat | awk '{print $1}' | head -n1`
 kc exec -i $pod -- bash -c 'cat > /tmp/import' < tiamat-export-124268-20170313-160049.xml
 kc exec -it $pod bash
 cd /tmp
