@@ -52,7 +52,7 @@ public class QuayMergerTest {
         assertThat(result).hasSize(1);
 
         Quay quay = result.iterator().next();
-        assertThat(quay.getVersion()).isNotEmpty();
+        assertThat(quay.getVersion()).isNotZero();
     }
 
     @Test
@@ -71,7 +71,7 @@ public class QuayMergerTest {
         assertThat(result).hasSize(1);
 
         Quay quay = result.iterator().next();
-        assertThat(quay.getVersion()).isNotEmpty();
+        assertThat(quay.getVersion()).isNotZero();
     }
 
     @Test

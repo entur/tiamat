@@ -12,19 +12,11 @@ public class VersionIncrementor {
     private static final Logger logger = LoggerFactory.getLogger(VersionIncrementor.class);
 
     public void incrementVersion(EntityInVersionStructure versionedEntity) {
-        Long version = tryParseLong(versionedEntity.getVersion());
-        version ++;
-        logger.debug("Setting version {} for {}", version, versionedEntity);
-        versionedEntity.setVersion(version.toString());
-    }
-
-    private long tryParseLong(String version) {
-        try {
-            return Long.parseLong(version);
-        } catch(NumberFormatException |NullPointerException e) {
-            logger.warn("Could not parse version from string {}. Returning 0", version);
-            return 0L;
-        }
+        return;
+//        Long version = versionedEntity.getVersion();
+//        version ++;
+//        logger.debug("Setting version {} for {}", version, versionedEntity);
+//        versionedEntity.setVersion(version);
     }
 
 }

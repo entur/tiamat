@@ -40,7 +40,7 @@ public class QuayTest extends CommonSpringBootTest {
     @Test
     public void persistQuayWithCommonValues() throws ParseException {
         Quay quay = new Quay();
-        quay.setVersion("001");
+        quay.setVersion(1L);
         quay.setCreated(ZonedDateTime.parse("2010-04-17T09:30:47Z"));
         quay.setDataSourceRef("nptg:DataSource:NaPTAN");
         quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
@@ -79,7 +79,7 @@ public class QuayTest extends CommonSpringBootTest {
     public void persistQuayWithRoadAddress() {
         Quay quay = new Quay();
         RoadAddress roadAddress = new RoadAddress();
-        roadAddress.setVersion("any");
+        roadAddress.setVersion(1L);
         roadAddress.setRoadName(new MultilingualStringEntity("Wimbledon Bridge", "en"));
         roadAddress.setBearingCompass("W");
         quay.setRoadAddress(roadAddress);
@@ -117,7 +117,7 @@ public class QuayTest extends CommonSpringBootTest {
         Quay quay = new Quay();
 
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
-        accessibilityAssessment.setVersion("any");
+        accessibilityAssessment.setVersion(1L);
         accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
         quay.setAccessibilityAssessment(accessibilityAssessment);
 

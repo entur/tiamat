@@ -168,11 +168,11 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     public void mapPathLinkToNetexAndVerifyVersion() {
         Quay quay = new Quay();
         quay.setNetexId("10");
-        quay.setVersion("123");
+        quay.setVersion(123L);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("11");
-        stopPlace.setVersion("321");
+        stopPlace.setVersion(321L);
 
         PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
         pathLink.setNetexId("123");

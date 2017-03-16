@@ -77,7 +77,7 @@ public class MergingStopPlaceImporterTest {
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
         firstStopPlace.setNetexId(firstStopId);
-        firstStopPlace.setVersion("1");
+        firstStopPlace.setVersion(1L);
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal1 = new Quay();
@@ -126,7 +126,7 @@ public class MergingStopPlaceImporterTest {
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
         firstStopPlace.setNetexId(firstStopId);
         firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id");
-        firstStopPlace.setVersion("1");
+        firstStopPlace.setVersion(1L);
 
         StopPlace newStopPlace = new StopPlace();
         newStopPlace.setCentroid(point);
@@ -151,7 +151,7 @@ public class MergingStopPlaceImporterTest {
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstStopPlace.setNetexId(firstStopId);
-        firstStopPlace.setVersion("1");
+        firstStopPlace.setVersion(1L);
         firstStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         Quay terminal1 = new Quay();

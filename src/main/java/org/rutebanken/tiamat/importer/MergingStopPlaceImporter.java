@@ -146,7 +146,7 @@ public class MergingStopPlaceImporter {
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
-        newStopPlace.setVersion("1");
+        newStopPlace.setVersion(1);
         newStopPlace.setCreated(ZonedDateTime.now());
         newStopPlace.setChanged(ZonedDateTime.now());
         return saveAndUpdateCache(newStopPlace);

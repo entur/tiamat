@@ -61,6 +61,20 @@ public class StopPlaceTest extends CommonSpringBootTest {
     }
 
     @Test
+    public void checkVersionOfSavedStopPlace() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop Place"));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+        stopPlace.setChanged(ZonedDateTime.now());
+        stopPlaceRepository.save(stopPlace);
+
+        stopPlaceRepository.flush();
+        stopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        assertThat(stopPlace.getVersion()).isNotNull();
+        assertThat(stopPlace.getVersion()).isEqualTo(1L);
+    }
+
+    @Test
     public void persistStopPlaceWithAccessSpace() {
         StopPlace stopPlace = new StopPlace();
 
@@ -103,7 +117,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         Level level = new Level();
         level.setName(new MultilingualStringEntity("Erde", "fr"));
         level.setPublicCode("E");
-        level.setVersion("01");
+        level.setVersion(1L);
         stopPlace.getLevels().add(level);
 
         stopPlaceRepository.save(stopPlace);

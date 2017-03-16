@@ -135,7 +135,7 @@ public class StreamingPublicationDeliveryTest {
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
-        stopPlace.setVersion("2");
+        stopPlace.setVersion(2L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(1);
         stopPlaces.add(stopPlace);

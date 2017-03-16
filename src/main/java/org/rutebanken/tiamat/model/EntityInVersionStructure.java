@@ -4,6 +4,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,8 @@ public class EntityInVersionStructure extends EntityStructure {
     @Transient
     protected ModificationEnumeration modification;
 
-    protected String version;
+    @Version
+    protected long version;
 
     @Transient
     protected StatusEnumeration status;
@@ -97,12 +99,12 @@ public class EntityInVersionStructure extends EntityStructure {
     }
 
 
-    public String getVersion() {
+    public long getVersion() {
         return version;
     }
 
 
-    public void setVersion(String value) {
+    public void setVersion(long value) {
         this.version = value;
     }
 
