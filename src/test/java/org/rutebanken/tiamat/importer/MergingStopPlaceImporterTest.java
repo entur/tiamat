@@ -109,7 +109,7 @@ public class MergingStopPlaceImporterTest {
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
 
         assertThat(importResult.getNetexId()).isEqualTo(firstStopId);
-        assertThat(importResult.getVersion()).isEqualTo("2");
+        assertThat(importResult.getVersion()).isEqualTo(2L);
     }
 
     /**
@@ -181,7 +181,7 @@ public class MergingStopPlaceImporterTest {
 
         assertThat(importResult.getNetexId()).isEqualTo(importResult.getNetexId());
         assertThat(importResult.getQuays()).hasSize(2);
-        assertThat(importResult.getVersion()).isEqualTo("2");
+        assertThat(importResult.getVersion()).isEqualTo(2L);
     }
 
     /**

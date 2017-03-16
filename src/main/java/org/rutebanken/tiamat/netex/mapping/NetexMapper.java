@@ -1,12 +1,18 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 import ma.glasnost.orika.*;
-import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.PathLink;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.TopographicPlaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +30,7 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        TopographicPlaceMapper topographicPlaceMapper,
-                       DataManagedObjectStructureIdMapper dataManagedObjectStructureIdMapper) {
+                       DataManagedObjectStructureMapper dataManagedObjectStructureMapper) {
         logger.info("Setting up netexMapper with DI");
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -68,10 +74,11 @@ public class NetexMapper {
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
-                .customize(dataManagedObjectStructureIdMapper)
+                .customize(dataManagedObjectStructureMapper)
                 .exclude("id")
                 .exclude("keyList")
                 .exclude("keyValues")
+                .exclude("version")
                 .byDefault()
                 .register();
 
@@ -79,7 +86,7 @@ public class NetexMapper {
     }
 
     public NetexMapper() {
-        this(getDefaultConverters(), new KeyListToKeyValuesMapMapper(), new TopographicPlaceMapper(), new DataManagedObjectStructureIdMapper());
+        this(getDefaultConverters(), new KeyListToKeyValuesMapMapper(), new TopographicPlaceMapper(), new DataManagedObjectStructureMapper(new NetexIdMapper()));
         logger.info("Setting up netexMapper without DI");
     }
 
