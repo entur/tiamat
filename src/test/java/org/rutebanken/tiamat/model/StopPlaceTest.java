@@ -9,9 +9,13 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.Commit;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -61,24 +65,51 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
     @Test
     public void saveTwoVersionsOfStopFindLastVersion() {
-        StopPlace firstVersion = new StopPlace(new EmbeddableMultilingualString("Stop Place"));
+
+        String netexId = "NSR:StopPlace:60000";
+
+        StopPlace firstVersion = new StopPlace();
         firstVersion.setVersion(1L);
-        firstVersion.setNetexId("NSR:StopPlace:1");
+        firstVersion.setNetexId(netexId);
         firstVersion = stopPlaceRepository.save(firstVersion);
         stopPlaceRepository.flush();
 
-        StopPlace secondVersionSameStop = new StopPlace(new EmbeddableMultilingualString("Stop Place 2"));
-        secondVersionSameStop.setVersion(2L);
-        secondVersionSameStop.setNetexId("NSR:StopPlace:1");
-        stopPlaceRepository.save(secondVersionSameStop);
-
+        StopPlace secondVersion = new StopPlace();
+        secondVersion.setVersion(2L);
+        secondVersion.setNetexId(netexId);
+        stopPlaceRepository.save(secondVersion);
         stopPlaceRepository.flush();
 
-        StopPlace actualActualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondVersionSameStop.getNetexId());
+        StopPlace actualActualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondVersion.getNetexId());
         assertThat(actualActualSecondVersion.getVersion()).isEqualTo(2L);
 
         StopPlace actualFirstVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(firstVersion.getNetexId(), firstVersion.getVersion());
         assertThat(actualFirstVersion.getVersion()).isEqualTo(1L);
+    }
+
+    @Test
+    public void createTwoVersionsOfNewStop() {
+
+        StopPlace firstVersion = new StopPlace();
+        firstVersion.setVersion(1L);
+        firstVersion = stopPlaceRepository.save(firstVersion);
+        stopPlaceRepository.flush();
+
+        StopPlace secondVersion = new StopPlace();
+        secondVersion.setNetexId(firstVersion.getNetexId());
+        secondVersion.setVersion(2L);
+
+        stopPlaceRepository.save(secondVersion);
+        stopPlaceRepository.flush();
+
+        StopPlace actualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondVersion.getNetexId());
+        assertThat(actualSecondVersion.getVersion()).isEqualTo(2L);
+
+        StopPlace actualFirstVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(firstVersion.getNetexId(), firstVersion.getVersion());
+        assertThat(actualFirstVersion.getVersion()).isEqualTo(1L);
+
+        // This must be true as both actual objects has been retrieved from netexId
+        assertThat(actualSecondVersion.getNetexId()).isEqualTo(firstVersion.getNetexId());
     }
 
     @Test
