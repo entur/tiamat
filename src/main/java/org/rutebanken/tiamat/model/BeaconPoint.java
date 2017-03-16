@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class BeaconPoint
-        extends BeaconPoint_ {
+public class BeaconPoint extends ActivationPoint {
 
 
 }
