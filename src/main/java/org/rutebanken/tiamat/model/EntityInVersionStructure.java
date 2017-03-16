@@ -13,7 +13,7 @@ public class EntityInVersionStructure extends EntityStructure {
     private final List<ValidityCondition> validityConditions = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(updatable = false)
+    @JoinColumn
     protected List<ValidBetween> validBetween;
 
     @Transient
