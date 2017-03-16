@@ -183,7 +183,7 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         assertThat(netexPathLink.getId()).isEqualTo(pathLink.getNetexId());
 
         assertThat(netexPathLink.getFrom().getPlaceRef().getVersion()).isEqualTo(String.valueOf(quay.getVersion()));
-        assertThat(netexPathLink.getTo().getPlaceRef().getVersion()).isEqualTo(stopPlace.getVersion());
+        assertThat(netexPathLink.getTo().getPlaceRef().getVersion()).isEqualTo(String.valueOf(stopPlace.getVersion()));
 
     }
 
