@@ -5,23 +5,13 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.TiamatApplication;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathJunctionRepository;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -64,7 +54,7 @@ public class PathLinkTest extends CommonSpringBootTest {
 
         pathLinkRepository.save(pathLink);
 
-        PathLink actualPathLink = pathLinkRepository.findByNetexId(pathLink.getNetexId());
+        PathLink actualPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
         assertThat(actualPathLink.getFrom()).isNotNull();
     }
@@ -83,7 +73,7 @@ public class PathLinkTest extends CommonSpringBootTest {
         PathLink pathLink = new PathLink(from, to);
         pathLinkRepository.save(pathLink);
 
-        PathLink actualPathLink = pathLinkRepository.findByNetexId(pathLink.getNetexId());
+        PathLink actualPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
         assertThat(actualPathLink.getFrom().getQuay().getNetexId()).isEqualTo(quay1.getNetexId());
         assertThat(actualPathLink.getTo().getQuay().getNetexId()).isEqualTo(quay2.getNetexId());
@@ -110,8 +100,8 @@ public class PathLinkTest extends CommonSpringBootTest {
         pathLinkRepository.save(pathLinkToPathJunction);
         pathLinkRepository.save(pathLinkToQuay);
 
-        PathLink actualPathLinkToPathJunction = pathLinkRepository.findByNetexId(pathLinkToPathJunction.getNetexId());
-        PathLink actualPathLinkToQuay = pathLinkRepository.findByNetexId(pathLinkToQuay.getNetexId());
+        PathLink actualPathLinkToPathJunction = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkToPathJunction.getNetexId());
+        PathLink actualPathLinkToQuay = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkToQuay.getNetexId());
 
         assertThat(actualPathLinkToPathJunction.getFrom().getQuay().getNetexId()).isEqualTo(fromQuay.getNetexId());
         assertThat(actualPathLinkToPathJunction.getTo().getPathJunction().getNetexId()).isEqualTo(pathJunction.getNetexId());
@@ -136,7 +126,7 @@ public class PathLinkTest extends CommonSpringBootTest {
 
         pathLinkRepository.save(pathLink);
 
-        PathLink actual = pathLinkRepository.findByNetexId(pathLink.getNetexId());
+        PathLink actual = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
         assertThat(actual.getLineString()).isNotNull();
         assertThat(actual.getLineString().getCoordinates()).isEqualTo(coordinates);
 
@@ -157,7 +147,7 @@ public class PathLinkTest extends CommonSpringBootTest {
 
         pathLinkRepository.save(pathLink);
 
-        PathLink actual = pathLinkRepository.findByNetexId(pathLink.getNetexId());
+        PathLink actual = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
 
         assertThat(actual.getTransferDuration()).isNotNull();
@@ -175,7 +165,7 @@ public class PathLinkTest extends CommonSpringBootTest {
         pathLink.getKeyValues().put("ORIGINAL_ID", value);
 
         pathLinkRepository.save(pathLink);
-        PathLink actual = pathLinkRepository.findByNetexId(pathLink.getNetexId());
+        PathLink actual = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems().containsAll(ids));
     }

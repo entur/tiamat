@@ -7,9 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 @Component
 public class QuayDisassembler {
@@ -39,7 +37,7 @@ public class QuayDisassembler {
             logger.trace("The quay to disassemble has no Id, which means it's new.");
             quay = new Quay();
         } else {
-             quay = quayRepository.findByNetexId(quayDto.id);
+             quay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayDto.id);
             if (quay == null) {
                 logger.warn("There is no existing quay with id {}, returning null", quayDto.id);
                 return null;

@@ -1,16 +1,10 @@
 package org.rutebanken.tiamat.model;
 
-import org.eclipse.jetty.websocket.jsr356.annotations.JsrParamIdText;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -39,7 +33,7 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getTopographicPlace()).isNotNull();
         assertThat(actualStopPlace.getTopographicPlace().getNetexId()).isEqualTo(nedreEiker.getNetexId());
         assertThat(actualStopPlace.getTopographicPlace().getName()).isEqualTo(nedreEiker.getName());
@@ -61,7 +55,7 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         topographicPlaceRepository.save(nedreEiker);
 
-        TopographicPlace actualNedreEiker = topographicPlaceRepository.findByNetexId(nedreEiker.getNetexId());
+        TopographicPlace actualNedreEiker = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(nedreEiker.getNetexId());
 
         assertThat(actualNedreEiker).isNotNull();
         assertThat(actualNedreEiker.getParentTopographicPlace()).isNotNull();
@@ -81,7 +75,7 @@ public class TopographicPlaceTest extends CommonSpringBootTest {
 
         topographicPlaceRepository.save(akershus);
 
-        TopographicPlace actual = topographicPlaceRepository.findByNetexId(akershus.getNetexId());
+        TopographicPlace actual = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(akershus.getNetexId());
         assertThat(actual.getCountryRef()).isNotNull();
         assertThat(actual.getCountryRef().getRef()).isEqualTo(IanaCountryTldEnumeration.NO);
     }

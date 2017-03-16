@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PathLinkRepository extends JpaRepository<PathLink, Long>, PathLinkRepositoryCustom, IdentifiedEntityRepository<PathLink> {
 
     @Override
-    PathLink findByNetexId(String netexId);
+    PathLink findFirstByNetexIdOrderByVersionDesc(String netexId);
 }

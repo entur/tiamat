@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.service;
 
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -13,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
-
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.getNetexId;
 
 @Transactional
 @Service
@@ -43,7 +40,7 @@ public class PathLinkUpdaterService {
 
             logger.debug("Looking for PathLink with ID: {}", incomingPathLink.getNetexId());
 
-            PathLink existingPathLink = pathLinkRepository.findByNetexId(incomingPathLink.getNetexId());
+            PathLink existingPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(incomingPathLink.getNetexId());
 
             if(existingPathLink == null) {
                 throw new NoSuchElementException("Specified path link with ID: " + incomingPathLink.getNetexId() + " does not exist");
@@ -123,7 +120,7 @@ public class PathLinkUpdaterService {
         if(pathLinkEnd.getQuay() != null) {
             // Quay is only mapped with ID. Need to look it up and replace the reference.
 
-            Quay quay = quayRepository.findByNetexId(pathLinkEnd.getQuay().getNetexId());
+            Quay quay = quayRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkEnd.getQuay().getNetexId());
             if(quay != null) {
                 logger.debug("Found quay {}", quay);
                 pathLinkEnd.setQuay(quay);
@@ -133,7 +130,7 @@ public class PathLinkUpdaterService {
         }
 
         if(pathLinkEnd.getStopPlace() != null) {
-            StopPlace stopPlace = stopPlaceRepository.findByNetexId(pathLinkEnd.getStopPlace().getNetexId());
+            StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkEnd.getStopPlace().getNetexId());
             if(stopPlace != null) {
                 logger.info("Found stop place {}", stopPlace);
                 pathLinkEnd.setStopPlace(stopPlace);

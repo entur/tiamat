@@ -63,7 +63,7 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
                 return Optional.ofNullable(stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), stopPlace.getStopPlaceType()));
             });
             if(stopPlaceNetexId.isPresent()) {
-                return stopPlaceRepository.findByNetexId(stopPlaceNetexId.get());
+                return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId.get());
             }
             return null;
         } catch (ExecutionException e) {

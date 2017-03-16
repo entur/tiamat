@@ -1,15 +1,15 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+)
 public class EntityInVersionStructure extends EntityStructure {
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -28,7 +28,7 @@ public class EntityInVersionStructure extends EntityStructure {
 
     @Transient
     protected ModificationEnumeration modification;
-    
+
     protected long version;
 
     @Transient

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -61,17 +60,25 @@ public class StopPlaceTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void checkVersionOfSavedStopPlace() {
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop Place"));
-        stopPlace = stopPlaceRepository.save(stopPlace);
+    public void saveTwoVersionsOfStopFindLastVersion() {
+        StopPlace firstVersion = new StopPlace(new EmbeddableMultilingualString("Stop Place"));
+        firstVersion.setVersion(1L);
+        firstVersion.setNetexId("NSR:StopPlace:1");
+        firstVersion = stopPlaceRepository.save(firstVersion);
         stopPlaceRepository.flush();
-        stopPlace.setChanged(ZonedDateTime.now());
-        stopPlaceRepository.save(stopPlace);
+
+        StopPlace secondVersionSameStop = new StopPlace(new EmbeddableMultilingualString("Stop Place 2"));
+        secondVersionSameStop.setVersion(2L);
+        secondVersionSameStop.setNetexId("NSR:StopPlace:1");
+        stopPlaceRepository.save(secondVersionSameStop);
 
         stopPlaceRepository.flush();
-        stopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
-        assertThat(stopPlace.getVersion()).isNotNull();
-        assertThat(stopPlace.getVersion()).isEqualTo(1L);
+
+        StopPlace actualActualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstVersion.getNetexId());
+        assertThat(actualActualSecondVersion.getVersion()).isEqualTo(2L);
+
+        StopPlace actualFirstVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(firstVersion.getNetexId(), firstVersion.getVersion());
+        assertThat(actualFirstVersion.getVersion()).isEqualTo(1L);
     }
 
     @Test
@@ -84,7 +91,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         stopPlace.getAccessSpaces().add(accessSpace);
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getAccessSpaces()).isNotEmpty();
         assertThat(actualStopPlace.getAccessSpaces().get(0).getShortName().getValue()).isEqualTo(accessSpace.getShortName().getValue());
@@ -103,7 +110,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
         assertThat(actualStopPlace.getEquipmentPlaces().get(0).getNetexId()).isEqualTo(equipmentPlace.getNetexId());
@@ -121,7 +128,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         stopPlace.getLevels().add(level);
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getLevels()).isNotEmpty();
         assertThat(actualStopPlace.getLevels().get(0).getName().getValue()).isEqualTo(level.getName().getValue());
@@ -137,7 +144,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         stopPlace.setRoadAddress(roadAddress);
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getRoadAddress()).isNotNull();
         assertThat(actualStopPlace.getRoadAddress().getNetexId()).isEqualTo(roadAddress.getNetexId());
@@ -156,7 +163,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
         assertThat(actualStopPlace.getValidityConditions().get(0).getName().getValue()).isEqualTo(validityCondition.getName().getValue());
@@ -175,7 +182,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getParentSiteRef().getRef()).isEqualTo(stopPlaceReference.getRef());
     }
 
@@ -185,7 +192,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.getOtherTransportModes().add(VehicleModeEnumeration.AIR);
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getOtherTransportModes()).contains(VehicleModeEnumeration.AIR);
     }
 
@@ -194,7 +201,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setDataSourceRef("dataSourceRef");
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getDataSourceRef()).isEqualTo(stopPlace.getDataSourceRef());
     }
 
@@ -203,7 +210,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCreated(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getCreated()).isEqualTo(stopPlace.getCreated());
     }
 
@@ -212,7 +219,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getChanged()).isEqualTo(stopPlace.getChanged());
     }
 
@@ -224,7 +231,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         alternativeName.setShortName(new MultilingualStringEntity("short name", "en"));
         stopPlace.getAlternativeNames().add(alternativeName);
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getAlternativeNames()).isNotEmpty();
         assertThat(actualStopPlace.getAlternativeNames().get(0).getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }
@@ -234,7 +241,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setDescription(new EmbeddableMultilingualString("description", "en"));
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getDescription().getValue()).isEqualTo(stopPlace.getDescription().getValue());
     }
 
@@ -246,7 +253,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         stopPlace.setShortName(new EmbeddableMultilingualString("short name"));
 
         stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getPublicCode()).isEqualTo(stopPlace.getPublicCode());
         assertThat(actualStopPlace.getNetexId()).isEqualTo(stopPlace.getNetexId());
@@ -278,7 +285,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace).isEqualToComparingOnlyGivenFields(actualStopPlace,
                 "stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
@@ -300,7 +307,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
         stopPlaceRepository.save(stopPlace);
 
         assertThat(quay.getNetexId()).isNotNull();
-        Quay actualQuay = quayRepository.findByNetexId(quay.getNetexId());
+        Quay actualQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
         assertThat(actualQuay).isNotNull();
     }
 
@@ -321,7 +328,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
     }
 
     private void modifyStopPlaceAndAddQuay(String stopPlaceNetexId) {
-        StopPlace existingStopPlace = stopPlaceRepository.findByNetexId(stopPlaceNetexId);
+        StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
 
         existingStopPlace.getQuays().forEach(q -> {
             q.setDescription(new EmbeddableMultilingualString("a new description for quay"));
@@ -335,7 +342,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(existingStopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findByNetexId(existingStopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingStopPlace.getNetexId());
 
         assertThat(actualStopPlace.getStopPlaceType()).isEqualTo(StopTypeEnumeration.AIRPORT);
 
@@ -351,7 +358,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actual = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems().containsAll(ids));
     }
@@ -370,7 +377,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        StopPlace actual = stopPlaceRepository.findByNetexId(stopPlace.getNetexId());
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems()).hasSize(1);
     }

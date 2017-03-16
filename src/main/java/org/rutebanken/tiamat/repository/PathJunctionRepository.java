@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PathJunctionRepository extends JpaRepository<PathJunction, Long>, IdentifiedEntityRepository<PathJunction> {
 
     @Override
-    PathJunction findByNetexId(String netexId);
+    PathJunction findFirstByNetexIdOrderByVersionDesc(String netexId);
 }

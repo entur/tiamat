@@ -62,10 +62,10 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
             StopPlace tiamatStopPlace;
 
             if(tiamatId.isPresent()) {
-                tiamatStopPlace = stopPlaceRepository.findByNetexId(tiamatId.get());
+                tiamatStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(tiamatId.get());
             } else {
                 String idFromOriginalId = stopPlaceRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
-                tiamatStopPlace = stopPlaceRepository.findByNetexId(idFromOriginalId);
+                tiamatStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(idFromOriginalId);
             }
 
             logger.info("Found stop place {}", tiamatStopPlace);
@@ -76,7 +76,7 @@ public class PathLinkEndConverter extends BidirectionalConverter<PathLinkEndStru
             Quay tiamatQuay;
 
             if(tiamatId.isPresent()) {
-                tiamatQuay = quayRepository.findByNetexId(tiamatId.get());
+                tiamatQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(tiamatId.get());
             } else {
                 long idFromOriginalId = quayRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, Sets.newHashSet(placeRefStructure.getRef()));
                 tiamatQuay = quayRepository.findOne(idFromOriginalId);

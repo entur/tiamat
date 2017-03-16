@@ -4,7 +4,6 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.IdResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ class PathLinkFetcher implements DataFetcher {
 
         Optional<String> pathLinkNetexId = idResolver.extractIdIfPresent(ID, environment.getArguments());
         if (pathLinkNetexId.isPresent()) {
-            return Arrays.asList(pathLinkRepository.findByNetexId(pathLinkNetexId.get()));
+            return Arrays.asList(pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkNetexId.get()));
         }
         Optional<String> stopPlaceNetexId = idResolver.extractIdIfPresent(FIND_BY_STOP_PLACE_ID, environment.getArguments());
         if (stopPlaceNetexId.isPresent()) {

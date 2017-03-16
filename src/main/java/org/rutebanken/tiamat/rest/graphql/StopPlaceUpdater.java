@@ -5,7 +5,6 @@ import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -67,7 +66,7 @@ class StopPlaceUpdater implements DataFetcher {
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("Updating StopPlace {}", netexId);
-                stopPlace = stopPlaceRepository.findByNetexId(netexId);
+                stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
 
                 Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
 

@@ -80,7 +80,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         stopPlaceRepository.save(stopPlace);
 
         String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
-        StopPlace actual = stopPlaceRepository.findByNetexId(netexId);
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
 
@@ -101,7 +101,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
         assertThat(netexId).isEqualTo(stopPlace.getNetexId());
-        StopPlace actual = stopPlaceRepository.findByNetexId(netexId);
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
 
@@ -135,7 +135,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         assertThat(id).isEqualTo(matchingStopPlace.getNetexId());
 
-        StopPlace actual = stopPlaceRepository.findByNetexId(id);
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("value");
@@ -151,7 +151,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         assertThat(id).isEqualTo(stopPlaceWithSomeValues.getNetexId());
 
-        StopPlace actual = stopPlaceRepository.findByNetexId(id);
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
         Assertions.assertThat(actual.getKeyValues().get("key").getItems()).contains("Third value");
@@ -255,7 +255,7 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
 
         String result = stopPlaceRepository.findNearbyStopPlace(envelope, stopPlace.getName().getValue(), StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
-        StopPlace actual = stopPlaceRepository.findByNetexId(result);
+        StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(result);
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 

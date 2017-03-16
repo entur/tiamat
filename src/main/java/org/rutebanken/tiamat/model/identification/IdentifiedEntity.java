@@ -17,7 +17,6 @@ public abstract class IdentifiedEntity {
     @GeneratedValue(generator="sequence_per_table_generator")
     protected Long id;
 
-    @Column(unique = true)
     protected String netexId;
 
 

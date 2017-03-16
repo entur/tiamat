@@ -17,6 +17,6 @@ public interface TopographicPlaceRepository extends PagingAndSortingRepository<T
     List<TopographicPlace> findByNameValueAndCountryRefRefAndTopographicPlaceType(String name, IanaCountryTldEnumeration ianCountryTld, TopographicPlaceTypeEnumeration placeType);
 
     @Override
-    TopographicPlace findByNetexId(String netexId);
+    TopographicPlace findFirstByNetexIdOrderByVersionDesc(String netexId);
 }
 

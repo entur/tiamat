@@ -22,7 +22,7 @@ public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.r
 
         TopographicPlaceRefStructure parentTopographicPlaceRef = netexTopographicPlace.getParentTopographicPlaceRef();
         if (parentTopographicPlaceRef != null && parentTopographicPlaceRef.getRef() != null) {
-            org.rutebanken.tiamat.model.TopographicPlace parentTopographicPlace = topographicPlaceRepository.findByNetexId(parentTopographicPlaceRef.getRef());
+            org.rutebanken.tiamat.model.TopographicPlace parentTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentTopographicPlaceRef.getRef());
 
             tiamatTopographicPlace.setParentTopographicPlace(parentTopographicPlace);
         }

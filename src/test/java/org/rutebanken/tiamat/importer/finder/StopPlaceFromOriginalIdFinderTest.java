@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.importer.finder;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
@@ -28,7 +27,7 @@ public class StopPlaceFromOriginalIdFinderTest {
         stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("another-original-id");
         stopPlace.getOrCreateValues(ORIGINAL_ID_KEY).add("the-one-original-id");
 
-        when(stopPlaceRepository.findByNetexId(stopPlace.getNetexId())).thenReturn(stopPlace);
+        when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId())).thenReturn(stopPlace);
         when(stopPlaceRepository
                 .findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getKeyValues().get(ORIGINAL_ID_KEY).getItems()))
                 .thenReturn(stopPlace.getNetexId());

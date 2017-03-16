@@ -4,7 +4,6 @@ import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.QuayTypeEnumeration;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
@@ -51,7 +50,7 @@ public class QuayDisassemblerTest {
         Quay quay = new Quay();
         quay.setNetexId(quayDto.id);
 
-        when(quayRepository.findByNetexId(quayDto.id)).thenReturn(quay);
+        when(quayRepository.findFirstByNetexIdOrderByVersionDesc(quayDto.id)).thenReturn(quay);
 
         Quay actualQuay = quayDisassembler.disassemble(quayDto);
 

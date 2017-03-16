@@ -72,14 +72,14 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
             Optional<String> matchingStopPlaceNetexId = keyValueCache.getIfPresent(cacheKey);
             if(matchingStopPlaceNetexId != null && matchingStopPlaceNetexId.isPresent()) {
                 logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId.get());
-                return stopPlaceRepository.findByNetexId(matchingStopPlaceNetexId.get());
+                return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId.get());
             }
         }
 
         // No cache match
         String stopPlaceNetexId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
         if(stopPlaceNetexId != null) {
-            return stopPlaceRepository.findByNetexId(stopPlaceNetexId);
+            return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
         }
         return null;
     }

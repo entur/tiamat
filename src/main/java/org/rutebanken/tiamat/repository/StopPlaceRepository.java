@@ -24,6 +24,7 @@ public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, Sto
     Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceIds);
 
     @Override
-    StopPlace findByNetexId(String netexId);
+    StopPlace findFirstByNetexIdOrderByVersionDesc(String netexId);
+
 }
 

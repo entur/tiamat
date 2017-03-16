@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface QuayRepository extends JpaRepository<Quay, Long>, QuayRepositoryCustom, IdentifiedEntityRepository<Quay> {
 
     @Override
-    Quay findByNetexId(String netexId);
+    Quay findFirstByNetexIdOrderByVersionDesc(String netexId);
 }

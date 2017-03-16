@@ -29,7 +29,7 @@ public class StopPlaceAssemblerTest {
 
         StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findByNetexId(municipality.getNetexId())).thenReturn(municipality);
+        when(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(municipality.getNetexId())).thenReturn(municipality);
 
         List<TopographicPlace> topographicPlaces = new ArrayList<>(Arrays.asList(municipality));
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(municipalityName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN)).thenReturn(topographicPlaces);
@@ -52,7 +52,7 @@ public class StopPlaceAssemblerTest {
 
         StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findByNetexId(municipality.getNetexId())).thenReturn(municipality);
+        when(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(municipality.getNetexId())).thenReturn(municipality);
 
         String countyName = "Akershus";
 
@@ -61,7 +61,7 @@ public class StopPlaceAssemblerTest {
 
         municipality.setParentTopographicPlace(county);
 
-        when(topographicPlaceRepository.findByNetexId(county.getNetexId())).thenReturn(county);
+        when(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(county.getNetexId())).thenReturn(county);
 
         List<TopographicPlace> municipalities = new ArrayList<>(Arrays.asList(municipality));
         when(topographicPlaceRepository.findByNameValueAndCountryRefRefAndTopographicPlaceType(municipalityName, IanaCountryTldEnumeration.NO, TopographicPlaceTypeEnumeration.TOWN)).thenReturn(municipalities);
@@ -86,7 +86,7 @@ public class StopPlaceAssemblerTest {
 
         StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findByNetexId(municipality.getNetexId())).thenReturn(municipality);
+        when(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(municipality.getNetexId())).thenReturn(municipality);
 
         stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }
@@ -101,7 +101,7 @@ public class StopPlaceAssemblerTest {
 
         StopPlace stopPlace = stopPlaceWithTopographicPlace(municipality);
 
-        when(topographicPlaceRepository.findByNetexId(municipality.getNetexId())).thenReturn(null);
+        when(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(municipality.getNetexId())).thenReturn(null);
 
         stopPlaceAssembler.assembleMunicipalityAndCounty(new StopPlaceDto(), stopPlace);
     }

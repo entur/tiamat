@@ -134,7 +134,7 @@ public class MergingStopPlaceImporterTest {
         newStopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
-        when(stopPlaceRepository.findByNetexId(firstStopId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstStopId)).thenReturn(firstStopPlace);
         when(stopPlaceRepository.save(firstStopPlace)).thenReturn(firstStopPlace);
 
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(newStopPlace);
@@ -174,7 +174,7 @@ public class MergingStopPlaceImporterTest {
 
         mockStopPlaceSave(firstStopId, firstStopPlace);
         when(stopPlaceRepository.findNearbyStopPlace(any(Envelope.class), any(String.class), any(StopTypeEnumeration.class))).thenReturn(firstStopId);
-        when(stopPlaceRepository.findByNetexId(firstStopId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstStopId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
@@ -216,7 +216,7 @@ public class MergingStopPlaceImporterTest {
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
         when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
-        when(stopPlaceRepository.findByNetexId(savedStopPlaceId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
@@ -254,7 +254,7 @@ public class MergingStopPlaceImporterTest {
 
         mockStopPlaceSave(savedStopPlaceId, firstStopPlace);
         when(stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, Sets.newHashSet(String.valueOf(chouetteId)))).thenReturn(savedStopPlaceId);
-        when(stopPlaceRepository.findByNetexId(savedStopPlaceId)).thenReturn(firstStopPlace);
+        when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(savedStopPlaceId)).thenReturn(firstStopPlace);
 
         // Import only the second stop place as the first one is already "saved" (mocked)
         StopPlace importResult = stopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
