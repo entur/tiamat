@@ -12,11 +12,10 @@ public class VersionIncrementor {
     private static final Logger logger = LoggerFactory.getLogger(VersionIncrementor.class);
 
     public void incrementVersion(EntityInVersionStructure versionedEntity) {
-        return;
-//        Long version = versionedEntity.getVersion();
-//        version ++;
-//        logger.debug("Setting version {} for {}", version, versionedEntity);
-//        versionedEntity.setVersion(version);
+        Long version = versionedEntity.getVersion();
+        version ++;
+        logger.debug("Setting version {} for {}", version, versionedEntity);
+        versionedEntity.setVersion(version);
     }
 
 }

@@ -28,8 +28,7 @@ public class EntityInVersionStructure extends EntityStructure {
 
     @Transient
     protected ModificationEnumeration modification;
-
-    @Version
+    
     protected long version;
 
     @Transient
