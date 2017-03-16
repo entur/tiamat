@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class ValidityTrigger
-        extends ValidityTrigger_VersionStructure {
+public class ValidityTrigger extends ValidityCondition {
 
 
 }

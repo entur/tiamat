@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class ValidDuring
-        extends ValidDuring_VersionStructure {
+public class ValidDuring extends ValidBetween {
 
 
 }

@@ -7,11 +7,11 @@ import java.util.List;
 public class ValidityTriggers_RelStructure
         extends ContainmentAggregationStructure {
 
-    protected List<ValidityTrigger_VersionStructure> validityTrigger;
+    protected List<ValidityTrigger> validityTrigger;
 
-    public List<ValidityTrigger_VersionStructure> getValidityTrigger() {
+    public List<ValidityTrigger> getValidityTrigger() {
         if (validityTrigger == null) {
-            validityTrigger = new ArrayList<ValidityTrigger_VersionStructure>();
+            validityTrigger = new ArrayList<ValidityTrigger>();
         }
         return this.validityTrigger;
     }

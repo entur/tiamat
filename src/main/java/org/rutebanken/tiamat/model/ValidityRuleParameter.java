@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class ValidityRuleParameter
-        extends ValidityRuleParameter_VersionStructure {
+public class ValidityRuleParameter extends ValidityCondition {
 
 
 }

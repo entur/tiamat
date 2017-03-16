@@ -90,16 +90,17 @@ public class InitialImportResource {
 
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
                 ExecutorService executorService = Executors.newFixedThreadPool(threads, new ThreadFactoryBuilder().setNameFormat("importer-%d").build());
-                AtomicBoolean receivedPoisonPill = new AtomicBoolean(false);
+                AtomicBoolean stop = new AtomicBoolean(false);
 
                 for(int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
-                            while (!Thread.currentThread().isInterrupted() && !receivedPoisonPill.get()) {
+                            while (!Thread.currentThread().isInterrupted() && !stop.get()) {
                                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
+
                                 if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                                     logger.info("Finished importing stops");
-                                    receivedPoisonPill.set(true);
+                                    stop.set(true);
                                     break;
                                 }
 
@@ -108,9 +109,11 @@ public class InitialImportResource {
                             }
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
+                            stop.set(true);
                             return;
                         } catch (ExecutionException e) {
                             logger.warn("Execution exception", e);
+                            stop.set(true);
                         }
                     });
                 }

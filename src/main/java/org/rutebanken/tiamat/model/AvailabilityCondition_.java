@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-public class ValidityPeriod
+public class AvailabilityCondition_
         extends ValidBetween {
 
 
