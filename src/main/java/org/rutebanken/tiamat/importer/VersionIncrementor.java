@@ -13,7 +13,13 @@ public class VersionIncrementor {
 
     public void incrementVersion(EntityInVersionStructure versionedEntity) {
         Long version = versionedEntity.getVersion();
-        version ++;
+
+        if(version == -1L) {
+            version = 1L;
+        } else {
+            version ++;
+        }
+
         logger.debug("Setting version {} for {}", version, versionedEntity);
         versionedEntity.setVersion(version);
     }
