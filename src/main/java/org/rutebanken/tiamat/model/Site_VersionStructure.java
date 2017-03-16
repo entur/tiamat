@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
-@Table(indexes = {@Index(name="topographic_place_ref_index", columnList = "topographic_place_ref")})
 public abstract class Site_VersionStructure
         extends SiteElement {
 

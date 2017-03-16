@@ -11,8 +11,15 @@ import java.util.*;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-@Table(indexes = {
-        @Index(name="stop_place_type_index", columnList = "stopPlaceType")})
+@Table(
+        indexes = {
+                @Index(name = "stop_place_topographic_place_ref_index", columnList = "topographic_place_ref"),
+                @Index(name = "stop_place_name_value_index", columnList = "name_value"),
+                @Index(name = "stop_place_type_index", columnList = "stopPlaceType")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+)
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 

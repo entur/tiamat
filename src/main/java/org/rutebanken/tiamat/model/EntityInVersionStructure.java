@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
-)
 public class EntityInVersionStructure extends EntityStructure {
 
     @OneToMany(cascade = CascadeType.ALL)

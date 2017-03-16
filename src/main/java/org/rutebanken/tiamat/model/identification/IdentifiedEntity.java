@@ -10,7 +10,6 @@ import javax.persistence.*;
 
 @MappedSuperclass
 @EntityListeners(IdentifiedEntityListener.class)
-@Table(indexes = {@Index(name = "netex_id_index", columnList = "netex_id")})
 public abstract class IdentifiedEntity {
 
     @Id
