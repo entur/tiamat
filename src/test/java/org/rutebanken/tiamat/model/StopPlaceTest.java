@@ -74,7 +74,7 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         stopPlaceRepository.flush();
 
-        StopPlace actualActualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstVersion.getNetexId());
+        StopPlace actualActualSecondVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondVersionSameStop.getNetexId());
         assertThat(actualActualSecondVersion.getVersion()).isEqualTo(2L);
 
         StopPlace actualFirstVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(firstVersion.getNetexId(), firstVersion.getVersion());
