@@ -12,7 +12,8 @@ public class EntityInVersionStructure extends EntityStructure {
     @Transient
     private final List<ValidityCondition> validityConditions = new ArrayList<>();
 
-    @Transient
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(updatable = false)
     protected List<ValidBetween> validBetween;
 
     @Transient
@@ -45,7 +46,7 @@ public class EntityInVersionStructure extends EntityStructure {
 
     public List<ValidBetween> getValidBetween() {
         if (validBetween == null) {
-            validBetween = new ArrayList<ValidBetween>();
+            validBetween = new ArrayList<>();
         }
         return this.validBetween;
     }

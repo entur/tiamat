@@ -4,8 +4,7 @@ import javax.persistence.*;
 
 
 @MappedSuperclass
-public class ValidityCondition
-        extends DataManagedObjectStructure {
+public class ValidityCondition extends DataManagedObjectStructure {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private MultilingualStringEntity name;

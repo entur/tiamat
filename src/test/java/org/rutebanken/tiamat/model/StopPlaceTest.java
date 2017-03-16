@@ -181,23 +181,26 @@ public class StopPlaceTest extends CommonSpringBootTest {
         assertThat(actualStopPlace.getRoadAddress().getNetexId()).isEqualTo(roadAddress.getNetexId());
     }
 
-    @Ignore
     @Test
-    public void persistStopPlaceWithValidityCondition() {
+    public void persistStopPlaceWithValidityBetween() {
 
         StopPlace stopPlace = new StopPlace();
 
-        ValidityCondition validityCondition = new ValidityCondition();
-        validityCondition.setName(new MultilingualStringEntity("Validity condition", "en"));
+        ValidBetween validBetween = new ValidBetween();
+        validBetween.setFromDate(ZonedDateTime.now());
+        validBetween.setToDate(ZonedDateTime.now().plusWeeks(10));
 
-        stopPlace.getValidityConditions().add(validityCondition);
+        stopPlace.getValidBetween().add(validBetween);
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
-        assertThat(actualStopPlace.getValidityConditions().get(0).getName().getValue()).isEqualTo(validityCondition.getName().getValue());
+        assertThat(actualStopPlace.getValidBetween()).isNotEmpty();
+
+        ValidBetween actualValidBetween = actualStopPlace.getValidBetween().get(0);
+        assertThat(actualValidBetween.getFromDate()).isEqualTo(validBetween.getFromDate());
+        assertThat(actualValidBetween.getToDate()).isEqualTo(validBetween.getToDate());
     }
 
     @Ignore
