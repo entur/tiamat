@@ -9,13 +9,9 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.Commit;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -182,23 +178,23 @@ public class StopPlaceTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void persistStopPlaceWithValidityBetween() {
+    public void persistStopPlaceWithValidBetween() {
 
         StopPlace stopPlace = new StopPlace();
 
         ValidBetween validBetween = new ValidBetween();
         validBetween.setFromDate(ZonedDateTime.now());
         validBetween.setToDate(ZonedDateTime.now().plusWeeks(10));
-
-        stopPlace.getValidBetween().add(validBetween);
+        
+        stopPlace.setValidBetweens(Arrays.asList(validBetween));
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getValidBetween()).isNotEmpty();
+        assertThat(actualStopPlace.getValidBetweens()).isNotEmpty();
 
-        ValidBetween actualValidBetween = actualStopPlace.getValidBetween().get(0);
+        ValidBetween actualValidBetween = actualStopPlace.getValidBetweens().get(0);
         assertThat(actualValidBetween.getFromDate()).isEqualTo(validBetween.getFromDate());
         assertThat(actualValidBetween.getToDate()).isEqualTo(validBetween.getToDate());
     }

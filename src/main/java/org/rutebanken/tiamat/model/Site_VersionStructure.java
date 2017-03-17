@@ -12,42 +12,57 @@ public abstract class Site_VersionStructure
     @OneToMany(cascade = CascadeType.ALL)
     @Transient
     private final List<Level> levels = new ArrayList<>();
+
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "topographic_place_ref")),
             @AttributeOverride(name = "version", column = @Column(name = "topographic_place_version"))
     })
     @Embedded
     protected TopographicPlaceRefStructure topographicPlaceRef;
+
     @Transient
     protected TopographicPlaceView topographicPlaceView;
+
     @Transient
     protected TopographicPlaceRefs_RelStructure additionalTopographicPlaces;
+
     @Transient
     protected SiteTypeEnumeration siteType;
+
     @Transient
     protected Boolean atCentre;
+
     @Transient
     protected LocaleStructure locale;
+
     @Transient
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
+
     @Transient
     protected Organisation_DerivedViewStructure operatingOrganisationView;
+
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
             @AttributeOverride(name = "version", column = @Column(name = "parent_site_version"))
     })
     @Embedded
     protected SiteRefStructure parentSiteRef;
+
     @Transient
     protected SiteRefs_RelStructure adjacentSites;
+
     @Transient
     protected TopographicPlaceRefStructure containedInPlaceRef;
+
     @Transient
     protected SiteEntrances_RelStructure entrances;
+
     @Transient
     protected PlaceEquipments_RelStructure placeEquipments;
+
     @Transient
     protected LocalServices_RelStructure localServices;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<EquipmentPlace> equipmentPlaces;
 

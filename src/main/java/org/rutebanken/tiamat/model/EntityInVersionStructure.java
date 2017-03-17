@@ -13,8 +13,7 @@ public class EntityInVersionStructure extends EntityStructure {
     private final List<ValidityCondition> validityConditions = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn
-    protected List<ValidBetween> validBetween;
+    protected List<ValidBetween> validBetweens;
 
     @Transient
     protected String dataSourceRef;
@@ -44,11 +43,12 @@ public class EntityInVersionStructure extends EntityStructure {
         return validityConditions;
     }
 
-    public List<ValidBetween> getValidBetween() {
-        if (validBetween == null) {
-            validBetween = new ArrayList<>();
-        }
-        return this.validBetween;
+    public List<ValidBetween> getValidBetweens() {
+        return validBetweens;
+    }
+
+    public void setValidBetweens(List<ValidBetween> validBetweens) {
+        this.validBetweens = validBetweens;
     }
 
     public String getDataSourceRef() {
