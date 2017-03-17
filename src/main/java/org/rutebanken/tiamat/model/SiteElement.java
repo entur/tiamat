@@ -5,18 +5,21 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @MappedSuperclass
 public abstract class SiteElement extends AddressablePlace {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected AccessibilityAssessment accessibilityAssessment;
+
     @Transient
     protected List<AccessModeEnumeration> accessModes;
+
     @Transient
     protected MultilingualStringEntity nameSuffix;
+
     @Transient
     protected MultilingualStringEntity crossRoad;
 
@@ -75,7 +78,6 @@ public abstract class SiteElement extends AddressablePlace {
     public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
-
 
     public MultilingualStringEntity getCrossRoad() {
         return crossRoad;
