@@ -1,8 +1,13 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
+
+@MappedSuperclass
 public class GroupOfPoints_VersionStructure
         extends GroupOfEntities_VersionStructure {
 
+    @Transient
     protected PointRefs_RelStructure members;
 
     public GroupOfPoints_VersionStructure(EmbeddableMultilingualString name) {
