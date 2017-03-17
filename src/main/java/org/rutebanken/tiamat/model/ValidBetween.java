@@ -3,10 +3,11 @@ package org.rutebanken.tiamat.model;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 import java.time.ZonedDateTime;
 
-@Entity
-public class ValidBetween extends ValidityCondition {
+@MappedSuperclass
+public abstract class ValidBetween extends ValidityCondition {
 
     private ZonedDateTime fromDate;
 

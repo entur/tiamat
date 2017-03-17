@@ -9,11 +9,7 @@ import java.util.List;
 public class EntityInVersionStructure extends EntityStructure {
 
     @OneToMany(cascade = CascadeType.ALL)
-    @Transient
-    private final List<ValidityCondition> validityConditions = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL)
-    protected List<ValidBetween> validBetweens;
+    private final List<AvailabilityCondition> availabilityConditions = new ArrayList<>();
 
     @Transient
     protected String dataSourceRef;
@@ -39,16 +35,8 @@ public class EntityInVersionStructure extends EntityStructure {
     @Transient
     protected String derivedFromObjectRef;
 
-    public List<ValidityCondition> getValidityConditions() {
-        return validityConditions;
-    }
-
-    public List<ValidBetween> getValidBetweens() {
-        return validBetweens;
-    }
-
-    public void setValidBetweens(List<ValidBetween> validBetweens) {
-        this.validBetweens = validBetweens;
+    public List<AvailabilityCondition> getAvailabilityConditions() {
+        return availabilityConditions;
     }
 
     public String getDataSourceRef() {
