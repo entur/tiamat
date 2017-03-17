@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,16 +51,14 @@ public class PathLinksImporter {
                         if(changed) {
                             existing.setChanged(ZonedDateTime.now());
                         }
+                        versionIncrementor.incrementVersion(existing);
                         return existing;
                     } else {
                         logger.debug("No existing path link. Using incoming {}", pathLink);
                         pathLink.setCreated(ZonedDateTime.now());
+                        pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);
                         return pathLink;
                     }
-                })
-                .map(pathLink -> {
-                    versionIncrementor.incrementVersion(pathLink);
-                    return pathLink;
                 })
                 .map(pathLink -> pathLinkRepository.save(pathLink))
                 .map(pathLink -> netexMapper.mapToNetexModel(pathLink))

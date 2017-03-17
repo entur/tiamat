@@ -18,6 +18,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.CentroidComputer;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;

@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;
@@ -64,7 +65,7 @@ public class QuayMergerTest {
         Quay quay1 = new Quay();
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(80, 20)));
         quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("XYZ:StopArea:987654");
-        
+
         incomingQuays.add(quay1);
 
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
@@ -504,7 +505,7 @@ public class QuayMergerTest {
     }
 
     @Test
-    public void twoQuaysWithDifferentPublicCodeShouldNotBeMerged()  {
+    public void twoQuaysWithDifferentPublicCodeShouldNotBeMerged() {
 
         Quay first = new Quay();
         Point firstQuayPoint = geometryFactory.createPoint(new Coordinate(60, 11));
