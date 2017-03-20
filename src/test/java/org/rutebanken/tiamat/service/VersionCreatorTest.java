@@ -14,6 +14,8 @@ import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
@@ -64,7 +66,6 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
     @Test
     public void createNewVersionOfStopWithGeometry() {
-
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.0, 11.1)));
@@ -73,6 +74,17 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
         assertThat(newVersion.getCentroid()).isNotNull();
     }
+
+    @Test
+    public void createNewVersionOfStopWithZonedDateTime() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setChanged(ZonedDateTime.now());
+        stopPlace = stopPlaceRepository.save(stopPlace);
+        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        assertThat(newVersion.getChanged()).isNotNull();
+    }
+
 
     @Test
     public void createNewVersionOfPathLink() {

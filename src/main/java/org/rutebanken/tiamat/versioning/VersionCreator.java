@@ -2,15 +2,19 @@ package org.rutebanken.tiamat.versioning;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Point;
+import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
 
 /**
  * Creates new version of already existing objects, by mapping with Orika and ignore primary key "id".
@@ -44,6 +48,14 @@ public class VersionCreator {
 
         mapperFactory.getConverterFactory()
                 .registerConverter(new PassThroughConverter(Point.class));
+
+        mapperFactory.getConverterFactory()
+                .registerConverter(new CustomConverter<ZonedDateTime, ZonedDateTime>() {
+                    @Override
+                    public ZonedDateTime convert(ZonedDateTime zonedDateTime, Type<? extends ZonedDateTime> type) {
+                        return ZonedDateTime.from(zonedDateTime);
+                    }
+                });
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
