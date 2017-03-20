@@ -23,7 +23,7 @@ public class VersionIncrementor {
             version++;
         }
 
-        logger.debug("Incrementing version {} for {}", version, entity);
+        logger.debug("Incrementing version to {} for {}", version, entity);
         entity.setVersion(version);
     }
 }

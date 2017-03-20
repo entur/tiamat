@@ -9,5 +9,5 @@ public interface IdentifiedEntityRepository<T extends IdentifiedEntity> {
 
     T findFirstByNetexIdOrderByVersionDesc(String netexId);
 
-    StopPlace findFirstByNetexIdAndVersion(String netexId, long version);
+    T findFirstByNetexIdAndVersion(String netexId, long version);
 }

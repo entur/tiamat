@@ -2,9 +2,10 @@ package org.rutebanken.tiamat.service;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.PathJunctionRepository;
+import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,16 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private PathLinkRepository pathLinkRepository;
+
+    @Autowired
+    private PathJunctionRepository pathJunctionRepository;
+
+    @Autowired
+    private QuayRepository quayRepository;
+
 
     @Autowired
     private VersionCreator versionCreator;
@@ -35,7 +46,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace);
+        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
 
         stopPlaceRepository.save(newVersion);
@@ -47,4 +58,41 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         assertThat(secondVersion.getQuays()).isNotNull();
         assertThat(secondVersion.getQuays()).hasSize(1);
     }
+
+    @Test
+    public void createNewVersionOfPathLink() {
+        Quay fromQuay = new Quay();
+        fromQuay.setVersion(1L);
+        fromQuay = quayRepository.save(fromQuay);
+
+        Quay toQuay = new Quay();
+        toQuay.setVersion(1L);
+        toQuay = quayRepository.save(toQuay);
+
+        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(fromQuay);
+        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(toQuay);
+
+        PathLink pathLink = new PathLink(pathLinkEndFromQuay, pathLinkEndToQuay);
+        pathLink.setVersion(1L);
+
+        pathLink = pathLinkRepository.save(pathLink);
+
+        PathLink newVersion = versionCreator.createNewVersionFrom(pathLink, PathLink.class);
+
+        assertThat(newVersion.getVersion())
+                .describedAs("The version of path link should have been incremented")
+                .isEqualTo(pathLink.getVersion()+1);
+
+        newVersion = pathLinkRepository.save(newVersion);
+
+        PathLink actualNewVersionPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+
+        assertThat(actualNewVersionPathLink.getVersion()).isEqualTo(2L);
+        assertThat(actualNewVersionPathLink.getFrom().getQuay().getNetexId()).isEqualTo(fromQuay.getNetexId());
+        assertThat(actualNewVersionPathLink.getTo().getQuay().getNetexId()).isEqualTo(toQuay.getNetexId());
+
+        PathLink actualOldVersionPathLink = pathLinkRepository.findFirstByNetexIdAndVersion(newVersion.getNetexId(), 1L);
+        assertThat(actualOldVersionPathLink).isNotNull();
+    }
+
 }
