@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.CentroidComputer;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class MergingStopPlaceImporter {
 
     private final NetexMapper netexMapper;
 
-    private final VersionIncrementor versionIncrementor;
+    private final VersionCreator versionCreator;
 
 
     @Autowired
@@ -65,7 +66,8 @@ public class MergingStopPlaceImporter {
                                     StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
-                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper, VersionIncrementor versionIncrementor) {
+                                    KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
+                                    VersionCreator versionCreator) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
@@ -77,7 +79,7 @@ public class MergingStopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
-        this.versionIncrementor = versionIncrementor;
+        this.versionCreator = versionCreator;
     }
 
     /**
@@ -168,9 +170,10 @@ public class MergingStopPlaceImporter {
 
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
+            // The stop place has changed. Create a new version for it.
+            foundStopPlace = versionCreator.createNewVersionFrom(foundStopPlace, StopPlace.class);
         }
         logger.info("Updated existing stop place {}. ", foundStopPlace);
-        versionIncrementor.incrementVersion(foundStopPlace);
 
         return saveAndUpdateCache(foundStopPlace);
     }

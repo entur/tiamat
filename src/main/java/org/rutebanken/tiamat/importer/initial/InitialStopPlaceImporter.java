@@ -60,7 +60,7 @@ public class InitialStopPlaceImporter {
 //        }
 
         stopPlaceRepository.save(stopPlace);
-        logger.debug("Saving stop place {} {}", stopPlace.getName(), stopPlace.getNetexId());
+        logger.debug("Saving stop place {}, version {}, netex ID: {}", stopPlace.getName(), stopPlace.getVersion(), stopPlace.getNetexId());
         stopPlacesImported.incrementAndGet();
         return netexMapper.mapToNetexModel(stopPlace);
     }

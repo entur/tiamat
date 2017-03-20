@@ -18,6 +18,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.CentroidComputer;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 
 import java.util.Arrays;
@@ -57,6 +58,8 @@ public class MergingStopPlaceImporterTest {
 
     private VersionIncrementor versionIncrementor = new VersionIncrementor();
 
+    private VersionCreator versionCreator = new VersionCreator(versionIncrementor);
+
     private QuayMerger quayMerger = new QuayMerger(versionIncrementor);
 
     private NetexMapper netexMapper = new NetexMapper();
@@ -64,7 +67,7 @@ public class MergingStopPlaceImporterTest {
     private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder = new NearbyStopsWithSameTypeFinder(stopPlaceRepository, new EnvelopeCreator(geometryFactory));
     private MergingStopPlaceImporter stopPlaceImporter = new MergingStopPlaceImporter(topographicPlaceCreator,
             countyAndMunicipalityLookupService, quayRepository, stopPlaceRepository, stopPlaceFromOriginalIdFinder,
-            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionIncrementor);
+            nearbyStopsWithSameTypeFinder, nearbyStopPlaceFinder, centroidComputer, keyValueListAppender, quayMerger, netexMapper, versionCreator);
 
     /**
      * Test that two nearby stops close to each other is treated as the same.
