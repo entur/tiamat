@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Creates new version of already existing objects, by mapping with Orika and ignore primary key "id".
+ */
 @Service
 public class VersionCreator {
 
@@ -39,6 +42,7 @@ public class VersionCreator {
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
+                // New version for path link does not mean new version for quay, stop place or entrance.
                 .fieldMap("quay").converter(pathLinkEndPassThroughId).add()
                 .fieldMap("stopPlace").converter(pathLinkEndPassThroughId).add()
                 .fieldMap("entrance").converter(pathLinkEndPassThroughId).add()
