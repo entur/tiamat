@@ -6,10 +6,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.PathJunctionRepository;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +30,9 @@ public class VersionCreatorTest extends CommonSpringBootTest {
     @Autowired
     private QuayRepository quayRepository;
 
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
     private VersionCreator versionCreator;
@@ -85,6 +85,24 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         assertThat(newVersion.getChanged()).isNotNull();
     }
 
+    @Test
+    public void createNewVersionOfStopWithTopographicPlace() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setVersion(1L);
+        topographicPlaceRepository.save(topographicPlace);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTopographicPlace(topographicPlace);
+        stopPlace.setVersion(1L);
+
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+
+        // Save it. Reference to topographic place should be kept.
+        newVersion = stopPlaceRepository.save(newVersion);
+    }
 
     @Test
     public void createNewVersionOfPathLink() {

@@ -36,15 +36,15 @@ public class VersionCreator {
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
-        mapperFactory.classMap(StopPlace.class, StopPlace.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        final String pathLinkEndPassThroughId = "pathLinkEndPassThrough";
+        final String pathLinkEndPassThroughId = "pathLinkEndPassThroughId";
 
         mapperFactory.getConverterFactory()
                 .registerConverter(pathLinkEndPassThroughId, new PassThroughConverter(Quay.class, StopPlace.class));
+
+        final String stopPlacePassThroughId = "stopPlacePassThroughId";
+
+        mapperFactory.getConverterFactory()
+                .registerConverter(stopPlacePassThroughId, new PassThroughConverter(TopographicPlace.class));
 
         mapperFactory.getConverterFactory()
                 .registerConverter(new PassThroughConverter(Point.class));
@@ -56,6 +56,12 @@ public class VersionCreator {
                         return ZonedDateTime.from(zonedDateTime);
                     }
                 });
+
+        mapperFactory.classMap(StopPlace.class, StopPlace.class)
+                .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
