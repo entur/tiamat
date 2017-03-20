@@ -7,3 +7,5 @@ CREATE index table_name_index ON id_generator(table_name);
 CREATE index id_value_index ON id_generator(id_value);
 
 CREATE index value_id_index ON value_items (value_id);
+
+CREATE INDEX trgm_idx ON stop_place USING GIST (name_value gist_trgm_ops);
