@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.service;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
@@ -23,7 +26,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
     private PathLinkRepository pathLinkRepository;
 
     @Autowired
-    private PathJunctionRepository pathJunctionRepository;
+    private GeometryFactory geometryFactory;
 
     @Autowired
     private QuayRepository quayRepository;
@@ -57,6 +60,18 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         assertThat(secondVersion).isNotNull();
         assertThat(secondVersion.getQuays()).isNotNull();
         assertThat(secondVersion.getQuays()).hasSize(1);
+    }
+
+    @Test
+    public void createNewVersionOfStopWithGeometry() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.0, 11.1)));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        assertThat(newVersion.getCentroid()).isNotNull();
     }
 
     @Test

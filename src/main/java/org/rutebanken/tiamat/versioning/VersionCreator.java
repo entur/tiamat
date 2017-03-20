@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Point;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
@@ -39,6 +41,9 @@ public class VersionCreator {
 
         mapperFactory.getConverterFactory()
                 .registerConverter(pathLinkEndPassThroughId, new PassThroughConverter(Quay.class, StopPlace.class));
+
+        mapperFactory.getConverterFactory()
+                .registerConverter(new PassThroughConverter(Point.class));
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
