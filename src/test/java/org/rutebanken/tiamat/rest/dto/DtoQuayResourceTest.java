@@ -29,7 +29,7 @@ public class DtoQuayResourceTest {
     }
 
     @Test
-    public void keyValueQuayMappingWithWithSize() throws IOException {
+    public void keyValueQuayMappingWithSize() throws IOException {
         int keyValueMappingCount = 3;
         int size = 1;
 
