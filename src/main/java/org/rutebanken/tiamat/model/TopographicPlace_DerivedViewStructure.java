@@ -1,21 +1,11 @@
 package org.rutebanken.tiamat.model;
 
-public class TopographicPlace_DerivedViewStructure
-        extends DerivedViewStructure {
+public class TopographicPlace_DerivedViewStructure extends DerivedViewStructure {
 
-    protected TopographicPlaceRefStructure topographicPlaceRef;
     protected MultilingualStringEntity name;
     protected MultilingualStringEntity shortName;
     protected MultilingualStringEntity qualifierName;
     protected CountryRef countryRef;
-
-    public TopographicPlaceRefStructure getTopographicPlaceRef() {
-        return topographicPlaceRef;
-    }
-
-    public void setTopographicPlaceRef(TopographicPlaceRefStructure value) {
-        this.topographicPlaceRef = value;
-    }
 
     public MultilingualStringEntity getName() {
         return name;

@@ -5,7 +5,7 @@ public class StopArea_VersionStructure
 
     protected String publicCode;
     protected StopAreaRefStructure parentStopAreaRef;
-    protected TopographicPlaceRefStructure topographicPlaceRef;
+    protected TopographicPlace topographicPlace;
     protected TopographicPlaceView topographicPlaceView;
 
     public String getPublicCode() {
@@ -22,14 +22,6 @@ public class StopArea_VersionStructure
 
     public void setParentStopAreaRef(StopAreaRefStructure value) {
         this.parentStopAreaRef = value;
-    }
-
-    public TopographicPlaceRefStructure getTopographicPlaceRef() {
-        return topographicPlaceRef;
-    }
-
-    public void setTopographicPlaceRef(TopographicPlaceRefStructure value) {
-        this.topographicPlaceRef = value;
     }
 
     public TopographicPlaceView getTopographicPlaceView() {

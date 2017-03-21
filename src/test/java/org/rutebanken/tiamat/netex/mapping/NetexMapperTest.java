@@ -86,15 +86,24 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
 
     @Test
-    public void mapStopPlaceToNetex() throws Exception {
+    public void mapStopPlaceWithNameAndTopographicPlaceRefToNetex() throws Exception {
         StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("stopplacenetexid");
         stopPlace.setName(new EmbeddableMultilingualString("name", "en"));
+
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
+        topographicPlace.setVersion(1L);
+        topographicPlace.setNetexId("netexidfortopoplace");
+        stopPlace.setTopographicPlace(topographicPlace);
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getName()).isNotNull();
         assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(netexStopPlace.getTopographicPlaceRef()).isNotNull();
+        assertThat(netexStopPlace.getTopographicPlaceRef().getRef()).isEqualTo(topographicPlace.getNetexId());
+        assertThat(netexStopPlace.getTopographicPlaceRef().getVersion()).isEqualTo(topographicPlace.getVersion());
     }
 
     @Ignore
@@ -326,8 +335,9 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
         TopographicPlace tiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
         assertThat(tiamatMunicipality).isNotNull();
-        assertThat(tiamatMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
-        assertThat(tiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
+        assertThat(tiamatMunicipality.getParentTopographicPlace())
+                .describedAs("The municipality should have a parent topographic place").isNotNull();
+        assertThat(tiamatMunicipality.getParentTopographicPlace().getNetexId()).isEqualTo(county.getId());
     }
 
 }

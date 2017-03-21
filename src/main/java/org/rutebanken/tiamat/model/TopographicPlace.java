@@ -8,8 +8,7 @@ import javax.persistence.*;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table
-public class TopographicPlace
-        extends Place {
+public class TopographicPlace extends Place {
 
     protected String isoCode;
 
@@ -63,7 +62,6 @@ public class TopographicPlace
     public TopographicPlaceRefStructure getParentTopographicPlaceRef() {
         return parentTopographicPlaceRef;
     }
-
 
     public void setParentTopographicPlaceRef(TopographicPlaceRefStructure value) {
         this.parentTopographicPlaceRef = value;

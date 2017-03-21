@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
@@ -13,18 +15,14 @@ public abstract class Site_VersionStructure
     @Transient
     private final List<Level> levels = new ArrayList<>();
 
-    @AttributeOverrides({
-            @AttributeOverride(name = "ref", column = @Column(name = "topographic_place_ref")),
-            @AttributeOverride(name = "version", column = @Column(name = "topographic_place_version"))
-    })
-    @Embedded
+    @org.hibernate.annotations.Cache(
+            usage = CacheConcurrencyStrategy.READ_WRITE
+    )
+    @OneToOne(fetch = FetchType.LAZY)
+    protected TopographicPlace topographicPlace;
+
+    @Transient
     protected TopographicPlaceRefStructure topographicPlaceRef;
-
-    @Transient
-    protected TopographicPlaceView topographicPlaceView;
-
-    @Transient
-    protected TopographicPlaceRefs_RelStructure additionalTopographicPlaces;
 
     @Transient
     protected SiteTypeEnumeration siteType;
@@ -52,9 +50,6 @@ public abstract class Site_VersionStructure
     protected SiteRefs_RelStructure adjacentSites;
 
     @Transient
-    protected TopographicPlaceRefStructure containedInPlaceRef;
-
-    @Transient
     protected SiteEntrances_RelStructure entrances;
 
     @Transient
@@ -73,28 +68,26 @@ public abstract class Site_VersionStructure
     public Site_VersionStructure() {
     }
 
+    public TopographicPlace getTopographicPlace() {
+        return topographicPlace;
+    }
+
+    public void setTopographicPlace(TopographicPlace topographicPlace) {
+        this.topographicPlace = topographicPlace;
+    }
+
+    /**
+     * Should be removed.
+     */
     public TopographicPlaceRefStructure getTopographicPlaceRef() {
         return topographicPlaceRef;
     }
 
+    /**
+     * NOT for persistance. Should be removed. See TopographicPlace instead.
+     */
     public void setTopographicPlaceRef(TopographicPlaceRefStructure value) {
         this.topographicPlaceRef = value;
-    }
-
-    public TopographicPlaceView getTopographicPlaceView() {
-        return topographicPlaceView;
-    }
-
-    public void setTopographicPlaceView(TopographicPlaceView value) {
-        this.topographicPlaceView = value;
-    }
-
-    public TopographicPlaceRefs_RelStructure getAdditionalTopographicPlaces() {
-        return additionalTopographicPlaces;
-    }
-
-    public void setAdditionalTopographicPlaces(TopographicPlaceRefs_RelStructure value) {
-        this.additionalTopographicPlaces = value;
     }
 
     public SiteTypeEnumeration getSiteType() {
@@ -153,16 +146,7 @@ public abstract class Site_VersionStructure
         this.adjacentSites = value;
     }
 
-    public TopographicPlaceRefStructure getContainedInPlaceRef() {
-        return containedInPlaceRef;
-    }
-
-    public void setContainedInPlaceRef(TopographicPlaceRefStructure value) {
-        this.containedInPlaceRef = value;
-    }
-
-
-    public SiteEntrances_RelStructure getEntrances() {
+     public SiteEntrances_RelStructure getEntrances() {
         return entrances;
     }
 
