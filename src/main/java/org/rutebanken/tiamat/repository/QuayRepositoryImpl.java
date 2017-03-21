@@ -55,8 +55,11 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 				"FROM quay_key_values qkv " +
 					"INNER JOIN value_items v " +
 						"ON qkv.key_values_id = v.value_id " +
-				"WHERE  qkv.key_values_key = :key " +
-					"AND v.items IN ( :values ) ");
+					"INNER JOIN quay q " +
+						"ON quay_id = quay_id " +
+				"WHERE qkv.key_values_key = :key " +
+					"AND v.items IN ( :values ) " +
+					"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE q.netex_id = qv.netex_id)");
 
 		query.setParameter("key", key);
 		query.setParameter("values", values);
