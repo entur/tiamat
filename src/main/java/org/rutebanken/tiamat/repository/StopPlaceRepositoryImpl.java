@@ -51,7 +51,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString = "SELECT s FROM StopPlace s " +
                 "WHERE within(s.centroid, :filter) = true " +
-                    "AND s.version = (SELECT max(sv.version) FROM StopPlace sv) " +
+                    "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
                     "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId)";
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
@@ -71,8 +71,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         TypedQuery<String> query = entityManager
                 .createQuery("SELECT s.netexId FROM StopPlace s " +
                              "WHERE within(s.centroid, :filter) = true " +
-                            "AND s.name.value = :name " +
-                            "AND s.stopPlaceType = :stopPlaceType", String.class);
+                                "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
+                                "AND s.name.value = :name " +
+                                "AND s.stopPlaceType = :stopPlaceType", String.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration);
         query.setParameter("name", name);
@@ -91,7 +92,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         TypedQuery<String> query = entityManager
                 .createQuery("SELECT s.netexId FROM StopPlace s " +
                         "WHERE within(s.centroid, :filter) = true " +
-                        "AND s.stopPlaceType = :stopPlaceType", String.class);
+                            "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
+                            "AND s.stopPlaceType = :stopPlaceType", String.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration);
         try {
@@ -118,7 +120,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                                             "INNER JOIN value_items v " +
                                                                 "ON spkv.key_values_id = v.value_id " +
                                                         "WHERE spkv.key_values_key = :key " +
-                                                            "AND v.items IN ( :values ) ");
+                                                            "AND v.items IN ( :values ) " +
+                                                            "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)");
 
         query.setParameter("key", key);
         query.setParameter("values", values);
@@ -145,7 +148,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                                           "INNER JOIN stop_place s " +
                                                             "ON spkv.stop_place_id = s.id " +
                                                         "WHERE  spkv.key_values_key = :key "+
-                                                        "AND v.items LIKE ( :value ) ");
+                                                        "AND v.items LIKE ( :value ) " +
+                                                        "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)");
 
         query.setParameter("key", key);
         query.setParameter("value", "%"+value+"%");
@@ -166,7 +170,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     // Does not belong here. Move it to QuayRepository.
     @Override
     public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.netexId, q.version " +
+        String sql = "SELECT vi.items, q.netex_id, q.version " +
                             "FROM quay_key_values qkv " +
                             "INNER JOIN stop_place_quays spq " +
                                 "ON spq.quays_id = qkv.quay_id " +
@@ -191,7 +195,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT v.items, s.netexId, s.version " +
+        String sql = "SELECT v.items, s.netex_id, s.version " +
                         "FROM stop_place_key_values spkv " +
                         "INNER JOIN value_items v " +
                             "ON spkv.key_values_id = v.value_id " +
@@ -296,7 +300,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
         operators.add("and");
-        wheres.add("version = (select max(sv.version) from stopPlace sv)");
+        wheres.add("version = (select max(sv.version) from stopPlace sv where sv.netexId = stopPlace.netexId)");
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
