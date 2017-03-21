@@ -69,9 +69,11 @@ public class InitialImportResource {
         Lock lock = hazelcastInstance.getLock(KEY_INITIAL_IMPORT_LOCK);
 
         if (lock.tryLock()) {
-            UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
+            int threads = Runtime.getRuntime().availableProcessors();
+            ExecutorService executorService = Executors.newFixedThreadPool(threads, new ThreadFactoryBuilder().setNameFormat("importer-%d").build());
 
             try {
+                UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
                 AtomicInteger topographicPlacesCounter = new AtomicInteger();
                 org.rutebanken.tiamat.model.SiteFrame siteFrame = unmarshalResult.getPublicationDeliveryStructure().getDataObjects().getCompositeFrameOrCommonFrame()
                         .stream()
@@ -86,21 +88,20 @@ public class InitialImportResource {
 
 
                 logger.info("Importing stops");
-                int threads = Runtime.getRuntime().availableProcessors();
 
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
-                ExecutorService executorService = Executors.newFixedThreadPool(threads, new ThreadFactoryBuilder().setNameFormat("importer-%d").build());
-                AtomicBoolean stop = new AtomicBoolean(false);
+
+                AtomicBoolean stopExecution = new AtomicBoolean(false);
 
                 for(int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
-                            while (!Thread.currentThread().isInterrupted() && !stop.get()) {
+                            while (!Thread.currentThread().isInterrupted() && !stopExecution.get()) {
                                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
 
                                 if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                                     logger.info("Finished importing stops");
-                                    stop.set(true);
+                                    stopExecution.set(true);
                                     break;
                                 }
 
@@ -109,16 +110,16 @@ public class InitialImportResource {
                             }
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-                            stop.set(true);
+                            stopExecution.set(true);
                             return;
                         } catch (ExecutionException e) {
                             logger.warn("Execution exception", e);
-                            stop.set(true);
+                            stopExecution.set(true);
                         }
                     });
                 }
 
-                logger.info("Waiting for all inmport tasks to finish");
+                logger.info("Waiting for all import tasks to finish");
 
                 executorService.shutdown();
                 executorService.awaitTermination(150, TimeUnit.MINUTES);
@@ -126,7 +127,8 @@ public class InitialImportResource {
                 return Response.ok("Imported " + stopPlacesImported.get() + " stop places.").build();
 
             } catch (Exception e) {
-                logger.error("Caught exception while importing publication delivery: " + unmarshalResult.getPublicationDeliveryStructure(), e);
+                logger.error("Caught exception while importing publication delivery initially", e);
+                executorService.shutdownNow();
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
             } finally {
                 lock.unlock();
