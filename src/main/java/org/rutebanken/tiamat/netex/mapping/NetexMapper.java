@@ -56,6 +56,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
+                .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .byDefault()
                 .register();
 
@@ -70,7 +71,6 @@ public class NetexMapper {
         mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
                 .byDefault()
                 .register();
-
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
