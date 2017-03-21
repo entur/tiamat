@@ -633,6 +633,30 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
         Assertions.assertThat(result).isNotEmpty();
     }
 
+    @Test
+    public void findOnlyMaxVersion() {
+        StopPlace versionOne = new StopPlace();
+        versionOne.setVersion(1L);
+        versionOne.setNetexId("NSR:StopPlace:999");
+        StopPlace versionTwo = new StopPlace();
+        versionTwo.setVersion(2L);
+        versionTwo.setNetexId(versionOne.getNetexId());
+
+        versionOne = stopPlaceRepository.save(versionOne);
+        versionTwo = stopPlaceRepository.save(versionTwo);
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+                .setNetexIdList(Arrays.asList(versionOne.getNetexId()))
+                .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+
+        assertThat(result)
+                .describedAs("Expecting only one stop place in return. Because only the highest version should be returned.")
+                .hasSize(1);
+
+    }
+
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
