@@ -22,10 +22,13 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
         Query query = entityManager.createNativeQuery("SELECT path_link_id " +
                 "FROM path_link_key_values plkv " +
-                "INNER JOIN value_items v " +
-                "ON plkv.key_values_id = v.value_id " +
-                "WHERE  plkv.key_values_key = :key " +
-                "AND v.items IN ( :values ) ");
+                    "INNER JOIN value_items v " +
+                        "ON plkv.key_values_id = v.value_id " +
+                    "INNER JOIN path_link pl " +
+                        "ON path_link_id = pl.id" +
+                "WHERE plkv.key_values_key = :key " +
+                    "AND v.items IN ( :values ) " +
+                    "AND pl.version = (SELECT MAX(plv.version) FROM path_link plv WHERE plv.netex_id = pl.netex_id)");
 
         query.setParameter("key", key);
         query.setParameter("values", values);
