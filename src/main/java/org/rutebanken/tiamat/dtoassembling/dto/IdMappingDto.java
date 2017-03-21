@@ -7,15 +7,16 @@ import java.math.BigInteger;
 public class IdMappingDto {
     public String originalId;
     public String netexId;
+    public String version;
 
 
-    public IdMappingDto(String originalId, String netexId) {
+    public IdMappingDto(String originalId, String netexId, String version) {
         this.originalId = originalId;
         this.netexId = netexId;
     }
 
     public String toCsvString() {
-        return originalId + "," + netexId;
+        return originalId + "," + netexId + "," + version;
     }
 
 }

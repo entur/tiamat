@@ -34,9 +34,9 @@ public class DtoQuayResourceTest {
         int size = 1;
 
         when(stopPlaceRepository.findKeyValueMappingsForQuay(anyInt(), anyInt()))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString())))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString())))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString(), "1")))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString(), "2")))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString(), "3")))
                 .thenReturn(new ArrayList<>());
 
         Response response = dtoQuayResource.getIdMapping(size);

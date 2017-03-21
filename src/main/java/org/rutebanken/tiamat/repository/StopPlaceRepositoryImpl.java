@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
 
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Longs;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -23,9 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -162,9 +162,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
+    // Does not belong here. Move it to QuayRepository.
     @Override
     public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.netexId " +
+        String sql = "SELECT vi.items, q.netexId, q.version " +
                             "FROM quay_key_values qkv " +
                             "INNER JOIN stop_place_quays spq " +
                                 "ON spq.quays_id = qkv.quay_id " +
@@ -180,7 +181,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto((String)row[0], (String)row[1]));
+            mappingResult.add(new IdMappingDto((String) row[0], (String) row[1], (String) row[2]));
         }
 
         return mappingResult;
@@ -189,7 +190,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT v.items, s.netexId " +
+        String sql = "SELECT v.items, s.netexId, s.version " +
                         "FROM stop_place_key_values spkv " +
                         "INNER JOIN value_items v " +
                             "ON spkv.key_values_id = v.value_id " +
@@ -201,7 +202,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto((String)row[0], (String)row[1]));
+            mappingResult.add(new IdMappingDto((String) row[0], (String) row[1], (String) row[2]));
         }
 
         return mappingResult;
