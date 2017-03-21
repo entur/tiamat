@@ -25,7 +25,7 @@ public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private QuayMerger quayMerger = new QuayMerger(new VersionIncrementor());
+    private QuayMerger quayMerger = new QuayMerger();
 
 
     @Test
@@ -51,28 +51,6 @@ public class QuayMergerTest {
 
         Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
         assertThat(result).hasSize(1);
-
-        Quay quay = result.iterator().next();
-        assertThat(quay.getVersion()).isNotZero();
-    }
-
-    @Test
-    public void versionMustBeSet() {
-
-        Set<Quay> existingQuays = new HashSet<>();
-        Set<Quay> incomingQuays = new HashSet<>();
-
-        Quay quay1 = new Quay();
-        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(80, 20)));
-        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("XYZ:StopArea:987654");
-
-        incomingQuays.add(quay1);
-
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
-        assertThat(result).hasSize(1);
-
-        Quay quay = result.iterator().next();
-        assertThat(quay.getVersion()).isNotZero();
     }
 
     @Test

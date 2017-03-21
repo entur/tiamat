@@ -93,4 +93,14 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
+    public StopPlace createNewVersionFrom(StopPlace stopPlace) {
+
+        StopPlace newVersion = createNewVersionFrom(stopPlace, StopPlace.class);
+        if(newVersion.getQuays() != null) {
+            newVersion.getQuays().forEach(quay -> versionIncrementor.incrementVersion(quay));
+        }
+
+        return newVersion;
+    }
+
 }

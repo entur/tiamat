@@ -86,6 +86,22 @@ public class VersionCreatorTest extends CommonSpringBootTest {
     }
 
     @Test
+    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.setVersion(1L);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlace = stopPlaceRepository.save(stopPlace);
+        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace);
+        assertThat(newVersion.getQuays()).isNotEmpty();
+        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
+    }
+
+    @Test
     public void createNewVersionOfStopWithTopographicPlace() {
 
         TopographicPlace topographicPlace = new TopographicPlace();

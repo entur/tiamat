@@ -171,11 +171,14 @@ public class MergingStopPlaceImporter {
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
             // The stop place has changed. Create a new version for it.
-            foundStopPlace = versionCreator.createNewVersionFrom(foundStopPlace, StopPlace.class);
+            foundStopPlace = versionCreator.createNewVersionFrom(foundStopPlace);
+            logger.info("Updated existing stop place {}. ", foundStopPlace);
+            return saveAndUpdateCache(foundStopPlace);
         }
-        logger.info("Updated existing stop place {}. ", foundStopPlace);
 
-        return saveAndUpdateCache(foundStopPlace);
+        logger.debug("No changes. Returning existing stop {}", foundStopPlace);
+        return foundStopPlace;
+
     }
 
     private StopPlace saveAndUpdateCache(StopPlace stopPlace) {

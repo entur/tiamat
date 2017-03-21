@@ -32,13 +32,6 @@ public class QuayMerger {
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
 
-    private final VersionIncrementor versionIncrementor;
-
-    @Autowired
-    public QuayMerger(VersionIncrementor versionIncrementor) {
-        this.versionIncrementor = versionIncrementor;
-    }
-
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
@@ -82,7 +75,6 @@ public class QuayMerger {
                 result.add(incomingQuay);
                 incomingQuay.setCreated(ZonedDateTime.now());
                 incomingQuay.setChanged(ZonedDateTime.now());
-                versionIncrementor.incrementVersion(incomingQuay);
                 addedQuaysCounter.incrementAndGet();
             }
         }
@@ -116,7 +108,6 @@ public class QuayMerger {
         if(idUpdated || changedByMerge) {
             alreadyAdded.setChanged(ZonedDateTime.now());
             updatedQuaysCounter.incrementAndGet();
-            versionIncrementor.incrementVersion(alreadyAdded);
         }
     }
 

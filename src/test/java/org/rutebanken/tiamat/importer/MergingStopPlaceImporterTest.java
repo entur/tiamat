@@ -60,7 +60,7 @@ public class MergingStopPlaceImporterTest {
 
     private VersionCreator versionCreator = new VersionCreator(versionIncrementor);
 
-    private QuayMerger quayMerger = new QuayMerger(versionIncrementor);
+    private QuayMerger quayMerger = new QuayMerger();
 
     private NetexMapper netexMapper = new NetexMapper();
 
