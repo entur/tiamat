@@ -51,7 +51,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString = "SELECT s FROM StopPlace s " +
                 "WHERE within(s.centroid, :filter) = true " +
-                "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId)";
+                    "AND s.version = (SELECT max(sv.version) FROM StopPlace sv) " +
+                    "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId)";
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);

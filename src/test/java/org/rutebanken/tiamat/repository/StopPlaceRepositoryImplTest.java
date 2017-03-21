@@ -176,6 +176,32 @@ public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
     }
 
     @Test
+    public void findStopPlacesWithinMaxVersion() throws Exception {
+
+        double southEastLatitude = 59.875649;
+        double southEastLongitude = 10.500340;
+
+        double northWestLatitude = 59.875924;
+        double northWestLongitude = 10.500699;
+
+        StopPlace version1 = createStopPlace(59.875679, 10.500430);
+        version1.setVersion(1L);
+        version1.setNetexId("NSR:StopPlace:977777");
+        StopPlace version2 = createStopPlace(59.875679, 10.500430);
+        version2.setVersion(2L);
+        version2.setNetexId(version1.getNetexId());
+        stopPlaceRepository.save(version1);
+        stopPlaceRepository.save(version2);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
+        assertThat(result).hasSize(1);
+        assertThat(result.getContent().get(0).getVersion()).isEqualTo(version2.getVersion());
+
+    }
+
+    @Test
     public void findStopPlaceWithinNoStopsInBoundingBox() throws Exception {
         double southEastLatitude = 59.875649;
         double southEastLongitude = 10.500340;
