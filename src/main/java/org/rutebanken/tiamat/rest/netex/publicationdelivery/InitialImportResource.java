@@ -97,7 +97,11 @@ public class InitialImportResource {
                     executorService.submit(() -> {
                         try {
                             while (!Thread.currentThread().isInterrupted() && !stopExecution.get()) {
-                                StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
+                                StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().poll(1, TimeUnit.SECONDS);
+
+                                if(stopPlace == null) {
+                                    continue;
+                                }
 
                                 if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                                     logger.info("Finished importing stops");
