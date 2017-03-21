@@ -25,7 +25,7 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
                     "INNER JOIN value_items v " +
                         "ON plkv.key_values_id = v.value_id " +
                     "INNER JOIN path_link pl " +
-                        "ON path_link_id = pl.id" +
+                        "ON path_link_id = pl.id " +
                 "WHERE plkv.key_values_key = :key " +
                     "AND v.items IN ( :values ) " +
                     "AND pl.version = (SELECT MAX(plv.version) FROM path_link plv WHERE plv.netex_id = pl.netex_id)");
