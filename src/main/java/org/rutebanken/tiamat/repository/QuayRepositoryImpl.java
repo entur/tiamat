@@ -36,7 +36,10 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
 		TypedQuery<Quay> query = entityManager.createQuery(
-				"SELECT s FROM Quay s LEFT OUTER JOIN s.centroid sp WHERE within(sp.location, :filter) = true",
+				"SELECT s FROM Quay s " +
+					"LEFT OUTER JOIN s.centroid sp " +
+					"WHERE within(sp.location, :filter) = true" +
+						" AND s.version = (SELECT MAX(sv.version) FROM Quay sv WHERE sv.netexId = s.netexId)",
 				Quay.class);
 		query.setParameter("filter", geometryFilter);
 
