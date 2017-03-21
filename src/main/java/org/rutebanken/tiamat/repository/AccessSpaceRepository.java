@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccessSpaceRepository extends JpaRepository<AccessSpace, Long>, IdentifiedEntityRepository<AccessSpace> {
 
-    AccessSpace findFirstByNetexIdOrderByVersionDesc(String netexId);
 }
