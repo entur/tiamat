@@ -39,15 +39,18 @@ public class TopographicPlaceMapper extends CustomMapper<TopographicPlace, org.r
         }
 
         if (tiamatTopographicPlace.getParentTopographicPlace() != null) {
-            TopographicPlaceRefStructure parentTopographicPlaceRef =  new TopographicPlaceRefStructure();
-            parentTopographicPlaceRef.withRef(
-                    tiamatTopographicPlace.getParentTopographicPlace().getNetexId());
+            TopographicPlaceRefStructure parentTopographicPlaceRef =  new TopographicPlaceRefStructure()
+                .withRef(tiamatTopographicPlace.getParentTopographicPlace().getNetexId())
+                    .withVersion(stringVersion(tiamatTopographicPlace.getParentTopographicPlace().getVersion()));
 
             netexTopographicPlace.withParentTopographicPlaceRef(parentTopographicPlaceRef);
         }
 
-        // TODO: versioning
-        netexTopographicPlace.setVersion("any");
+        netexTopographicPlace.setVersion(stringVersion(tiamatTopographicPlace.getVersion()));
 
+    }
+
+    public String stringVersion(Long version) {
+        return String.valueOf(version);
     }
 }
