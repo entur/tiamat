@@ -109,6 +109,10 @@ public class NetexMapper {
         return converters;
     }
 
+    public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace) {
+        return facade.map(topographicPlace, TopographicPlace.class);
+    }
+
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
         SiteFrame siteFrame = facade.map(tiamatSiteFrame, SiteFrame.class);
         return siteFrame;
