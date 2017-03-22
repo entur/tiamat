@@ -81,20 +81,31 @@ public class PublicationDeliveryImporter {
 
             responseSiteframe.withId(requestId+"-response").withVersion("1");
 
-            List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = tiamatStops.stream().map(stopPlace -> stopPlace.getTopographicPlace()).distinct().collect(Collectors.toList());
-            List<org.rutebanken.tiamat.model.TopographicPlace> parentTopographicPlaces = topographicPlaces.stream().map(topographicPlace -> topographicPlace.getParentTopographicPlace()).distinct().collect(Collectors.toList());
+            List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = tiamatStops
+                    .stream()
+                    .filter(stopPlace -> stopPlace.getTopographicPlace() != null)
+                    .map(org.rutebanken.tiamat.model.StopPlace::getTopographicPlace)
+                    .distinct()
+                    .collect(Collectors.toList());
+            List<org.rutebanken.tiamat.model.TopographicPlace> parentTopographicPlaces = topographicPlaces
+                    .stream()
+                    .filter(topographicPlace -> topographicPlace.getParentTopographicPlace() != null)
+                    .map(org.rutebanken.tiamat.model.TopographicPlace::getParentTopographicPlace)
+                    .distinct()
+                    .collect(Collectors.toList());
 
-            responseSiteframe.withTopographicPlaces(
-                    new TopographicPlacesInFrame_RelStructure()
-                        .withTopographicPlace(
-                                Stream.of(topographicPlaces, parentTopographicPlaces)
-                                        .flatMap(Collection::stream)
+            if(!topographicPlaces.isEmpty() || !parentTopographicPlaces.isEmpty()) {
+                responseSiteframe.withTopographicPlaces(
+                        new TopographicPlacesInFrame_RelStructure()
+                                .withTopographicPlace(
+                                        Stream.of(topographicPlaces, parentTopographicPlaces)
+                                                .flatMap(Collection::stream)
                                         /*
                                             Mappping outside transaction. Should be ok for topographic place as it does not have lazy collections.
                                         */
-                                        .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
-                                .collect(Collectors.toSet())));
-
+                                                .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
+                                                .collect(Collectors.toSet())));
+            }
 
             responseSiteframe.withStopPlaces(
                     new StopPlacesInFrame_RelStructure()
