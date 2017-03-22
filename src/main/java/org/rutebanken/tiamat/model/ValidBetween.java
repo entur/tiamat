@@ -13,6 +13,17 @@ public abstract class ValidBetween extends ValidityCondition {
 
     private ZonedDateTime toDate;
 
+    public ValidBetween(ZonedDateTime fromDate, ZonedDateTime toDate) {
+        this.fromDate = fromDate;
+        this.toDate = toDate;
+    }
+
+    public ValidBetween(ZonedDateTime fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public ValidBetween() {
+    }
 
     public ZonedDateTime getFromDate() {
         return fromDate;

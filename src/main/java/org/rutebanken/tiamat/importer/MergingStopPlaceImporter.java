@@ -12,7 +12,6 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.CentroidComputer;
 import org.rutebanken.tiamat.versioning.VersionCreator;
-import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +146,8 @@ public class MergingStopPlaceImporter {
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
-        newStopPlace.setVersion(1);
+        versionCreator.createFirstVersionWithAvailabilityCondition(newStopPlace);
+
         newStopPlace.setCreated(ZonedDateTime.now());
         newStopPlace.setChanged(ZonedDateTime.now());
         return saveAndUpdateCache(newStopPlace);
@@ -171,9 +171,10 @@ public class MergingStopPlaceImporter {
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
             // The stop place has changed. Create a new version for it.
-            foundStopPlace = versionCreator.createNewVersionFrom(foundStopPlace);
-            logger.info("Updated existing stop place {}. ", foundStopPlace);
-            return saveAndUpdateCache(foundStopPlace);
+            StopPlace newVersion = versionCreator.createNewVersion(foundStopPlace);
+            logger.info("Updated existing stop place {}. ", newVersion);
+            stopPlaceRepository.save(foundStopPlace);
+            return saveAndUpdateCache(newVersion);
         }
 
         logger.debug("No changes. Returning existing stop {}", foundStopPlace);

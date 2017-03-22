@@ -97,7 +97,7 @@ public class NetexMapper {
         converters.add(new QuayListConverter());
         converters.add(new AlternativeNamesConverter());
         converters.add(new EquipmentPlacesConverter());
-        converters.add(new ValidityConditionsConverter());
+        converters.add(new AvailabilityConditionsConverter());
         converters.add(new BoardingPositionsConverter());
         converters.add(new CheckConstraintsConverter());
         converters.add(new DestinationDisplayViewsConverter());

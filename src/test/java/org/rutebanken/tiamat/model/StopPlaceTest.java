@@ -186,15 +186,15 @@ public class StopPlaceTest extends CommonSpringBootTest {
         availabilityCondition.setFromDate(ZonedDateTime.now());
         availabilityCondition.setToDate(ZonedDateTime.now().plusWeeks(10));
         
-        stopPlace.getAvailabilityConditions().add(availabilityCondition);
+        stopPlace.getValidityConditions().add(availabilityCondition);
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getAvailabilityConditions()).isNotEmpty();
+        assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
 
-        ValidBetween actualValidBetween = actualStopPlace.getAvailabilityConditions().get(0);
+        ValidBetween actualValidBetween = actualStopPlace.getValidityConditions().get(0);
         assertThat(actualValidBetween.getFromDate()).isEqualTo(availabilityCondition.getFromDate());
         assertThat(actualValidBetween.getToDate()).isEqualTo(availabilityCondition.getToDate());
     }

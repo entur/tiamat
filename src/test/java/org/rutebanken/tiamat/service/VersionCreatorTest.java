@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
@@ -51,7 +50,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
 
         stopPlaceRepository.save(newVersion);
@@ -71,7 +70,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.0, 11.1)));
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getCentroid()).isNotNull();
     }
 
@@ -81,7 +80,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(ZonedDateTime.now());
         stopPlace = stopPlaceRepository.save(stopPlace);
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getChanged()).isNotNull();
     }
 
@@ -96,7 +95,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.getQuays().add(quay);
 
         stopPlace = stopPlaceRepository.save(stopPlace);
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace);
+        StopPlace newVersion = versionCreator.createNewVersion(stopPlace);
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
@@ -114,7 +113,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersionFrom(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
 
         // Save it. Reference to topographic place should be kept.
         newVersion = stopPlaceRepository.save(newVersion);
@@ -138,7 +137,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         pathLink = pathLinkRepository.save(pathLink);
 
-        PathLink newVersion = versionCreator.createNewVersionFrom(pathLink, PathLink.class);
+        PathLink newVersion = versionCreator.createNewVersion(pathLink, PathLink.class);
 
         assertThat(newVersion.getVersion())
                 .describedAs("The version of path link should have been incremented")
@@ -154,6 +153,41 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         PathLink actualOldVersionPathLink = pathLinkRepository.findFirstByNetexIdAndVersion(newVersion.getNetexId(), 1L);
         assertThat(actualOldVersionPathLink).isNotNull();
+    }
+
+    @Test
+    public void newVersionShouldHaveValidityCondition() {
+        StopPlace oldVersion = new StopPlace();
+        oldVersion.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.setVersion(1L);
+
+        oldVersion.getQuays().add(quay);
+
+        oldVersion.getValidityConditions().add(new AvailabilityCondition(ZonedDateTime.now().minusDays(2)));
+
+        oldVersion = stopPlaceRepository.save(oldVersion);
+
+        ZonedDateTime beforeCreated = ZonedDateTime.now();
+        System.out.println(beforeCreated);
+
+        StopPlace newVersion = versionCreator.createNewVersion(oldVersion);
+
+
+        assertThat(newVersion.getValidityConditions())
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        System.out.println(oldVersion.getValidityConditions().get(0).getToDate());
+        assertThat(oldVersion.getValidityConditions().get(0).getToDate()).isAfterOrEqualTo(beforeCreated);
+
+
+        AvailabilityCondition availabilityCondition = newVersion.getValidityConditions().get(0);
+        assertThat(availabilityCondition.getFromDate()).isAfterOrEqualTo(beforeCreated);
+        assertThat(availabilityCondition.getToDate()).isNull();
+
     }
 
 }
