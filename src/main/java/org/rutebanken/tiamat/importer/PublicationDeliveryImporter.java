@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBElement;
@@ -19,7 +21,6 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class PublicationDeliveryImporter {
@@ -34,16 +35,18 @@ public class PublicationDeliveryImporter {
     private final NetexMapper netexMapper;
     private final StopPlacePreSteps stopPlacePreSteps;
     private final PathLinksImporter pathLinksImporter;
+    private final TopographicPlacesExporter topographicPlacesExporter;
 
 
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
-                                       TransactionalStopPlacesImporter transactionalStopPlacesImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter) {
+                                       TransactionalStopPlacesImporter transactionalStopPlacesImporter, PublicationDeliveryExporter publicationDeliveryExporter, StopPlacePreSteps stopPlacePreSteps, PathLinksImporter pathLinksImporter, TopographicPlacesExporter topographicPlacesExporter) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
         this.pathLinksImporter = pathLinksImporter;
+        this.topographicPlacesExporter = topographicPlacesExporter;
     }
 
 
@@ -81,30 +84,21 @@ public class PublicationDeliveryImporter {
 
             responseSiteframe.withId(requestId+"-response").withVersion("1");
 
-            List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = tiamatStops
+            List<Pair<String,Long>> topographicPlaceRefs = tiamatStops
                     .stream()
                     .filter(stopPlace -> stopPlace.getTopographicPlace() != null)
                     .map(org.rutebanken.tiamat.model.StopPlace::getTopographicPlace)
-                    .distinct()
-                    .collect(Collectors.toList());
-            List<org.rutebanken.tiamat.model.TopographicPlace> parentTopographicPlaces = topographicPlaces
-                    .stream()
-                    .filter(topographicPlace -> topographicPlace.getParentTopographicPlace() != null)
-                    .map(org.rutebanken.tiamat.model.TopographicPlace::getParentTopographicPlace)
+                    .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getVersion()))
                     .distinct()
                     .collect(Collectors.toList());
 
-            if(!topographicPlaces.isEmpty() || !parentTopographicPlaces.isEmpty()) {
+            List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(topographicPlaceRefs);
+
+
+            if (!netexTopographicPlaces.isEmpty()) {
                 responseSiteframe.withTopographicPlaces(
                         new TopographicPlacesInFrame_RelStructure()
-                                .withTopographicPlace(
-                                        Stream.of(topographicPlaces, parentTopographicPlaces)
-                                                .flatMap(Collection::stream)
-                                        /*
-                                            Mappping outside transaction. Should be ok for topographic place as it does not have lazy collections.
-                                        */
-                                                .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
-                                                .collect(Collectors.toSet())));
+                                .withTopographicPlace(netexTopographicPlaces));
             }
 
             responseSiteframe.withStopPlaces(
