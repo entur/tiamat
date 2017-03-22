@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class VersionIncrementor {
 
-    public static final long INITIAL_VERSION = -1;
+    public static final long INITIAL_VERSION = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(VersionIncrementor.class);
 
     public void incrementVersion(EntityInVersionStructure entity) {
         Long version = entity.getVersion();
 
-        if (version == -1L) {
-            version = 1L;
+        if (version == 0 || version == null) {
+            version = INITIAL_VERSION;
         } else {
             version++;
         }

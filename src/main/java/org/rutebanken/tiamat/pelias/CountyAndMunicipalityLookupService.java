@@ -32,6 +32,9 @@ public class CountyAndMunicipalityLookupService {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
+    @Autowired
+    private VersionIncrementor versionIncrementor;
+
     private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
 
 
@@ -127,7 +130,8 @@ public class CountyAndMunicipalityLookupService {
             municipality = new TopographicPlace();
             municipality.setName(new EmbeddableMultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
-            municipality.setVersion(VersionIncrementor.INITIAL_VERSION);
+            versionIncrementor.incrementVersion(municipality);
+
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);
             municipality.setCountryRef(countryRef);
@@ -157,7 +161,7 @@ public class CountyAndMunicipalityLookupService {
             county = new TopographicPlace();
             county.setName(new EmbeddableMultilingualString(peliasCounty, "no"));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
-            county.setVersion(VersionIncrementor.INITIAL_VERSION);
+            versionIncrementor.incrementVersion(county);
 
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);
