@@ -76,7 +76,7 @@ public class PublicationDeliveryExporter {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
         siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdMapper.generateNetexId(siteFrame));
+        siteFrame.setNetexId(NetexIdMapper.generateRandomizedNetexId(siteFrame));
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
