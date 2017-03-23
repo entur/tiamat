@@ -113,6 +113,7 @@ public class NetexIdMapper {
 
         if(StringUtils.countMatches(netexId, ":") != 2) {
             logger.warn("Expected number of colons is two. {}", netexId);
+            return false;
         }
 
         return true;
