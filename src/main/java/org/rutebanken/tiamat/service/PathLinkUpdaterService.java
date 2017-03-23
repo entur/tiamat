@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.service;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,10 @@ public class PathLinkUpdaterService {
     private static final Logger logger = LoggerFactory.getLogger(PathLinkUpdaterService.class);
 
     @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
     private PathLinkRepository pathLinkRepository;
+
+    @Autowired
+    private ReferenceResolver referenceResolver;
 
 
     public PathLink createOrUpdatePathLink(PathLink incomingPathLink) {
@@ -99,12 +97,10 @@ public class PathLinkUpdaterService {
 
 
         if(incomingPathLink.getFrom() != null) {
-            PathLinkEnd from = loadPathLinkEndReference(incomingPathLink.getFrom());
-            resultPathLink.setFrom(from);
+            verifyPathLinkReferences(incomingPathLink.getFrom());
         }
         if(incomingPathLink.getTo() != null) {
-            PathLinkEnd to = loadPathLinkEndReference(incomingPathLink.getTo());
-            resultPathLink.setTo(to);
+            verifyPathLinkReferences(incomingPathLink.getTo());
         }
 
         pathLinkRepository.save(resultPathLink);
@@ -115,33 +111,16 @@ public class PathLinkUpdaterService {
 
     }
 
-    private PathLinkEnd loadPathLinkEndReference(PathLinkEnd pathLinkEnd) {
+    private void verifyPathLinkReferences(PathLinkEnd pathLinkEnd) {
 
-        if(pathLinkEnd.getQuay() != null) {
-            // Quay is only mapped with ID. Need to look it up and replace the reference.
+        if(pathLinkEnd.getPlaceRef() != null) {
+            EntityInVersionStructure entityInVersionStructure = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
 
-            Quay quay = quayRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkEnd.getQuay().getNetexId());
-            if(quay != null) {
-                logger.debug("Found quay {}", quay);
-                pathLinkEnd.setQuay(quay);
-                return pathLinkEnd;
+            if(entityInVersionStructure == null) {
+                throw new NoSuchElementException("Cannot find path link end reference to place " + pathLinkEnd.getPlaceRef());
             }
-            throw new NoSuchElementException("Cannot find path link end reference to quay " + pathLinkEnd.getQuay().getNetexId());
         }
-
-        if(pathLinkEnd.getStopPlace() != null) {
-            StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkEnd.getStopPlace().getNetexId());
-            if(stopPlace != null) {
-                logger.info("Found stop place {}", stopPlace);
-                pathLinkEnd.setStopPlace(stopPlace);
-                return pathLinkEnd;
-            }
-            throw new NoSuchElementException("Cannot find path link end reference to stop place " + pathLinkEnd.getStopPlace().getNetexId());
-        }
-
-        throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end " + pathLinkEnd);
-
-        // TODO entrance/level
+        throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end " + pathLinkEnd.getPlaceRef());
     }
 
 

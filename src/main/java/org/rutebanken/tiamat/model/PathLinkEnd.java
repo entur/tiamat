@@ -1,22 +1,22 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
 
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLinkEnd extends IdentifiedEntity {
 
-    @ManyToOne
-    private StopPlace stopPlace;
-
-    @ManyToOne
-    private Quay quay;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "place_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "place_version"))
+    })
+    private AddressablePlaceRefStructure placeRef;
 
     @Transient
     @OneToOne
@@ -35,16 +35,12 @@ public class PathLinkEnd extends IdentifiedEntity {
     @Transient
     private Level level;
 
-    public PathLinkEnd(Quay quay) {
-        this.quay = quay;
+    public PathLinkEnd() {}
+
+    public PathLinkEnd(AddressablePlaceRefStructure placeRef) {
+        this.placeRef = placeRef;
     }
 
-    public PathLinkEnd() {
-    }
-
-    public PathLinkEnd(StopPlace stopPlace) {
-        this.stopPlace = stopPlace;
-    }
 
     public PathLinkEnd(AccessSpace accessSpace) {
         this.accessSpace = accessSpace;
@@ -60,6 +56,15 @@ public class PathLinkEnd extends IdentifiedEntity {
 
     public PathLinkEnd(Level level) {
         this.level = level;
+    }
+
+
+    public AddressablePlaceRefStructure getPlaceRef() {
+        return placeRef;
+    }
+
+    public void setPlaceRef(AddressablePlaceRefStructure placeRef) {
+        this.placeRef = placeRef;
     }
 
     public SiteEntrance getEntrance() {
@@ -78,21 +83,7 @@ public class PathLinkEnd extends IdentifiedEntity {
         this.level = level;
     }
 
-    public StopPlace getStopPlace() {
-        return stopPlace;
-    }
 
-    public void setStopPlace(StopPlace stopPlace) {
-        this.stopPlace = stopPlace;
-    }
-
-    public Quay getQuay() {
-        return quay;
-    }
-
-    public void setQuay(Quay quay) {
-        this.quay = quay;
-    }
 
     public PathJunction getPathJunction() {
         return pathJunction;
@@ -115,11 +106,11 @@ public class PathLinkEnd extends IdentifiedEntity {
         return MoreObjects.toStringHelper(this)
                 .omitNullValues()
                 .add("id", id)
-                .add("quay", quay)
-                .add("stopPlace", stopPlace)
+                .add("placeRef", placeRef)
                 .add("pathJunction", pathJunction)
                 .add("level", level)
                 .add("entrace", entrance)
                 .toString();
     }
+
 }

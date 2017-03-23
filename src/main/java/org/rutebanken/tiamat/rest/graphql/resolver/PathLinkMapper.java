@@ -1,9 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql.resolver;
 
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.TransferDuration;
+import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component
@@ -88,9 +86,14 @@ public class PathLinkMapper {
         if(input.get("quay") != null) {
             Optional<String> quayNetexId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
             if(quayNetexId.isPresent()) {
-                Quay quay = new Quay();
-                quay.setNetexId(quayNetexId.get());
-                pathLinkEnd.setQuay(quay);
+                QuayReference quayReference = new QuayReference();
+                quayReference.setRef(quayNetexId.get());
+
+                // Should be able to receive version as well?
+                quayReference.setVersion(ANY_VERSION);
+
+                pathLinkEnd.setPlaceRef(quayReference);
+                logger.info("Did set quay reference on PathLinkEnd: {}", quayReference);
             }
         } else {
             logger.warn("Could not resolve Quay. Stop Place is not supported yet. Input was: {}", input);

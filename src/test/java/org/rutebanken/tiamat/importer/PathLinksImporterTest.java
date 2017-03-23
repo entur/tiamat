@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
@@ -25,7 +26,7 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
 
     @Test
     public void importPathLinks() throws Exception {
-        PathLink pathLink = new PathLink(new PathLinkEnd(quayRepository.save(new Quay())), new PathLinkEnd(quayRepository.save(new Quay())));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
         List<org.rutebanken.netex.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
         assertThat(netexPathLinks).isNotEmpty();
         assertThat(netexPathLinks).hasSize(1);

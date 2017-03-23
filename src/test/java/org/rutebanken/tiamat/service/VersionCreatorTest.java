@@ -129,8 +129,8 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         toQuay.setVersion(1L);
         toQuay = quayRepository.save(toQuay);
 
-        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(fromQuay);
-        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(toQuay);
+        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(new AddressablePlaceRefStructure(fromQuay.getNetexId(), String.valueOf(fromQuay.getVersion()), Quay.class.getSimpleName()));
+        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(new AddressablePlaceRefStructure(toQuay.getNetexId(), String.valueOf(toQuay.getVersion()), Quay.class.getSimpleName()));
 
         PathLink pathLink = new PathLink(pathLinkEndFromQuay, pathLinkEndToQuay);
         pathLink.setVersion(1L);
@@ -148,8 +148,8 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         PathLink actualNewVersionPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
 
         assertThat(actualNewVersionPathLink.getVersion()).isEqualTo(2L);
-        assertThat(actualNewVersionPathLink.getFrom().getQuay().getNetexId()).isEqualTo(fromQuay.getNetexId());
-        assertThat(actualNewVersionPathLink.getTo().getQuay().getNetexId()).isEqualTo(toQuay.getNetexId());
+        assertThat(actualNewVersionPathLink.getFrom().getPlaceRef().getRef()).isEqualTo(fromQuay.getNetexId());
+        assertThat(actualNewVersionPathLink.getTo().getPlaceRef().getRef()).isEqualTo(toQuay.getNetexId());
 
         PathLink actualOldVersionPathLink = pathLinkRepository.findFirstByNetexIdAndVersion(newVersion.getNetexId(), 1L);
         assertThat(actualOldVersionPathLink).isNotNull();

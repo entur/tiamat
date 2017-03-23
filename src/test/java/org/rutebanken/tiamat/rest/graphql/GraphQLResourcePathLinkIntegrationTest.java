@@ -30,7 +30,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         secondQuay.setDescription(new EmbeddableMultilingualString("This is the second quay"));
         quayRepository.save(secondQuay);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(firstQuay), new PathLinkEnd(secondQuay));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure((firstQuay))), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
         Coordinate[] coordinates = new Coordinate[2];
         coordinates[0] = new Coordinate(11, 60);
         coordinates[1] = new Coordinate(11.1, 60.1);
@@ -93,7 +93,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         stopPlaceRepository.save(stopPlace);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(firstQuay), new PathLinkEnd(secondQuay));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
         pathLinkRepository.save(pathLink);
 
         String graphQlJsonQuery = "{" +

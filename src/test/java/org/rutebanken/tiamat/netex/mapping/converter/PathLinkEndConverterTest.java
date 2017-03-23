@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Transactional
 public class PathLinkEndConverterTest extends CommonSpringBootTest {
@@ -30,6 +32,9 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
 
     @Autowired
     private QuayRepository quayRepository;
+
+    @Autowired
+    private ReferenceResolver referenceResolver;
 
     @Test
     public void mapPathLinkWithStopsFromNetexToTiamat() {
@@ -107,20 +112,15 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
     @Test
     public void mapPathLinkWithInternalIdsFromNetexToTiamat() {
         StopPlace fromTiamatStop = new StopPlace();
-        String fromStopPlaceId = NetexIdMapper.generateNetexId(fromTiamatStop);
-        fromTiamatStop.setNetexId(fromStopPlaceId);
         stopPlaceRepository.save(fromTiamatStop);
 
         org.rutebanken.netex.model.StopPlace fromStopPlace = new org.rutebanken.netex.model.StopPlace();
-        fromStopPlace.withId(fromStopPlaceId);
+        fromStopPlace.withId(fromTiamatStop.getNetexId());
 
         Quay toTiamatQuay = new Quay();
-        String toId = NetexIdMapper.generateNetexId(toTiamatQuay);
-        toTiamatQuay.setNetexId(toId);
         quayRepository.save(toTiamatQuay);
-        org.rutebanken.netex.model.Quay toQuay = new org.rutebanken.netex.model.Quay();
-
-        toQuay.withId(toId);
+        org.rutebanken.netex.model.Quay toQuay = new org.rutebanken.netex.model.Quay()
+                .withId(toTiamatQuay.getNetexId());
 
         org.rutebanken.netex.model.PathLink netexPathLink = new org.rutebanken.netex.model.PathLink()
                 .withFrom(
@@ -128,12 +128,14 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
                                 .withPlaceRef(
                                         new PlaceRef()
                                                 .withRef(fromStopPlace.getId())
+                                                .withVersion(ANY_VERSION)
                                                 .withNameOfMemberClass(fromStopPlace.getClass().getSimpleName())))
                 .withTo(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRef()
                                                 .withRef(toQuay.getId())
+                                                .withVersion(ANY_VERSION)
                                                 .withNameOfMemberClass(toQuay.getClass().getSimpleName())));
 
         List<PathLink> actual = netexMapper.mapPathLinksToTiamatModel(Arrays.asList(netexPathLink));
@@ -152,7 +154,7 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("netexId for stop place");
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quay)), new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace)));
         pathLink.setNetexId("path link netex id");
 
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
@@ -174,7 +176,7 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         stopPlace.setNetexId("11");
         stopPlace.setVersion(321L);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(quay), new PathLinkEnd(stopPlace));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quay)), new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace)));
         pathLink.setNetexId("123");
 
         org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
@@ -207,13 +209,9 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
         }
     }
 
-    private SiteElement getPlaceFromPathLinkEnd(PathLinkEnd pathLinkEnd) {
-        Optional<SiteElement> found = Arrays.asList(pathLinkEnd.getQuay(), pathLinkEnd.getStopPlace(), pathLinkEnd.getEntrance())
-                .stream()
-                .filter(Objects::nonNull)
-                .findFirst();
-        assertThat(found).describedAs("Expected pathLinkEnd to contain place").isPresent();
-        return found.get();
+    private AddressablePlace getPlaceFromPathLinkEnd(PathLinkEnd pathLinkEnd) {
+        EntityInVersionStructure entityInVersionStructure = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
+        return (AddressablePlace) entityInVersionStructure;
     }
 
     private StopPlace createAndPersistTiamatStopWithOriginalId(String originalId) {

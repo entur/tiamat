@@ -105,7 +105,7 @@ public class NetexMapper {
         converters.add(new OffsetDateTimeZonedDateTimeConverter());
         converters.add(new SimplePointVersionStructureConverter());
         converters.add(new KeyValuesToKeyListConverter());
-        converters.add(new PathLinkEndConverter());
+//        converters.add(new PathLinkEndConverter());
         return converters;
     }
 
