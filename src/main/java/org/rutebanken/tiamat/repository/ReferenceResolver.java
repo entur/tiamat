@@ -3,6 +3,9 @@ package org.rutebanken.tiamat.repository;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +16,16 @@ import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSIO
 @Component
 public class ReferenceResolver {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReferenceResolver.class);
+
     @Autowired
     private EntityInVersionStructureRepository entityInVersionStructureRepository;
 
     public <T extends EntityInVersionStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
-        assertNotNull(versionOfObjectRefStructure, versionOfObjectRefStructure.getRef());
-        assertNotNull(versionOfObjectRefStructure, versionOfObjectRefStructure.getVersion());
+        logger.debug("Received reference: {}", versionOfObjectRefStructure);
+
+        assertNotNull(versionOfObjectRefStructure, "ref", versionOfObjectRefStructure.getRef());
 
         String ref = versionOfObjectRefStructure.getRef();
         String memberClass = ref.substring(ref.indexOf(':') + 1, ref.lastIndexOf(':'));
@@ -29,7 +35,7 @@ public class ReferenceResolver {
             @SuppressWarnings("unchecked")
             Class<T> clazz = (Class<T>) Class.forName(canonicalName);
 
-            if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion())) {
+            if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
                 return entityInVersionStructureRepository.findFirstByNetexIdOrderByVersionDesc(ref, clazz);
             } else {
                 long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
@@ -41,9 +47,9 @@ public class ReferenceResolver {
         }
     }
 
-    private void assertNotNull(VersionOfObjectRefStructure versionOfObjectRefStructure, String field) {
-        if (field == null) {
-            throw new IllegalArgumentException(field + " value cannot be null: " + versionOfObjectRefStructure);
+    private void assertNotNull(VersionOfObjectRefStructure versionOfObjectRefStructure, String name, String fieldValue) {
+        if (fieldValue == null) {
+            throw new IllegalArgumentException(name + " value cannot be null: " + versionOfObjectRefStructure);
         }
     }
 }
