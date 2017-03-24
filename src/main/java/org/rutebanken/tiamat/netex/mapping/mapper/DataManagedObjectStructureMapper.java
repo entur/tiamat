@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+
 @Component
 public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedObjectStructure, org.rutebanken.tiamat.model.DataManagedObjectStructure> {
 
@@ -27,7 +29,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
         netexIdMapper.toTiamatModel(netexEntity, tiamatEntity);
 
         if(netexEntity.getVersion() != null) {
-            if (netexEntity.getVersion().equals("any")) {
+            if (netexEntity.getVersion().equals(ANY_VERSION)) {
                 tiamatEntity.setVersion(-1L); // Need to handle this value in import.
             } else {
                 Long longVersion = Longs.tryParse(netexEntity.getVersion());

@@ -24,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+
 @Component
 @Transactional
 public class PublicationDeliveryExporter {
@@ -56,7 +58,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportSiteFrame(SiteFrame siteFrame) {
         logger.info("Returning publication delivery");
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion("any")
+                .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withParticipantRef(NetexIdMapper.NSR);
 
