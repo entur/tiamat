@@ -11,17 +11,13 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_L
 @Component
 public class PathLinkEndObjectTypeCreator {
 
-    public GraphQLObjectType create(GraphQLObjectType quayObjectType, GraphQLObjectType stopPlaceObjectType, GraphQLFieldDefinition netexIdFieldDefinition) {
+    public GraphQLObjectType create(GraphQLObjectType entityReferenceObjectType, GraphQLFieldDefinition netexIdFieldDefinition) {
         return newObject()
                 .name(OUTPUT_TYPE_PATH_LINK_END)
                 .field(netexIdFieldDefinition)
                 .field(newFieldDefinition()
-                        .name("quay")
-                        .type(quayObjectType))
-                .field(newFieldDefinition()
-                        .name("stopPlace")
-                        .type(stopPlaceObjectType))
+                        .name("placeRef")
+                        .type(entityReferenceObjectType))
                 .build();
-
     }
 }

@@ -16,6 +16,15 @@ public class GraphQLNames {
     public static final String PATH_LINK_FROM = "from";
     public static final String PATH_LINK_TO = "to";
 
+    public static final String PATH_LINK_END_PLACE_REF = "placeRef";
+
+    public static final String OUTPUT_TYPE_ENTITY_REF = "Ref";
+    public static final String INPUT_TYPE_ENTITY_REF = OUTPUT_TYPE_ENTITY_REF + INPUT_TYPE_POSTFIX;
+
+    public static final String ENTITY_REF_REF = "ref";
+    public static final String ENTITY_REF_VERSION = "version";
+    public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+
     public static final String OUTPUT_TYPE_TRANSFER_DURATION = "TransferDuration";
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
 

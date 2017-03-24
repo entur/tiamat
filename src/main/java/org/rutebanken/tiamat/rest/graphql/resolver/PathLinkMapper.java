@@ -83,6 +83,23 @@ public class PathLinkMapper {
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
         idResolver.extractAndSetNetexId(ID, input, pathLinkEnd);
 
+        if(input.get(PATH_LINK_END_PLACE_REF) != null) {
+
+            @SuppressWarnings("unchecked")
+            Map<String, String> placeRefInput = (Map<String, String>) input.get(PATH_LINK_END_PLACE_REF);
+            String reference = placeRefInput.get(ENTITY_REF_REF);
+            String version = placeRefInput.get(ENTITY_REF_VERSION);
+            if(version == null) {
+                version = ANY_VERSION;
+            }
+
+            AddressablePlaceRefStructure addressablePlaceRef = new AddressablePlaceRefStructure(reference, version, null);
+            pathLinkEnd.setPlaceRef(addressablePlaceRef);
+        } else {
+            throw new IllegalArgumentException("Expected PathLinkEnd " + pathLinkEnd + " to contain PlaceRef");
+        }
+
+
         if(input.get("quay") != null) {
             Optional<String> quayNetexId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
             if(quayNetexId.isPresent()) {

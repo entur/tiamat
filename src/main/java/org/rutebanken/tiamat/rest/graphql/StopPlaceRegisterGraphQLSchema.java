@@ -1,9 +1,9 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.language.FieldDefinition;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -99,7 +99,30 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType);
 
-        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
+        GraphQLObjectType entityRefObjectType = newObject()
+                .name("entityRefObjectType")
+                .description("A reference to an object")
+                .field(newFieldDefinition()
+                        .name(ENTITY_REF_REF)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(ENTITY_REF_VERSION)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name("quay")
+                        .type(quayObjectType)
+                        .dataFetcher(new DataFetcher() {
+                            @Override
+                            public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
+
+                                System.out.println(dataFetchingEnvironment.getSource());
+                                return new Quay();
+                            }
+                        }))
+                .build();
+
+
+        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(entityRefObjectType, netexIdFieldDefinition);
 
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 

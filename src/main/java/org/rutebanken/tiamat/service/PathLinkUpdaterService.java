@@ -119,8 +119,9 @@ public class PathLinkUpdaterService {
             if(entityInVersionStructure == null) {
                 throw new NoSuchElementException("Cannot find path link end reference to place " + pathLinkEnd.getPlaceRef());
             }
+            return;
         }
-        throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end " + pathLinkEnd.getPlaceRef());
+        throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end ref" + pathLinkEnd.getPlaceRef());
     }
 
 
