@@ -93,14 +93,12 @@ public class PathLinkEndConverterTest extends CommonSpringBootTest {
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRef()
-                                                .withRef(fromQuay.getId())
-                                                .withNameOfMemberClass(fromQuay.getClass().getSimpleName())))
+                                                .withRef(fromQuay.getId())))
                 .withTo(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRef()
-                                                .withRef(toQuay.getId())
-                                                .withNameOfMemberClass(toQuay.getClass().getSimpleName())));
+                                                .withRef(toQuay.getId())));
 
         List<PathLink> actual = netexMapper.mapPathLinksToTiamatModel(Arrays.asList(netexPathLink));
         assertThat(actual).hasSize(1);
