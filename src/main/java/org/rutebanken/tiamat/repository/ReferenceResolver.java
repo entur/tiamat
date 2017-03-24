@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.apache.commons.lang.StringUtils;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
@@ -28,6 +29,10 @@ public class ReferenceResolver {
         assertNotNull(versionOfObjectRefStructure, "ref", versionOfObjectRefStructure.getRef());
 
         String ref = versionOfObjectRefStructure.getRef();
+        if(StringUtils.countMatches(ref, ":") != 2) {
+            throw new IllegalArgumentException("Expected two number of colons in ref. Got: '" + ref + "'");
+
+        }
         String memberClass = ref.substring(ref.indexOf(':') + 1, ref.lastIndexOf(':'));
 
         String canonicalName = EntityInVersionStructure.class.getPackage().getName() + "." + memberClass;
