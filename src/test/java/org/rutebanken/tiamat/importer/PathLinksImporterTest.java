@@ -1,11 +1,13 @@
 package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
+import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 public class PathLinksImporterTest extends CommonSpringBootTest{
 
@@ -49,5 +52,35 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
         assertThat(firsts).hasSize(1);
         assertThat(seconds).hasSize(1);
         assertThat(firsts.get(0).getId()).isEqualTo(seconds.get(0).getId());
+    }
+
+    @Test
+    public void shouldResolveForeignPlaceReferences() {
+
+        Quay fromQuay = new Quay();
+        String fromQuayOriginalId = "RUT:StopPlace:123";
+        fromQuay.getOriginalIds().add(fromQuayOriginalId);
+
+        quayRepository.save(fromQuay);
+
+        Quay toQuay = new Quay();
+        String toQuayOriginalId = "RUT:StopPlace:321";
+        toQuay.getOriginalIds().add(toQuayOriginalId);
+
+        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION, null);
+        PathLinkEnd pathLinkEndFrom = new PathLinkEnd(fromPlaceRef);
+
+        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, ANY_VERSION, null);
+        PathLinkEnd pathLinkEndTo = new PathLinkEnd(toPlaceRef);
+
+        PathLink pathLink = new PathLink(pathLinkEndFrom, pathLinkEndTo);
+
+        List<org.rutebanken.netex.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
+
+        org.rutebanken.netex.model.PathLink actual = result.get(0);
+        assertThat(actual.getFrom().getPlaceRef().getRef()).contains("NSR:Quay:");
+        assertThat(actual.getTo().getPlaceRef().getRef()).contains("NSR:Quay:");
+
+
     }
 }

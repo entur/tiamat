@@ -1,9 +1,13 @@
 package org.rutebanken.tiamat.importer;
 
+import com.hazelcast.nio.Address;
+import org.rutebanken.tiamat.model.AddressablePlace;
 import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +29,8 @@ public class PathLinksImporter {
 
     private final PathLinkRepository pathLinkRepository;
 
+    private final ReferenceResolver referenceResolver;
+
     private final NetexMapper netexMapper;
 
     private final KeyValueListAppender keyValueListAppender;
@@ -32,8 +38,9 @@ public class PathLinksImporter {
     private final VersionIncrementor versionIncrementor;
 
     @Autowired
-    public PathLinksImporter(PathLinkRepository pathLinkRepository, NetexMapper netexMapper, KeyValueListAppender keyValueListAppender, VersionIncrementor versionIncrementor) {
+    public PathLinksImporter(PathLinkRepository pathLinkRepository, ReferenceResolver referenceResolver, NetexMapper netexMapper, KeyValueListAppender keyValueListAppender, VersionIncrementor versionIncrementor) {
         this.pathLinkRepository = pathLinkRepository;
+        this.referenceResolver = referenceResolver;
         this.netexMapper = netexMapper;
         this.keyValueListAppender = keyValueListAppender;
         this.versionIncrementor = versionIncrementor;
@@ -57,12 +64,22 @@ public class PathLinksImporter {
                         logger.debug("No existing path link. Using incoming {}", pathLink);
                         pathLink.setCreated(ZonedDateTime.now());
                         pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);
+
+                        resolvePlaceRefs(pathLink.getFrom());
+
                         return pathLink;
                     }
                 })
                 .map(pathLink -> pathLinkRepository.save(pathLink))
                 .map(pathLink -> netexMapper.mapToNetexModel(pathLink))
                 .collect(toList());
+    }
+
+    private void resolvePlaceRefs(PathLinkEnd pathLinkEnd) {
+        AddressablePlace addressablePlace = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
+        if(addressablePlace == null) {
+            throw new IllegalArgumentException("Cannot resolve " + pathLinkEnd.getPlaceRef());
+        }
     }
 
     private Optional<PathLink> findExistingPathLinkIfPresent(PathLink incomingPathLink) {
