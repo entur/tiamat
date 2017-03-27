@@ -93,7 +93,7 @@ public class PathLinkMapper {
                 version = ANY_VERSION;
             }
 
-            AddressablePlaceRefStructure addressablePlaceRef = new AddressablePlaceRefStructure(reference, version, null);
+            AddressablePlaceRefStructure addressablePlaceRef = new AddressablePlaceRefStructure(reference, version);
             pathLinkEnd.setPlaceRef(addressablePlaceRef);
         } else {
             throw new IllegalArgumentException("Expected PathLinkEnd " + pathLinkEnd + " to contain PlaceRef");

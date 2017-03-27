@@ -14,15 +14,12 @@ public class VersionOfObjectRefStructure implements Serializable {
 
     private String version;
 
-    private String nameOfRefClass;
-
     public VersionOfObjectRefStructure() {
     }
 
-    public VersionOfObjectRefStructure(String ref, String version, String nameOfRefClass) {
+    public VersionOfObjectRefStructure(String ref, String version) {
         this.ref = ref;
         this.version = version;
-        this.nameOfRefClass = nameOfRefClass;
     }
 
     public String getRef() {
@@ -39,17 +36,6 @@ public class VersionOfObjectRefStructure implements Serializable {
 
     public void setVersion(String value) {
         this.version = value;
-    }
-
-    /**
-     * Name of Class of the referenced entity. Allows reflection. Fixed for each entity type.
-     */
-    public String getNameOfRefClass() {
-        return nameOfRefClass;
-    }
-
-    public void setNameOfRefClass(String nameOfRefClass) {
-        this.nameOfRefClass = nameOfRefClass;
     }
 
     @Override

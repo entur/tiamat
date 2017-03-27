@@ -69,10 +69,10 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
 
         quayRepository.save(toQuay);
 
-        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION, null);
+        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION);
         PathLinkEnd pathLinkEndFrom = new PathLinkEnd(fromPlaceRef);
 
-        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, ANY_VERSION, null);
+        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, ANY_VERSION);
         PathLinkEnd pathLinkEndTo = new PathLinkEnd(toPlaceRef);
 
         PathLink pathLink = new PathLink(pathLinkEndFrom, pathLinkEndTo);

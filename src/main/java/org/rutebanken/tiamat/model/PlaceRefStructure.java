@@ -9,7 +9,7 @@ public class PlaceRefStructure extends GroupOfEntitiesRefStructure {
         super();
     }
 
-    public PlaceRefStructure(String ref, String version, String nameOfRefClass) {
-        super(ref, version, nameOfRefClass);
+    public PlaceRefStructure(String ref, String version) {
+        super(ref, version);
     }
 }

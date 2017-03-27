@@ -11,10 +11,10 @@ public class AddressablePlaceRefStructure extends PlaceRefStructure {
     public AddressablePlaceRefStructure() {}
 
     public AddressablePlaceRefStructure(AddressablePlace addressablePlace) {
-        super(addressablePlace.getNetexId(), String.valueOf(addressablePlace.getVersion()), addressablePlace.getClass().getSimpleName());
+        super(addressablePlace.getNetexId(), String.valueOf(addressablePlace.getVersion()));
     }
 
-    public AddressablePlaceRefStructure(String ref, String version, String nameOfRefClass) {
-        super(ref, version, nameOfRefClass);
+    public AddressablePlaceRefStructure(String ref, String version) {
+        super(ref, version);
     }
 }

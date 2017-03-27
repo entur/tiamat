@@ -9,7 +9,7 @@ public abstract class GroupOfEntitiesRefStructure extends VersionOfObjectRefStru
         super();
     }
 
-    public GroupOfEntitiesRefStructure(String ref, String version, String nameOfRefClass) {
-        super(ref, version, nameOfRefClass);
+    public GroupOfEntitiesRefStructure(String ref, String version) {
+        super(ref, version);
     }
 }

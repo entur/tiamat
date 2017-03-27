@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.tiamat.model.AddressablePlace;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -65,8 +66,8 @@ public class PathLinksImporter {
                         pathLink.setCreated(ZonedDateTime.now());
                         pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);
 
-                        resolvePlaceRefs(pathLink.getFrom());
-                        resolvePlaceRefs(pathLink.getTo());
+                        resolveAndFixPlaceRefs(pathLink.getFrom());
+                        resolveAndFixPlaceRefs(pathLink.getTo());
 
                         return pathLink;
                     }
@@ -76,11 +77,12 @@ public class PathLinksImporter {
                 .collect(toList());
     }
 
-    private void resolvePlaceRefs(PathLinkEnd pathLinkEnd) {
+    private void resolveAndFixPlaceRefs(PathLinkEnd pathLinkEnd) {
         AddressablePlace addressablePlace = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
         if (addressablePlace == null) {
             throw new IllegalArgumentException("Cannot resolve " + pathLinkEnd.getPlaceRef());
         }
+        pathLinkEnd.setPlaceRef(new AddressablePlaceRefStructure(addressablePlace));
     }
 
     private Optional<PathLink> findExistingPathLinkIfPresent(PathLink incomingPathLink) {

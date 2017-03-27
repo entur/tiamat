@@ -129,8 +129,8 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         toQuay.setVersion(1L);
         toQuay = quayRepository.save(toQuay);
 
-        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(new AddressablePlaceRefStructure(fromQuay.getNetexId(), String.valueOf(fromQuay.getVersion()), Quay.class.getSimpleName()));
-        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(new AddressablePlaceRefStructure(toQuay.getNetexId(), String.valueOf(toQuay.getVersion()), Quay.class.getSimpleName()));
+        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(new AddressablePlaceRefStructure(fromQuay.getNetexId(), String.valueOf(fromQuay.getVersion())));
+        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(new AddressablePlaceRefStructure(toQuay.getNetexId(), String.valueOf(toQuay.getVersion())));
 
         PathLink pathLink = new PathLink(pathLinkEndFromQuay, pathLinkEndToQuay);
         pathLink.setVersion(1L);
