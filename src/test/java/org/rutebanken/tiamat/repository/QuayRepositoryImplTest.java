@@ -23,7 +23,7 @@ public class QuayRepositoryImplTest extends CommonSpringBootTest {
 
         quayRepository.save(version1);
 
-        Quay version2 = versionCreator.createNewVersion(version1, Quay.class);
+        Quay version2 = versionCreator.createNextVersion(version1, Quay.class);
 
         quayRepository.save(version2);
 

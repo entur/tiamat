@@ -122,9 +122,8 @@ public class PublicationDeliveryTestHelper {
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
         Response response = postPublicationDelivery(publicationDeliveryStructure);
 
-        if(! (response instanceof StreamingOutput)) {
-            System.out.println("Response if not instance of streaming output");
-            System.out.println(response);
+        if(! (response.getEntity() instanceof StreamingOutput)) {
+            throw new RuntimeException("Response is not instance of streaming output: "+response);
         }
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

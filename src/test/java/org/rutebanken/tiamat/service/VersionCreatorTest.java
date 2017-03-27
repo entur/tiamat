@@ -50,7 +50,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
 
         stopPlaceRepository.save(newVersion);
@@ -70,7 +70,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.0, 11.1)));
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getCentroid()).isNotNull();
     }
 
@@ -80,7 +80,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(ZonedDateTime.now());
         stopPlace = stopPlaceRepository.save(stopPlace);
-        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getChanged()).isNotNull();
     }
 
@@ -95,7 +95,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         stopPlace.getQuays().add(quay);
 
         stopPlace = stopPlaceRepository.save(stopPlace);
-        StopPlace newVersion = versionCreator.createNewVersion(stopPlace);
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace);
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
@@ -113,7 +113,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = versionCreator.createNewVersion(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
 
         // Save it. Reference to topographic place should be kept.
         newVersion = stopPlaceRepository.save(newVersion);
@@ -137,7 +137,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         pathLink = pathLinkRepository.save(pathLink);
 
-        PathLink newVersion = versionCreator.createNewVersion(pathLink, PathLink.class);
+        PathLink newVersion = versionCreator.createNextVersion(pathLink, PathLink.class);
 
         assertThat(newVersion.getVersion())
                 .describedAs("The version of path link should have been incremented")
@@ -172,7 +172,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
         ZonedDateTime beforeCreated = ZonedDateTime.now();
         System.out.println(beforeCreated);
 
-        StopPlace newVersion = versionCreator.createNewVersion(oldVersion);
+        StopPlace newVersion = versionCreator.createNextVersion(oldVersion);
 
 
         assertThat(newVersion.getValidityConditions())

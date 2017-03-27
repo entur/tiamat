@@ -56,7 +56,6 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
     @Override
     public TopographicPlaceRefStructure convertFrom(TopographicPlace topographicPlace, Type<TopographicPlaceRefStructure> type) {
         TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure()
-                .withNameOfMemberClass(TopographicPlace.class.getSimpleName())
                 .withCreated(OffsetDateTime.now())
                 .withRef(topographicPlace.getNetexId())
                 .withVersion(String.valueOf(topographicPlace.getVersion()));

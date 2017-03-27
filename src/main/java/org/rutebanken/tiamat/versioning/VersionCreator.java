@@ -84,7 +84,7 @@ public class VersionCreator {
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 
-    public <T extends EntityInVersionStructure> T createNewVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+    public <T extends EntityInVersionStructure> T createNextVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
         ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
@@ -105,9 +105,9 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
-    public StopPlace createNewVersion(StopPlace stopPlace) {
+    public StopPlace createNextVersion(StopPlace stopPlace) {
 
-        StopPlace newVersion = createNewVersion(stopPlace, StopPlace.class);
+        StopPlace newVersion = createNextVersion(stopPlace, StopPlace.class);
         if (newVersion.getQuays() != null) {
             newVersion.getQuays().forEach(quay -> versionIncrementor.incrementVersion(quay));
         }
@@ -115,17 +115,17 @@ public class VersionCreator {
         return newVersion;
     }
 
-    public <T extends EntityInVersionStructure> T createFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+    public <T extends EntityInVersionStructure> T initiateFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Initiating new version for entity {}", entityInVersionStructure);
-        versionIncrementor.incrementVersion(entityInVersionStructure);
+        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
         entityInVersionStructure.getValidityConditions().add(new AvailabilityCondition(ZonedDateTime.now()));
         return type.cast(entityInVersionStructure);
     }
 
-    public StopPlace createFirstVersionWithAvailabilityCondition(StopPlace stopPlace) {
-        stopPlace = createFirstVersionWithAvailabilityCondition(stopPlace, StopPlace.class);
+    public StopPlace initiateFirstVersionWithAvailabilityCondition(StopPlace stopPlace) {
+        stopPlace = initiateFirstVersionWithAvailabilityCondition(stopPlace, StopPlace.class);
         if(stopPlace.getQuays() != null) {
-            stopPlace.getQuays().forEach(quay -> versionIncrementor.incrementVersion(quay));
+            stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
         }
         return stopPlace;
     }

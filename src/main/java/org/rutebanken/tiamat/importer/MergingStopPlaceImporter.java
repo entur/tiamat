@@ -146,7 +146,7 @@ public class MergingStopPlaceImporter {
         centroidComputer.computeCentroidForStopPlace(newStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
-        versionCreator.createFirstVersionWithAvailabilityCondition(newStopPlace);
+        versionCreator.initiateFirstVersionWithAvailabilityCondition(newStopPlace);
 
         newStopPlace.setCreated(ZonedDateTime.now());
         newStopPlace.setChanged(ZonedDateTime.now());
@@ -171,7 +171,7 @@ public class MergingStopPlaceImporter {
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             foundStopPlace.setChanged(ZonedDateTime.now());
             // The stop place has changed. Create a new version for it.
-            StopPlace newVersion = versionCreator.createNewVersion(foundStopPlace);
+            StopPlace newVersion = versionCreator.createNextVersion(foundStopPlace);
             logger.info("Updated existing stop place {}. ", newVersion);
             stopPlaceRepository.save(foundStopPlace);
             return saveAndUpdateCache(newVersion);
