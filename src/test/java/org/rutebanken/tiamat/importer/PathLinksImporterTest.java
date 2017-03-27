@@ -58,14 +58,16 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
     public void shouldResolveForeignPlaceReferences() {
 
         Quay fromQuay = new Quay();
-        String fromQuayOriginalId = "RUT:StopPlace:123";
+        String fromQuayOriginalId = "RUT:Quay:123";
         fromQuay.getOriginalIds().add(fromQuayOriginalId);
 
         quayRepository.save(fromQuay);
 
         Quay toQuay = new Quay();
-        String toQuayOriginalId = "RUT:StopPlace:321";
+        String toQuayOriginalId = "RUT:Quay:321";
         toQuay.getOriginalIds().add(toQuayOriginalId);
+
+        quayRepository.save(toQuay);
 
         AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION, null);
         PathLinkEnd pathLinkEndFrom = new PathLinkEnd(fromPlaceRef);
