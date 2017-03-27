@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer;
 
-import com.hazelcast.nio.Address;
 import org.rutebanken.tiamat.model.AddressablePlace;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
@@ -58,6 +57,7 @@ public class PathLinksImporter {
                         if(changed) {
                             existing.setChanged(ZonedDateTime.now());
                         }
+                        // Update place ref?
                         versionIncrementor.incrementVersion(existing);
                         return existing;
                     } else {
@@ -66,6 +66,7 @@ public class PathLinksImporter {
                         pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);
 
                         resolvePlaceRefs(pathLink.getFrom());
+                        resolvePlaceRefs(pathLink.getTo());
 
                         return pathLink;
                     }
@@ -77,7 +78,7 @@ public class PathLinksImporter {
 
     private void resolvePlaceRefs(PathLinkEnd pathLinkEnd) {
         AddressablePlace addressablePlace = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
-        if(addressablePlace == null) {
+        if (addressablePlace == null) {
             throw new IllegalArgumentException("Cannot resolve " + pathLinkEnd.getPlaceRef());
         }
     }

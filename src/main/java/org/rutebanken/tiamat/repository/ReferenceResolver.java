@@ -1,8 +1,9 @@
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityNotFoundException;
+import java.util.Set;
 
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
@@ -20,9 +21,9 @@ public class ReferenceResolver {
     private static final Logger logger = LoggerFactory.getLogger(ReferenceResolver.class);
 
     @Autowired
-    private EntityInVersionStructureRepository entityInVersionStructureRepository;
+    private GenericDataManagedObjectRepository entityInVersionStructureRepository;
 
-    public <T extends EntityInVersionStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
+    public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
         logger.debug("Received reference: {}", versionOfObjectRefStructure);
 
@@ -40,11 +41,20 @@ public class ReferenceResolver {
             @SuppressWarnings("unchecked")
             Class<T> clazz = (Class<T>) Class.forName(canonicalName);
 
+            final String netexId;
+            if(!NetexIdMapper.isNsrId(ref)) {
+                logger.debug("Detected ID without expected prefix: {}. Will try to find it from original ID: {}.", NetexIdMapper.NSR, ref);
+                Set<String> valuesArgument = Sets.newHashSet(ref);
+                netexId = entityInVersionStructureRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
+            } else {
+                netexId = ref;
+            }
+
             if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
-                return entityInVersionStructureRepository.findFirstByNetexIdOrderByVersionDesc(ref, clazz);
+                return entityInVersionStructureRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
             } else {
                 long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
-                return entityInVersionStructureRepository.findFirstByNetexIdAndVersion(ref, version, clazz);
+                return entityInVersionStructureRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
             }
 
         } catch (ClassNotFoundException e) {
