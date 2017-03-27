@@ -64,15 +64,13 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
-                                                .withRef(fromStopPlace.getId())
-                                                .withNameOfMemberClass(fromStopPlace.getClass().getSimpleName())))
+                                                .withRef(fromStopPlace.getId())))
                 .withTo(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(toStopPlace.getId())
-                                                .withVersion("1")
-                                                .withNameOfMemberClass(toStopPlace.getClass().getSimpleName())));
+                                                .withVersion("1")));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(fromStopPlace, toStopPlace);
         publicationDeliveryTestHelper.addPathLinks(publicationDelivery, netexPathLink);
