@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
-public class PathLinksImporterTest extends CommonSpringBootTest{
+public class PathLinksImporterTest extends CommonSpringBootTest {
 
     @Autowired
     private QuayRepository quayRepository;
@@ -41,11 +41,12 @@ public class PathLinksImporterTest extends CommonSpringBootTest{
 
     @Test
     public void shouldNotSaveDuplicatePathLinks() throws Exception {
-        PathLink pathLink = new PathLink();
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
+
         pathLink.getOriginalIds().add("originalID");
         List<org.rutebanken.netex.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
 
-        PathLink pathLink2 = new PathLink();
+        PathLink pathLink2 = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
         pathLink2.getOriginalIds().add("originalID");
         List<org.rutebanken.netex.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2));
 

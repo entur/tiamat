@@ -78,6 +78,9 @@ public class PathLinksImporter {
     }
 
     private void resolveAndFixPlaceRefs(PathLinkEnd pathLinkEnd) {
+        if(pathLinkEnd == null || pathLinkEnd.getPlaceRef() == null) {
+            throw new IllegalArgumentException("Cannot import path link without pathlink end with from/to place ref: "+pathLinkEnd);
+        }
         AddressablePlace addressablePlace = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
         if (addressablePlace == null) {
             throw new IllegalArgumentException("Cannot resolve " + pathLinkEnd.getPlaceRef());
