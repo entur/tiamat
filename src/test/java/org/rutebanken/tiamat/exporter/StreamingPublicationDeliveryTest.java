@@ -8,7 +8,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.*;
@@ -17,13 +16,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class StreamingPublicationDeliveryTest {
 
@@ -48,7 +44,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -90,7 +86,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -134,7 +130,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
         stopPlace.setVersion(2L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(1);

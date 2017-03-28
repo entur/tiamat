@@ -8,6 +8,7 @@ import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,6 +18,9 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
     @Autowired
     private NetexMapper netexMapper;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
@@ -86,15 +90,25 @@ public class NetexMapperTest extends CommonSpringBootTest {
 
 
     @Test
-    public void mapStopPlaceToNetex() throws Exception {
+    public void mapStopPlaceWithNameAndTopographicPlaceRefToNetex() throws Exception {
         StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("stopplacenetexid");
         stopPlace.setName(new EmbeddableMultilingualString("name", "en"));
+        stopPlace.setVersion(1L);
+
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
+        topographicPlace.setVersion(1L);
+        topographicPlace.setNetexId("netexidfortopoplace");
+        stopPlace.setTopographicPlace(topographicPlace);
 
         org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getName()).isNotNull();
         assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(netexStopPlace.getTopographicPlaceRef()).isNotNull();
+        assertThat(netexStopPlace.getTopographicPlaceRef().getRef()).isEqualTo(topographicPlace.getNetexId());
+        assertThat(netexStopPlace.getTopographicPlaceRef().getVersion()).isEqualTo(String.valueOf(topographicPlace.getVersion()));
     }
 
     @Ignore
@@ -290,7 +304,7 @@ public class NetexMapperTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
+    public void  mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
 
@@ -319,15 +333,27 @@ public class NetexMapperTest extends CommonSpringBootTest {
                 .getTopographicPlace()
                 .add(county);
 
+        // To be able to look up NSR references, we need to persist municipality and county
+        TopographicPlace tiamatCounty = new TopographicPlace(new EmbeddableMultilingualString(county.getName().getValue()));
+        tiamatCounty.setNetexId(county.getId());
+        topographicPlaceRepository.save(tiamatCounty);
+
+        TopographicPlace tiamatMunicipality = new TopographicPlace(new EmbeddableMultilingualString(municipality.getName().getValue()));
+        tiamatMunicipality.setNetexId(municipality.getId());
+        tiamatMunicipality.setParentTopographicPlace(tiamatCounty);
+        topographicPlaceRepository.save(tiamatMunicipality);
+
+
         SiteFrame tiamatSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        TopographicPlace tiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
-        assertThat(tiamatMunicipality).isNotNull();
-        assertThat(tiamatMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
-        assertThat(tiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
+        TopographicPlace actualTiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        assertThat(actualTiamatMunicipality).isNotNull();
+        assertThat(actualTiamatMunicipality.getParentTopographicPlace())
+                .describedAs("The municipality should have a parent topographic place").isNotNull();
+        assertThat(actualTiamatMunicipality.getParentTopographicPlace().getNetexId()).isEqualTo(county.getId());
     }
 
 }

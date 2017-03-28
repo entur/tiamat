@@ -1,11 +1,11 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.language.FieldDefinition;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +35,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private PathLinkObjectTypeCreator pathLinkObjectTypeCreator;
+
+    @Autowired
+    private EntityRefObjectTypeCreator entityRefObjectTypeCreator;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -99,7 +102,11 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType);
 
-        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(quayObjectType, stopPlaceObjectType, netexIdFieldDefinition);
+        GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
+
+        GraphQLObjectType entityRefObjectType = entityRefObjectTypeCreator.create(addressablePlaceObjectType);
+
+        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(entityRefObjectType, netexIdFieldDefinition);
 
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
@@ -165,6 +172,16 @@ public class StopPlaceRegisterGraphQLSchema {
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
                 .mutation(stopPlaceRegisterMutation)
+                .build();
+    }
+
+    private GraphQLObjectType createAddressablePlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
+        return newObject()
+                .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
+                .fields(commonFieldsList)
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .build();
     }
 

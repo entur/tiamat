@@ -1,14 +1,26 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass
 public class VersionOfObjectRefStructure implements Serializable {
 
-    protected String ref;
+    public static final String ANY_VERSION = "any";
 
-    protected String version;
+    private String ref;
+
+    private String version;
+
+    public VersionOfObjectRefStructure() {
+    }
+
+    public VersionOfObjectRefStructure(String ref, String version) {
+        this.ref = ref;
+        this.version = version;
+    }
 
     public String getRef() {
         return ref;
@@ -24,5 +36,13 @@ public class VersionOfObjectRefStructure implements Serializable {
 
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("ref", ref)
+                .add("version", version)
+                .toString();
     }
 }

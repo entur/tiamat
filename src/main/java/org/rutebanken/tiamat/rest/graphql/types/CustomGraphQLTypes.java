@@ -202,11 +202,21 @@ public class CustomGraphQLTypes {
                     .type(GraphQLString))
             .build();
 
+    public static GraphQLInputObjectType refInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_ENTITY_REF)
+            .field(newInputObjectField()
+                    .name(ENTITY_REF_REF)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(ENTITY_REF_VERSION)
+                    .type(GraphQLString))
+            .build();
+
     public static GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_PATH_LINK_END)
             .field(newInputObjectField()
-                    .name("quay")
-                    .type(quayIdReferenceInputObjectType))
+                    .name(PATH_LINK_END_PLACE_REF)
+                    .type(refInputObjectType))
             .build();
 
     public static GraphQLInputObjectType pathLinkObjectInputType = GraphQLInputObjectType.newInputObject()

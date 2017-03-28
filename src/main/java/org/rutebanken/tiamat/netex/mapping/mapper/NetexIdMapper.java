@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
+import org.apache.commons.lang.StringUtils;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
@@ -100,12 +101,22 @@ public class NetexIdMapper {
      * Creates random NSR-ID.
      * TODO: Move to test
      */
-    public static String generateNetexId(IdentifiedEntity identifiedEntity) {
+    public static String generateRandomizedNetexId(IdentifiedEntity identifiedEntity) {
         return getNetexId(determineIdType(identifiedEntity), String.valueOf(new Random().nextInt()));
     }
 
     public static boolean isNsrId(String netexId) {
-        return netexId.contains(NetexIdMapper.NSR);
+        if(!netexId.contains(NetexIdMapper.NSR)) {
+            logger.warn("The netexId: {} does not start with {}", netexId, NSR);
+            return false;
+        }
+
+        if(StringUtils.countMatches(netexId, ":") != 2) {
+            logger.warn("Expected number of colons is two. {}", netexId);
+            return false;
+        }
+
+        return true;
     }
 
     public static Optional<String> getOptionalTiamatId(String netexId) {

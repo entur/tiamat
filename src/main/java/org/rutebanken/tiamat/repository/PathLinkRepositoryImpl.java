@@ -55,10 +55,10 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
                 "               ON pl.from_id = ple.id " +
                 "                  OR pl.to_id = ple.id " +
                 "       INNER JOIN quay q " +
-                "               ON q.id = ple.quay_id " +
+                "               ON q.netex_id = ple.place_ref " +
                 "WHERE q.id IN (SELECT spq.quays_id " +
                 "                FROM stop_place_quays spq " +
-                "                   INNER join stop_place s on s.id = spq.stop_place_id " +
+                "                   INNER JOIN stop_place s ON s.id = spq.stop_place_id " +
                 "                WHERE s.netex_id = :netexStopPlaceId)";
 
         Query query = entityManager.createNativeQuery(sql);

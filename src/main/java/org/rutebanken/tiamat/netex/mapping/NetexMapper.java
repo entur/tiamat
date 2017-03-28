@@ -56,6 +56,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
+                .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .byDefault()
                 .register();
 
@@ -70,7 +71,6 @@ public class NetexMapper {
         mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
                 .byDefault()
                 .register();
-
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
@@ -97,7 +97,7 @@ public class NetexMapper {
         converters.add(new QuayListConverter());
         converters.add(new AlternativeNamesConverter());
         converters.add(new EquipmentPlacesConverter());
-        converters.add(new ValidityConditionsConverter());
+        converters.add(new AvailabilityConditionsConverter());
         converters.add(new BoardingPositionsConverter());
         converters.add(new CheckConstraintsConverter());
         converters.add(new DestinationDisplayViewsConverter());
@@ -105,8 +105,12 @@ public class NetexMapper {
         converters.add(new OffsetDateTimeZonedDateTimeConverter());
         converters.add(new SimplePointVersionStructureConverter());
         converters.add(new KeyValuesToKeyListConverter());
-        converters.add(new PathLinkEndConverter());
+//        converters.add(new PathLinkEndConverter());
         return converters;
+    }
+
+    public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace) {
+        return facade.map(topographicPlace, TopographicPlace.class);
     }
 
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {

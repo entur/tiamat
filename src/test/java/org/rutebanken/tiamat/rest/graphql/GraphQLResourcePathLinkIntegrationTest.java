@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSION;
 
 public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -22,15 +23,13 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
     public void retrievePathLinkReferencingTwoQuays() throws Exception {
         Quay firstQuay = new Quay();
         firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        firstQuay.setDescription(new EmbeddableMultilingualString("This is the first quay"));
         quayRepository.save(firstQuay);
 
         Quay secondQuay = new Quay();
         secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
-        secondQuay.setDescription(new EmbeddableMultilingualString("This is the second quay"));
         quayRepository.save(secondQuay);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(firstQuay), new PathLinkEnd(secondQuay));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure((firstQuay))), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
         Coordinate[] coordinates = new Coordinate[2];
         coordinates[0] = new Coordinate(11, 60);
         coordinates[1] = new Coordinate(11.1, 60.1);
@@ -48,16 +47,16 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                 "   id " +
                 "    from {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
                 "      }" +
                 "    }" +
                 "    to {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
                 "      }" +
                 "    }" +
                 "}" +
@@ -68,24 +67,23 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                     .body("id", comparesEqualTo(pathLink.getNetexId()))
                 .root("data.pathLink[0].from")
                     .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
-                    .body("quay.id", equalTo(firstQuay.getNetexId()))
-                    .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
+                    .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
+                   .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
                 .root("data.pathLink[0].to")
                     .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
-                    .body("quay.id", equalTo(secondQuay.getNetexId()))
-                    .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
+                    .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
     }
 
     @Test
     public void findPathLinkFromStopPlaceId() throws Exception {
 
         Quay firstQuay = new Quay();
-        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        firstQuay.setDescription(new EmbeddableMultilingualString("This is the first quay"));
+        firstQuay.setVersion(1L);
 
         Quay secondQuay = new Quay();
-        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
-        secondQuay.setDescription(new EmbeddableMultilingualString("This is the second quay"));
+        secondQuay.setVersion(2L);
+        secondQuay.setPublicCode("X");
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.getQuays().add(firstQuay);
@@ -93,7 +91,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         stopPlaceRepository.save(stopPlace);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(firstQuay), new PathLinkEnd(secondQuay));
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
         pathLinkRepository.save(pathLink);
 
         String graphQlJsonQuery = "{" +
@@ -102,16 +100,16 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                 "   id " +
                 "    from {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
                 "      }" +
                 "    }" +
                 "    to {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
                 "      }" +
                 "    }" +
                 "}" +
@@ -119,15 +117,15 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         executeGraphQL(graphQlJsonQuery)
                 .root("data.pathLink[0]")
-                .body("id", comparesEqualTo(pathLink.getNetexId()))
+                    .body("id", comparesEqualTo(pathLink.getNetexId()))
                 .root("data.pathLink[0].from")
-                .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
-                .body("quay.id", equalTo(firstQuay.getNetexId()))
-                .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
+                    .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
+                    .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
                 .root("data.pathLink[0].to")
-                .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
-                .body("quay.id", equalTo(secondQuay.getNetexId()))
-                .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
+                    .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
+                    .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
 
     }
 
@@ -135,19 +133,19 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
     public void createNewPathLinkBetweenQuays() throws Exception {
         Quay firstQuay = new Quay();
         firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        firstQuay.setDescription(new EmbeddableMultilingualString("This is the first quay"));
+        firstQuay.setVersion(INITIAL_VERSION);
         quayRepository.save(firstQuay);
 
         Quay secondQuay = new Quay();
+        secondQuay.setVersion(INITIAL_VERSION+1);
         secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
-        secondQuay.setDescription(new EmbeddableMultilingualString("This is the second quay"));
         quayRepository.save(secondQuay);
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
-                "       from: {quay: {id: \\\"" + firstQuay.getNetexId() + "\\\"}}, " +
-                "       to: {quay: {id: \\\"" + secondQuay.getNetexId() + "\\\"}}, " +
+                "       from: {placeRef: {ref: \\\"" + firstQuay.getNetexId() + "\\\", version:\\\"" + firstQuay.getVersion() +"\\\"}}, " +
+                "       to: {placeRef: {ref: \\\"" + secondQuay.getNetexId() + "\\\", version:\\\"" + ANY_VERSION + "\\\"}}, " +
                 "       geometry: {" +
                 "           type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
                 "       }" +
@@ -159,16 +157,17 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                 "       }" +
                 "    from {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
+//                "        quay { id }" +
                 "      }" +
                 "    }" +
                 "    to {" +
                 "      id" +
-                "      quay {" +
-                "        id" +
-                "        description {value}" +
+                "      placeRef {" +
+                "        ref" +
+                "        version" +
                 "      }" +
                 "    }" +
                 "  }" +
@@ -180,12 +179,12 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                     .body("geometry", notNullValue())
                 .root("data.pathLink[0].from")
                     .body("id", notNullValue())
-                    .body("quay.id", equalTo(firstQuay.getNetexId()))
-                    .body("quay.description.value", equalTo(firstQuay.getDescription().getValue()))
+                    .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
                 .root("data.pathLink[0].to")
                     .body("id", notNullValue())
-                    .body("quay.id", equalTo(secondQuay.getNetexId()))
-                    .body("quay.description.value", equalTo(secondQuay.getDescription().getValue()));
+                    .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(ANY_VERSION));
     }
 
     @Test

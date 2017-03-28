@@ -4,8 +4,7 @@ import javax.persistence.MappedSuperclass;
 
 
 @MappedSuperclass
-public class SiteComponentRefStructure
-        extends SiteElementRefStructure {
+public class SiteComponentRefStructure extends SiteElementRefStructure {
 
 
 }

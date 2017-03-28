@@ -13,7 +13,6 @@ import java.util.*;
 @Entity
 @Table(
         indexes = {
-                @Index(name = "stop_place_topographic_place_ref_index", columnList = "topographic_place_ref"),
                 @Index(name = "stop_place_name_value_index", columnList = "name_value"),
                 @Index(name = "stop_place_type_index", columnList = "stopPlaceType")
         },
@@ -76,12 +75,6 @@ public class StopPlace
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
-    @org.hibernate.annotations.Cache(
-            usage = CacheConcurrencyStrategy.READ_WRITE
-    )
-    @OneToOne(fetch = FetchType.LAZY)
-    protected TopographicPlace topographicPlace;
-
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
 
@@ -90,14 +83,6 @@ public class StopPlace
     }
 
     public StopPlace() {
-    }
-
-    public TopographicPlace getTopographicPlace() {
-        return topographicPlace;
-    }
-
-    public void setTopographicPlace(TopographicPlace topographicPlace) {
-        this.topographicPlace = topographicPlace;
     }
 
     public String getPublicCode() {

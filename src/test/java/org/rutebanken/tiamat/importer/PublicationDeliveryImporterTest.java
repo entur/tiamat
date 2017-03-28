@@ -3,10 +3,9 @@ package org.rutebanken.tiamat.importer;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-
-import javax.xml.bind.JAXBElement;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -14,7 +13,7 @@ import static org.mockito.Mockito.mock;
 
 public class PublicationDeliveryImporterTest {
 
-    PublicationDeliveryImporter publicationDeliveryImporter = new PublicationDeliveryImporter(mock(NetexMapper.class), mock(TransactionalStopPlacesImporter.class), mock(PublicationDeliveryExporter.class), mock(StopPlacePreSteps.class), mock(PathLinksImporter.class));
+    PublicationDeliveryImporter publicationDeliveryImporter = new PublicationDeliveryImporter(mock(NetexMapper.class), mock(TransactionalStopPlacesImporter.class), mock(PublicationDeliveryExporter.class), mock(StopPlacePreSteps.class), mock(PathLinksImporter.class), new TopographicPlacesExporter());
 
     @SuppressWarnings("unchecked")
     @Test
@@ -38,7 +37,7 @@ public class PublicationDeliveryImporterTest {
     @Test
     public void findSiteFrameFromCommonFrame() {
         ObjectFactory objectFactory = new ObjectFactory();
-        PublicationDeliveryImporter publicationDeliveryImporter = new PublicationDeliveryImporter(mock(NetexMapper.class), mock(TransactionalStopPlacesImporter.class), mock(PublicationDeliveryExporter.class), mock(StopPlacePreSteps.class), mock(PathLinksImporter.class));
+        PublicationDeliveryImporter publicationDeliveryImporter = new PublicationDeliveryImporter(mock(NetexMapper.class), mock(TransactionalStopPlacesImporter.class), mock(PublicationDeliveryExporter.class), mock(StopPlacePreSteps.class), mock(PathLinksImporter.class), new TopographicPlacesExporter());
 
 
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()

@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.importer.finder;
 
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 
 import java.util.List;
 import java.util.Optional;

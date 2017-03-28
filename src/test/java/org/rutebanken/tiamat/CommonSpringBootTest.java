@@ -22,7 +22,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
 public abstract class CommonSpringBootTest {
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -31,7 +31,7 @@ public abstract class CommonSpringBootTest {
     private PathLinkRepository pathLinkRepository;
 
     @Autowired
-    private QuayRepository quayRepository;
+    protected QuayRepository quayRepository;
 
     @After
     public void clearRepositories() {

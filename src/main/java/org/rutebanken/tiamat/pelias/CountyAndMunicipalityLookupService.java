@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.model.Properties;
 import org.rutebanken.tiamat.pelias.model.ReverseLookupResult;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,10 @@ public class CountyAndMunicipalityLookupService {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
-    
+
+    @Autowired
+    private VersionIncrementor versionIncrementor;
+
     private static Striped<Semaphore> stripedSemaphores = Striped.lazyWeakSemaphore(19, 1);
 
 
@@ -40,14 +44,14 @@ public class CountyAndMunicipalityLookupService {
      */
     public void populateCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) throws IOException, InterruptedException {
 
-        if(!stopPlace.hasCoordinates()) {
+        if (!stopPlace.hasCoordinates()) {
             return;
         }
 
         Point point = stopPlace.getCentroid();
 
         Properties peliasProperties = reverseLookup(point, stopPlace);
-        if(peliasProperties == null) {
+        if (peliasProperties == null) {
             return;
         }
 
@@ -126,7 +130,8 @@ public class CountyAndMunicipalityLookupService {
             municipality = new TopographicPlace();
             municipality.setName(new EmbeddableMultilingualString(locality, "no"));
             municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
-            
+            versionIncrementor.incrementVersion(municipality);
+
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);
             municipality.setCountryRef(countryRef);
@@ -156,6 +161,7 @@ public class CountyAndMunicipalityLookupService {
             county = new TopographicPlace();
             county.setName(new EmbeddableMultilingualString(peliasCounty, "no"));
             county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+            versionIncrementor.incrementVersion(county);
 
             CountryRef countryRef = new CountryRef();
             countryRef.setRef(IanaCountryTldEnumeration.NO);

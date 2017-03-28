@@ -52,9 +52,9 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	}
 
 	@Override
-	public Long findByKeyValue(String key, Set<String> values) {
+	public String findByKeyValue(String key, Set<String> values) {
 
-		Query query = entityManager.createNativeQuery("SELECT quay_id " +
+		Query query = entityManager.createNativeQuery("SELECT q.netex_id " +
 				"FROM quay_key_values qkv " +
 					"INNER JOIN value_items v " +
 						"ON qkv.key_values_id = v.value_id " +
@@ -69,11 +69,11 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<BigInteger> results = query.getResultList();
+			List<String> results = query.getResultList();
 			if(results.isEmpty()) {
 				return null;
 			} else {
-				return results.get(0).longValue();
+				return results.get(0);
 			}
 		} catch (NoResultException noResultException) {
 			return null;

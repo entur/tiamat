@@ -7,8 +7,6 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 public class QuayRepositoryImplTest extends CommonSpringBootTest {
 
     @Autowired
@@ -25,7 +23,7 @@ public class QuayRepositoryImplTest extends CommonSpringBootTest {
 
         quayRepository.save(version1);
 
-        Quay version2 = versionCreator.createNewVersionFrom(version1, Quay.class);
+        Quay version2 = versionCreator.createNextVersion(version1, Quay.class);
 
         quayRepository.save(version2);
 

@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.importer.finder;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.finder.TopographicPlaceFromRefFinder;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -22,7 +21,7 @@ public class TopographicPlaceFromRefFinderTest {
         List<TopographicPlace> topographicPlacelist = new ArrayList<>();
 
         TopographicPlace topographicPlace = new TopographicPlace();
-        String topographicNetexId = NetexIdMapper.generateNetexId(topographicPlace);
+        String topographicNetexId = NetexIdMapper.generateRandomizedNetexId(topographicPlace);
         topographicPlace.setNetexId(topographicNetexId);
 
         TopographicPlaceRefStructure topographicPlaceRef = new TopographicPlaceRefStructure();

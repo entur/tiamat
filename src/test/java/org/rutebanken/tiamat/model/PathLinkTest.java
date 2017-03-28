@@ -48,7 +48,7 @@ public class PathLinkTest extends CommonSpringBootTest {
     @Test
     public void persistPathLinkWithPathLinkEnd() {
         PathLink pathLink = new PathLink();
-        PathLinkEnd from = new PathLinkEnd(createAndSaveStop("A stop place that is referenced to by a path link"));
+        PathLinkEnd from = new PathLinkEnd(new AddressablePlaceRefStructure(createAndSaveStop("A stop place that is referenced to by a path link")));
 
         pathLink.setFrom(from);
 
@@ -67,16 +67,16 @@ public class PathLinkTest extends CommonSpringBootTest {
         quayRepository.save(quay2);
 
 
-        PathLinkEnd from = new PathLinkEnd(quay1);
-        PathLinkEnd to = new PathLinkEnd(quay2);
+        PathLinkEnd from = new PathLinkEnd(new AddressablePlaceRefStructure(quay1));
+        PathLinkEnd to = new PathLinkEnd(new AddressablePlaceRefStructure(quay2));
 
         PathLink pathLink = new PathLink(from, to);
         pathLinkRepository.save(pathLink);
 
         PathLink actualPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
-        assertThat(actualPathLink.getFrom().getQuay().getNetexId()).isEqualTo(quay1.getNetexId());
-        assertThat(actualPathLink.getTo().getQuay().getNetexId()).isEqualTo(quay2.getNetexId());
+        assertThat(actualPathLink.getFrom().getPlaceRef().getRef()).isEqualTo(quay1.getNetexId());
+        assertThat(actualPathLink.getTo().getPlaceRef().getRef()).isEqualTo(quay2.getNetexId());
     }
 
     @Test
@@ -89,10 +89,10 @@ public class PathLinkTest extends CommonSpringBootTest {
         PathJunction pathJunction = new PathJunction();
         pathJunction = pathJunctionRepository.save(pathJunction);
 
-        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(fromQuay);
+        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(new AddressablePlaceRefStructure(fromQuay));
         PathLinkEnd pathLinkEndToPathJunction = new PathLinkEnd(pathJunction);
         PathLinkEnd pathLinkEndFromPathJunction = new PathLinkEnd(pathJunction);
-        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(toQuay);
+        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(new AddressablePlaceRefStructure(toQuay));
 
         PathLink pathLinkToPathJunction = new PathLink(pathLinkEndFromQuay, pathLinkEndToPathJunction);
         PathLink pathLinkToQuay = new PathLink(pathLinkEndFromPathJunction, pathLinkEndToQuay);
@@ -103,11 +103,11 @@ public class PathLinkTest extends CommonSpringBootTest {
         PathLink actualPathLinkToPathJunction = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkToPathJunction.getNetexId());
         PathLink actualPathLinkToQuay = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkToQuay.getNetexId());
 
-        assertThat(actualPathLinkToPathJunction.getFrom().getQuay().getNetexId()).isEqualTo(fromQuay.getNetexId());
+        assertThat(actualPathLinkToPathJunction.getFrom().getPlaceRef().getRef()).isEqualTo(fromQuay.getNetexId());
         assertThat(actualPathLinkToPathJunction.getTo().getPathJunction().getNetexId()).isEqualTo(pathJunction.getNetexId());
 
         assertThat(actualPathLinkToQuay.getFrom().getPathJunction().getNetexId()).isEqualTo(pathJunction.getNetexId());
-        assertThat(actualPathLinkToQuay.getTo().getQuay().getNetexId()).isEqualTo(pathLinkToQuay.getTo().getQuay().getNetexId());
+        assertThat(actualPathLinkToQuay.getTo().getPlaceRef().getRef()).isEqualTo(pathLinkToQuay.getTo().getPlaceRef().getRef());
     }
 
     @Test

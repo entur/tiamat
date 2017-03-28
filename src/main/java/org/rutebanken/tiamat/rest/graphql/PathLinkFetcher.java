@@ -33,9 +33,11 @@ class PathLinkFetcher implements DataFetcher {
         if (pathLinkNetexId.isPresent()) {
             return Arrays.asList(pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkNetexId.get()));
         }
+
         Optional<String> stopPlaceNetexId = idResolver.extractIdIfPresent(FIND_BY_STOP_PLACE_ID, environment.getArguments());
         if (stopPlaceNetexId.isPresent()) {
             // Find pathlinks referencing to stops. Or path links referencing to quays that belong to stop.
+
             return pathLinkRepository.findAll(pathLinkRepository.findByStopPlaceNetexId(stopPlaceNetexId.get()));
         }
 

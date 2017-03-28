@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.nvdb.model.VegObjekt;
 import org.rutebanken.tiamat.nvdb.service.NvdbStopPlaceTypeMapper;

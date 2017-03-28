@@ -64,15 +64,13 @@ public class PathLinkImportTest extends CommonSpringBootTest {
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
-                                                .withRef(fromStopPlace.getId())
-                                                .withNameOfMemberClass(fromStopPlace.getClass().getSimpleName())))
+                                                .withRef(fromStopPlace.getId())))
                 .withTo(
                         new PathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(toStopPlace.getId())
-                                                .withVersion("1")
-                                                .withNameOfMemberClass(toStopPlace.getClass().getSimpleName())));
+                                                .withVersion("1")));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(fromStopPlace, toStopPlace);
         publicationDeliveryTestHelper.addPathLinks(publicationDelivery, netexPathLink);
@@ -83,8 +81,8 @@ public class PathLinkImportTest extends CommonSpringBootTest {
         assertThat(result).as("Expecting path link in return").hasSize(1);
         PathLink importedPathLink = result.get(0);
         assertThat(importedPathLink.getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
-        assertThat(importedPathLink.getFrom().getPlaceRef().getNameOfMemberClass()).isEqualTo(fromStopPlace.getClass().getSimpleName());
-        assertThat(importedPathLink.getTo().getPlaceRef().getNameOfMemberClass()).isEqualTo(toStopPlace.getClass().getSimpleName());
+        assertThat(importedPathLink.getFrom().getPlaceRef().getRef()).contains(fromStopPlace.getClass().getSimpleName());
+        assertThat(importedPathLink.getTo().getPlaceRef().getRef()).contains(toStopPlace.getClass().getSimpleName());
         assertThat(importedPathLink.getTransferDuration().getDefaultDuration()).isEqualTo(duration);
 
         assertThat(importedPathLink.getLineString()).isNotNull();
