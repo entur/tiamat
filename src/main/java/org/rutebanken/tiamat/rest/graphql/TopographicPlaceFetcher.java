@@ -28,8 +28,18 @@ class TopographicPlaceFetcher implements DataFetcher {
         Example<TopographicPlace> example = getTopographicPlaceExample(environment);
 
         String nsrId = environment.getArgument(ID);
+        Boolean allVersions = environment.getArgument(ALL_VERSIONS);
+        if(allVersions == null) {
+            allVersions = false;
+        }
+
         if (nsrId != null) {
-            return Arrays.asList(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(nsrId));
+
+            if (allVersions) {
+                return topographicPlaceRepository.findByNetexId(nsrId);
+            } else {
+                return Arrays.asList(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(nsrId));
+            }
         }
         return topographicPlaceRepository.findAll(example);
 
