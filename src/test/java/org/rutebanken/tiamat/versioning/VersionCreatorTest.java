@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.versioning;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
