@@ -1,10 +1,12 @@
 package org.rutebanken.tiamat.service;
 
-import org.rutebanken.tiamat.model.*;
+import graphql.GraphQLException;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.TransferDuration;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +38,16 @@ public class PathLinkUpdaterService {
         if(incomingPathLink.getNetexId() != null) {
             // Update?
 
-            logger.debug("Looking for PathLink with ID: {}", incomingPathLink.getNetexId());
+            logger.debug("Looking for PathLink with ID: {} and version: {}", incomingPathLink.getNetexId(), incomingPathLink.getVersion());
 
             PathLink existingPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(incomingPathLink.getNetexId());
 
             if(existingPathLink == null) {
                 throw new NoSuchElementException("Specified path link with ID: " + incomingPathLink.getNetexId() + " does not exist");
+            }
+
+            if(incomingPathLink.getVersion() > 0 && existingPathLink.getVersion() != incomingPathLink.getVersion()) {
+                throw new GraphQLException("Incoming PathLink version differs from existing path link with id " + incomingPathLink.getNetexId() + ", version: " + existingPathLink.getVersion() + " != " + incomingPathLink.getVersion());
             }
 
             logger.debug("Found existing path link: {}", existingPathLink);
