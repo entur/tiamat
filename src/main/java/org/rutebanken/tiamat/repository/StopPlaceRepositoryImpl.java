@@ -298,9 +298,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             }
         }
 
-
-        operators.add("and");
-        wheres.add("version = (select max(sv.version) from StopPlace sv where sv.netexId = stopPlace.netexId)");
+        if(!stopPlaceSearch.isAllVersions()) {
+            operators.add("and");
+            wheres.add("version = (select max(sv.version) from StopPlace sv where sv.netexId = stopPlace.netexId)");
+        }
 
         for(int i = 0; i < wheres.size(); i++) {
             if(i > 0) {
