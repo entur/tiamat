@@ -18,7 +18,7 @@ public class GraphQLNames {
 
     public static final String PATH_LINK_END_PLACE_REF = "placeRef";
 
-    public static final String OUTPUT_TYPE_ENTITY_REF = "Ref";
+    public static final String OUTPUT_TYPE_ENTITY_REF = "EntityRef";
     public static final String INPUT_TYPE_ENTITY_REF = OUTPUT_TYPE_ENTITY_REF + INPUT_TYPE_POSTFIX;
 
     public static final String ENTITY_REF_REF = "ref";
