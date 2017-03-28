@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import com.google.common.primitives.Booleans;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
@@ -33,7 +34,7 @@ class PathLinkFetcher implements DataFetcher {
 
         Optional<String> pathLinkNetexId = idResolver.extractIdIfPresent(ID, environment.getArguments());
 
-        boolean allVersions = Boolean.valueOf(environment.getArgument(ALL_VERSIONS));
+        boolean allVersions = environment.getArgument(ALL_VERSIONS) != null ? environment.getArgument(ALL_VERSIONS) : false;
 
         if (pathLinkNetexId.isPresent()) {
             if(allVersions) {
@@ -58,7 +59,7 @@ class PathLinkFetcher implements DataFetcher {
                     .collect(Collectors.toList());
         }
 
-        return new ArrayList<PathLink>();
+        return pathLinkRepository.findAll();
 
     }
 
