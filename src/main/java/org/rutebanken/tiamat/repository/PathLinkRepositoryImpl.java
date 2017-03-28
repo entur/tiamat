@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
-
 public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
     @Autowired
@@ -47,9 +45,9 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
     }
 
     @Override
-    public List<Long> findByStopPlaceNetexId(String netexStopPlaceId) {
+    public List<String> findByStopPlaceNetexId(String netexStopPlaceId) {
 
-        String sql = "SELECT pl.id " +
+        String sql = "SELECT pl.netex_id " +
                 "FROM path_link pl " +
                 "       INNER JOIN path_link_end ple " +
                 "               ON pl.from_id = ple.id " +
@@ -66,10 +64,8 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
         try {
             @SuppressWarnings("unchecked")
-            List<BigInteger> results = query.getResultList();
-            return results.stream()
-                    .map(bigInteger -> bigInteger.longValue())
-                    .collect(toList());
+            List<String> results = query.getResultList();
+            return results;
 
         } catch (NoResultException noResultException) {
             return new ArrayList<>();
