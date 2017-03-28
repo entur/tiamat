@@ -25,6 +25,9 @@ public class GraphQLNames {
     public static final String ENTITY_REF_VERSION = "version";
     public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
+    public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
+
+
     public static final String OUTPUT_TYPE_TRANSFER_DURATION = "TransferDuration";
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
 

@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.rest.graphql;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
-import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -44,6 +43,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher pathLinkFetcher;
+
+    @Autowired
+    DataFetcher objectReferenceFetcher;
 
     @Autowired
     DataFetcher pathLinkUpdater;
@@ -99,6 +101,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType);
 
+        GraphQLObjectType addressablePlaceObjectType = newObject()
+                .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
+                .fields(commonFieldsList)
+                .build();
+
+
         GraphQLObjectType entityRefObjectType = newObject()
                 .name("entityRefObjectType")
                 .description("A reference to an object")
@@ -109,16 +117,9 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(ENTITY_REF_VERSION)
                         .type(GraphQLString))
                 .field(newFieldDefinition()
-                        .name("quay")
-                        .type(quayObjectType)
-                        .dataFetcher(new DataFetcher() {
-                            @Override
-                            public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
-
-                                System.out.println(dataFetchingEnvironment.getSource());
-                                return new Quay();
-                            }
-                        }))
+                        .name("addressablePlace")
+                        .type(addressablePlaceObjectType)
+                        .dataFetcher(objectReferenceFetcher))
                 .build();
 
 

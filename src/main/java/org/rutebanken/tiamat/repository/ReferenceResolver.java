@@ -21,7 +21,7 @@ public class ReferenceResolver {
     private static final Logger logger = LoggerFactory.getLogger(ReferenceResolver.class);
 
     @Autowired
-    private GenericDataManagedObjectRepository entityInVersionStructureRepository;
+    private GenericDataManagedObjectRepository genericDataManagedObjectRepository;
 
     public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
@@ -45,16 +45,16 @@ public class ReferenceResolver {
             if(!NetexIdMapper.isNsrId(ref)) {
                 logger.debug("Detected ID without expected prefix: {}. Will try to find it from original ID: {}.", NetexIdMapper.NSR, ref);
                 Set<String> valuesArgument = Sets.newHashSet(ref);
-                netexId = entityInVersionStructureRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
+                netexId = genericDataManagedObjectRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
             } else {
                 netexId = ref;
             }
 
             if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
-                return entityInVersionStructureRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
+                return genericDataManagedObjectRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
             } else {
                 long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
-                return entityInVersionStructureRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
+                return genericDataManagedObjectRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
             }
 
         } catch (ClassNotFoundException e) {
