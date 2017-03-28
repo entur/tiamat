@@ -179,6 +179,9 @@ public class StopPlaceRegisterGraphQLSchema {
         return newObject()
                 .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
                 .fields(commonFieldsList)
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .build();
     }
 
