@@ -99,23 +99,6 @@ public class PathLinkMapper {
             throw new IllegalArgumentException("Expected PathLinkEnd " + pathLinkEnd + " to contain PlaceRef");
         }
 
-
-        if(input.get("quay") != null) {
-            Optional<String> quayNetexId = idResolver.extractIdIfPresent(ID, (Map) input.get("quay"));
-            if(quayNetexId.isPresent()) {
-                QuayReference quayReference = new QuayReference();
-                quayReference.setRef(quayNetexId.get());
-
-                // Should be able to receive version as well?
-                quayReference.setVersion(ANY_VERSION);
-
-                pathLinkEnd.setPlaceRef(quayReference);
-                logger.info("Did set quay reference on PathLinkEnd: {}", quayReference);
-            }
-        } else {
-            logger.warn("Could not resolve Quay. Stop Place is not supported yet. Input was: {}", input);
-        }
-
         logger.trace("Mapped {}", pathLinkEnd);
         return pathLinkEnd;
     }
