@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 import static graphql.Scalars.GraphQLInt;
+import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -55,6 +56,9 @@ public class PathLinkObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(PATH_LINK_TO)
                         .type(pathLinkEndObjecttype))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
                 .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(TRANSFER_DURATION)
