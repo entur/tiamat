@@ -27,18 +27,15 @@ class TopographicPlaceFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         Example<TopographicPlace> example = getTopographicPlaceExample(environment);
 
-        String nsrId = environment.getArgument(ID);
-        Boolean allVersions = environment.getArgument(ALL_VERSIONS);
-        if(allVersions == null) {
-            allVersions = false;
-        }
+        String netexId = environment.getArgument(ID);
+        boolean allVersions = Boolean.parseBoolean(environment.getArgument(ALL_VERSIONS));
 
-        if (nsrId != null) {
+        if (netexId != null) {
 
             if (allVersions) {
-                return topographicPlaceRepository.findByNetexId(nsrId);
+                return topographicPlaceRepository.findByNetexId(netexId);
             } else {
-                return Arrays.asList(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(nsrId));
+                return Arrays.asList(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId));
             }
         }
         return topographicPlaceRepository.findAll(example);
