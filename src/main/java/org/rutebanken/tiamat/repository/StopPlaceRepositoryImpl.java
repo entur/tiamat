@@ -249,7 +249,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
-        String orderByStatement = "";
+        List<String> orderByStatements = new ArrayList<>();
 
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
@@ -268,7 +268,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 operators.add("or");
                 wheres.add("netexId like concat('%', :query, '%'))");
                 operators.add("and");
-                orderByStatement = " order by similarity(stopPlace.name.value, :query) desc";
+                orderByStatements.add("similarity(stopPlace.name.value, :query) desc");
             }
 
             if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
@@ -312,7 +312,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             queryString.append(' ').append(wheres.get(i)).append(' ');
         }
 
-        queryString.append(orderByStatement);
+        orderByStatements.add("netexId, version asc");
+        queryString.append(" order by");
+
+        for(int i = 0; i < orderByStatements.size(); i++) {
+            if(i > 0) {
+                queryString.append(',');
+            }
+            queryString.append(' ').append(orderByStatements.get(i)).append(' ');
+        }
 
         logger.debug("{}", queryString);
         final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString.toString(), StopPlace.class);
