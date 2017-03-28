@@ -45,7 +45,7 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher pathLinkFetcher;
 
     @Autowired
-    DataFetcher objectReferenceFetcher;
+    DataFetcher referenceFetcher;
 
     @Autowired
     DataFetcher pathLinkUpdater;
@@ -119,7 +119,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name("addressablePlace")
                         .type(addressablePlaceObjectType)
-                        .dataFetcher(objectReferenceFetcher))
+                        .dataFetcher(referenceFetcher))
                 .build();
 
 

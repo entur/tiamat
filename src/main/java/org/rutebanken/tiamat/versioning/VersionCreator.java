@@ -64,9 +64,6 @@ public class VersionCreator {
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
-                // New version for path link does not mean new version for quay, stop place or entrance.
-//                .fieldMap("quay").converter(pathLinkEndPassThroughId).add()
-//                .fieldMap("stopPlace").converter(pathLinkEndPassThroughId).add()
                 .fieldMap("entrance").converter(pathLinkEndPassThroughId).add()
                 .byDefault()
                 .register();
