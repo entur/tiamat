@@ -77,6 +77,7 @@ public class GraphQLNames {
     public static final String QUERY = "query";
     public static final String PAGE = "page";
     public static final String SIZE = "size";
+    public static final String ALL_VERSIONS = "allVersions";
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";
