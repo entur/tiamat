@@ -33,6 +33,10 @@ public class PathLinkMapper {
         PathLink pathLink = new PathLink();
         idResolver.extractAndSetNetexId(ID, input, pathLink);
 
+        if(input.get(VERSION) != null) {
+            pathLink.setVersion((Long) input.get(VERSION));
+        }
+
         if(input.get(PATH_LINK_FROM) != null) {
             pathLink.setFrom(mapToPathLinkEnd(PATH_LINK_FROM, input));
         }
