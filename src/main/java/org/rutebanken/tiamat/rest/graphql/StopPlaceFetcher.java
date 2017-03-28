@@ -50,6 +50,10 @@ class StopPlaceFetcher implements DataFetcher {
 
         String netexId = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
+
+        stopPlaceSearchBuilder.setAllVersions(Boolean.valueOf(environment.getArgument(ALL_VERSIONS)));
+
+
         if (netexId != null && !netexId.isEmpty()) {
 
             try {
