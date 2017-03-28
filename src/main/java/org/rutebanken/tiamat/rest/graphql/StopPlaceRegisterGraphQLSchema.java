@@ -110,6 +110,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
+        GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
+                .name(ALL_VERSIONS)
+                .type(GraphQLBoolean)
+                .description("Fetch all versions for entitites in result")
+                .build();
+
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name("StopPlaceRegister")
                 .description("Query and search for data")
@@ -117,7 +123,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(stopPlaceObjectType))
                         .name(FIND_STOPPLACE)
                         .description("Search for StopPlaces")
-                        .argument(createFindStopPlaceArguments())
+                        .argument(createFindStopPlaceArguments(allVersionsArgument))
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
@@ -130,13 +136,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(FIND_TOPOGRAPHIC_PLACE)
                         .type(new GraphQLList(topographicPlaceObjectType))
                         .description("Find topographic places")
-                        .argument(createFindTopographicPlaceArguments())
+                        .argument(createFindTopographicPlaceArguments(allVersionsArgument))
                         .dataFetcher(topographicPlaceFetcher))
                 .field(newFieldDefinition()
                         .name(FIND_PATH_LINK)
                         .type(new GraphQLList(pathLinkObjectType))
                         .description("Find path links")
-                        .argument(createFindPathLinkArguments())
+                        .argument(createFindPathLinkArguments(allVersionsArgument))
                         .dataFetcher(pathLinkFetcher))
                 .build();
 
@@ -185,12 +191,13 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private List<GraphQLArgument> createFindPathLinkArguments() {
+    private List<GraphQLArgument> createFindPathLinkArguments(GraphQLArgument allVersionsArgument) {
         List<GraphQLArgument> arguments = new ArrayList<>();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
                 .build());
+        arguments.add(allVersionsArgument);
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
@@ -198,12 +205,13 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private List<GraphQLArgument> createFindTopographicPlaceArguments() {
+    private List<GraphQLArgument> createFindTopographicPlaceArguments(GraphQLArgument allVersionsArgument) {
         List<GraphQLArgument> arguments = new ArrayList<>();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
                 .build());
+        arguments.add(allVersionsArgument);
         arguments.add(GraphQLArgument.newArgument()
                 .name(TOPOGRAPHIC_PLACE_TYPE)
                 .type(topographicPlaceTypeEnum)
@@ -217,14 +225,10 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private List<GraphQLArgument> createFindStopPlaceArguments() {
+    private List<GraphQLArgument> createFindStopPlaceArguments(GraphQLArgument allVersionsArgument) {
         List<GraphQLArgument> arguments = new ArrayList<>();
         arguments.addAll(createPageAndSizeArguments());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.")
-                .build());
+        arguments.add(allVersionsArgument);
                 //Search
         arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)
