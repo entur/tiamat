@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
+import org.rutebanken.tiamat.service.StopPlaceUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -30,6 +28,9 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 class StopPlaceUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceUpdater.class);
+
+    @Autowired
+    private StopPlaceUpdaterService stopPlaceUpdaterService;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -94,7 +95,7 @@ class StopPlaceUpdater implements DataFetcher {
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
                     stopPlace.setChanged(ZonedDateTime.now());
-                    stopPlace = stopPlaceRepository.save(stopPlace);
+                    stopPlace = stopPlaceUpdaterService.save(stopPlace);
 
                 }
             }
@@ -207,6 +208,43 @@ class StopPlaceUpdater implements DataFetcher {
             }
 
             
+            isUpdated = true;
+        }
+
+        if (input.get("accessibilityAssessment") != null) {
+            AccessibilityAssessment accessibilityAssessment = entity.getAccessibilityAssessment();
+            if (accessibilityAssessment == null) {
+                accessibilityAssessment = new AccessibilityAssessment();
+            }
+
+            Map<String, Object> accessibilityAssessmentInput = (Map) input.get("accessibilityAssessment");
+            List<AccessibilityLimitation> limitations = accessibilityAssessment.getLimitations();
+            AccessibilityLimitation limitation;
+            if (limitations == null || limitations.isEmpty()) {
+                limitations = new ArrayList<>();
+                limitation = new AccessibilityLimitation();
+            } else {
+                limitation = limitations.get(0);
+            }
+
+            Map<String, LimitationStatusEnumeration> limitationsInput = (Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations");
+
+            limitation.setWheelchairAccess(limitationsInput.get("wheelchairAccess"));
+            limitation.setAudibleSignalsAvailable(limitationsInput.get("audibleSignalsAvailable"));
+            limitation.setStepFreeAccess(limitationsInput.get("stepFreeAccess"));
+            limitation.setLiftFreeAccess(limitationsInput.get("liftFreeAccess"));
+            limitation.setVisualSignsAvailable(limitationsInput.get("visualSignsAvailable"));
+            limitation.setEscalatorFreeAccess(limitationsInput.get("escalatorFreeAccess"));
+
+            if (!limitations.contains(limitation)) {
+                limitations.add(limitation);
+                accessibilityAssessment.setLimitations(limitations);
+                accessibilityAssessment.setCreated(ZonedDateTime.now());
+            } else {
+                limitation.setChanged(ZonedDateTime.now());
+            }
+
+            entity.setAccessibilityAssessment(accessibilityAssessment);
             isUpdated = true;
         }
         return isUpdated;

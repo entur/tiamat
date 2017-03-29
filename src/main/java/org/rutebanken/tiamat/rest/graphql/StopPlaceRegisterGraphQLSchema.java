@@ -66,6 +66,8 @@ public class StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
 
+        commonFieldsList.add(newFieldDefinition().name("accessibilityAssessment").type(accessibilityAssessmentObjectType).build());
+
         GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
                 .name(GEOMETRY)
                 .type(geoJsonObjectType)
@@ -383,6 +385,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name("accessibilityAssessment").type(accessibilityAssessmentInputObjectType).build());
 
         return commonInputFieldsList;
     }

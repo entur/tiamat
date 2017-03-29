@@ -1,9 +1,8 @@
 package org.rutebanken.tiamat;
 
-import com.hazelcast.core.HazelcastInstance;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -13,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.transaction.AfterTransaction;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
@@ -33,6 +31,7 @@ public abstract class CommonSpringBootTest {
     @Autowired
     protected QuayRepository quayRepository;
 
+    @Before
     @After
     public void clearRepositories() {
 

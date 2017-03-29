@@ -10,16 +10,12 @@ public abstract class SiteElement extends AddressablePlace {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
-
     @Transient
     protected List<AccessModeEnumeration> accessModes;
-
     @Transient
     protected MultilingualStringEntity nameSuffix;
-
     @Transient
     protected MultilingualStringEntity crossRoad;
 
