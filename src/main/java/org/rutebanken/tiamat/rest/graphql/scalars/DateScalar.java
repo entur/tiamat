@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
+import graphql.language.StringValue;
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 
@@ -18,7 +19,7 @@ public class DateScalar {
     public static GraphQLScalarType GraphQLDateScalar = new GraphQLScalarType("Date", DATE_SCALAR_DESCRIPTION, new Coercing() {
         @Override
         public String serialize(Object input) {
-            if(input instanceof ZonedDateTime) {
+            if (input instanceof ZonedDateTime) {
                 return ((ZonedDateTime) input).format(FORMATTER);
             }
             return null;
@@ -31,6 +32,9 @@ public class DateScalar {
 
         @Override
         public Object parseLiteral(Object input) {
+            if (input instanceof StringValue) {
+                return parseValue(((StringValue) input).getValue());
+            }
             return null;
         }
     });

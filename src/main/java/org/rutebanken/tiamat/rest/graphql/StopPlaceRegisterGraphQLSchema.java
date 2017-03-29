@@ -158,7 +158,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType quayInputObjectType = createQuayInputObjectType(commonInputFieldList);
 
-        GraphQLInputObjectType validBetweenInputObjectType = createValidBetweenInputObjectType(commonInputFieldList);
+        GraphQLInputObjectType validBetweenInputObjectType = createValidBetweenInputObjectType();
 
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
@@ -382,18 +382,17 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private GraphQLInputObjectType createValidBetweenInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList) {
+    private GraphQLInputObjectType createValidBetweenInputObjectType() {
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_VALID_BETWEEN)
-                .fields(commonInputFieldsList)
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN_FROM_DATE)
                         .type(new GraphQLNonNull(GraphQLDateScalar))
-                        .description(DATE_SCALAR_DESCRIPTION))
+                        .description("When the new version is valid from"))
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN_TO_DATE)
-                        .type(new GraphQLNonNull(GraphQLDateScalar))
-                        .description(DATE_SCALAR_DESCRIPTION))
+                        .type(GraphQLDateScalar)
+                        .description("When the version is no longer valid"))
                 .build();
     }
 

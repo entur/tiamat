@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
+import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
 import org.rutebanken.tiamat.service.StopPlaceUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
+    @Autowired
+    private ValidBetweenMapper validBetweenMapper;
 
     private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
 
@@ -104,7 +108,6 @@ class StopPlaceUpdater implements DataFetcher {
     }
 
     /**
-     *
      * @param input
      * @param stopPlace
      * @return true if StopPlace or any og the attached Quays are updated
@@ -115,6 +118,13 @@ class StopPlaceUpdater implements DataFetcher {
         if (input.get(STOP_PLACE_TYPE) != null) {
             stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));
             isUpdated = true;
+        }
+
+        if (input.get(VALID_BETWEENS) != null) {
+            List values = (List) input.get(VALID_BETWEENS);
+            for (Object value : values) {
+                stopPlace.getValidBetweens().add(validBetweenMapper.map((Map) value));
+            }
         }
 
         if (input.get(QUAYS) != null) {
@@ -207,7 +217,7 @@ class StopPlaceUpdater implements DataFetcher {
                 }
             }
 
-            
+
             isUpdated = true;
         }
 
