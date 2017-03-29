@@ -34,7 +34,7 @@ public class ValidBetweenMapper {
         }
 
         if(input.get(VALID_BETWEEN_TO_DATE) != null) {
-            validBetween.setFromDate((ZonedDateTime) input.get(VALID_BETWEEN_TO_DATE));
+            validBetween.setToDate((ZonedDateTime) input.get(VALID_BETWEEN_TO_DATE));
         }
 
         return validBetween;

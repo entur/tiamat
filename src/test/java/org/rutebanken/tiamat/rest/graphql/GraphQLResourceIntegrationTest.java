@@ -380,6 +380,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String updatedName = "Testing name ";
         String updatedShortName = "Testing shortname ";
         String updatedDescription = "Testing description ";
+        String fromDate = "2012-04-23T18:25:43.511Z";
+        String toDate = "2018-04-23T18:25:43.511Z";
 
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);
@@ -399,6 +401,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
+                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
@@ -407,6 +410,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  stopPlaceType " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
+                "  validBetweens { fromDate toDate } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
@@ -419,7 +423,9 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
-                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
+                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible))
+                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
+                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
     }
 
 
