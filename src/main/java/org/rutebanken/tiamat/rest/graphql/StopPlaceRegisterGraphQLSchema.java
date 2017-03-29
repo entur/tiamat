@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
@@ -20,6 +21,8 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateScalar;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
@@ -102,7 +105,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
-        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType);
+        GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
+
+        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType);
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -153,7 +158,10 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType quayInputObjectType = createQuayInputObjectType(commonInputFieldList);
 
-        GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList, topographicPlaceInputObjectType, quayInputObjectType);
+        GraphQLInputObjectType validBetweenInputObjectType = createValidBetweenInputObjectType(commonInputFieldList);
+
+        GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
+                topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
@@ -315,7 +323,8 @@ public class StopPlaceRegisterGraphQLSchema {
     }
 
 
-    private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
+    private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList,
+                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType) {
         return newObject()
                     .name(OUTPUT_TYPE_STOPPLACE)
                     .fields(commonFieldsList)
@@ -334,6 +343,9 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(QUAYS)
                             .type(new GraphQLList(quayObjectType)))
+                    .field(newFieldDefinition()
+                            .name(VALID_BETWEENS)
+                            .type(new GraphQLList(validBetweenObjectType)))
                     .build();
     }
 
@@ -356,9 +368,40 @@ public class StopPlaceRegisterGraphQLSchema {
                     .build();
     }
 
+    private GraphQLObjectType createValidBetweenObjectType() {
+        return newObject()
+                .name(OUTPUT_TYPE_VALID_BETWEEN)
+                .field(newFieldDefinition()
+                        .name(VALID_BETWEEN_FROM_DATE)
+                        .type(GraphQLDateScalar)
+                        .description(DATE_SCALAR_DESCRIPTION))
+                .field(newFieldDefinition()
+                        .name(VALID_BETWEEN_TO_DATE)
+                        .type(GraphQLDateScalar)
+                        .description(DATE_SCALAR_DESCRIPTION))
+                .build();
+    }
+
+    private GraphQLInputObjectType createValidBetweenInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList) {
+        return GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_VALID_BETWEEN)
+                .fields(commonInputFieldsList)
+                .field(newInputObjectField()
+                        .name(VALID_BETWEEN_FROM_DATE)
+                        .type(new GraphQLNonNull(GraphQLDateScalar))
+                        .description(DATE_SCALAR_DESCRIPTION))
+                .field(newInputObjectField()
+                        .name(VALID_BETWEEN_TO_DATE)
+                        .type(new GraphQLNonNull(GraphQLDateScalar))
+                        .description(DATE_SCALAR_DESCRIPTION))
+                .build();
+    }
+
+
     private GraphQLInputObjectType createStopPlaceInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList,
                                                                   GraphQLInputObjectType topographicPlaceInputObjectType,
-                                                                  GraphQLInputObjectType quayObjectInputType) {
+                                                                  GraphQLInputObjectType quayObjectInputType,
+                                                                  GraphQLInputObjectType validBetweenInputObjectType) {
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_STOPPLACE)
                 .fields(commonInputFieldsList)
@@ -374,6 +417,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectInputType)))
+                .field(newInputObjectField()
+                        .name(VALID_BETWEENS)
+                        .type(new GraphQLList(validBetweenInputObjectType)))
                 .build();
     }
 
