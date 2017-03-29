@@ -1,8 +1,8 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import graphql.*;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Component
@@ -57,7 +56,7 @@ public class GraphQLResource {
 
 			// convert JSON string to Map
 			try {
-				variables = mapper.readValue(s, new TypeReference<Map<String, Object>>(){});
+				variables = mapper.readValue(s, TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 			} catch (IOException e) {
                 HashMap<String, Object> content = new HashMap<>();
                 content.put("errors", e.getMessage());
