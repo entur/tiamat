@@ -122,9 +122,11 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (input.get(VALID_BETWEENS) != null) {
             List values = (List) input.get(VALID_BETWEENS);
+            stopPlace.getValidBetweens().clear();
             for (Object value : values) {
                 stopPlace.getValidBetweens().add(validBetweenMapper.map((Map) value));
             }
+            isUpdated = true;
         }
 
         if (input.get(QUAYS) != null) {
