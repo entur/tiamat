@@ -283,6 +283,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLInputObjectType refInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_ENTITY_REF)
+            .description(ENTITY_REF_DESCRIPTION)
             .field(newInputObjectField()
                     .name(ENTITY_REF_REF)
                     .type(GraphQLString)

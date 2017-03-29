@@ -20,6 +20,7 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_ENTITY_REF = "EntityRef";
     public static final String INPUT_TYPE_ENTITY_REF = OUTPUT_TYPE_ENTITY_REF + INPUT_TYPE_POSTFIX;
+    public static final String ENTITY_REF_DESCRIPTION = "A reference to an entity with version";
 
     public static final String ENTITY_REF_REF = "ref";
     public static final String ENTITY_REF_REF_DESCRIPTION = "The NeTEx ID of the of the referenced entity. The reference must already exist";

@@ -19,7 +19,7 @@ public class EntityRefObjectTypeCreator {
     public GraphQLObjectType create(GraphQLObjectType addressablePlaceObjectType) {
         return newObject()
                 .name(OUTPUT_TYPE_ENTITY_REF)
-                .description("A reference to an object")
+                .description(ENTITY_REF_DESCRIPTION)
                 .field(newFieldDefinition()
                         .name(ENTITY_REF_REF)
                         .type(GraphQLString))
