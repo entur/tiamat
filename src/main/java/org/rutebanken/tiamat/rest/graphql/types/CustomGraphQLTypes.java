@@ -285,10 +285,12 @@ public class CustomGraphQLTypes {
             .name(INPUT_TYPE_ENTITY_REF)
             .field(newInputObjectField()
                     .name(ENTITY_REF_REF)
-                    .type(GraphQLString))
+                    .type(GraphQLString)
+                    .description(ENTITY_REF_REF_DESCRIPTION))
             .field(newInputObjectField()
                     .name(ENTITY_REF_VERSION)
-                    .type(GraphQLString))
+                    .type(GraphQLString)
+                    .description(ENTITY_REF_VERSION_DESCRIPTION))
             .build();
 
     public static GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()

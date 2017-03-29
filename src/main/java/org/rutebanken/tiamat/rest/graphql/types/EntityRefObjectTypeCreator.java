@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_VERSION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_ENTITY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component
 public class EntityRefObjectTypeCreator {
@@ -25,12 +23,15 @@ public class EntityRefObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(ENTITY_REF_REF)
                         .type(GraphQLString))
+                        .description(ENTITY_REF_REF_DESCRIPTION)
                 .field(newFieldDefinition()
                         .name(ENTITY_REF_VERSION)
                         .type(GraphQLString))
+                        .description(ENTITY_REF_VERSION_DESCRIPTION)
                 .field(newFieldDefinition()
                         .name("addressablePlace")
                         .type(addressablePlaceObjectType)
+                        .description("")
                         .dataFetcher(referenceFetcher))
                 .build();
     }
