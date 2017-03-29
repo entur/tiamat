@@ -72,8 +72,10 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
+                .field("validBetween", "validBetweens")
                 .customize(dataManagedObjectStructureMapper)
                 .exclude("id")
                 .exclude("keyList")
@@ -97,7 +99,7 @@ public class NetexMapper {
         converters.add(new QuayListConverter());
         converters.add(new AlternativeNamesConverter());
         converters.add(new EquipmentPlacesConverter());
-        converters.add(new AvailabilityConditionsConverter());
+        converters.add(new ValidBetweenConverter());
         converters.add(new BoardingPositionsConverter());
         converters.add(new CheckConstraintsConverter());
         converters.add(new DestinationDisplayViewsConverter());

@@ -87,17 +87,17 @@ public class VersionCreator {
         ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
         System.out.println("New version valid from : " + newVersionValidFrom);
         logger.debug("New version valid from {}", newVersionValidFrom);
-        if (!entityInVersionStructure.getValidityConditions().isEmpty()) {
-            AvailabilityCondition availabilityCondition = entityInVersionStructure.getValidityConditions().get(0);
-            availabilityCondition.setToDate(newVersionValidFrom);
+        if (!entityInVersionStructure.getValidBetweens().isEmpty()) {
+            ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);
+            validBetween.setToDate(newVersionValidFrom);
         }
 
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
         versionIncrementor.incrementVersion(copy);
 
-        copy.getValidityConditions().clear();
-        copy.getValidityConditions().add(new AvailabilityCondition(newVersionValidFrom));
+        copy.getValidBetweens().clear();
+        copy.getValidBetweens().add(new ValidBetween(newVersionValidFrom));
 
         return type.cast(copy);
     }
@@ -115,7 +115,7 @@ public class VersionCreator {
     public <T extends EntityInVersionStructure> T initiateFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Initiating new version for entity {}", entityInVersionStructure);
         entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        entityInVersionStructure.getValidityConditions().add(new AvailabilityCondition(ZonedDateTime.now()));
+        entityInVersionStructure.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
         return type.cast(entityInVersionStructure);
     }
 
