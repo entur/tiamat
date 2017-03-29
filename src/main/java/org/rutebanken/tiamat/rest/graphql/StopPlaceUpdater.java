@@ -4,6 +4,7 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -21,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.rutebanken.tiamat.auth.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
@@ -44,6 +46,9 @@ class StopPlaceUpdater implements DataFetcher {
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
+    @Autowired
+    private StopPlaceAuthorizationService authorizationService;
+
     private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
 
 
@@ -61,14 +66,15 @@ class StopPlaceUpdater implements DataFetcher {
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
         StopPlace stopPlace = null;
+        StopPlace previousVersion = null;
         if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
             Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("Updating StopPlace {}", netexId);
-                stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-
+                previousVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+                stopPlace = previousVersion;
                 Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
 
             } else {
@@ -95,6 +101,7 @@ class StopPlaceUpdater implements DataFetcher {
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
                     stopPlace.setChanged(ZonedDateTime.now());
+                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace, previousVersion);
                     stopPlace = stopPlaceUpdaterService.save(stopPlace);
 
                 }

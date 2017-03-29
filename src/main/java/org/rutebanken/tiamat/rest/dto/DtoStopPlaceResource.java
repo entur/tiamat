@@ -5,6 +5,7 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
+import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
@@ -33,6 +34,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 
+import static org.rutebanken.tiamat.auth.AuthorizationConstants.ROLE_EDIT_STOPS;
+
 @Component
 @Produces("application/json")
 @Path("/stop_place")
@@ -55,8 +58,11 @@ public class DtoStopPlaceResource {
     @Autowired
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
-    @GET
-    public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
+	@Autowired
+	private StopPlaceAuthorizationService authorizationService;
+
+	@GET
+	public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
 
         keyCloak();
 
@@ -158,6 +164,7 @@ public class DtoStopPlaceResource {
         StopPlace currentStopPlace = stopPlaceRepository.findOne(Long.valueOf(simpleStopPlaceDto.id));
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDto);
         if(stopPlace != null) {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace, currentStopPlace);
             stopPlace = save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace, true);
         }
@@ -180,6 +187,7 @@ public class DtoStopPlaceResource {
 
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
         if(stopPlace != null) {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace);
             stopPlace = save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace, true);
         }
