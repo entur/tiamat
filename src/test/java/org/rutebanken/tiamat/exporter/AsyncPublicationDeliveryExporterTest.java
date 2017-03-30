@@ -2,13 +2,12 @@ package org.rutebanken.tiamat.exporter;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
@@ -22,7 +21,7 @@ import java.io.IOException;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AsyncPublicationDeliveryExporterTest extends CommonSpringBootTest {
+public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;

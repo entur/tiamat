@@ -1,13 +1,12 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import net.opengis.gml._3.DeprecatedDirectPositionListType;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,7 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PathLinkImportTest extends CommonSpringBootTest {
+public class PathLinkImportTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;

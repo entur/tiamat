@@ -7,15 +7,12 @@ import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -26,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.USED_H2_IDS_BY_ENTITY;
 
-public class GaplessIdGeneratorServiceTest extends CommonSpringBootTest {
+public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;

@@ -1,25 +1,20 @@
 package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
-public class PathLinksImporterTest extends CommonSpringBootTest {
+public class PathLinksImporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private PathLinksImporter pathLinksImporter;

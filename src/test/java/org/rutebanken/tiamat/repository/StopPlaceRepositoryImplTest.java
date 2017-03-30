@@ -3,18 +3,14 @@ package org.rutebanken.tiamat.repository;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +22,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Transactional
-public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
+public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     @Transactional(propagation = Propagation.NEVER)
     @Test

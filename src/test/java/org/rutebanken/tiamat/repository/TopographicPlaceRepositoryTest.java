@@ -1,19 +1,15 @@
 package org.rutebanken.tiamat.repository;
 
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class TopographicPlaceRepositoryTest extends CommonSpringBootTest {
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+public class TopographicPlaceRepositoryTest extends TiamatIntegrationTest {
 
     @Test
     public void findByTopographicPlaceAndCountry() {

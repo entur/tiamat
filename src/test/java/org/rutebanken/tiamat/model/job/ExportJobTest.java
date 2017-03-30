@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.model.job;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExportJobTest extends CommonSpringBootTest {
+public class ExportJobTest extends TiamatIntegrationTest {
 
     @Autowired
     private ExportJobRepository exportJobRepository;

@@ -1,20 +1,10 @@
 package org.rutebanken.tiamat.pelias;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CountyAndMunicipalityLookupServiceTest extends CommonSpringBootTest {
+public class CountyAndMunicipalityLookupServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;

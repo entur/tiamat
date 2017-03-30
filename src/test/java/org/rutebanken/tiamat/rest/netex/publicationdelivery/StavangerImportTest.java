@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Import tests for different cases in Stavanger.
  */
-public class StavangerImportTest  extends CommonSpringBootTest {
+public class StavangerImportTest  extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;

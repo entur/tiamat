@@ -3,21 +3,13 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 
 import static com.jayway.restassured.RestAssured.given;
 
 
-public abstract class AbstractGraphQLResourceIntegrationTest extends CommonSpringBootTest {
+public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
 
     protected static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
 

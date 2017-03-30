@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
 @ActiveProfiles("geodb")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-public abstract class CommonSpringBootTest {
+public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected StopPlaceRepository stopPlaceRepository;

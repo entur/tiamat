@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -15,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class QuayTest extends CommonSpringBootTest {
+public class QuayTest extends TiamatIntegrationTest {
 
     /**
      * Using example data from https://github.com/StichtingOpenGeo/NeTEx/blob/master/examples/functions/stopPlace/Netex_10_StopPlace_uk_ComplexStation_Wimbledon_1.xml
