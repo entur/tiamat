@@ -23,18 +23,7 @@ import java.util.stream.Collectors;
 public class DtoQuayResource {
 
     @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private QuayAssembler quayAssembler;
-
-    @Autowired
-    StopPlaceRepository stopPlaceRepository;
-
-    @GET
-    public List<QuayDto> getQuays() {
-        return quayRepository.findAll().stream().map(quay -> quayAssembler.assemble(quay)).collect(Collectors.toList());
-    }
+    private StopPlaceRepository stopPlaceRepository;
 
     @GET
     @Produces("text/plain")

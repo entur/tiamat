@@ -25,7 +25,7 @@ public class DtoStopPlaceResource {
     private static final Logger logger = LoggerFactory.getLogger(DtoStopPlaceResource.class);
 
     @Autowired
-    StopPlaceRepository stopPlaceRepository;
+    private StopPlaceRepository stopPlaceRepository;
 
     @GET
     @Produces("text/plain")
