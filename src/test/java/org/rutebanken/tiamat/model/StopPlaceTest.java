@@ -182,21 +182,21 @@ public class StopPlaceTest extends CommonSpringBootTest {
 
         StopPlace stopPlace = new StopPlace();
 
-        AvailabilityCondition availabilityCondition = new AvailabilityCondition();
-        availabilityCondition.setFromDate(ZonedDateTime.now());
-        availabilityCondition.setToDate(ZonedDateTime.now().plusWeeks(10));
+        ValidBetween validBetween = new ValidBetween();
+        validBetween.setFromDate(ZonedDateTime.now());
+        validBetween.setToDate(ZonedDateTime.now().plusWeeks(10));
         
-        stopPlace.getValidityConditions().add(availabilityCondition);
+        stopPlace.getValidBetweens().add(validBetween);
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getValidityConditions()).isNotEmpty();
+        assertThat(actualStopPlace.getValidBetweens()).isNotEmpty();
 
-        ValidBetween actualValidBetween = actualStopPlace.getValidityConditions().get(0);
-        assertThat(actualValidBetween.getFromDate()).isEqualTo(availabilityCondition.getFromDate());
-        assertThat(actualValidBetween.getToDate()).isEqualTo(availabilityCondition.getToDate());
+        ValidBetween actualValidBetween = actualStopPlace.getValidBetweens().get(0);
+        assertThat(actualValidBetween.getFromDate()).isEqualTo(validBetween.getFromDate());
+        assertThat(actualValidBetween.getToDate()).isEqualTo(validBetween.getToDate());
     }
 
     @Ignore
