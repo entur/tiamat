@@ -30,6 +30,11 @@ security.basic.enabled=false
 
 peliasReverseLookupEndpoint=https://beta.rutebanken.org/apiman-gateway/rutebanken/geocoder/1.0/reverse
 logging.level.no.rutebanken.tiamat.pelias=TRACE
+
+keycloak.realm=rutebanken
+keycloak.auth-server-url=https://beta.rutebanken.org/admin/neti/api
+keycloak.resource=Tiamat
+
 ```
 
 To start Tiamat with this configuration, specify **spring.config.location**:
