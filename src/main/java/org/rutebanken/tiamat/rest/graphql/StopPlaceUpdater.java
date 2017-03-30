@@ -10,8 +10,8 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
-import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,9 +105,11 @@ class StopPlaceUpdater implements DataFetcher {
                                 .filter(quay -> quay.getNetexId() == null)
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
+
+                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedStopPlace);
+
                     updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
 
-                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, updatedStopPlace, existingVersion);
                     return updatedStopPlace;
                 }
             }
