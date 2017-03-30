@@ -85,12 +85,6 @@ public class VersionCreator {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
         ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
-        System.out.println("New version valid from : " + newVersionValidFrom);
-        logger.debug("New version valid from {}", newVersionValidFrom);
-        if (!entityInVersionStructure.getValidityConditions().isEmpty()) {
-            AvailabilityCondition availabilityCondition = entityInVersionStructure.getValidityConditions().get(0);
-            availabilityCondition.setToDate(newVersionValidFrom);
-        }
 
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
@@ -102,11 +96,32 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
+    public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
+        //TODO: Need to support "valid from" set explicitly
+        System.out.println("New version valid from : " + newVersionValidFrom);
+        logger.debug("New version valid from {}", newVersionValidFrom);
+        if (!entityInVersionStructure.getValidityConditions().isEmpty()) {
+            AvailabilityCondition availabilityCondition = entityInVersionStructure.getValidityConditions().get(0);
+            availabilityCondition.setToDate(newVersionValidFrom);
+        }
+        return entityInVersionStructure;
+    }
+
     public StopPlace createNextVersion(StopPlace stopPlace) {
 
         StopPlace newVersion = createNextVersion(stopPlace, StopPlace.class);
+
         if (newVersion.getQuays() != null) {
-            newVersion.getQuays().forEach(quay -> versionIncrementor.incrementVersion(quay));
+            newVersion.getQuays().forEach(quay -> {
+                versionIncrementor.incrementVersion(quay);
+                if (quay.getAccessibilityAssessment() != null) {
+                    AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
+                    versionIncrementor.incrementVersion(accessibilityAssessment);
+                    if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
+                        versionIncrementor.incrementVersion(accessibilityAssessment.getLimitations().get(0));
+                    }
+                }
+            });
         }
 
         return newVersion;

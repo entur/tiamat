@@ -1,35 +1,27 @@
-package org.rutebanken.tiamat.model.listeners;
+package org.rutebanken.tiamat.versioning.util;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.StopPlaceUpdaterService;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.*;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles("geodb")
-@EnableAspectJAutoProxy(proxyTargetClass = true)
 @Transactional
 @Commit
-public class AccessibilityAssessmentOptimizerTest {
+public class AccessibilityAssessmentOptimizerTest extends CommonSpringBootTest {
 
     @Autowired
     public QuayRepository quayRepository;
@@ -38,7 +30,7 @@ public class AccessibilityAssessmentOptimizerTest {
     public StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    public StopPlaceUpdaterService stopPlaceUpdaterService;
+    public StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     /*
      * Testcase:
@@ -65,7 +57,7 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlaceUpdaterService.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -108,7 +100,7 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlaceUpdaterService.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -158,9 +150,9 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlaceUpdaterService.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createNewVersion(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
@@ -173,7 +165,7 @@ public class AccessibilityAssessmentOptimizerTest {
 
         actualStopPlace.getQuays().add(quay3);
 
-        stopPlaceUpdaterService.save(actualStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace, actualStopPlace);
 
         StopPlace actualStopPlace2 = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -228,9 +220,9 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlaceUpdaterService.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createNewVersion(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNull();
 
@@ -240,7 +232,7 @@ public class AccessibilityAssessmentOptimizerTest {
 
         actualStopPlace.getQuays().add(quay3);
 
-        stopPlaceUpdaterService.save(actualStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace, actualStopPlace);
 
         StopPlace actualStopPlace2 = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -279,6 +271,80 @@ public class AccessibilityAssessmentOptimizerTest {
                 });
     }
 
+
+    /*
+     * Testcase:
+     * - Two quays - no AccessibilityAssessment set
+     * - StopPlace thus has none
+     * - One quay gets AccessibilityAssessment, other quay should be set to all UNKNOWN
+     */
+    @Test
+    public void persistAndUpdateStopPlaceWithQuayWithAllNullAccessibilityAssessment() {
+
+        Quay quay1 = new Quay();
+        quay1.setName(createEmbeddableString("quay1"));
+
+        Quay quay2 = new Quay();
+        quay2.setName(createEmbeddableString("quay2"));
+
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.getQuays().add(quay1);
+        stopPlace.getQuays().add(quay2);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createNewVersion(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
+
+        assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
+        AccessibilityLimitation limitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);
+        assertThat(limitation.getWheelchairAccess()).isEqualTo(UNKNOWN);
+        assertThat(limitation.getLiftFreeAccess()).isEqualTo(UNKNOWN);
+        assertThat(limitation.getEscalatorFreeAccess()).isEqualTo(UNKNOWN);
+        assertThat(limitation.getAudibleSignalsAvailable()).isEqualTo(UNKNOWN);
+        assertThat(limitation.getStepFreeAccess()).isEqualTo(UNKNOWN);
+        assertThat(stopPlace.getAccessibilityAssessment().getMobilityImpairedAccess()).isEqualTo(UNKNOWN);
+
+        actualStopPlace.getQuays().stream().forEach(quay -> assertThat(quay.getAccessibilityAssessment()).isNull());
+
+        Set<Quay> quays = actualStopPlace.getQuays();
+        for (Quay quay : quays) {
+            if (quay.getName().getValue().equals(quay1.getName().getValue())) {
+                quay.setAccessibilityAssessment(createAccessibilityAssessment(FALSE, TRUE, TRUE, TRUE, TRUE));
+            }
+        }
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace, actualStopPlace);
+
+        StopPlace actualStopPlace2 = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+
+        assertThat(actualStopPlace2.getAccessibilityAssessment()).isNull();
+
+        actualStopPlace2.getQuays()
+                .stream()
+                .forEach(quay -> {
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+
+                    assertThat(actualAccessibilityLimitation).isNotNull();
+
+                    if (quay.getName().getValue().equals(quay1.getName().getValue())) {
+                        assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(FALSE);
+                        assertThat(actualAccessibilityLimitation.getLiftFreeAccess()).isEqualTo(TRUE);
+                        assertThat(actualAccessibilityLimitation.getEscalatorFreeAccess()).isEqualTo(TRUE);
+                        assertThat(actualAccessibilityLimitation.getAudibleSignalsAvailable()).isEqualTo(TRUE);
+                        assertThat(actualAccessibilityLimitation.getStepFreeAccess()).isEqualTo(TRUE);
+                        assertThat(quay.getAccessibilityAssessment().getMobilityImpairedAccess()).isEqualTo(PARTIAL);
+                    } else {
+                        assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(UNKNOWN);
+                        assertThat(actualAccessibilityLimitation.getLiftFreeAccess()).isEqualTo(UNKNOWN);
+                        assertThat(actualAccessibilityLimitation.getEscalatorFreeAccess()).isEqualTo(UNKNOWN);
+                        assertThat(actualAccessibilityLimitation.getAudibleSignalsAvailable()).isEqualTo(UNKNOWN);
+                        assertThat(actualAccessibilityLimitation.getStepFreeAccess()).isEqualTo(UNKNOWN);
+                        assertThat(quay.getAccessibilityAssessment().getMobilityImpairedAccess()).isEqualTo(UNKNOWN);
+                    }
+                });
+    }
+
     /*
      * Testcase:
      * - StopPlace and two quays with different AccessibilityAssessment
@@ -303,7 +369,7 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlace = stopPlaceUpdaterService.save(stopPlace);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -360,7 +426,7 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlace = stopPlaceUpdaterService.save(stopPlace);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
@@ -418,7 +484,7 @@ public class AccessibilityAssessmentOptimizerTest {
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
-        stopPlaceUpdaterService.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 

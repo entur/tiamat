@@ -9,7 +9,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
-import org.rutebanken.tiamat.service.StopPlaceUpdaterService;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class StopPlaceUpdater implements DataFetcher {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceUpdater.class);
 
     @Autowired
-    private StopPlaceUpdaterService stopPlaceUpdaterService;
+    private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -60,28 +60,30 @@ class StopPlaceUpdater implements DataFetcher {
     }
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
-        StopPlace stopPlace = null;
+        StopPlace updatedStopPlace;
+        StopPlace existingVersion = null;
+
         if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
             Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("Updating StopPlace {}", netexId);
-                stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-
-                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+                existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+                updatedStopPlace = stopPlaceVersionedSaverService.createNewVersion(existingVersion);
+                Preconditions.checkArgument(updatedStopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
 
             } else {
                 logger.info("Creating new StopPlace");
-                stopPlace = new StopPlace();
-                stopPlace.setCreated(ZonedDateTime.now());
+                updatedStopPlace = new StopPlace();
+                updatedStopPlace.setCreated(ZonedDateTime.now());
             }
 
-            if (stopPlace != null) {
-                boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
+            if (updatedStopPlace != null) {
+                boolean hasValuesChanged = populateStopPlaceFromInput(input, updatedStopPlace);
 
                 if (hasValuesChanged) {
-                    if (stopPlace.getQuays() != null) {
+                    if (updatedStopPlace.getQuays() != null) {
                         /*
                          * Explicitly saving new Quays  when updating and creating new Quays in the same request.
                          * Already existing quays are attempted to be inserted causing ConstraintViolationException.
@@ -90,17 +92,16 @@ class StopPlaceUpdater implements DataFetcher {
                          * references on StopPlace-object.
                          *
                          */
-                        stopPlace.getQuays().stream()
+                        updatedStopPlace.getQuays().stream()
                                 .filter(quay -> quay.getNetexId() == null)
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
-                    stopPlace.setChanged(ZonedDateTime.now());
-                    stopPlace = stopPlaceUpdaterService.save(stopPlace);
-
+                    updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
+                    return updatedStopPlace;
                 }
             }
         }
-        return stopPlace;
+        return existingVersion;
     }
 
     /**

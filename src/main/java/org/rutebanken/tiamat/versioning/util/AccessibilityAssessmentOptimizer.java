@@ -1,32 +1,18 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.versioning.util;
 
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.rutebanken.tiamat.service.MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess;
+import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess;
 
-
-@Transactional
 @Service
-public class StopPlaceUpdaterService {
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    public StopPlace save(StopPlace stopPlace) {
-
-        optimizeAccessibilityAssessments(stopPlace);
-        return stopPlaceRepository.save(stopPlace);
-    }
+public class AccessibilityAssessmentOptimizer {
 
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
         try {

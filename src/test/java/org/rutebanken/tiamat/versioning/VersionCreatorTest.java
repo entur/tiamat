@@ -5,8 +5,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.*;
-import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,6 +176,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         StopPlace newVersion = versionCreator.createNextVersion(oldVersion);
 
+        oldVersion = versionCreator.terminateVersion(oldVersion, ZonedDateTime.now());
 
         assertThat(newVersion.getValidityConditions())
                 .isNotNull()
