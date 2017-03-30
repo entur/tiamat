@@ -26,27 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest {
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Autowired
     private MergingStopPlaceImporter mergingStopPlaceImporter;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-
-    @Before
-    public void cleanRepositories() {
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
-        quayRepository.deleteAll();
-    }
 
     /**
      * Two stop places with the same name and coordinates should become one stop place.

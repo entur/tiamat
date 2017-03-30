@@ -22,9 +22,6 @@ import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSIO
 public class PathLinksImporterTest extends CommonSpringBootTest {
 
     @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
     private PathLinksImporter pathLinksImporter;
 
     @Test

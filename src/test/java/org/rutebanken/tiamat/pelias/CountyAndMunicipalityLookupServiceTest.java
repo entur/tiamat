@@ -26,22 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CountyAndMunicipalityLookupServiceTest extends CommonSpringBootTest {
 
     @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-    
-    @Before
-    public void cleanRepositories() {
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
-    }
 
     /**
      * Earlier, there was an issue with duplicate topographic places created when running parallel tests.

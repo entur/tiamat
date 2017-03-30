@@ -23,21 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class PathLinkTest extends CommonSpringBootTest {
 
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
-
-    @Autowired
-    private PathJunctionRepository pathJunctionRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
-
     @Test
     public void simplePersistTest() {
         PathLink pathLink = new PathLink();

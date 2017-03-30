@@ -30,9 +30,6 @@ public class AsyncPublicationDeliveryExporterTest extends CommonSpringBootTest {
     @Autowired
     private ExportJobRepository exportJobRepository;
 
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
     @Ignore
     @Test
     public void test() throws JAXBException, ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException, InterruptedException {

@@ -26,30 +26,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Transactional
-@ActiveProfiles("geodb")
 public class StopPlaceRepositoryImplTest extends CommonSpringBootTest {
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Before
-    public void before() {
-        pathLinkRepository.deleteAll();
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
-    }
 
     @Transactional(propagation = Propagation.NEVER)
     @Test

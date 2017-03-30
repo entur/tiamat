@@ -18,9 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TransactionalStopPlacesImporterTest extends CommonSpringBootTest {
 
     @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Autowired
     private TransactionalStopPlacesImporter siteFrameImporter;
 
     /**

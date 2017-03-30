@@ -29,12 +29,6 @@ import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.USED_H2_I
 public class GaplessIdGeneratorServiceTest extends CommonSpringBootTest {
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
 
     @Autowired

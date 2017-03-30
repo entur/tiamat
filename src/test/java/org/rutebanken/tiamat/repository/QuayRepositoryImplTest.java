@@ -10,9 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class QuayRepositoryImplTest extends CommonSpringBootTest {
 
     @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
     private VersionCreator versionCreator;
 
     @Test

@@ -27,12 +27,6 @@ public class NearbyStopsWithSameTypeFinderTest extends CommonSpringBootTest {
     private static final Coordinate OSL_GARDERMOEN = new Coordinate(60.190448, 11.106292);
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Autowired
     private NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder;
 
     @Before

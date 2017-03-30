@@ -12,13 +12,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Transactional
 public class TopographicPlaceTest extends CommonSpringBootTest {
 
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
     @Test
     public void stopPlaceShouldBeReferencingTopographicalPlace() {
 

@@ -5,6 +5,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -20,32 +21,10 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends CommonSprin
 
     protected static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
 
-    @Autowired
-    protected StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    protected TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    protected PathLinkRepository pathLinkRepository;
-
-    @Autowired
-    protected GeometryFactory geometryFactory;
-
-    @Value("${local.server.port}")
-    protected int port;
-
     @Before
     public void configureRestAssured() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
-    }
-
-    @Before
-    public void clearRepositories() {
-        pathLinkRepository.deleteAll();
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
     }
 
     protected ValidatableResponse executeGraphQL(String graphQlJsonQuery) {

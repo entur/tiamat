@@ -16,9 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PublicationDeliveryExporterTest extends CommonSpringBootTest {
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
     private PublicationDeliveryExporter publicationDeliveryExporter;
 
     @Test

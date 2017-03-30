@@ -25,9 +25,6 @@ import static org.mockito.Mockito.when;
 
 public class TopographicPlaceCreatorTest {
 
-    private TopographicPlaceFromRefFinder topographicPlaceFromRefFinder = new TopographicPlaceFromRefFinder();
-
-
     /**
      * When importing a municipality that is already saved, return the existing one.
      */
