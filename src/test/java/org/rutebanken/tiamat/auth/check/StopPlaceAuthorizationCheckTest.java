@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.auth;
+package org.rutebanken.tiamat.auth.check;
 
 import com.vividsolutions.jts.geom.*;
 import org.junit.Assert;
@@ -10,21 +10,21 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.rutebanken.tiamat.auth.GenericAuthorizationService.ENTITY_CLASSIFIER_ALL_TYPES;
+import static org.rutebanken.tiamat.auth.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 
-public class StopPlaceAuthorizationServiceTest {
+public class StopPlaceAuthorizationCheckTest {
 
-	private StopPlaceAuthorizationService stopPlaceAuthorizationService = new StopPlaceAuthorizationService();
+	private static final String ENTITY_TYPE_STOP_PLACE = "StopPlace";
 
 	@Test
 	public void matchesOrgAndExactEntityClassification() {
 		StopPlace stopPlace = stopPlace(StopTypeEnumeration.COACH_STATION);
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.e = new HashMap<>();
-		roleAssignment.e.put("StopPlace", Arrays.asList("other", StopTypeEnumeration.COACH_STATION.value()));
-		AuthorizationTask<StopPlace> task = new AuthorizationTask(stopPlace, roleAssignment, null);
+		roleAssignment.e.put(ENTITY_TYPE_STOP_PLACE, Arrays.asList("other", StopTypeEnumeration.COACH_STATION.value()));
+		StopPlaceAuthorizationCheck check = new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, null);
 
-		Assert.assertTrue(stopPlaceAuthorizationService.isAllowed(task));
+		Assert.assertTrue(check.isAllowed());
 	}
 
 	@Test
@@ -32,10 +32,10 @@ public class StopPlaceAuthorizationServiceTest {
 		StopPlace stopPlace = stopPlace(StopTypeEnumeration.COACH_STATION);
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.e = new HashMap<>();
-		roleAssignment.e.put("StopPlace", Arrays.asList("other", ENTITY_CLASSIFIER_ALL_TYPES));
-		AuthorizationTask<StopPlace> task = new AuthorizationTask(stopPlace, roleAssignment, null);
+		roleAssignment.e.put(ENTITY_TYPE_STOP_PLACE, Arrays.asList("other", ENTITY_CLASSIFIER_ALL_TYPES));
+		StopPlaceAuthorizationCheck check = new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, null);
 
-		Assert.assertTrue(stopPlaceAuthorizationService.isAllowed(task));
+		Assert.assertTrue(check.isAllowed());
 	}
 
 	@Test
@@ -44,10 +44,10 @@ public class StopPlaceAuthorizationServiceTest {
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.e = new HashMap<>();
 		roleAssignment.e.put("OtherType", Arrays.asList(ENTITY_CLASSIFIER_ALL_TYPES, StopTypeEnumeration.COACH_STATION.value()));
-		roleAssignment.e.put("StopPlace", Arrays.asList("wrongStopType"));
-		AuthorizationTask<StopPlace> task = new AuthorizationTask(stopPlace, roleAssignment, null);
+		roleAssignment.e.put(ENTITY_TYPE_STOP_PLACE, Arrays.asList("wrongStopType"));
+		StopPlaceAuthorizationCheck check = new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, null);
 
-		Assert.assertFalse(stopPlaceAuthorizationService.isAllowed(task));
+		Assert.assertFalse(check.isAllowed());
 	}
 
 	@Test
@@ -59,11 +59,11 @@ public class StopPlaceAuthorizationServiceTest {
 
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.e = new HashMap<>();
-		roleAssignment.e.put("StopPlace", Arrays.asList(ENTITY_CLASSIFIER_ALL_TYPES));
+		roleAssignment.e.put(ENTITY_TYPE_STOP_PLACE, Arrays.asList(ENTITY_CLASSIFIER_ALL_TYPES));
 
-		AuthorizationTask<StopPlace> task = new AuthorizationTask(stopPlace, roleAssignment, administrativeZone);
+		StopPlaceAuthorizationCheck check = new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, administrativeZone);
 
-		Assert.assertTrue(stopPlaceAuthorizationService.isAllowed(task));
+		Assert.assertTrue(check.isAllowed());
 	}
 
 	@Test
@@ -75,10 +75,10 @@ public class StopPlaceAuthorizationServiceTest {
 
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.e = new HashMap<>();
-		roleAssignment.e.put("StopPlace", Arrays.asList("other", ENTITY_CLASSIFIER_ALL_TYPES));
-		AuthorizationTask<StopPlace> task = new AuthorizationTask(stopPlace, roleAssignment, administrativeZone);
+		roleAssignment.e.put(ENTITY_TYPE_STOP_PLACE, Arrays.asList("other", ENTITY_CLASSIFIER_ALL_TYPES));
+		StopPlaceAuthorizationCheck check = new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, administrativeZone);
 
-		Assert.assertFalse(stopPlaceAuthorizationService.isAllowed(task));
+		Assert.assertFalse(check.isAllowed());
 	}
 
 	private Polygon polygon() {

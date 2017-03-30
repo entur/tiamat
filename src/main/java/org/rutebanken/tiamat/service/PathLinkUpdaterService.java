@@ -1,10 +1,9 @@
 package org.rutebanken.tiamat.service;
 
 import graphql.GraphQLException;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.TransferDuration;
+import org.rutebanken.tiamat.auth.AuthorizationConstants;
+import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.slf4j.Logger;
@@ -14,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Transactional
 @Service
@@ -28,9 +29,11 @@ public class PathLinkUpdaterService {
     @Autowired
     private ReferenceResolver referenceResolver;
 
+    @Autowired
+    private AuthorizationService authorizationService;
 
     public PathLink createOrUpdatePathLink(PathLink incomingPathLink) {
-
+        Set<EntityInVersionStructure> entitiesRequiringAuthorization=new HashSet<>();
         PathLink resultPathLink;
 
         boolean updatedExisting;
@@ -102,13 +105,16 @@ public class PathLinkUpdaterService {
         }
 
 
-        if(incomingPathLink.getFrom() != null) {
-            verifyPathLinkReferences(incomingPathLink.getFrom());
-        }
-        if(incomingPathLink.getTo() != null) {
-            verifyPathLinkReferences(incomingPathLink.getTo());
-        }
+	    if (incomingPathLink.getFrom() != null) {
+		    EntityInVersionStructure from = verifyPathLinkReferences(incomingPathLink.getFrom());
+		    entitiesRequiringAuthorization.add(from);
+	    }
+	    if (incomingPathLink.getTo() != null) {
+		    EntityInVersionStructure to = verifyPathLinkReferences(incomingPathLink.getTo());
+		    entitiesRequiringAuthorization.add(to);
+	    }
 
+        authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS,entitiesRequiringAuthorization);
         pathLinkRepository.save(resultPathLink);
 
         logger.info("{} {}", updatedExisting ? "Updated" : "Created", resultPathLink);
@@ -117,7 +123,7 @@ public class PathLinkUpdaterService {
 
     }
 
-    private void verifyPathLinkReferences(PathLinkEnd pathLinkEnd) {
+    private EntityInVersionStructure verifyPathLinkReferences(PathLinkEnd pathLinkEnd) {
 
         if(pathLinkEnd.getPlaceRef() != null) {
             EntityInVersionStructure entityInVersionStructure = referenceResolver.resolve(pathLinkEnd.getPlaceRef());
@@ -125,7 +131,7 @@ public class PathLinkUpdaterService {
             if(entityInVersionStructure == null) {
                 throw new NoSuchElementException("Cannot find path link end reference to place " + pathLinkEnd.getPlaceRef());
             }
-            return;
+            return entityInVersionStructure;
         }
         throw new NoSuchElementException("Cannot find path link end reference (quay/stop/..) for path link end ref" + pathLinkEnd.getPlaceRef());
     }

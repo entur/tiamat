@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.auth;
 
 import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.tiamat.auth.check.AuthorizationCheckFactory;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
@@ -11,13 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class GenericAuthorizationService<T extends EntityStructure> implements AuthorizationService<T> {
-
-	public static final String ENTITY_CLASSIFIER_ALL_TYPES = "*";
+public class GenericAuthorizationService implements AuthorizationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(GenericAuthorizationService.class);
 
@@ -30,63 +31,40 @@ public class GenericAuthorizationService<T extends EntityStructure> implements A
 	@Autowired
 	protected TopographicPlaceRepository topographicPlaceRepository;
 
+	@Autowired
+	private AuthorizationCheckFactory authorizationCheckFactory;
 
-	public void assertAuthorized(String requiredRole, T... entities) {
+	@Autowired
+	private RoleAssignmentExtractor roleAssignmentExtractor;
+
+	@Override
+	public void assertAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
 		if (!authorizationEnabled) {
 			return;
 		}
 
-		List<RoleAssignment> relevantRoles = RoleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(Collectors.toList());
+		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(Collectors.toList());
 		boolean allowed = true;
-		for (T entity : entities) {
+		for (EntityStructure entity : entities) {
 			allowed &= entity == null ||
 					           relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
 			if (!allowed) {
 				throw new AccessDeniedException("Insufficient privileges for operation");
 			}
 		}
-
 	}
 
-	protected boolean isAuthorizationForEntity(T entity, RoleAssignment roleAssignment) {
+	@Override
+	public void assertAuthorized(String requiredRole, EntityStructure... entities) {
+		assertAuthorized(requiredRole, Arrays.asList(entities));
+	}
+
+	protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment) {
 		Polygon administrativeZone = null;
 		if (roleAssignment.z != null) {
 			topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.z);
 		}
-		AuthorizationTask<T> task = new AuthorizationTask<T>(entity, roleAssignment, administrativeZone);
-		return isAllowed(task);
-	}
-
-	public boolean isAllowed(AuthorizationTask<T> task) {
-		return matchesTypeAndClassifier(task) && matchesOrganisation(task) && matchesAdministrativeZone(task);
-	}
-
-	protected boolean matchesTypeAndClassifier(AuthorizationTask<T> task) {
-		if (task.getRoleAssignment().e != null) {
-			List<String> authorizedEntityClassifications = task.getRoleAssignment().e.get(getEntityTypeName(task.getEntity()));
-			if (authorizedEntityClassifications != null) {
-				return authorizedEntityClassifications.stream().anyMatch(c -> c.equals(ENTITY_CLASSIFIER_ALL_TYPES) || isMatchForExplicitClassifier(task, c));
-			}
-
-		}
-		return false;
-	}
-
-
-	protected boolean matchesOrganisation(AuthorizationTask<T> task) {
-		return true;
-	}
-
-	protected boolean matchesAdministrativeZone(AuthorizationTask<T> task) {
-		return true;
-	}
-
-	protected String getEntityTypeName(T entity) {
-		return entity.getClass().getSimpleName();
-	}
-
-	protected boolean isMatchForExplicitClassifier(AuthorizationTask<T> task, String classifier) {
-		return false;
+		return authorizationCheckFactory.buildCheck(entity, roleAssignment, administrativeZone).isAllowed();
 	}
 
 
