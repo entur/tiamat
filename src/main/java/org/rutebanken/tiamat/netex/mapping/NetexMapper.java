@@ -155,4 +155,8 @@ public class NetexMapper {
     public PathLink mapToNetexModel(org.rutebanken.tiamat.model.PathLink pathLink) {
         return facade.map(pathLink, PathLink.class);
     }
+
+    public MapperFacade getFacade() {
+        return facade;
+    }
 }

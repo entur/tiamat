@@ -3,10 +3,8 @@ package org.rutebanken.tiamat.importer;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.CompositeFrame;
-import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
@@ -14,7 +12,6 @@ import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +42,7 @@ public class PublicationDeliveryImporter {
     private final StopPlacePreSteps stopPlacePreSteps;
     private final PathLinksImporter pathLinksImporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
+    private final TopographicPlaceImporter topographicPlaceImporter;
 
 
     @Autowired
@@ -53,13 +51,14 @@ public class PublicationDeliveryImporter {
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
                                        PathLinksImporter pathLinksImporter,
-                                       TopographicPlacesExporter topographicPlacesExporter) {
+                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
         this.pathLinksImporter = pathLinksImporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
+        this.topographicPlaceImporter = topographicPlaceImporter;
     }
 
 
@@ -89,15 +88,11 @@ public class PublicationDeliveryImporter {
             responseSiteframe.withId(requestId + "-response").withVersion("1");
 
             if(hasTopographicPlaces(netexSiteFrame)) {
-                List<TopographicPlace> netexTopographicPlaces = netexSiteFrame.getTopographicPlaces().getTopographicPlace();
-                logger.info("Detected {} incoming topogprahic places", netexTopographicPlaces.size());
-
-                List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = netexTopographicPlaces
-                        .stream()
-                        .map(netexTopographicPlace -> netexMapper.mapToTiamatModel(netexTopographicPlace))
-                        .collect(Collectors.toList());
-
-
+                List<TopographicPlace> importedTopographicPlaces = topographicPlaceImporter.importTopographicPlaces(
+                        netexMapper.getFacade()
+                            .mapAsList(netexSiteFrame.getTopographicPlaces().getTopographicPlace(),
+                            org.rutebanken.tiamat.model.TopographicPlace.class));
+                responseSiteframe.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure().withTopographicPlace(importedTopographicPlaces));
             }
 
 
@@ -160,7 +155,7 @@ public class PublicationDeliveryImporter {
     }
 
     private int numberOfStops(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getStopPlaces().getStopPlace().size();
+        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace().size() : 0;
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
