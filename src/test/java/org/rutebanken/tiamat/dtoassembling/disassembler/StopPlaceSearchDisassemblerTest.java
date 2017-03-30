@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StopPlaceSearchDisassemblerTest {
 
-    private StopPlaceSearchDisassembler stopPlaceDisassembler = new StopPlaceSearchDisassembler(new NetexIdMapper());
+    private StopPlaceSearchDisassembler stopPlaceDisassembler = new StopPlaceSearchDisassembler();
 
     @Test
     public void disassembleIdList() {
