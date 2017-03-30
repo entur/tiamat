@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 @Transactional
 public class HealthResource {
     @Autowired
-    StopPlaceRepository stopPlaceRepository;
+    private StopPlaceRepository stopPlaceRepository;
 
     @GET
     @Path("readiness")
