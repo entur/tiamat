@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Point;
-import net.opengis.gml._3.PolygonType;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
@@ -15,9 +14,6 @@ public class Zone_VersionStructure
     protected TypeOfZoneRefs_RelStructure types;
 
     protected Point centroid;
-
-    @Transient
-    protected PolygonType polygon;
 
     @Transient
     protected Projections_RelStructure projections;
@@ -46,14 +42,6 @@ public class Zone_VersionStructure
 
     public void setCentroid(Point value) {
         this.centroid = value;
-    }
-
-    public PolygonType getPolygon() {
-        return polygon;
-    }
-
-    public void setPolygon(PolygonType value) {
-        this.polygon = value;
     }
 
     public Projections_RelStructure getProjections() {
