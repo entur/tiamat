@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import graphql.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ public class GraphQLResource {
 
 	public GraphQLResource() {
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema);
@@ -39,7 +41,7 @@ public class GraphQLResource {
 
 	private GraphQL graphQL;
 
-	
+
     @POST
 	@SuppressWarnings("unchecked")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -125,6 +127,8 @@ public class GraphQLResource {
 	private Response.Status getStatusCodeFromThrowable(Throwable e) {
         if(e instanceof DataIntegrityViolationException) {
             return Response.Status.INTERNAL_SERVER_ERROR;
+        } else if (e instanceof AccessDeniedException) {
+	        return Response.Status.FORBIDDEN;
         }
 
         return Response.Status.OK;

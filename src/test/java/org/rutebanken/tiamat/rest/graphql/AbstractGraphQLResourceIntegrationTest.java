@@ -49,6 +49,10 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends CommonSprin
     }
 
     protected ValidatableResponse executeGraphQL(String graphQlJsonQuery) {
+        return executeGraphQL(graphQlJsonQuery,200);
+    }
+
+    protected ValidatableResponse executeGraphQL(String graphQlJsonQuery,int httpStatusCode) {
         return given()
                 .port(port)
                 .contentType(ContentType.JSON)
@@ -57,8 +61,10 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends CommonSprin
                 .post(BASE_URI_GRAPHQL)
                 .then()
                 .log().body()
-                .statusCode(200)
+                .statusCode(httpStatusCode)
                 .assertThat();
     }
+
+
 
 }
