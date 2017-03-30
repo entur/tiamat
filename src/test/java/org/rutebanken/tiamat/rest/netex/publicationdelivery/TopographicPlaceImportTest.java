@@ -21,7 +21,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
     @Test
-    public void publicationDeliveryWithPathLink() throws Exception {
+    public void publicationDeliveryWithTopographicPlace() throws Exception {
 
         List<Double> values = new ArrayList<>();
         values.add(9.8468);
@@ -60,6 +60,8 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
         TopographicPlace actualTopographicPlace = result.get(0);
 
+        assertThat(actualTopographicPlace.getPolygon()).isNotNull();
+        assertThat(actualTopographicPlace.getPolygon().getExterior()).isEqualTo(topographicPlace.getPolygon().getExterior());
         assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
     }
 }
