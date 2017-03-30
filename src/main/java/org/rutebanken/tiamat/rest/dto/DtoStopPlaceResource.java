@@ -1,17 +1,13 @@
 package org.rutebanken.tiamat.rest.dto;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
-import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.*;
+import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
@@ -20,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +54,7 @@ public class DtoStopPlaceResource {
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
 	@Autowired
-	private StopPlaceAuthorizationService authorizationService;
+	private AuthorizationService authorizationService;
 
 	@GET
 	public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {

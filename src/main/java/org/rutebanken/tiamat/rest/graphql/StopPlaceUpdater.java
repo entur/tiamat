@@ -4,7 +4,7 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -48,7 +48,7 @@ class StopPlaceUpdater implements DataFetcher {
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
     @Autowired
-    private StopPlaceAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
