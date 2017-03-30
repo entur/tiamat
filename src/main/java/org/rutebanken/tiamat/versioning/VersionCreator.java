@@ -85,7 +85,6 @@ public class VersionCreator {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
         ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
-        System.out.println("New version valid from : " + newVersionValidFrom);
         logger.debug("New version valid from {}", newVersionValidFrom);
         if (!entityInVersionStructure.getValidBetweens().isEmpty()) {
             ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);
