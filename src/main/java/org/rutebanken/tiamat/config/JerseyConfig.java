@@ -4,7 +4,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.rutebanken.tiamat.rest.coordinates.CoordinatesFixerResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
-import org.rutebanken.tiamat.rest.dto.DtoTopographicPlaceResource;
 import org.rutebanken.tiamat.rest.exception.AccessDeniedExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
@@ -23,7 +22,6 @@ public class JerseyConfig extends ResourceConfig {
         register(CoordinatesFixerResource.class);
         register(DtoStopPlaceResource.class);
         register(DtoQuayResource.class);
-        register(DtoTopographicPlaceResource.class);
         register(PublicationDeliveryResource.class);
         register(InitialImportResource.class);
         register(GraphQLResource.class);

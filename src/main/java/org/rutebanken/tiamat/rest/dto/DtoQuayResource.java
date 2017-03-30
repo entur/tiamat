@@ -1,9 +1,6 @@
 package org.rutebanken.tiamat.rest.dto;
 
-import org.rutebanken.tiamat.dtoassembling.assembler.QuayAssembler;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.dtoassembling.dto.QuayDto;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,15 +12,19 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
 @Path("/quay")
 public class DtoQuayResource {
 
+
+    private final StopPlaceRepository stopPlaceRepository;
+
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    public DtoQuayResource(StopPlaceRepository stopPlaceRepository) {
+        this.stopPlaceRepository = stopPlaceRepository;
+    }
 
     @GET
     @Produces("text/plain")
