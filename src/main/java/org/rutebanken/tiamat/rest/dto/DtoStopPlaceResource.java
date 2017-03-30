@@ -1,16 +1,13 @@
 package org.rutebanken.tiamat.rest.dto;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.dtoassembling.assembler.StopPlaceAssembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.*;
+import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
@@ -19,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +28,8 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
+
+import static org.rutebanken.tiamat.auth.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Component
 @Produces("application/json")
@@ -55,11 +53,11 @@ public class DtoStopPlaceResource {
     @Autowired
     private StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
-    @GET
-    public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
+	@Autowired
+	private AuthorizationService authorizationService;
 
-        keyCloak();
-
+	@GET
+	public List<StopPlaceDto> getStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
 
         Page<StopPlace> stopPlaces;
@@ -98,31 +96,6 @@ public class DtoStopPlaceResource {
         }).build();
     }
 
-    private KeycloakAuthenticationToken keyCloak() {
-        // Example reading details about authenticated user
-        KeycloakAuthenticationToken auth = (KeycloakAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
-
-        if(auth != null) {
-            @SuppressWarnings("unchecked")
-            KeycloakPrincipal<KeycloakSecurityContext> principal = (KeycloakPrincipal<KeycloakSecurityContext>) auth.getPrincipal();
-            AccessToken token = principal.getKeycloakSecurityContext().getToken();
-            String email = token.getEmail();
-            String firstname = token.getGivenName();
-            String lastname = token.getFamilyName();
-            String fullname = token.getName();
-            String preferredUsername = token.getPreferredUsername();
-            List agencyids = (List) token.getOtherClaims().get("agencyid");
-
-
-            // all means all agencies, if not a semicolon delimited list of agencies
-
-            logger.info("Logged in " + principal + " with preferred username " + preferredUsername + ", name is " + firstname + " " + lastname + " and has email address " + email + " and represents agencie(s) " + ToStringBuilder.reflectionToString(agencyids));
-
-            // TODO make sure we only return data according to agencyids
-        }
-        return auth;
-    }
-
     @POST
     @Path("search")
     public List<StopPlaceDto> getStopPlacesFromBoundingBox(@Context HttpServletResponse response,
@@ -151,13 +124,13 @@ public class DtoStopPlaceResource {
     @POST
     @Path("{id}")
     public StopPlaceDto updateStopPlace(StopPlaceDto simpleStopPlaceDto, @PathParam("id") String id) {
-        keyCloak();
 
         logger.info("Save stop place {} with id {}", simpleStopPlaceDto.name, simpleStopPlaceDto.id);
 
         StopPlace currentStopPlace = stopPlaceRepository.findOne(Long.valueOf(simpleStopPlaceDto.id));
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(currentStopPlace, simpleStopPlaceDto);
         if(stopPlace != null) {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace, currentStopPlace);
             stopPlace = save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace, true);
         }
@@ -167,8 +140,6 @@ public class DtoStopPlaceResource {
 
     @POST
     public StopPlaceDto createStopPlace(StopPlaceDto simpleStopPlaceDto) {
-        keyCloak();
-
         logger.info("Creating stop place with name {}, {} quays and centroid: {}",
                 simpleStopPlaceDto.name,
                 simpleStopPlaceDto.quays != null ? simpleStopPlaceDto.quays.size() : 0,
@@ -180,6 +151,7 @@ public class DtoStopPlaceResource {
 
         StopPlace stopPlace = stopPlaceDisassembler.disassemble(new StopPlace(), simpleStopPlaceDto);
         if(stopPlace != null) {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace);
             stopPlace = save(stopPlace);
             return stopPlaceAssembler.assemble(stopPlace, true);
         }

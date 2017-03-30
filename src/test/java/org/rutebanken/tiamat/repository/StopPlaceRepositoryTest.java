@@ -1,10 +1,13 @@
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.collect.Sets;
+import org.junit.Assert;
 import org.junit.Before;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.TiamatApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,58 +27,72 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StopPlaceRepositoryTest extends CommonSpringBootTest {
 
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+	@Autowired
+	private StopPlaceRepository stopPlaceRepository;
 
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
+	@Autowired
+	private PathLinkRepository pathLinkRepository;
 
-    @Before
-    public void cleanRepositories() {
-        pathLinkRepository.deleteAll();;
-        stopPlaceRepository.deleteAll();
-    }
+	@Before
+	public void cleanRepositories() {
+		pathLinkRepository.deleteAll();
+		;
+		stopPlaceRepository.deleteAll();
+	}
 
-    @Test
-    public void findStopPlacesSortedCorrectly() {
-        StopPlace stopPlaceOlder = new StopPlace();
-        StopPlace stopPlaceNewer = new StopPlace();
+	@Test
+	public void findStopPlacesSortedCorrectly() {
+		StopPlace stopPlaceOlder = new StopPlace();
+		StopPlace stopPlaceNewer = new StopPlace();
 
-        stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-        stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
+		stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
+		stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
 
-        stopPlaceRepository.save(stopPlaceNewer);
-        stopPlaceRepository.save(stopPlaceOlder);
+		stopPlaceRepository.save(stopPlaceNewer);
+		stopPlaceRepository.save(stopPlaceOlder);
 
-        Pageable pageable = new PageRequest(0, 2);
-        Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
+		Pageable pageable = new PageRequest(0, 2);
+		Page<StopPlace> page = stopPlaceRepository.findAllByOrderByChangedDesc(pageable);
 
-        assertThat(page.getContent().get(0).getNetexId()).isEqualTo(stopPlaceNewer.getNetexId());
-        assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
-        assertThat(page.getContent().get(1).getNetexId()).isEqualTo(stopPlaceOlder.getNetexId());
-        assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
-    }
+		assertThat(page.getContent().get(0).getNetexId()).isEqualTo(stopPlaceNewer.getNetexId());
+		assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+		assertThat(page.getContent().get(1).getNetexId()).isEqualTo(stopPlaceOlder.getNetexId());
+		assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
+	}
 
-    @Test
-    public void findStopPlacesByNameSortedCorrectly() {
-        StopPlace stopPlaceOlder = new StopPlace();
-        StopPlace stopPlaceNewer = new StopPlace();
+	@Test
+	public void findStopPlacesByNameSortedCorrectly() {
+		StopPlace stopPlaceOlder = new StopPlace();
+		StopPlace stopPlaceNewer = new StopPlace();
 
-        stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-        stopPlaceOlder.setName(new EmbeddableMultilingualString("it's older", "en"));
+		stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
+		stopPlaceOlder.setName(new EmbeddableMultilingualString("it's older", "en"));
 
-        stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
-        stopPlaceNewer.setName(new EmbeddableMultilingualString("it's newer", "en"));
+		stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
+		stopPlaceNewer.setName(new EmbeddableMultilingualString("it's newer", "en"));
 
-        stopPlaceRepository.save(stopPlaceNewer);
-        stopPlaceRepository.save(stopPlaceOlder);
+		stopPlaceRepository.save(stopPlaceNewer);
+		stopPlaceRepository.save(stopPlaceOlder);
 
-        Pageable pageable = new PageRequest(0, 2);
-        Page<StopPlace> page = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc("it", pageable);
+		Pageable pageable = new PageRequest(0, 2);
+		Page<StopPlace> page = stopPlaceRepository.findByNameValueContainingIgnoreCaseOrderByChangedDesc("it", pageable);
 
-        assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
-        assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged() );
-    }
+		assertThat(page.getContent().get(0).getChanged()).isEqualTo(stopPlaceNewer.getChanged());
+		assertThat(page.getContent().get(1).getChanged()).isEqualTo(stopPlaceOlder.getChanged());
+	}
+
+
+	@Test
+	public void findByQuay() {
+		StopPlace stopPlace = new StopPlace();
+		Quay quay = new Quay();
+		stopPlace.setQuays(Sets.newHashSet(quay));
+
+		StopPlace savedStop = stopPlaceRepository.save(stopPlace);
+
+		StopPlace foundStop = stopPlaceRepository.findByQuay(quay);
+		Assert.assertEquals(savedStop, foundStop);
+	}
 
     /*
     @Test

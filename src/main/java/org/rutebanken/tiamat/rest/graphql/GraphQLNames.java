@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.EXAMPLE_DATE_TIME;
+
 public class GraphQLNames {
 
     private static final String INPUT_TYPE_POSTFIX = "Input";
@@ -20,13 +23,23 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_ENTITY_REF = "EntityRef";
     public static final String INPUT_TYPE_ENTITY_REF = OUTPUT_TYPE_ENTITY_REF + INPUT_TYPE_POSTFIX;
+    public static final String ENTITY_REF_DESCRIPTION = "A reference to an entity with version";
 
     public static final String ENTITY_REF_REF = "ref";
+    public static final String ENTITY_REF_REF_DESCRIPTION = "The NeTEx ID of the of the referenced entity. The reference must already exist";
     public static final String ENTITY_REF_VERSION = "version";
+    public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity. Specify \"any\" to always reference the newest version";
     public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
+    public static final String OUTPUT_TYPE_VALID_BETWEEN = "ValidBetween";
+    public static final String INPUT_TYPE_VALID_BETWEEN = OUTPUT_TYPE_VALID_BETWEEN + INPUT_TYPE_POSTFIX;
+
+    public static final String VALID_BETWEEN_FROM_DATE = "fromDate";
+    public static final String VALID_BETWEEN_TO_DATE = "toDate";
+
+    public static final String DATE_SCALAR_DESCRIPTION = "Date time using the format: " + DATE_TIME_PATTERN + ". Example: "+EXAMPLE_DATE_TIME;
 
     public static final String OUTPUT_TYPE_TRANSFER_DURATION = "TransferDuration";
     public static final String INPUT_TYPE_TRANSFER_DURATION = OUTPUT_TYPE_TRANSFER_DURATION + INPUT_TYPE_POSTFIX;
@@ -90,6 +103,7 @@ public class GraphQLNames {
     public static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
+    public static final String VALID_BETWEENS = "validBetweens";
 
     public static final String NAME = "name";
     public static final String TOPOGRAPHIC_PLACE_TYPE_ENUM = "TopographicPlaceType";

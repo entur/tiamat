@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.auth;
 
+import org.keycloak.adapters.KeycloakConfigResolver;
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.rutebanken.tiamat.filter.CorsResponseFilter;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
@@ -14,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
@@ -24,10 +27,12 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
+
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
 	 * manager.
@@ -46,26 +51,28 @@ public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
 	}
 
+	@Bean
+	public KeycloakConfigResolver KeycloakConfigResolver() {
+		return new KeycloakSpringBootConfigResolver();
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
 
 		logger.info("Configuring HttpSecurity");
-		// TODO update here with paths that should be secured correctly
+
 		http.csrf().disable()
-			.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
-			.authorizeRequests()
-			.antMatchers("/jersey/*").hasRole("holdeplassregister_read")
-			.antMatchers("/admin/*")
-			.hasRole("ADMIN")
-			.anyRequest()
-			.permitAll();
+				.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
+				.authorizeRequests()
+				.anyRequest()
+				.permitAll();
 	}
 
 	@Override
 	protected KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
 		KeycloakAuthenticationProvider keycloakAuthenticationProvider = super.keycloakAuthenticationProvider();
-		
+
 		// Add mapper so we dont have to prefix all roles in keycloak with ROLE_
 		keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
 		return keycloakAuthenticationProvider;
@@ -74,7 +81,7 @@ public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Bean
 	public FilterRegistrationBean keycloakAuthenticationProcessingFilterRegistrationBean(
-			KeycloakAuthenticationProcessingFilter filter) {
+			                                                                                    KeycloakAuthenticationProcessingFilter filter) {
 		FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
 		registrationBean.setEnabled(false);
 		return registrationBean;

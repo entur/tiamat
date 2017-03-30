@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.LineString;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
@@ -18,6 +20,9 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
     @Autowired
     private QuayRepository quayRepository;
+
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
 
     @Test
     public void retrievePathLinkReferencingTwoQuays() throws Exception {
@@ -134,12 +139,14 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         Quay firstQuay = new Quay();
         firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         firstQuay.setVersion(INITIAL_VERSION);
-        quayRepository.save(firstQuay);
 
         Quay secondQuay = new Quay();
         secondQuay.setVersion(INITIAL_VERSION+1);
         secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
-        quayRepository.save(secondQuay);
+
+        StopPlace stop = new StopPlace();
+        stop.setQuays(Sets.newHashSet(firstQuay, secondQuay));
+        stopPlaceRepository.save(stop);
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +

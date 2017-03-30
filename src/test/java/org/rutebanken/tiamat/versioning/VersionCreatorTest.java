@@ -5,10 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.CommonSpringBootTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -158,7 +155,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
     }
 
     @Test
-    public void newVersionShouldHaveValidityCondition() {
+    public void newVersionShouldHaveValidBetween() {
         StopPlace oldVersion = new StopPlace();
         oldVersion.setVersion(1L);
 
@@ -167,7 +164,7 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         oldVersion.getQuays().add(quay);
 
-        oldVersion.getValidityConditions().add(new AvailabilityCondition(ZonedDateTime.now().minusDays(2)));
+        oldVersion.getValidBetweens().add(new ValidBetween(ZonedDateTime.now().minusDays(2)));
 
         oldVersion = stopPlaceRepository.save(oldVersion);
 
@@ -178,18 +175,18 @@ public class VersionCreatorTest extends CommonSpringBootTest {
 
         oldVersion = versionCreator.terminateVersion(oldVersion, ZonedDateTime.now());
 
-        assertThat(newVersion.getValidityConditions())
+        assertThat(newVersion.getValidBetweens())
                 .isNotNull()
                 .isNotEmpty()
                 .hasSize(1);
 
-        System.out.println(oldVersion.getValidityConditions().get(0).getToDate());
-        assertThat(oldVersion.getValidityConditions().get(0).getToDate()).isAfterOrEqualTo(beforeCreated);
+        System.out.println(oldVersion.getValidBetweens().get(0).getToDate());
+        assertThat(oldVersion.getValidBetweens().get(0).getToDate()).isAfterOrEqualTo(beforeCreated);
 
 
-        AvailabilityCondition availabilityCondition = newVersion.getValidityConditions().get(0);
-        assertThat(availabilityCondition.getFromDate()).isAfterOrEqualTo(beforeCreated);
-        assertThat(availabilityCondition.getToDate()).isNull();
+        ValidBetween validBetween = newVersion.getValidBetweens().get(0);
+        assertThat(validBetween.getFromDate()).isAfterOrEqualTo(beforeCreated);
+        assertThat(validBetween.getToDate()).isNull();
 
     }
 

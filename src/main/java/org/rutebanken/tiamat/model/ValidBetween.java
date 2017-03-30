@@ -6,8 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import java.time.ZonedDateTime;
 
-@MappedSuperclass
-public abstract class ValidBetween extends ValidityCondition {
+@Entity
+public class ValidBetween extends ValidityCondition {
 
     private ZonedDateTime fromDate;
 

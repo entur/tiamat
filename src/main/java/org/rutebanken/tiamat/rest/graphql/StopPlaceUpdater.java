@@ -4,12 +4,14 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.rutebanken.tiamat.auth.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
@@ -43,6 +46,12 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
+
+    @Autowired
+    private ValidBetweenMapper validBetweenMapper;
 
     private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
 
@@ -72,7 +81,7 @@ class StopPlaceUpdater implements DataFetcher {
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 updatedStopPlace = stopPlaceVersionedSaverService.createNewVersion(existingVersion);
                 Preconditions.checkArgument(updatedStopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
-
+                
             } else {
                 logger.info("Creating new StopPlace");
                 updatedStopPlace = new StopPlace();
@@ -97,6 +106,8 @@ class StopPlaceUpdater implements DataFetcher {
                                 .forEach(quay -> quayRepository.saveAndFlush(quay));
                     }
                     updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
+
+                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, updatedStopPlace, existingVersion);
                     return updatedStopPlace;
                 }
             }
@@ -105,7 +116,6 @@ class StopPlaceUpdater implements DataFetcher {
     }
 
     /**
-     *
      * @param input
      * @param stopPlace
      * @return true if StopPlace or any og the attached Quays are updated
@@ -115,6 +125,15 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (input.get(STOP_PLACE_TYPE) != null) {
             stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));
+            isUpdated = true;
+        }
+
+        if (input.get(VALID_BETWEENS) != null) {
+            List values = (List) input.get(VALID_BETWEENS);
+            stopPlace.getValidBetweens().clear();
+            for (Object value : values) {
+                stopPlace.getValidBetweens().add(validBetweenMapper.map((Map) value));
+            }
             isUpdated = true;
         }
 

@@ -355,6 +355,35 @@ public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
     }
 
     @Test
+    public void validityMustBeSetOnImportedStop() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("x")
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("new"));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
+
+        List<ValidBetween> actualValidBetween = actualStopPlace.getValidBetween();
+
+        assertThat(actualValidBetween)
+                .as("Stop Place should have actualValidBetween set")
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        ValidBetween validBetween = actualValidBetween.get(0);
+        assertThat(validBetween.getFromDate())
+                .as("From date should be set")
+                .isNotNull();
+
+    }
+
+    @Test
     public void updateStopPlaceShouldHaveItsDateChanged() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
