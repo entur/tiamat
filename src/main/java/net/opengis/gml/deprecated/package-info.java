@@ -6,4 +6,5 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://www.opengis.net/gml/3.2", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@Deprecated
 package net.opengis.gml.deprecated;
