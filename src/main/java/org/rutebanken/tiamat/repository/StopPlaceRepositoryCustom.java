@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.Page;
@@ -37,4 +38,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 
     List<StopPlace> findAll(List<String> stopPlacesNetexIds);
+
+    StopPlace findByQuay(Quay quay);
 }
