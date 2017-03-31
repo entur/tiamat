@@ -21,13 +21,15 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
     @Test
-    public void publicationDeliveryWithTopographicPlace() throws Exception {
+    public void publicationDeliveryWithTopographicPlaceAndPolygon() throws Exception {
 
         List<Double> values = new ArrayList<>();
         values.add(9.8468);
         values.add(59.2649);
         values.add(9.8456);
         values.add(59.2654);
+        values.add(9.8457);
+        values.add(59.2655);
         values.add(9.8443);
         values.add(59.2663);
 
@@ -60,8 +62,43 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
         TopographicPlace actualTopographicPlace = result.get(0);
 
-        assertThat(actualTopographicPlace.getPolygon()).isNotNull();
+        assertThat(actualTopographicPlace.getPolygon())
+                .as("polygon must not be null")
+                .isNotNull();
         assertThat(actualTopographicPlace.getPolygon().getExterior()).isEqualTo(topographicPlace.getPolygon().getExterior());
         assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
+    }
+
+    @Test
+    public void publicationDeliveryWithParentTopographicPlace() throws Exception {
+        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+
+        TopographicPlace county = new TopographicPlace()
+                .withId("KVE:TopographicPlace:07")
+                .withName(countyName)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(countyName))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
+                .withCountryRef(new CountryRef().withValue("NO"));
+
+        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+
+        TopographicPlace municipality = new TopographicPlace()
+                .withId("KVE:TopographicPlace:08")
+                .withName(municipalityName)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef(county.getId()).withVersion(county.getVersion()));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(county, municipality);
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
+        assertThat(result).as("Expecting topographic place in return").hasSize(2);
+
+
+
     }
 }
