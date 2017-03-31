@@ -32,6 +32,8 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         values.add(59.2655);
         values.add(9.8443);
         values.add(59.2663);
+        values.add(values.get(0));
+        values.add(values.get(1));
 
         DirectPositionListType positionList = new DirectPositionListType().withValue(values);
 
