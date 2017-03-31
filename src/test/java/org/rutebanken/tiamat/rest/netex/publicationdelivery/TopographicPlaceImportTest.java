@@ -6,6 +6,7 @@ import net.opengis.gml._3.ObjectFactory;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.netex.mapping.converter.PolygonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
+
+    @Autowired
+    private PolygonConverter polygonConverter;
 
     @Test
     public void publicationDeliveryWithTopographicPlaceAndPolygon() throws Exception {
@@ -67,7 +71,10 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         assertThat(actualTopographicPlace.getPolygon())
                 .as("polygon must not be null")
                 .isNotNull();
-        assertThat(actualTopographicPlace.getPolygon().getExterior()).isEqualTo(topographicPlace.getPolygon().getExterior());
+
+        List<Double> actualExteriorValues = polygonConverter.extractValues(topographicPlace.getPolygon().getExterior());
+
+        assertThat(actualExteriorValues).isEqualTo(values);
         assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
     }
 

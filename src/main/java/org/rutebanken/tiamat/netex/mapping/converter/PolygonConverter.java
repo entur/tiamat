@@ -88,6 +88,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
         if (optionalCoordinates.isPresent()) {
             List<Double> values = toList(optionalCoordinates.get());
             return new PolygonType()
+                    .withId("GEN-PolygonType-" + Math.abs(polygon.hashCode()))
                     .withExterior(of(values))
                     .withInterior(ofInteriorRings(polygon));
         }
