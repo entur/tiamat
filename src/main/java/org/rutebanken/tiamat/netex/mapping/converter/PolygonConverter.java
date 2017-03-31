@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonType> {
-    
+
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
 
     private final GeometryFactory geometryFactory;
@@ -80,21 +80,39 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
     public PolygonType convertTo(Polygon polygon, Type<PolygonType> type) {
 
         Optional<Coordinate[]> optionalCoordinates = Optional.ofNullable(polygon)
-                .map(Polygon::getCoordinates)
+                .map(Polygon::getExteriorRing)
+                .map(LineString::getCoordinates)
                 .filter(coordinates -> coordinates.length > 0);
 
 
         if (optionalCoordinates.isPresent()) {
             List<Double> values = toList(optionalCoordinates.get());
             return new PolygonType()
-                    .withExterior(new AbstractRingPropertyType()
-                            .withAbstractRing(openGisObjectFactory.createLinearRing(
-                                    new LinearRingType()
-                                            .withPosList(
-                                                    new DirectPositionListType().withValue(values)))));
+                    .withExterior(of(values))
+                    .withInterior(ofInteriorRings(polygon));
         }
 
         return null;
+    }
+
+    private List<AbstractRingPropertyType> ofInteriorRings(Polygon polygon) {
+        List<AbstractRingPropertyType> list = new ArrayList<>();
+        for(int n = 0; n < polygon.getNumInteriorRing(); n++) {
+            if(polygon.getInteriorRingN(n).getCoordinates() != null) {
+                List<Double> values = toList(polygon.getInteriorRingN(n).getCoordinates());
+                list.add(of(values));
+            }
+
+        }
+        return list;
+    }
+
+    private AbstractRingPropertyType of(List<Double> values) {
+        return new AbstractRingPropertyType()
+                .withAbstractRing(openGisObjectFactory.createLinearRing(
+                        new LinearRingType()
+                                .withPosList(
+                                        new DirectPositionListType().withValue(values))));
     }
 
     private List<Double> toList(Coordinate[] coordinates) {
