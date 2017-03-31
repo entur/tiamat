@@ -98,7 +98,6 @@ public class VersionCreator {
 
     public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
         //TODO: Need to support "valid from" set explicitly
-        System.out.println("New version valid from : " + newVersionValidFrom);
         logger.debug("New version valid from {}", newVersionValidFrom);
         if (!entityInVersionStructure.getValidBetweens().isEmpty()) {
             ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);

@@ -4,6 +4,8 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,48 +16,58 @@ import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalcul
 @Service
 public class AccessibilityAssessmentOptimizer {
 
+    @Autowired
+    private VersionCreator versionCreator;
+
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
-        try {
-            List<AccessibilityAssessment> allAccessibilityAssessments = new ArrayList<>();
 
-            // Populate assessments on all quays that do not have assessments set
-            stopPlace.getQuays()
-                    .stream()
-                    .filter(quay -> quay.getAccessibilityAssessment() == null)
-                    .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
+        List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
 
-            // Collect all assessments
-            stopPlace.getQuays()
-                    .stream()
-                    .forEach(quay -> allAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+        // Populate assessments on all quays that do not have assessments set
+        stopPlace.getQuays()
+                .stream()
+                .filter(quay -> quay.getAccessibilityAssessment() == null)
+                .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
 
-            if (!allAccessibilityAssessments.isEmpty()) {
-                //Assessments are set
+        // Collect all assessments
+        stopPlace.getQuays()
+                .stream()
+                .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
 
-                if (allAccessibilityAssessmentsAreEqual(allAccessibilityAssessments)) {
-                    //All quays are equal
-                    //Set Assessment on StopPlace
-                    stopPlace.setAccessibilityAssessment(deepCopyAccessibilityAssessment(allAccessibilityAssessments.get(0)));
+        if (!allQuayAccessibilityAssessments.isEmpty()) {
+            //Assessments are set
 
-                    //Remove Assessment from Quays
-                    stopPlace.getQuays().forEach(quay -> quay.setAccessibilityAssessment(null));
-                } else {
-                    // Assessments are different - remove from StopPlace
-                    stopPlace.setAccessibilityAssessment(null);
+            if (allAccessibilityAssessmentsAreEqual(allQuayAccessibilityAssessments)) {
+                //All quays are equal
+                //Set Assessment on StopPlace
+
+                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.get(0));
+
+                if (stopPlace.getAccessibilityAssessment() != null) {
+                    // Use existing Assessment instead, but update limitations
+                    AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
+                    nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
+                    firstAccessibilityAssessment = versionCreator.createNextVersion(nextVersion, AccessibilityAssessment.class);
                 }
-            }
 
-            if (stopPlace.getAccessibilityAssessment() != null) {
-                calculateAndSetMobilityImpairedAccess(stopPlace.getAccessibilityAssessment());
+                stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
+
+                //Remove Assessment from Quays
+                stopPlace.getQuays().forEach(quay -> quay.setAccessibilityAssessment(null));
+            } else {
+                // Assessments are different - remove from StopPlace
+                stopPlace.setAccessibilityAssessment(null);
             }
-            if (stopPlace.getQuays() != null) {
-                stopPlace.getQuays()
-                        .stream()
-                        .filter(quay -> quay.getAccessibilityAssessment() != null)
-                        .forEach(quay -> calculateAndSetMobilityImpairedAccess(quay.getAccessibilityAssessment()));
-            }
-        } catch (Throwable t) {
-            System.err.println("");
+        }
+
+        if (stopPlace.getAccessibilityAssessment() != null) {
+            calculateAndSetMobilityImpairedAccess(stopPlace.getAccessibilityAssessment());
+        }
+        if (stopPlace.getQuays() != null) {
+            stopPlace.getQuays()
+                    .stream()
+                    .filter(quay -> quay.getAccessibilityAssessment() != null)
+                    .forEach(quay -> calculateAndSetMobilityImpairedAccess(quay.getAccessibilityAssessment()));
         }
     }
 
@@ -65,14 +77,14 @@ public class AccessibilityAssessmentOptimizer {
         }
         AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
 
-        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        AccessibilityLimitation limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(new AccessibilityLimitation(), AccessibilityLimitation.class);
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
         limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
         limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
 
-        AccessibilityAssessment quayAssessment = new AccessibilityAssessment();
+        AccessibilityAssessment quayAssessment = versionCreator.initiateFirstVersionWithAvailabilityCondition(new AccessibilityAssessment(), AccessibilityAssessment.class);
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
 
         List<AccessibilityLimitation> limitations = new ArrayList<>();

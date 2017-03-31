@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -16,7 +16,7 @@ import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class StopPlaceVersionedSaverServiceTest extends CommonSpringBootTest {
+public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
 
     @Autowired

@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
@@ -71,6 +74,27 @@ public class StopPlaceVersionedSaverService {
             stopPlaceRepository.save(existingStopPlace);
         }
 
+        if (stopPlaceToSave.getQuays() != null) {
+            stopPlaceToSave.getQuays().forEach(quay -> {
+                if (quay.getNetexId() == null) {
+                    quay = versionCreator.initiateFirstVersionWithAvailabilityCondition(quay, Quay.class);
+                }
+                AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
+
+                if (accessibilityAssessment != null) {
+                    if (accessibilityAssessment.getNetexId() == null) {
+                        accessibilityAssessment = versionCreator.initiateFirstVersionWithAvailabilityCondition(accessibilityAssessment, AccessibilityAssessment.class);
+                    }
+                    if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
+                        AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
+                        if (limitation.getNetexId() == null) {
+                            limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(limitation, AccessibilityLimitation.class);
+                        }
+                    }
+                }
+
+            });
+        }
         // Save latest version
         return stopPlaceRepository.save(stopPlaceToSave);
     }

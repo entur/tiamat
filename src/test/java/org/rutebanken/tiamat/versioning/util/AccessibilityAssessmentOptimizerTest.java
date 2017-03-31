@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.versioning.util;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -21,7 +21,7 @@ import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.*;
 
 @Transactional
 @Commit
-public class AccessibilityAssessmentOptimizerTest extends CommonSpringBootTest {
+public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest {
 
     @Autowired
     public QuayRepository quayRepository;
