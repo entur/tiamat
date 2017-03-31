@@ -1,23 +1,13 @@
 package org.rutebanken.tiamat.model;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Transactional
-public class TopographicPlaceTest extends CommonSpringBootTest {
-
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+public class TopographicPlaceTest extends TiamatIntegrationTest {
 
     @Test
     public void stopPlaceShouldBeReferencingTopographicalPlace() {

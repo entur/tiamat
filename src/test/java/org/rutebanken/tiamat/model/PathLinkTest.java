@@ -2,16 +2,10 @@ package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.repository.PathJunctionRepository;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -21,22 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class PathLinkTest extends CommonSpringBootTest {
-
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
-
-    @Autowired
-    private PathJunctionRepository pathJunctionRepository;
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
+public class PathLinkTest extends TiamatIntegrationTest {
 
     @Test
     public void simplePersistTest() {

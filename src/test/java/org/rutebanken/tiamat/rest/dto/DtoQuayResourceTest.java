@@ -24,8 +24,7 @@ public class DtoQuayResourceTest {
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource();
-        dtoQuayResource.stopPlaceRepository = stopPlaceRepository;
+        dtoQuayResource = new DtoQuayResource(stopPlaceRepository);
     }
 
     @Test

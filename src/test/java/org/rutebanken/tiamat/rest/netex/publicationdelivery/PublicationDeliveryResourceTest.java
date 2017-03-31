@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
+public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;

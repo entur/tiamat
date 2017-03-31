@@ -6,21 +6,17 @@ import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
-public class NetexMapperTest extends CommonSpringBootTest {
+public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Autowired
     private NetexMapper netexMapper;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {

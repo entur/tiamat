@@ -1,7 +1,0 @@
-<jaxb:bindings schemaLocation="file:ifopt.xsd"
-	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" 
-	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	version="1.0">
-	<jaxb:globalBindings underscoreBinding="asCharInWord" localScoping="toplevel" />
-</jaxb:bindings> 

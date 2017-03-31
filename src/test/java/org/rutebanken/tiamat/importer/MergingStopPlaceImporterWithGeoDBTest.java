@@ -1,20 +1,14 @@
 package org.rutebanken.tiamat.importer;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import org.junit.Before;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.junit.Test;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,30 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * See also {@link MergingStopPlaceImporterTest}
  */
 @Transactional
-public class MergingStopPlaceImporterWithGeoDBTest extends CommonSpringBootTest {
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
+public class MergingStopPlaceImporterWithGeoDBTest extends TiamatIntegrationTest {
 
     @Autowired
     private MergingStopPlaceImporter mergingStopPlaceImporter;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
-
-
-    @Before
-    public void cleanRepositories() {
-        stopPlaceRepository.deleteAll();
-        topographicPlaceRepository.deleteAll();
-        quayRepository.deleteAll();
-    }
 
     /**
      * Two stop places with the same name and coordinates should become one stop place.

@@ -72,20 +72,6 @@ ONLY_TAGS=rb PLAY=build vagrant provision
 ONLY_TAGS=rb PLAY=run vagrant provision
 ```
 
-
-## Bootstrap generation of data from GTFS stops.txt for development
-It is not common to do this anymore. It reads an old stops.txt file and generates data. It is probably better to use a NeTEx export from google cloud storage.
-```
-mvn spring-boot:run -Dspring.profiles.active=geodb,bootstrap -Dspring.config.location=src/test/resources/application.properties
-```
-
-### Run with external config **and** bootstrap data from GTFS for development
-Can be used with an empty PostgreSQL.
-```
-mvn spring-boot:run -Dspring.profiles.active=bootstrap -Dspring.config.location=/path/to/application.properties
-```
-
-
 ## Run Keycloak
 
 Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone. *Currently disabled, see NRP-16*

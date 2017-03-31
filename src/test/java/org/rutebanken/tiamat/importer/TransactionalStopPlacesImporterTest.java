@@ -2,12 +2,9 @@ package org.rutebanken.tiamat.importer;
 
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -15,10 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TransactionalStopPlacesImporterTest extends CommonSpringBootTest {
-
-    @Autowired
-    private GeometryFactory geometryFactory;
+public class TransactionalStopPlacesImporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private TransactionalStopPlacesImporter siteFrameImporter;

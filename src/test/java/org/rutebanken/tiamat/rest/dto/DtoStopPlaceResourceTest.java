@@ -24,8 +24,7 @@ public class DtoStopPlaceResourceTest {
 
     @Before
     public void setUp() {
-        dtoStopPlaceResource = new DtoStopPlaceResource();
-        dtoStopPlaceResource.stopPlaceRepository = stopPlaceRepository;
+        dtoStopPlaceResource = new DtoStopPlaceResource(stopPlaceRepository);
     }
 
     @Test

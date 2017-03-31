@@ -1,11 +1,9 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,23 +12,7 @@ import java.time.ZonedDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class VersionCreatorTest extends CommonSpringBootTest {
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private PathLinkRepository pathLinkRepository;
-
-    @Autowired
-    private GeometryFactory geometryFactory;
-
-    @Autowired
-    private QuayRepository quayRepository;
-
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+public class VersionCreatorTest extends TiamatIntegrationTest {
 
     @Autowired
     private VersionCreator versionCreator;

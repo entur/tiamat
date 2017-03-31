@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="any">
-    <PublicationTimestamp>2016-11-29T13:32:06.869+01:00</PublicationTimestamp>
-    <ParticipantRef>NSR</ParticipantRef>
-    <dataObjects>
-        <SiteFrame created="2016-11-29T13:32:06.41+01:00" modification="new" status="active"/>
-    </dataObjects>
-</PublicationDelivery>
