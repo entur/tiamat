@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-public class PolygonConverter extends BidirectionalConverter<PolygonType, Polygon> {
+public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonType> {
+    
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
 
     private final GeometryFactory geometryFactory;
@@ -29,7 +30,7 @@ public class PolygonConverter extends BidirectionalConverter<PolygonType, Polygo
     }
 
     @Override
-    public Polygon convertTo(PolygonType polygonType, Type<Polygon> type) {
+    public Polygon convertFrom(PolygonType polygonType, Type<Polygon> type) {
 
         Optional<List<Double>> optionalExteriorValues = Optional.ofNullable(polygonType)
                 .map(PolygonType::getExterior)
@@ -76,7 +77,7 @@ public class PolygonConverter extends BidirectionalConverter<PolygonType, Polygo
     }
 
     @Override
-    public PolygonType convertFrom(Polygon polygon, Type<PolygonType> type) {
+    public PolygonType convertTo(Polygon polygon, Type<PolygonType> type) {
 
         Optional<Coordinate[]> optionalCoordinates = Optional.ofNullable(polygon)
                 .map(Polygon::getCoordinates)
@@ -97,7 +98,7 @@ public class PolygonConverter extends BidirectionalConverter<PolygonType, Polygo
     }
 
     private List<Double> toList(Coordinate[] coordinates) {
-        List<Double> values = new ArrayList<>(coordinates.length*2);
+        List<Double> values = new ArrayList<>(coordinates.length * 2);
         for (Coordinate coordinate : coordinates) {
             values.add(coordinate.x);
             values.add(coordinate.y);
