@@ -683,7 +683,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void receivePublicationDelivery() throws Exception {
+    public void importPublicationDeliveryAndVerifyStatusCode200() throws Exception {
 
         String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\"\n" +
@@ -705,7 +705,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "                    <TransportMode>bus</TransportMode>\n" +
                 "                    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
                 "                    <quays>\n" +
-                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">\n" +
+                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:Quay:1\">\n" +
                 "                            <Centroid>\n" +
                 "                                <Location srsName=\"WGS84\">\n" +
                 "                                    <Longitude>10.8577903</Longitude>\n" +
