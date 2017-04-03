@@ -20,7 +20,7 @@ public class NetexIdProviderTest {
 
         GaplessIdGeneratorService gaplessIdGeneratorService = mock(GaplessIdGeneratorService.class);
 
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, Arrays.asList("KVE"), validPrefixList);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, new ValidPrefixList(new String[] {"KVE"}));
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
