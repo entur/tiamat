@@ -64,11 +64,12 @@ class StopPlaceFetcher implements DataFetcher {
                 List<StopPlace> stopPlace;
                 if(version != null && version > 0) {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
+                    stopPlaces = new PageImpl<>(stopPlace, pageable, 1L);
                 } else {
-                    stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId));
+                    stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
+                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
                 }
 
-                stopPlaces = new PageImpl<>(stopPlace, pageable, 1L);
             } catch (NumberFormatException nfe) {
                 logger.info("Attempted to find stopPlace with invalid id [{}]", netexId);
             }
