@@ -88,6 +88,7 @@ public class StopPlaceVersionedSaverService {
                     if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
                         AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
                         if (limitation.getNetexId() == null) {
+                            // TODO: All object under StopPlace does probably not need to have availability condition
                             limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(limitation, AccessibilityLimitation.class);
                         }
                     }

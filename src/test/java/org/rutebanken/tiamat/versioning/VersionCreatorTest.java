@@ -4,12 +4,15 @@ import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 @Transactional
 public class VersionCreatorTest extends TiamatIntegrationTest {
@@ -53,6 +56,53 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
         StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
         assertThat(newVersion.getCentroid()).isNotNull();
+    }
+
+    @Test
+    public void unsavedNewVersionShouldNotHavePrimaryKey() throws NoSuchFieldException, IllegalAccessException {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+
+        ValidBetween validBetween = new ValidBetween(ZonedDateTime.now());
+        validBetween.getOriginalIds().add("1000");
+
+        stopPlace.getValidBetweens().add(validBetween);
+
+        // Save first version
+        stopPlace = stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+
+        Object firstVersionValidBetweenId = getIdValue(stopPlace.getValidBetweens().get(0));
+        assertThat(firstVersionValidBetweenId).isNotNull();
+
+        // Create new version
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
+
+        Object actualStopPlaceId = getIdValue(newVersion);
+        assertThat(actualStopPlaceId).isNull();
+
+        // Check that ID of ValidBetween has been excluded in the new version
+        Object actualValidBetweenId = getIdValue(newVersion.getValidBetweens().get(0));
+        assertThat(actualValidBetweenId)
+                .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
+                .isNull();
+
+        // Save the new version
+        newVersion = stopPlaceRepository.save(newVersion);
+
+        // Check that the saved new version does not have the same value as the previous ID
+        actualValidBetweenId = getIdValue(newVersion.getValidBetweens().get(0));
+        assertThat(actualValidBetweenId)
+                .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
+                .isNotEqualTo(firstVersionValidBetweenId);
+
+
+    }
+
+    private Object getIdValue(IdentifiedEntity entity) throws NoSuchFieldException, IllegalAccessException {
+        Field field = IdentifiedEntity.class.getDeclaredField("id");
+        field.setAccessible(true);
+        return field.get(entity);
     }
 
     @Test
