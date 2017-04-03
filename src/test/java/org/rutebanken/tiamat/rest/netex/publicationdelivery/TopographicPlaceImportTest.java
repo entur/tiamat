@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
@@ -100,7 +101,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
                 .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef(county.getId()).withVersion(county.getVersion()));
 
-        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(county, municipality);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality, county);
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
@@ -109,5 +110,23 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
 
 
+    }
+
+    @Test(expected = Exception.class)
+    public void publicationDeliveryWithInvalidParentTopographicPlaceRef() throws Exception {
+
+        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+
+        TopographicPlace municipality = new TopographicPlace()
+                .withId("KVE:TopographicPlace:08")
+                .withName(municipalityName)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef("KVE:TopographicPlace:1").withVersion(ANY_VERSION));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality);
+
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
     }
 }

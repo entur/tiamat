@@ -26,7 +26,8 @@ import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateS
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
-public class StopPlaceRegisterGraphQLSchema {
+public class
+StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
