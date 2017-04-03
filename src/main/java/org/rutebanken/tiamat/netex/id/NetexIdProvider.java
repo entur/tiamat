@@ -1,16 +1,14 @@
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.locks.Lock;
 
 @Component
 public class NetexIdProvider {
@@ -20,9 +18,13 @@ public class NetexIdProvider {
 
     private final GaplessIdGeneratorService gaplessIdGenerator;
 
+    private final List<String> validPrefixForClaiming;
+
     @Autowired
-    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator) {
+    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator,
+                           @Value("${list.of.strings}") List<String> validPrefixForClaiming) {
         this.gaplessIdGenerator = gaplessIdGenerator;
+        this.validPrefixForClaiming = validPrefixForClaiming;
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
