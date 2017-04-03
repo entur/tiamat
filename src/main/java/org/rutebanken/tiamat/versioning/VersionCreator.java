@@ -78,6 +78,11 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(ValidBetween.class, ValidBetween.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 
