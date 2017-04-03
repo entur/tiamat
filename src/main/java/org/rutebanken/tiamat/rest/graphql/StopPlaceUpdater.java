@@ -216,13 +216,13 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
 
-        if (input.get("accessibilityAssessment") != null) {
+        if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
             AccessibilityAssessment accessibilityAssessment = entity.getAccessibilityAssessment();
             if (accessibilityAssessment == null) {
                 accessibilityAssessment = new AccessibilityAssessment();
             }
 
-            Map<String, Object> accessibilityAssessmentInput = (Map) input.get("accessibilityAssessment");
+            Map<String, Object> accessibilityAssessmentInput = (Map) input.get(ACCESSIBILITY_ASSESSMENT);
             List<AccessibilityLimitation> limitations = accessibilityAssessment.getLimitations();
             AccessibilityLimitation limitation;
             if (limitations == null || limitations.isEmpty()) {
@@ -262,12 +262,11 @@ class StopPlaceUpdater implements DataFetcher {
 
     private AccessibilityLimitation createAccessibilityLimitationFromInput(Map<String, LimitationStatusEnumeration> limitationsInput) {
         AccessibilityLimitation limitation = new AccessibilityLimitation();
-        limitation.setWheelchairAccess(limitationsInput.get("wheelchairAccess"));
-        limitation.setAudibleSignalsAvailable(limitationsInput.get("audibleSignalsAvailable"));
-        limitation.setStepFreeAccess(limitationsInput.get("stepFreeAccess"));
-        limitation.setLiftFreeAccess(limitationsInput.get("liftFreeAccess"));
-        limitation.setVisualSignsAvailable(limitationsInput.get("visualSignsAvailable"));
-        limitation.setEscalatorFreeAccess(limitationsInput.get("escalatorFreeAccess"));
+        limitation.setWheelchairAccess(limitationsInput.get(WHEELCHAIR_ACCESS));
+        limitation.setAudibleSignalsAvailable(limitationsInput.get(AUDIBLE_SIGNALS_AVAILABLE));
+        limitation.setStepFreeAccess(limitationsInput.get(STEP_FREE_ACCESS));
+        limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
+        limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
         return limitation;
     }
 

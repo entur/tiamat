@@ -52,8 +52,8 @@ public class CustomGraphQLTypes {
             .value("GeometryCollection")
             .build();
 
-    public static  GraphQLEnumType limitationStatusEnum = GraphQLEnumType.newEnum()
-            .name("LimitationStatusType")
+        public static  GraphQLEnumType limitationStatusEnum = GraphQLEnumType.newEnum()
+            .name(LIMITATION_STATUS_ENUM)
             .value("FALSE", LimitationStatusEnumeration.FALSE)
             .value("TRUE", LimitationStatusEnumeration.TRUE)
             .value("PARTIAL", LimitationStatusEnumeration.PARTIAL)
@@ -64,7 +64,7 @@ public class CustomGraphQLTypes {
             .name(OUTPUT_TYPE_GEO_JSON)
             .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
             .field(newFieldDefinition()
-                    .name("type")
+                    .name(TYPE)
                     .type(geometryTypeEnum)
                     .dataFetcher(env -> {
                             if (env.getSource() instanceof Geometry) {
@@ -73,7 +73,7 @@ public class CustomGraphQLTypes {
                             return null;
                     }))
             .field(newFieldDefinition()
-                    .name("coordinates")
+                    .name(COORDINATES)
                     .type(GraphQLGeoJSONCoordinates))
             .build();
 
@@ -147,44 +147,44 @@ public class CustomGraphQLTypes {
             .build();
 
         public static GraphQLObjectType accessibilityLimitationsObjectType = newObject()
-                .name("AccessibilityLimitations")
+                .name(OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS)
                 .field(newFieldDefinition()
                                 .name(ID)
                                 .type(GraphQLString)
                                 .dataFetcher(env -> ((AccessibilityLimitation) env.getSource()).getNetexId())
                 )
                 .field(newFieldDefinition()
-                        .name("version")
+                        .name(VERSION)
                         .type(GraphQLString))
                 .field(newFieldDefinition()
-                        .name("wheelchairAccess")
+                        .name(WHEELCHAIR_ACCESS)
                         .type(limitationStatusEnum))
                 .field(newFieldDefinition()
-                        .name("stepFreeAccess")
+                        .name(STEP_FREE_ACCESS)
                         .type(limitationStatusEnum))
                 .field(newFieldDefinition()
-                        .name("escalatorFreeAccess")
+                        .name(ESCALATOR_FREE_ACCESS)
                         .type(limitationStatusEnum))
                 .field(newFieldDefinition()
-                        .name("liftFreeAccess")
+                        .name(LIFT_FREE_ACCESS)
                         .type(limitationStatusEnum))
                 .field(newFieldDefinition()
-                        .name("audibleSignalsAvailable")
+                        .name(AUDIBLE_SIGNALS_AVAILABLE)
                         .type(limitationStatusEnum))
                 .build();
 
         public static GraphQLObjectType accessibilityAssessmentObjectType = newObject()
-                .name("AccessibilityAssessment")
+                .name(OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT)
                 .field(newFieldDefinition()
                         .name(ID)
                         .type(GraphQLString)
-                        .dataFetcher(env -> ((AccessibilityAssessment)env.getSource()).getNetexId())
+                        .dataFetcher(env -> ((AccessibilityAssessment) env.getSource()).getNetexId())
                 )
                 .field(newFieldDefinition()
-                        .name("version")
+                        .name(VERSION)
                         .type(GraphQLString))
                 .field(newFieldDefinition()
-                        .name("limitations")
+                        .name(LIMITATIONS)
                         .type(accessibilityLimitationsObjectType)
                         .dataFetcher(env -> {
                                 List<AccessibilityLimitation> limitations = ((AccessibilityAssessment) env.getSource()).getLimitations();
@@ -194,7 +194,7 @@ public class CustomGraphQLTypes {
                                 return null;
                         }))
                 .field(newFieldDefinition()
-                        .name("mobilityImpairedAccess")
+                        .name(MOBILITY_IMPAIRED_ACCESS)
                         .type(limitationStatusEnum))
                 .build();
 
@@ -211,34 +211,34 @@ public class CustomGraphQLTypes {
 
 
         public static GraphQLInputObjectType accessibilityLimitationsInputObjectType = GraphQLInputObjectType.newInputObject()
-                .name("AccessibilityLimitationInput")
+                .name(INPUT_TYPE_ACCESSIBILITY_LIMITATIONS)
                 .field(newInputObjectField()
                         .name(ID)
                         .type(GraphQLString))
                 .field(newInputObjectField()
-                        .name("wheelchairAccess")
+                        .name(WHEELCHAIR_ACCESS)
                         .type(new GraphQLNonNull(limitationStatusEnum)))
                 .field(newInputObjectField()
-                        .name("stepFreeAccess")
+                        .name(STEP_FREE_ACCESS)
                         .type(new GraphQLNonNull(limitationStatusEnum)))
                 .field(newInputObjectField()
-                        .name("escalatorFreeAccess")
+                        .name(ESCALATOR_FREE_ACCESS)
                         .type(new GraphQLNonNull(limitationStatusEnum)))
                 .field(newInputObjectField()
-                        .name("liftFreeAccess")
+                        .name(LIFT_FREE_ACCESS)
                         .type(new GraphQLNonNull(limitationStatusEnum)))
                 .field(newInputObjectField()
-                        .name("audibleSignalsAvailable")
+                        .name(AUDIBLE_SIGNALS_AVAILABLE)
                         .type(new GraphQLNonNull(limitationStatusEnum)))
                 .build();
 
         public static GraphQLInputObjectType accessibilityAssessmentInputObjectType = GraphQLInputObjectType.newInputObject()
-                .name("AccessibilityAssessmentInput")
+                .name(INPUT_TYPE_ACCESSIBILITY_ASSESSMENT)
                 .field(newInputObjectField()
                         .name(ID)
                         .type(GraphQLString))
                 .field(newInputObjectField()
-                        .name("limitations")
+                        .name(LIMITATIONS)
                         .type(accessibilityLimitationsInputObjectType))
             .build();
 
