@@ -12,8 +12,8 @@ import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.id.NetexIdHelper.ORIGINAL_ID_KEY;
 
 /**
  * Test stop place importer with mocked dependencies.
@@ -77,7 +77,7 @@ public class MergingStopPlaceImporterTest {
     public void findNearbyStopWithSameType() throws ExecutionException, InterruptedException {
 
         StopPlace firstStopPlace = new StopPlace();
-        String firstStopId = NetexIdMapper.generateRandomizedNetexId(firstStopPlace);
+        String firstStopId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
         firstStopPlace.setNetexId(firstStopId);
@@ -86,7 +86,7 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("Filipstad"));
-        terminal1.setNetexId(NetexIdMapper.generateRandomizedNetexId(firstStopPlace));
+        terminal1.setNetexId(NetexIdHelper.generateRandomizedNetexId(firstStopPlace));
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885)));
 
         firstStopPlace.getQuays().add(terminal1);
@@ -100,7 +100,7 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal2 = new Quay();
         terminal2.setName(new EmbeddableMultilingualString("Filipstad ferjeterminal"));
-        terminal2.setNetexId(NetexIdMapper.generateRandomizedNetexId(terminal2));
+        terminal2.setNetexId(NetexIdHelper.generateRandomizedNetexId(terminal2));
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(10.709707, 59.908737)));
         secondStopPlace.getQuays().add(terminal2);
 
@@ -125,11 +125,11 @@ public class MergingStopPlaceImporterTest {
         Point point = geometryFactory.createPoint(new Coordinate(10.7096245, 59.9086885));
 
         StopPlace firstStopPlace = new StopPlace();
-        String firstStopId = NetexIdMapper.generateRandomizedNetexId(firstStopPlace);
+        String firstStopId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setCentroid(point);
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
         firstStopPlace.setNetexId(firstStopId);
-        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id");
+        firstStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id");
         firstStopPlace.setVersion(1L);
 
         StopPlace newStopPlace = new StopPlace();
@@ -151,7 +151,7 @@ public class MergingStopPlaceImporterTest {
     public void detectAndMergeQuaysFromTwoSimilarStopPlaces() throws ExecutionException, InterruptedException {
 
         StopPlace firstStopPlace = new StopPlace();
-        String firstStopId = NetexIdMapper.generateRandomizedNetexId(firstStopPlace);
+        String firstStopId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(59.933307, 10.775973)));
         firstStopPlace.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstStopPlace.setNetexId(firstStopId);
@@ -160,7 +160,7 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal1 = new Quay();
         terminal1.setName(new EmbeddableMultilingualString("terminal 1"));
-        terminal1.setNetexId(NetexIdMapper.generateRandomizedNetexId(terminal1));
+        terminal1.setNetexId(NetexIdHelper.generateRandomizedNetexId(terminal1));
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(60.000, 10.78)));
 
         firstStopPlace.getQuays().add(terminal1);
@@ -172,7 +172,7 @@ public class MergingStopPlaceImporterTest {
 
         Quay terminal2 = new Quay();
         terminal2.setName(new EmbeddableMultilingualString("terminal 2"));
-        terminal2.setNetexId(NetexIdMapper.generateRandomizedNetexId(terminal2));
+        terminal2.setNetexId(NetexIdHelper.generateRandomizedNetexId(terminal2));
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(60.01, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
 
@@ -197,13 +197,13 @@ public class MergingStopPlaceImporterTest {
         final String chouetteQuayId = "OPP:Quays:3333";
 
         StopPlace firstStopPlace = new StopPlace();
-        String savedStopPlaceId = NetexIdMapper.generateRandomizedNetexId(firstStopPlace);
+        String savedStopPlaceId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setNetexId(savedStopPlaceId);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
-        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
+        firstStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal1 = new Quay();
-        terminal1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        terminal1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
         firstStopPlace.getQuays().add(terminal1);
 
@@ -211,10 +211,10 @@ public class MergingStopPlaceImporterTest {
         // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(80.000, 20.78)));
         // Set same ID as first stop place
-        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
-        terminal2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        terminal2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
 
@@ -237,7 +237,7 @@ public class MergingStopPlaceImporterTest {
         final String chouetteId = "OPP:StopArea:123123";
 
         StopPlace firstStopPlace = new StopPlace();
-        String savedStopPlaceId = NetexIdMapper.generateRandomizedNetexId(firstStopPlace);
+        String savedStopPlaceId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
         firstStopPlace.setNetexId(savedStopPlaceId);
 
@@ -250,7 +250,7 @@ public class MergingStopPlaceImporterTest {
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(80.000, 20.78)));
 
         // Set same ID as first stop place
-        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
@@ -279,11 +279,11 @@ public class MergingStopPlaceImporterTest {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
-        stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
+        stopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay quay1 = new Quay();
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
-        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         stopPlace.getQuays().add(quay1);
 
         when(stopPlaceRepository.save(stopPlace)).thenReturn(stopPlace);

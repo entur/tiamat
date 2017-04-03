@@ -7,8 +7,8 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -60,7 +60,7 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
-                .withParticipantRef(NetexIdMapper.NSR);
+                .withParticipantRef(NetexIdHelper.NSR);
 
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
@@ -78,7 +78,7 @@ public class PublicationDeliveryExporter {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
         siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdMapper.generateRandomizedNetexId(siteFrame));
+        siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 

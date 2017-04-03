@@ -5,10 +5,9 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +67,7 @@ class StopPlaceFetcher implements DataFetcher {
             }
         } else if (importedId != null && !importedId.isEmpty()) {
 
-            List<String> stopPlaceNetexId = stopPlaceRepository.searchByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
+            List<String> stopPlaceNetexId = stopPlaceRepository.searchByKeyValue(NetexIdHelper.ORIGINAL_ID_KEY, environment.getArgument(IMPORTED_ID_QUERY));
 
             if (stopPlaceNetexId != null && !stopPlaceNetexId.isEmpty()) {
                 stopPlaceSearchBuilder.setNetexIdList(stopPlaceNetexId);

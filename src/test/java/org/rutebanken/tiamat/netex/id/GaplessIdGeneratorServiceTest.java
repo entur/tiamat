@@ -11,7 +11,6 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
@@ -54,7 +53,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     @Test
     public void explicitIdMustBeInsertedIntoHelperTable() {
 
-        String wantedId = NetexIdMapper.getNetexId("Quay", "1");
+        String wantedId = NetexIdHelper.getNetexId("Quay", "1");
 
         Quay quay = new Quay();
         quay.setNetexId(wantedId);
@@ -77,14 +76,14 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         // Use first 500 IDs
         for(long explicitId = 1; explicitId <= 30; explicitId ++) {
             Quay quay = new Quay();
-            quay.setNetexId(NetexIdMapper.getNetexId(Quay.class.getSimpleName(), String.valueOf(explicitId)));
+            quay.setNetexId(NetexIdHelper.getNetexId(Quay.class.getSimpleName(), String.valueOf(explicitId)));
             quayRepository.save(quay);
             System.out.println("Saved quay: " + quay.getNetexId());
         }
 
         Quay quay = new Quay();
         quayRepository.save(quay);
-        assertThat(NetexIdMapper.getNetexIdPostfix(quay.getNetexId())).isEqualTo(31);
+        assertThat(NetexIdHelper.getNetexIdPostfix(quay.getNetexId())).isEqualTo(31);
     }
 
     /**

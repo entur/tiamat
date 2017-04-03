@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.netex.id;
 
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ public class NetexIdProvider {
                            @Value("${list.of.strings}") List<String> validPrefixForClaiming) {
         this.gaplessIdGenerator = gaplessIdGenerator;
         this.validPrefixForClaiming = validPrefixForClaiming;
+
+        logger.info("Valid prefixes for claiming explicit IDs: {}", validPrefixForClaiming);
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
@@ -32,15 +33,15 @@ public class NetexIdProvider {
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
-        return NetexIdMapper.getNetexId(entityTypeName, String.valueOf(longId));
+        return NetexIdHelper.getNetexId(entityTypeName, String.valueOf(longId));
     }
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        if (!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
+        if (!NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
             logger.warn("Detected non NSR ID: {}", identifiedEntity.getNetexId());
         } else {
-            Long claimedId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
+            Long claimedId = NetexIdHelper.getNetexIdPostfix(identifiedEntity.getNetexId());
 
             String entityTypeName = key(identifiedEntity);
 
@@ -51,4 +52,5 @@ public class NetexIdProvider {
     private String key(IdentifiedEntity identifiedEntity) {
         return identifiedEntity.getClass().getSimpleName();
     }
+
 }

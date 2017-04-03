@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 
 import javax.persistence.CascadeType;
 import javax.persistence.MappedSuperclass;
@@ -67,6 +67,6 @@ public abstract class DataManagedObjectStructure
     }
 
     public Set<String> getOriginalIds() {
-        return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
+        return getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY);
     }
 }

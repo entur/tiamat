@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +42,10 @@ public class ReferenceResolver {
             Class<T> clazz = (Class<T>) Class.forName(canonicalName);
 
             final String netexId;
-            if(!NetexIdMapper.isNsrId(ref)) {
-                logger.debug("Detected ID without expected prefix: {}. Will try to find it from original ID: {}.", NetexIdMapper.NSR, ref);
+            if(!NetexIdHelper.isNsrId(ref)) {
+                logger.debug("Detected ID without expected prefix: {}. Will try to find it from original ID: {}.", NetexIdHelper.NSR, ref);
                 Set<String> valuesArgument = Sets.newHashSet(ref);
-                netexId = genericDataManagedObjectRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
+                netexId = genericDataManagedObjectRepository.findByKeyValue(NetexIdHelper.ORIGINAL_ID_KEY, valuesArgument, clazz);
             } else {
                 netexId = ref;
             }

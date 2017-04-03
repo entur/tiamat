@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -85,7 +84,7 @@ public class CoordinatesFixerResource {
 
                     logger.info("Found stop place or quay without centroid... {}", stopPlace);
 
-                    Set<String> originalIds = stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
+                    Set<String> originalIds = stopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY);
                     logger.info("Found original Ids for stop: {}", originalIds);
 
                     for(String originalId : originalIds) {
