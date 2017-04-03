@@ -21,7 +21,7 @@ public class NetexIdProvider {
 
     @Autowired
     public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator,
-                           @Value("${list.of.strings}") List<String> validPrefixForClaiming) {
+                           @Value("${netex.id.valid.prefix.list:NSR,KVE}") List<String> validPrefixForClaiming) {
         this.gaplessIdGenerator = gaplessIdGenerator;
         this.validPrefixForClaiming = validPrefixForClaiming;
 
@@ -38,10 +38,14 @@ public class NetexIdProvider {
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        if (!NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
-            logger.warn("Detected non NSR ID: {}", identifiedEntity.getNetexId());
+        String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
+
+        if (!validPrefixForClaiming.contains(prefix)) {
+            logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
         } else {
-            Long claimedId = NetexIdHelper.getNetexIdPostfix(identifiedEntity.getNetexId());
+            logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
+
+            Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
 
             String entityTypeName = key(identifiedEntity);
 

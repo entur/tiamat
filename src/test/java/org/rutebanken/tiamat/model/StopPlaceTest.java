@@ -42,8 +42,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace giveMeAnyId2 = stopPlaceRepository.save(new StopPlace());
 
         assertThat(explicitIdStopPlace.getNetexId()).isEqualTo(explicitId);
-        assertThat(NetexIdHelper.getNetexIdPostfix(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
-        assertThat(NetexIdHelper.getNetexIdPostfix(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(NetexIdHelper.extractIdPostfix(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(NetexIdHelper.extractIdPostfix(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
     }
 
     @Test

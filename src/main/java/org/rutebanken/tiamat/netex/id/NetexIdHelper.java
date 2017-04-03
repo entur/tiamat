@@ -22,19 +22,6 @@ public class NetexIdHelper {
     // TODO: make it configurable
     public static final String NSR = "NSR";
 
-    /**
-     *
-     * @param netexId Id with long value after last colon.
-     * @return long value
-     */
-    public static long getNetexIdPostfix(String netexId) {
-        try {
-            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
-        } catch (NumberFormatException e) {
-            throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
-        }
-    }
-
     public static String getNetexId(String type, String id) {
         return NSR + ":" + type + ":" + id;
     }
@@ -59,6 +46,27 @@ public class NetexIdHelper {
         }
 
         return true;
+    }
+
+    /**
+     *
+     * @param netexId Id with long value after last colon.
+     * @return long value
+     */
+    public static long extractIdPostfix(String netexId) {
+        try {
+            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
+        }
+    }
+
+    public static String extractIdPrefix(String netexId) {
+        if(StringUtils.countMatches(netexId, ":") != 2) {
+            throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
+        }
+
+        return netexId.substring(0, netexId.indexOf(':'));
     }
 
     public static Optional<String> getOptionalTiamatId(String netexId) {

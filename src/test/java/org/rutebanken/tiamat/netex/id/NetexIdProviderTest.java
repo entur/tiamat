@@ -20,11 +20,10 @@ public class NetexIdProviderTest {
         topographicPlace.setNetexId("KVE:"+TopographicPlace.class.getSimpleName()+":1");
 
         GaplessIdGeneratorService gaplessIdGeneratorService = mock(GaplessIdGeneratorService.class);
-        verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
 
         NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, Arrays.asList("KVE"));
 
         netexIdProvider.claimId(topographicPlace);
-
+        verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
     }
 }
