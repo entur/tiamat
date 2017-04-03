@@ -38,7 +38,7 @@ public class NetexIdProvider {
 
         String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
 
-        if (!validPrefixForClaiming.contains(prefix)) {
+        if (!validPrefixList.get().contains(prefix)) {
             logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
         } else {
             logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
