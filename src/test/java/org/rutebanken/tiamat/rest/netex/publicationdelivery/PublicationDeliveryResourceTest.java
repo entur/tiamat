@@ -42,9 +42,9 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .withId("RUT:StopPlace:123123")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
-                    .withLocation(new LocationStructure()
-                            .withLatitude(new BigDecimal("9"))
-                            .withLongitude(new BigDecimal("71"))));
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopPlace:123123")
@@ -69,6 +69,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
     /**
      * Real life example: Two stops with different IDs should be merged into one, and their quays should be added.
+     *
      * @throws Exception
      */
     @Test
@@ -145,14 +146,14 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                    .withQuayRefOrQuay(new Quay()
-                            .withId("xyz:123")
-                            .withVersion("1")
-                            .withName(new MultilingualString().withValue("quay"))
-                            .withCentroid(new SimplePoint_VersionStructure()
-                                .withLocation(new LocationStructure()
-                                        .withLatitude(new BigDecimal("9.1"))
-                                        .withLongitude(new BigDecimal("71.2"))))));
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:Quay:4")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("quay"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -164,10 +165,10 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay().stream()
-                    .filter(object -> object instanceof Quay)
-                    .map(object -> ((Quay) object))
-                    .findFirst()
-                    .get();
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .findFirst()
+                .get();
 
 
         assertThat(quay.getName().getValue()).isEqualTo("quay");
@@ -260,7 +261,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1));
         publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2));
 
-        for(PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
+        for (PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
             PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(pubde);
             StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
@@ -328,17 +329,17 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void createdAndChangedTimestampsMustBeSetOnStopPlaceAndQuays() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:4")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                        .withVersion("1")
-                                        .withId("y")
-                                        .withName(new MultilingualString().withValue("new quay"))
-                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("62.799557598196465"))
-                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+                                .withVersion("1")
+                                .withId("XYZ:Quay:5")
+                                .withName(new MultilingualString().withValue("new quay"))
+                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("62.799557598196465"))
+                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -358,7 +359,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void validityMustBeSetOnImportedStop() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:123")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"));
 
@@ -387,7 +388,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void updateStopPlaceShouldHaveItsDateChanged() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:123")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"));
 
@@ -399,14 +400,14 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         // Add a Quay to the stop place so that it will be updated.
         stopPlace.withQuays(
-                        new Quays_RelStructure()
-                                .withQuayRefOrQuay(new Quay()
-                                        .withVersion("1")
-                                        .withId("y")
-                                        .withName(new MultilingualString().withValue("new quay"))
-                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("62.799557598196465"))
-                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+                new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withVersion("1")
+                                .withId("XYZ:Quay:321")
+                                .withName(new MultilingualString().withValue("new quay"))
+                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("62.799557598196465"))
+                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
 
         PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
@@ -455,7 +456,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withVersion("1")
-                                .withId(chouetteId+1)
+                                .withId(chouetteId + 1)
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -519,7 +520,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         publicationDeliveryTestHelper.hasOriginalId(originalQuayId, quay);
@@ -556,7 +557,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Steinerskolen Moss");
@@ -595,7 +596,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Fleskeby sentrum");
@@ -606,7 +607,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void computeStopPlaceCentroid() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("CentroidStopPlace")
+                .withId("XYZ:StopPlace:9")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -614,17 +615,17 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("2"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withId("1")
-                                .withVersion("1")
-                                .withName(new MultilingualString().withValue("quay number one"))
-                                .withCentroid(new SimplePoint_VersionStructure()
-                                        .withId("12")
+                                        .withId("XYZ:Quay:9")
                                         .withVersion("1")
-                                        .withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("10"))
-                                                .withLongitude(new BigDecimal("20")))),
+                                        .withName(new MultilingualString().withValue("quay number one"))
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withId("12")
+                                                .withVersion("1")
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("10"))
+                                                        .withLongitude(new BigDecimal("20")))),
                                 new Quay()
-                                        .withId("133")
+                                        .withId("XYZ:Quay:133")
                                         .withVersion("1")
                                         .withName(new MultilingualString().withValue("quay number two"))
                                         .withCentroid(new SimplePoint_VersionStructure()
@@ -650,7 +651,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         final int maxdigits = 6;
 
         StopPlace stopPlace = new StopPlace()
-                .withId("CentroidStopPlace")
+                .withId("XYZ:StopPlace:91")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -658,15 +659,13 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("20.123456789123456789123456789"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                        .withId("1")
+                                .withName(new MultilingualString().withValue("quay number one"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withId("XYZ:Quay:91")
                                         .withVersion("1")
-                                        .withName(new MultilingualString().withValue("quay number one"))
-                                        .withCentroid(new SimplePoint_VersionStructure()
-                                                .withId("12.")
-                                                .withVersion("1")
-                                                .withLocation(new LocationStructure()
-                                                        .withLatitude(new BigDecimal("10.123456789123456789123456789"))
-                                                        .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10.123456789123456789123456789"))
+                                                .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 

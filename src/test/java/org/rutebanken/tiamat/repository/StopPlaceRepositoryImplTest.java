@@ -96,11 +96,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     public void findCorrectStopPlaceFromKeyValue() {
         StopPlace anotherStopPlaceWithAnotherValue = new StopPlace();
         anotherStopPlaceWithAnotherValue.getKeyValues().put("key", new Value("anotherValue"));
-        anotherStopPlaceWithAnotherValue.setNetexId("y");
         stopPlaceRepository.save(anotherStopPlaceWithAnotherValue);
 
         StopPlace matchingStopPlace = new StopPlace();
-        matchingStopPlace.setNetexId("x");
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
@@ -549,11 +547,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     public void findStopPlacesByListOfIds() throws Exception {
 
         StopPlace stopPlace1 = new StopPlace();
-        stopPlace1.setNetexId("1");
         stopPlaceRepository.save(stopPlace1);
 
         StopPlace stopPlace2 = new StopPlace();
-        stopPlace2.setNetexId("2");
         stopPlaceRepository.save(stopPlace2);
 
         StopPlace stopPlaceThatShouldNotBeReturned = new StopPlace();
