@@ -3,8 +3,10 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,6 +18,11 @@ import org.springframework.stereotype.Component;
 public class NetexIdMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
+
+    public static final String ORIGINAL_ID_KEY = "imported-id";
+
+    @Autowired
+    private ValidPrefixList validPrefixList;
 
     public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
         if(internalEntity.getNetexId() == null) {
@@ -30,15 +37,15 @@ public class NetexIdMapper {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setNetexId(null);
-        } else if(netexEntity.getId().startsWith(NetexIdHelper.NSR)) {
-            logger.debug("Detected tiamat ID: {}. ", netexEntity.getId());
+        } else if(validPrefixList.get().contains(NetexIdHelper.extractIdPrefix(netexEntity.getId()))) {
+            logger.debug("Detected ID with valid prefix: {}. ", netexEntity.getId());
             tiamatEntity.setNetexId(netexEntity.getId());
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
             tiamatEntity.setNetexId(null);
         }
-        logger.debug("Copy key values to tiamat model");
+        logger.debug("Copy key values to tiamat model: {}", tiamatEntity.getNetexId());
         copyKeyValuesToTiamatModel(netexEntity, tiamatEntity);
     }
 
@@ -53,14 +60,14 @@ public class NetexIdMapper {
         if(netexEntity.getKeyList() != null) {
             if(netexEntity.getKeyList().getKeyValue() != null) {
                 for(KeyValueStructure keyValueStructure : netexEntity.getKeyList().getKeyValue()) {
-                    if(keyValueStructure.getKey().equals(NetexIdHelper.ORIGINAL_ID_KEY)) {
+                    if(keyValueStructure.getKey().equals(ORIGINAL_ID_KEY)) {
                         if(keyValueStructure.getValue().contains(",")) {
                             String[] originalIds = keyValueStructure.getValue().split(",");
                             for(String originalId : originalIds) {
-                                tiamatEntity.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(originalId);
+                                tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(originalId);
                             }
                         } else {
-                            tiamatEntity.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(keyValueStructure.getValue());
+                            tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(keyValueStructure.getValue());
                         }
 
                     } else {
@@ -77,7 +84,7 @@ public class NetexIdMapper {
      * @param netexId The id to add to values, using the key #{ORIGINAL_ID_KEY}
      */
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        dataManagedObjectStructure.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(netexId);
+        dataManagedObjectStructure.getOrCreateValues(ORIGINAL_ID_KEY).add(netexId);
     }
 
 }

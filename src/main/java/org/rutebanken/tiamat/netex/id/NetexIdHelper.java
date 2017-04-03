@@ -17,8 +17,6 @@ public class NetexIdHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
-    public static final String ORIGINAL_ID_KEY = "imported-id";
-
     // TODO: make it configurable
     public static final String NSR = "NSR";
 

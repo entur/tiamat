@@ -5,7 +5,6 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,7 +20,7 @@ public class NetexIdProviderTest {
 
         GaplessIdGeneratorService gaplessIdGeneratorService = mock(GaplessIdGeneratorService.class);
 
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, Arrays.asList("KVE"));
+        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, Arrays.asList("KVE"), validPrefixList);
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);

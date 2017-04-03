@@ -14,6 +14,7 @@ import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.rutebanken.tiamat.netex.id.NetexIdHelper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 /**
  * Test stop place importer with mocked dependencies.
@@ -129,7 +130,7 @@ public class MergingStopPlaceImporterTest {
         firstStopPlace.setCentroid(point);
         firstStopPlace.setName(new EmbeddableMultilingualString("Filipstad", "no"));
         firstStopPlace.setNetexId(firstStopId);
-        firstStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id");
+        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id");
         firstStopPlace.setVersion(1L);
 
         StopPlace newStopPlace = new StopPlace();
@@ -200,10 +201,10 @@ public class MergingStopPlaceImporterTest {
         String savedStopPlaceId = NetexIdHelper.generateRandomizedNetexId(firstStopPlace);
         firstStopPlace.setNetexId(savedStopPlaceId);
         firstStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
-        firstStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
+        firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal1 = new Quay();
-        terminal1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        terminal1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
         firstStopPlace.getQuays().add(terminal1);
 
@@ -211,10 +212,10 @@ public class MergingStopPlaceImporterTest {
         // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(80.000, 20.78)));
         // Set same ID as first stop place
-        secondStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
-        terminal2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        terminal2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
         secondStopPlace.getQuays().add(terminal2);
 
@@ -250,7 +251,7 @@ public class MergingStopPlaceImporterTest {
         secondStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(80.000, 20.78)));
 
         // Set same ID as first stop place
-        secondStopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
+        secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal2 = new Quay();
         terminal2.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
@@ -279,11 +280,11 @@ public class MergingStopPlaceImporterTest {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(70.933307, 10.775973)));
-        stopPlace.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteId);
+        stopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay quay1 = new Quay();
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(70.000, 10.78)));
-        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add(chouetteQuayId);
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteQuayId);
         stopPlace.getQuays().add(quay1);
 
         when(stopPlaceRepository.save(stopPlace)).thenReturn(stopPlace);

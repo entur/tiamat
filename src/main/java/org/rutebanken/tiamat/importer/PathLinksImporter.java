@@ -4,8 +4,8 @@ import org.rutebanken.tiamat.model.AddressablePlace;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
@@ -54,7 +54,7 @@ public class PathLinksImporter {
                     Optional<PathLink> optionalPathLink = findExistingPathLinkIfPresent(pathLink);
                     if(optionalPathLink.isPresent()) {
                         PathLink existing = optionalPathLink.get();
-                        boolean changed = keyValueListAppender.appendToOriginalId(NetexIdHelper.ORIGINAL_ID_KEY, pathLink, existing);
+                        boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing);
                         if(changed) {
                             existing.setChanged(ZonedDateTime.now());
                         }
@@ -95,7 +95,7 @@ public class PathLinksImporter {
             logger.info("Found existing existing path link from incoming ID {}", existingPathLink);
 
         } else if(!incomingPathLink.getOriginalIds().isEmpty()) {
-            Long existingPathLinkId = pathLinkRepository.findByKeyValue(NetexIdHelper.ORIGINAL_ID_KEY, incomingPathLink.getOriginalIds());
+            Long existingPathLinkId = pathLinkRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, incomingPathLink.getOriginalIds());
             if(existingPathLinkId != null) {
                 existingPathLink = Optional.of(pathLinkRepository.findOne(existingPathLinkId));
                 logger.info("Found existing existing path link from original id. {}", existingPathLink);

@@ -5,8 +5,8 @@ import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -157,7 +157,7 @@ public class MergingStopPlaceImporter {
         logger.debug("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
 
         boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
-        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdHelper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
+        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
         boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
 
         boolean typeChanged = false;

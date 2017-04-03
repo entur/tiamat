@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -67,14 +67,14 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.compassBearing, other.compassBearing)
                 && Objects.equals(this.publicCode, other.publicCode)
-                && getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY));
+                && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, centroid,
                 compassBearing, publicCode,
-                getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY));
+                getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
     @Override

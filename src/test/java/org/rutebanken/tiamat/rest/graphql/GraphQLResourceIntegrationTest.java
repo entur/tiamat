@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.util.HashSet;
 
@@ -61,7 +61,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String originalId = "RUT:Stop:1234";
         org.rutebanken.tiamat.model.Value value = new org.rutebanken.tiamat.model.Value(originalId);
-        stopPlace.getKeyValues().put(NetexIdHelper.ORIGINAL_ID_KEY, value);
+        stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value);
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +

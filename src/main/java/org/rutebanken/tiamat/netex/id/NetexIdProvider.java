@@ -14,18 +14,16 @@ public class NetexIdProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdProvider.class);
 
-
     private final GaplessIdGeneratorService gaplessIdGenerator;
 
-    private final List<String> validPrefixForClaiming;
+    private final ValidPrefixList validPrefixList;
 
     @Autowired
-    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator,
-                           @Value("${netex.id.valid.prefix.list:NSR,KVE}") List<String> validPrefixForClaiming) {
+    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList) {
         this.gaplessIdGenerator = gaplessIdGenerator;
-        this.validPrefixForClaiming = validPrefixForClaiming;
+        this.validPrefixList = validPrefixList;
 
-        logger.info("Valid prefixes for claiming explicit IDs: {}", validPrefixForClaiming);
+
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {

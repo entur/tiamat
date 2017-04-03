@@ -11,7 +11,7 @@ import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.netex.id.NetexIdHelper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexMapperTest extends TiamatIntegrationTest {
 

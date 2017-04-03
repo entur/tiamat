@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;
@@ -36,11 +36,11 @@ public class QuayMergerTest {
         Quay quay1 = new Quay();
         quay1.setNetexId("123");
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
-        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("BRA:StopArea:123123");
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("BRA:StopArea:123123");
 
         Quay quay2 = new Quay();
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
-        quay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("RUT:StopArea:123123");
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:123123");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(quay1);
@@ -61,11 +61,11 @@ public class QuayMergerTest {
         Quay quay1 = new Quay();
         quay1.setNetexId("123");
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
-        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay quay2 = new Quay();
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
-        quay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(quay1);
@@ -87,12 +87,12 @@ public class QuayMergerTest {
         Quay west = new Quay();
         west.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         west.setCompassBearing(270f);
-        west.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        west.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay east = new Quay();
         east.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         east.setCompassBearing(40f);
-        east.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-2");
+        east.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(west);
@@ -159,11 +159,11 @@ public class QuayMergerTest {
 
         Quay quay1 = new Quay();
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
-        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay quay2 = new Quay();
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
-        quay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(quay2);
@@ -180,11 +180,11 @@ public class QuayMergerTest {
 
         Quay quay1 = new Quay();
         quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
-        quay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        quay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay quay2 = new Quay();
         quay2.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
-        quay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("another-id");
+        quay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("another-id");
 
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(quay2);
@@ -208,12 +208,12 @@ public class QuayMergerTest {
         Quay existingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
         existingQuay1.setNetexId("123");
         existingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.142897636770531, 59.83297022041692)));
-        existingQuay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
+        existingQuay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
 
         Quay existingQuay2 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
         existingQuay2.setNetexId("2");
         existingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.142676854561447, 59.83314448493502)));
-        existingQuay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
+        existingQuay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(existingQuay1);
@@ -221,11 +221,11 @@ public class QuayMergerTest {
 
         Quay incomingQuay1 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
         incomingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.14317535486387, 59.832848923825956)));
-        incomingQuay1.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
+        incomingQuay1.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012202");
 
         Quay incomingQuay2 = new Quay(new EmbeddableMultilingualString("Fredheimveien"));
         incomingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.142902250197631, 59.83304200609072)));
-        incomingQuay2.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
+        incomingQuay2.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("RUT:StopArea:0229012201");
 
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(incomingQuay2);
@@ -330,13 +330,13 @@ public class QuayMergerTest {
         Quay first = new Quay();
         first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         first.setCompassBearing(270f);
-        first.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
         first.setName(new EmbeddableMultilingualString("A"));
 
         Quay second = new Quay();
         second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         // No compass bearing
-        second.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-2");
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
         first.setName(new EmbeddableMultilingualString("A"));
 
         Set<Quay> existingQuays = new HashSet<>();
@@ -355,13 +355,13 @@ public class QuayMergerTest {
         Quay first = new Quay();
         first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         first.setCompassBearing(270f);
-        first.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
         first.setName(new EmbeddableMultilingualString("A"));
 
         Quay second = new Quay();
         second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         // No compass bearing
-        second.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-2");
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-2");
         second.setName(new EmbeddableMultilingualString("B"));
 
         Set<Quay> existingQuays = new HashSet<>();
@@ -380,12 +380,12 @@ public class QuayMergerTest {
         Quay first = new Quay();
         first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         first.setCompassBearing(270f);
-        first.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay second = new Quay();
         second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         // No compass bearing
-        second.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
         second.setName(new EmbeddableMultilingualString("A"));
 
         Set<Quay> existingQuays = new HashSet<>();
@@ -407,12 +407,12 @@ public class QuayMergerTest {
 
         Quay first = new Quay();
         first.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
-        first.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        first.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Quay second = new Quay();
         second.setCentroid(geometryFactory.createPoint(new Coordinate(60, 11)));
         second.setCompassBearing(270f);
-        second.getOrCreateValues(NetexIdHelper.ORIGINAL_ID_KEY).add("original-id-1");
+        second.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-1");
 
         Set<Quay> existingQuays = new HashSet<>();
         existingQuays.add(first);
