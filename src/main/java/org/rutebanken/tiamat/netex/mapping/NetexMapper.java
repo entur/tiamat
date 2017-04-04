@@ -68,6 +68,9 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(AccessibilityAssessment.class, org.rutebanken.tiamat.model.AccessibilityAssessment.class)
+                .byDefault()
+                .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
