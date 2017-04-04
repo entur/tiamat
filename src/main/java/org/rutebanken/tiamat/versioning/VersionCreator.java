@@ -35,10 +35,6 @@ public class VersionCreator {
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
-        final String pathLinkEndPassThroughId = "pathLinkEndPassThroughId";
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(pathLinkEndPassThroughId, new PassThroughConverter(Quay.class, StopPlace.class));
 
         final String stopPlacePassThroughId = "stopPlacePassThroughId";
 
@@ -64,7 +60,6 @@ public class VersionCreator {
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
-                .fieldMap("entrance").converter(pathLinkEndPassThroughId).add()
                 .byDefault()
                 .register();
 
@@ -131,16 +126,19 @@ public class VersionCreator {
         return newVersion;
     }
 
-    public <T extends EntityInVersionStructure> T initiateFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+    public <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Initiating new version for entity {}", entityInVersionStructure);
         entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        entityInVersionStructure.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
         return type.cast(entityInVersionStructure);
     }
 
-    public StopPlace initiateFirstVersionWithAvailabilityCondition(StopPlace stopPlace) {
-        stopPlace = initiateFirstVersionWithAvailabilityCondition(stopPlace, StopPlace.class);
-        if(stopPlace.getQuays() != null) {
+
+    public StopPlace initiateFirstVersion(StopPlace stopPlace) {
+        stopPlace = initiateFirstVersion(stopPlace, StopPlace.class);
+        ZonedDateTime now = ZonedDateTime.now();
+        stopPlace.setCreated(now);
+        stopPlace.getValidBetweens().add(new ValidBetween(now));
+        if (stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
         }
         return stopPlace;

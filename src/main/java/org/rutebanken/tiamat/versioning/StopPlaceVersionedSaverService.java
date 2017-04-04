@@ -48,16 +48,17 @@ public class StopPlaceVersionedSaverService {
             throw new IllegalArgumentException("Existing and new StopPlace must be different objects");
         }
 
+        if(existingVersion != null && existingVersion.getNetexId() == null) {
+            throw new IllegalArgumentException("Existing stop place must have netexId set: " + existingVersion);
+        }
+
         // Rearrange AccessibilityAssessment if necessary
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
         StopPlace stopPlaceToSave;
         if (existingVersion == null) {
-            stopPlaceToSave = versionCreator.initiateFirstVersionWithAvailabilityCondition(newVersion);
-            stopPlaceToSave.setCreated(ZonedDateTime.now());
-        } else if (existingVersion.getVersion() == newVersion.getVersion() |
-                !existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-
+            stopPlaceToSave = versionCreator.initiateFirstVersion(newVersion);
+        } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
             throw new IllegalArgumentException("Existing and new StopPlace do not match");
         } else {
 
@@ -77,19 +78,18 @@ public class StopPlaceVersionedSaverService {
         if (stopPlaceToSave.getQuays() != null) {
             stopPlaceToSave.getQuays().forEach(quay -> {
                 if (quay.getNetexId() == null) {
-                    quay = versionCreator.initiateFirstVersionWithAvailabilityCondition(quay, Quay.class);
+                    quay = versionCreator.initiateFirstVersion(quay, Quay.class);
                 }
                 AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
 
                 if (accessibilityAssessment != null) {
                     if (accessibilityAssessment.getNetexId() == null) {
-                        accessibilityAssessment = versionCreator.initiateFirstVersionWithAvailabilityCondition(accessibilityAssessment, AccessibilityAssessment.class);
+                        accessibilityAssessment = versionCreator.initiateFirstVersion(accessibilityAssessment, AccessibilityAssessment.class);
                     }
                     if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
                         AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
                         if (limitation.getNetexId() == null) {
-                            // TODO: All object under StopPlace does probably not need to have availability condition
-                            limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(limitation, AccessibilityLimitation.class);
+                            limitation = versionCreator.initiateFirstVersion(limitation, AccessibilityLimitation.class);
                         }
                     }
                 }

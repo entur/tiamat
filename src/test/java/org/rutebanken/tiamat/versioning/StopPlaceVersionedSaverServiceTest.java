@@ -44,6 +44,38 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void noValidbetweenOnChildObjects() {
+        Quay quay = new Quay();
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getQuays().add(quay);
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getQuays().iterator().next().getValidBetweens()).isEmpty();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptExistingAndNewVersionToBeExactlyEqual() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace, stopPlace);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void savingNewVersionShouldOnlyAcceptSameVersion() {
+
+        StopPlace existingVersion = new StopPlace();
+        StopPlace newVersion = new StopPlace();
+        stopPlaceVersionedSaverService.saveNewVersion(existingVersion, newVersion);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void existingVersionMustHaveNetexId() {
+        StopPlace existingVersion = new StopPlace();
+        StopPlace newVersion = new StopPlace();
+        stopPlaceVersionedSaverService.saveNewVersion(existingVersion, newVersion);
+    }
+
+    @Test
     public void testUpdateStopPlaceWithQuay() {
         Quay quay1 = new Quay();
         quay1.setName(new EmbeddableMultilingualString("quay1"));
