@@ -35,10 +35,6 @@ public class VersionCreator {
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
-        final String pathLinkEndPassThroughId = "pathLinkEndPassThroughId";
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(pathLinkEndPassThroughId, new PassThroughConverter(Quay.class, StopPlace.class));
 
         final String stopPlacePassThroughId = "stopPlacePassThroughId";
 
@@ -64,7 +60,6 @@ public class VersionCreator {
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
-                .fieldMap("entrance").converter(pathLinkEndPassThroughId).add()
                 .byDefault()
                 .register();
 
