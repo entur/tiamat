@@ -96,7 +96,22 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
                 .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
                 .isNotEqualTo(firstVersionValidBetweenId);
 
+    }
 
+    @Test
+    public void deepCopiedObjectShouldHaveOriginalId() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.getOriginalIds().add("original-id");
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        ValidBetween validBetween = new ValidBetween(ZonedDateTime.now());
+        validBetween.getOriginalIds().add("1000");
+        stopPlace.getValidBetweens().add(validBetween);
+
+        StopPlace newVersion = versionCreator.createNextVersion(stopPlace, StopPlace.class);
+        assertThat(newVersion.getOriginalIds()).hasSize(1);
+        assertThat(newVersion.getValidBetweens().get(0).getOriginalIds()).hasSize(1);
     }
 
     private Object getIdValue(IdentifiedEntity entity) throws NoSuchFieldException, IllegalAccessException {
