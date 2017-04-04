@@ -105,8 +105,16 @@ public class TransactionalStopPlacesImporterTest extends TiamatIntegrationTest {
 
 
         assertThat(importStopPlaces).hasSize(1);
-//        assertThat(actual).containsOnlyOnce(stopPlace1);
-//        assertThat(actual).extracting(org.rutebanken.netex.model.StopPlace::getVersion).containsOnly("10");
+        org.rutebanken.netex.model.StopPlace importedStopPlace = importStopPlaces.iterator().next();
+        assertThat(importedStopPlace).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).hasSize(1);
+        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().get(0);
 
+        assertThat(accessibilityLimitation).isNotNull();
+        assertThat(accessibilityLimitation.getWheelchairAccess()).isNotNull();
+        assertThat(accessibilityLimitation.getWheelchairAccess().value()).isEqualTo(limitation.getWheelchairAccess().value());
     }
 }
