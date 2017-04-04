@@ -135,8 +135,10 @@ public class VersionCreator {
 
     public StopPlace initiateFirstVersion(StopPlace stopPlace) {
         stopPlace = initiateFirstVersion(stopPlace, StopPlace.class);
-         stopPlace.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
-        if(stopPlace.getQuays() != null) {
+        ZonedDateTime now = ZonedDateTime.now();
+        stopPlace.setCreated(now);
+        stopPlace.getValidBetweens().add(new ValidBetween(now));
+        if (stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
         }
         return stopPlace;

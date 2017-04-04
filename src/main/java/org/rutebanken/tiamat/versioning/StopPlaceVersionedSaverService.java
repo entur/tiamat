@@ -48,16 +48,17 @@ public class StopPlaceVersionedSaverService {
             throw new IllegalArgumentException("Existing and new StopPlace must be different objects");
         }
 
+        if(existingVersion != null && existingVersion.getNetexId() == null) {
+            throw new IllegalArgumentException("Existing stop place must have netexId set: " + existingVersion);
+        }
+
         // Rearrange AccessibilityAssessment if necessary
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
         StopPlace stopPlaceToSave;
         if (existingVersion == null) {
             stopPlaceToSave = versionCreator.initiateFirstVersion(newVersion);
-            stopPlaceToSave.setCreated(ZonedDateTime.now());
-        } else if (existingVersion.getVersion() == newVersion.getVersion() |
-                !existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-
+        } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
             throw new IllegalArgumentException("Existing and new StopPlace do not match");
         } else {
 
