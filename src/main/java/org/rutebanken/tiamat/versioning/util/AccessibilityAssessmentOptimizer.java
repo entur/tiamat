@@ -54,7 +54,8 @@ public class AccessibilityAssessmentOptimizer {
                     // Use existing Assessment instead, but update limitations
                     AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
-                    firstAccessibilityAssessment = versionCreator.createNextVersion(nextVersion, AccessibilityAssessment.class);
+                    firstAccessibilityAssessment = nextVersion;
+//                    firstAccessibilityAssessment = versionCreator.createNextVersion(nextVersion, AccessibilityAssessment.class);
                 }
 
                 stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
@@ -84,14 +85,14 @@ public class AccessibilityAssessmentOptimizer {
         }
         AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
 
-        AccessibilityLimitation limitation = versionCreator.initiateFirstVersion(new AccessibilityLimitation(), AccessibilityLimitation.class);
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
         limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
         limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
 
-        AccessibilityAssessment quayAssessment = versionCreator.initiateFirstVersion(new AccessibilityAssessment(), AccessibilityAssessment.class);
+        AccessibilityAssessment quayAssessment = new AccessibilityAssessment();
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
 
         List<AccessibilityLimitation> limitations = new ArrayList<>();

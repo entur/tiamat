@@ -96,6 +96,60 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
+    public StopPlace createNextVersion(StopPlace stopPlace) {
+        StopPlace newVersion = createNextVersion(stopPlace, StopPlace.class);
+        return newVersion;
+    }
+
+    public <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+        logger.debug("Initiating first version for entity {}", entityInVersionStructure.getClass().getSimpleName());
+        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
+        return type.cast(entityInVersionStructure);
+    }
+
+    public StopPlace initiateFirstVersion(StopPlace stopPlace) {
+        stopPlace = initiateFirstVersion(stopPlace, StopPlace.class);
+        initiateOrIncrementAccessibilityAssesmentVersion(stopPlace);
+        ZonedDateTime now = ZonedDateTime.now();
+        stopPlace.setCreated(now);
+        stopPlace.getValidBetweens().add(new ValidBetween(now));
+        return stopPlace;
+    }
+
+    public StopPlace initiateOrIncrementNewVersionForChildren(StopPlace stopPlaceToSave) {
+
+        if (stopPlaceToSave.getQuays() != null) {
+            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
+            stopPlaceToSave.getQuays().forEach(quay -> {
+                initiateOrIncrement(quay);
+                initiateOrIncrementAccessibilityAssesmentVersion(quay);
+
+            });
+        }
+        return stopPlaceToSave;
+    }
+
+    public void initiateOrIncrementAccessibilityAssesmentVersion(SiteElement siteElement) {
+        AccessibilityAssessment accessibilityAssessment = siteElement.getAccessibilityAssessment();
+
+        if (accessibilityAssessment != null) {
+            initiateOrIncrement(accessibilityAssessment);
+
+            if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
+                AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
+                initiateOrIncrement(limitation);
+            }
+        }
+    }
+
+    private void initiateOrIncrement(EntityInVersionStructure entityInVersionStructure) {
+        if(entityInVersionStructure.getNetexId() == null) {
+            initiateFirstVersion(entityInVersionStructure, EntityInVersionStructure.class);
+        } else {
+            versionIncrementor.incrementVersion(entityInVersionStructure);
+        }
+    }
+
     public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
         //TODO: Need to support "valid from" set explicitly
 
@@ -110,43 +164,4 @@ public class VersionCreator {
         }
         return entityInVersionStructure;
     }
-
-    public StopPlace createNextVersion(StopPlace stopPlace) {
-
-        StopPlace newVersion = createNextVersion(stopPlace, StopPlace.class);
-
-        if (newVersion.getQuays() != null) {
-            newVersion.getQuays().forEach(quay -> {
-                versionIncrementor.incrementVersion(quay);
-                if (quay.getAccessibilityAssessment() != null) {
-                    AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
-                    versionIncrementor.incrementVersion(accessibilityAssessment);
-                    if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
-                        versionIncrementor.incrementVersion(accessibilityAssessment.getLimitations().get(0));
-                    }
-                }
-            });
-        }
-
-        return newVersion;
-    }
-
-    public <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
-        logger.debug("Initiating new version for entity {}", entityInVersionStructure);
-        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        return type.cast(entityInVersionStructure);
-    }
-
-
-    public StopPlace initiateFirstVersion(StopPlace stopPlace) {
-        stopPlace = initiateFirstVersion(stopPlace, StopPlace.class);
-        ZonedDateTime now = ZonedDateTime.now();
-        stopPlace.setCreated(now);
-        stopPlace.getValidBetweens().add(new ValidBetween(now));
-        if (stopPlace.getQuays() != null) {
-            stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
-        }
-        return stopPlace;
-    }
-
 }
