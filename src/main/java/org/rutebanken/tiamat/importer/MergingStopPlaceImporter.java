@@ -11,7 +11,7 @@ import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.geo.CentroidComputer;
-import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class MergingStopPlaceImporter {
 
     private final NetexMapper netexMapper;
 
-    private final VersionCreator versionCreator;
+    private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
 
     @Autowired
@@ -66,7 +66,7 @@ public class MergingStopPlaceImporter {
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    VersionCreator versionCreator) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService) {
         this.topographicPlaceCreator = topographicPlaceCreator;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.quayRepository = quayRepository;
@@ -78,7 +78,7 @@ public class MergingStopPlaceImporter {
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
-        this.versionCreator = versionCreator;
+        this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
     }
 
     /**
@@ -102,115 +102,86 @@ public class MergingStopPlaceImporter {
         return netexMapper.mapToNetexModel(importStopPlaceWithoutNetexMapping(newStopPlace));
     }
 
-    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace newStopPlace) throws InterruptedException, ExecutionException {
-        final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(newStopPlace);
+    public StopPlace importStopPlaceWithoutNetexMapping(StopPlace incomingStopPlace) throws InterruptedException, ExecutionException {
+        final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(incomingStopPlace);
 
         final StopPlace stopPlace;
         if (foundStopPlace != null) {
-            stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, newStopPlace);
+            stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, incomingStopPlace);
         } else {
-            stopPlace = handleCompletelyNewStopPlace(newStopPlace);
+            stopPlace = handleCompletelyNewStopPlace(incomingStopPlace);
 
         }
         return stopPlace;
     }
 
 
-    public StopPlace handleCompletelyNewStopPlace(StopPlace newStopPlace) throws ExecutionException {
+    public StopPlace handleCompletelyNewStopPlace(StopPlace incomingStopPlace) throws ExecutionException {
 
-        if(newStopPlace.getNetexId() != null) {
+        if(incomingStopPlace.getNetexId() != null) {
             // This should not be necesarry.
             // Because this is a completely new stop.
             // And original netex ID should have been moved to key values.
-            newStopPlace.setNetexId(null);
-            if(newStopPlace.getQuays() != null) {
-                newStopPlace.getQuays().forEach(q -> q.setNetexId(null));
+            incomingStopPlace.setNetexId(null);
+            if(incomingStopPlace.getQuays() != null) {
+                incomingStopPlace.getQuays().forEach(q -> q.setNetexId(null));
             }
         }
 
-        /*if (newStopPlace.getTopographicPlaceRef() == null) {
-            if (hasTopographicPlaces(siteFrame)) {
-                topographicPlaceCreator.setTopographicReference(newStopPlace,
-                        siteFrame.getTopographicPlaces().getTopographicPlace(),
-                        topographicPlacesCreatedCounter);
-            } else {
-                lookupCountyAndMunicipality(newStopPlace, topographicPlacesCreatedCounter);
-            }
-        }*/
-        if(newStopPlace.getQuays() != null) {
-            Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
-            newStopPlace.setQuays(quays);
-            logger.trace("Importing quays for new stop place {}", newStopPlace);
+        if(incomingStopPlace.getQuays() != null) {
+            Set<Quay> quays = quayMerger.addNewQuaysOrAppendImportIds(incomingStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger());
+            incomingStopPlace.setQuays(quays);
+            logger.trace("Importing quays for new stop place {}", incomingStopPlace);
         }
 
-        centroidComputer.computeCentroidForStopPlace(newStopPlace);
+        centroidComputer.computeCentroidForStopPlace(incomingStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
-        logger.debug("New stop place: {}. Setting version to \"1\"", newStopPlace.getName());
-        versionCreator.initiateFirstVersion(newStopPlace);
+        logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
+        stopPlaceVersionedSaverService.createNewVersion(incomingStopPlace);
 
-        newStopPlace.setCreated(ZonedDateTime.now());
-        newStopPlace.setChanged(ZonedDateTime.now());
-        return saveAndUpdateCache(newStopPlace);
+        incomingStopPlace.setCreated(ZonedDateTime.now());
+        incomingStopPlace.setChanged(ZonedDateTime.now());
+        incomingStopPlace = stopPlaceVersionedSaverService.saveNewVersion(incomingStopPlace);
+        return updateCache(incomingStopPlace);
     }
 
-    public StopPlace handleAlreadyExistingStopPlace(StopPlace foundStopPlace, StopPlace newStopPlace) {
-        logger.debug("Found existing stop place {} from incoming {}", foundStopPlace, newStopPlace);
+    public StopPlace handleAlreadyExistingStopPlace(StopPlace existingStopPlace, StopPlace incomingStopPlace) {
+        logger.debug("Found existing stop place {} from incoming {}", existingStopPlace, incomingStopPlace);
 
-        boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(newStopPlace, foundStopPlace);
-        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, newStopPlace, foundStopPlace);
-        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(foundStopPlace);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createNewVersion(existingStopPlace);
+
+        boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(incomingStopPlace, newVersion);
+        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, newVersion);
+        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(newVersion);
 
         boolean typeChanged = false;
-        if(foundStopPlace.getStopPlaceType() == null && newStopPlace.getStopPlaceType() != null) {
-            foundStopPlace.setStopPlaceType(newStopPlace.getStopPlaceType());
-            logger.info("Updated stop place type to {} for stop place {}", foundStopPlace.getStopPlaceType(), foundStopPlace);
+        if(newVersion.getStopPlaceType() == null && incomingStopPlace.getStopPlaceType() != null) {
+            newVersion.setStopPlaceType(incomingStopPlace.getStopPlaceType());
+            logger.info("Updated stop place type to {} for stop place {}", newVersion.getStopPlaceType(), newVersion);
             typeChanged = true;
-
         }
 
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            foundStopPlace.setChanged(ZonedDateTime.now());
-            // The stop place has changed. Create a new version for it.
-            StopPlace newVersion = versionCreator.createNextVersion(foundStopPlace);
+            newVersion.setChanged(ZonedDateTime.now());
+            // The stop place has changed.
             logger.info("Updated existing stop place {}. ", newVersion);
-            stopPlaceRepository.save(foundStopPlace);
-            return saveAndUpdateCache(newVersion);
+            newVersion = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, newVersion);
+            return updateCache(newVersion);
         }
 
-        logger.debug("No changes. Returning existing stop {}", foundStopPlace);
-        return foundStopPlace;
+        logger.debug("No changes. Returning existing stop {}", existingStopPlace);
+        return existingStopPlace;
 
     }
 
-    private StopPlace saveAndUpdateCache(StopPlace stopPlace) {
+    private StopPlace updateCache(StopPlace stopPlace) {
         // Keep the attached stop place reference in case it is merged.
-        stopPlace = stopPlaceRepository.save(stopPlace);
-
-        if (stopPlace.getQuays() != null) {
-            for (Quay quay : stopPlace.getQuays()) {
-                quayRepository.save(quay);
-            }
-        }
 
         stopPlaceFromOriginalIdFinder.update(stopPlace);
         nearbyStopPlaceFinder.update(stopPlace);
         logger.info("Saved stop place {}", stopPlace);
         return stopPlace;
     }
-
-//    private boolean hasTopographicPlaces(SiteFrame siteFrame) {
-//        return siteFrame.getTopographicPlaces() != null
-//                && siteFrame.getTopographicPlaces().getTopographicPlace() != null
-//                && !siteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
-//    }
-//
-//    private void lookupCountyAndMunicipality(StopPlace stopPlace, AtomicInteger topographicPlacesCreatedCounter) {
-//        try {
-//            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreatedCounter);
-//        } catch (IOException | InterruptedException e) {
-//            logger.warn("Could not lookup county and municipality for stop place with id {}", stopPlace.getId());
-//        }
-//    }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
         final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
