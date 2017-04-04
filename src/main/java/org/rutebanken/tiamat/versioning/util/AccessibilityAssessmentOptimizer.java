@@ -29,15 +29,17 @@ public class AccessibilityAssessmentOptimizer {
         List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
 
         // Populate assessments on all quays that do not have assessments set
-        stopPlace.getQuays()
-                .stream()
-                .filter(quay -> quay.getAccessibilityAssessment() == null)
-                .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
+        if(stopPlace.getQuays() != null) {
+            stopPlace.getQuays()
+                    .stream()
+                    .filter(quay -> quay.getAccessibilityAssessment() == null)
+                    .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
 
-        // Collect all assessments
-        stopPlace.getQuays()
-                .stream()
-                .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+            // Collect all assessments
+            stopPlace.getQuays()
+                    .stream()
+                    .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+        }
 
         if (!allQuayAccessibilityAssessments.isEmpty()) {
             //Assessments are set
