@@ -17,14 +17,18 @@ import java.time.ZonedDateTime;
 @Service
 public class StopPlaceVersionedSaverService {
 
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
+
+    private final VersionCreator versionCreator;
+
+    private final AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
 
     @Autowired
-    private VersionCreator versionCreator;
-
-    @Autowired
-    private AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
+    public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository, VersionCreator versionCreator, AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer) {
+        this.stopPlaceRepository = stopPlaceRepository;
+        this.versionCreator = versionCreator;
+        this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
+    }
 
 
     public StopPlace createNewVersion(StopPlace stopPlace) {
@@ -97,6 +101,7 @@ public class StopPlaceVersionedSaverService {
             });
         }
         // Save latest version
-        return stopPlaceRepository.save(stopPlaceToSave);
+        stopPlaceToSave = stopPlaceRepository.save(stopPlaceToSave);
+        return stopPlaceToSave;
     }
 }
