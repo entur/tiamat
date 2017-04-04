@@ -44,6 +44,17 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void noValidbetweenOnChildObjects() {
+        Quay quay = new Quay();
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getQuays().add(quay);
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getQuays().iterator().next().getValidBetweens()).isEmpty();
+    }
+
+    @Test
     public void testUpdateStopPlaceWithQuay() {
         Quay quay1 = new Quay();
         quay1.setName(new EmbeddableMultilingualString("quay1"));
