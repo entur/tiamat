@@ -52,8 +52,8 @@ public abstract class Site_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @Transient
-    protected PlaceEquipments_RelStructure placeEquipments;
+    @OneToOne (cascade = CascadeType.ALL)
+    protected PlaceEquipment placeEquipments;
 
     @Transient
     protected LocalServices_RelStructure localServices;
@@ -155,11 +155,11 @@ public abstract class Site_VersionStructure
     }
 
 
-    public PlaceEquipments_RelStructure getPlaceEquipments() {
+    public PlaceEquipment getPlaceEquipments() {
         return placeEquipments;
     }
 
-    public void setPlaceEquipments(PlaceEquipments_RelStructure value) {
+    public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
     }
 

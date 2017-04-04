@@ -7,8 +7,7 @@ import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import java.util.List;
 
-import static graphql.Scalars.GraphQLInt;
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -98,6 +97,150 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(LANG)
                     .type(GraphQLString))
+            .build();
+
+
+    public static GraphQLObjectType shelterEquipmentType = newObject()
+            .name(OUTPUT_TYPE_SHELTER_EQUIPMENT)
+            .field(newFieldDefinition()
+                    .name(ENCLOSED)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLInputObjectType shelterEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SHELTER_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(ENCLOSED)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLObjectType ticketingEquipmentType = newObject()
+            .name(OUTPUT_TYPE_TICKETING_EQUIPMENT)
+            .field(newFieldDefinition()
+                    .name(TICKET_MACHINES)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_MACHINES)
+                    .type(GraphQLBigInteger))
+            .build();
+
+
+    public static GraphQLInputObjectType ticketingEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_TICKETING_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(TICKET_MACHINES)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_MACHINES)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLObjectType waitingRoomEquipmentType = newObject()
+            .name(OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT)
+            .field(newFieldDefinition()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLInputObjectType waitingRoomEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_WAITING_ROOM_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLObjectType sanitaryEquipmentType = newObject()
+            .name(OUTPUT_TYPE_SANITARY_EQUIPMENT)
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_TOILETS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+
+    public static GraphQLInputObjectType sanitaryEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SANITARY_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_TOILETS)
+                    .type(GraphQLBigInteger))
+            .build();
+
+
+    public static GraphQLObjectType equipmentType = newObject()
+            .name(OUTPUT_TYPE_PLACE_EQUIPMENTS)
+            .field(newFieldDefinition()
+                    .name(SHELTER_EQUIPMENT)
+                    .type(shelterEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof ShelterEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(WAITING_ROOM_EQUIPMENT)
+                    .type(waitingRoomEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof WaitingRoomEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(SANITARY_EQUIPMENT)
+                    .type(sanitaryEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof SanitaryEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(TICKETING_EQUIPMENT)
+                    .type(ticketingEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof TicketingEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .build();
+
+    public static GraphQLInputObjectType equipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_PLACE_EQUIPMENTS)
+            .field(newInputObjectField()
+                    .name(SHELTER_EQUIPMENT)
+                    .type(shelterEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(WAITING_ROOM_EQUIPMENT)
+                    .type(waitingRoomEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(SANITARY_EQUIPMENT)
+                    .type(sanitaryEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(TICKETING_EQUIPMENT)
+                    .type(ticketingEquipmentInputType))
             .build();
 
     public static GraphQLObjectType topographicParentPlaceObjectType = newObject()

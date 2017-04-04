@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -214,6 +215,42 @@ class StopPlaceUpdater implements DataFetcher {
 
             
             isUpdated = true;
+        }
+
+        if (input.get(PLACE_EQUIPMENTS) != null) {
+            Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
+
+            Map<String, Object> sanitaryEquipment = (Map<String, Object>) equipmentInput.get(SANITARY_EQUIPMENT);
+
+            SanitaryEquipment toalett = new SanitaryEquipment();
+            toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
+
+            Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
+            ShelterEquipment leskur = new ShelterEquipment();
+            leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
+            leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
+
+            Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
+            WaitingRoomEquipment venterom = new WaitingRoomEquipment();
+            venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
+
+            Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
+            TicketingEquipment billettAutomat = new TicketingEquipment();
+            billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
+            billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+
+            PlaceEquipment equipments = new PlaceEquipment();
+            equipments.getInstalledEquipment().add(venterom);
+            equipments.getInstalledEquipment().add(billettAutomat);
+            equipments.getInstalledEquipment().add(toalett);
+            equipments.getInstalledEquipment().add(leskur);
+
+            if (entity instanceof StopPlace) {
+                ((StopPlace)entity).setPlaceEquipments(equipments);
+            } else if (entity instanceof Quay) {
+                ((Quay)entity).setPlaceEquipments(equipments);
+            }
+
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {

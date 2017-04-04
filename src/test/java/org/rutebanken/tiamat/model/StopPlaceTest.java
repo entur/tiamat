@@ -2,12 +2,13 @@ package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.junit.Test;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -128,6 +129,45 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
         assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
         assertThat(actualStopPlace.getEquipmentPlaces().get(0).getNetexId()).isEqualTo(equipmentPlace.getNetexId());
+    }
+
+    @Test
+    public void persistStopPlaceWithPlaceEquipment() {
+
+        StopPlace stopPlace = new StopPlace();
+
+        PlaceEquipment equipments = new PlaceEquipment();
+
+
+        ShelterEquipment leskur = new ShelterEquipment();
+            leskur.setEnclosed(false);
+            leskur.setSeats(BigInteger.valueOf(2));
+
+        WaitingRoomEquipment venterom = new WaitingRoomEquipment();
+            venterom.setSeats(BigInteger.valueOf(25));
+
+        TicketingEquipment billettAutomat = new TicketingEquipment();
+        billettAutomat.setTicketMachines(true);
+        billettAutomat.setNumberOfMachines(BigInteger.valueOf(2));
+
+        SanitaryEquipment toalett = new SanitaryEquipment();
+        toalett.setNumberOfToilets(BigInteger.valueOf(2));
+
+        equipments.getInstalledEquipment().add(venterom);
+        equipments.getInstalledEquipment().add(billettAutomat);
+        equipments.getInstalledEquipment().add(toalett);
+        equipments.getInstalledEquipment().add(leskur);
+
+        stopPlace.setPlaceEquipments(equipments);
+
+        stopPlaceRepository.save(stopPlace);
+        String netexId = stopPlace.getNetexId();
+
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+
+        assertThat(actualStopPlace.getPlaceEquipments().getNetexId()).isNotNull();
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment()).isNotEmpty();
+//        assertThat(((SiteElement)actualStopPlace.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().get(0)).getNetexId()).isEqualTo(luggageLockerEquipment.getNetexId());
     }
 
     @Ignore // level is transient

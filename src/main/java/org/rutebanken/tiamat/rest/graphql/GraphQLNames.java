@@ -68,6 +68,21 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
+    public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_SHELTER_EQUIPMENT = "ShelterEquipment";
+    public static final String INPUT_TYPE_SHELTER_EQUIPMENT = OUTPUT_TYPE_SHELTER_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT = "WaitingRoomEquipment";
+    public static final String INPUT_TYPE_WAITING_ROOM_EQUIPMENT = OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_TICKETING_EQUIPMENT = "TicketingEquipment";
+    public static final String INPUT_TYPE_TICKETING_EQUIPMENT = OUTPUT_TYPE_TICKETING_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_SANITARY_EQUIPMENT = "SanitaryEquipment";
+    public static final String INPUT_TYPE_SANITARY_EQUIPMENT = OUTPUT_TYPE_SANITARY_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
@@ -97,6 +112,17 @@ public class GraphQLNames {
     public static final String LIFT_FREE_ACCESS = "liftFreeAccess";
     public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
 
+    public static final String PLACE_EQUIPMENTS = "placeEquipments";
+    public static final String SHELTER_EQUIPMENT = "shelterEquipment";
+    public static final String TICKETING_EQUIPMENT = "ticketingEquipment";
+    public static final String SANITARY_EQUIPMENT = "sanitaryEquipment";
+    public static final String WAITING_ROOM_EQUIPMENT = "waitingRoomEquipment";
+
+    public static final String NUMBER_OF_TOILETS = "numberOfToilets";
+    public static final String ENCLOSED = "enclosed";
+    public static final String SEATS = "seats";
+    public static final String TICKET_MACHINES = "ticketMachines";
+    public static final String NUMBER_OF_MACHINES = "numberOfMachines";
 
     public static final String IMPORTED_ID = "importedId";
     public static final String VERSION = "version";

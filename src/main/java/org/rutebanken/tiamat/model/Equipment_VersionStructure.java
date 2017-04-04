@@ -1,14 +1,25 @@
 package org.rutebanken.tiamat.model;
 
-public abstract class Equipment_VersionStructure
-        extends DataManagedObjectStructure {
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
+@MappedSuperclass
+public abstract class Equipment_VersionStructure
+        extends EntityInVersionStructure {
+
+    @Transient
     protected MultilingualStringEntity name;
+    @Transient
     protected PrivateCodeStructure privateCode;
+    @Transient
     protected PrivateCodeStructure publicCode;
+    @Transient
     protected String image;
+    @Transient
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
+    @Transient
     protected MultilingualStringEntity description;
+    @Transient
     protected MultilingualStringEntity note;
     protected Boolean outOfService;
 

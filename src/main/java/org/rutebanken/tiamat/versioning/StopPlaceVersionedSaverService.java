@@ -1,9 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
-import org.rutebanken.tiamat.model.AccessibilityAssessment;
-import org.rutebanken.tiamat.model.AccessibilityLimitation;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,8 +89,18 @@ public class StopPlaceVersionedSaverService {
                         }
                     }
                 }
+                if (quay.getPlaceEquipments() != null) {
+                    if (quay.getPlaceEquipments().getNetexId() == null) {
+                        quay.setPlaceEquipments(versionCreator.initiateFirstVersionWithAvailabilityCondition(quay.getPlaceEquipments(), PlaceEquipment.class));
+                    }
+                }
 
             });
+            if (stopPlaceToSave.getPlaceEquipments() != null) {
+                if (stopPlaceToSave.getPlaceEquipments().getNetexId() == null) {
+                    stopPlaceToSave.setPlaceEquipments(versionCreator.initiateFirstVersionWithAvailabilityCondition(stopPlaceToSave.getPlaceEquipments(), PlaceEquipment.class));
+                }
+            }
         }
         // Save latest version
         return stopPlaceRepository.save(stopPlaceToSave);

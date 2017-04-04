@@ -27,7 +27,7 @@ public abstract class SiteComponent_VersionStructure
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
     @Transient
-    protected PlaceEquipments_RelStructure placeEquipments;
+    protected PlaceEquipment placeEquipments;
     @Transient
     protected LocalServices_RelStructure localServices;
     @OneToMany(cascade = CascadeType.ALL)
@@ -80,12 +80,12 @@ public abstract class SiteComponent_VersionStructure
     }
 
 
-    public PlaceEquipments_RelStructure getPlaceEquipments() {
+    public PlaceEquipment getPlaceEquipments() {
         return placeEquipments;
     }
 
 
-    public void setPlaceEquipments(PlaceEquipments_RelStructure value) {
+    public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
     }
 
