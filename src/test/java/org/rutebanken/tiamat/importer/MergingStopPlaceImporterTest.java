@@ -25,7 +25,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
  * See also {@link MergingStopPlaceImporterTest}
  */
 @Transactional
-public class MergingStopPlaceImporterWithGeoDBTest extends TiamatIntegrationTest {
+public class MergingStopPlaceImporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private MergingStopPlaceImporter mergingStopPlaceImporter;
@@ -67,7 +67,7 @@ public class MergingStopPlaceImporterWithGeoDBTest extends TiamatIntegrationTest
         assertThat(importResult.getQuays().iterator().next().getName().getValue()).isEqualTo(name);
 
     }
-
+    
     @Test
     public void addQuaysToStopPlaceWithoutQuays() throws ExecutionException, InterruptedException {
         String name = "Eselbergveien";
@@ -122,34 +122,6 @@ public class MergingStopPlaceImporterWithGeoDBTest extends TiamatIntegrationTest
         mergingStopPlaceImporter.importStopPlace(firstStopPlace);
         StopPlace secondStopPlace = createStopPlaceWithQuay(name, 6, 60.0001, "11063198", "11063198");
         mergingStopPlaceImporter.importStopPlace(secondStopPlace);
-    }
-
-    /**
-     * Import two stop places with the same coordinates.
-     * Verify that quays are not added multiple times.
-     */
-    @Test
-    public void quaysWithSameCoordinatesMustNotBeAddedMultipleTimes2() throws ExecutionException, InterruptedException {
-        String name = "Mjåsund";
-
-        double latitude = 59.32262902417035;
-        double longitude = 5.447071920203443;
-        String stopPlaceId = "11463484";
-        String quayId = "11463483";
-
-        StopPlace firstStopPlace = createStopPlaceWithQuay(name,
-                longitude, latitude, stopPlaceId, quayId);
-
-        // Import first stop place.
-        mergingStopPlaceImporter.importStopPlace(firstStopPlace);
-
-        StopPlace secondStopPlace = createStopPlaceWithQuay(name,
-                longitude, latitude, stopPlaceId, quayId);
-
-        // Import second stop place with a quay with the same coordinates as second stop place
-        StopPlace actualStopPlace = mergingStopPlaceImporter.importStopPlaceWithoutNetexMapping(secondStopPlace);
-
-        assertThat(actualStopPlace.getQuays()).hasSize(1);
     }
 
     /**
