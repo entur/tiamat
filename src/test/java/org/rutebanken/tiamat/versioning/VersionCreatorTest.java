@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
@@ -98,6 +99,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
     }
 
+    @Ignore
     @Test
     public void deepCopiedObjectShouldHaveOriginalId() {
         StopPlace stopPlace = new StopPlace();
