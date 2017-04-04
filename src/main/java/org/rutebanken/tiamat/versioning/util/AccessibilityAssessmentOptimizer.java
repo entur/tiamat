@@ -16,8 +16,13 @@ import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalcul
 @Service
 public class AccessibilityAssessmentOptimizer {
 
+    private final VersionCreator versionCreator;
+
     @Autowired
-    private VersionCreator versionCreator;
+    public AccessibilityAssessmentOptimizer(VersionCreator versionCreator) {
+        this.versionCreator = versionCreator;
+    }
+
 
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
 
