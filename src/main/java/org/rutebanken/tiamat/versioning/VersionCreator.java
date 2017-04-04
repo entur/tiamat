@@ -126,15 +126,16 @@ public class VersionCreator {
         return newVersion;
     }
 
-    public <T extends EntityInVersionStructure> T initiateFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+    public <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Initiating new version for entity {}", entityInVersionStructure);
         entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        entityInVersionStructure.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
         return type.cast(entityInVersionStructure);
     }
 
-    public StopPlace initiateFirstVersionWithAvailabilityCondition(StopPlace stopPlace) {
-        stopPlace = initiateFirstVersionWithAvailabilityCondition(stopPlace, StopPlace.class);
+
+    public StopPlace initiateFirstVersion(StopPlace stopPlace) {
+        stopPlace = initiateFirstVersion(stopPlace, StopPlace.class);
+         stopPlace.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
         if(stopPlace.getQuays() != null) {
             stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
         }

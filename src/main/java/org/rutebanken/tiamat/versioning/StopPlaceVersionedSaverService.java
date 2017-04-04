@@ -53,7 +53,7 @@ public class StopPlaceVersionedSaverService {
 
         StopPlace stopPlaceToSave;
         if (existingVersion == null) {
-            stopPlaceToSave = versionCreator.initiateFirstVersionWithAvailabilityCondition(newVersion);
+            stopPlaceToSave = versionCreator.initiateFirstVersion(newVersion);
             stopPlaceToSave.setCreated(ZonedDateTime.now());
         } else if (existingVersion.getVersion() == newVersion.getVersion() |
                 !existingVersion.getNetexId().equals(newVersion.getNetexId())) {
@@ -77,19 +77,18 @@ public class StopPlaceVersionedSaverService {
         if (stopPlaceToSave.getQuays() != null) {
             stopPlaceToSave.getQuays().forEach(quay -> {
                 if (quay.getNetexId() == null) {
-                    quay = versionCreator.initiateFirstVersionWithAvailabilityCondition(quay, Quay.class);
+                    quay = versionCreator.initiateFirstVersion(quay, Quay.class);
                 }
                 AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
 
                 if (accessibilityAssessment != null) {
                     if (accessibilityAssessment.getNetexId() == null) {
-                        accessibilityAssessment = versionCreator.initiateFirstVersionWithAvailabilityCondition(accessibilityAssessment, AccessibilityAssessment.class);
+                        accessibilityAssessment = versionCreator.initiateFirstVersion(accessibilityAssessment, AccessibilityAssessment.class);
                     }
                     if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
                         AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
                         if (limitation.getNetexId() == null) {
-                            // TODO: All object under StopPlace does probably not need to have availability condition
-                            limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(limitation, AccessibilityLimitation.class);
+                            limitation = versionCreator.initiateFirstVersion(limitation, AccessibilityLimitation.class);
                         }
                     }
                 }

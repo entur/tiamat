@@ -77,14 +77,14 @@ public class AccessibilityAssessmentOptimizer {
         }
         AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
 
-        AccessibilityLimitation limitation = versionCreator.initiateFirstVersionWithAvailabilityCondition(new AccessibilityLimitation(), AccessibilityLimitation.class);
+        AccessibilityLimitation limitation = versionCreator.initiateFirstVersion(new AccessibilityLimitation(), AccessibilityLimitation.class);
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
         limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
         limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
 
-        AccessibilityAssessment quayAssessment = versionCreator.initiateFirstVersionWithAvailabilityCondition(new AccessibilityAssessment(), AccessibilityAssessment.class);
+        AccessibilityAssessment quayAssessment = versionCreator.initiateFirstVersion(new AccessibilityAssessment(), AccessibilityAssessment.class);
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
 
         List<AccessibilityLimitation> limitations = new ArrayList<>();
