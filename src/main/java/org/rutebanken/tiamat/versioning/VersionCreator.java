@@ -98,8 +98,13 @@ public class VersionCreator {
 
     public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
         //TODO: Need to support "valid from" set explicitly
+
+        if(entityInVersionStructure == null) {
+            throw new IllegalArgumentException("Cannot terminate version for null object");
+        }
+
         logger.debug("New version valid from {}", newVersionValidFrom);
-        if (!entityInVersionStructure.getValidBetweens().isEmpty()) {
+        if (entityInVersionStructure.getValidBetweens() != null && !entityInVersionStructure.getValidBetweens().isEmpty()) {
             ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);
             validBetween.setToDate(newVersionValidFrom);
         }
