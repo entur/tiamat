@@ -10,6 +10,12 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_TOPOGRAPHIC_PLACE = "TopographicPlace";
     public static final String INPUT_TYPE_TOPOGRAPHIC_PLACE = OUTPUT_TYPE_TOPOGRAPHIC_PLACE + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS = "AccessibilityLimitations";
+    public static final String INPUT_TYPE_ACCESSIBILITY_LIMITATIONS = OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT = "AccessibilityAssessment";
+    public static final String INPUT_TYPE_ACCESSIBILITY_ASSESSMENT = OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_PATH_LINK = "PathLink";
     public static final String INPUT_TYPE_PATH_LINK = OUTPUT_TYPE_PATH_LINK + INPUT_TYPE_POSTFIX;
 
@@ -73,12 +79,25 @@ public class GraphQLNames {
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
+    public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
+
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
 
     public static final String ID = "id";
     public static final String STOP_PLACE_TYPE = "stopPlaceType";
     public static final String SHORT_NAME = "shortName";
     public static final String DESCRIPTION = "description";
+    public static final String ACCESSIBILITY_ASSESSMENT = "accessibilityAssessment";
+    public static final String LIMITATIONS = "limitations";
+    public static final String MOBILITY_IMPAIRED_ACCESS = "mobilityImpairedAccess";
+
+    public static final String WHEELCHAIR_ACCESS = "wheelchairAccess";
+    public static final String STEP_FREE_ACCESS = "stepFreeAccess";
+    public static final String ESCALATOR_FREE_ACCESS = "escalatorFreeAccess";
+    public static final String LIFT_FREE_ACCESS = "liftFreeAccess";
+    public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
+
+
     public static final String IMPORTED_ID = "importedId";
     public static final String VERSION = "version";
     public static final String PUBLIC_CODE = "publicCode";
@@ -104,6 +123,8 @@ public class GraphQLNames {
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
     public static final String VALID_BETWEENS = "validBetweens";
+    public static final String ADDRESSABLE_PLACE = "addressablePlace";
+    public static final String PLACE_REF = "placeRef";
 
     public static final String NAME = "name";
     public static final String TOPOGRAPHIC_PLACE_TYPE_ENUM = "TopographicPlaceType";

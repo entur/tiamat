@@ -2,22 +2,14 @@ package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
 import org.junit.Assert;
-import org.junit.Before;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.TiamatApplication;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,20 +17,7 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StopPlaceRepositoryTest extends CommonSpringBootTest {
-
-	@Autowired
-	private StopPlaceRepository stopPlaceRepository;
-
-	@Autowired
-	private PathLinkRepository pathLinkRepository;
-
-	@Before
-	public void cleanRepositories() {
-		pathLinkRepository.deleteAll();
-		;
-		stopPlaceRepository.deleteAll();
-	}
+public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 
 	@Test
 	public void findStopPlacesSortedCorrectly() {

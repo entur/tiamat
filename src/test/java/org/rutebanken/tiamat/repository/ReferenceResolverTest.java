@@ -1,16 +1,15 @@
 package org.rutebanken.tiamat.repository;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
-public class ReferenceResolverTest extends CommonSpringBootTest{
+public class ReferenceResolverTest extends TiamatIntegrationTest {
 
     @Autowired
     private ReferenceResolver referenceResolver;

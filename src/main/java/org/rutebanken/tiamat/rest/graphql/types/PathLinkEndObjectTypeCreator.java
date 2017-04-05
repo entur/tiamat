@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_LINK_END;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_REF;
 
 @Component
 public class PathLinkEndObjectTypeCreator {
@@ -16,7 +17,7 @@ public class PathLinkEndObjectTypeCreator {
                 .name(OUTPUT_TYPE_PATH_LINK_END)
                 .field(netexIdFieldDefinition)
                 .field(newFieldDefinition()
-                        .name("placeRef")
+                        .name(PLACE_REF)
                         .type(entityReferenceObjectType))
                 .build();
     }

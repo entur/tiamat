@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
+public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;
@@ -346,12 +346,10 @@ public class PublicationDeliveryResourceTest extends CommonSpringBootTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
         assertThat(actualStopPlace.getCreated()).as("The imported stop place's created date must not be null").isNotNull();
-        assertThat(actualStopPlace.getChanged()).as("The imported stop place's changed date must not be null").isNotNull();
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
         assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
-        assertThat(actualQuays.get(0).getChanged()).as("The imported quay's changed date must not be null").isNotNull();
     }
 
     @Test

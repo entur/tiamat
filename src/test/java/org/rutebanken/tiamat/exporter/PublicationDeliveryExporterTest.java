@@ -1,11 +1,10 @@
 package org.rutebanken.tiamat.exporter;
 
+import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.CommonSpringBootTest;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.junit.Test;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.bind.JAXBElement;
@@ -13,10 +12,7 @@ import javax.xml.bind.JAXBException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PublicationDeliveryExporterTest extends CommonSpringBootTest {
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryExporter publicationDeliveryExporter;

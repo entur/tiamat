@@ -1,38 +1,35 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.versioning.util;
 
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.rutebanken.tiamat.service.MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess;
+import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess;
 
-
-@Transactional
 @Service
-public class StopPlaceUpdaterService {
+public class AccessibilityAssessmentOptimizer {
+
+    private final VersionCreator versionCreator;
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    public StopPlace save(StopPlace stopPlace) {
-
-        optimizeAccessibilityAssessments(stopPlace);
-        return stopPlaceRepository.save(stopPlace);
+    public AccessibilityAssessmentOptimizer(VersionCreator versionCreator) {
+        this.versionCreator = versionCreator;
     }
 
-    public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
-        try {
-            List<AccessibilityAssessment> allAccessibilityAssessments = new ArrayList<>();
 
-            // Populate assessments on all quays that do not have assessments set
+    public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
+
+        List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
+
+        // Populate assessments on all quays that do not have assessments set
+        if(stopPlace.getQuays() != null) {
             stopPlace.getQuays()
                     .stream()
                     .filter(quay -> quay.getAccessibilityAssessment() == null)
@@ -41,35 +38,44 @@ public class StopPlaceUpdaterService {
             // Collect all assessments
             stopPlace.getQuays()
                     .stream()
-                    .forEach(quay -> allAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+                    .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+        }
 
-            if (!allAccessibilityAssessments.isEmpty()) {
-                //Assessments are set
+        if (!allQuayAccessibilityAssessments.isEmpty()) {
+            //Assessments are set
 
-                if (allAccessibilityAssessmentsAreEqual(allAccessibilityAssessments)) {
-                    //All quays are equal
-                    //Set Assessment on StopPlace
-                    stopPlace.setAccessibilityAssessment(deepCopyAccessibilityAssessment(allAccessibilityAssessments.get(0)));
+            if (allAccessibilityAssessmentsAreEqual(allQuayAccessibilityAssessments)) {
+                //All quays are equal
+                //Set Assessment on StopPlace
 
-                    //Remove Assessment from Quays
-                    stopPlace.getQuays().forEach(quay -> quay.setAccessibilityAssessment(null));
-                } else {
-                    // Assessments are different - remove from StopPlace
-                    stopPlace.setAccessibilityAssessment(null);
+                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.get(0));
+
+                if (stopPlace.getAccessibilityAssessment() != null) {
+                    // Use existing Assessment instead, but update limitations
+                    AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
+                    nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
+                    firstAccessibilityAssessment = nextVersion;
+//                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
-            }
 
-            if (stopPlace.getAccessibilityAssessment() != null) {
-                calculateAndSetMobilityImpairedAccess(stopPlace.getAccessibilityAssessment());
+                stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
+
+                //Remove Assessment from Quays
+                stopPlace.getQuays().forEach(quay -> quay.setAccessibilityAssessment(null));
+            } else {
+                // Assessments are different - remove from StopPlace
+                stopPlace.setAccessibilityAssessment(null);
             }
-            if (stopPlace.getQuays() != null) {
-                stopPlace.getQuays()
-                        .stream()
-                        .filter(quay -> quay.getAccessibilityAssessment() != null)
-                        .forEach(quay -> calculateAndSetMobilityImpairedAccess(quay.getAccessibilityAssessment()));
-            }
-        } catch (Throwable t) {
-            System.err.println("");
+        }
+
+        if (stopPlace.getAccessibilityAssessment() != null) {
+            calculateAndSetMobilityImpairedAccess(stopPlace.getAccessibilityAssessment());
+        }
+        if (stopPlace.getQuays() != null) {
+            stopPlace.getQuays()
+                    .stream()
+                    .filter(quay -> quay.getAccessibilityAssessment() != null)
+                    .forEach(quay -> calculateAndSetMobilityImpairedAccess(quay.getAccessibilityAssessment()));
         }
     }
 

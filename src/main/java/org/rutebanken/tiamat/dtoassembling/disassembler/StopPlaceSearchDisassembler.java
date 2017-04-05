@@ -19,12 +19,6 @@ public class StopPlaceSearchDisassembler {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceSearchDisassembler.class);
 
-    private NetexIdMapper netexIdMapper;
-
-    public StopPlaceSearchDisassembler(NetexIdMapper netexIdMapper) {
-        this.netexIdMapper = netexIdMapper;
-    }
-
     public StopPlaceSearch disassemble(StopPlaceSearchDto stopPlaceSearchDto) {
 
         StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();

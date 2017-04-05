@@ -1,35 +1,45 @@
 package org.rutebanken.tiamat;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
 @ActiveProfiles("geodb")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-public abstract class CommonSpringBootTest {
+public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+    protected TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
-    private PathLinkRepository pathLinkRepository;
+    protected PathLinkRepository pathLinkRepository;
+
+    @Autowired
+    protected PathJunctionRepository pathJunctionRepository;
 
     @Autowired
     protected QuayRepository quayRepository;
+
+    @Autowired
+    protected GeometryFactory geometryFactory;
+
+    @Value("${local.server.port}")
+    protected int port;
 
     @Before
     @After

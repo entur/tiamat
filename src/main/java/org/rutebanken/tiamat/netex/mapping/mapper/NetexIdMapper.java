@@ -35,7 +35,7 @@ public class NetexIdMapper {
         }
     }
 
-    public void toTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
+    public void toTiamatModel(org.rutebanken.netex.model.EntityInVersionStructure netexEntity, EntityInVersionStructure tiamatEntity) {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setNetexId(null);
@@ -44,11 +44,15 @@ public class NetexIdMapper {
             tiamatEntity.setNetexId(netexEntity.getId());
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
-            moveOriginalIdToKeyValueList(tiamatEntity, netexEntity.getId());
-            tiamatEntity.setNetexId(null);
+            if(tiamatEntity instanceof  DataManagedObjectStructure) {
+                moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId());
+                tiamatEntity.setNetexId(null);
+            }
         }
-        logger.debug("Copy key values to tiamat model");
-        copyKeyValuesToTiamatModel(netexEntity, tiamatEntity);
+        if(netexEntity instanceof org.rutebanken.netex.model.DataManagedObjectStructure && tiamatEntity instanceof DataManagedObjectStructure) {
+            logger.debug("Copy key values to tiamat model");
+            copyKeyValuesToTiamatModel((org.rutebanken.netex.model.DataManagedObjectStructure) netexEntity, (DataManagedObjectStructure) tiamatEntity);
+        }
     }
 
     /**

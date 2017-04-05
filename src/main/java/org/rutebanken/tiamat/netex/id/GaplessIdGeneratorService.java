@@ -174,7 +174,7 @@ public class GaplessIdGeneratorService {
                 insertUsedIdsSql.append(',');
             }
         }
-//        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING"); // psql version in carbon does not support this.
+        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING");
         Query query = entityManager.createNativeQuery(insertUsedIdsSql.toString());
         query.executeUpdate();
         entityManager.flush();

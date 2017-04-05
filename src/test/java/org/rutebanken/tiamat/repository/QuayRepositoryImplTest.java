@@ -2,15 +2,12 @@ package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import org.rutebanken.tiamat.CommonSpringBootTest;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuayRepositoryImplTest extends CommonSpringBootTest {
-
-    @Autowired
-    private QuayRepository quayRepository;
+public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
     @Autowired
     private VersionCreator versionCreator;
@@ -23,7 +20,7 @@ public class QuayRepositoryImplTest extends CommonSpringBootTest {
 
         quayRepository.save(version1);
 
-        Quay version2 = versionCreator.createNextVersion(version1, Quay.class);
+        Quay version2 = versionCreator.createCopy(version1, Quay.class);
 
         quayRepository.save(version2);
 
