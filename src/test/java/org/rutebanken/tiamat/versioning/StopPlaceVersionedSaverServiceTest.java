@@ -155,7 +155,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
             fail("Saving the same version as new version is not allowed");
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).isEqualTo("Existing and new StopPlace must be different objects");
+            assertThat(e.getMessage()).isEqualTo("Existing and new version must be different objects");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
