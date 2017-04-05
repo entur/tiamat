@@ -3,8 +3,7 @@ package org.rutebanken.tiamat.model;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 
 @MappedSuperclass
@@ -16,6 +15,7 @@ public class Zone_VersionStructure
 
     protected Point centroid;
 
+    @Basic(fetch = FetchType.LAZY)
     protected Polygon polygon;
 
     @Transient
