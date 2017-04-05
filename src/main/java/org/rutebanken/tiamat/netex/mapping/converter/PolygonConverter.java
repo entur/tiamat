@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,7 +89,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
         if (optionalCoordinates.isPresent()) {
             List<Double> values = toList(optionalCoordinates.get());
             return new PolygonType()
-                    .withId("GEN-PolygonType-" + Math.abs(polygon.hashCode()))
+                    .withId("GEN-PolygonType-" + Math.abs(Objects.hash(values)))
                     .withExterior(of(values))
                     .withInterior(ofInteriorRings(polygon));
         }

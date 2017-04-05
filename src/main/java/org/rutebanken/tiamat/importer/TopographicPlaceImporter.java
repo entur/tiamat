@@ -42,7 +42,7 @@ public class TopographicPlaceImporter {
 
         return topographicPlaces
                 .stream()
-                .peek(topographicPlace -> logger.info("{}", topographicPlace))
+                .peek(topographicPlace -> logger.trace("{}", topographicPlace))
                 .map(topographicPlace -> topographicPlaceRepository.save(topographicPlace))
                 .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
                 .collect(toList());

@@ -100,6 +100,7 @@ public class PolygonConverterTest {
         PolygonType actual = polygonConverter.convertTo(polygon, new TypeBuilder<PolygonType>() {
         }.build());
         assertThat(actual).isNotNull();
+        assertThat(actual.getId()).isNotEmpty();
 
         List<Double> values = polygonConverter.extractValues(actual.getExterior());
         assertThat(values).hasSize(coordinates.length * 2);
