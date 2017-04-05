@@ -139,8 +139,6 @@ public class MergingStopPlaceImporter {
         logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
         stopPlaceVersionedSaverService.createCopy(incomingStopPlace);
 
-        incomingStopPlace.setCreated(ZonedDateTime.now());
-        incomingStopPlace.setChanged(ZonedDateTime.now());
         incomingStopPlace = stopPlaceVersionedSaverService.saveNewVersion(incomingStopPlace);
         return updateCache(incomingStopPlace);
     }
@@ -162,8 +160,6 @@ public class MergingStopPlaceImporter {
         }
 
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            copy.setChanged(ZonedDateTime.now());
-            // The stop place has changed.
             logger.info("Updated existing stop place {}. ", copy);
             copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
             return updateCache(copy);

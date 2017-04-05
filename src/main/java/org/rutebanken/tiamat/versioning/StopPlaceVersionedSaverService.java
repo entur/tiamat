@@ -33,12 +33,6 @@ public class StopPlaceVersionedSaverService {
 
 
     public StopPlace createCopy(StopPlace stopPlace) {
-
-        if (stopPlace.getNetexId() == null) {
-            stopPlace.setCreated(ZonedDateTime.now());
-        } else {
-            stopPlace.setChanged(ZonedDateTime.now());
-        }
         return versionCreator.createCopy(stopPlace);
     }
 
@@ -64,11 +58,13 @@ public class StopPlaceVersionedSaverService {
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             stopPlaceToSave = newVersion;
+            newVersion.setCreated(ZonedDateTime.now());
         } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
             throw new IllegalArgumentException("Existing and new StopPlace do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
         } else {
             stopPlaceToSave = newVersion;
 
+            stopPlaceToSave.setChanged(ZonedDateTime.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
             logger.debug("About terminate previous version of {}", existingVersion.getNetexId());
