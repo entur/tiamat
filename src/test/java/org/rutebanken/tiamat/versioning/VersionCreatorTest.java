@@ -60,16 +60,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(actualValidBetweenId)
                 .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
                 .isNull();
-
-        // Save the new version
-        newVersion = stopPlaceRepository.save(newVersion);
-
-        // Check that the saved new version does not have the same value as the previous ID
-        actualValidBetweenId = getIdValue(newVersion.getValidBetweens().get(0));
-        assertThat(actualValidBetweenId)
-                .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
-                .isNotEqualTo(firstVersionValidBetweenId);
-
     }
 
     @Ignore
