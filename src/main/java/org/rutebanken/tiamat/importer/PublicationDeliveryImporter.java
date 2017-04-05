@@ -90,6 +90,7 @@ public class PublicationDeliveryImporter {
             if(hasTopographicPlaces(netexSiteFrame)) {
                 logger.info("Publication delivery contains {} topographic places for import.", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
 
+                logger.info("About to map {} topographic places to internal model", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
                 List<org.rutebanken.tiamat.model.TopographicPlace> mappedTopographicPlaces = netexMapper.getFacade()
                         .mapAsList(netexSiteFrame.getTopographicPlaces().getTopographicPlace(),
                                 org.rutebanken.tiamat.model.TopographicPlace.class);
