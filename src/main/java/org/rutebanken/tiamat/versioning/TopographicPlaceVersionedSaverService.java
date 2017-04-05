@@ -37,6 +37,7 @@ public class TopographicPlaceVersionedSaverService extends VersionedSaverService
         if(existingTopographicPlace == null) {
             newVersion.setCreated(ZonedDateTime.now());
         } else {
+            newVersion.setVersion(existingTopographicPlace.getVersion());
             existingTopographicPlace = versionCreator.terminateVersion(existingTopographicPlace, ZonedDateTime.now());
             topographicPlaceRepository.save(existingTopographicPlace);
         }
