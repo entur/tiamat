@@ -29,7 +29,7 @@ public class EntityRefObjectTypeCreator {
                         .type(GraphQLString))
                         .description(ENTITY_REF_VERSION_DESCRIPTION)
                 .field(newFieldDefinition()
-                        .name("addressablePlace")
+                        .name(ADDRESSABLE_PLACE)
                         .type(addressablePlaceObjectType)
                         .description("")
                         .dataFetcher(referenceFetcher))

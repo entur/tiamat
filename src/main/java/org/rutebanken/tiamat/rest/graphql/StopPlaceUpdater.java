@@ -11,7 +11,7 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
-import org.rutebanken.tiamat.service.StopPlaceUpdaterService;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ class StopPlaceUpdater implements DataFetcher {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceUpdater.class);
 
     @Autowired
-    private StopPlaceUpdaterService stopPlaceUpdaterService;
+    private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -69,49 +69,37 @@ class StopPlaceUpdater implements DataFetcher {
     }
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
-        StopPlace stopPlace = null;
-        StopPlace previousVersion = null;
+        StopPlace updatedStopPlace;
+        StopPlace existingVersion = null;
+
         if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
             Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("Updating StopPlace {}", netexId);
-                previousVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-                stopPlace = previousVersion;
-                Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+                existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+                Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion);
 
             } else {
                 logger.info("Creating new StopPlace");
-                stopPlace = new StopPlace();
-                stopPlace.setCreated(ZonedDateTime.now());
+                updatedStopPlace = new StopPlace();
             }
 
-            if (stopPlace != null) {
-                boolean hasValuesChanged = populateStopPlaceFromInput(input, stopPlace);
+            if (updatedStopPlace != null) {
+                boolean hasValuesChanged = populateStopPlaceFromInput(input, updatedStopPlace);
 
                 if (hasValuesChanged) {
-                    if (stopPlace.getQuays() != null) {
-                        /*
-                         * Explicitly saving new Quays  when updating and creating new Quays in the same request.
-                         * Already existing quays are attempted to be inserted causing ConstraintViolationException.
-                         *
-                         * It is necessary to call saveAndFlush(quay) to enforce database-constraints and updating
-                         * references on StopPlace-object.
-                         *
-                         */
-                        stopPlace.getQuays().stream()
-                                .filter(quay -> quay.getNetexId() == null)
-                                .forEach(quay -> quayRepository.saveAndFlush(quay));
-                    }
-                    stopPlace.setChanged(ZonedDateTime.now());
-                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace, previousVersion);
-                    stopPlace = stopPlaceUpdaterService.save(stopPlace);
+                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedStopPlace);
 
+                    updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
+
+                    return updatedStopPlace;
                 }
             }
         }
-        return stopPlace;
+        return existingVersion;
     }
 
     /**
@@ -171,8 +159,6 @@ class StopPlaceUpdater implements DataFetcher {
             logger.info("Updating Quay {} for StopPlace {}", quay.getNetexId(), stopPlace.getNetexId());
         } else {
             quay = new Quay();
-            quay.setCreated(ZonedDateTime.now());
-
             logger.info("Creating new Quay");
         }
         boolean isQuayUpdated = populate(quayInputMap, quay);
@@ -226,17 +212,17 @@ class StopPlaceUpdater implements DataFetcher {
                 }
             }
 
-
+            
             isUpdated = true;
         }
 
-        if (input.get("accessibilityAssessment") != null) {
+        if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
             AccessibilityAssessment accessibilityAssessment = entity.getAccessibilityAssessment();
             if (accessibilityAssessment == null) {
                 accessibilityAssessment = new AccessibilityAssessment();
             }
 
-            Map<String, Object> accessibilityAssessmentInput = (Map) input.get("accessibilityAssessment");
+            Map<String, Object> accessibilityAssessmentInput = (Map) input.get(ACCESSIBILITY_ASSESSMENT);
             List<AccessibilityLimitation> limitations = accessibilityAssessment.getLimitations();
             AccessibilityLimitation limitation;
             if (limitations == null || limitations.isEmpty()) {
@@ -246,27 +232,42 @@ class StopPlaceUpdater implements DataFetcher {
                 limitation = limitations.get(0);
             }
 
-            Map<String, LimitationStatusEnumeration> limitationsInput = (Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations");
+            AccessibilityLimitation limitationFromInput = createAccessibilityLimitationFromInput((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
 
-            limitation.setWheelchairAccess(limitationsInput.get("wheelchairAccess"));
-            limitation.setAudibleSignalsAvailable(limitationsInput.get("audibleSignalsAvailable"));
-            limitation.setStepFreeAccess(limitationsInput.get("stepFreeAccess"));
-            limitation.setLiftFreeAccess(limitationsInput.get("liftFreeAccess"));
-            limitation.setVisualSignsAvailable(limitationsInput.get("visualSignsAvailable"));
-            limitation.setEscalatorFreeAccess(limitationsInput.get("escalatorFreeAccess"));
+            //Only flag as updated if limitations are updated
+            if (limitationFromInput.getWheelchairAccess() != limitation.getWheelchairAccess() |
+                    limitationFromInput.getAudibleSignalsAvailable() != limitation.getAudibleSignalsAvailable() |
+                    limitationFromInput.getStepFreeAccess() != limitation.getStepFreeAccess() |
+                    limitationFromInput.getLiftFreeAccess() != limitation.getLiftFreeAccess() |
+                    limitationFromInput.getEscalatorFreeAccess() != limitation.getEscalatorFreeAccess()) {
 
-            if (!limitations.contains(limitation)) {
+                limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
+                limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
+                limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
+                limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
+                limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
+
+
+                limitations.clear();
                 limitations.add(limitation);
                 accessibilityAssessment.setLimitations(limitations);
-                accessibilityAssessment.setCreated(ZonedDateTime.now());
-            } else {
-                limitation.setChanged(ZonedDateTime.now());
-            }
 
-            entity.setAccessibilityAssessment(accessibilityAssessment);
-            isUpdated = true;
+                entity.setAccessibilityAssessment(accessibilityAssessment);
+
+                isUpdated = true;
+            }
         }
         return isUpdated;
+    }
+
+    private AccessibilityLimitation createAccessibilityLimitationFromInput(Map<String, LimitationStatusEnumeration> limitationsInput) {
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(limitationsInput.get(WHEELCHAIR_ACCESS));
+        limitation.setAudibleSignalsAvailable(limitationsInput.get(AUDIBLE_SIGNALS_AVAILABLE));
+        limitation.setStepFreeAccess(limitationsInput.get(STEP_FREE_ACCESS));
+        limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
+        limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
+        return limitation;
     }
 
     private EmbeddableMultilingualString getEmbeddableString(Map map) {

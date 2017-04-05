@@ -5,7 +5,6 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
@@ -21,7 +20,6 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateScalar;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
@@ -70,7 +68,12 @@ StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
 
-        commonFieldsList.add(newFieldDefinition().name("accessibilityAssessment").type(accessibilityAssessmentObjectType).build());
+        commonFieldsList.add(newFieldDefinition()
+                .name(ACCESSIBILITY_ASSESSMENT)
+                .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
+                .type(accessibilityAssessmentObjectType)
+                .build()
+        );
 
         GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
                 .name(GEOMETRY)
@@ -245,6 +248,11 @@ StopPlaceRegisterGraphQLSchema {
                 .name(ID)
                 .type(GraphQLString)
                 .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
+                .description("Find stop place based on ID. Only used together with " + ID + " argument")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)
@@ -431,7 +439,13 @@ StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
-        commonInputFieldsList.add(newInputObjectField().name("accessibilityAssessment").type(accessibilityAssessmentInputObjectType).build());
+        commonInputFieldsList.add(
+                newInputObjectField()
+                        .name(ACCESSIBILITY_ASSESSMENT)
+                        .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
+                        .type(accessibilityAssessmentInputObjectType)
+                        .build()
+        );
 
         return commonInputFieldsList;
     }

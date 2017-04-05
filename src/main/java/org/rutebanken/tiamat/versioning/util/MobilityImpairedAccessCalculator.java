@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.versioning.util;
 
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;

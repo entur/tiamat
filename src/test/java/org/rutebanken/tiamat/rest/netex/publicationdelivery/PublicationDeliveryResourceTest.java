@@ -347,12 +347,10 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
         assertThat(actualStopPlace.getCreated()).as("The imported stop place's created date must not be null").isNotNull();
-        assertThat(actualStopPlace.getChanged()).as("The imported stop place's changed date must not be null").isNotNull();
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
         assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
-        assertThat(actualQuays.get(0).getChanged()).as("The imported quay's changed date must not be null").isNotNull();
     }
 
     @Test
