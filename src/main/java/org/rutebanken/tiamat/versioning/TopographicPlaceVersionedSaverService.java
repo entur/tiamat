@@ -23,13 +23,21 @@ public class TopographicPlaceVersionedSaverService extends VersionedSaverService
     private VersionCreator versionCreator;
 
     @Override
-    public TopographicPlace saveNewVersion(TopographicPlace existingVersion, TopographicPlace newVersion) {
+    public TopographicPlace saveNewVersion(TopographicPlace existingTopographicPlace, TopographicPlace newVersion) {
 
-        if(existingVersion == null) {
+        if(existingTopographicPlace == null) {
+            if (newVersion.getNetexId() != null) {
+                existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+                if (existingTopographicPlace != null) {
+                    logger.info("Found existing topographic place from netexId {}", existingTopographicPlace.getNetexId());
+                }
+            }
+        }
+
+        if(existingTopographicPlace == null) {
             newVersion.setCreated(ZonedDateTime.now());
         } else {
-            TopographicPlace existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdAndVersion(existingVersion.getNetexId(), existingVersion.getVersion());
-            existingTopographicPlace = versionCreator.terminateVersion(existingVersion, ZonedDateTime.now());
+            existingTopographicPlace = versionCreator.terminateVersion(existingTopographicPlace, ZonedDateTime.now());
             topographicPlaceRepository.save(existingTopographicPlace);
         }
 

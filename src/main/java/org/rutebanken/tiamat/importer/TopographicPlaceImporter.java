@@ -50,13 +50,7 @@ public class TopographicPlaceImporter {
 
         for(TopographicPlace incomingTopographicPlace : topographicPlaces) {
             logger.trace("{}", incomingTopographicPlace);
-            TopographicPlace existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingTopographicPlace.getNetexId());
-
-            if(existingTopographicPlace != null) {
-                incomingTopographicPlace.setVersion(existingTopographicPlace.getVersion());
-            }
-
-            incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(existingTopographicPlace, incomingTopographicPlace);
+            incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
             topographicPlacesCounter.incrementAndGet();
             org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(incomingTopographicPlace);
 
