@@ -1,15 +1,23 @@
 package org.rutebanken.tiamat.netex.mapping;
 
-import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.AccessibilityAssessment;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.PathLink;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.PathLink;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.TopographicPlaceMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +34,9 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        TopographicPlaceMapper topographicPlaceMapper,
-                       DataManagedObjectStructureMapper dataManagedObjectStructureMapper) {
+                       DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
+                       NetexIdMapper netexIdMapper) {
+
         logger.info("Setting up netexMapper with DI");
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -68,6 +78,23 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(AccessibilityAssessment.class, org.rutebanken.tiamat.model.AccessibilityAssessment.class)
+                .customize(new CustomMapper<AccessibilityAssessment, org.rutebanken.tiamat.model.AccessibilityAssessment>() {
+                    @Override
+                    public void mapAtoB(AccessibilityAssessment accessibilityAssessment, org.rutebanken.tiamat.model.AccessibilityAssessment accessibilityAssessment2, MappingContext context) {
+                        super.mapAtoB(accessibilityAssessment, accessibilityAssessment2, context);
+                        netexIdMapper.toTiamatModel(accessibilityAssessment, accessibilityAssessment2);
+                    }
+
+                    @Override
+                    public void mapBtoA(org.rutebanken.tiamat.model.AccessibilityAssessment accessibilityAssessment, AccessibilityAssessment accessibilityAssessment2, MappingContext context) {
+                        super.mapBtoA(accessibilityAssessment, accessibilityAssessment2, context);
+                        netexIdMapper.toNetexModel(accessibilityAssessment, accessibilityAssessment2);
+                    }
+                })
+                .exclude("id")
+                .byDefault()
+                .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
@@ -84,7 +111,11 @@ public class NetexMapper {
     }
 
     public NetexMapper() {
-        this(getDefaultConverters(), new KeyListToKeyValuesMapMapper(), new TopographicPlaceMapper(), new DataManagedObjectStructureMapper(new NetexIdMapper()));
+        this(getDefaultConverters(),
+                new KeyListToKeyValuesMapMapper(),
+                new TopographicPlaceMapper(),
+                new DataManagedObjectStructureMapper(new NetexIdMapper()),
+                new NetexIdMapper());
         logger.info("Setting up netexMapper without DI");
     }
 
