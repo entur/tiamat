@@ -5,21 +5,17 @@ import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.AccessibilityAssessment;
-import org.rutebanken.tiamat.model.AccessibilityLimitation;
-import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.xml.bind.JAXBException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -430,4 +426,20 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         return accessibilityAssessment;
     }
 
+    @Test
+    public void accessibilityAssesmentIdToNetex() throws Exception {
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setNetexId("NSR:AccessibilityAssesment:123124");
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:321123");
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+
+        org.rutebanken.netex.model.AccessibilityAssessment netexAccessibilityAssesment = netexStopPlace.getAccessibilityAssessment();
+
+        assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
+        assertThat(netexAccessibilityAssesment.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssesment:123124");
+    }
 }

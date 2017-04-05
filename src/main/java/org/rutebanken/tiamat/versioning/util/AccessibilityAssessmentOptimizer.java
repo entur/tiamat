@@ -16,23 +16,30 @@ import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalcul
 @Service
 public class AccessibilityAssessmentOptimizer {
 
+    private final VersionCreator versionCreator;
+
     @Autowired
-    private VersionCreator versionCreator;
+    public AccessibilityAssessmentOptimizer(VersionCreator versionCreator) {
+        this.versionCreator = versionCreator;
+    }
+
 
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
 
         List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
 
         // Populate assessments on all quays that do not have assessments set
-        stopPlace.getQuays()
-                .stream()
-                .filter(quay -> quay.getAccessibilityAssessment() == null)
-                .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
+        if(stopPlace.getQuays() != null) {
+            stopPlace.getQuays()
+                    .stream()
+                    .filter(quay -> quay.getAccessibilityAssessment() == null)
+                    .forEach(quay -> quay.setAccessibilityAssessment(deepCopyAccessibilityAssessment(stopPlace.getAccessibilityAssessment())));
 
-        // Collect all assessments
-        stopPlace.getQuays()
-                .stream()
-                .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+            // Collect all assessments
+            stopPlace.getQuays()
+                    .stream()
+                    .forEach(quay -> allQuayAccessibilityAssessments.add(quay.getAccessibilityAssessment()));
+        }
 
         if (!allQuayAccessibilityAssessments.isEmpty()) {
             //Assessments are set
@@ -47,7 +54,8 @@ public class AccessibilityAssessmentOptimizer {
                     // Use existing Assessment instead, but update limitations
                     AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
-                    firstAccessibilityAssessment = versionCreator.createNextVersion(nextVersion, AccessibilityAssessment.class);
+                    firstAccessibilityAssessment = nextVersion;
+//                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
 
                 stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
@@ -77,14 +85,14 @@ public class AccessibilityAssessmentOptimizer {
         }
         AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
 
-        AccessibilityLimitation limitation = versionCreator.initiateFirstVersion(new AccessibilityLimitation(), AccessibilityLimitation.class);
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
         limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
         limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
 
-        AccessibilityAssessment quayAssessment = versionCreator.initiateFirstVersion(new AccessibilityAssessment(), AccessibilityAssessment.class);
+        AccessibilityAssessment quayAssessment = new AccessibilityAssessment();
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
 
         List<AccessibilityLimitation> limitations = new ArrayList<>();
