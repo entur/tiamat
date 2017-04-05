@@ -28,7 +28,9 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        TopographicPlaceMapper topographicPlaceMapper,
-                       DataManagedObjectStructureMapper dataManagedObjectStructureMapper) {
+                       DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
+                       NetexIdMapper netexIdMapper) {
+
         logger.info("Setting up netexMapper with DI");
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -70,8 +72,6 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        NetexIdMapper netexIdMapper = new NetexIdMapper();
-
         mapperFactory.classMap(AccessibilityAssessment.class, org.rutebanken.tiamat.model.AccessibilityAssessment.class)
                 .customize(new CustomMapper<AccessibilityAssessment, org.rutebanken.tiamat.model.AccessibilityAssessment>() {
                     @Override
@@ -105,7 +105,11 @@ public class NetexMapper {
     }
 
     public NetexMapper() {
-        this(getDefaultConverters(), new KeyListToKeyValuesMapMapper(), new TopographicPlaceMapper(), new DataManagedObjectStructureMapper(new NetexIdMapper()));
+        this(getDefaultConverters(),
+                new KeyListToKeyValuesMapMapper(),
+                new TopographicPlaceMapper(),
+                new DataManagedObjectStructureMapper(new NetexIdMapper()),
+                new NetexIdMapper());
         logger.info("Setting up netexMapper without DI");
     }
 
