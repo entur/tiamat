@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
+import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
@@ -137,7 +138,7 @@ public class MergingStopPlaceImporter {
         centroidComputer.computeCentroidForStopPlace(incomingStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
-        stopPlaceVersionedSaverService.createCopy(incomingStopPlace);
+        stopPlaceVersionedSaverService.createCopy(incomingStopPlace, StopPlace.class);
 
         incomingStopPlace = stopPlaceVersionedSaverService.saveNewVersion(incomingStopPlace);
         return updateCache(incomingStopPlace);
@@ -146,7 +147,7 @@ public class MergingStopPlaceImporter {
     public StopPlace handleAlreadyExistingStopPlace(StopPlace existingStopPlace, StopPlace incomingStopPlace) {
         logger.debug("Found existing stop place {} from incoming {}", existingStopPlace, incomingStopPlace);
 
-        StopPlace copy = stopPlaceVersionedSaverService.createCopy(existingStopPlace);
+        StopPlace copy = stopPlaceVersionedSaverService.createCopy(existingStopPlace, StopPlace.class);
 
         boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(incomingStopPlace, copy);
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, copy);

@@ -4,13 +4,14 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,10 +28,13 @@ public class TopographicPlaceImporter {
 
     private final TopographicPlaceRepository topographicPlaceRepository;
 
+    private final TopographicPlaceVersionedSaverService topographicPlaceVersionedSaverService;
+
     @Autowired
-    public TopographicPlaceImporter(NetexMapper netexMapper, TopographicPlaceRepository topographicPlaceRepository) {
+    public TopographicPlaceImporter(NetexMapper netexMapper, TopographicPlaceRepository topographicPlaceRepository, TopographicPlaceVersionedSaverService topographicPlaceVersionedSaverService) {
         this.netexMapper = netexMapper;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.topographicPlaceVersionedSaverService = topographicPlaceVersionedSaverService;
     }
 
     public List<org.rutebanken.netex.model.TopographicPlace> importTopographicPlaces(List<TopographicPlace> topographicPlaces, AtomicInteger topographicPlacesCounter) {
@@ -41,15 +45,25 @@ public class TopographicPlaceImporter {
         checkInvalidReferences(topographicPlaces);
 
         logger.info("Importing topographic places");
-        return topographicPlaces
-                .stream()
-                .peek(topographicPlace -> logger.trace("{}", topographicPlace))
-                .map(topographicPlace -> topographicPlaceRepository.save(topographicPlace))
-                .peek(p -> topographicPlacesCounter.incrementAndGet())
-                .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
-                .collect(toList());
 
+        List<org.rutebanken.netex.model.TopographicPlace> importedTopographicPlaces = new ArrayList<>();
 
+        for(TopographicPlace incomingTopographicPlace : topographicPlaces) {
+            logger.trace("{}", incomingTopographicPlace);
+            TopographicPlace existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingTopographicPlace.getNetexId());
+
+            if(existingTopographicPlace != null) {
+                incomingTopographicPlace.setVersion(existingTopographicPlace.getVersion());
+            }
+
+            incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(existingTopographicPlace, incomingTopographicPlace);
+            topographicPlacesCounter.incrementAndGet();
+            org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(incomingTopographicPlace);
+
+            importedTopographicPlaces.add(netexTopographicPlace);
+        }
+
+        return importedTopographicPlaces;
     }
 
     private void checkInvalidReferences(List<TopographicPlace> topographicPlaces) {

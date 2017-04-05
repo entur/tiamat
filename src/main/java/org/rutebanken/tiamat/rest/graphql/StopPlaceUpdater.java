@@ -80,7 +80,7 @@ class StopPlaceUpdater implements DataFetcher {
                 logger.info("Updating StopPlace {}", netexId);
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
-                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion);
+                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
             } else {
                 logger.info("Creating new StopPlace");

@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import java.time.ZonedDateTime;
 
 @Transactional
 @Service
-public class StopPlaceVersionedSaverService {
+public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
 
@@ -31,25 +32,10 @@ public class StopPlaceVersionedSaverService {
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
     }
 
-
-    public StopPlace createCopy(StopPlace stopPlace) {
-        return versionCreator.createCopy(stopPlace);
-    }
-
-
-    public StopPlace saveNewVersion(StopPlace newVersion) {
-        return saveNewVersion(null, newVersion);
-    }
-
+    @Override
     public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion) {
 
-        if (existingVersion == newVersion) {
-            throw new IllegalArgumentException("Existing and new StopPlace must be different objects");
-        }
-
-        if(existingVersion != null && existingVersion.getNetexId() == null) {
-            throw new IllegalArgumentException("Existing stop place must have netexId set: " + existingVersion);
-        }
+        super.validate(existingVersion, newVersion);
 
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
@@ -59,8 +45,6 @@ public class StopPlaceVersionedSaverService {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             stopPlaceToSave = newVersion;
             newVersion.setCreated(ZonedDateTime.now());
-        } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-            throw new IllegalArgumentException("Existing and new StopPlace do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
         } else {
             stopPlaceToSave = newVersion;
 
@@ -75,8 +59,35 @@ public class StopPlaceVersionedSaverService {
         }
 
         // Save latest version
-        stopPlaceToSave = versionCreator.initiateOrIncrementVersions(stopPlaceToSave);
+        stopPlaceToSave = initiateOrIncrementVersions(stopPlaceToSave);
         stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
         return stopPlaceToSave;
+    }
+
+    /**
+     * Increment versions for stop place with children.
+     * The object must have their netexId set, or else they will get an initial version
+     * @param stopPlace with quays and accessibility assessment
+     * @return modified StopPlace
+     */
+    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
+        versionCreator.initiateOrIncrement(stopPlace);
+        initiateOrIncrementVersionsForChildren(stopPlace);
+        ZonedDateTime now = ZonedDateTime.now();
+        stopPlace.getValidBetweens().add(new ValidBetween(now));
+        return stopPlace;
+    }
+
+    private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
+
+        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
+
+        if (stopPlaceToSave.getQuays() != null) {
+            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
+            stopPlaceToSave.getQuays().forEach(quay -> {
+                versionCreator.initiateOrIncrement(quay);
+                versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(quay);
+            });
+        }
     }
 }
