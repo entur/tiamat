@@ -10,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Transactional
@@ -34,19 +33,21 @@ public class TopographicPlaceImporter {
         this.topographicPlaceRepository = topographicPlaceRepository;
     }
 
-    public List<org.rutebanken.netex.model.TopographicPlace> importTopographicPlaces(List<TopographicPlace> topographicPlaces) {
+    public List<org.rutebanken.netex.model.TopographicPlace> importTopographicPlaces(List<TopographicPlace> topographicPlaces, AtomicInteger topographicPlacesCounter) {
 
         logger.info("Importing {} incoming topogprahic places", topographicPlaces.size());
 
+        logger.info("Checking invalid references");
         checkInvalidReferences(topographicPlaces);
 
+        logger.info("Importing topographic places");
         return topographicPlaces
                 .stream()
                 .peek(topographicPlace -> logger.trace("{}", topographicPlace))
                 .map(topographicPlace -> topographicPlaceRepository.save(topographicPlace))
+                .peek(p -> topographicPlacesCounter.incrementAndGet())
                 .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
                 .collect(toList());
-
 
 
     }
@@ -60,12 +61,12 @@ public class TopographicPlaceImporter {
                                 .allMatch(other -> {
                                     return other.getNetexId().equals(parentTopographicPlaceRef)
                                             && (ANY_VERSION.equals(parentTopographicPlaceRef.getVersion())
-                                                || parentTopographicPlaceRef.getVersion() == null
-                                                || parentTopographicPlaceRef.getVersion().equals(other.getVersion()));
+                                            || parentTopographicPlaceRef.getVersion() == null
+                                            || parentTopographicPlaceRef.getVersion().equals(other.getVersion()));
                                 }))
                 .collect(toList());
 
-        if(!invalidrefs.isEmpty()) {
+        if (!invalidrefs.isEmpty()) {
             throw new IllegalArgumentException("Invalid references to topographic place: " + invalidrefs);
         }
     }

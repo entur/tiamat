@@ -89,12 +89,14 @@ public class PublicationDeliveryImporter {
 
             if(hasTopographicPlaces(netexSiteFrame)) {
                 logger.info("Publication delivery contains {} topographic places for import.", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
-                List<TopographicPlace> importedTopographicPlaces = topographicPlaceImporter.importTopographicPlaces(
-                        netexMapper.getFacade()
-                            .mapAsList(netexSiteFrame.getTopographicPlaces().getTopographicPlace(),
-                            org.rutebanken.tiamat.model.TopographicPlace.class));
+
+                List<org.rutebanken.tiamat.model.TopographicPlace> mappedTopographicPlaces = netexMapper.getFacade()
+                        .mapAsList(netexSiteFrame.getTopographicPlaces().getTopographicPlace(),
+                                org.rutebanken.tiamat.model.TopographicPlace.class);
+                logger.info("Mapped {} topographic places to internal model", mappedTopographicPlaces.size());
+                List<TopographicPlace> importedTopographicPlaces = topographicPlaceImporter.importTopographicPlaces(mappedTopographicPlaces, topographicPlacesCounter);
                 responseSiteframe.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure().withTopographicPlace(importedTopographicPlaces));
-                logger.info("Finished importing topographic plcaes");
+                logger.info("Finished importing topographic places");
             }
 
 

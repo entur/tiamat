@@ -13,12 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Component
 public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonType> {
 
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
+
+    private static final AtomicLong polygonIdCounter = new AtomicLong();
 
     private final GeometryFactory geometryFactory;
 
@@ -89,7 +92,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
         if (optionalCoordinates.isPresent()) {
             List<Double> values = toList(optionalCoordinates.get());
             return new PolygonType()
-                    .withId("GEN-PolygonType-" + Math.abs(Objects.hash(values)))
+                    .withId("GEN-PolygonType-" + polygonIdCounter.incrementAndGet())
                     .withExterior(of(values))
                     .withInterior(ofInteriorRings(polygon));
         }
