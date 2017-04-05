@@ -10,12 +10,6 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -134,6 +128,7 @@ public class NetexMapper {
         converters.add(new OffsetDateTimeZonedDateTimeConverter());
         converters.add(new SimplePointVersionStructureConverter());
         converters.add(new KeyValuesToKeyListConverter());
+        converters.add(new AccessibilityLimitationsListConverter());
 //        converters.add(new PathLinkEndConverter());
         return converters;
     }

@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NetexIdMapperTest {
     @Test
-    public void siteFrameIdMapping() throws Exception {
+    public void mapSiteFrameIdToNetex() throws Exception {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setNetexId("NSR:SiteFrame:123123");
 
@@ -21,7 +21,7 @@ public class NetexIdMapperTest {
     }
 
     @Test
-    public void accessibilityAssesmentIdMapping() throws Exception {
+    public void accessibilityAssesmentIdToNetex() throws Exception {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
         accessibilityAssessment.setNetexId("NSR:AccessibilityAssesment:123124");
 
