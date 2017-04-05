@@ -32,14 +32,14 @@ public class StopPlaceVersionedSaverService {
     }
 
 
-    public StopPlace createNewVersion(StopPlace stopPlace) {
+    public StopPlace createCopy(StopPlace stopPlace) {
 
         if (stopPlace.getNetexId() == null) {
             stopPlace.setCreated(ZonedDateTime.now());
         } else {
             stopPlace.setChanged(ZonedDateTime.now());
         }
-        return versionCreator.createNextVersion(stopPlace);
+        return versionCreator.createCopy(stopPlace);
     }
 
 
@@ -62,29 +62,25 @@ public class StopPlaceVersionedSaverService {
 
         StopPlace stopPlaceToSave;
         if (existingVersion == null) {
-            logger.debug("Existing version is not present, which means new entity. Initiating version: {}", newVersion);
-            stopPlaceToSave = versionCreator.initiateFirstVersion(newVersion);
-        } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-            throw new IllegalArgumentException("Existing and new StopPlace do not match: " + existingVersion.getNetexId() + " !=" + newVersion.getNetexId());
-        } else {
-            logger.debug("About terminate previous version of {}", existingVersion.getNetexId());
-
+            logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             stopPlaceToSave = newVersion;
-            stopPlaceToSave.setChanged(ZonedDateTime.now());
+        } else if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
+            throw new IllegalArgumentException("Existing and new StopPlace do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
+        } else {
+            stopPlaceToSave = newVersion;
 
             // TODO: Add support for "valid from/to" being explicitly set
 
-
+            logger.debug("About terminate previous version of {}", existingVersion.getNetexId());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(existingVersion.getNetexId(), existingVersion.getVersion());
             logger.debug("Invalidate existing version for {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             existingStopPlace = versionCreator.terminateVersion(existingStopPlace, ZonedDateTime.now());
             stopPlaceRepository.save(existingStopPlace);
         }
 
-        versionCreator.initiateOrIncrementNewVersionForChildren(stopPlaceToSave);
-
         // Save latest version
-        stopPlaceToSave = stopPlaceRepository.save(stopPlaceToSave);
+        stopPlaceToSave = versionCreator.initiateOrIncrementVersions(stopPlaceToSave);
+        stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
         return stopPlaceToSave;
     }
 }

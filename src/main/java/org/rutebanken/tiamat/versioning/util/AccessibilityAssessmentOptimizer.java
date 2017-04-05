@@ -55,7 +55,7 @@ public class AccessibilityAssessmentOptimizer {
                     AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
                     firstAccessibilityAssessment = nextVersion;
-//                    firstAccessibilityAssessment = versionCreator.createNextVersion(nextVersion, AccessibilityAssessment.class);
+//                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
 
                 stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);

@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,7 +110,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         String stopPlaceName = null;
         for (int i = 0; i < 3; i++) {
             stopPlaceName = "test " + i;
-            StopPlace sp = stopPlaceVersionedSaverService.createNewVersion(actualStopPlace);
+            StopPlace sp = stopPlaceVersionedSaverService.createCopy(actualStopPlace);
             sp.setName(new EmbeddableMultilingualString(stopPlaceName));
             actualStopPlace = stopPlaceVersionedSaverService.saveNewVersion(actualStopPlace, sp);
 
@@ -181,14 +182,62 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         boolean failedAsExpected = false;
         try {
             StopPlace fail = stopPlaceVersionedSaverService.saveNewVersion(actualStopPlace, actualStopPlace1);
-            fail("Saving new version of different object is not allowed");
+            fail("Saving new version of different object is not allowed: " + fail);
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).isEqualTo("Existing and new StopPlace do not match");
+            assertThat(e.getMessage()).startsWith("Existing and new StopPlace do not match");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
     }
+
+    @Test
+    public void createNewVersionFromExistingStopPlaceAndVerifyTwoPersistedCoexistingStops() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setName(new EmbeddableMultilingualString("versioned stop place"));
+
+        Quay quay = new Quay();
+        quay.setVersion(1L);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
+        assertThat(newVersion.getVersion()).isEqualTo(2L);
+
+        StopPlace firstVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), 1L);
+        assertThat(firstVersion).isNotNull();
+        StopPlace secondVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), 2L);
+        assertThat(secondVersion).isNotNull();
+        assertThat(secondVersion.getQuays()).isNotNull();
+        assertThat(secondVersion.getQuays()).hasSize(1);
+    }
+
+    @Test
+    public void createNewVersionOfStopWithTopographicPlace() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlaceRepository.save(topographicPlace);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTopographicPlace(topographicPlace);
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2);
+
+        // Save it. Reference to topographic place should be kept.
+        StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
+        assertThat(stopPlace3.getTopographicPlace()).isNotNull();
+    }
+
+
 
 
 }

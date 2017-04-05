@@ -137,7 +137,7 @@ public class MergingStopPlaceImporter {
         centroidComputer.computeCentroidForStopPlace(incomingStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
-        stopPlaceVersionedSaverService.createNewVersion(incomingStopPlace);
+        stopPlaceVersionedSaverService.createCopy(incomingStopPlace);
 
         incomingStopPlace.setCreated(ZonedDateTime.now());
         incomingStopPlace.setChanged(ZonedDateTime.now());
@@ -148,25 +148,25 @@ public class MergingStopPlaceImporter {
     public StopPlace handleAlreadyExistingStopPlace(StopPlace existingStopPlace, StopPlace incomingStopPlace) {
         logger.debug("Found existing stop place {} from incoming {}", existingStopPlace, incomingStopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createNewVersion(existingStopPlace);
+        StopPlace copy = stopPlaceVersionedSaverService.createCopy(existingStopPlace);
 
-        boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(incomingStopPlace, newVersion);
-        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, newVersion);
-        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(newVersion);
+        boolean quayChanged = quayMerger.addNewQuaysOrAppendImportIds(incomingStopPlace, copy);
+        boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, copy);
+        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(copy);
 
         boolean typeChanged = false;
-        if(newVersion.getStopPlaceType() == null && incomingStopPlace.getStopPlaceType() != null) {
-            newVersion.setStopPlaceType(incomingStopPlace.getStopPlaceType());
-            logger.info("Updated stop place type to {} for stop place {}", newVersion.getStopPlaceType(), newVersion);
+        if(copy.getStopPlaceType() == null && incomingStopPlace.getStopPlaceType() != null) {
+            copy.setStopPlaceType(incomingStopPlace.getStopPlaceType());
+            logger.info("Updated stop place type to {} for stop place {}", copy.getStopPlaceType(), copy);
             typeChanged = true;
         }
 
         if(quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            newVersion.setChanged(ZonedDateTime.now());
+            copy.setChanged(ZonedDateTime.now());
             // The stop place has changed.
-            logger.info("Updated existing stop place {}. ", newVersion);
-            newVersion = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, newVersion);
-            return updateCache(newVersion);
+            logger.info("Updated existing stop place {}. ", copy);
+            copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
+            return updateCache(copy);
         }
 
         logger.debug("No changes. Returning existing stop {}", existingStopPlace);
