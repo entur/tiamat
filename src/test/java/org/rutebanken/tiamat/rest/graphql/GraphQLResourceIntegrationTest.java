@@ -342,7 +342,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
-                "  topographicPlace { id topographicPlaceType } " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  } " +
@@ -354,8 +353,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("topographicPlace.id", notNullValue())
-                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
@@ -368,12 +365,15 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
 
+        TopographicPlace topographicPlace = createMunicipalityWithCountyRef("asler", null);
+
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlace.setShortName(new EmbeddableMultilingualString("E"));
         stopPlace.setDescription(new EmbeddableMultilingualString("E6s beste boller"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         stopPlace.setAllAreasWheelchairAccessible(false);
+        stopPlace.setTopographicPlace(topographicPlace);
 
         stopPlaceRepository.save(stopPlace);
 
@@ -408,6 +408,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
+                "  topographicPlace { id topographicPlaceType } " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  validBetweens { fromDate toDate } " +
@@ -424,6 +425,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible))
+                    .body("topographicPlace.id", notNullValue())
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
                     .body("validBetweens[0].toDate", comparesEqualTo(toDate));
     }
@@ -748,7 +751,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
         if(county != null) {
-            municipality.setParentTopographicPlace(county);
+            municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county));
         }
         topographicPlaceRepository.save(municipality);
         return municipality;
