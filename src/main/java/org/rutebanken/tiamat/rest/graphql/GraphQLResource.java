@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import graphql.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,11 +124,20 @@ public class GraphQLResource {
 	}
 
 
-	private Response.Status getStatusCodeFromThrowable(Throwable e) {
-        if(e instanceof DataIntegrityViolationException) {
+    private Response.Status getStatusCodeFromThrowable(Throwable e) {
+        Throwable rootCause = e;
+
+        if (e instanceof NestedRuntimeException) {
+            NestedRuntimeException nestedRuntimeException = ((NestedRuntimeException) e);
+            if (nestedRuntimeException.getRootCause() != null) {
+                rootCause = nestedRuntimeException.getRootCause();
+            }
+        }
+
+        if (rootCause instanceof DataIntegrityViolationException) {
             return Response.Status.INTERNAL_SERVER_ERROR;
-        } else if (e instanceof AccessDeniedException) {
-	        return Response.Status.FORBIDDEN;
+        } else if (rootCause instanceof AccessDeniedException) {
+            return Response.Status.FORBIDDEN;
         }
 
         return Response.Status.OK;
