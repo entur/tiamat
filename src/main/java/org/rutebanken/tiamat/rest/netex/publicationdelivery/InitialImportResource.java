@@ -87,6 +87,8 @@ public class InitialImportResource {
                         .findFirst().get();
 
 
+                // Todo: import topographic places
+
                 logger.info("Importing stops");
 
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
@@ -109,8 +111,7 @@ public class InitialImportResource {
                                     break;
                                 }
 
-                                initialStopPlaceImporter.importStopPlace(stopPlacesImported,
-                                        topographicPlacesCounter, siteFrame, netexMapper.mapToTiamatModel(stopPlace));
+                                initialStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
                             }
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
