@@ -23,7 +23,7 @@ public class StopPlaceTopographicRefUpdater {
     @Autowired
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
-    public void update(AtomicInteger topographicPlacesCreated, Set<String> updatedStopPlaceIds) {
+    public void update(Set<String> updatedStopPlaceIds) {
         try {
 
             Iterator<StopPlace> iterator = stopPlaceRepository.scrollStopPlaces();
@@ -34,7 +34,7 @@ public class StopPlaceTopographicRefUpdater {
                 if (stopPlace.getTopographicPlace() == null) {
                     logger.info("Stop Place does not have reference to topographic place: {}", stopPlace);
                     try {
-                        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
+                        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
                         stopPlaceRepository.save(stopPlace);
                         updatedStopPlaceIds.add(stopPlace.getNetexId());
                     } catch (IOException e) {

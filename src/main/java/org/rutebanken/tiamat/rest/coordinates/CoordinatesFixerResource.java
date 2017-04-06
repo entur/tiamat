@@ -113,7 +113,7 @@ public class CoordinatesFixerResource {
                             }
 
                             try {
-                                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
+                                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
                             } catch (InterruptedException e) {
                                 logger.warn("Interruped while looking up count and municipality", e);
                             }
