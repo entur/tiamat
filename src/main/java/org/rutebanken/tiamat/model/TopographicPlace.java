@@ -7,7 +7,13 @@ import javax.persistence.*;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-@Table
+@Table(
+        indexes = {
+                @Index(name = "topographic_place_name_value_index", columnList = "name_value")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+)
 public class TopographicPlace extends Place {
 
     protected String isoCode;
