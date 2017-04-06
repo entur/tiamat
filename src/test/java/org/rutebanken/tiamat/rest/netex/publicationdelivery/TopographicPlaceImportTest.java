@@ -110,6 +110,47 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void publicationDeliveryWithParentTopographicPlaceValidReferences() throws Exception {
+        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+
+        TopographicPlace county = new TopographicPlace()
+                .withId("KVE:TopographicPlace:07")
+                .withName(countyName)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(countyName))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
+                .withCountryRef(new CountryRef().withValue("NO"));
+
+        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        TopographicPlace municipality = new TopographicPlace()
+                .withId("KVE:TopographicPlace:08")
+                .withName(municipalityName)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef(county.getId()).withVersion(county.getVersion()));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality, county);
+
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
+        assertThat(result).as("Expecting topographic place in return").hasSize(2);
+
+        for(TopographicPlace topographicPlace : result) {
+            if(topographicPlace.getParentTopographicPlaceRef() != null) {
+                assertThat(topographicPlace.getParentTopographicPlaceRef().getVersion()).isEqualTo("2");
+            } else {
+                assertThat(topographicPlace.getVersion()).isEqualTo("2");
+            }
+
+        }
+    }
+
+    @Test
     public void reimportTopographicPlaceAndExpectVersionIncremented() throws Exception {
         MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
 
@@ -128,7 +169,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
         assertThat(result.get(0).getVersion()).isEqualTo("1");
-    
+
         response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
         result = publicationDeliveryTestHelper.extractTopographicPlace(response);
 
