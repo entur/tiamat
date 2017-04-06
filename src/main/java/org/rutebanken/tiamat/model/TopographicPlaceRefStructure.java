@@ -6,5 +6,10 @@ import javax.persistence.Embeddable;
 public class TopographicPlaceRefStructure
         extends PlaceRefStructure {
 
+    public TopographicPlaceRefStructure() {
+    }
 
+    public TopographicPlaceRefStructure(String ref, String version) {
+        super(ref, version);
+    }
 }
