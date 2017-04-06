@@ -106,9 +106,9 @@ public class CustomGraphQLTypes {
                     .name(ID)
                     .type(GraphQLString)
                     .dataFetcher(env -> {
-                        TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
-                        if (topographicPlace != null) {
-                            return topographicPlace.getNetexId();
+                        TopographicPlaceRefStructure topographicPlaceRefStructure = (TopographicPlaceRefStructure) env.getSource();
+                        if (topographicPlaceRefStructure != null) {
+                            return topographicPlaceRefStructure.getRef();
                         } else {
                             return null;
                         }
@@ -141,8 +141,8 @@ public class CustomGraphQLTypes {
                     .name(NAME)
                     .type(embeddableMultilingualStringObjectType))
             .field(newFieldDefinition()
-                            .name(PARENT_TOPOGRAPHIC_PLACE)
-                            .type(topographicParentPlaceObjectType)
+                    .name(PARENT_TOPOGRAPHIC_PLACE)
+                    .type(topographicParentPlaceObjectType)
             )
             .build();
 
