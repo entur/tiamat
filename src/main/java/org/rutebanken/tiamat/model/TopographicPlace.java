@@ -29,7 +29,11 @@ public class TopographicPlace extends Place {
     @Embedded
     protected CountryRef countryRef;
 
-    @Transient
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "parent_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "parent_ref_version"))
+    })
+    @Embedded
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
 
     public TopographicPlace(EmbeddableMultilingualString name) {
