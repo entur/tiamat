@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +46,15 @@ public class MergingStopPlaceImporter {
 
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
+    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
 
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
@@ -60,6 +63,7 @@ public class MergingStopPlaceImporter {
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
+        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
     }
 
     /**
@@ -91,8 +95,9 @@ public class MergingStopPlaceImporter {
             stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, incomingStopPlace);
         } else {
             stopPlace = handleCompletelyNewStopPlace(incomingStopPlace);
-
         }
+        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+
         return stopPlace;
     }
 

@@ -1,6 +1,9 @@
 package org.rutebanken.tiamat.service;
 
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -19,15 +22,20 @@ public class CountyAndMunicipalityLookupService {
     private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);
 
     @Autowired
+    private GeometryFactory geometryFactory;
+
+    @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    public void populateCountyAndMunicipality(Site_VersionStructure siteVersionStructure) throws IOException, InterruptedException {
+    public void populateCountyAndMunicipality(Site_VersionStructure siteVersionStructure) {
 
         if (!siteVersionStructure.hasCoordinates()) {
             return;
         }
 
-        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findByPoint(siteVersionStructure.getCentroid());
+        Point swappedCoordinates = geometryFactory.createPoint(new Coordinate(siteVersionStructure.getCentroid().getY(), siteVersionStructure.getCentroid().getX()));
+
+        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findByPoint(swappedCoordinates);
         if (topographicPlaces == null || topographicPlaces.isEmpty()) {
             logger.warn("Could not find topographic places from site's point: {}", siteVersionStructure.getCentroid());
             return;

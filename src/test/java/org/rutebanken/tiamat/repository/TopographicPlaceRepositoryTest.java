@@ -15,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 public class TopographicPlaceRepositoryTest extends TiamatIntegrationTest {
-    
+
     @Autowired
     private GeometryFactory geometryFactory;
 

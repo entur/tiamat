@@ -112,11 +112,7 @@ public class CoordinatesFixerResource {
                                 });
                             }
 
-                            try {
-                                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
-                            } catch (InterruptedException e) {
-                                logger.warn("Interruped while looking up count and municipality", e);
-                            }
+                            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
 
                             logger.info("Saving stop place {}", stopPlace);
                             updatedStopPlaceIds.add(stopPlace.getNetexId());
