@@ -41,8 +41,9 @@ public class TopographicPlacesExporter {
                     .collect(Collectors.toList());
 
             List<org.rutebanken.tiamat.model.TopographicPlace> counties = municipalities.stream()
-                    .filter(municipality -> municipality.getParentTopographicPlace() != null)
-                    .map(municipality -> municipality.getParentTopographicPlace())
+                    .filter(municipality -> municipality.getParentTopographicPlaceRef() != null)
+                    .map(municipality -> municipality.getParentTopographicPlaceRef())
+                    .map(county -> topographicPlaceRepository.findFirstByNetexIdAndVersion(county.getRef(), Long.parseLong(county.getVersion())))
                     .distinct()
                     .collect(Collectors.toList());
 
