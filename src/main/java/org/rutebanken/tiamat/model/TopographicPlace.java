@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -30,9 +31,6 @@ public class TopographicPlace extends Place {
 
     @Transient
     protected TopographicPlaceRefStructure parentTopographicPlaceRef;
-
-    @OneToOne
-    protected TopographicPlace parentTopographicPlace;
 
     public TopographicPlace(EmbeddableMultilingualString name) {
         super(name);
@@ -73,13 +71,15 @@ public class TopographicPlace extends Place {
         this.parentTopographicPlaceRef = value;
     }
 
-    public TopographicPlace getParentTopographicPlace() {
-        return parentTopographicPlace;
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("netexId", netexId)
+                .add("name", name != null ? name.getValue() : null)
+                .add("isoCode", isoCode)
+                .add("topographicPlaceType", topographicPlaceType)
+                .add("countryRef", countryRef)
+                .toString();
     }
-
-
-    public void setParentTopographicPlace(TopographicPlace value) {
-        this.parentTopographicPlace = value;
-    }
-
 }
