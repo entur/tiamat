@@ -3,14 +3,12 @@ package org.rutebanken.tiamat.importer.modifier;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
