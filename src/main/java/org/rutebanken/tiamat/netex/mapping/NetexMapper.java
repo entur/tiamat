@@ -27,7 +27,6 @@ public class NetexMapper {
 
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
-                       TopographicPlaceMapper topographicPlaceMapper,
                        DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
                        NetexIdMapper netexIdMapper) {
 
@@ -51,7 +50,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
-                .customize(topographicPlaceMapper)
+                .fieldBToA("name", "descriptor.name")
                 .byDefault()
                 .register();
 
@@ -107,7 +106,6 @@ public class NetexMapper {
     public NetexMapper() {
         this(getDefaultConverters(),
                 new KeyListToKeyValuesMapMapper(),
-                new TopographicPlaceMapper(),
                 new DataManagedObjectStructureMapper(new NetexIdMapper()),
                 new NetexIdMapper());
         logger.info("Setting up netexMapper without DI");
