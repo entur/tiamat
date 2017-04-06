@@ -36,6 +36,9 @@ public class TopographicPlaceVersionedSaverService extends VersionedSaverService
 
         if(existingTopographicPlace == null) {
             newVersion.setCreated(ZonedDateTime.now());
+            // If the new incoming version has the version attribute set, reset it.
+            // For tiamat, this is the first time this topographic place is saved
+            newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingTopographicPlace.getVersion());
             existingTopographicPlace = versionCreator.terminateVersion(existingTopographicPlace, ZonedDateTime.now());
