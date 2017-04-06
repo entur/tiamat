@@ -657,7 +657,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
 
         if (parentCounty != null) {
-            municipality.setParentTopographicPlace(parentCounty);
+            municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(parentCounty.getNetexId(), String.valueOf(parentCounty.getVersion())));
         }
 
         topographicPlaceRepository.save(municipality);
