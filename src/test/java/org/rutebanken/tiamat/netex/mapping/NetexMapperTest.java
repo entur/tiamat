@@ -14,6 +14,7 @@ import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -281,7 +282,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         county.setNetexId("1L");
 
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
-        municipality.setParentTopographicPlace(county);
+        municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county));
         municipality.setNetexId("2L");
 
         tiamatSiteFrame
@@ -343,7 +344,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         TopographicPlace tiamatMunicipality = new TopographicPlace(new EmbeddableMultilingualString(municipality.getName().getValue()));
         tiamatMunicipality.setNetexId(municipality.getId());
-        tiamatMunicipality.setParentTopographicPlace(tiamatCounty);
+        tiamatMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(tiamatCounty));
         topographicPlaceRepository.save(tiamatMunicipality);
 
 
@@ -354,9 +355,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         TopographicPlace actualTiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
         assertThat(actualTiamatMunicipality).isNotNull();
-        assertThat(actualTiamatMunicipality.getParentTopographicPlace())
+        assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef())
                 .describedAs("The municipality should have a parent topographic place").isNotNull();
-        assertThat(actualTiamatMunicipality.getParentTopographicPlace().getNetexId()).isEqualTo(county.getId());
+        assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
     }
 
     @Test
