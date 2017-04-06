@@ -299,7 +299,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 			if (hasCountyFilter && !hasIdFilter) {
 				String suffix = hasMunicipalityFilter ? ")" : "";
-				wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlace.netexId in :countyId)" + suffix);
+				wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
 				parameters.put("countyId", stopPlaceSearch.getCountyIds());
 			}
 		}
