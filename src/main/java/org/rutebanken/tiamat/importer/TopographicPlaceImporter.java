@@ -41,42 +41,57 @@ public class TopographicPlaceImporter {
 
         logger.info("Importing {} incoming topogprahic places", topographicPlaces.size());
 
-        logger.info("Checking invalid references");
-        checkInvalidReferences(topographicPlaces);
+        List<TopographicPlace> parentTopographicPlaces = new ArrayList<>();
 
-        logger.info("Importing topographic places");
-
-        List<org.rutebanken.netex.model.TopographicPlace> importedTopographicPlaces = new ArrayList<>();
-
-        for(TopographicPlace incomingTopographicPlace : topographicPlaces) {
-            logger.trace("{}", incomingTopographicPlace);
-            incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
-            topographicPlacesCounter.incrementAndGet();
-            org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(incomingTopographicPlace);
-
-            importedTopographicPlaces.add(netexTopographicPlace);
+        logger.info("Importing topographic places without parent topographic place");
+        for (TopographicPlace incomingTopographicPlace : topographicPlaces) {
+            if(incomingTopographicPlace.getParentTopographicPlaceRef() == null) {
+                parentTopographicPlaces.add(importTopographicPlace(incomingTopographicPlace, topographicPlacesCounter));
+            }
         }
 
-        return importedTopographicPlaces;
+        List<TopographicPlace> withParentTopographicPlace = new ArrayList<>();
+
+        logger.info("Importing topographic places with parent topographic place");
+        for (TopographicPlace incomingTopographicPlace : topographicPlaces) {
+            if(incomingTopographicPlace.getParentTopographicPlaceRef() != null) {
+
+                boolean parentExist = false;
+                for(TopographicPlace parentTopographicPlace : parentTopographicPlaces) {
+                    if(parentTopographicPlace.getNetexId().equals(incomingTopographicPlace.getParentTopographicPlaceRef().getRef())) {
+                        parentExist = true;
+                        break;
+                    }
+                }
+
+                if(!parentExist) {
+                    throw new IllegalArgumentException("Invalid references to topographic place: " + incomingTopographicPlace.getParentTopographicPlaceRef());
+                }
+
+                withParentTopographicPlace.add(importTopographicPlace(incomingTopographicPlace, topographicPlacesCounter));
+            }
+        }
+
+        List<TopographicPlace> result = new ArrayList<>(parentTopographicPlaces);
+        result.addAll(withParentTopographicPlace);
+        return result.stream().map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace)).collect(toList());
+
     }
 
-    private void checkInvalidReferences(List<TopographicPlace> topographicPlaces) {
-        List<TopographicPlaceRefStructure> invalidrefs = topographicPlaces.stream()
-                .filter(topographicPlace -> topographicPlace.getParentTopographicPlaceRef() != null)
-                .map(topographicPlace -> topographicPlace.getParentTopographicPlaceRef())
-                .filter(parentTopographicPlaceRef ->
-                        topographicPlaces.stream()
-                                .allMatch(other -> {
-                                    return other.getNetexId().equals(parentTopographicPlaceRef)
-                                            && (ANY_VERSION.equals(parentTopographicPlaceRef.getVersion())
-                                            || parentTopographicPlaceRef.getVersion() == null
-                                            || parentTopographicPlaceRef.getVersion().equals(other.getVersion()));
-                                }))
-                .collect(toList());
+    private TopographicPlace importTopographicPlace(TopographicPlace incomingTopographicPlace, AtomicInteger topographicPlacesCounter) {
+        logger.debug("{}", incomingTopographicPlace);
+        if (incomingTopographicPlace.getParentTopographicPlaceRef() != null) {
+            // Rewrite the versioned reference to any.
+            logger.debug("Resolving reference: {}", incomingTopographicPlace.getParentTopographicPlaceRef());
+            TopographicPlace parent = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingTopographicPlace.getParentTopographicPlaceRef().getRef());
+            TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion()));
+            logger.debug("Found parent topographic place and created reference: {}", topographicPlaceRefStructure);
+            incomingTopographicPlace.setParentTopographicPlaceRef(topographicPlaceRefStructure);
 
-        if (!invalidrefs.isEmpty()) {
-            throw new IllegalArgumentException("Invalid references to topographic place: " + invalidrefs);
         }
+        incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
+        topographicPlacesCounter.incrementAndGet();
+        return incomingTopographicPlace;
     }
 
 }
