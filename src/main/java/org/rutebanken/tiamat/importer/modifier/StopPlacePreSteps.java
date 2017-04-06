@@ -30,7 +30,6 @@ public class StopPlacePreSteps {
     private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
     private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
     private final CompassBearingRemover compassBearingRemover;
-    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
 
     @Autowired
@@ -39,14 +38,13 @@ public class StopPlacePreSteps {
                              QuayNameRemover quayNameRemover,
                              StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
                              QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover, CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
+                             CompassBearingRemover compassBearingRemover) {
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
         this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
         this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
         this.compassBearingRemover = compassBearingRemover;
-        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
     }
 
     public List<StopPlace> run(List<StopPlace> stops, AtomicInteger topographicPlacesCounter) {
@@ -59,14 +57,7 @@ public class StopPlacePreSteps {
                 .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
                 .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
                 .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
-                .map(stopPlace -> {
-                    try {
-                        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCounter);
-                    } catch (IOException |InterruptedException e) {
-                        logger.warn("Error looking up county and municipality", e);
-                    }
-                    return stopPlace;
-                }).collect(toList());
+                .collect(toList());
         return stops;
     }
 }
