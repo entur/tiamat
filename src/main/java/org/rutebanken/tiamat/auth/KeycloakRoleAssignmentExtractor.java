@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.NotAuthorizedException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +41,9 @@ public class KeycloakRoleAssignmentExtractor implements RoleAssignmentExtractor 
 			}
 
 			return roleAssignmentList.stream().map(m -> parse(m)).collect(Collectors.toList());
+		} else {
+			throw new NotAuthorizedException("Not authorized with token");
 		}
-		return new ArrayList<>();
 	}
 
 	private RoleAssignment parse(Object roleAssignment) {
