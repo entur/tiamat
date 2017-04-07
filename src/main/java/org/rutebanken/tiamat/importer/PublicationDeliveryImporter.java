@@ -36,6 +36,11 @@ public class PublicationDeliveryImporter {
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
     private static final Object STOP_PLACE_IMPORT_LOCK = new Object();
 
+    /**
+     * Make this configurable. Export topographic places in response.
+     */
+    private static final boolean EXPORT_TOPOGRAPHIC_PLACES = false;
+
     private final TransactionalStopPlacesImporter transactionalStopPlacesImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
@@ -111,26 +116,32 @@ public class PublicationDeliveryImporter {
                 }
                 logger.info("Saved {} stop places", stopPlacesCreated);
 
+
+
+                if(EXPORT_TOPOGRAPHIC_PLACES) {
+                    // Find topographic places from imported stops
+                    List<Pair<String, Long>> topographicPlaceRefs = tiamatStops
+                            .stream()
+                            .filter(stopPlace -> stopPlace.getTopographicPlace() != null)
+                            .map(org.rutebanken.tiamat.model.StopPlace::getTopographicPlace)
+                            .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getVersion()))
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(topographicPlaceRefs);
+
+                    if (!netexTopographicPlaces.isEmpty()) {
+                        responseSiteframe.withTopographicPlaces(
+                                new TopographicPlacesInFrame_RelStructure()
+                                        .withTopographicPlace(netexTopographicPlaces));
+                    }
+                } else {
+                    stopPlaces.stream().forEach(stopPlace -> stopPlace.setTopographicPlaceRef(null));
+                }
+
                 responseSiteframe.withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
                                 .withStopPlace(stopPlaces));
-
-                // Find topographic places from imported stops
-                List<Pair<String, Long>> topographicPlaceRefs = tiamatStops
-                        .stream()
-                        .filter(stopPlace -> stopPlace.getTopographicPlace() != null)
-                        .map(org.rutebanken.tiamat.model.StopPlace::getTopographicPlace)
-                        .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getVersion()))
-                        .distinct()
-                        .collect(Collectors.toList());
-
-                List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(topographicPlaceRefs);
-
-                if (!netexTopographicPlaces.isEmpty()) {
-                    responseSiteframe.withTopographicPlaces(
-                            new TopographicPlacesInFrame_RelStructure()
-                                    .withTopographicPlace(netexTopographicPlaces));
-                }
             }
 
             if(netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
