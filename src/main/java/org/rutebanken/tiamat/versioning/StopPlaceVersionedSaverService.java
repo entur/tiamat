@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.versioning;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,17 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
 
+    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+
     @Autowired
-    public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository, VersionCreator versionCreator, AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer) {
+    public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
+                                          VersionCreator versionCreator,
+                                          AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
+                                          CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
+        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
     }
 
     @Override
@@ -60,6 +67,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         // Save latest version
         stopPlaceToSave = initiateOrIncrementVersions(stopPlaceToSave);
+        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlaceToSave);
         stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
         return stopPlaceToSave;
     }

@@ -46,15 +46,12 @@ public class MergingStopPlaceImporter {
 
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
-    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
-
-
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
@@ -63,7 +60,6 @@ public class MergingStopPlaceImporter {
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
-        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
     }
 
     /**
@@ -96,7 +92,6 @@ public class MergingStopPlaceImporter {
         } else {
             stopPlace = handleCompletelyNewStopPlace(incomingStopPlace);
         }
-        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
 
         return stopPlace;
     }
