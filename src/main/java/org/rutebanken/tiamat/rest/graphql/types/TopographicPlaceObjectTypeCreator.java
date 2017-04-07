@@ -5,6 +5,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topogr
 public class TopographicPlaceObjectTypeCreator {
 
     @Autowired
-    private ReferenceResolver referenceResolver;
+    private TopographicPlaceRepository topographicPlaceRepository;
 
 
     public GraphQLObjectType create() {
@@ -51,7 +52,7 @@ public class TopographicPlaceObjectTypeCreator {
                             if(env.getSource() instanceof  TopographicPlace) {
                                 TopographicPlace child = (TopographicPlace) env.getSource();
                                 if(child.getParentTopographicPlaceRef() != null) {
-                                    return referenceResolver.resolve(child.getParentTopographicPlaceRef());
+                                    return topographicPlaceRepository.findFirstByNetexIdAndVersion(child.getParentTopographicPlaceRef().getRef(), Long.parseLong(child.getParentTopographicPlaceRef().getVersion()));
                                 }
                             }
                             return null;
