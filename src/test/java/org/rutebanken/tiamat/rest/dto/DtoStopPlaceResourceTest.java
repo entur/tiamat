@@ -33,9 +33,9 @@ public class DtoStopPlaceResourceTest {
         int size = 1;
 
         when(stopPlaceRepository.findKeyValueMappingsForStop(anyInt(), anyInt()))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString(), "1")))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString(), "1")))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString(), "1")))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString())))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString())))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
                 .thenReturn(new ArrayList<>());
 
         Response response = dtoStopPlaceResource.getIdMapping(size);
