@@ -47,7 +47,7 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
         stopPlace.setQuays(quays);
 
         stopPlace = saverService.saveNewVersion(stopPlace);
-        StopPlace newVersion = saverService.createCopy(stopPlace);
+        StopPlace newVersion = saverService.createCopy(stopPlace, StopPlace.class);
         String originalId3 = "TST:12345";
         newVersion.getQuays().forEach(quay -> quay.getOriginalIds().add(originalId3));
 
