@@ -114,11 +114,12 @@ public class InitialImportResource {
                                 initialStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
                             }
                         } catch (InterruptedException e) {
+                            logger.warn("Interrupted. Stopping all jobs");
                             Thread.currentThread().interrupt();
                             stopExecution.set(true);
                             return;
-                        } catch (ExecutionException e) {
-                            logger.warn("Execution exception", e);
+                        } catch (Exception e) {
+                            logger.warn("Caught exception while importing stop", e);
                             stopExecution.set(true);
                         }
                     });

@@ -41,16 +41,6 @@ public class InitialStopPlaceImporter {
     }
 
     public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger stopPlacesImported, StopPlace stopPlace) throws InterruptedException, ExecutionException {
-
-        if (stopPlace.getQuays() != null) {
-            logger.debug("Stop place has {} quays", stopPlace.getQuays().size());
-            Set<Quay> savedQuays = stopPlace.getQuays().stream().map(quay -> {
-                logger.debug("Saving quay ");
-                return quayRepository.save(quay);
-            }).collect(Collectors.toSet());
-            stopPlace.setQuays(savedQuays);
-        }
-
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {}, version {}, netex ID: {}", stopPlace.getName(), stopPlace.getVersion(), stopPlace.getNetexId());
         stopPlacesImported.incrementAndGet();
