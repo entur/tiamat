@@ -5,18 +5,21 @@ import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.CountryRef;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
-import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -306,7 +309,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void  mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
+    public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
 
@@ -356,6 +359,72 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef())
                 .describedAs("The municipality should have a parent topographic place").isNotNull();
         assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
+    }
+
+
+    @Test
+    public void mapStopPlaceWithAccessibilityAssessmentToTiamat() {
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        netexStopPlace.setAccessibilityAssessment(createNetexAccessibilityAssessment());
+
+        assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+
+        StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
+
+        assertThat(tiamatStopPlace).isNotNull();
+        assertThat(tiamatStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(tiamatStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+    }
+
+    protected org.rutebanken.netex.model.AccessibilityAssessment createNetexAccessibilityAssessment() {
+        org.rutebanken.netex.model.AccessibilityAssessment accessibilityAssessment = new org.rutebanken.netex.model.AccessibilityAssessment();
+
+        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = new org.rutebanken.netex.model.AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
+        List<org.rutebanken.netex.model.AccessibilityLimitation> limitations = new ArrayList<>();
+        limitations.add(accessibilityLimitation);
+        limitationsRelStructure.getAccessibilityLimitation().addAll(limitations);
+        accessibilityAssessment.setLimitations(limitationsRelStructure);
+        return accessibilityAssessment;
+    }
+
+    @Test
+    public void mapStopPlaceWithAccessibilityAssessmentToNetex() {
+        StopPlace tiamatStopPlace = new StopPlace();
+        tiamatStopPlace.setAccessibilityAssessment(createAccessibilityAssessment());
+
+        assertThat(tiamatStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(tiamatStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
+
+        assertThat(netexStopPlace).isNotNull();
+        assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
+        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotEmpty();
+    }
+
+    protected AccessibilityAssessment createAccessibilityAssessment() {
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+
+        AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(LimitationStatusEnumeration.TRUE);
+
+        List<AccessibilityLimitation> limitations = new ArrayList<>();
+        limitations.add(accessibilityLimitation);
+        accessibilityAssessment.setLimitations(limitations);
+        return accessibilityAssessment;
     }
 
     @Test

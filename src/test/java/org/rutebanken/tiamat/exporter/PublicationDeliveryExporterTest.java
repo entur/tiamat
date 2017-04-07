@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.exporter;
 
+import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.bind.JAXBElement;

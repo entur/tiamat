@@ -48,11 +48,11 @@ public class PublicationDeliveryResource {
 
     @Autowired
     public PublicationDeliveryResource(
-                                       PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
-                                       PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                                       StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
-                                       PublicationDeliveryExporter publicationDeliveryExporter,
-                                       AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter, PublicationDeliveryImporter publicationDeliveryImporter) {
+                                              PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
+                                              PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
+                                              StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
+                                              PublicationDeliveryExporter publicationDeliveryExporter,
+                                              AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter, PublicationDeliveryImporter publicationDeliveryImporter) {
 
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
@@ -88,12 +88,12 @@ public class PublicationDeliveryResource {
     }
 
     @GET
-    @Path(ASYNC_JOB_URL+"/{id}")
+    @Path(ASYNC_JOB_URL + "/{id}")
     public Response getJob(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
-        if(exportJob == null) {
+        if (exportJob == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
@@ -102,18 +102,18 @@ public class PublicationDeliveryResource {
     }
 
     @GET
-    @Path(ASYNC_JOB_URL+"/{id}/content")
+    @Path(ASYNC_JOB_URL + "/{id}/content")
     public Response getJobContents(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
-        if(exportJob == null) {
+        if (exportJob == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         logger.info("Returning result of job {}", exportJob);
-        if(!exportJob.getStatus().equals(JobStatus.FINISHED)) {
-            return Response.accepted("Job status is not FINISHED for job: "+exportJob).build();
+        if (!exportJob.getStatus().equals(JobStatus.FINISHED)) {
+            return Response.accepted("Job status is not FINISHED for job: " + exportJob).build();
         }
 
         InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);

@@ -6,6 +6,7 @@ import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -29,6 +30,18 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
 
     @Override
     public List<AccessibilityLimitation> convertFrom(AccessibilityLimitations_RelStructure accessibilityLimitations_relStructure, Type<List<AccessibilityLimitation>> type) {
-        return null;
+        List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
+
+        if(accessibilityLimitations_relStructure.getAccessibilityLimitation() != null) {
+            accessibilityLimitations_relStructure.getAccessibilityLimitation().stream()
+                    .filter(object -> object instanceof org.rutebanken.netex.model.AccessibilityLimitation)
+                    .map(accessibilityLimitation -> {
+                        AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
+                        return tiamatLimitation;
+                    })
+                    .forEach(limitation -> accessibilityLimitations.add(limitation));
+        }
+
+        return accessibilityLimitations;
     }
 }

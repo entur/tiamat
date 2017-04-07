@@ -2,23 +2,24 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.google.common.collect.Sets;
 import graphql.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,12 +27,18 @@ import java.util.stream.Collectors;
 @Transactional
 public class GraphQLResource {
 
+    /**
+     * Exception classes that should cause data fetching exceptions to be rethrown and mapped to corresponding HTTP status code outside transaction.
+     */
+    private static final Set<Class<? extends RuntimeException>> RETHROW_EXCEPTION_TYPES
+            = Sets.newHashSet(NotAuthorizedException.class, AccessDeniedException.class, DataIntegrityViolationException.class);
+
 	@Autowired
 	private StopPlaceRegisterGraphQLSchema stopPlaceRegisterGraphQLSchema;
 
 	public GraphQLResource() {
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema);
@@ -39,7 +46,7 @@ public class GraphQLResource {
 
 	private GraphQL graphQL;
 
-	
+
     @POST
 	@SuppressWarnings("unchecked")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -122,12 +129,28 @@ public class GraphQLResource {
 	}
 
 
-	private Response.Status getStatusCodeFromThrowable(Throwable e) {
-        if(e instanceof DataIntegrityViolationException) {
-            return Response.Status.INTERNAL_SERVER_ERROR;
+    private Response.Status getStatusCodeFromThrowable(Throwable e) {
+        Throwable rootCause = getRootCause(e);
+
+        if (RETHROW_EXCEPTION_TYPES.stream().anyMatch(c -> c.isAssignableFrom(rootCause.getClass()))) {
+            throw (RuntimeException) rootCause;
         }
+
 
         return Response.Status.OK;
     }
+
+    private Throwable getRootCause(Throwable e) {
+        Throwable rootCause = e;
+
+        if (e instanceof NestedRuntimeException) {
+            NestedRuntimeException nestedRuntimeException = ((NestedRuntimeException) e);
+            if (nestedRuntimeException.getRootCause() != null) {
+                rootCause = nestedRuntimeException.getRootCause();
+            }
+        }
+        return rootCause;
+    }
+
 
 }
