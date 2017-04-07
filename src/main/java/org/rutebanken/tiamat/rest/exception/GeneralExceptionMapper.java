@@ -35,11 +35,14 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
 
     public Response toResponse(Exception ex) {
         Throwable rootCause = getRootCause(ex);
-        if (rootCause instanceof WebApplicationException){
-            return ((WebApplicationException)rootCause).getResponse();
+        int status;
+        if (rootCause instanceof WebApplicationException) {
+            status = ((WebApplicationException) rootCause).getResponse().getStatus();
+        } else {
+            status = toStatus(rootCause);
         }
 
-        return Response.status(toStatus(rootCause))
+        return Response.status(status)
                        .entity(new ErrorResponseEntity(rootCause.getMessage()))
                        .build();
     }
