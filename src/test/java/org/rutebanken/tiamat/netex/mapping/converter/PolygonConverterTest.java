@@ -135,8 +135,8 @@ public class PolygonConverterTest {
     private void assertCoordinatesMatch(LineString actual, List<Double> expectedExteriorValues, String description) {
         int counter = 0;
         for (Coordinate coordinate : actual.getCoordinates()) {
-            assertThat(coordinate.x).as(description + " x coordinate").isEqualTo(expectedExteriorValues.get(counter++));
-            assertThat(coordinate.y).as(description + " y coordinate").isEqualTo(expectedExteriorValues.get(counter++));
+            assertThat(coordinate.y).as(description + " x coordinate").isEqualTo(expectedExteriorValues.get(counter++));
+            assertThat(coordinate.x).as(description + " y coordinate").isEqualTo(expectedExteriorValues.get(counter++));
         }
     }
 
