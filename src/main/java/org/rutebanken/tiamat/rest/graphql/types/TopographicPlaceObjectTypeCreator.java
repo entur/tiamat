@@ -46,7 +46,7 @@ public class TopographicPlaceObjectTypeCreator {
                         .type(embeddableMultilingualStringObjectType))
                 .field(newFieldDefinition()
                         .name(PARENT_TOPOGRAPHIC_PLACE)
-                        .type(new GraphQLList(new GraphQLTypeReference(OUTPUT_TYPE_TOPOGRAPHIC_PLACE)))
+                        .type(new GraphQLTypeReference(OUTPUT_TYPE_TOPOGRAPHIC_PLACE))
                         .dataFetcher(env -> {
                             if(env.getSource() instanceof  TopographicPlace) {
                                 TopographicPlace child = (TopographicPlace) env.getSource();
