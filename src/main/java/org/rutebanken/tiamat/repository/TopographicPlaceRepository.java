@@ -20,7 +20,7 @@ public interface TopographicPlaceRepository extends PagingAndSortingRepository<T
      */
     List<TopographicPlace> findByNameValueAndCountryRefRefAndTopographicPlaceType(String name, IanaCountryTldEnumeration ianCountryTld, TopographicPlaceTypeEnumeration placeType);
 
-    @Query("select tp from TopographicPlace tp inner join tp.polygon pp where contains(pp.polygon, :#{#point}) = TRUE")
+    @Query("select tp from TopographicPlace tp inner join tp.polygon pp where contains(pp.polygon, :#{#point}) = TRUE AND tp.version = (SELECT MAX(tpv.version) FROM TopographicPlace tpv WHERE tpv.netexId = tp.netexId)")
     List<TopographicPlace> findByPoint(@Param("point") Point point);
 
 }
