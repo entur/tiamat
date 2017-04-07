@@ -33,9 +33,7 @@ public class CountyAndMunicipalityLookupService {
             return;
         }
 
-        Point swappedCoordinates = geometryFactory.createPoint(new Coordinate(siteVersionStructure.getCentroid().getY(), siteVersionStructure.getCentroid().getX()));
-
-        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findByPoint(swappedCoordinates);
+        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findByPoint(siteVersionStructure.getCentroid());
         if (topographicPlaces == null || topographicPlaces.isEmpty()) {
             logger.warn("Could not find topographic places from site's point: {}", siteVersionStructure.getCentroid());
             return;

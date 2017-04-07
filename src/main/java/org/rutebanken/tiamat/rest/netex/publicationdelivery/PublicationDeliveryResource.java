@@ -22,6 +22,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
 import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
@@ -61,14 +62,18 @@ public class PublicationDeliveryResource {
         this.publicationDeliveryImporter = publicationDeliveryImporter;
     }
 
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
+        return receivePublicationDelivery(inputStream, null);
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
+    public Response receivePublicationDelivery(InputStream inputStream, @QueryParam("countyReference") List<String> countyReferences) throws IOException, JAXBException, SAXException {
+
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
-            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery);
+            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, countyReferences);
             return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
         } catch (Exception e) {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);

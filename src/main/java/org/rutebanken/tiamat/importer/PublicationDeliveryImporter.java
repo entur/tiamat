@@ -9,6 +9,7 @@ import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
+import org.rutebanken.tiamat.importer.filter.ZoneCountyFilterer;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
@@ -48,6 +49,7 @@ public class PublicationDeliveryImporter {
     private final PathLinksImporter pathLinksImporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TopographicPlaceImporter topographicPlaceImporter;
+    private final ZoneCountyFilterer zoneCountyFilterer;
 
 
     @Autowired
@@ -56,7 +58,7 @@ public class PublicationDeliveryImporter {
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
                                        PathLinksImporter pathLinksImporter,
-                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter) {
+                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter, ZoneCountyFilterer zoneCountyFilterer) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -64,11 +66,16 @@ public class PublicationDeliveryImporter {
         this.pathLinksImporter = pathLinksImporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.topographicPlaceImporter = topographicPlaceImporter;
+        this.zoneCountyFilterer = zoneCountyFilterer;
     }
 
 
-    @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery) {
+        return importPublicationDelivery(incomingPublicationDelivery, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, List<String> countyReferences) {
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
@@ -110,6 +117,11 @@ public class PublicationDeliveryImporter {
                 List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
                 tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
 
+                logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), countyReferences);
+                tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(countyReferences, tiamatStops);
+                logger.info("Got {} stops after filtering by: {}", tiamatStops.size(), countyReferences);
+
+
                 Collection<org.rutebanken.netex.model.StopPlace> stopPlaces;
                 synchronized (STOP_PLACE_IMPORT_LOCK) {
                     stopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
@@ -117,8 +129,7 @@ public class PublicationDeliveryImporter {
                 logger.info("Saved {} stop places", stopPlacesCreated);
 
 
-
-                if(EXPORT_TOPOGRAPHIC_PLACES) {
+                if (EXPORT_TOPOGRAPHIC_PLACES) {
                     // Find topographic places from imported stops
                     List<Pair<String, Long>> topographicPlaceRefs = tiamatStops
                             .stream()
@@ -139,9 +150,13 @@ public class PublicationDeliveryImporter {
                     stopPlaces.stream().forEach(stopPlace -> stopPlace.setTopographicPlaceRef(null));
                 }
 
-                responseSiteframe.withStopPlaces(
-                        new StopPlacesInFrame_RelStructure()
-                                .withStopPlace(stopPlaces));
+                if (!stopPlaces.isEmpty()) {
+                    responseSiteframe.withStopPlaces(
+                            new StopPlacesInFrame_RelStructure()
+                                    .withStopPlace(stopPlaces));
+                } else {
+                    logger.info("No stops in response");
+                }
             }
 
             if(netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
