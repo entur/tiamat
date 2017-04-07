@@ -365,7 +365,9 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
 
-        TopographicPlace topographicPlace = createMunicipalityWithCountyRef("asler", null);
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("somwhere"));
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
+        topographicPlaceRepository.save(topographicPlace);
 
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlace.setShortName(new EmbeddableMultilingualString("E"));
