@@ -44,14 +44,14 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
 
         if (stopPlaceSearch.isEmpty()) {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
         } else {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
         }
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
-        return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAll());
+        return exportPublicationDeliveryWithStops(stopPlaceRepository.findAll());
     }
 
     @SuppressWarnings("unchecked")
@@ -70,10 +70,10 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
-        return exportPublicationDeliveryWithoutStops(null);
+        return exportPublicationDeliveryWithStops(null);
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops(Iterable<StopPlace> iterableStopPlaces) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
