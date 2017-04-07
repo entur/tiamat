@@ -115,17 +115,15 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getTopographicPlaceRef().getVersion()).isEqualTo(String.valueOf(topographicPlace.getVersion()));
     }
 
-    @Ignore
     @Test
     public void mapStopPlaceToInternalWithId() throws Exception {
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
-        String stopPlaceId = "1339";
-        netexStopPlace.setId("NSR:StopPlace:" + stopPlaceId);
+        netexStopPlace.setId("NSR:StopPlace:1339");
 
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getNetexId()).isEqualTo(stopPlaceId);
+        assertThat(tiamatStopPlace.getNetexId()).isEqualTo(netexStopPlace.getId());
     }
 
     @Test
