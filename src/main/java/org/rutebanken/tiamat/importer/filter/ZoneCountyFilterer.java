@@ -32,19 +32,19 @@ public class ZoneCountyFilterer {
 
 
         if(countyReferences == null || countyReferences.isEmpty()) {
-            logger.info("Cannot filter zones with empty county references: {}. Returning all stops.", countyReferences);
+            logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", countyReferences);
             return zones;
         }
 
         if(zones == null || zones.isEmpty()) {
-            logger.info("There are no zones to filter");
+            logger.info("There are no zones to filter.");
             return zones;
         }
 
         return zones.stream()
                 .filter(zone -> {
                     if(zone.getCentroid() == null) {
-                        logger.warn("Stop place does not have centroid: {}. Returning all stops.", zone);
+                        logger.warn("Zone does not have centroid: {}", zone);
                         return false;
                     }
                     return true;
