@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 
 import java.util.List;
 
@@ -98,52 +99,6 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(LANG)
                     .type(GraphQLString))
-            .build();
-
-    public static GraphQLObjectType topographicParentPlaceObjectType = newObject()
-            .name(OUTPUT_TYPE_TOPOGRAPHIC_PLACE)
-            .field(newFieldDefinition()
-                    .name(ID)
-                    .type(GraphQLString)
-                    .dataFetcher(env -> {
-                        TopographicPlaceRefStructure topographicPlaceRefStructure = (TopographicPlaceRefStructure) env.getSource();
-                        if (topographicPlaceRefStructure != null) {
-                            return topographicPlaceRefStructure.getRef();
-                        } else {
-                            return null;
-                        }
-                    }))
-            .field(newFieldDefinition()
-                    .name(TOPOGRAPHIC_PLACE_TYPE)
-                    .type(topographicPlaceTypeEnum))
-            .field(newFieldDefinition()
-                    .name(NAME)
-                    .type(embeddableMultilingualStringObjectType))
-            .build();
-
-    public static GraphQLObjectType topographicPlaceObjectType = newObject()
-            .name(OUTPUT_TYPE_TOPOGRAPHIC_PLACE)
-            .field(newFieldDefinition()
-                    .name(ID)
-                    .type(GraphQLString)
-                    .dataFetcher(env -> {
-                        TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
-                        if (topographicPlace != null) {
-                            return topographicPlace.getNetexId();
-                        } else {
-                            return null;
-                        }
-                    }))
-            .field(newFieldDefinition()
-                    .name(TOPOGRAPHIC_PLACE_TYPE)
-                    .type(topographicPlaceTypeEnum))
-            .field(newFieldDefinition()
-                    .name(NAME)
-                    .type(embeddableMultilingualStringObjectType))
-            .field(newFieldDefinition()
-                    .name(PARENT_TOPOGRAPHIC_PLACE)
-                    .type(topographicParentPlaceObjectType)
-            )
             .build();
 
         public static GraphQLObjectType accessibilityLimitationsObjectType = newObject()
