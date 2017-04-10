@@ -6,7 +6,7 @@ import org.rutebanken.tiamat.model.EntityStructure;
 
 import java.util.List;
 
-import static org.rutebanken.tiamat.auth.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 
 public class AuthorizationCheck<T extends EntityStructure> {
 

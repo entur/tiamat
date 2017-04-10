@@ -123,7 +123,7 @@ public class PublicationDeliveryImporter {
     }
 
     private int numberOfStops(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getStopPlaces().getStopPlace().size();
+        return 0;//netexSiteFrame.getStopPlaces().getStopPlace().size();
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {

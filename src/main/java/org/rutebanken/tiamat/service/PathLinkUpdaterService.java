@@ -1,9 +1,13 @@
 package org.rutebanken.tiamat.service;
 
 import graphql.GraphQLException;
-import org.rutebanken.tiamat.auth.AuthorizationConstants;
+
+import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.TransferDuration;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.slf4j.Logger;

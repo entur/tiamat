@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.auth;
 
+import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 

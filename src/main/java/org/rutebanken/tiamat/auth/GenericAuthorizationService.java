@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.auth;
 
 import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.AuthorizationCheckFactory;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
