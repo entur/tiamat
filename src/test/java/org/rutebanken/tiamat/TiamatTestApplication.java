@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat;
 
 
+import org.rutebanken.tiamat.auth.RoleAssignmentExtractorConfig;
 import org.rutebanken.tiamat.auth.TiamatSecurityConfig;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.boot.SpringApplication;
@@ -24,7 +25,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EntityScan(basePackageClasses={StopPlace.class})
 @ComponentScan(excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatSecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatApplication.class)
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatApplication.class),
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = RoleAssignmentExtractorConfig.class)
 } )
 public class TiamatTestApplication {
     public static void main(String[] args) {
