@@ -93,12 +93,26 @@ public class StopPlaceVersionedSaverService {
                     if (quay.getPlaceEquipments().getNetexId() == null) {
                         quay.setPlaceEquipments(versionCreator.initiateFirstVersionWithAvailabilityCondition(quay.getPlaceEquipments(), PlaceEquipment.class));
                     }
+                    if (quay.getPlaceEquipments().getInstalledEquipment() != null) {
+                        quay.getPlaceEquipments().getInstalledEquipment().forEach(installed -> {
+                            if (installed.getNetexId() == null) {
+                                installed = versionCreator.initiateFirstVersionWithAvailabilityCondition(installed, installed.getClass());
+                            }
+                        });
+                    }
                 }
 
             });
             if (stopPlaceToSave.getPlaceEquipments() != null) {
                 if (stopPlaceToSave.getPlaceEquipments().getNetexId() == null) {
                     stopPlaceToSave.setPlaceEquipments(versionCreator.initiateFirstVersionWithAvailabilityCondition(stopPlaceToSave.getPlaceEquipments(), PlaceEquipment.class));
+                }
+                if (stopPlaceToSave.getPlaceEquipments().getInstalledEquipment() != null) {
+                    stopPlaceToSave.getPlaceEquipments().getInstalledEquipment().forEach(installed -> {
+                        if (installed.getNetexId() == null) {
+                            installed = versionCreator.initiateFirstVersionWithAvailabilityCondition(installed, installed.getClass());
+                        }
+                    });
                 }
             }
         }

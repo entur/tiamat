@@ -74,6 +74,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_SHELTER_EQUIPMENT = "ShelterEquipment";
     public static final String INPUT_TYPE_SHELTER_EQUIPMENT = OUTPUT_TYPE_SHELTER_EQUIPMENT + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT = "CycleStorageEquipment";
+    public static final String INPUT_TYPE_CYCLE_STORAGE_EQUIPMENT = OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT = "WaitingRoomEquipment";
     public static final String INPUT_TYPE_WAITING_ROOM_EQUIPMENT = OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT + INPUT_TYPE_POSTFIX;
 
@@ -113,16 +116,29 @@ public class GraphQLNames {
     public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
 
     public static final String PLACE_EQUIPMENTS = "placeEquipments";
-    public static final String SHELTER_EQUIPMENT = "shelterEquipment";
     public static final String TICKETING_EQUIPMENT = "ticketingEquipment";
     public static final String SANITARY_EQUIPMENT = "sanitaryEquipment";
+    public static final String SHELTER_EQUIPMENT = "shelterEquipment";
+    public static final String CYCLE_STORAGE_EQUIPMENT = "cycleStorageEquipment";
     public static final String WAITING_ROOM_EQUIPMENT = "waitingRoomEquipment";
 
+    // SanitaryEquipment
     public static final String NUMBER_OF_TOILETS = "numberOfToilets";
-    public static final String ENCLOSED = "enclosed";
+    public static final String GENDER = "gender";
+
+    // WaitingRoomEquipment
     public static final String SEATS = "seats";
+    public static final String STEP_FREE = "stepFree";
+    public static final String HEATED = "heated";
+
+    // TicketingEquipment
     public static final String TICKET_MACHINES = "ticketMachines";
+    public static final String TICKET_OFFICE = "ticketOffice";
     public static final String NUMBER_OF_MACHINES = "numberOfMachines";
+
+    //CycleStorageEquipment
+    public static final String NUMBER_OF_SPACES = "numberOfSpaces";
+    public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
 
     public static final String IMPORTED_ID = "importedId";
     public static final String VERSION = "version";

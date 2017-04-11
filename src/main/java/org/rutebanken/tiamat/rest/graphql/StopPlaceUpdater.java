@@ -224,18 +224,27 @@ class StopPlaceUpdater implements DataFetcher {
 
             SanitaryEquipment toalett = new SanitaryEquipment();
             toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
+            toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
 
             Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
             ShelterEquipment leskur = new ShelterEquipment();
-            leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
             leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
+            leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
+
+            Map<String, Object> cycleStorageEquipment = (Map<String, Object>) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
+            CycleStorageEquipment sykkelskur = new CycleStorageEquipment();
+            sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
+            sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
 
             Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
             WaitingRoomEquipment venterom = new WaitingRoomEquipment();
             venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
+            venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
+            venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
 
             Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
             TicketingEquipment billettAutomat = new TicketingEquipment();
+            billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
             billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
             billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
 
@@ -244,6 +253,7 @@ class StopPlaceUpdater implements DataFetcher {
             equipments.getInstalledEquipment().add(billettAutomat);
             equipments.getInstalledEquipment().add(toalett);
             equipments.getInstalledEquipment().add(leskur);
+            equipments.getInstalledEquipment().add(sykkelskur);
 
             if (entity instanceof StopPlace) {
                 ((StopPlace)entity).setPlaceEquipments(equipments);
