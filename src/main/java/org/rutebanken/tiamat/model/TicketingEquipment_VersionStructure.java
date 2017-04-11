@@ -1,29 +1,45 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@MappedSuperclass
 public class TicketingEquipment_VersionStructure
         extends InstalledEquipment_VersionStructure {
 
-    protected List<VehicleModeEnumeration> vehicleModes;
     protected Boolean ticketMachines;
     protected BigInteger numberOfMachines;
-    protected BigDecimal heightOfMachineInterface;
-    protected List<TicketingFacilityEnumeration> ticketingFacilityList;
-    protected List<TicketingServiceFacilityEnumeration> ticketingServiceFacilityList;
     protected Boolean ticketOffice;
+
+    @Transient
+    protected List<VehicleModeEnumeration> vehicleModes;
+    @Transient
+    protected BigDecimal heightOfMachineInterface;
+    @Transient
+    protected List<TicketingFacilityEnumeration> ticketingFacilityList;
+    @Transient
+    protected List<TicketingServiceFacilityEnumeration> ticketingServiceFacilityList;
+    @Transient
     protected Boolean ticketCounter;
+    @Transient
     protected BigInteger numberOfTills;
+    @Transient
     protected QueueManagementEnumeration queueManagement;
+    @Transient
     protected List<PaymentMethodEnumeration> paymentMethods;
+    @Transient
     protected List<TicketTypeEnumeration> ticketTypesAvailable;
+    @Transient
     protected List<TicketingFacilityEnumeration> scopeOfTicketsAvailable;
+    @Transient
     protected Boolean lowCounterAccess;
+    @Transient
     protected BigDecimal heightOfLowCounter;
+    @Transient
     protected Boolean inductionLoops;
 
     public List<VehicleModeEnumeration> getVehicleModes() {
