@@ -2,12 +2,18 @@ package org.rutebanken.tiamat.importer;
 
 
 import com.vividsolutions.jts.geom.Coordinate;
-import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.junit.Test;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,5 +74,47 @@ public class TransactionalStopPlacesImporterTest extends TiamatIntegrationTest {
         assertThat(actual).containsOnlyOnce(stopPlace1);
         assertThat(actual).extracting(org.rutebanken.netex.model.StopPlace::getVersion).containsOnly("10");
 
+    }
+
+    /**
+     * Test added to reprocude NRP-1366
+     */
+    @Test
+    public void importStopPlaceWithAccessibilityAssessment() {
+
+        StopPlace stopPlace = new StopPlace();
+        AccessibilityAssessment aa = new AccessibilityAssessment();
+        List<AccessibilityLimitation> limitations = new ArrayList<>();
+
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+
+        limitations.add(limitation);
+
+        aa.setLimitations(limitations);
+
+
+        aa.setLimitations(limitations);
+        stopPlace.setAccessibilityAssessment(aa);
+
+        List<StopPlace> sp = new ArrayList<>();
+        sp.add(stopPlace);
+
+        AtomicInteger counter = new AtomicInteger();
+        Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces = siteFrameImporter.importStopPlaces(sp, counter);
+
+
+        assertThat(importStopPlaces).hasSize(1);
+        org.rutebanken.netex.model.StopPlace importedStopPlace = importStopPlaces.iterator().next();
+        assertThat(importedStopPlace).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
+        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).hasSize(1);
+        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().get(0);
+
+        assertThat(accessibilityLimitation).isNotNull();
+        assertThat(accessibilityLimitation.getWheelchairAccess()).isNotNull();
+        assertThat(accessibilityLimitation.getWheelchairAccess().value()).isEqualTo(limitation.getWheelchairAccess().value());
     }
 }

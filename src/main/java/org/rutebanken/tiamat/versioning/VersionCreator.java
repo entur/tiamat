@@ -35,10 +35,6 @@ public class VersionCreator {
 
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
-        final String pathLinkEndPassThroughId = "pathLinkEndPassThroughId";
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(pathLinkEndPassThroughId, new PassThroughConverter(Quay.class, StopPlace.class));
 
         final String stopPlacePassThroughId = "stopPlacePassThroughId";
 
@@ -64,7 +60,6 @@ public class VersionCreator {
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
-                .fieldMap("entrance").converter(pathLinkEndPassThroughId).add()
                 .byDefault()
                 .register();
 
@@ -78,17 +73,21 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(ValidBetween.class, ValidBetween.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 
-    public <T extends EntityInVersionStructure> T createNextVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+    public <T extends EntityInVersionStructure> T createCopy(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
         ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
 
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
-        versionIncrementor.incrementVersion(copy);
 
         copy.getValidBetweens().clear();
         copy.getValidBetweens().add(new ValidBetween(newVersionValidFrom));
@@ -96,49 +95,83 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
+    /**
+     * Create next version of stop place, before changes are made.
+     * Does not increment version. Will be done when saving.
+     * @param stopPlace
+     * @return a deep copied stop place with incremented version and valid between set.
+     */
+    public StopPlace createCopy(StopPlace stopPlace) {
+        return createCopy(stopPlace, StopPlace.class);
+    }
+
+    private <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
+        logger.debug("Initiating first version for entity {}", entityInVersionStructure.getClass().getSimpleName());
+        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
+        return type.cast(entityInVersionStructure);
+    }
+
+    /**
+     * Increment versions for stop place with children.
+     * The object must have their netexId set, or else they will get an initial version
+     * @param stopPlace with quays and accessibility assessment
+     * @return modified StopPlace
+     */
+    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
+        initiateOrIncrement(stopPlace);
+        initiateOrIncrementVersionsForChildren(stopPlace);
+        ZonedDateTime now = ZonedDateTime.now();
+        stopPlace.setCreated(now);
+        stopPlace.getValidBetweens().add(new ValidBetween(now));
+        return stopPlace;
+    }
+
+    private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
+
+        initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
+
+        if (stopPlaceToSave.getQuays() != null) {
+            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
+            stopPlaceToSave.getQuays().forEach(quay -> {
+                initiateOrIncrement(quay);
+                initiateOrIncrementAccessibilityAssesmentVersion(quay);
+            });
+        }
+    }
+
+    private void initiateOrIncrementAccessibilityAssesmentVersion(SiteElement siteElement) {
+        AccessibilityAssessment accessibilityAssessment = siteElement.getAccessibilityAssessment();
+
+        if (accessibilityAssessment != null) {
+            initiateOrIncrement(accessibilityAssessment);
+
+            if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
+                AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
+                initiateOrIncrement(limitation);
+            }
+        }
+    }
+
+    private void initiateOrIncrement(EntityInVersionStructure entityInVersionStructure) {
+        if(entityInVersionStructure.getNetexId() == null) {
+            initiateFirstVersion(entityInVersionStructure, EntityInVersionStructure.class);
+        } else {
+            versionIncrementor.incrementVersion(entityInVersionStructure);
+        }
+    }
+
     public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
         //TODO: Need to support "valid from" set explicitly
+
+        if(entityInVersionStructure == null) {
+            throw new IllegalArgumentException("Cannot terminate version for null object");
+        }
+
         logger.debug("New version valid from {}", newVersionValidFrom);
-        if (!entityInVersionStructure.getValidBetweens().isEmpty()) {
+        if (entityInVersionStructure.getValidBetweens() != null && !entityInVersionStructure.getValidBetweens().isEmpty()) {
             ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);
             validBetween.setToDate(newVersionValidFrom);
         }
         return entityInVersionStructure;
     }
-
-    public StopPlace createNextVersion(StopPlace stopPlace) {
-
-        StopPlace newVersion = createNextVersion(stopPlace, StopPlace.class);
-
-        if (newVersion.getQuays() != null) {
-            newVersion.getQuays().forEach(quay -> {
-                versionIncrementor.incrementVersion(quay);
-                if (quay.getAccessibilityAssessment() != null) {
-                    AccessibilityAssessment accessibilityAssessment = quay.getAccessibilityAssessment();
-                    versionIncrementor.incrementVersion(accessibilityAssessment);
-                    if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
-                        versionIncrementor.incrementVersion(accessibilityAssessment.getLimitations().get(0));
-                    }
-                }
-            });
-        }
-
-        return newVersion;
-    }
-
-    public <T extends EntityInVersionStructure> T initiateFirstVersionWithAvailabilityCondition(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
-        logger.debug("Initiating new version for entity {}", entityInVersionStructure);
-        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        entityInVersionStructure.getValidBetweens().add(new ValidBetween(ZonedDateTime.now()));
-        return type.cast(entityInVersionStructure);
-    }
-
-    public StopPlace initiateFirstVersionWithAvailabilityCondition(StopPlace stopPlace) {
-        stopPlace = initiateFirstVersionWithAvailabilityCondition(stopPlace, StopPlace.class);
-        if(stopPlace.getQuays() != null) {
-            stopPlace.getQuays().forEach(quay -> quay.setVersion(VersionIncrementor.INITIAL_VERSION));
-        }
-        return stopPlace;
-    }
-
 }

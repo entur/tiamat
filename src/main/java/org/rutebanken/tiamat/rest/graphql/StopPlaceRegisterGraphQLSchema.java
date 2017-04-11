@@ -259,6 +259,11 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
+                .description("Find stop place based on ID. Only used together with " + ID + " argument")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)
                 .type(new GraphQLList(stopPlaceTypeEnum))
                 .description("Only return StopPlaces with given StopPlaceType(s).")

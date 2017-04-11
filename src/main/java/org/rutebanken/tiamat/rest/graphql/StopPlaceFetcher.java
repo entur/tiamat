@@ -51,6 +51,7 @@ class StopPlaceFetcher implements DataFetcher {
 
         String netexId = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
+        Integer version = (Integer) environment.getArgument(VERSION);
 
         Boolean allVersions = environment.getArgument(ALL_VERSIONS);
         if(allVersions != null) {
@@ -60,9 +61,15 @@ class StopPlaceFetcher implements DataFetcher {
         if (netexId != null && !netexId.isEmpty()) {
 
             try {
-                stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
+                List<StopPlace> stopPlace;
+                if(version != null && version > 0) {
+                    stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
+                    stopPlaces = new PageImpl<>(stopPlace, pageable, 1L);
+                } else {
+                    stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
+                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                }
 
-                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             } catch (NumberFormatException nfe) {
                 logger.info("Attempted to find stopPlace with invalid id [{}]", netexId);
             }

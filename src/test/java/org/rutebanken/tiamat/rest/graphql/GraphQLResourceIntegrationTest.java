@@ -380,8 +380,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         String updatedName = "Testing name ";
         String updatedShortName = "Testing shortname ";
         String updatedDescription = "Testing description ";
-        String fromDate = "2012-04-23T18:25:43.511Z";
-        String toDate = "2018-04-23T18:25:43.511Z";
+        String fromDate = "2012-04-23T18:25:43.511+0200";
+        String toDate = "2018-04-23T18:25:43.511+0200";
 
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);

@@ -176,15 +176,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	// Does not belong here. Move it to QuayRepository.
 	@Override
 	public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
-		String sql = "SELECT vi.items, q.netex_id, q.version " +
+		String sql = "SELECT vi.items, q.netex_id " +
 				             "FROM quay_key_values qkv " +
 				             "INNER JOIN stop_place_quays spq " +
 				             "ON spq.quays_id = qkv.quay_id " +
 				             "INNER JOIN quay q " +
-				             "ON spq.quays_id = q.id " +
+				             "ON (spq.quays_id = q.id " +
+								"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
 				             "INNER JOIN value_items vi " +
 				             "ON qkv.key_values_id = vi.value_id " +
-				             "ORDER BY q.netexId";
+				             "ORDER BY q.netex_id";
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
 		@SuppressWarnings("unchecked")
@@ -192,7 +193,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 		List<IdMappingDto> mappingResult = new ArrayList<>();
 		for (Object[] row : result) {
-			mappingResult.add(new IdMappingDto((String) row[0], (String) row[1], (String) row[2]));
+			mappingResult.add(new IdMappingDto((String) row[0].toString(), (String) row[1].toString()));
 		}
 
 		return mappingResult;
@@ -201,19 +202,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
-		String sql = "SELECT v.items, s.netex_id, s.version " +
+		String sql = "SELECT v.items, s.netex_id " +
 				             "FROM stop_place_key_values spkv " +
 				             "INNER JOIN value_items v " +
 				             "ON spkv.key_values_id = v.value_id " +
 				             "INNER JOIN stop_place s " +
-				             "ON s.id = spkv.stop_place_id";
+				             "ON s.id = spkv.stop_place_id " +
+				 			 "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
+
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
 		List<Object[]> result = nativeQuery.getResultList();
 
 		List<IdMappingDto> mappingResult = new ArrayList<>();
 		for (Object[] row : result) {
-			mappingResult.add(new IdMappingDto((String) row[0], (String) row[1], (String) row[2]));
+			mappingResult.add(new IdMappingDto((String) row[0], (String) row[1]));
 		}
 
 		return mappingResult;
