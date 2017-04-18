@@ -125,6 +125,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(STEP_FREE)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(ENCLOSED)
+                    .type(GraphQLBoolean))
             .build();
 
     public static GraphQLInputObjectType shelterEquipmentInputType = GraphQLInputObjectType.newInputObject()
@@ -134,6 +137,9 @@ public class CustomGraphQLTypes {
                     .type(GraphQLBigInteger))
             .field(newInputObjectField()
                     .name(STEP_FREE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(ENCLOSED)
                     .type(GraphQLBoolean))
             .build();
 

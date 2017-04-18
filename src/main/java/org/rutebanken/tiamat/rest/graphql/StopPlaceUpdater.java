@@ -228,6 +228,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
             ShelterEquipment leskur = new ShelterEquipment();
+            leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
             leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
             leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
 

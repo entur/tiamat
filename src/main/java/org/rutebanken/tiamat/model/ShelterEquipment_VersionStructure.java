@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 public class ShelterEquipment_VersionStructure
         extends WaitingEquipment_VersionStructure {
 
-    @Transient
     protected Boolean enclosed;
     @Transient
     protected BigDecimal distanceFromNearestKerb;

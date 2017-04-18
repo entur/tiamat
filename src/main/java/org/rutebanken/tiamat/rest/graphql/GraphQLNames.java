@@ -131,6 +131,10 @@ public class GraphQLNames {
     public static final String STEP_FREE = "stepFree";
     public static final String HEATED = "heated";
 
+    // ShelterEquipment
+    public static final String ENCLOSED = "enclosed";
+
+
     // TicketingEquipment
     public static final String TICKET_MACHINES = "ticketMachines";
     public static final String TICKET_OFFICE = "ticketOffice";
