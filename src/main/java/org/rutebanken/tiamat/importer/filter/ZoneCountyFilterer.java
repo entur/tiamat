@@ -58,7 +58,7 @@ public class ZoneCountyFilterer {
                     List<TopographicPlace> places = topographicPlaces.stream()
                             .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
                             .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
-                            .peek(topographicPlace -> logger.info("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone.getNetexId()))
+                            .peek(topographicPlace -> logger.info("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
                             .collect(toList());
                     return !places.isEmpty();
                 })
