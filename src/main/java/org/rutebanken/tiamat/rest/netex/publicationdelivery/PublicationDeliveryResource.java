@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -69,11 +70,11 @@ public class PublicationDeliveryResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream, @QueryParam("countyReference") List<String> countyReferences) throws IOException, JAXBException, SAXException {
+    public Response receivePublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
-            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, countyReferences);
+            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, publicationDeliveryParams);
             return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
         } catch (Exception e) {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);

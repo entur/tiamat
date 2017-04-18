@@ -75,7 +75,7 @@ public class PublicationDeliveryImporter {
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, List<String> countyReferences) {
+    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, PublicationDeliveryParams publicationDeliveryParams) {
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
@@ -117,9 +117,11 @@ public class PublicationDeliveryImporter {
                 List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
                 tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
 
-                logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), countyReferences);
-                tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(countyReferences, tiamatStops);
-                logger.info("Got {} stops after filtering by: {}", tiamatStops.size(), countyReferences);
+                if(publicationDeliveryParams != null) {
+                    logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
+                    tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
+                    logger.info("Got {} stops after filtering by: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
+                }
 
 
                 Collection<org.rutebanken.netex.model.StopPlace> stopPlaces;
