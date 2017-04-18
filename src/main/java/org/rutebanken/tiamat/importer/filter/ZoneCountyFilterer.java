@@ -37,6 +37,7 @@ public class ZoneCountyFilterer {
         return new Supplier<List<TopographicPlace>>() {
             @Override
             public List<TopographicPlace> get() {
+                logger.info("Fetching topographic places from repo");
                 return topographicPlaceRepository.findAllMaxVersion();
             }
         };
@@ -50,6 +51,9 @@ public class ZoneCountyFilterer {
      * @return filtered list
      */
     public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones) {
+
+
+
 
         if(countyReferences == null || countyReferences.isEmpty()) {
             logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", countyReferences);
