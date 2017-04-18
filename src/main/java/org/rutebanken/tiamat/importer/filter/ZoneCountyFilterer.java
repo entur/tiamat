@@ -23,10 +23,7 @@ public class ZoneCountyFilterer {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
-
-    @Autowired
-    private CountyFinder countyFinder;
-
+    
     /**
      * Filter zones that does not belong to the given list of county references
      *
@@ -67,7 +64,5 @@ public class ZoneCountyFilterer {
                     return !places.isEmpty();
                 })
                 .collect(toList());
-
-
     }
 }
