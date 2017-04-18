@@ -804,7 +804,6 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         System.out.println(byteArrayOutputStream.toString());
     }
 
-    @Ignore
     @Test
     public void importNSBStopPlace() throws JAXBException, IOException, SAXException {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
