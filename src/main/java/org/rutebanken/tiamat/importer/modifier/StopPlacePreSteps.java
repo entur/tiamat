@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.modifier;
 
+import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -28,6 +29,7 @@ public class StopPlacePreSteps {
     private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
     private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
     private final CompassBearingRemover compassBearingRemover;
+    private final CentroidComputer centroidComputer;
 
 
     @Autowired
@@ -36,19 +38,24 @@ public class StopPlacePreSteps {
                              QuayNameRemover quayNameRemover,
                              StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
                              QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover) {
+                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer) {
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
         this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
         this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
         this.compassBearingRemover = compassBearingRemover;
+        this.centroidComputer = centroidComputer;
     }
 
     public List<StopPlace> run(List<StopPlace> stops, AtomicInteger topographicPlacesCounter) {
         final String logCorrelationId = MDC.get(PublicationDeliveryImporter.IMPORT_CORRELATION_ID);
         stops.parallelStream()
                 .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, logCorrelationId))
+                .map(stopPlace -> {
+                    centroidComputer.computeCentroidForStopPlace(stopPlace);
+                    return stopPlace;
+                })
                 .map(stopPlace -> compassBearingRemover.remove(stopPlace))
                 .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
                 .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
