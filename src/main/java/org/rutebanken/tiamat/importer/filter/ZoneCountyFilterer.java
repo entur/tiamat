@@ -2,21 +2,20 @@ package org.rutebanken.tiamat.importer.filter;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
@@ -28,20 +27,8 @@ public class ZoneCountyFilterer {
     private static final Logger logger = LoggerFactory.getLogger(ZoneCountyFilterer.class);
 
     @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
-    private final Supplier<List<TopographicPlace>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 1, TimeUnit.HOURS);
-
-
-    private Supplier<List<TopographicPlace>> getTopographicPlaceSupplier() {
-        return new Supplier<List<TopographicPlace>>() {
-            @Override
-            public List<TopographicPlace> get() {
-                logger.info("Fetching topographic places from repo");
-                return topographicPlaceRepository.findAllMaxVersion();
-            }
-        };
-    }
 
     public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones) {
         return filterByCountyMatch(countyReferences, zones, false);
@@ -76,15 +63,14 @@ public class ZoneCountyFilterer {
                     return true;
                 })
                 .filter(zone -> {
-
-                    List<TopographicPlace> places = topographicPlaces.get()
-                            .stream()
-                            .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
-                            .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
-                            .filter(topographicPlace -> zone.getCentroid().within(topographicPlace.getPolygon()))
-                            .peek(topographicPlace -> logger.debug("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
-                            .collect(toList());
-                    return !places.isEmpty() && !negate;
+                    Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findCountyMatchingReferences(countyReferences, zone.getCentroid());
+                    if(topographicPlace.isPresent()) {
+                        logger.debug("Found matching topographic place {} for zone {}", topographicPlace.get().getNetexId(), zone);
+                        return negate ? false : true;
+                    } else {
+                        logger.info("Found no counties for {}", zone);
+                        return negate ? true : false;
+                    }
                 })
                 .collect(toList());
     }
