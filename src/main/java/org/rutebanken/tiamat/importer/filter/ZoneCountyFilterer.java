@@ -76,7 +76,7 @@ public class ZoneCountyFilterer {
                             .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
                             .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
                             .filter(topographicPlace -> zone.getCentroid().within(topographicPlace.getPolygon()))
-                            .peek(topographicPlace -> logger.info("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
+                            .peek(topographicPlace -> logger.debug("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
                             .collect(toList());
                     return !places.isEmpty();
                 })
