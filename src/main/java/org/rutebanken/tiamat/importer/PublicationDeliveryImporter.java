@@ -36,7 +36,7 @@ public class PublicationDeliveryImporter {
     /**
      * Make this configurable. Export topographic places in response.
      */
-    private static final boolean EXPORT_TOPOGRAPHIC_PLACES = false;
+    private static final boolean EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS = false;
 
     private final TransactionalStopPlacesImporter transactionalStopPlacesImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
@@ -83,6 +83,8 @@ public class PublicationDeliveryImporter {
 
         if(publicationDeliveryParams == null) {
             publicationDeliveryParams = new PublicationDeliveryParams();
+        } else {
+            validate(publicationDeliveryParams);
         }
 
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
@@ -141,7 +143,7 @@ public class PublicationDeliveryImporter {
                 logger.info("Saved {} stop places", stopPlacesCreated);
 
 
-                if (EXPORT_TOPOGRAPHIC_PLACES) {
+                if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
                     List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));
 
                     if (!netexTopographicPlaces.isEmpty()) {
@@ -175,6 +177,14 @@ public class PublicationDeliveryImporter {
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();
+        }
+    }
+
+    private void validate(PublicationDeliveryParams publicationDeliveryParams) {
+        if(publicationDeliveryParams.onlyImportStopsInCounties != null && publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null) {
+            if(!publicationDeliveryParams.onlyImportStopsInCounties.isEmpty() && ! publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
+                throw new IllegalArgumentException("onlyImportStopsInCounties and onlyImportStopsInCounties cannot be specified at the same time!");
+            }
         }
     }
 
