@@ -46,6 +46,7 @@ public class CountyAndMunicipalityLookupService {
         if (topographicPlaceWithParent.isPresent()) {
             siteVersionStructure.setTopographicPlace(topographicPlaceWithParent.get());
             logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
+            return;
         } else {
             logger.warn("Could not find topographic place with parent for site {}", siteVersionStructure);
         }

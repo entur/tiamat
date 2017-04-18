@@ -96,7 +96,7 @@ public class GaplessIdGeneratorService {
                 insertIds(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
-            logger.info("Generating new available IDs for {}", entityTypeName);
+            logger.debug("Generating new available IDs for {}", entityTypeName);
             generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
 
             transaction.commit();
@@ -123,7 +123,7 @@ public class GaplessIdGeneratorService {
         }
 
         if (!isH2()) {
-            logger.info("Inserting retrieved IDs: {}", retrievedIds);
+            logger.debug("Inserting retrieved IDs: {}", retrievedIds);
 
             insertIds(entityTypeName, retrievedIds, entityManager);
         }
@@ -223,7 +223,7 @@ public class GaplessIdGeneratorService {
             counter++;
         }
 
-        logger.info("H2: Created {} Ids for {}", retrievedIds.size(), entityTypeName);
+        logger.debug("H2: Created {} Ids for {}", retrievedIds.size(), entityTypeName);
         return retrievedIds;
     }
 
@@ -241,7 +241,7 @@ public class GaplessIdGeneratorService {
             try {
                 EntityManager entityManager = entityManagerFactory.createEntityManager();
                 isH2 = new AtomicBoolean(entityManager.unwrap(SessionImpl.class).getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2"));
-                logger.info("Detected H2: {}", isH2);
+                logger.debug("Detected H2: {}", isH2);
             } catch (SQLException e) {
                 throw new RuntimeException("Could not determine database provider", e);
             }
