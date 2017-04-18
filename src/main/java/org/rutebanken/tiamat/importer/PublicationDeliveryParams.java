@@ -8,4 +8,7 @@ public class PublicationDeliveryParams {
 
     @QueryParam(value = "onlyImportStopsInCounty")
     public List<String> onlyImportStopsInCounties = new ArrayList<>();
+
+    @QueryParam(value = "importType")
+    public ImportType importType = ImportType.MERGE;
 }

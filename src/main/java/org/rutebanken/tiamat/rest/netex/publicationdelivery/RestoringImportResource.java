@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.importer.initial.InitialStopPlaceImporter;
+import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,21 +36,21 @@ import static org.rutebanken.tiamat.importer.PublicationDeliveryImporter.IMPORT_
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
-public class InitialImportResource {
+public class RestoringImportResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(InitialImportResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestoringImportResource.class);
     private static final String KEY_INITIAL_IMPORT_LOCK = "initial_import_lock";
 
     private final PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller;
     private final NetexMapper netexMapper;
-    private final InitialStopPlaceImporter initialStopPlaceImporter;
+    private final RestoringStopPlaceImporter restoringStopPlaceImporter;
     private final HazelcastInstance hazelcastInstance;
 
     @Autowired
-    public InitialImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, NetexMapper netexMapper, InitialStopPlaceImporter initialStopPlaceImporter, HazelcastInstance hazelcastInstance) {
+    public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, NetexMapper netexMapper, RestoringStopPlaceImporter restoringStopPlaceImporter, HazelcastInstance hazelcastInstance) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
-        this.initialStopPlaceImporter = initialStopPlaceImporter;
+        this.restoringStopPlaceImporter = restoringStopPlaceImporter;
         this.hazelcastInstance = hazelcastInstance;
     }
 
@@ -111,7 +110,7 @@ public class InitialImportResource {
                                     break;
                                 }
 
-                                initialStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
+                                restoringStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
                             }
                         } catch (InterruptedException e) {
                             logger.warn("Interrupted. Stopping all jobs");
