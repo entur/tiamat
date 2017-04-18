@@ -50,7 +50,16 @@ public class MatchingIdAppendingStopPlacesImporter {
                 logger.info("Found matching stop place {}", existingstopPlace);
                 keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, stopPlace, existingstopPlace);
                 stopPlace = stopPlaceRepository.save(existingstopPlace);
-                matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlace));
+                String netexId = stopPlace.getNetexId();
+
+                boolean alreadyAdded = matchedStopPlaces
+                        .stream()
+                        .filter(alreadyAddedStop -> alreadyAddedStop.getId().equals(netexId))
+                        .findAny().isPresent();
+
+                if(!alreadyAdded) {
+                    matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlace));
+                }
                 stopPlacesCreatedOrUpdated.incrementAndGet();
             }
         });
