@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -790,6 +791,131 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "\t</dataObjects>\n" +
                 "</PublicationDelivery>\n" +
                 "\n";
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Ignore
+    @Test
+    public void importNSBStopPlace() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "   \n" +
+                "   \n" +
+                "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>grailsId</Key>\n" +
+                "                     <Value>3</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>lisaId</Key>\n" +
+                "                     <Value>2146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>jbvCode</Key>\n" +
+                "                     <Value>ADL</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>iffCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>uicCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761037602</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"no\">Arendal</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                     <Latitude>58.465256</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>\n" +
+                "               <PostalAddress id=\"NSB:PostalAddress:3\" version=\"1\">\n" +
+                "                  <AddressLine1>Møllebakken 15</AddressLine1>\n" +
+                "                  <AddressLine2> 4841 Arendal</AddressLine2>\n" +
+                "               </PostalAddress>\n" +
+                "               <AccessibilityAssessment id=\"NSB:AccessibilityAssessment:3\" version=\"1\">\n" +
+                "                  <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                  <limitations>\n" +
+                "                     <AccessibilityLimitation>\n" +
+                "                        <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                        <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                     </AccessibilityLimitation>\n" +
+                "                  </limitations>\n" +
+                "               </AccessibilityAssessment>\n" +
+                "               <placeEquipments>\n" +
+                "                  <WaitingRoomEquipment id=\"NSB:WaitingRoomEquipment:3\" version=\"1\"/>\n" +
+                "                  <SanitaryEquipment id=\"NSB:SanitaryEquipment:3\" version=\"1\">\n" +
+                "                     <Gender>both</Gender>\n" +
+                "                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>\n" +
+                "                  </SanitaryEquipment>\n" +
+                "                  <TicketingEquipment id=\"NSB:TicketingEquipment:3\" version=\"1\">\n" +
+                "                     <NumberOfMachines>1</NumberOfMachines>\n" +
+                "                  </TicketingEquipment>\n" +
+                "               </placeEquipments>\n" +
+                "               <localServices>\n" +
+                "                  <LeftLuggageService id=\"NSB:LeftLuggageService:3\" version=\"1\">\n" +
+                "                     <SelfServiceLockers>true</SelfServiceLockers>\n" +
+                "                  </LeftLuggageService>\n" +
+                "                  <TicketingService id=\"NSB:TicketingService:3\" version=\"1\">\n" +
+                "                     <TicketCounterService>true</TicketCounterService>\n" +
+                "                  </TicketingService>\n" +
+                "               </localServices>\n" +
+                "               <StopPlaceType>railStation</StopPlaceType>\n" +
+                "               <Weighting>interchangeAllowed</Weighting>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"NSB:Quay:0076021461\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>grails-platformId</Key>\n" +
+                "                           <Value>825930</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>uicCode</Key>\n" +
+                "                           <Value>7602146</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                           <Latitude>58.465256</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <PublicCode>1</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
