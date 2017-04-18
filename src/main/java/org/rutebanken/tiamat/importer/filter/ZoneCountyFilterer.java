@@ -4,22 +4,28 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.coordinates.CountyFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
 @Component
+@Transactional
 public class ZoneCountyFilterer {
 
     private static final Logger logger = LoggerFactory.getLogger(ZoneCountyFilterer.class);
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
+
+    @Autowired
+    private CountyFinder countyFinder;
 
     /**
      * Filter zones that does not belong to the given list of county references
@@ -50,14 +56,12 @@ public class ZoneCountyFilterer {
                     return true;
                 })
                 .filter(zone -> {
-                    List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findByPoint(zone.getCentroid());
-                    if(topographicPlaces == null || topographicPlaces.isEmpty()) {
-                        logger.info("Filtering out {} because there is no match for it in any topographic place", zone);
-                        return false;
-                    }
-                    List<TopographicPlace> places = topographicPlaces.stream()
+
+                    List<TopographicPlace> places = topographicPlaceRepository.findAllMaxVersion()
+                            .stream()
                             .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
                             .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
+                            .filter(topographicPlace -> zone.getCentroid().within(topographicPlace.getPolygon()))
                             .peek(topographicPlace -> logger.info("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
                             .collect(toList());
                     return !places.isEmpty();
