@@ -2,6 +2,13 @@ package org.rutebanken.tiamat.importer;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.filter.ZoneCountyFilterer;
@@ -47,6 +54,7 @@ public class PublicationDeliveryImporter {
     private final TopographicPlaceImporter topographicPlaceImporter;
     private final ZoneCountyFilterer zoneCountyFilterer;
     private final ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter;
+    private final MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter;
 
 
 
@@ -56,7 +64,7 @@ public class PublicationDeliveryImporter {
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
                                        PathLinksImporter pathLinksImporter,
-                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter, ZoneCountyFilterer zoneCountyFilterer, ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter) {
+                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter, ZoneCountyFilterer zoneCountyFilterer, ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter, MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -66,6 +74,7 @@ public class PublicationDeliveryImporter {
         this.topographicPlaceImporter = topographicPlaceImporter;
         this.zoneCountyFilterer = zoneCountyFilterer;
         this.parallelInitialStopPlaceImporter = parallelInitialStopPlaceImporter;
+        this.matchingIdAppendingStopPlacesImporter = matchingIdAppendingStopPlacesImporter;
     }
 
 
@@ -89,13 +98,13 @@ public class PublicationDeliveryImporter {
 
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        AtomicInteger stopPlacesCreated = new AtomicInteger(0);
+        AtomicInteger stopPlacesCreatedOrUpdated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCounter = new AtomicInteger(0);
         SiteFrame netexSiteFrame = findSiteFrame(incomingPublicationDelivery);
 
         String requestId = netexSiteFrame.getId();
 
-        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreated, numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
+        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreatedOrUpdated, numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
 
         try {
             SiteFrame responseSiteframe = new SiteFrame();
@@ -132,15 +141,22 @@ public class PublicationDeliveryImporter {
 
                 if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
                     synchronized (STOP_PLACE_IMPORT_LOCK) {
-                        importedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
+                        importedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
                     }
                 } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
-                    importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreated);
+                    importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+                } else if(publicationDeliveryParams.importType.equals(ImportType.ORIGINAL_ID_MATCH)) {
+                    if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
+                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
+                        tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops, true);
+                        logger.info("Got {} stops back from zone filter", tiamatStops.size());
+                    }
+                    logger.info("Importing {} stops", tiamatStops.size());
+                    importedNetexStopPlaces = matchingIdAppendingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
                 } else {
                     throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
-
                 }
-                logger.info("Saved {} stop places", stopPlacesCreated);
+                logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedOrUpdated);
 
 
                 if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {

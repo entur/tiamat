@@ -43,17 +43,19 @@ public class ZoneCountyFilterer {
         };
     }
 
+    public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones) {
+        return filterByCountyMatch(countyReferences, zones, false);
+    }
+
     /**
      * Filter zones that does not belong to the given list of county references
      *
      * @param countyReferences NetexIDs
      * @param zones to filter
+     * @param negate negates the filter. Only stop places that is outside the given counties will be returned.
      * @return filtered list
      */
-    public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones) {
-
-
-
+    public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones, boolean negate) {
 
         if(countyReferences == null || countyReferences.isEmpty()) {
             logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", countyReferences);
@@ -82,7 +84,7 @@ public class ZoneCountyFilterer {
                             .filter(topographicPlace -> zone.getCentroid().within(topographicPlace.getPolygon()))
                             .peek(topographicPlace -> logger.debug("Found matching topographic place {} for zone {}", topographicPlace.getNetexId(), zone))
                             .collect(toList());
-                    return !places.isEmpty();
+                    return !places.isEmpty() && !negate;
                 })
                 .collect(toList());
     }

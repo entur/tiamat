@@ -18,10 +18,10 @@ public class ImportLoggerTask extends TimerTask {
     private final AtomicInteger topographicPlacesCreated;
     private final String correlationId;
 
-    public ImportLoggerTask(AtomicInteger stopPlacesCreated, int totalStopPlaces,
+    public ImportLoggerTask(AtomicInteger stopPlacesCreatedOrUpdated, int totalStopPlaces,
                             AtomicInteger topographicPlacesCreated, String correlationId) {
 
-        this.stopPlacesCreated = stopPlacesCreated;
+        this.stopPlacesCreated = stopPlacesCreatedOrUpdated;
         this.startTime = System.currentTimeMillis();
         this.totalStopPlaces = totalStopPlaces;
         this.topographicPlacesCreated = topographicPlacesCreated;
