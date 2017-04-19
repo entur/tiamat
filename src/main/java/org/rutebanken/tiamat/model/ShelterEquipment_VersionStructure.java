@@ -1,9 +1,10 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
 
-
+@MappedSuperclass
 public class ShelterEquipment_VersionStructure
         extends WaitingEquipment_VersionStructure {
 
