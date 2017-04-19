@@ -52,7 +52,7 @@ public class CentroidComputer {
         }
         if(anyAdded) {
             Point point = geometryFactory.createPoint(centroidPoint.getCentroid());
-            logger.debug("Created centroid for stop place based on {} quays. {}", quays.size(), point);
+            logger.info("Created centroid for stop place based on {} quays. {}", quays.size(), point);
             return Optional.of(point);
         }
         else return Optional.empty();
