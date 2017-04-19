@@ -29,7 +29,7 @@ public class GaplessIdGeneratorService {
 
     public static final long INITIAL_LAST_ID = 1;
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
-    private static final int FETCH_SIZE = 20;
+    private static final int FETCH_SIZE = 10000;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
     private static AtomicBoolean isH2 = null;
