@@ -67,9 +67,12 @@ public class ZoneCountyFilterer {
                     if(topographicPlace.isPresent()) {
                         logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
+                    } else if(negate){
+                        logger.info("Keeping {}. Negate: {}", zone, negate);
+                        return true;
                     } else {
-                        logger.info("No matching counties for {}. Negate: {}", zone, negate);
-                        return negate ? true : false;
+                        logger.info("Filtering out {}. Negate: {}", zone, negate);
+                        return false;
                     }
                 })
                 .collect(toList());
