@@ -33,7 +33,7 @@ public class CentroidComputer {
             boolean changed = stopPlace.getCentroid() == null || !point.equals(stopPlace.getCentroid());
             stopPlace.setCentroid(point);
             if(changed) {
-                logger.info("Created centroid {} for stop place based on quays. {}", point, stopPlace);
+                logger.debug("Created centroid {} for stop place based on quays. {}", point, stopPlace);
             }
             return changed;
         }
