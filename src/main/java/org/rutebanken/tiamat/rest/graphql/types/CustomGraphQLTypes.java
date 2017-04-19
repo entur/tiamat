@@ -117,8 +117,21 @@ public class CustomGraphQLTypes {
             .build();
 
 
-    public static GraphQLObjectType shelterEquipmentType = newObject()
+        public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
+                .name(ID)
+                .type(GraphQLString)
+                .dataFetcher(env -> {
+                        if (env.getSource() instanceof IdentifiedEntity) {
+                                return ((IdentifiedEntity) env.getSource()).getNetexId();
+                        }
+                        return null;
+                })
+                .build();
+
+
+        public static GraphQLObjectType shelterEquipmentType = newObject()
             .name(OUTPUT_TYPE_SHELTER_EQUIPMENT)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                     .name(SEATS)
                     .type(GraphQLBigInteger))
@@ -145,6 +158,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType ticketingEquipmentType = newObject()
             .name(OUTPUT_TYPE_TICKETING_EQUIPMENT)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                     .name(TICKET_OFFICE)
                     .type(GraphQLBoolean))
@@ -172,6 +186,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType cycleStorageEquipmentType = newObject()
             .name(OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                     .name(NUMBER_OF_SPACES)
                     .type(GraphQLBigInteger))
@@ -193,6 +208,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType waitingRoomEquipmentType = newObject()
             .name(OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                     .name(SEATS)
                     .type(GraphQLBigInteger))
@@ -219,6 +235,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType sanitaryEquipmentType = newObject()
             .name(OUTPUT_TYPE_SANITARY_EQUIPMENT)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                     .name(NUMBER_OF_TOILETS)
                     .type(GraphQLBigInteger))
@@ -241,6 +258,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType equipmentType = newObject()
             .name(OUTPUT_TYPE_PLACE_EQUIPMENTS)
+            .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                             .name(WAITING_ROOM_EQUIPMENT)
                             .type(waitingRoomEquipmentType)
@@ -424,17 +442,6 @@ public class CustomGraphQLTypes {
                         .name(MOBILITY_IMPAIRED_ACCESS)
                         .type(limitationStatusEnum))
                 .build();
-
-    public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
-            .name(ID)
-            .type(GraphQLString)
-            .dataFetcher(env -> {
-                if (env.getSource() instanceof IdentifiedEntity) {
-                    return ((IdentifiedEntity) env.getSource()).getNetexId();
-                }
-                return null;
-            })
-            .build();
 
 
         public static GraphQLInputObjectType accessibilityLimitationsInputObjectType = GraphQLInputObjectType.newInputObject()
