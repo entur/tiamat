@@ -32,6 +32,9 @@ public class CentroidComputer {
             Point point = optionalPoint.get();
             boolean changed = stopPlace.getCentroid() == null || !point.equals(stopPlace.getCentroid());
             stopPlace.setCentroid(point);
+            if(changed) {
+                logger.info("Created centroid {} for stop place based on quays. {}", point, stopPlace);
+            }
             return changed;
         }
 
@@ -52,7 +55,6 @@ public class CentroidComputer {
         }
         if(anyAdded) {
             Point point = geometryFactory.createPoint(centroidPoint.getCentroid());
-            logger.info("Created centroid for stop place based on {} quays. {}", quays.size(), point);
             return Optional.of(point);
         }
         else return Optional.empty();
