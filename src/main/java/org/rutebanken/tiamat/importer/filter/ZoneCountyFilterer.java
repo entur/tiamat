@@ -65,10 +65,10 @@ public class ZoneCountyFilterer {
                 .filter(zone -> {
                     Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findCountyMatchingReferences(countyReferences, zone.getCentroid());
                     if(topographicPlace.isPresent()) {
-                        logger.debug("Found matching topographic place {} for zone {}", topographicPlace.get().getNetexId(), zone);
+                        logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
                     } else {
-                        logger.info("Found no counties for {}", zone);
+                        logger.info("Found no counties for {}, negate: {}", zone, negate);
                         return negate ? true : false;
                     }
                 })
