@@ -13,7 +13,7 @@ import javax.persistence.*;
                 @Index(name = "topographic_place_name_value_index", columnList = "name_value")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+                @UniqueConstraint(name = "topographic_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
 )
 public class TopographicPlace extends Place {
 

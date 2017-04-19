@@ -17,7 +17,7 @@ import java.util.*;
                 @Index(name = "stop_place_type_index", columnList = "stopPlaceType")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+                @UniqueConstraint(name = "stop_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
 )
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
