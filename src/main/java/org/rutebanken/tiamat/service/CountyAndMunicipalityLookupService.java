@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.stream.Collectors.toList;
 
 @Service
+@Transactional
 public class CountyAndMunicipalityLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);

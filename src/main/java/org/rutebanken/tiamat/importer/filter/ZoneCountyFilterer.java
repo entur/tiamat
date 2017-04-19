@@ -54,7 +54,7 @@ public class ZoneCountyFilterer {
             return zones;
         }
 
-        return zones.stream()
+        return zones.parallelStream()
                 .filter(zone -> {
                     if(zone.getCentroid() == null) {
                         logger.warn("Zone does not have centroid: {}", zone);
