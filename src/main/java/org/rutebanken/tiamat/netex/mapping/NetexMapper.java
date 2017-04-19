@@ -65,6 +65,10 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
+                .exclude("localServices")
+                .exclude("placeEquipments")
+                .exclude("postalAddress")
+                .exclude("roadAddress")
                 .byDefault()
                 .register();
 
