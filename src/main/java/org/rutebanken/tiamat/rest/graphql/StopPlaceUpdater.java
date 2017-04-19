@@ -218,43 +218,59 @@ class StopPlaceUpdater implements DataFetcher {
         }
 
         if (input.get(PLACE_EQUIPMENTS) != null) {
+            PlaceEquipment equipments = new PlaceEquipment();
+
             Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
 
-            Map<String, Object> sanitaryEquipment = (Map<String, Object>) equipmentInput.get(SANITARY_EQUIPMENT);
+            SanitaryEquipment toalett = null;
+            if (equipmentInput.get(SANITARY_EQUIPMENT) != null) {
+                Map<String, Object> sanitaryEquipment = (Map<String, Object>) equipmentInput.get(SANITARY_EQUIPMENT);
 
-            SanitaryEquipment toalett = new SanitaryEquipment();
-            toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
-            toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
-
-            Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
-            ShelterEquipment leskur = new ShelterEquipment();
-            leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
-            leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
-            leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
-
-            Map<String, Object> cycleStorageEquipment = (Map<String, Object>) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
-            CycleStorageEquipment sykkelskur = new CycleStorageEquipment();
-            sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
-            sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
-
-            Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
-            WaitingRoomEquipment venterom = new WaitingRoomEquipment();
-            venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
-            venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
-            venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
-
-            Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
-            TicketingEquipment billettAutomat = new TicketingEquipment();
-            billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
-            billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
-            billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
-
-            PlaceEquipment equipments = new PlaceEquipment();
-            equipments.getInstalledEquipment().add(venterom);
-            equipments.getInstalledEquipment().add(billettAutomat);
+                toalett = new SanitaryEquipment();
+                toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
+                toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
+            }
             equipments.getInstalledEquipment().add(toalett);
+
+            ShelterEquipment leskur = null;
+            if (equipmentInput.get(SHELTER_EQUIPMENT) != null) {
+                Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
+                leskur = new ShelterEquipment();
+                leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
+                leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
+                leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
+            }
             equipments.getInstalledEquipment().add(leskur);
+
+            CycleStorageEquipment sykkelskur = null;
+            if (equipmentInput.get(CYCLE_STORAGE_EQUIPMENT) != null) {
+                Map<String, Object> cycleStorageEquipment = (Map<String, Object>) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
+                sykkelskur = new CycleStorageEquipment();
+                sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
+                sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
+            }
             equipments.getInstalledEquipment().add(sykkelskur);
+
+            WaitingRoomEquipment venterom = null;
+            if (equipmentInput.get(WAITING_ROOM_EQUIPMENT) != null) {
+                Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
+                venterom = new WaitingRoomEquipment();
+                venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
+                venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
+                venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
+            }
+            equipments.getInstalledEquipment().add(venterom);
+
+            TicketingEquipment billettAutomat = null;
+            if (equipmentInput.get(TICKETING_EQUIPMENT) != null) {
+                Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
+                billettAutomat = new TicketingEquipment();
+                billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
+                billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
+                billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+            }
+            equipments.getInstalledEquipment().add(billettAutomat);
+
 
             if (entity instanceof StopPlace) {
                 ((StopPlace)entity).setPlaceEquipments(equipments);

@@ -3,15 +3,11 @@ package org.rutebanken.tiamat.netex.mapping;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.TopographicPlaceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +125,7 @@ public class NetexMapper {
         converters.add(new SimplePointVersionStructureConverter());
         converters.add(new KeyValuesToKeyListConverter());
         converters.add(new AccessibilityLimitationsListConverter());
+        converters.add(new InstalledEquipmentConverter());
 //        converters.add(new PathLinkEndConverter());
         return converters;
     }
