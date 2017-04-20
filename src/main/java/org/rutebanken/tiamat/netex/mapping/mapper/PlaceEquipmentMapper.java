@@ -24,7 +24,15 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
         List<org.rutebanken.netex.model.InstalledEquipment_VersionStructure> netexInstalledEquipmentList = placeEquipments_relStructure
                 .getInstalledEquipmentRefOrInstalledEquipment()
                 .stream()
-                .map(jaxbElement -> (org.rutebanken.netex.model.InstalledEquipment_VersionStructure) jaxbElement.getValue())
+                .filter(jaxbElement -> {
+                    Object equipment = jaxbElement.getValue();
+                    return (equipment instanceof SanitaryEquipment |
+                            equipment instanceof TicketingEquipment |
+                            equipment instanceof WaitingRoomEquipment |
+                            equipment instanceof CycleStorageEquipment |
+                            equipment instanceof ShelterEquipment);
+                })
+                .map(jaxbElement -> (InstalledEquipment_VersionStructure)jaxbElement.getValue())
                 .collect(Collectors.toList());
         List<org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(netexInstalledEquipmentList, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class, context);
 
