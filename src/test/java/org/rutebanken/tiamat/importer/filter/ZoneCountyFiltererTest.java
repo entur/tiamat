@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -22,6 +23,7 @@ public class ZoneCountyFiltererTest extends TiamatIntegrationTest {
     @Autowired
     private ZoneCountyFilterer zoneCountyFilterer;
 
+    @Ignore
     @Test
     public void filterByCountyMatch() throws Exception {
 
