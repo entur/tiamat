@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
-import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,7 +255,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
 
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
