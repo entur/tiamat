@@ -78,6 +78,12 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+
+        mapperFactory.classMap(InstalledEquipment_VersionStructure.class, InstalledEquipment_VersionStructure.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 

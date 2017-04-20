@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
@@ -72,7 +72,18 @@ StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
-
+        commonFieldsList.add(newFieldDefinition()
+                .name(PLACE_EQUIPMENTS)
+                .type(equipmentType)
+                .dataFetcher(env -> {
+                    if (env.getSource() instanceof StopPlace) {
+                        return ((StopPlace)env.getSource()).getPlaceEquipments();
+                    } else if (env.getSource() instanceof Quay) {
+                        return ((Quay)env.getSource()).getPlaceEquipments();
+                    }
+                    return null;
+                })
+                .build());
         commonFieldsList.add(newFieldDefinition()
                 .name(ACCESSIBILITY_ASSESSMENT)
                 .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
@@ -447,6 +458,7 @@ StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
         commonInputFieldsList.add(
                 newInputObjectField()
                         .name(ACCESSIBILITY_ASSESSMENT)

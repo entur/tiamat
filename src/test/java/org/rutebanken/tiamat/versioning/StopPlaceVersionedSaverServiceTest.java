@@ -1,15 +1,12 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
-import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,6 +233,33 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
         assertThat(stopPlace3.getTopographicPlace()).isNotNull();
+    }
+
+
+    @Test
+    public void createNewVersionOfStopWithPlaceEquipment() {
+
+
+        StopPlace stopPlace = new StopPlace();
+        PlaceEquipment equipment = new PlaceEquipment();
+        SanitaryEquipment sanitaryEquipment = new SanitaryEquipment();
+        sanitaryEquipment.setNumberOfToilets(BigInteger.ONE);
+        equipment.getInstalledEquipment().add(sanitaryEquipment);
+
+        WaitingRoomEquipment waitingRoomEquipment = new WaitingRoomEquipment();
+        waitingRoomEquipment.setHeated(true);
+        equipment.getInstalledEquipment().add(waitingRoomEquipment);
+
+        stopPlace.setPlaceEquipments(equipment);
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
+
+        // Save it. Reference to topographic place should be kept.
+        StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
+        assertThat(stopPlace3.getPlaceEquipments().getInstalledEquipment()).isNotNull();
     }
 
 

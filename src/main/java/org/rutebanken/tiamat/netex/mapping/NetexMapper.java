@@ -60,7 +60,6 @@ public class NetexMapper {
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 // TODO: Excluding some fields while waiting for NRP-1354
                 .exclude("localServices")
-                .exclude("placeEquipments")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
                 .byDefault()
@@ -68,7 +67,6 @@ public class NetexMapper {
 
         mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
                 .exclude("localServices")
-                .exclude("placeEquipments")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
                 .byDefault()
@@ -79,6 +77,37 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
+                .fieldBToA("netexId", "id")
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(WaitingRoomEquipment.class, org.rutebanken.tiamat.model.WaitingRoomEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TicketingEquipment.class, org.rutebanken.tiamat.model.TicketingEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(ShelterEquipment.class, org.rutebanken.tiamat.model.ShelterEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(CycleStorageEquipment.class, org.rutebanken.tiamat.model.CycleStorageEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+                .fieldBToA("netexId", "id")
+                .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();
 

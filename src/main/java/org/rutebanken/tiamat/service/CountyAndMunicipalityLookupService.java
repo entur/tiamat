@@ -3,8 +3,6 @@ package org.rutebanken.tiamat.service;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
@@ -18,7 +16,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +54,7 @@ public class CountyAndMunicipalityLookupService {
                 .stream()
                 .filter(pair -> point.within(pair.getSecond()))
                 .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
+                .filter(topographicPlace -> topographicPlace != null)
                 .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(topographicPlaceType))
                 .findAny();
     }

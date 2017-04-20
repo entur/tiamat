@@ -1,9 +1,10 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-
+@MappedSuperclass
 public abstract class WaitingEquipment_VersionStructure
         extends SiteEquipment_VersionStructure {
 

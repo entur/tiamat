@@ -1,25 +1,38 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@MappedSuperclass
 public class SanitaryEquipment_VersionStructure
         extends PassengerEquipment_VersionStructure {
 
-    protected AccessibilityAssessment accessibilityAssessment;
     protected GenderLimitationEnumeration gender;
-    protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
     protected BigInteger numberOfToilets;
+
+    @Transient
+    protected AccessibilityAssessment accessibilityAssessment;
+    @Transient
+    protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
+    @Transient
     protected Boolean freeToUse;
+    @Transient
     protected BigDecimal charge;
+    @Transient
     protected String currency;
+    @Transient
     protected List<PaymentMethodEnumeration> paymentMethods;
+    @Transient
     protected BigDecimal wheelchairTurningCircle;
+    @Transient
     protected Boolean sharpsDisposal;
+    @Transient
     protected StaffingEnumeration staffing;
+    @Transient
     protected String keySCheme;
 
     public AccessibilityAssessment getAccessibilityAssessment() {

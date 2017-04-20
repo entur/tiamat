@@ -8,8 +8,7 @@ import org.rutebanken.tiamat.repository.ReferenceResolver;
 
 import java.util.List;
 
-import static graphql.Scalars.GraphQLInt;
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -61,6 +60,23 @@ public class CustomGraphQLTypes {
             .value("UNKNOWN", LimitationStatusEnumeration.UNKNOWN)
             .build();
 
+        public static  GraphQLEnumType cycleStorageTypeEnum = GraphQLEnumType.newEnum()
+            .name(CYCLE_STORAGE_TYPE)
+            .value("bars", CycleStorageEnumeration.BARS)
+            .value("racks", CycleStorageEnumeration.RACKS)
+            .value("railings", CycleStorageEnumeration.RAILINGS)
+            .value("cycleScheme", CycleStorageEnumeration.CYCLE_SCHEME)
+            .value("other", CycleStorageEnumeration.OTHER)
+            .build();
+
+        public static  GraphQLEnumType genderTypeEnum = GraphQLEnumType.newEnum()
+            .name(GENDER)
+            .value("both", GenderLimitationEnumeration.BOTH)
+            .value("femaleOnly", GenderLimitationEnumeration.FEMALE_ONLY)
+            .value("maleOnly", GenderLimitationEnumeration.MALE_ONLY)
+            .value("sameSexOnly", GenderLimitationEnumeration.SAME_SEX_ONLY)
+            .build();
+
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
             .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
@@ -99,6 +115,235 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(LANG)
                     .type(GraphQLString))
+            .build();
+
+
+        public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
+                .name(ID)
+                .type(GraphQLString)
+                .dataFetcher(env -> {
+                        if (env.getSource() instanceof IdentifiedEntity) {
+                                return ((IdentifiedEntity) env.getSource()).getNetexId();
+                        }
+                        return null;
+                })
+                .build();
+
+
+        public static GraphQLObjectType shelterEquipmentType = newObject()
+            .name(OUTPUT_TYPE_SHELTER_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(STEP_FREE)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(ENCLOSED)
+                    .type(GraphQLBoolean))
+            .build();
+
+    public static GraphQLInputObjectType shelterEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SHELTER_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(STEP_FREE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(ENCLOSED)
+                    .type(GraphQLBoolean))
+            .build();
+
+    public static GraphQLObjectType ticketingEquipmentType = newObject()
+            .name(OUTPUT_TYPE_TICKETING_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(TICKET_OFFICE)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(TICKET_MACHINES)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_MACHINES)
+                    .type(GraphQLBigInteger))
+            .build();
+
+
+    public static GraphQLInputObjectType ticketingEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_TICKETING_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(TICKET_OFFICE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(TICKET_MACHINES)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_MACHINES)
+                    .type(GraphQLBigInteger))
+            .build();
+
+    public static GraphQLObjectType cycleStorageEquipmentType = newObject()
+            .name(OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_SPACES)
+                    .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(CYCLE_STORAGE_TYPE)
+                    .type(cycleStorageTypeEnum))
+            .build();
+
+
+    public static GraphQLInputObjectType cycleStorageEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_CYCLE_STORAGE_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_SPACES)
+                    .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(CYCLE_STORAGE_TYPE)
+                    .type(cycleStorageTypeEnum))
+            .build();
+
+    public static GraphQLObjectType waitingRoomEquipmentType = newObject()
+            .name(OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(HEATED)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(STEP_FREE)
+                    .type(GraphQLBoolean))
+            .build();
+
+    public static GraphQLInputObjectType waitingRoomEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_WAITING_ROOM_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(SEATS)
+                    .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(HEATED)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(STEP_FREE)
+                    .type(GraphQLBoolean))
+            .build();
+
+    public static GraphQLObjectType sanitaryEquipmentType = newObject()
+            .name(OUTPUT_TYPE_SANITARY_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_TOILETS)
+                    .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(GENDER)
+                    .type(genderTypeEnum))
+            .build();
+
+
+    public static GraphQLInputObjectType sanitaryEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SANITARY_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_TOILETS)
+                    .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(GENDER)
+                    .type(genderTypeEnum))
+            .build();
+
+
+    public static GraphQLObjectType equipmentType = newObject()
+            .name(OUTPUT_TYPE_PLACE_EQUIPMENTS)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                            .name(WAITING_ROOM_EQUIPMENT)
+                            .type(waitingRoomEquipmentType)
+                            .dataFetcher(env -> {
+                                    List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                                    for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                            if (ie instanceof WaitingRoomEquipment) {
+                                                    return ie;
+                                            }
+                                    }
+                                    return null;
+                            })
+            )
+            .field(newFieldDefinition()
+                    .name(SANITARY_EQUIPMENT)
+                    .type(sanitaryEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof SanitaryEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(TICKETING_EQUIPMENT)
+                    .type(ticketingEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof TicketingEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(SHELTER_EQUIPMENT)
+                    .type(shelterEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof ShelterEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(CYCLE_STORAGE_EQUIPMENT)
+                    .type(cycleStorageEquipmentType)
+                    .dataFetcher(env -> {
+                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                    if (ie instanceof CycleStorageEquipment) {
+                                            return ie;
+                                    }
+                            }
+                            return null;
+                    })
+            )
+            .build();
+
+    public static GraphQLInputObjectType equipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_PLACE_EQUIPMENTS)
+            .field(newInputObjectField()
+                    .name(WAITING_ROOM_EQUIPMENT)
+                    .type(waitingRoomEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(SANITARY_EQUIPMENT)
+                    .type(sanitaryEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(TICKETING_EQUIPMENT)
+                    .type(ticketingEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(SHELTER_EQUIPMENT)
+                    .type(shelterEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(CYCLE_STORAGE_EQUIPMENT)
+                    .type(cycleStorageEquipmentInputType))
             .build();
 
         public static GraphQLObjectType accessibilityLimitationsObjectType = newObject()
@@ -152,17 +397,6 @@ public class CustomGraphQLTypes {
                         .name(MOBILITY_IMPAIRED_ACCESS)
                         .type(limitationStatusEnum))
                 .build();
-
-    public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
-            .name(ID)
-            .type(GraphQLString)
-            .dataFetcher(env -> {
-                if (env.getSource() instanceof IdentifiedEntity) {
-                    return ((IdentifiedEntity) env.getSource()).getNetexId();
-                }
-                return null;
-            })
-            .build();
 
 
         public static GraphQLInputObjectType accessibilityLimitationsInputObjectType = GraphQLInputObjectType.newInputObject()

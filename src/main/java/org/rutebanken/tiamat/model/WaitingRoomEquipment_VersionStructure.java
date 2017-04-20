@@ -1,13 +1,16 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@MappedSuperclass
 public class WaitingRoomEquipment_VersionStructure
         extends WaitingEquipment_VersionStructure {
 
     protected Boolean womenOnly;
+    @Transient
     protected List<SanitaryFacilityEnumeration> sanitary;
     protected ClassOfUseRef classOfUseRef;
 
