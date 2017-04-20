@@ -22,9 +22,6 @@ public abstract class Site_VersionStructure
     protected TopographicPlace topographicPlace;
 
     @Transient
-    protected TopographicPlaceRefStructure topographicPlaceRef;
-
-    @Transient
     protected SiteTypeEnumeration siteType;
 
     @Transient
@@ -74,20 +71,6 @@ public abstract class Site_VersionStructure
 
     public void setTopographicPlace(TopographicPlace topographicPlace) {
         this.topographicPlace = topographicPlace;
-    }
-
-    /**
-     * Should be removed.
-     */
-    public TopographicPlaceRefStructure getTopographicPlaceRef() {
-        return topographicPlaceRef;
-    }
-
-    /**
-     * NOT for persistance. Should be removed. See TopographicPlace instead.
-     */
-    public void setTopographicPlaceRef(TopographicPlaceRefStructure value) {
-        this.topographicPlaceRef = value;
     }
 
     public SiteTypeEnumeration getSiteType() {

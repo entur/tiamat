@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -22,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
 import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
@@ -61,14 +63,18 @@ public class PublicationDeliveryResource {
         this.publicationDeliveryImporter = publicationDeliveryImporter;
     }
 
+    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
+        return receivePublicationDelivery(inputStream, null);
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
+    public Response receivePublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
+
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
-            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery);
+            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, publicationDeliveryParams);
             return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
         } catch (Exception e) {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);

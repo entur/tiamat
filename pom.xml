@@ -67,6 +67,7 @@
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
         <hazelcast-hibernate5.version>1.2</hazelcast-hibernate5.version>
+        <jaxb-version>2.2.11</jaxb-version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
@@ -122,6 +123,23 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb-version}</version>
+
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-xjc</artifactId>
+            <version>${jaxb-version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.rutebanken.helpers</groupId>
             <artifactId>hazelcast-helper</artifactId>

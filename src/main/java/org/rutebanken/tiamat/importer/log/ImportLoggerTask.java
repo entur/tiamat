@@ -13,15 +13,15 @@ public class ImportLoggerTask extends TimerTask {
     private static final Logger logger = LoggerFactory.getLogger(ImportLoggerTask.class);
 
     private final AtomicInteger stopPlacesCreated;
-    private final long startTime;
+    private long startTime;
     private final int totalStopPlaces;
     private final AtomicInteger topographicPlacesCreated;
     private final String correlationId;
 
-    public ImportLoggerTask(AtomicInteger stopPlacesCreated, int totalStopPlaces,
+    public ImportLoggerTask(AtomicInteger stopPlacesCreatedOrUpdated, int totalStopPlaces,
                             AtomicInteger topographicPlacesCreated, String correlationId) {
 
-        this.stopPlacesCreated = stopPlacesCreated;
+        this.stopPlacesCreated = stopPlacesCreatedOrUpdated;
         this.startTime = System.currentTimeMillis();
         this.totalStopPlaces = totalStopPlaces;
         this.topographicPlacesCreated = topographicPlacesCreated;
@@ -30,6 +30,10 @@ public class ImportLoggerTask extends TimerTask {
 
     @Override
     public void run() {
+        if(stopPlacesCreated.get() == 0) {
+            startTime = System.currentTimeMillis();
+        }
+
         long duration = System.currentTimeMillis() - startTime;
 
         MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, correlationId);

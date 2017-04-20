@@ -2,9 +2,9 @@ package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.junit.Test;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +33,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     @Test
     public void fillGapsInStopPlaces() {
         int explicitIdPostfix = 20000;
-        String explicitId = NetexIdMapper.getNetexId(StopPlace.class.getSimpleName(), String.valueOf(explicitIdPostfix));
+        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), String.valueOf(explicitIdPostfix));
         StopPlace explicitIdStopPlace = new StopPlace();
         explicitIdStopPlace.setNetexId(explicitId);
         explicitIdStopPlace = stopPlaceRepository.save(explicitIdStopPlace);
@@ -43,8 +43,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace giveMeAnyId2 = stopPlaceRepository.save(new StopPlace());
 
         assertThat(explicitIdStopPlace.getNetexId()).isEqualTo(explicitId);
-        assertThat(NetexIdMapper.getNetexIdPostfix(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
-        assertThat(NetexIdMapper.getNetexIdPostfix(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(NetexIdHelper.extractIdPostfix(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(NetexIdHelper.extractIdPostfix(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
     }
 
     @Test

@@ -152,7 +152,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
@@ -222,7 +222,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNull();
 
@@ -294,7 +294,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()));
+        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         AccessibilityLimitation limitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);

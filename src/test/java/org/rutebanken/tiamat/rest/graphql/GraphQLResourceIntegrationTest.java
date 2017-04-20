@@ -342,7 +342,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
-                "  topographicPlace { id topographicPlaceType } " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  } " +
@@ -354,8 +353,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("topographicPlace.id", notNullValue())
-                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
@@ -367,6 +364,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
+        TopographicPlace parentTopographicPlace = new TopographicPlace(new EmbeddableMultilingualString("countyforinstance"));
+        parentTopographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+
+        topographicPlaceRepository.save(parentTopographicPlace);
+        TopographicPlace topographicPlace = createMunicipalityWithCountyRef("somewhere in space", parentTopographicPlace);
 
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlace.setShortName(new EmbeddableMultilingualString("E"));
@@ -374,6 +376,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         stopPlace.setAllAreasWheelchairAccessible(false);
+        stopPlace.setTopographicPlace(topographicPlace);
 
         stopPlaceRepository.save(stopPlace);
 
@@ -408,6 +411,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
+                "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  validBetweens { fromDate toDate } " +
@@ -424,6 +428,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible))
+                    .body("topographicPlace.id", notNullValue())
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
+                    .body("topographicPlace.parentTopographicPlace", notNullValue())
+                    .body("topographicPlace.parentTopographicPlace.id", notNullValue())
+                    .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()))
                     .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
                     .body("validBetweens[0].toDate", comparesEqualTo(toDate));
     }
@@ -747,8 +756,9 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
         if(county != null) {
-            municipality.setParentTopographicPlace(county);
+            municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county));
         }
         topographicPlaceRepository.save(municipality);
         return municipality;

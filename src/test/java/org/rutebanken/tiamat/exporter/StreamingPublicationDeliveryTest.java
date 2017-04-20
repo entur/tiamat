@@ -5,8 +5,8 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.xml.sax.SAXException;
 
@@ -44,7 +44,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -86,7 +86,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -130,7 +130,7 @@ public class StreamingPublicationDeliveryTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
-        stopPlace.setNetexId(NetexIdMapper.generateRandomizedNetexId(stopPlace));
+        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
         stopPlace.setVersion(2L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(1);

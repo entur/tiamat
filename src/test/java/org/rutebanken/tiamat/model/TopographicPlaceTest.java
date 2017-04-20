@@ -41,15 +41,15 @@ public class TopographicPlaceTest extends TiamatIntegrationTest {
         // Municipality
         TopographicPlace nedreEiker = new TopographicPlace();
         nedreEiker.setName(new EmbeddableMultilingualString("Nedre Eiker", "no"));
-        nedreEiker.setParentTopographicPlace(buskerud);
+        nedreEiker.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(buskerud));
 
         topographicPlaceRepository.save(nedreEiker);
 
         TopographicPlace actualNedreEiker = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(nedreEiker.getNetexId());
 
         assertThat(actualNedreEiker).isNotNull();
-        assertThat(actualNedreEiker.getParentTopographicPlace()).isNotNull();
-        assertThat(actualNedreEiker.getParentTopographicPlace().getNetexId()).isEqualTo(buskerud.getNetexId());
+        assertThat(actualNedreEiker.getParentTopographicPlaceRef()).isNotNull();
+        assertThat(actualNedreEiker.getParentTopographicPlaceRef().getRef()).isEqualTo(buskerud.getNetexId());
 
     }
 

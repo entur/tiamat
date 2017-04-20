@@ -40,11 +40,9 @@ public class StopPlaceTopographicRefUpdaterResource {
 
         final Set<String> updatedStopPlaceIds = new ConcurrentHashSet<>();
 
-        final AtomicInteger topographicPlacesCreated = new AtomicInteger();
+        stopPlaceTopographicRefUpdater.update(updatedStopPlaceIds);
 
-        stopPlaceTopographicRefUpdater.update(topographicPlacesCreated, updatedStopPlaceIds);
-
-        logger.info("Returning list of updated stop place IDs {}. Topographic places created: {}", updatedStopPlaceIds, topographicPlacesCreated);
+        logger.info("Returning list of updated stop place IDs {}.", updatedStopPlaceIds);
         return updatedStopPlaceIds;
     }
 
