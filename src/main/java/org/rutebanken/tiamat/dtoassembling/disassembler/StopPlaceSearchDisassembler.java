@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.dtoassembling.disassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class StopPlaceSearchDisassembler {
 
         if(stopPlaceSearchDto.idList != null) {
             stopPlaceSearchBuilder.setNetexIdList(stopPlaceSearchDto.idList.stream()
-                    .filter(nsrId -> nsrId.startsWith(NetexIdMapper.NSR))
+                    .filter(nsrId -> nsrId.startsWith(NetexIdHelper.NSR))
                     .filter(nsrId -> nsrId.toLowerCase().contains(StopPlace.class.getSimpleName().toLowerCase()))
                     .collect(Collectors.toList()));
         }

@@ -17,7 +17,7 @@ public class VersionIncrementor {
     public void incrementVersion(EntityInVersionStructure entity) {
         Long version = entity.getVersion();
 
-        if (version == 0 || version == null) {
+        if (version == null || version < INITIAL_VERSION) {
             version = INITIAL_VERSION;
         } else {
             version++;

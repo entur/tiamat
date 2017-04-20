@@ -7,8 +7,8 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -44,14 +44,14 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
 
         if (stopPlaceSearch.isEmpty()) {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
         } else {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
         }
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
-        return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAll());
+        return exportPublicationDeliveryWithStops(stopPlaceRepository.findAll());
     }
 
     @SuppressWarnings("unchecked")
@@ -60,7 +60,7 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
-                .withParticipantRef(NetexIdMapper.NSR);
+                .withParticipantRef(NetexIdHelper.NSR);
 
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
@@ -70,15 +70,15 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
-        return exportPublicationDeliveryWithoutStops(null);
+        return exportPublicationDeliveryWithStops(null);
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops(Iterable<StopPlace> iterableStopPlaces) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
         siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdMapper.generateRandomizedNetexId(siteFrame));
+        siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 

@@ -1,13 +1,14 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
+import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,12 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
 
     private final GeometryFactory geometryFactory;
 
+    private final DoubleValuesToCoordinateSequence doubleValuesToCoordinateSequence;
+
     @Autowired
-    public LineStringConverter(GeometryFactory geometryFactory) {
+    public LineStringConverter(GeometryFactory geometryFactory, DoubleValuesToCoordinateSequence doubleValuesToCoordinateSequence) {
         this.geometryFactory = geometryFactory;
+        this.doubleValuesToCoordinateSequence = doubleValuesToCoordinateSequence;
     }
 
     @Override
@@ -36,15 +40,9 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
             checkSrsDimension(lineStringType);
 
             List<Double> values = lineStringType.getPosList().getValue();
-            Coordinate[] coordinates = new Coordinate[values.size()/2];
-            int coordinateIndex = 0;
-            for (int index = 0; index < values.size(); index += 2) {
-                Coordinate coordinate = new Coordinate(values.get(index), values.get(index+1));
-                logger.debug("Parsed coordinate: {}", coordinate);
-                coordinates[coordinateIndex++] = coordinate;
-            }
 
-            LineString lineString = new LineString(new CoordinateArraySequence(coordinates), geometryFactory);
+            CoordinateSequence coordinateSequence = doubleValuesToCoordinateSequence.convert(values);
+            LineString lineString = new LineString(coordinateSequence, geometryFactory);
 
             return lineString;
         }

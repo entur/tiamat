@@ -95,23 +95,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(newVersion.getChanged()).isNotNull();
     }
 
-    @Test
-    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setVersion(1L);
-
-        Quay quay = new Quay();
-        quay.setVersion(1L);
-
-        stopPlace.getQuays().add(quay);
-
-        stopPlaceRepository.save(stopPlace);
-
-        StopPlace newVersion = versionCreator.createCopy(stopPlace);
-        newVersion = versionCreator.initiateOrIncrementVersions(newVersion);
-        assertThat(newVersion.getQuays()).isNotEmpty();
-        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
-    }
 
     @Ignore // Should be testing future path link saver service
     @Test
@@ -167,7 +150,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         ZonedDateTime beforeCreated = ZonedDateTime.now();
         System.out.println(beforeCreated);
 
-        StopPlace newVersion = versionCreator.createCopy(oldVersion);
+        StopPlace newVersion = versionCreator.createCopy(oldVersion, StopPlace.class);
 
         oldVersion = versionCreator.terminateVersion(oldVersion, ZonedDateTime.now());
 

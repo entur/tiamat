@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -30,4 +32,13 @@ public class CountryRef implements Serializable{
         this.ref = value;
     }
 
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("value", value)
+                .add("ref", ref)
+                .toString();
+    }
 }

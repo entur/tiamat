@@ -15,6 +15,7 @@ import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -117,17 +118,15 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getTopographicPlaceRef().getVersion()).isEqualTo(String.valueOf(topographicPlace.getVersion()));
     }
 
-    @Ignore
     @Test
     public void mapStopPlaceToInternalWithId() throws Exception {
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
-        String stopPlaceId = "1339";
-        netexStopPlace.setId("NSR:StopPlace:" + stopPlaceId);
+        netexStopPlace.setId("NSR:StopPlace:1339");
 
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getNetexId()).isEqualTo(stopPlaceId);
+        assertThat(tiamatStopPlace.getNetexId()).isEqualTo(netexStopPlace.getId());
     }
 
     @Test
@@ -284,7 +283,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         county.setNetexId("1L");
 
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
-        municipality.setParentTopographicPlace(county);
+        municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county));
         municipality.setNetexId("2L");
 
         tiamatSiteFrame
@@ -310,7 +309,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void  mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
+    public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
         netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
 
@@ -346,7 +345,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         TopographicPlace tiamatMunicipality = new TopographicPlace(new EmbeddableMultilingualString(municipality.getName().getValue()));
         tiamatMunicipality.setNetexId(municipality.getId());
-        tiamatMunicipality.setParentTopographicPlace(tiamatCounty);
+        tiamatMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(tiamatCounty));
         topographicPlaceRepository.save(tiamatMunicipality);
 
 
@@ -357,11 +356,10 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         TopographicPlace actualTiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
         assertThat(actualTiamatMunicipality).isNotNull();
-        assertThat(actualTiamatMunicipality.getParentTopographicPlace())
+        assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef())
                 .describedAs("The municipality should have a parent topographic place").isNotNull();
-        assertThat(actualTiamatMunicipality.getParentTopographicPlace().getNetexId()).isEqualTo(county.getId());
+        assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getId());
     }
-
 
 
     @Test

@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
+import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
@@ -110,7 +111,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         String stopPlaceName = null;
         for (int i = 0; i < 3; i++) {
             stopPlaceName = "test " + i;
-            StopPlace sp = stopPlaceVersionedSaverService.createCopy(actualStopPlace);
+            StopPlace sp = stopPlaceVersionedSaverService.createCopy(actualStopPlace, StopPlace.class);
             sp.setName(new EmbeddableMultilingualString(stopPlaceName));
             actualStopPlace = stopPlaceVersionedSaverService.saveNewVersion(actualStopPlace, sp);
 
@@ -154,7 +155,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
             fail("Saving the same version as new version is not allowed");
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).isEqualTo("Existing and new StopPlace must be different objects");
+            assertThat(e.getMessage()).isEqualTo("Existing and new version must be different objects");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
@@ -205,7 +206,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
@@ -230,7 +231,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
 
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
@@ -238,6 +239,22 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
 
+    @Test
+    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
 
+        Quay quay = new Quay();
+        quay.setVersion(1L);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
+        assertThat(newVersion.getQuays()).isNotEmpty();
+        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
+    }
 
 }

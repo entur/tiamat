@@ -60,7 +60,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
                 .withRef(topographicPlace.getNetexId())
                 .withVersion(String.valueOf(topographicPlace.getVersion()));
 
-        logger.info("Mapped topographic place ref structure: {}", topographicPlaceRefStructure);
+        logger.debug("Mapped topographic place ref structure: {}", topographicPlaceRefStructure);
 
         return topographicPlaceRefStructure;
     }

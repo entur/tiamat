@@ -3,11 +3,13 @@ package org.rutebanken.tiamat.rest.graphql;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Link;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,8 @@ import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateS
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
-public class StopPlaceRegisterGraphQLSchema {
+public class
+StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
@@ -39,6 +42,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private EntityRefObjectTypeCreator entityRefObjectTypeCreator;
+
+    @Autowired
+    private TopographicPlaceObjectTypeCreator topographicPlaceObjectTypeCreator;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -110,7 +116,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
 
-        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType);
+        GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
+
+        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType, topographicPlaceObjectType);
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -332,7 +340,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
 
     private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList,
-                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType) {
+                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType,
+                                                        GraphQLObjectType topographicPlaceObjectType) {
         return newObject()
                     .name(OUTPUT_TYPE_STOPPLACE)
                     .fields(commonFieldsList)

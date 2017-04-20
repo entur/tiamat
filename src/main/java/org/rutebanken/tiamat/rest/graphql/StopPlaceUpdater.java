@@ -6,7 +6,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
@@ -80,7 +80,7 @@ class StopPlaceUpdater implements DataFetcher {
                 logger.info("Updating StopPlace {}", netexId);
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
-                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion);
+                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
             } else {
                 logger.info("Creating new StopPlace");
@@ -206,7 +206,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             if (entity instanceof StopPlace) {
                 try {
-                    countyAndMunicipalityLookupService.populateCountyAndMunicipality((StopPlace) entity, createdTopographicPlaceCounter);
+                    countyAndMunicipalityLookupService.populateCountyAndMunicipality((StopPlace) entity);
                 } catch (Exception e) {
                     logger.warn("Setting TopographicPlace on StopPlace failed", e);
                 }

@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -113,11 +112,7 @@ public class CoordinatesFixerResource {
                                 });
                             }
 
-                            try {
-                                countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace, topographicPlacesCreated);
-                            } catch (InterruptedException e) {
-                                logger.warn("Interruped while looking up count and municipality", e);
-                            }
+                            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
 
                             logger.info("Saving stop place {}", stopPlace);
                             updatedStopPlaceIds.add(stopPlace.getNetexId());
