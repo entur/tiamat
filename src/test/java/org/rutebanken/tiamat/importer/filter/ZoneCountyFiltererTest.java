@@ -33,6 +33,8 @@ public class ZoneCountyFiltererTest extends TiamatIntegrationTest {
         LinearRing linearRing = new LinearRing(new CoordinateArraySequence(geometry.getCoordinates()), geometryFactory);
         county1.setPolygon(geometryFactory.createPolygon(linearRing, null));
 
+        System.out.println("Polygon for county is:"+county1.getPolygon().toString());
+
         topographicPlaceRepository.save(county1);
 
         StopPlace stopPlace = new StopPlace();
@@ -40,11 +42,11 @@ public class ZoneCountyFiltererTest extends TiamatIntegrationTest {
 
         List<? extends Zone_VersionStructure> list = zoneCountyFilterer.filterByCountyMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace));
 
-        assertThat(list).hasSize(1);
+        assertThat(list).as("List of stops filtered by county").hasSize(1);
 
         list = zoneCountyFilterer.filterByCountyMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace), true);
 
-        assertThat(list).isEmpty();
+        assertThat(list).as("Negated list of stops not in county").isEmpty();
 
     }
 
