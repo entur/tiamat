@@ -71,7 +71,7 @@ public class ZoneCountyFilterer {
                         logger.info("Keeping {}. Negate: {}", zone, negate);
                         return true;
                     } else {
-                        logger.info("Filtering out {}. Negate: {}", zone, negate);
+                        logger.info("Filtering out {}. County references: {}. Negate: {}", zone, countyReferences, negate);
                         return false;
                     }
                 })

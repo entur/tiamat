@@ -23,7 +23,7 @@ public class GenericAuthorizationService implements AuthorizationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(GenericAuthorizationService.class);
 
-	@Value("${authorization.enabled:false}")
+	@Value("${authorization.enabled:true}")
 	protected boolean authorizationEnabled;
 
 	@Value("${administrative.zone.id.prefix:KVE:TopographicPlace}")

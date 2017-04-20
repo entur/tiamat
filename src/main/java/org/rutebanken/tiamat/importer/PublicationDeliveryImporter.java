@@ -132,9 +132,10 @@ public class PublicationDeliveryImporter {
                 List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
                 tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
 
+                int numberOfStopBeforeFiltering = tiamatStops.size();
                 logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
                 tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
-                logger.info("Got {} stops after filtering by: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
+                logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.onlyImportStopsInCounties);
 
                 final Collection<org.rutebanken.netex.model.StopPlace> importedNetexStopPlaces;
                 logger.info("The import type is: {}", publicationDeliveryParams.importType);
