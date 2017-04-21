@@ -75,9 +75,10 @@ public class CountyAndMunicipalityLookupService {
             public List<Pair<String, Polygon>> get() {
                 logger.info("Fetching topographic places from repository");
                 return topographicPlaceRepository.findAllMaxVersion()
-                        .stream()
-                        .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getPolygon()))
-                        .collect(toList());
+                               .stream()
+                               .filter(topographicPlace -> topographicPlace.getPolygon() != null)
+                               .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getPolygon()))
+                               .collect(toList());
             }
         };
     }
