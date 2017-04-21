@@ -1,19 +1,14 @@
 package org.rutebanken.tiamat.netex.mapping;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +57,29 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
+                .customize(new CustomMapper<StopPlace, org.rutebanken.tiamat.model.StopPlace>() {
+                    @Override
+                    public void mapAtoB(StopPlace stopPlace, org.rutebanken.tiamat.model.StopPlace stopPlace2, MappingContext context) {
+                        super.mapAtoB(stopPlace, stopPlace2, context);
+                        if (stopPlace.getPlaceEquipments() != null &&
+                                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
+                                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
+                            stopPlace.setPlaceEquipments(null);
+                            stopPlace2.setPlaceEquipments(null);
+                        }
+                    }
+
+                    @Override
+                    public void mapBtoA(org.rutebanken.tiamat.model.StopPlace stopPlace, StopPlace stopPlace2, MappingContext context) {
+                        super.mapBtoA(stopPlace, stopPlace2, context);
+                        if (stopPlace.getPlaceEquipments() != null &&
+                                stopPlace.getPlaceEquipments().getInstalledEquipment() != null &&
+                                stopPlace.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
+                            stopPlace.setPlaceEquipments(null);
+                            stopPlace2.setPlaceEquipments(null);
+                        }
+                    }
+                })
                 .byDefault()
                 .register();
 
