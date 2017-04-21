@@ -36,7 +36,9 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                 .collect(Collectors.toList());
         List<org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(netexInstalledEquipmentList, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class, context);
 
-        placeEquipment.getInstalledEquipment().addAll(installedEquipment_versionStructures);
+        if (!installedEquipment_versionStructures.isEmpty()) {
+            placeEquipment.getInstalledEquipment().addAll(installedEquipment_versionStructures);
+        }
     }
 
     @Override
@@ -64,7 +66,9 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                 .collect(Collectors.toList());
 
 
-        placeEquipments_relStructure.getInstalledEquipmentRefOrInstalledEquipment().addAll(jaxbElements);
+        if (!jaxbElements.isEmpty()) {
+            placeEquipments_relStructure.getInstalledEquipmentRefOrInstalledEquipment().addAll(jaxbElements);
+        }
 
 
     }
