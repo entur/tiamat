@@ -7,9 +7,7 @@ import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest{
 
@@ -79,6 +77,38 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
 
     }
+
+    @Test
+    public void getTopographicPlaceByNameNoMatch() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setName(new EmbeddableMultilingualString("Oppfold"));
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+
+
+        topographicPlaceRepository.save(topographicPlace);
+
+        String query = "{" +
+                "\"query\":\"" +
+                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"SomethingElse\\\") {" +
+                "    id" +
+                "    name {" +
+                "      value" +
+                "      __typename" +
+                "    }" +
+                "    topographicPlaceType" +
+                "    __typename" +
+                "  }" +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        System.out.println(query);
+
+        executeGraphQL(query)
+                .body("data.topographicPlace ", hasSize(0));
+
+    }
+
 
     @Test
     public void getTopographicPlaceByType() {
