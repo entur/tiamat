@@ -70,11 +70,12 @@ public class AsyncPublicationDeliveryExporter {
         exportService.submit(new Runnable() {
             @Override
             public void run() {
-                logger.info("Started export job {}", exportJob);
-                PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
-                logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
 
                 try {
+                    logger.info("Started export job {}", exportJob);
+                    PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
+                    logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
+
                     logger.info("About to add stop places?");
 
                     final PipedInputStream in = new PipedInputStream();
