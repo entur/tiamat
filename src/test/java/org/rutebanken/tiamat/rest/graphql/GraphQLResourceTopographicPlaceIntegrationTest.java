@@ -61,7 +61,7 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         String query = "{" +
                 "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"Vestfold\\\") {" +
+                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"vestfolD\\\") {" +
                 "    id" +
                 "    name {" +
                 "      value" +
