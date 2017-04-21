@@ -48,4 +48,90 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
 
     }
+
+    @Test
+    public void getTopographicPlaceByName() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setName(new EmbeddableMultilingualString("Vestfold"));
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+
+
+        topographicPlaceRepository.save(topographicPlace);
+
+        String query = "{" +
+                "\"query\":\"" +
+                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"Vestfold\\\") {" +
+                "    id" +
+                "    name {" +
+                "      value" +
+                "      __typename" +
+                "    }" +
+                "    topographicPlaceType" +
+                "    __typename" +
+                "  }" +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        System.out.println(query);
+
+        executeGraphQL(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+
+    }
+
+    @Test
+    public void getTopographicPlaceByType() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+
+
+        topographicPlaceRepository.save(topographicPlace);
+
+        String query = "{" +
+                "\"query\":\"" +
+                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (topographicPlaceType: county) {" +
+                "    id" +
+                "    topographicPlaceType" +
+                "    __typename" +
+                "  }" +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        System.out.println(query);
+
+        executeGraphQL(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+    }
+
+    @Test
+    public void getTopographicPlaceByTypeAndName() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        topographicPlace.setName(new EmbeddableMultilingualString("Somewhere"));
+
+
+        topographicPlaceRepository.save(topographicPlace);
+
+        String query = "{" +
+                "\"query\":\"" +
+                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (topographicPlaceType: county, query: \\\"Somewhere\\\") {" +
+                "    id" +
+                "    name {" +
+                "      value" +
+                "      __typename" +
+                "    }" +
+                "    topographicPlaceType" +
+                "    __typename" +
+                "  }" +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        System.out.println(query);
+
+        executeGraphQL(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+    }
 }
