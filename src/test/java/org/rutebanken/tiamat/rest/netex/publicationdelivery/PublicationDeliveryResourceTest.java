@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -887,6 +886,102 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "                     <TicketCounterService>true</TicketCounterService>\n" +
                 "                  </TicketingService>\n" +
                 "               </localServices>\n" +
+                "               <StopPlaceType>railStation</StopPlaceType>\n" +
+                "               <Weighting>interchangeAllowed</Weighting>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"NSB:Quay:0076021461\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>grails-platformId</Key>\n" +
+                "                           <Value>825930</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>uicCode</Key>\n" +
+                "                           <Value>7602146</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                           <Latitude>58.465256</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <PublicCode>1</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void importNSBStopPlaceWithTicketValidatorEquipment() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>grailsId</Key>\n" +
+                "                     <Value>3</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>lisaId</Key>\n" +
+                "                     <Value>2146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>jbvCode</Key>\n" +
+                "                     <Value>ADL</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>iffCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>uicCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761037602</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"no\">Arendal</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                     <Latitude>58.465256</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>\n" +
+                "               <placeEquipments>\n" +
+                "                  <TicketValidatorEquipment id=\"NSB:TicketValidatorEquipment:88\" version=\"1\">\n" +
+                "                     <TicketValidatorType>contactLess</TicketValidatorType>\n" +
+                "                  </TicketValidatorEquipment>\n" +
+                "               </placeEquipments>\n" +
                 "               <StopPlaceType>railStation</StopPlaceType>\n" +
                 "               <Weighting>interchangeAllowed</Weighting>\n" +
                 "               <quays>\n" +
