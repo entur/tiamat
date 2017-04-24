@@ -87,6 +87,29 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
+                .customize(new CustomMapper<Quay, org.rutebanken.tiamat.model.Quay>() {
+                    @Override
+                    public void mapAtoB(Quay quay, org.rutebanken.tiamat.model.Quay quay2, MappingContext context) {
+                        super.mapAtoB(quay, quay2, context);
+                        if (quay.getPlaceEquipments() != null &&
+                                quay.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
+                                quay.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
+                            quay.setPlaceEquipments(null);
+                            quay2.setPlaceEquipments(null);
+                        }
+                    }
+
+                    @Override
+                    public void mapBtoA(org.rutebanken.tiamat.model.Quay quay, Quay quay2, MappingContext context) {
+                        super.mapBtoA(quay, quay2, context);
+                        if (quay.getPlaceEquipments() != null &&
+                                quay.getPlaceEquipments().getInstalledEquipment() != null &&
+                                quay.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
+                            quay.setPlaceEquipments(null);
+                            quay2.setPlaceEquipments(null);
+                        }
+                    }
+                })
                 .byDefault()
                 .register();
 
