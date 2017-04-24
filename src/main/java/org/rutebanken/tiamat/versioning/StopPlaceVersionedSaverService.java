@@ -67,7 +67,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         // Save latest version
         stopPlaceToSave = initiateOrIncrementVersions(stopPlaceToSave);
-        countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlaceToSave);
+        countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlaceToSave);
         stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
         return stopPlaceToSave;
     }

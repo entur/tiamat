@@ -25,7 +25,7 @@ public class StopPlaceTopographicRefUpdater {
         if (stopPlace.getTopographicPlace() == null) {
             logger.info("Stop Place does not have reference to topographic place: {}", stopPlace);
 
-            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+            countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlace);
             stopPlaceRepository.save(stopPlace);
             return true;
         }

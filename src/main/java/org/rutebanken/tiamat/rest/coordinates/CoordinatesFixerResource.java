@@ -112,7 +112,7 @@ public class CoordinatesFixerResource {
                                 });
                             }
 
-                            countyAndMunicipalityLookupService.populateCountyAndMunicipality(stopPlace);
+                            countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlace);
 
                             logger.info("Saving stop place {}", stopPlace);
                             updatedStopPlaceIds.add(stopPlace.getNetexId());
