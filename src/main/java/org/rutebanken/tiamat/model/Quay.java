@@ -82,6 +82,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         return MoreObjects.toStringHelper(this)
                 .omitNullValues()
                 .add("id", id)
+                .add("version", version)
                 .add("name", name)
                 .add("centroid", centroid)
                 .add("bearing", compassBearing)
