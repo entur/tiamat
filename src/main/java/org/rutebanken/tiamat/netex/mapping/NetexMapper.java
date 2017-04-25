@@ -208,6 +208,7 @@ public class NetexMapper {
         converters.add(new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory()));
         converters.add(new KeyValuesToKeyListConverter());
         converters.add(new AccessibilityLimitationsListConverter());
+        converters.add(new TariffZonesConverter());
 //        converters.add(new PathLinkEndConverter());
         return converters;
     }
