@@ -81,6 +81,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		return getOneOrNull(query);
 	}
 
+	@Override
+	public String findNearbyStopPlace(Envelope envelope, String name) {
+		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+		TypedQuery<String> query = entityManager
+				.createQuery("SELECT s.netexId FROM StopPlace s " +
+						"WHERE within(s.centroid, :filter) = true " +
+						"AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
+						"AND s.name.value = :name ",
+						String.class);
+		query.setParameter("filter", geometryFilter);
+		query.setParameter("name", name);
+		return getOneOrNull(query);
+	}
+
 	private <T> T getOneOrNull(TypedQuery<T> query) {
 		try {
 			List<T> resultList = query.getResultList();

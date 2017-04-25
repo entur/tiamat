@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 
 import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,11 +93,11 @@ public class PublicationDeliveryTestHelper {
                 .peek(keyValueStructure -> System.out.println(keyValueStructure))
                 .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
                 .map(keyValueStructure -> keyValueStructure.getValue())
+                .map(value -> value.split(","))
+                .flatMap(values -> Stream.of(values))
+                .filter(value -> value.equals(expectedId))
                 .collect(Collectors.toList());
-        assertThat(list).hasSize(1);
-        String originalIdString = list.get(0);
-        assertThat(originalIdString).isNotEmpty();
-        assertThat(originalIdString).isEqualTo(expectedId);
+        assertThat(list).as("Matching original ID "+expectedId).hasSize(1);
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -143,7 +145,11 @@ public class PublicationDeliveryTestHelper {
     }
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
-        Response response = postPublicationDelivery(publicationDeliveryStructure);
+        return postAndReturnPublicationDelivery(publicationDeliveryStructure, null);
+    }
+
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
+        Response response = postPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
 
         if(! (response.getEntity() instanceof StreamingOutput)) {
             throw new RuntimeException("Response is not instance of streaming output: "+response);
@@ -179,7 +185,7 @@ public class PublicationDeliveryTestHelper {
 
     }
 
-    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
+    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = new ObjectFactory().createPublicationDelivery(publicationDeliveryStructure);
@@ -189,7 +195,7 @@ public class PublicationDeliveryTestHelper {
         marshaller.marshal(jaxPublicationDelivery, outputStream);
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-        return publicationDeliveryResource.receivePublicationDelivery(inputStream);
+        return publicationDeliveryResource.receivePublicationDelivery(inputStream, publicationDeliveryParams);
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {
