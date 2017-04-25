@@ -40,16 +40,17 @@ public class CentroidComputer {
 
                 stopPlace.getQuays().forEach(quay -> {
                     try {
-                        double distanceInMeters = JTS.orthodromicDistance(
-                                quay.getCentroid().getCoordinate(),
-                                stopPlace.getCentroid().getCoordinate(),
-                                DefaultGeographicCRS.WGS84);
+                        if(quay.getCentroid() != null) {
+                            double distanceInMeters = JTS.orthodromicDistance(
+                                    quay.getCentroid().getCoordinate(),
+                                    stopPlace.getCentroid().getCoordinate(),
+                                    DefaultGeographicCRS.WGS84);
 
-                        if(distanceInMeters > 100) {
-                            logger.warn("Calculated stop place centroid {} which is {} meters from quay centroid {} for stop place {}",
-                                    stopPlace.getCentroid(), distanceInMeters, quay.getCentroid(), stopPlace);
+                            if (distanceInMeters > 100) {
+                                logger.warn("Calculated stop place centroid {} which is {} meters from quay centroid {} for stop place {}",
+                                        stopPlace.getCentroid(), distanceInMeters, quay.getCentroid(), stopPlace);
+                            }
                         }
-
                     } catch (TransformException e) {
                         logger.warn("Could not determine orthodromic distance between quay and stop place {}", stopPlace);
                     }
