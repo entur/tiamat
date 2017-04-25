@@ -36,7 +36,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
      * When importing multiple stop places and those exists, make sure no Lazy Initialization Exception is thrown.
      */
     @Test
-    public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
+    public void publicationDeliveriesWithDuplicateStopPlace() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:123123")
@@ -65,6 +65,44 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+    }
+
+    @Test
+    public void publicationDeliveriesWithBusStationStopAndOnStreetBus() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123123")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:987654321")
+                .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
     }
 
     /**

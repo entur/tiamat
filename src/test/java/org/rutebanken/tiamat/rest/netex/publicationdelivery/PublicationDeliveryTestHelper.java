@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,11 +92,11 @@ public class PublicationDeliveryTestHelper {
                 .peek(keyValueStructure -> System.out.println(keyValueStructure))
                 .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
                 .map(keyValueStructure -> keyValueStructure.getValue())
+                .map(value -> value.split(","))
+                .flatMap(values -> Stream.of(values))
+                .filter(value -> value.equals(expectedId))
                 .collect(Collectors.toList());
-        assertThat(list).hasSize(1);
-        String originalIdString = list.get(0);
-        assertThat(originalIdString).isNotEmpty();
-        assertThat(originalIdString).isEqualTo(expectedId);
+        assertThat(list).as("Matching original ID "+expectedId).hasSize(1);
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
