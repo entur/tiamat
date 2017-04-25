@@ -11,6 +11,9 @@ public class TariffZoneRef extends ZoneRefStructure {
     @GeneratedValue(generator="sequence_per_table_generator")
     private Long id;
 
+    public TariffZoneRef() {
+    }
+
     public TariffZoneRef(TariffZone tariffZone) {
         this.setRef(tariffZone.getNetexId());
         this.setVersion(String.valueOf(tariffZone.getVersion()));
