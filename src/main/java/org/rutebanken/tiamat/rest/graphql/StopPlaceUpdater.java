@@ -207,7 +207,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             if (entity instanceof StopPlace) {
                 try {
-                    countyAndMunicipalityLookupService.populateCountyAndMunicipality((StopPlace) entity);
+                    countyAndMunicipalityLookupService.populateTopographicPlaceRelation((StopPlace) entity);
                 } catch (Exception e) {
                     logger.warn("Setting TopographicPlace on StopPlace failed", e);
                 }
