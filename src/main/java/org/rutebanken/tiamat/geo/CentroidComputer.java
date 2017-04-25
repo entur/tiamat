@@ -3,6 +3,9 @@ package org.rutebanken.tiamat.geo;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -34,6 +37,25 @@ public class CentroidComputer {
             stopPlace.setCentroid(point);
             if(changed) {
                 logger.debug("Created centroid {} for stop place based on quays. {}", point, stopPlace);
+
+                stopPlace.getQuays().forEach(quay -> {
+                    try {
+                        double distanceInMeters = JTS.orthodromicDistance(
+                                quay.getCentroid().getCoordinate(),
+                                stopPlace.getCentroid().getCoordinate(),
+                                DefaultGeographicCRS.WGS84);
+
+                        if(distanceInMeters > 100) {
+                            logger.warn("Calculated stop place centroid {} which is {} meters from quay centroid {} for stop place {}",
+                                    stopPlace.getCentroid(), distanceInMeters, quay.getCentroid(), stopPlace);
+                        }
+
+                    } catch (TransformException e) {
+                        logger.warn("Could not determine orthodromic distance between quay and stop place {}", stopPlace);
+                    }
+                });
+
+
             }
             return changed;
         }
