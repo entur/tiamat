@@ -19,7 +19,7 @@ public class ValidPrefixList {
     private final List<String> validPrefixForClaiming;
 
     @Autowired
-    public ValidPrefixList(@Value("${netex.id.valid.prefix.list:NSR,KVE}") String[] list) {
+    public ValidPrefixList(@Value("${netex.id.valid.prefix.list:NSR,KVE,WOF}") String[] list) {
         this.validPrefixForClaiming = ImmutableList.copyOf(list);
         logger.info("Valid prefixes for claiming explicit IDs: {}", validPrefixForClaiming);
     }
