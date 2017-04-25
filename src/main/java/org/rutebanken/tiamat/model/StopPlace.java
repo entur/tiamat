@@ -283,6 +283,8 @@ public class StopPlace
         return MoreObjects.toStringHelper(this)
                 .omitNullValues()
                 .add("id", id)
+                .add("netexId", netexId)
+                .add("version", version)
                 .add("name", name)
                 .add("stopPlaceType", stopPlaceType)
                 .add("centroid", centroid)

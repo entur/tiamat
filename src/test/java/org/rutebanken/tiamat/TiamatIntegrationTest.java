@@ -5,13 +5,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -22,6 +21,9 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    protected StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
     protected TopographicPlaceRepository topographicPlaceRepository;
