@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
+import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -103,6 +105,46 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+    }
+
+    @Test
+    public void allowOtherWhenMatchingExistingStopPlacesWithImportTypeMATCH() throws Exception {
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:987978")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+        StopPlace incomingStopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123546789")
+                .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.OTHER)
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(incomingStopPlace);
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.get(0));
     }
 
     /**

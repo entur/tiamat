@@ -54,6 +54,10 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     @Override
     public StopPlace find(StopPlace stopPlace) {
+        return find(stopPlace, false);
+    }
+
+    public StopPlace find(StopPlace stopPlace, boolean allowOther) {
 
         if(!stopPlace.hasCoordinates()) {
             return null;
@@ -67,17 +71,24 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
         try {
             Optional<String> stopPlaceNetexId = nearbyStopCache.get(createKey(stopPlace), () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
-                String matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), stopPlace.getStopPlaceType());
 
-                if(matchingStopPlaceId == null) {
-                    List<StopTypeEnumeration> alternativeTypes = alternativeTypesMap.get(stopPlace.getStopPlaceType());
+                String matchingStopPlaceId;
+                if(stopPlace.getStopPlaceType().equals(StopTypeEnumeration.OTHER) && allowOther) {
+                    // Allow finding stop places of any type if stop place type is other and allowOther is true
+                    matchingStopPlaceId =  stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
+                } else {
+                    matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), stopPlace.getStopPlaceType());
 
-                    if(alternativeTypes != null) {
-                        for (StopTypeEnumeration alternativeType : alternativeTypes) {
-                            matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), alternativeType);
-                            if (matchingStopPlaceId != null) {
-                                logger.info("Found matching stop place based on alternative type {} from type {}", alternativeType, stopPlace.getStopPlaceType());
-                                break;
+                    if (matchingStopPlaceId == null) {
+                        List<StopTypeEnumeration> alternativeTypes = alternativeTypesMap.get(stopPlace.getStopPlaceType());
+
+                        if (alternativeTypes != null) {
+                            for (StopTypeEnumeration alternativeType : alternativeTypes) {
+                                matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), alternativeType);
+                                if (matchingStopPlaceId != null) {
+                                    logger.info("Found matching stop place based on alternative type {} from type {}", alternativeType, stopPlace.getStopPlaceType());
+                                    break;
+                                }
                             }
                         }
                     }
