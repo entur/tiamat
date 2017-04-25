@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.versioning;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.ValidBetweenRepository;
 import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
@@ -22,6 +23,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final StopPlaceRepository stopPlaceRepository;
 
+    private final ValidBetweenRepository validBetweenRepository;
+
     private final VersionCreator versionCreator;
 
     private final AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
@@ -30,10 +33,12 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
+                                          ValidBetweenRepository validBetweenRepository,
                                           VersionCreator versionCreator,
                                           AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
                                           CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
@@ -58,11 +63,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             stopPlaceToSave.setChanged(ZonedDateTime.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
-            logger.debug("About terminate previous version of {}", existingVersion.getNetexId());
+            logger.debug("About to terminate previous version of {}", existingVersion.getNetexId());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(existingVersion.getNetexId(), existingVersion.getVersion());
             logger.debug("Invalidate existing version for {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             existingStopPlace = versionCreator.terminateVersion(existingStopPlace, ZonedDateTime.now());
-            stopPlaceRepository.save(existingStopPlace);
+
+            if (existingStopPlace.getValidBetweens() != null && !existingStopPlace.getValidBetweens().isEmpty()) {
+                validBetweenRepository.save(existingStopPlace.getValidBetweens());
+            }
         }
 
         // Save latest version
@@ -82,7 +90,18 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         versionCreator.initiateOrIncrement(stopPlace);
         initiateOrIncrementVersionsForChildren(stopPlace);
         ZonedDateTime now = ZonedDateTime.now();
-        stopPlace.getValidBetweens().add(new ValidBetween(now));
+
+        ValidBetween validBetween;
+        if (!stopPlace.getValidBetweens().isEmpty()) {
+            validBetween = stopPlace.getValidBetweens().get(0);
+        } else {
+            validBetween = new ValidBetween();
+            stopPlace.getValidBetweens().add(validBetween);
+        }
+
+        validBetween.setFromDate(now);
+        validBetween.setToDate(null);
+
         return stopPlace;
     }
 

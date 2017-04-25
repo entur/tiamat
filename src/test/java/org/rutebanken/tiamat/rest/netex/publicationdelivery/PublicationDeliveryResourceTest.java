@@ -67,6 +67,65 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
 
+
+    /**
+     * When sending a stop place wmultiple times with separate 'imported ids' - all 'imported ids' should be kept
+     */
+    @Test
+    public void publicationDeliveryWithImportedIdUpdates() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:1234")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+        StopPlace stopPlace3 = new StopPlace()
+                .withId("RUT:StopPlace:12345")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response2 = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
+
+        PublicationDeliveryStructure publicationDelivery3 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace3);
+        PublicationDeliveryStructure response3 = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery3);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+        List<StopPlace> result2 = publicationDeliveryTestHelper.extractStopPlaces(response2);
+        List<StopPlace> result3 = publicationDeliveryTestHelper.extractStopPlaces(response3);
+
+        assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result2).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result3).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result3.get(0).getVersion()).isEqualTo("3");
+    }
+
+
     /**
      * Real life example: Two stops with different IDs should be merged into one, and their quays should be added.
      *
@@ -1002,6 +1061,215 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "                        </Location>\n" +
                 "                     </Centroid>\n" +
                 "                     <PublicCode>1</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void importBrakarStopPlaceWithGeneralSignEquipment() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "           <StopPlace id=\"BRA:StopPlace:06021002\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761023202</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"nb\">Bragernes torg</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"EPSG:4326\">\n" +
+                "                     <Longitude>10.203912</Longitude>\n" +
+                "                     <Latitude>59.743416</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <StopPlaceType>busStation</StopPlaceType>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100201\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023206</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203526</Longitude>\n" +
+                "                           <Latitude>59.7432</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100201\" version=\"1\">\n" +
+                "                        <RoadName>v/Barista</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100201\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100201\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100201\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som papiroppslag--><GeneralSign id=\"BRA:HeadSign:0602100201\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">Timetable</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>A</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100202\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023204</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203558</Longitude>\n" +
+                "                           <Latitude>59.74361</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100202\" version=\"1\">\n" +
+                "                        <RoadName>Øvre Storgate</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100202\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100202\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som digital skjerm--><GeneralSign id=\"BRA:HeadSign:0602100202\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">RealtimeMonitor</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>B</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100203\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023205</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203966</Longitude>\n" +
+                "                           <Latitude>59.74358</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100203\" version=\"1\">\n" +
+                "                        <RoadName>mot torget</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100203\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100203\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100203\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som digital skjerm--><GeneralSign id=\"BRA:HeadSign:0602100203\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">RealtimeMonitor</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>C</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100204\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023203</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.204596</Longitude>\n" +
+                "                           <Latitude>59.743267</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100204\" version=\"1\">\n" +
+                "                        <RoadName>v/Børsen</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100204\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100204\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100204\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som papiroppslag--><GeneralSign id=\"BRA:HeadSign:0602100204\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">Timetable</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>D</PublicCode>\n" +
                 "                  </Quay>\n" +
                 "               </quays>\n" +
                 "            </StopPlace>\n" +
