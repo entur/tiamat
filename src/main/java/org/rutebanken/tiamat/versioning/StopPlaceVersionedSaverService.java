@@ -99,8 +99,10 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             stopPlace.getValidBetweens().add(validBetween);
         }
 
-        validBetween.setFromDate(now);
-        validBetween.setToDate(null);
+        if (validBetween.getFromDate() == null) {
+            validBetween.setFromDate(now);
+            validBetween.setToDate(null);
+        }
 
         return stopPlace;
     }
