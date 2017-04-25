@@ -49,6 +49,11 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
 
         List<JAXBElement<? extends org.rutebanken.netex.model.InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
                 .stream()
+                .filter(equipment -> (equipment instanceof SanitaryEquipment |
+                        equipment instanceof TicketingEquipment |
+                        equipment instanceof WaitingRoomEquipment |
+                        equipment instanceof CycleStorageEquipment |
+                        equipment instanceof ShelterEquipment))
                 .map(equipment -> {
                     if (equipment instanceof SanitaryEquipment) {
                         return objectFactory.createSanitaryEquipment((SanitaryEquipment) equipment);

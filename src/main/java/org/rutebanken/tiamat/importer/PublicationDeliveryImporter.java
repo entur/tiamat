@@ -146,7 +146,7 @@ public class PublicationDeliveryImporter {
                     }
                 } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                     importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-                } else if(publicationDeliveryParams.importType.equals(ImportType.ORIGINAL_ID_MATCH)) {
+                } else if(publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
                     if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
                         logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
                         tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);

@@ -95,13 +95,13 @@ public class ReproduceDuplicateKeysException {
                         .withQuayRefOrQuay(
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 1"))
-                                        .withId("XYZ:Quay1")
+                                        .withId("XYZ:Quay:1")
                                         .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location)),
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 2"))
-                                        .withId("XYZ:Quay2")
+                                        .withId("XYZ:Quay:2")
                                         .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location))));
@@ -116,13 +116,13 @@ public class ReproduceDuplicateKeysException {
                         .withQuayRefOrQuay(
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 1"))
-                                        .withId("123")
+                                        .withId("XYZ:Quay:123")
                                         .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location)),
                                 new Quay()
                                         .withName(new MultilingualString().withValue("Quay 2"))
-                                        .withId("1234")
+                                        .withId("XYZ:Quay:1234")
                                         .withVersion("1")
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(location))));

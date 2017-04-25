@@ -25,6 +25,8 @@ public class MatchingIdAppendingStopPlacesImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(MatchingIdAppendingStopPlacesImporter.class);
 
+    private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
+
     @Autowired
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
@@ -43,7 +45,7 @@ public class MatchingIdAppendingStopPlacesImporter {
 
         tiamatStops.forEach(stopPlace -> {
 
-            org.rutebanken.tiamat.model.StopPlace existingstopPlace = nearbyStopPlaceFinder.find(stopPlace);
+            org.rutebanken.tiamat.model.StopPlace existingstopPlace = nearbyStopPlaceFinder.find(stopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH);
             if(existingstopPlace == null) {
                 logger.warn("Cannot find nearby stop place: {}", stopPlace);
             } else {

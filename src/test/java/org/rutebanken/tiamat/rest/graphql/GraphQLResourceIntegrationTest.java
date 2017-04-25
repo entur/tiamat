@@ -378,13 +378,13 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         stopPlace.setAllAreasWheelchairAccessible(false);
         stopPlace.setTopographicPlace(topographicPlace);
 
-        stopPlaceRepository.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         String updatedName = "Testing name ";
         String updatedShortName = "Testing shortname ";
         String updatedDescription = "Testing description ";
-        String fromDate = "2012-04-23T18:25:43.511+0200";
-        String toDate = "2018-04-23T18:25:43.511+0200";
+//        String fromDate = "2012-04-23T18:25:43.511+0200";
+//        String toDate = "2018-04-23T18:25:43.511+0200";
 
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);
@@ -404,7 +404,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
-                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
+//                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
@@ -432,9 +432,9 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("topographicPlace.parentTopographicPlace", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.id", notNullValue())
-                    .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()))
-                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
-                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
+                    .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()));
+//                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
+//                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
     }
 
 
