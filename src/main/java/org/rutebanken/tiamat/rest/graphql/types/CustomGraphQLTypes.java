@@ -21,6 +21,8 @@ public class CustomGraphQLTypes {
             .name(TOPOGRAPHIC_PLACE_TYPE_ENUM)
             .value(TopographicPlaceTypeEnumeration.COUNTY.value(), TopographicPlaceTypeEnumeration.COUNTY)
             .value(TopographicPlaceTypeEnumeration.TOWN.value(), TopographicPlaceTypeEnumeration.TOWN)
+            .value(TopographicPlaceTypeEnumeration.STATE.value(), TopographicPlaceTypeEnumeration.STATE)
+            .value(TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST.value(), TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST)
             .build();
 
     public static GraphQLEnumType stopPlaceTypeEnum = GraphQLEnumType.newEnum()
