@@ -16,8 +16,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
@@ -28,20 +27,23 @@ public class CountyAndMunicipalityLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);
 
+    private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
+
+
     private final Supplier<List<Pair<String, Polygon>>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 10, TimeUnit.HOURS);
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    public void populateCountyAndMunicipality(Site_VersionStructure siteVersionStructure) {
+    public void populateTopographicPlaceRelation(Site_VersionStructure siteVersionStructure) {
 
         if (!siteVersionStructure.hasCoordinates()) {
             return;
         }
 
-        Optional<TopographicPlace> topographicPlace = findTopographicPlace(siteVersionStructure.getCentroid(), TopographicPlaceTypeEnumeration.TOWN);
+        Optional<TopographicPlace> topographicPlace = findTopographicPlace(siteVersionStructure.getCentroid());
 
-        if(topographicPlace.isPresent()) {
+        if (topographicPlace.isPresent()) {
             logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
             siteVersionStructure.setTopographicPlace(topographicPlace.get());
         } else {
@@ -49,24 +51,24 @@ public class CountyAndMunicipalityLookupService {
         }
     }
 
-    public Optional<TopographicPlace> findTopographicPlace(Point point, TopographicPlaceTypeEnumeration topographicPlaceType) {
+
+    public Optional<TopographicPlace> findTopographicPlace(Point point) {
         return topographicPlaces.get()
-                .stream()
-                .filter(pair -> point.within(pair.getSecond()))
-                .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
-                .filter(topographicPlace -> topographicPlace != null)
-                .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(topographicPlaceType))
-                .findAny();
+                       .stream()
+                       .filter(pair -> point.within(pair.getSecond()))
+                       .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
+                       .filter(topographicPlace -> topographicPlace != null)
+                       .findAny();
     }
 
     public Optional<TopographicPlace> findCountyMatchingReferences(List<String> countyReferences, Point point) {
         return topographicPlaces.get()
-                .stream()
-                .filter(pair -> point.within(pair.getSecond()))
-                .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
-                .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
-                .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
-                .findAny();
+                       .stream()
+                       .filter(pair -> point.within(pair.getSecond()))
+                       .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
+                       .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
+                       .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
+                       .findAny();
     }
 
     private Supplier<List<Pair<String, Polygon>>> getTopographicPlaceSupplier() {
@@ -75,10 +77,22 @@ public class CountyAndMunicipalityLookupService {
             public List<Pair<String, Polygon>> get() {
                 logger.info("Fetching topographic places from repository");
                 return topographicPlaceRepository.findAllMaxVersion()
-                        .stream()
-                        .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getPolygon()))
-                        .collect(toList());
+                               .stream()
+                               .filter(topographicPlace -> topographicPlace.getPolygon() != null)
+                               .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
+                               .sorted(new TopographicPlaceByAdminLevelComparator())
+                               .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getPolygon()))
+                               .collect(toList());
             }
         };
     }
+
+    private class TopographicPlaceByAdminLevelComparator implements Comparator<TopographicPlace> {
+        @Override
+        public int compare(TopographicPlace tp1, TopographicPlace tp2) {
+            return ADMIN_LEVEL_ORDER.indexOf(tp1.getTopographicPlaceType()) - ADMIN_LEVEL_ORDER.indexOf(tp2.getTopographicPlaceType());
+        }
+    }
+
+
 }
