@@ -38,6 +38,9 @@ public abstract class TiamatIntegrationTest {
     @Autowired
     protected GeometryFactory geometryFactory;
 
+    @Autowired
+    protected TariffZoneRepository tariffZoneRepository;
+
     @Value("${local.server.port}")
     protected int port;
 

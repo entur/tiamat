@@ -24,6 +24,7 @@ public class StopPlace
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
+
     protected String publicCode;
 
     @Enumerated(EnumType.STRING)
@@ -55,6 +56,7 @@ public class StopPlace
 
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
+
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
@@ -63,20 +65,27 @@ public class StopPlace
     protected StopTypeEnumeration stopPlaceType;
 
     protected Boolean borderCrossing;
+
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected SitePathLinks_RelStructure pathLinks;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected PathJunctions_RelStructure pathJunctions;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<TariffZoneRef> tariffZones = new HashSet<>();
 
     public StopPlace(EmbeddableMultilingualString name) {
         super(name);
@@ -240,6 +249,14 @@ public class StopPlace
 
     public void setQuays(Set<Quay> quays) {
         this.quays = quays;
+    }
+
+    public Set<TariffZoneRef> getTariffZones() {
+        return tariffZones;
+    }
+
+    public void setTariffZones(Set<TariffZoneRef> tariffZones) {
+        this.tariffZones = tariffZones;
     }
 
     @Override
