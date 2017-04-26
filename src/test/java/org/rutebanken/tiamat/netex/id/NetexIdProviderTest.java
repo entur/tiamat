@@ -56,7 +56,7 @@ public class NetexIdProviderTest {
     }
 
     /**
-     * Claim ID with invalid ID
+     * Claim ID with any prefix
      */
     @Test
     public void claimAnyIdForType() {
