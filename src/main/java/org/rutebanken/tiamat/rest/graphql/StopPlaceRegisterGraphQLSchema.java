@@ -1,10 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -374,6 +371,9 @@ StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(VALID_BETWEENS)
                             .type(new GraphQLList(validBetweenObjectType)))
+                    .field(newFieldDefinition()
+                            .name(ALTERNATIVE_NAMES)
+                            .type(new GraphQLList(alternativeNameObjectType)))
                     .build();
     }
 
@@ -393,6 +393,9 @@ StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(PUBLIC_CODE)
                             .type(GraphQLString))
+                    .field(newFieldDefinition()
+                            .name(ALTERNATIVE_NAMES)
+                            .type(new GraphQLList(alternativeNameObjectType)))
                     .build();
     }
 
@@ -458,6 +461,7 @@ StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
         commonInputFieldsList.add(
                 newInputObjectField()

@@ -855,6 +855,83 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
     }
 
 
+    @Test
+    public void testSimpleMutationUpdateAlternativeNames() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        AlternativeName altName = new AlternativeName();
+        altName.setNameType(NameTypeEnumeration.ALIAS);
+        altName.setName(new MultilingualStringEntity("Navn", "no-nb"));
+
+        AlternativeName altName2 = new AlternativeName();
+        altName2.setNameType(NameTypeEnumeration.ALIAS);
+        altName2.setName(new MultilingualStringEntity("Nom", "fr"));
+
+        stopPlace.getAlternativeNames().add(altName);
+        stopPlace.getAlternativeNames().add(altName2);
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
+        quay.getAlternativeNames().add(altName);
+        quay.getAlternativeNames().add(altName2);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String name = "Testing name ";
+        String netexId = stopPlace.getNetexId();
+
+        //Verify that placeEquipments have been set
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
+                "    id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("alternativeNames", notNullValue())
+                    .body("alternativeNames[0].nameType", notNullValue())
+                    .body("alternativeNames[0].name.value", notNullValue())
+                    .body("alternativeNames[0].name.lang", notNullValue())
+                    .body("alternativeNames[1].nameType", notNullValue())
+                    .body("alternativeNames[1].name.value", notNullValue())
+                    .body("alternativeNames[1].name.lang", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", comparesEqualTo(quay.getNetexId()))
+                    .body("alternativeNames", notNullValue())
+                    .body("alternativeNames[0].nameType", notNullValue())
+                    .body("alternativeNames[0].name.value", notNullValue())
+                    .body("alternativeNames[0].name.lang", notNullValue())
+                    .body("alternativeNames[1].nameType", notNullValue())
+                    .body("alternativeNames[1].name.value", notNullValue())
+                    .body("alternativeNames[1].name.lang", notNullValue())
+        ;
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);

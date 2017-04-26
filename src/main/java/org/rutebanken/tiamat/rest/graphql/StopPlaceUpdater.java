@@ -198,6 +198,10 @@ class StopPlaceUpdater implements DataFetcher {
             entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
             isUpdated = true;
         }
+        if (input.get(ALTERNATIVE_NAMES) != null) {
+            entity.getAlternativeNames().addAll(getAlternativeNames((List) input.get(ALTERNATIVE_NAMES)));
+            isUpdated = true;
+        }
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY)));
 
@@ -334,4 +338,24 @@ class StopPlaceUpdater implements DataFetcher {
         return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
     }
 
+    private List<AlternativeName> getAlternativeNames(List list) {
+        List<AlternativeName> alternativeNames = new ArrayList<>();
+        for (Object entry : list) {
+            if (entry instanceof Map) {
+                alternativeNames.add(getAlternativeName((Map) entry));
+            }
+        }
+        return alternativeNames;
+    }
+
+    private AlternativeName getAlternativeName(Map entry) {
+        AlternativeName altName = new AlternativeName();
+        altName.setNameType((NameTypeEnumeration) entry.get(NAME_TYPE));
+        altName.setName(getMultilingualEntity((Map)entry.get(NAME)));
+        return altName;
+    }
+
+    private MultilingualStringEntity getMultilingualEntity(Map map) {
+        return new MultilingualStringEntity((String) map.get(VALUE), (String)map.get(LANG));
+    }
 }

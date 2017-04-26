@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
 
 import java.util.List;
 
@@ -78,6 +77,15 @@ public class CustomGraphQLTypes {
             .value("maleOnly", GenderLimitationEnumeration.MALE_ONLY)
             .value("sameSexOnly", GenderLimitationEnumeration.SAME_SEX_ONLY)
             .build();
+
+        public static GraphQLEnumType nameTypeEnum = GraphQLEnumType.newEnum()
+                .name(NAME_TYPE)
+                .value("alias", NameTypeEnumeration.ALIAS)
+                .value("copy", NameTypeEnumeration.COPY)
+                .value("label", NameTypeEnumeration.LABEL)
+                .value("translation", NameTypeEnumeration.TRANSLATION)
+                .value("other", NameTypeEnumeration.OTHER)
+                .build();
 
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
@@ -442,6 +450,48 @@ public class CustomGraphQLTypes {
                     .name(LANG)
                     .type(GraphQLString))
             .build();
+
+    public static GraphQLObjectType multiLingualStringObjectType = newObject()
+            .name(OUTPUT_TYPE_MULTILINGUAL_STRING)
+            .field(newFieldDefinition()
+                    .name(VALUE)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(LANG)
+                    .type(GraphQLString))
+            .build();
+
+    public static GraphQLInputObjectType multiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_MULTILINGUAL_STRING)
+            .field(newInputObjectField()
+                    .name(VALUE)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(LANG)
+                    .type(GraphQLString))
+            .build();
+
+
+    public static GraphQLObjectType alternativeNameObjectType = newObject()
+                .name(OUTPUT_TYPE_ALTERNATIVE_NAME)
+                .field(newFieldDefinition()
+                        .name(NAME_TYPE)
+                        .type(nameTypeEnum))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(multiLingualStringObjectType))
+                .build();
+
+
+    public static GraphQLInputObjectType alternativeNameInputObjectType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_ALTERNATIVE_NAME)
+                .field(newInputObjectField()
+                        .name(NAME_TYPE)
+                        .type(nameTypeEnum))
+                .field(newInputObjectField()
+                        .name(NAME)
+                        .type(new GraphQLNonNull(multiLingualStringInputObjectType)))
+                .build();
 
     public static GraphQLInputObjectType topographicPlaceInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_TOPOGRAPHIC_PLACE)

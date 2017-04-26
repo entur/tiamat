@@ -68,6 +68,12 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_MULTILINGUAL_STRING = "MultilingualString";
+    public static final String INPUT_TYPE_MULTILINGUAL_STRING = OUTPUT_TYPE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_ALTERNATIVE_NAME = "AlternativeName";
+    public static final String INPUT_TYPE_ALTERNATIVE_NAME = OUTPUT_TYPE_ALTERNATIVE_NAME + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
     public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
 
@@ -173,6 +179,8 @@ public class GraphQLNames {
     public static final String PLACE_REF = "placeRef";
 
     public static final String NAME = "name";
+    public static final String NAME_TYPE = "nameType";
+    public static final String ALTERNATIVE_NAMES = "alternativeNames";
     public static final String TOPOGRAPHIC_PLACE_TYPE_ENUM = "TopographicPlaceType";
     public static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     public static final String TOPOGRAPHIC_PLACE = "topographicPlace";
