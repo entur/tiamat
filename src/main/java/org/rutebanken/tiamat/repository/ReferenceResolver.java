@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,11 @@ import java.util.Set;
 
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
+/**
+ * Note that: Not all references are references to DataManagedObjectStructure.
+ * For instance, AccomodationRefStructure.
+ * This means that key value lookup cannot happen for this entity.
+ */
 @Component
 public class ReferenceResolver {
 
@@ -23,6 +29,9 @@ public class ReferenceResolver {
 
     @Autowired
     private GenericDataManagedObjectRepository genericDataManagedObjectRepository;
+
+    @Autowired
+    private ValidPrefixList validPrefixList;
 
     public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
@@ -35,16 +44,18 @@ public class ReferenceResolver {
             throw new IllegalArgumentException("Expected two number of colons in ref. Got: '" + ref + "'");
 
         }
-        String memberClass = ref.substring(ref.indexOf(':') + 1, ref.lastIndexOf(':'));
+        String memberClass = NetexIdHelper.extractIdType(ref);
 
         String canonicalName = EntityInVersionStructure.class.getPackage().getName() + "." + memberClass;
         try {
             @SuppressWarnings("unchecked")
             Class<T> clazz = (Class<T>) Class.forName(canonicalName);
 
+            String prefix = NetexIdHelper.extractIdPrefix(ref);
+
             final String netexId;
-            if(!NetexIdHelper.isNsrId(ref)) {
-                logger.debug("Detected ID without expected prefix: {}. Will try to find it from original ID: {}.", NetexIdHelper.NSR, ref);
+            if(!validPrefixList.isValidPrefixForType(prefix, memberClass)) {
+                logger.debug("Detected ID without valid prefix: {} and type {}. Will try to find it from original ID: {}.", prefix, memberClass, ref);
                 Set<String> valuesArgument = Sets.newHashSet(ref);
                 netexId = genericDataManagedObjectRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
             } else {

@@ -28,6 +28,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     }
 
     protected T saveNewVersion(T existingVersion, T newVersion) {
+
+        validate(existingVersion, newVersion);
+
         if(existingVersion == null) {
             if (newVersion.getNetexId() != null) {
                 existingVersion = getRepository().findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
@@ -40,7 +43,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         if(existingVersion == null) {
             newVersion.setCreated(ZonedDateTime.now());
             // If the new incoming version has the version attribute set, reset it.
-            // For tiamat, this is the first time this topographic place is saved
+            // For tiamat, this is the first time this entity with this ID is saved
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
@@ -64,11 +67,11 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
         if(existingVersion != null) {
             if (existingVersion.getNetexId() == null) {
-                throw new IllegalArgumentException("Existing stop place must have netexId set: " + existingVersion);
+                throw new IllegalArgumentException("Existing entity must have netexId set: " + existingVersion);
             }
 
             if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-                throw new IllegalArgumentException("Existing and new StopPlace do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
+                throw new IllegalArgumentException("Existing and new entity do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
             }
         }
     }

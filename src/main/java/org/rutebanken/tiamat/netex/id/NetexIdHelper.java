@@ -59,6 +59,10 @@ public class NetexIdHelper {
         }
     }
 
+    public static String extractIdType(String netexId) {
+        return netexId.substring(netexId.indexOf(':')+1, netexId.lastIndexOf(':'));
+    }
+
     public static String extractIdPrefix(String netexId) {
         if(StringUtils.countMatches(netexId, ":") != 2) {
             throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
