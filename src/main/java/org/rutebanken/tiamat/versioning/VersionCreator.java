@@ -78,8 +78,33 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(PlaceEquipment.class, PlaceEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
 
-        mapperFactory.classMap(InstalledEquipment_VersionStructure.class, InstalledEquipment_VersionStructure.class)
+
+        mapperFactory.classMap(WaitingRoomEquipment.class, WaitingRoomEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SanitaryEquipment.class, SanitaryEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TicketingEquipment.class, TicketingEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(ShelterEquipment.class, ShelterEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(CycleStorageEquipment.class, CycleStorageEquipment.class)
                 .exclude(ID_FIELD)
                 .byDefault()
                 .register();

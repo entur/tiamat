@@ -6,11 +6,11 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -53,9 +52,6 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
-
-    private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
-
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
