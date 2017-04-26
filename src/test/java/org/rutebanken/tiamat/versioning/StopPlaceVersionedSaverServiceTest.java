@@ -183,7 +183,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
             fail("Saving new version of different object is not allowed: " + fail);
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).startsWith("Existing and new StopPlace do not match");
+            assertThat(e.getMessage()).startsWith("Existing and new entity do not match");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
