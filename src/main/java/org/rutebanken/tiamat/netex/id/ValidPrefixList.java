@@ -1,30 +1,54 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.collect.ImmutableList;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ValidPrefixList {
 
-    private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);
+    public static final String ANY_PREFIX = "*";
 
-    private final List<String> validPrefixForClaiming;
+    private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);
+    private final Map<String, List<String>> validPrefixesPerType;
 
     @Autowired
-    public ValidPrefixList(@Value("${netex.id.valid.prefix.list:NSR,KVE}") String[] list) {
-        this.validPrefixForClaiming = ImmutableList.copyOf(list);
-        logger.info("Valid prefixes for claiming explicit IDs: {}", validPrefixForClaiming);
+    public ValidPrefixList(@Value("#{${netex.id.valid.prefix.list:{TopographicPlace:{'KVE'},TariffZone:{'*'}}}}") Map<String, List<String>> validPrefixesPerType) {
+        for(String type : validPrefixesPerType.keySet()) {
+            List<String> validPrefixesForType = validPrefixesPerType.get(type);
+            logger.info("Loaded valid prefixes for {}: {} ", type, validPrefixesForType);
+        }
+
+        this.validPrefixesPerType = validPrefixesPerType;
     }
 
-    public List<String> get() {
-        return validPrefixForClaiming;
+    public List<String> get(Class clazz) {
+        logger.trace("Looking for valid prefixes for type: {}", clazz);
+        return validPrefixesPerType.get(clazz.getSimpleName());
+    }
+
+    public boolean isValidPrefixForType(String prefix, Class clazz) {
+
+        if(prefix.equals(NetexIdHelper.NSR)) {
+            return true;
+        }
+
+        List<String> validPrefixes = validPrefixesPerType.get(clazz.getSimpleName());
+        if(validPrefixes == null) {
+            return false;
+        }
+        if(validPrefixes.contains(prefix)) {
+            return true;
+        }
+        if(validPrefixes.contains(ANY_PREFIX)) {
+            return true;
+        }
+        return false;
     }
 }

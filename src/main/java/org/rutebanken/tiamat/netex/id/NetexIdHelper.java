@@ -17,7 +17,7 @@ public class NetexIdHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
-    // TODO: make it configurable
+    // TODO: make it configurable, maybe in ValidPrefixList
     public static final String NSR = "NSR";
 
     public static String getNetexId(String type, String id) {

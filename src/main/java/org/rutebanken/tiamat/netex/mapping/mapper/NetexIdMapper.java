@@ -37,7 +37,7 @@ public class NetexIdMapper {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setNetexId(null);
-        } else if(validPrefixList.get().contains(NetexIdHelper.extractIdPrefix(netexEntity.getId()))) {
+        } else if(validPrefixList.isValidPrefixForType(NetexIdHelper.extractIdPrefix(netexEntity.getId()), tiamatEntity.getClass())) {
             logger.debug("Detected ID with valid prefix: {}. ", netexEntity.getId());
             tiamatEntity.setNetexId(netexEntity.getId());
         } else {

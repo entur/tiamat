@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static org.rutebanken.tiamat.netex.id.ValidPrefixList.ANY_PREFIX;
+
 @Component
 public class NetexIdProvider {
 
@@ -38,9 +40,7 @@ public class NetexIdProvider {
 
         String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
 
-        if (!validPrefixList.get().contains(prefix)) {
-            logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
-        } else {
+        if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
             logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
 
             Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
@@ -48,6 +48,8 @@ public class NetexIdProvider {
             String entityTypeName = key(identifiedEntity);
 
             gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+        } else {
+            logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
         }
     }
 
