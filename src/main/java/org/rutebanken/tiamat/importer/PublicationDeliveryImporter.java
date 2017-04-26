@@ -128,6 +128,14 @@ public class PublicationDeliveryImporter {
             }
 
 
+            if(hasTariffZones(netexSiteFrame)) {
+                List<TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
+                logger.info("Got {} tariff zones", tiamatTariffZones.size());
+
+
+
+            }
+
             if(hasStops(netexSiteFrame)) {
                 List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
                 tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
@@ -195,6 +203,10 @@ public class PublicationDeliveryImporter {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();
         }
+    }
+
+    private boolean hasTariffZones(SiteFrame netexSiteFrame) {
+        return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
     }
 
     private void validate(PublicationDeliveryParams publicationDeliveryParams) {

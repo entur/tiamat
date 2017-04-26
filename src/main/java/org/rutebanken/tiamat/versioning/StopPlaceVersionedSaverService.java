@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.ValidBetweenRepository;
 import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
@@ -9,6 +10,7 @@ import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
+    }
+
+    @Override
+    public EntityInVersionRepository<StopPlace> getRepository() {
+        return stopPlaceRepository;
     }
 
     @Override

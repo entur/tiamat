@@ -1,12 +1,9 @@
 package org.rutebanken.tiamat.repository;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vividsolutions.jts.geom.Point;
-import org.hibernate.annotations.Parameter;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -16,10 +13,7 @@ import org.springframework.data.repository.query.Param;
 import javax.persistence.QueryHint;
 import java.util.List;
 
-public interface TopographicPlaceRepository extends PagingAndSortingRepository<TopographicPlace, Long>,
-        JpaRepository<TopographicPlace, Long>,
-        IdentifiedEntityRepository<TopographicPlace>,
-        TopographicPlaceRepositoryCustom {
+public interface TopographicPlaceRepository extends EntityInVersionRepository<TopographicPlace>, TopographicPlaceRepositoryCustom {
 
     /**
      * Should only be one per name, country and placeType...

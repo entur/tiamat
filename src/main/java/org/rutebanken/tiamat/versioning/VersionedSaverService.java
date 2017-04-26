@@ -1,13 +1,23 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.EntityInVersionRepository;
+import org.rutebanken.tiamat.repository.GenericDataManagedObjectRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.ZonedDateTime;
 
 public abstract class VersionedSaverService<T extends EntityInVersionStructure> {
 
+    private static final Logger logger = LoggerFactory.getLogger(VersionedSaverService.class);
+
     @Autowired
     private VersionCreator versionCreator;
+
+    public abstract EntityInVersionRepository<T> getRepository();
 
     public <T extends EntityInVersionStructure> T createCopy(T entity, Class<T> type) {
         return versionCreator.createCopy(entity, type);
@@ -17,7 +27,30 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         return saveNewVersion(null, newVersion);
     }
 
-    protected abstract T saveNewVersion(T existingVersion, T newVersion);
+    protected T saveNewVersion(T existingVersion, T newVersion) {
+        if(existingVersion == null) {
+            if (newVersion.getNetexId() != null) {
+                existingVersion = getRepository().findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+                if (existingVersion != null) {
+                    logger.info("Found existing entity from netexId {}", existingVersion.getNetexId());
+                }
+            }
+        }
+
+        if(existingVersion == null) {
+            newVersion.setCreated(ZonedDateTime.now());
+            // If the new incoming version has the version attribute set, reset it.
+            // For tiamat, this is the first time this topographic place is saved
+            newVersion.setVersion(-1L);
+        } else {
+            newVersion.setVersion(existingVersion.getVersion());
+            existingVersion = versionCreator.terminateVersion(existingVersion, ZonedDateTime.now());
+            getRepository().save(existingVersion);
+        }
+
+        versionCreator.initiateOrIncrement(newVersion);
+        return getRepository().save(newVersion);
+    }
 
     protected void validate(T existingVersion, T newVersion) {
 
