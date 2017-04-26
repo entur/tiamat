@@ -113,6 +113,10 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
