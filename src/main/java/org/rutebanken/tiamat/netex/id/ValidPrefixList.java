@@ -19,7 +19,7 @@ public class ValidPrefixList {
     private final Map<String, List<String>> validPrefixesPerType;
 
     @Autowired
-    public ValidPrefixList(@Value("#{${netex.id.valid.prefix.list:{TopographicPlace:{'KVE'},TariffZone:{'*'}}}}") Map<String, List<String>> validPrefixesPerType) {
+    public ValidPrefixList(@Value("#{${netex.id.valid.prefix.list:{TopographicPlace:{'KVE','WOF'},TariffZone:{'*'}}}}") Map<String, List<String>> validPrefixesPerType) {
         for(String type : validPrefixesPerType.keySet()) {
             List<String> validPrefixesForType = validPrefixesPerType.get(type);
             logger.info("Loaded valid prefixes for {}: {} ", type, validPrefixesForType);
