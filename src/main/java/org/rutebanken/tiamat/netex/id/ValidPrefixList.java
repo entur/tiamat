@@ -34,12 +34,16 @@ public class ValidPrefixList {
     }
 
     public boolean isValidPrefixForType(String prefix, Class clazz) {
+        return isValidPrefixForType(prefix, clazz.getSimpleName());
+    }
+
+    public boolean isValidPrefixForType(String prefix, String type) {
 
         if(prefix.equals(NetexIdHelper.NSR)) {
             return true;
         }
 
-        List<String> validPrefixes = validPrefixesPerType.get(clazz.getSimpleName());
+        List<String> validPrefixes = validPrefixesPerType.get(type);
         if(validPrefixes == null) {
             return false;
         }
