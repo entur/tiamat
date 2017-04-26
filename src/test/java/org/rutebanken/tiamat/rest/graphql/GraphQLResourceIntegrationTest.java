@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
@@ -736,6 +737,124 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
+    /**
+     * Test that reproduces NRP-1433
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testSimpleMutationUpdateStopPlaceKeepPlaceEquipmentsOnQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Espa"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+        stopPlace.setPlaceEquipments(createPlaceEquipments());
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
+        quay.setPlaceEquipments(createPlaceEquipments());
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String name = "Testing name ";
+        String netexId = stopPlace.getNetexId();
+
+        //Verify that placeEquipments have been set
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
+                "    id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+        ;
+
+        //Update StopPlace name
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "          name: { value:\\\"" + name + "\\\" } " +
+                "       }) { " +
+                "    id " +
+                "    name { value } " +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("name.value", comparesEqualTo(name))
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue());
+
+    }
+
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
@@ -764,5 +883,34 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         return municipality;
     }
 
+
+    private PlaceEquipment createPlaceEquipments() {
+        PlaceEquipment equipments = new PlaceEquipment();
+
+        ShelterEquipment leskur = new ShelterEquipment();
+        leskur.setEnclosed(false);
+        leskur.setSeats(BigInteger.valueOf(2));
+
+        WaitingRoomEquipment venterom = new WaitingRoomEquipment();
+        venterom.setSeats(BigInteger.valueOf(25));
+
+        TicketingEquipment billettAutomat = new TicketingEquipment();
+        billettAutomat.setTicketMachines(true);
+        billettAutomat.setNumberOfMachines(BigInteger.valueOf(2));
+
+        SanitaryEquipment toalett = new SanitaryEquipment();
+        toalett.setNumberOfToilets(BigInteger.valueOf(2));
+
+        CycleStorageEquipment sykkelstativ = new CycleStorageEquipment();
+        sykkelstativ.setCycleStorageType(CycleStorageEnumeration.RACKS);
+        sykkelstativ.setNumberOfSpaces(BigInteger.TEN);
+
+        equipments.getInstalledEquipment().add(venterom);
+        equipments.getInstalledEquipment().add(billettAutomat);
+        equipments.getInstalledEquipment().add(toalett);
+        equipments.getInstalledEquipment().add(leskur);
+        equipments.getInstalledEquipment().add(sykkelstativ);
+        return equipments;
+    }
 
 }
