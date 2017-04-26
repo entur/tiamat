@@ -52,6 +52,7 @@ public class PublicationDeliveryImporter {
     private final PathLinksImporter pathLinksImporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TopographicPlaceImporter topographicPlaceImporter;
+    private final TariffZoneImporter tariffZoneImporter;
     private final ZoneCountyFilterer zoneCountyFilterer;
     private final ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter;
     private final MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter;
@@ -64,7 +65,12 @@ public class PublicationDeliveryImporter {
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
                                        PathLinksImporter pathLinksImporter,
-                                       TopographicPlacesExporter topographicPlacesExporter, TopographicPlaceImporter topographicPlaceImporter, ZoneCountyFilterer zoneCountyFilterer, ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter, MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter) {
+                                       TopographicPlacesExporter topographicPlacesExporter,
+                                       TopographicPlaceImporter topographicPlaceImporter,
+                                       TariffZoneImporter tariffZoneImporter,
+                                       ZoneCountyFilterer zoneCountyFilterer,
+                                       ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter,
+                                       MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -72,6 +78,7 @@ public class PublicationDeliveryImporter {
         this.pathLinksImporter = pathLinksImporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.topographicPlaceImporter = topographicPlaceImporter;
+        this.tariffZoneImporter = tariffZoneImporter;
         this.zoneCountyFilterer = zoneCountyFilterer;
         this.parallelInitialStopPlaceImporter = parallelInitialStopPlaceImporter;
         this.matchingIdAppendingStopPlacesImporter = matchingIdAppendingStopPlacesImporter;
@@ -129,11 +136,9 @@ public class PublicationDeliveryImporter {
 
 
             if(hasTariffZones(netexSiteFrame)) {
-                List<TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
+                List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.info("Got {} tariff zones", tiamatTariffZones.size());
-
-
-
+                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneImporter.importTariffZones(tiamatTariffZones)));
             }
 
             if(hasStops(netexSiteFrame)) {
