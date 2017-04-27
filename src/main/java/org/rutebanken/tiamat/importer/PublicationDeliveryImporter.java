@@ -141,58 +141,7 @@ public class PublicationDeliveryImporter {
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneImporter.importTariffZones(tiamatTariffZones)));
             }
 
-            if(hasStops(netexSiteFrame)) {
-                List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
-                tiamatStops = stopPlacePreSteps.run(tiamatStops, topographicPlacesCounter);
-
-                int numberOfStopBeforeFiltering = tiamatStops.size();
-                logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
-                tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
-                logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.onlyImportStopsInCounties);
-
-                final Collection<org.rutebanken.netex.model.StopPlace> importedNetexStopPlaces;
-                logger.info("The import type is: {}", publicationDeliveryParams.importType);
-
-                if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
-                    synchronized (STOP_PLACE_IMPORT_LOCK) {
-                        importedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-                    }
-                } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
-                    importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-                } else if(publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
-                    if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
-                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
-                        tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
-                        logger.info("Got {} stops back from zone filter", tiamatStops.size());
-                    }
-                    logger.info("Importing {} stops", tiamatStops.size());
-                    importedNetexStopPlaces = matchingIdAppendingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-                } else {
-                    throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
-                }
-                logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedOrUpdated);
-
-
-                if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
-                    List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));
-
-                    if (!netexTopographicPlaces.isEmpty()) {
-                        responseSiteframe.withTopographicPlaces(
-                                new TopographicPlacesInFrame_RelStructure()
-                                        .withTopographicPlace(netexTopographicPlaces));
-                    }
-                } else {
-                    clearTopographicPlaceRefs(importedNetexStopPlaces);
-                }
-
-                if (!importedNetexStopPlaces.isEmpty()) {
-                    responseSiteframe.withStopPlaces(
-                            new StopPlacesInFrame_RelStructure()
-                                    .withStopPlace(importedNetexStopPlaces));
-                } else {
-                    logger.info("No stops in response");
-                }
-            }
+            handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
 
             if(netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
                 List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
@@ -209,6 +158,62 @@ public class PublicationDeliveryImporter {
             loggerTimer.cancel();
         }
     }
+
+    private void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedOrUpdated, SiteFrame responseSiteframe) {
+        if(hasStops(netexSiteFrame)) {
+            List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
+            tiamatStops = stopPlacePreSteps.run(tiamatStops);
+
+            int numberOfStopBeforeFiltering = tiamatStops.size();
+            logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
+            tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
+            logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.onlyImportStopsInCounties);
+
+            final Collection<org.rutebanken.netex.model.StopPlace> importedNetexStopPlaces;
+            logger.info("The import type is: {}", publicationDeliveryParams.importType);
+
+            if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
+                synchronized (STOP_PLACE_IMPORT_LOCK) {
+                    importedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+                }
+            } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
+                importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+            } else if(publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
+                if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
+                    logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
+                    tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
+                    logger.info("Got {} stops back from zone filter", tiamatStops.size());
+                }
+                logger.info("Importing {} stops", tiamatStops.size());
+                importedNetexStopPlaces = matchingIdAppendingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+            } else {
+                throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+            }
+            logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedOrUpdated);
+
+
+            if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
+                List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));
+
+                if (!netexTopographicPlaces.isEmpty()) {
+                    responseSiteframe.withTopographicPlaces(
+                            new TopographicPlacesInFrame_RelStructure()
+                                    .withTopographicPlace(netexTopographicPlaces));
+                }
+            } else {
+                clearTopographicPlaceRefs(importedNetexStopPlaces);
+            }
+
+            if (!importedNetexStopPlaces.isEmpty()) {
+                responseSiteframe.withStopPlaces(
+                        new StopPlacesInFrame_RelStructure()
+                                .withStopPlace(importedNetexStopPlaces));
+            } else {
+                logger.info("No stops in response");
+            }
+        }
+    }
+
 
     private boolean hasTariffZones(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
