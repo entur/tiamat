@@ -11,3 +11,5 @@ CREATE index id_value_index ON id_generator(id_value);
 CREATE index value_id_index ON value_items (value_id);
 
 CREATE INDEX trgm_idx ON stop_place USING GIST (name_value gist_trgm_ops);
+
+CREATE INDEX lower_case_stop_place_name_value ON stop_place ((lower(name_value)));
