@@ -20,11 +20,12 @@ public class StopPlaceSearchDto {
     @QueryParam(value = "countyReference") public List<String> countyReferences;
     @QueryParam(value = "stopPlaceType") public List<String> stopPlaceTypes;
     @QueryParam(value = "idList") public List<String> idList;
+    @QueryParam(value = "version") public Long version;
 
     public StopPlaceSearchDto() {}
 
     public StopPlaceSearchDto(int page, int size, String query, List<String> municipalityReferences,
-                              List<String> countyReferences, List<String> stopPlaceTypes, List<String> idList) {
+                              List<String> countyReferences, List<String> stopPlaceTypes, List<String> idList, Long version) {
         this.page = page;
         this.size = size;
         this.query = query;
@@ -32,6 +33,7 @@ public class StopPlaceSearchDto {
         this.countyReferences = countyReferences;
         this.stopPlaceTypes = stopPlaceTypes;
         this.idList = idList;
+        this.version = version;
     }
 
     public static class Builder {
@@ -43,6 +45,7 @@ public class StopPlaceSearchDto {
         private List<String> countyReferences;
         private List<String> stopPlaceTypes;
         private List<String> idList;
+        private Long version;
 
         public Builder setPage(int page) {
             this.page = page;
@@ -79,8 +82,13 @@ public class StopPlaceSearchDto {
             return this;
         }
 
+        public Builder setVersion(Long version) {
+            this.version = version;
+            return this;
+        }
+
         public StopPlaceSearchDto build() {
-            return new StopPlaceSearchDto(page, size, query, municipalityReferences, countyReferences, stopPlaceTypes, idList);
+            return new StopPlaceSearchDto(page, size, query, municipalityReferences, countyReferences, stopPlaceTypes, idList, version);
         }
     }
 }

@@ -16,11 +16,12 @@ public class StopPlaceSearch {
     private List<String> netexIdList;
     private Pageable pageable;
     private boolean allVersions;
+    private Long version;
 
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, Pageable pageable) {
+                            List<String> netexIdList, boolean allVersions, Pageable pageable, Long version) {
         this.query = query;
         this.municipalityIds = municipalityIds;
         this.countyIds = countyIds;
@@ -28,6 +29,7 @@ public class StopPlaceSearch {
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
         this.pageable = pageable;
+        this.version = version;
     }
 
     public String getQuery() {
@@ -79,6 +81,14 @@ public class StopPlaceSearch {
         this.netexIdList = netexIdList;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
                 || countyIds != null || municipalityIds != null
@@ -115,7 +125,7 @@ public class StopPlaceSearch {
         private List<String> idList;
         private boolean allVersions;
         private Pageable pageable = new PageRequest(0, 20);
-
+        private Long version;
 
         public Builder setQuery(String query) {
             this.query = query;
@@ -152,8 +162,13 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setVersion(Long version) {
+            this.version = version;
+            return this;
+        }
+
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pageable);
+            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pageable, version);
         }
 
     }

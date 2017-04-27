@@ -652,6 +652,33 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     }
 
+    @Test
+    public void findOnlyGivenVersion() {
+        StopPlace versionOne = new StopPlace();
+        versionOne.setVersion(1L);
+        versionOne.setNetexId("NSR:StopPlace:999");
+        StopPlace versionTwo = new StopPlace();
+        versionTwo.setVersion(2L);
+        versionTwo.setNetexId(versionOne.getNetexId());
+
+        versionOne = stopPlaceRepository.save(versionOne);
+        versionTwo = stopPlaceRepository.save(versionTwo);
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+                                                  .setNetexIdList(Arrays.asList(versionOne.getNetexId())).setVersion(1L)
+                                                  .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+
+        assertThat(result)
+                .describedAs("Expecting only one stop place in return. Because only the given version should be returned.")
+                .hasSize(1);
+
+        assertThat(result).extracting(StopPlace::getVersion)
+                .contains(1L);
+
+    }
+
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));

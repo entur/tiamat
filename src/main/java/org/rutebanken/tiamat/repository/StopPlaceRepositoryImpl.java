@@ -322,7 +322,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 			}
 		}
 
-		if (!stopPlaceSearch.isAllVersions()) {
+		if (stopPlaceSearch.getVersion() != null) {
+			operators.add("and");
+			wheres.add("stopPlace.version = :version");
+			parameters.put("version", stopPlaceSearch.getVersion());
+		} else if (!stopPlaceSearch.isAllVersions()) {
 			operators.add("and");
 			wheres.add("version = (select max(sv.version) from StopPlace sv where sv.netexId = stopPlace.netexId)");
 		}
