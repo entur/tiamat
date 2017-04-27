@@ -5,10 +5,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,29 +54,7 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
-                .customize(new CustomMapper<StopPlace, org.rutebanken.tiamat.model.StopPlace>() {
-                    @Override
-                    public void mapAtoB(StopPlace stopPlace, org.rutebanken.tiamat.model.StopPlace stopPlace2, MappingContext context) {
-                        super.mapAtoB(stopPlace, stopPlace2, context);
-                        if (stopPlace.getPlaceEquipments() != null &&
-                                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
-                                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
-                            stopPlace.setPlaceEquipments(null);
-                            stopPlace2.setPlaceEquipments(null);
-                        }
-                    }
-
-                    @Override
-                    public void mapBtoA(org.rutebanken.tiamat.model.StopPlace stopPlace, StopPlace stopPlace2, MappingContext context) {
-                        super.mapBtoA(stopPlace, stopPlace2, context);
-                        if (stopPlace.getPlaceEquipments() != null &&
-                                stopPlace.getPlaceEquipments().getInstalledEquipment() != null &&
-                                stopPlace.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
-                            stopPlace.setPlaceEquipments(null);
-                            stopPlace2.setPlaceEquipments(null);
-                        }
-                    }
-                })
+                .customize(new StopPlaceMapper())
                 .byDefault()
                 .register();
 
@@ -87,29 +62,7 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
-                .customize(new CustomMapper<Quay, org.rutebanken.tiamat.model.Quay>() {
-                    @Override
-                    public void mapAtoB(Quay quay, org.rutebanken.tiamat.model.Quay quay2, MappingContext context) {
-                        super.mapAtoB(quay, quay2, context);
-                        if (quay.getPlaceEquipments() != null &&
-                                quay.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
-                                quay.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
-                            quay.setPlaceEquipments(null);
-                            quay2.setPlaceEquipments(null);
-                        }
-                    }
-
-                    @Override
-                    public void mapBtoA(org.rutebanken.tiamat.model.Quay quay, Quay quay2, MappingContext context) {
-                        super.mapBtoA(quay, quay2, context);
-                        if (quay.getPlaceEquipments() != null &&
-                                quay.getPlaceEquipments().getInstalledEquipment() != null &&
-                                quay.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
-                            quay.setPlaceEquipments(null);
-                            quay2.setPlaceEquipments(null);
-                        }
-                    }
-                })
+                .customize(new QuayMapper())
                 .byDefault()
                 .register();
 
