@@ -48,7 +48,7 @@ public class StopPlacePreSteps {
         this.centroidComputer = centroidComputer;
     }
 
-    public List<StopPlace> run(List<StopPlace> stops, AtomicInteger topographicPlacesCounter) {
+    public List<StopPlace> run(List<StopPlace> stops) {
         final String logCorrelationId = MDC.get(PublicationDeliveryImporter.IMPORT_CORRELATION_ID);
         stops.parallelStream()
                 .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, logCorrelationId))

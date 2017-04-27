@@ -12,12 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Matches nearby existing stop places.
- * If match, only the ID is appended to the existing stop.
+ * If match, the ID and tariffzone ref is appended to the existing stop.
  */
 @Transactional
 @Component
@@ -51,6 +52,13 @@ public class MatchingIdAppendingStopPlacesImporter {
             } else {
                 logger.info("Found matching stop place {}", existingstopPlace);
                 keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, stopPlace, existingstopPlace);
+
+                if(stopPlace.getTariffZones() != null) {
+                    if (existingstopPlace.getTariffZones() == null) {
+                        existingstopPlace.setTariffZones(new HashSet<>());
+                    }
+                    existingstopPlace.getTariffZones().addAll(stopPlace.getTariffZones());
+                }
                 stopPlace = stopPlaceRepository.save(existingstopPlace);
                 String netexId = stopPlace.getNetexId();
 
