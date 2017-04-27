@@ -42,11 +42,11 @@ public class TariffZonesFromStopsExporter {
                 .filter(tariffZoneRef -> responseSiteFrame.getTariffZones() != null)
                 .filter(tariffZoneRef -> responseSiteFrame.getTariffZones().getTariffZone() != null)
                 .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
-                .peek(tariffZoneRef -> logger.info("Looking at tariffZoneRef: {}", tariffZoneRef))
+                .peek(tariffZoneRef -> logger.debug("Looking at tariffZoneRef: {}", tariffZoneRef))
                 .filter(tariffZoneRef -> responseSiteFrame.getTariffZones()
                         .getTariffZone()
                         .stream()
-                        .peek(tariffZone -> logger.info("Tariffzone: {} - Tariffzone ref {}", tariffZone.getId(), tariffZoneRef.getRef()))
+                        .peek(tariffZone -> logger.debug("Tariffzone: {} - Tariffzone ref {}", tariffZone.getId(), tariffZoneRef.getRef()))
                         .noneMatch(tariffZone -> tariffZone.getId().equals(tariffZoneRef.getRef())))
                 .map(tariffZoneRef -> {
                     TariffZoneRef tiamatRef = new TariffZoneRef();
