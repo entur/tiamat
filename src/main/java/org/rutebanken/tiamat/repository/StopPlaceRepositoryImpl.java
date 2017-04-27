@@ -290,7 +290,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 					wheres.add("(lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
 				}
 				operators.add("or");
-				wheres.add("netexId like concat('%', :query, '%'))");
+				wheres.add("netexId like concat('%:', :query))");
 				operators.add("and");
 				orderByStatements.add("similarity(stopPlace.name.value, :query) desc");
 			}
