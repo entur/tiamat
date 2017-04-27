@@ -166,7 +166,7 @@ public class PublicationDeliveryImporter {
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
             logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
-            tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
+            tiamatStops = zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
             logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.onlyImportStopsInCounties);
 
             final Collection<org.rutebanken.netex.model.StopPlace> importedNetexStopPlaces;
@@ -181,7 +181,7 @@ public class PublicationDeliveryImporter {
             } else if(publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
                 if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
                     logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
-                    tiamatStops = (List<org.rutebanken.tiamat.model.StopPlace>) zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
+                    tiamatStops = zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
                     logger.info("Got {} stops back from zone filter", tiamatStops.size());
                 }
                 logger.info("Importing {} stops", tiamatStops.size());

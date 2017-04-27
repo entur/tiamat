@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importer.filter;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.vividsolutions.jts.geom.Point;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
@@ -30,7 +31,7 @@ public class ZoneCountyFilterer {
     private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
 
 
-    public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones) {
+    public <T extends Zone_VersionStructure> List<T> filterByCountyMatch(List<String> countyReferences, List<T> zones) {
         return filterByCountyMatch(countyReferences, zones, false);
     }
 
@@ -42,7 +43,7 @@ public class ZoneCountyFilterer {
      * @param negate negates the filter. Only stop places that is outside the given counties will be returned.
      * @return filtered list
      */
-    public List<? extends Zone_VersionStructure> filterByCountyMatch(List<String> countyReferences, List<? extends Zone_VersionStructure> zones, boolean negate) {
+    public <T extends Zone_VersionStructure> List<T> filterByCountyMatch(List<String> countyReferences, List<T> zones, boolean negate) {
 
         if(countyReferences == null || countyReferences.isEmpty()) {
             logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", countyReferences);
