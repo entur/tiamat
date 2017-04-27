@@ -7,9 +7,10 @@ import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
-public class PersistablePolygon  {
+public class PersistablePolygon implements Serializable {
 
     @Id
     @GeneratedValue(generator="sequence_per_table_generator")
