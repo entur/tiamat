@@ -49,7 +49,7 @@ See also http://stackoverflow.com/a/26514779
 
 ### Postgres
 
-#### Run postgres/gis for tiamat in docker for development 
+#### Run postgres/gis for tiamat in docker for development
 ```
 docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
 ```
@@ -113,21 +113,21 @@ publicationDeliveryUnmarshaller.validateAgainstSchema=true
 
 ## NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery
 
 ### Query by name example:
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=Arne%20Garborgs%20vei
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=Arne%20Garborgs%20vei
 ```
 
 ### Query by ids that contains the number 3115
  ```
- https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=3115
+ https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?q=3115
  ```
 
 ### Query by stop place type
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?stopPlaceType=onstreetBus
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?stopPlaceType=onstreetBus
 ```
 It is also possible with multiple types.
 
@@ -135,28 +135,28 @@ It is also possible with multiple types.
 
 #### First, get references from this endpoint:
 ```
-https://test.rutebanken.org/admin/nsr/jersey/topographic_place
+https://www-test.rutebanken.org/admin/nsr/jersey/topographic_place
 ```
 
 #### Then you can set *countyReference* or *municipalityReference*
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
 ```
 
 ### Size of results
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?size=1000
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?size=1000
 ```
 
 ### Page
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?page=1
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?page=1
 ```
 
 ### ID list
 You can specify a list of NSR stop place IDs to return
 ```
-https://test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
 See the possible params
@@ -166,17 +166,17 @@ https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/ti
 At the time of writing, you need to export everything with async export.
 #### Start async export:
 ```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
+curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
 ```
 
 #### Check job status:
 ```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
+curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
 ```
 
 #### When job is done. Download it:
 ```
-curl https://test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116 | zcat | xmllint --format - > export.xml
+curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116/content | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
@@ -216,10 +216,10 @@ See https://github.com/rutebanken/devsetup/blob/master/docs/stolon.md#stolon-tia
 ### Import NeTEx file without *NSR* IDs
 This NeTEx file should not contain NSR ID.
 * Tiamat will match existing stops based on name and coordinates.
-* Tiamat will merge Quays inside stops that are close, have the same original ID and does not have too different compass bearing. 
+* Tiamat will merge Quays inside stops that are close, have the same original ID and does not have too different compass bearing.
 
 Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original IDs will be present in key value list on each object.
- 
+
 ```
 curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/jersey/publication_delivery
 ```
@@ -233,8 +233,7 @@ https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
 # GraphQL
 GraphQL endpoint is available on
 ```
-https://test.rutebanken.org/admin/nsr/jersey/graphql
+https://www-test.rutebanken.org/admin/nsr/jersey/graphql
 ```
 
-Tip: GraphiQL UI available on https://test.rutebanken.org/admin/shamash-nsr/ 
-
+Tip: GraphiQL UI available on https://www-test.rutebanken.org/admin/shamash-nsr/
