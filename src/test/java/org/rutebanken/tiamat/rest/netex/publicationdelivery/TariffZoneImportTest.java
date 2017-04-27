@@ -99,7 +99,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .withId("RUT:TariffZone:01");
 
         StopPlace stopPlace = new StopPlace()
-                .withId("XYZ:StopPlace:321")
+                .withId("RUT:StopPlace:321")
                 .withName(new MultilingualString().withValue("name"))
                 .withCentroid(point)
                 .withVersion("1")

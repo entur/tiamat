@@ -10,6 +10,7 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.filter.ZoneCountyFilterer;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
@@ -17,6 +18,7 @@ import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -56,8 +58,7 @@ public class PublicationDeliveryImporter {
     private final ZoneCountyFilterer zoneCountyFilterer;
     private final ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter;
     private final MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter;
-
-
+    private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
 
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
@@ -70,7 +71,8 @@ public class PublicationDeliveryImporter {
                                        TariffZoneImporter tariffZoneImporter,
                                        ZoneCountyFilterer zoneCountyFilterer,
                                        ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter,
-                                       MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter) {
+                                       MatchingIdAppendingStopPlacesImporter matchingIdAppendingStopPlacesImporter,
+                                       TariffZonesFromStopsExporter tariffZonesFromStopsExporter) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -82,6 +84,7 @@ public class PublicationDeliveryImporter {
         this.zoneCountyFilterer = zoneCountyFilterer;
         this.parallelInitialStopPlaceImporter = parallelInitialStopPlaceImporter;
         this.matchingIdAppendingStopPlacesImporter = matchingIdAppendingStopPlacesImporter;
+        this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
     }
 
 
@@ -191,6 +194,7 @@ public class PublicationDeliveryImporter {
             }
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedOrUpdated);
 
+            tariffZonesFromStopsExporter.resolveTariffZones(importedNetexStopPlaces, responseSiteframe);
 
             if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
                 List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));
@@ -213,7 +217,6 @@ public class PublicationDeliveryImporter {
             }
         }
     }
-
 
     private boolean hasTariffZones(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
