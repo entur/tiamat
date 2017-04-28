@@ -68,9 +68,6 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
-    public static final String OUTPUT_TYPE_MULTILINGUAL_STRING = "MultilingualString";
-    public static final String INPUT_TYPE_MULTILINGUAL_STRING = OUTPUT_TYPE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
-
     public static final String OUTPUT_TYPE_ALTERNATIVE_NAME = "AlternativeName";
     public static final String INPUT_TYPE_ALTERNATIVE_NAME = OUTPUT_TYPE_ALTERNATIVE_NAME + INPUT_TYPE_POSTFIX;
 

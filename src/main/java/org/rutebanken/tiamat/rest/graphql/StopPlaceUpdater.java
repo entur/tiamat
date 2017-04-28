@@ -6,7 +6,6 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
@@ -39,7 +39,7 @@ class StopPlaceUpdater implements DataFetcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private QuayRepository quayRepository;
+    private EntityManager em;
 
     @Autowired
     private GeometryResolver geometryResolver;
@@ -198,9 +198,17 @@ class StopPlaceUpdater implements DataFetcher {
             entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
             isUpdated = true;
         }
+
         if (input.get(ALTERNATIVE_NAMES) != null) {
-            entity.getAlternativeNames().addAll(getAlternativeNames((List) input.get(ALTERNATIVE_NAMES)));
-            isUpdated = true;
+            List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
+            for (Object alternativeNameObject : alternativeNames) {
+                Map alternativeNameInputMap = (Map) alternativeNameObject;
+                if (populateAlternativeNameFromInput(entity, alternativeNameInputMap)) {
+                    isUpdated = true;
+                } else {
+                    logger.info("AlternativeName not changed");
+                }
+            }
         }
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY)));
@@ -338,24 +346,43 @@ class StopPlaceUpdater implements DataFetcher {
         return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
     }
 
-    private List<AlternativeName> getAlternativeNames(List list) {
-        List<AlternativeName> alternativeNames = new ArrayList<>();
-        for (Object entry : list) {
-            if (entry instanceof Map) {
-                alternativeNames.add(getAlternativeName((Map) entry));
+    private boolean populateAlternativeNameFromInput(SiteElement entity, Map entry) {
+        boolean isUpdated = false;
+        AlternativeName altName;
+
+        NameTypeEnumeration nameType = (NameTypeEnumeration) entry.getOrDefault(NAME_TYPE, NameTypeEnumeration.OTHER);
+        EmbeddableMultilingualString name = getEmbeddableString((Map) entry.get(NAME));
+
+        if (name != null) {
+
+            Optional<AlternativeName> existing = entity.getAlternativeNames()
+                    .stream()
+                    .filter(alternativeName -> alternativeName != null)
+                    .filter(alternativeName -> alternativeName.getName() != null)
+                    .filter(alternativeName -> {
+                            return (alternativeName.getName().getLang() != null &&
+                                    alternativeName.getName().getLang().equals(name.getLang()) &&
+                                    alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
+                    })
+                    .findFirst();
+            if (existing.isPresent()) {
+                altName = existing.get();
+            } else {
+                altName = new AlternativeName();
+            }
+            if (name.getValue() != null) {
+                altName.setName(name);
+                altName.setNameType(nameType);
+                isUpdated = true;
+            }
+
+            if (altName.getName() == null || altName.getName().getValue() == null || altName.getName().getValue().isEmpty()) {
+                entity.getAlternativeNames().remove(altName);
+            } else if (isUpdated && altName.getNetexId() == null) {
+                entity.getAlternativeNames().add(altName);
             }
         }
-        return alternativeNames;
-    }
 
-    private AlternativeName getAlternativeName(Map entry) {
-        AlternativeName altName = new AlternativeName();
-        altName.setNameType((NameTypeEnumeration) entry.get(NAME_TYPE));
-        altName.setName(getMultilingualEntity((Map)entry.get(NAME)));
-        return altName;
-    }
-
-    private MultilingualStringEntity getMultilingualEntity(Map map) {
-        return new MultilingualStringEntity((String) map.get(VALUE), (String)map.get(LANG));
+        return isUpdated;
     }
 }

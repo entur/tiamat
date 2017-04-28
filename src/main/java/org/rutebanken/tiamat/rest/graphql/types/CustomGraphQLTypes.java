@@ -451,35 +451,14 @@ public class CustomGraphQLTypes {
                     .type(GraphQLString))
             .build();
 
-    public static GraphQLObjectType multiLingualStringObjectType = newObject()
-            .name(OUTPUT_TYPE_MULTILINGUAL_STRING)
-            .field(newFieldDefinition()
-                    .name(VALUE)
-                    .type(GraphQLString))
-            .field(newFieldDefinition()
-                    .name(LANG)
-                    .type(GraphQLString))
-            .build();
-
-    public static GraphQLInputObjectType multiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
-            .name(INPUT_TYPE_MULTILINGUAL_STRING)
-            .field(newInputObjectField()
-                    .name(VALUE)
-                    .type(GraphQLString))
-            .field(newInputObjectField()
-                    .name(LANG)
-                    .type(GraphQLString))
-            .build();
-
-
     public static GraphQLObjectType alternativeNameObjectType = newObject()
                 .name(OUTPUT_TYPE_ALTERNATIVE_NAME)
                 .field(newFieldDefinition()
                         .name(NAME_TYPE)
-                        .type(nameTypeEnum))
+                        .type(new GraphQLNonNull(nameTypeEnum)))
                 .field(newFieldDefinition()
                         .name(NAME)
-                        .type(multiLingualStringObjectType))
+                        .type(embeddableMultilingualStringObjectType))
                 .build();
 
 
@@ -490,7 +469,7 @@ public class CustomGraphQLTypes {
                         .type(nameTypeEnum))
                 .field(newInputObjectField()
                         .name(NAME)
-                        .type(new GraphQLNonNull(multiLingualStringInputObjectType)))
+                        .type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
                 .build();
 
     public static GraphQLInputObjectType topographicPlaceInputObjectType = GraphQLInputObjectType.newInputObject()

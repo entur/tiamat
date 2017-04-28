@@ -10,7 +10,6 @@ import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,11 +117,18 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
 
+        if (stopPlaceToSave.getAlternativeNames() != null) {
+            versionCreator.initiateOrIncrementAlternativeNamesVersion(stopPlaceToSave.getAlternativeNames());
+        }
+
         if (stopPlaceToSave.getQuays() != null) {
             logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
             stopPlaceToSave.getQuays().forEach(quay -> {
                 versionCreator.initiateOrIncrement(quay);
                 versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(quay);
+                if (quay.getAlternativeNames() != null) {
+                    versionCreator.initiateOrIncrementAlternativeNamesVersion(quay.getAlternativeNames());
+                }
             });
         }
     }
