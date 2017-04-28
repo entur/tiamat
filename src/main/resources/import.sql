@@ -1,5 +1,11 @@
 CREATE INDEX stop_place_centroid_index ON stop_place USING GIST ( centroid );
 
+CREATE index stop_place_netex_id_index ON stop_place(netex_id);
+CREATE index stop_place_version_index ON stop_place(version);
+
+CREATE index quay_netex_id_index ON quay(netex_id);
+CREATE index quay_version_index ON quay(version);
+
 CREATE INDEX persistable_polygon_index ON persistable_polygon USING GIST (polygon);
 
 DROP TABLE IF EXISTS id_generator;
