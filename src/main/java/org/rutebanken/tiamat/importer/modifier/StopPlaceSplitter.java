@@ -13,10 +13,11 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.tiamat.geo.CentroidComputer.DISTANCE_WARNING_METERS;
 
 @Component
 public class StopPlaceSplitter {
+
+    private static final int QUAY_DISTANCE = 1000;
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceSplitter.class);
 
@@ -109,6 +110,11 @@ public class StopPlaceSplitter {
             if(quay == alreadyAddedQuay) {
                 logger.debug("Quay already added {}", quay.getOriginalIds());
                 return true;
+            } else if(quay.getCentroid() == null && alreadyAddedQuay.getCentroid() != null) {
+                return false;
+            } else if (quay.getCentroid() == null && alreadyAddedQuay.getCentroid() == null) {
+                alreadyAddedQuayIterator.add(quay);
+                return true;
             } else if(close(quay, alreadyAddedQuay)) {
                 logger.debug("Quays are close. grouping {} together with: {}", quay.getOriginalIds(), alreadyAddedQuay.getOriginalIds());
                 alreadyAddedQuayIterator.add(quay);
@@ -126,7 +132,7 @@ public class StopPlaceSplitter {
                     quay1.getCentroid().getCoordinate(),
                     quay2.getCentroid().getCoordinate(),
                     DefaultGeographicCRS.WGS84);
-            return distanceInMeters < DISTANCE_WARNING_METERS;
+            return distanceInMeters < QUAY_DISTANCE;
         } catch (TransformException e) {
             logger.warn("Error checking distance between {} and {}", quay1, quay2, e);
         }

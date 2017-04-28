@@ -768,8 +768,8 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                                 .withId("30")
                                                 .withVersion("1")
                                                 .withLocation(new LocationStructure()
-                                                        .withLatitude(new BigDecimal("12"))
-                                                        .withLongitude(new BigDecimal("22"))))));
+                                                        .withLatitude(new BigDecimal("10.0002"))
+                                                        .withLongitude(new BigDecimal("20.0002"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -777,8 +777,8 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
-        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(21.0);
-        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(11.0);
+        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(20.0001);
+        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(10.0001);
     }
 
     @Test
