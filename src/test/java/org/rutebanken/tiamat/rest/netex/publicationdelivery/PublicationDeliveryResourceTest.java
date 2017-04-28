@@ -874,32 +874,35 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
      * It should be validated when streaming out.
      */
     @Test
-    public void exportStopPlaces() throws JAXBException, IOException, SAXException {
+    public void exportStopPlacesWithRelevantTopographicPlaces() throws JAXBException, IOException, SAXException {
+        exportStopPlacesAndVerify(true);
+    }
 
-        // Import stop to make sure we have something to export, allthough other tests might have populated the test database.
-        StopPlace stopPlace = new StopPlace()
-                .withId("XYZ:Stopplace:1")
-                .withVersion("1")
-                .withName(new MultilingualString().withValue("Østre gravlund"))
-                .withCentroid(new SimplePoint_VersionStructure()
-                        .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("59.914353"))
-                                .withLongitude(new BigDecimal("10.806387"))));
+    @Test
+    public void exportStopPlacesWithoutTopographicPlaces() throws JAXBException, IOException, SAXException {
+        exportStopPlacesAndVerify(false);
+    }
 
-        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+    private void exportStopPlacesAndVerify(boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
+        // Import stop to make sure we have something to export, although other tests might have populated the test database.
+        // Make ids and search string unique
+
+        insertTestStopWithTopographicPlace();
 
         StopPlaceSearchDto stopPlaceSearch = new StopPlaceSearchDto.Builder()
                 .setQuery("Østre gravlund")
                 .build();
-        Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch);
+        Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch,includeTopographicPlaces);
         assertThat(response.getStatus()).isEqualTo(200);
-
+        // TODO Response is empty. Inserted stop place is somehow not found
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
     }
+
+
 
     /**
      * Partially copied from https://github.com/rutebanken/netex-norway-examples/blob/master/examples/stops/BasicStopPlace_example.xml
@@ -1368,5 +1371,44 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+    }
+
+
+
+    private boolean testStopInserted = false;
+
+    private void insertTestStopWithTopographicPlace() throws JAXBException, IOException, SAXException {
+        if (testStopInserted) {
+            return;
+        }
+        testStopInserted = true;
+        TopographicPlace topographicParent = new TopographicPlace()
+                                                     .withId("KVE:TopographicPlace:1")
+                                                     .withVersion("1")
+                                                     .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Fylke")));
+
+        TopographicPlace topographicPlace = new TopographicPlace()
+                                                    .withId("KVE:TopographicPlace:3")
+                                                    .withVersion("1")
+                                                    .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Kommune")))
+                                                    .withParentTopographicPlaceRef(new TopographicPlaceRefStructure()
+                                                                                           .withRef(topographicParent.getId()));
+        PublicationDeliveryStructure topographicPlacesForImport = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(topographicParent, topographicPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(topographicPlacesForImport);
+
+
+        StopPlace stopPlace = new StopPlace()
+                                      .withId("XYZ:Stopplace:1")
+                                      .withVersion("1")
+                                      .withName(new MultilingualString().withValue("Østre gravlund"))
+                                      .withTopographicPlaceRef(new TopographicPlaceRefStructure()
+                                                                       .withRef(topographicPlace.getId()))
+                                      .withCentroid(new SimplePoint_VersionStructure()
+                                                            .withLocation(new LocationStructure()
+                                                                                  .withLatitude(new BigDecimal("59.914353"))
+                                                                                  .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
     }
 }

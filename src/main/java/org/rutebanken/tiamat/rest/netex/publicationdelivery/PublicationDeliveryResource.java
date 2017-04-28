@@ -131,11 +131,11 @@ public class PublicationDeliveryResource {
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) throws JAXBException, IOException, SAXException {
+    public Response exportStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto,
+                                                @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch,includeTopographicPlaces);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 
 }
-

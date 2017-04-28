@@ -39,7 +39,8 @@ public class StopPlaceSearchDisassembler {
         stopPlaceSearchBuilder.setCountyIds(stopPlaceSearchDto.countyReferences)
                         .setMunicipalityIds(stopPlaceSearchDto.municipalityReferences)
                         .setQuery(stopPlaceSearchDto.query)
-                        .setPageable(new PageRequest(stopPlaceSearchDto.page, stopPlaceSearchDto.size));
+                        .setPageable(new PageRequest(stopPlaceSearchDto.page, stopPlaceSearchDto.size))
+                        .setVersion(stopPlaceSearchDto.version);
 
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchBuilder.build();
         logger.info("Disassembled stop place search '{}'", stopPlaceSearch);
