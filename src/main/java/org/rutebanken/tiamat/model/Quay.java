@@ -5,15 +5,17 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "stop_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
+)
 public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
