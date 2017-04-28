@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.modifier;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
@@ -79,10 +80,12 @@ public class StopPlaceSplitterTest {
     }
 
     @Test
-    public void expectName() {
+    public void expectNameButNoOriginalId() {
 
         StopPlace originalStopplace = new StopPlace();
         originalStopplace.setName(new EmbeddableMultilingualString("name"));
+        String originalId = "zYx:StopPlace:321";
+        originalStopplace.getOriginalIds().add(originalId);
 
         Quay quay1 = new Quay();
         quay1.setNetexId("XYZ:Quay:1");
@@ -104,6 +107,13 @@ public class StopPlaceSplitterTest {
                 .extracting(EmbeddableMultilingualString::getValue)
                 .as("name value")
                 .containsExactly("name", "name");
+
+        assertThat(actual
+                .stream()
+                .flatMap(s -> s.getOriginalIds().stream())
+                .anyMatch(s -> s.contains(originalId)))
+                .as("Original ID on stop place")
+                .isFalse();
     }
 
     @Test

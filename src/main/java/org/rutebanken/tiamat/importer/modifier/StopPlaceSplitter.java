@@ -89,6 +89,7 @@ public class StopPlaceSplitter {
                 .map(quayList -> {
                     StopPlace newStopPlace = SerializationUtils.clone(originalStopPlace);
                     newStopPlace.getQuays().clear();
+                    newStopPlace.getOriginalIds().clear();
                     if(!quayList.get(0).getOriginalIds().isEmpty()) {
                         String generatedOriginalId = quayList.get(0).getOriginalIds().iterator().next()+"-generated";
                         newStopPlace.getOriginalIds().add(generatedOriginalId);
