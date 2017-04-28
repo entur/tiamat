@@ -17,10 +17,11 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         Quay version1 = new Quay();
         version1.getOrCreateValues("test").add("value");
-
+        version1.setVersion(1L);
         quayRepository.save(version1);
 
         Quay version2 = versionCreator.createCopy(version1, Quay.class);
+        version2.setVersion(2L);
 
         quayRepository.save(version2);
 
