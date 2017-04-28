@@ -26,7 +26,7 @@ public class CentroidComputer {
      * The threshold in meters for distance between stop place and quay centroid.
      * If more than this limit, log a warning;
      */
-    private static final int DISTANCE_WARNING_METERS = 200;
+    public static final int DISTANCE_WARNING_METERS = 200;
 
     private GeometryFactory geometryFactory;
 

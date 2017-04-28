@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -30,6 +29,7 @@ public class StopPlacePreSteps {
     private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
     private final CompassBearingRemover compassBearingRemover;
     private final CentroidComputer centroidComputer;
+    private final StopPlaceSplitter stopPlaceSplitter;
 
 
     @Autowired
@@ -38,7 +38,7 @@ public class StopPlacePreSteps {
                              QuayNameRemover quayNameRemover,
                              StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
                              QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer) {
+                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer, StopPlaceSplitter stopPlaceSplitter) {
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
@@ -46,10 +46,12 @@ public class StopPlacePreSteps {
         this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
         this.compassBearingRemover = compassBearingRemover;
         this.centroidComputer = centroidComputer;
+        this.stopPlaceSplitter = stopPlaceSplitter;
     }
 
     public List<StopPlace> run(List<StopPlace> stops) {
         final String logCorrelationId = MDC.get(PublicationDeliveryImporter.IMPORT_CORRELATION_ID);
+        stops = stopPlaceSplitter.split(stops);
         stops.parallelStream()
                 .peek(stopPlace -> MDC.put(PublicationDeliveryImporter.IMPORT_CORRELATION_ID, logCorrelationId))
                 .map(stopPlace -> {

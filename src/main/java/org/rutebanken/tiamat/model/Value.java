@@ -7,6 +7,7 @@ import org.hibernate.annotations.Cache;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
-public class Value {
+public class Value implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
