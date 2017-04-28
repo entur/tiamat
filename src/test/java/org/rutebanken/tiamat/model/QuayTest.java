@@ -252,8 +252,8 @@ public class QuayTest extends TiamatIntegrationTest {
         Quay quay = new Quay();
 
         AlternativeName alternativeName = new AlternativeName();
-        alternativeName.setShortName(new MultilingualStringEntity("short name", "en"));
-        alternativeName.setName(new MultilingualStringEntity("name", "en"));
+        alternativeName.setShortName(new EmbeddableMultilingualString("short name", "en"));
+        alternativeName.setName(new EmbeddableMultilingualString("name", "en"));
 
         quay.getAlternativeNames().add(alternativeName);
 

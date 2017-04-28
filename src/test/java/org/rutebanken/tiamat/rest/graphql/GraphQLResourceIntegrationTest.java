@@ -856,7 +856,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
 
     @Test
-    public void testSimpleMutationUpdateAlternativeNames() throws Exception {
+    public void testSimpleSaveAlternativeNames() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Name"));
@@ -864,11 +864,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         AlternativeName altName = new AlternativeName();
         altName.setNameType(NameTypeEnumeration.ALIAS);
-        altName.setName(new MultilingualStringEntity("Navn", "no-nb"));
+        altName.setName(new EmbeddableMultilingualString("Navn", "no"));
 
         AlternativeName altName2 = new AlternativeName();
         altName2.setNameType(NameTypeEnumeration.ALIAS);
-        altName2.setName(new MultilingualStringEntity("Nom", "fr"));
+        altName2.setName(new EmbeddableMultilingualString("Name", "en"));
 
         stopPlace.getAlternativeNames().add(altName);
         stopPlace.getAlternativeNames().add(altName2);
@@ -931,6 +931,63 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("alternativeNames[1].name.lang", notNullValue())
         ;
     }
+    @Test
+    public <T extends Comparable<T>> void testSimpleMutateAlternativeNames() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        AlternativeName altName = new AlternativeName();
+        altName.setNameType(NameTypeEnumeration.ALIAS);
+        altName.setName(new EmbeddableMultilingualString("Navn", "no"));
+
+        stopPlace.getAlternativeNames().add(altName);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String netexId = stopPlace.getNetexId();
+
+        String updatedAlternativeNameValue = "UPDATED ALIAS";
+        String updatedAlternativeNameLang = "no";
+
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "      id:\\\"" + netexId + "\\\"" +
+                "      alternativeNames: [" +
+                "        {" +
+                "          nameType: " + altName.getNameType().value() +
+                "          name: {" +
+                "            value: \\\"" + updatedAlternativeNameValue + "\\\"" +
+                "            lang:\\\""+ updatedAlternativeNameLang +"\\\"" +
+                "          }" +
+                "        } " +
+                "      ]" +
+                "    }) " +
+                "    {" +
+                "      id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(netexId))
+                .body("data.stopPlace[0].alternativeNames", notNullValue())
+                .root("data.stopPlace[0].alternativeNames[0]")
+//                .body("nameType", equalTo(altName.getNameType())) //RestAssured apparently does not like comparing response with enums...
+                .body("name.value", comparesEqualTo(updatedAlternativeNameValue))
+                .body("name.lang", comparesEqualTo(updatedAlternativeNameLang))
+        ;
+    }
+
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));

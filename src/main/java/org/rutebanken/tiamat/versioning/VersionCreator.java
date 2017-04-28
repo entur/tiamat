@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Creates new version of already existing objects, by mapping with Orika and ignore primary key "id".
@@ -109,6 +110,11 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(AlternativeName.class, AlternativeName.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 
@@ -151,6 +157,13 @@ public class VersionCreator {
                 AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
                 initiateOrIncrement(limitation);
             }
+        }
+    }
+
+    public void initiateOrIncrementAlternativeNamesVersion(List<AlternativeName> alternativeNames) {
+
+        if (alternativeNames != null) {
+            alternativeNames.forEach(alternativeName -> initiateOrIncrement(alternativeName));
         }
     }
 

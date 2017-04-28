@@ -2,12 +2,9 @@ package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Ignore;
-import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
-import org.junit.Test;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -301,7 +298,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
 
         AlternativeName alternativeName = new AlternativeName();
-        alternativeName.setShortName(new MultilingualStringEntity("short name", "en"));
+        alternativeName.setShortName(new EmbeddableMultilingualString("short name", "en"));
         stopPlace.getAlternativeNames().add(alternativeName);
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
