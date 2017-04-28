@@ -70,9 +70,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             stopPlaceToSave.setChanged(ZonedDateTime.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
-            logger.debug("About to terminate previous version of {}", existingVersion.getNetexId());
-            StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(existingVersion.getNetexId(), existingVersion.getVersion());
-            logger.debug("Invalidate existing version for {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
+            logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
+            StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
+            logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             existingStopPlace = versionCreator.terminateVersion(existingStopPlace, ZonedDateTime.now());
 
             if (existingStopPlace.getValidBetweens() != null && !existingStopPlace.getValidBetweens().isEmpty()) {
