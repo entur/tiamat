@@ -28,6 +28,8 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.*;
 
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+
 @Repository
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
@@ -193,15 +195,18 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
 		String sql = "SELECT vi.items, q.netex_id " +
 				             "FROM quay_key_values qkv " +
-				             "INNER JOIN stop_place_quays spq " +
-				             "ON spq.quays_id = qkv.quay_id " +
-				             "INNER JOIN quay q " +
-				             "ON (spq.quays_id = q.id " +
-								"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
-				             "INNER JOIN value_items vi " +
-				             "ON qkv.key_values_id = vi.value_id " +
+				             	"INNER JOIN stop_place_quays spq " +
+				             		"ON spq.quays_id = qkv.quay_id " +
+				             	"INNER JOIN quay q " +
+				             		"ON (spq.quays_id = q.id " +
+									"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
+				             	"INNER JOIN value_items vi " +
+									"ON qkv.key_values_id = vi.value_id " +
+				             "WHERE qkv.key_values_key = :originalIdKey " +
 				             "ORDER BY q.netex_id";
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+		nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
 
 		@SuppressWarnings("unchecked")
 		List<Object[]> result = nativeQuery.getResultList();
@@ -219,13 +224,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
 		String sql = "SELECT v.items, s.netex_id " +
 				             "FROM stop_place_key_values spkv " +
-				             "INNER JOIN value_items v " +
-				             "ON spkv.key_values_id = v.value_id " +
-				             "INNER JOIN stop_place s " +
-				             "ON s.id = spkv.stop_place_id " +
-				 			 "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
+				             	"INNER JOIN value_items v " +
+				             		"ON spkv.key_values_id = v.value_id " +
+				             	"INNER JOIN stop_place s " +
+				             		"ON s.id = spkv.stop_place_id " +
+				 			 		"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)" +
+							 "WHERE spkv.key_values_key = :originalIdKey";
 
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+		nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
 
 		List<Object[]> result = nativeQuery.getResultList();
 
