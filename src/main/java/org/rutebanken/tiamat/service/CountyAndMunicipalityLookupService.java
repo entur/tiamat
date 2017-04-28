@@ -5,6 +5,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
@@ -12,11 +13,13 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
@@ -30,7 +33,7 @@ public class CountyAndMunicipalityLookupService {
     private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
 
 
-    private final Supplier<List<Pair<String, Polygon>>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 10, TimeUnit.HOURS);
+    private final Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 10, TimeUnit.HOURS);
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -51,39 +54,35 @@ public class CountyAndMunicipalityLookupService {
         }
     }
 
-
     public Optional<TopographicPlace> findTopographicPlace(Point point) {
         return topographicPlaces.get()
                        .stream()
-                       .filter(pair -> point.within(pair.getSecond()))
-                       .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
+                       .filter(triple -> point.within(triple.getRight()))
+                       .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
                        .filter(topographicPlace -> topographicPlace != null)
                        .findAny();
     }
 
     public Optional<TopographicPlace> findCountyMatchingReferences(List<String> countyReferences, Point point) {
         return topographicPlaces.get()
-                       .stream()
-                       .filter(pair -> point.within(pair.getSecond()))
-                       .map(pair -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
-                       .filter(topographicPlace -> topographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.COUNTY))
-                       .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
-                       .findAny();
+                .stream()
+                .filter(triple -> triple.getMiddle().equals(TopographicPlaceTypeEnumeration.COUNTY))
+                .filter(triple -> point.within(triple.getRight()))
+                .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
+                .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
+                .findAny();
     }
 
-    private Supplier<List<Pair<String, Polygon>>> getTopographicPlaceSupplier() {
-        return new Supplier<List<Pair<String, Polygon>>>() {
-            @Override
-            public List<Pair<String, Polygon>> get() {
-                logger.info("Fetching topographic places from repository");
-                return topographicPlaceRepository.findAllMaxVersion()
-                               .stream()
-                               .filter(topographicPlace -> topographicPlace.getPolygon() != null)
-                               .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
-                               .sorted(new TopographicPlaceByAdminLevelComparator())
-                               .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getPolygon()))
-                               .collect(toList());
-            }
+    private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier() {
+        return () -> {
+            logger.info("Fetching topographic places from repository");
+            return topographicPlaceRepository.findAllMaxVersion()
+                    .stream()
+                    .filter(topographicPlace -> topographicPlace.getPolygon() != null)
+                    .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
+                    .sorted(new TopographicPlaceByAdminLevelComparator())
+                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getPolygon()))
+                    .collect(toList());
         };
     }
 
