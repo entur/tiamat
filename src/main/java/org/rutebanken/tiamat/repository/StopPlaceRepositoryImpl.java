@@ -223,11 +223,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		String sql = "SELECT v.items, s.netex_id " +
 				             "FROM stop_place_key_values spkv " +
 				             	"INNER JOIN value_items v " +
-				             		"ON spkv.key_values_id = v.value_id " +
+				             		"ON spkv.key_values_key = :originalIdKey AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
 				             	"INNER JOIN stop_place s " +
 				             		"ON s.id = spkv.stop_place_id " +
-				 			 		"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)" +
-							 "WHERE spkv.key_values_key = :originalIdKey";
+				 			 		"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
 
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
