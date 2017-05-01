@@ -32,7 +32,7 @@ public class DtoQuayResource {
     @GET
     @Produces("text/plain")
     @Path("/id_mapping")
-    public Response getIdMapping(@DefaultValue(value = "20000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
+    public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
 
         return Response.ok().entity((StreamingOutput) output -> {
 
