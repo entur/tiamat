@@ -201,9 +201,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 				             		"ON (spq.quays_id = q.id " +
 									"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
 				             	"INNER JOIN value_items vi " +
-									"ON qkv.key_values_id = vi.value_id " +
-				             "WHERE qkv.key_values_key = :originalIdKey " +
-				             "ORDER BY q.netex_id";
+									"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :originalIdKey";
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
 		nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
