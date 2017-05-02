@@ -69,10 +69,10 @@ public class ZoneCountyFilterer {
                         logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
                     } else if(negate){
-                        logger.info("Keeping {}. Negate: {}", zone, negate);
+                        logger.debug("Keeping {}. Negate: {}", zone, negate);
                         return true;
                     } else {
-                        logger.info("Filtering out {}. County references: {}. Negate: {}", zone, countyReferences, negate);
+                        logger.debug("Filtering out {}. County references: {}. Negate: {}", zone, countyReferences, negate);
                         return false;
                     }
                 })
