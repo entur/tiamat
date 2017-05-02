@@ -50,7 +50,7 @@ public class MatchingIdAppendingStopPlacesImporter {
             if(existingstopPlace == null) {
                 logger.warn("Cannot find nearby stop place: {}", stopPlace);
             } else {
-                logger.info("Found matching stop place {}", existingstopPlace);
+                logger.debug("Found matching stop place {}", existingstopPlace);
                 keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, stopPlace, existingstopPlace);
 
                 if(stopPlace.getTariffZones() != null) {
