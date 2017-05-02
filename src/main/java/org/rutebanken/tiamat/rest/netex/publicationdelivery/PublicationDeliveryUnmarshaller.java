@@ -43,6 +43,8 @@ public class PublicationDeliveryUnmarshaller {
 
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        jaxbUnmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+
 
         if(logger.isDebugEnabled()) {
             String xml = new String(toByteArray(inputStream));

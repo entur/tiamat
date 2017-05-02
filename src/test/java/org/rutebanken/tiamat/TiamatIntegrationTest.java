@@ -61,5 +61,8 @@ public abstract class TiamatIntegrationTest {
 
         topographicPlaceRepository.deleteAll();
         topographicPlaceRepository.flush();
+
+        tariffZoneRepository.deleteAll();
+        tariffZoneRepository.flush();
     }
 }
