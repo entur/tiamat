@@ -44,10 +44,10 @@ public class StopPlaceIdMatcher {
 
             org.rutebanken.tiamat.model.StopPlace existingStopPlace;
             if(incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
-                logger.info("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
+                logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
                 existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId());
             } else {
-                logger.info("Looking for stop by original id: {}", incomingStopPlace.getOriginalIds());
+                logger.debug("Looking for stop by original id: {}", incomingStopPlace.getOriginalIds());
                 existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);
             }
 
