@@ -82,6 +82,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
         assertThat(actualZones.get(0).getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+        assertThat(actualZones.get(0).getVersion()).isEqualTo("2");
     }
 
     @Test
