@@ -140,7 +140,7 @@ public class PublicationDeliveryImporter {
 
             if(hasTariffZones(netexSiteFrame)) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
-                logger.info("Got {} tariff zones", tiamatTariffZones.size());
+                logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneImporter.importTariffZones(tiamatTariffZones)));
             }
 
