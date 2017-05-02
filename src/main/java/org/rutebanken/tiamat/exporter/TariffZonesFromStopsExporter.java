@@ -39,15 +39,20 @@ public class TariffZonesFromStopsExporter {
     public void resolveTariffZones(Collection<StopPlace> importedNetexStopPlaces, SiteFrame responseSiteFrame) {
         List<TariffZone> relatedTariffZones = importedNetexStopPlaces.stream()
                 .filter(stopPlace -> stopPlace.getTariffZones() != null)
-                .filter(tariffZoneRef -> responseSiteFrame.getTariffZones() != null)
-                .filter(tariffZoneRef -> responseSiteFrame.getTariffZones().getTariffZone() != null)
                 .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
                 .peek(tariffZoneRef -> logger.debug("Looking at tariffZoneRef: {}", tariffZoneRef))
-                .filter(tariffZoneRef -> responseSiteFrame.getTariffZones()
-                        .getTariffZone()
-                        .stream()
-                        .peek(tariffZone -> logger.debug("Tariffzone: {} - Tariffzone ref {}", tariffZone.getId(), tariffZoneRef.getRef()))
-                        .noneMatch(tariffZone -> tariffZone.getId().equals(tariffZoneRef.getRef())))
+                .filter(tariffZoneRef -> {
+                    if(responseSiteFrame.getTariffZones() == null || responseSiteFrame.getTariffZones().getTariffZone() == null) {
+                        return true;
+                    }
+
+                    // Check tariffzones already added to the response site frame
+                    return responseSiteFrame.getTariffZones()
+                            .getTariffZone()
+                            .stream()
+                            .peek(tariffZone -> logger.debug("Tariffzone: {} - Tariffzone ref {}", tariffZone.getId(), tariffZoneRef.getRef()))
+                            .noneMatch(tariffZone -> tariffZone.getId().equals(tariffZoneRef.getRef()));
+                })
                 .map(tariffZoneRef -> {
                     TariffZoneRef tiamatRef = new TariffZoneRef();
                     tiamatRef.setRef(tariffZoneRef.getRef());
@@ -55,6 +60,7 @@ public class TariffZonesFromStopsExporter {
                 })
                 .map(tariffZoneRef -> referenceResolver.resolve(tariffZoneRef))
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
+                .distinct()
                 .collect(Collectors.toList());
 
         if(responseSiteFrame.getTariffZones() != null) {
