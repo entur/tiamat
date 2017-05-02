@@ -34,7 +34,7 @@ public class NetexIdHelper {
 
     public static boolean isNsrId(String netexId) {
         if(!netexId.contains(NSR)) {
-            logger.warn("The netexId: {} does not start with {}", netexId, NSR);
+            logger.debug("The netexId: {} does not start with {}", netexId, NSR);
             return false;
         }
 
