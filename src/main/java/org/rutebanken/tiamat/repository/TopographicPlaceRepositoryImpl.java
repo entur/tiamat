@@ -53,7 +53,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		Map<String, Object> parameters = new HashMap<>();
 
 		if(!Strings.isNullOrEmpty(name)) {
-			sql.append("AND LOWER(tp.name.value) LIKE LOWER(:name) ");
+			sql.append("AND LOWER(tp.name.value) LIKE CONCAT('%', LOWER(:name), '%')");
 			parameters.put("name", name);
 		}
 
