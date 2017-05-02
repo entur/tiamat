@@ -71,11 +71,16 @@ public class PublicationDeliveryResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public Response receivePublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
+        logger.info("Received Netex publication delivery, starting to parse...");
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
             PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, publicationDeliveryParams);
-            return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+            if(publicationDeliveryParams.skipOutput) {
+            	return Response.ok().build();
+            } else {
+            	return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
+            }
         } catch (Exception e) {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
