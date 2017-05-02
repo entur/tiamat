@@ -61,7 +61,7 @@ public class StopPlaceIdMatcher {
 
                 if(stopPlaceOptional.isPresent()) {
                     existingStopPlace = stopPlaceOptional.get();
-                    logger.info("Found stop place from quay imported id: {}", existingStopPlace);
+                    logger.debug("Found stop place from quay imported id: {}", existingStopPlace);
                 } else {
                     existingStopPlace = null;
                 }
