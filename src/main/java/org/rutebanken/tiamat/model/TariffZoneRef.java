@@ -18,4 +18,8 @@ public class TariffZoneRef extends ZoneRefStructure {
         this.setRef(tariffZone.getNetexId());
         this.setVersion(String.valueOf(tariffZone.getVersion()));
     }
+
+    public TariffZoneRef(String netexId) {
+        this.setRef(netexId);
+    }
 }
