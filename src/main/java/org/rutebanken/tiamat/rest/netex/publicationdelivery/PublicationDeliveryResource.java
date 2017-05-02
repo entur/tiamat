@@ -76,7 +76,7 @@ public class PublicationDeliveryResource {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
             PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, publicationDeliveryParams);
-            if(publicationDeliveryParams.skipOutput) {
+            if(publicationDeliveryParams != null && publicationDeliveryParams.skipOutput) {
             	return Response.ok().build();
             } else {
             	return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
