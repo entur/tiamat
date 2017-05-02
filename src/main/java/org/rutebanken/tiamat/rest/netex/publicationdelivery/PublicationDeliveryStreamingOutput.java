@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 

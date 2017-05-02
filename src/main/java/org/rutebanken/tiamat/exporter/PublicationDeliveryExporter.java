@@ -3,12 +3,9 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -21,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.xml.bind.JAXBException;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.*;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
@@ -34,6 +31,8 @@ public class PublicationDeliveryExporter {
     private TopographicPlaceRepository topographicPlaceRepository;
     private NetexMapper netexMapper;
 
+    public enum ExportMode {NONE, RELEVANT, ALL}
+
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository, TopographicPlaceRepository topographicPlaceRepository, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
@@ -41,17 +40,17 @@ public class PublicationDeliveryExporter {
         this.netexMapper = netexMapper;
     }
 
-    public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch) {
-
+    public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch, boolean includeTopographicPlaces) {
+        ExportMode topographicPlaceExportMode = includeTopographicPlaces ? RELEVANT : NONE;
         if (stopPlaceSearch.isEmpty()) {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()), topographicPlaceExportMode);
         } else {
-            return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findStopPlace(stopPlaceSearch));
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(stopPlaceSearch), topographicPlaceExportMode);
         }
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
-        return exportPublicationDeliveryWithoutStops(stopPlaceRepository.findAll());
+        return exportPublicationDeliveryWithStops(stopPlaceRepository.findAll(), ALL);
     }
 
     @SuppressWarnings("unchecked")
@@ -60,7 +59,7 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
-                .withParticipantRef(NetexIdMapper.NSR);
+                .withParticipantRef(NetexIdHelper.NSR);
 
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
@@ -70,15 +69,15 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
-        return exportPublicationDeliveryWithoutStops(null);
+        return exportPublicationDeliveryWithStops(null, ALL);
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops(Iterable<StopPlace> iterableStopPlaces) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportMode topographicPlaceExportMode) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setCreated(ZonedDateTime.now());
         siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdMapper.generateRandomizedNetexId(siteFrame));
+        siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
 
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
@@ -91,9 +90,10 @@ public class PublicationDeliveryExporter {
             }
         }
 
-        List<TopographicPlace> allTopographicPlaces = topographicPlaceRepository.findAll();
-        if (!allTopographicPlaces.isEmpty()) {
-            Iterator<TopographicPlace> topographicPlaceIterable = allTopographicPlaces.iterator();
+        Collection<TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, stopPlacesInFrame_relStructure);
+
+        if (!topographicPlacesForExport.isEmpty()) {
+            Iterator<TopographicPlace> topographicPlaceIterable = topographicPlacesForExport.iterator();
 
 
             TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
@@ -103,13 +103,53 @@ public class PublicationDeliveryExporter {
             logger.info("Adding {} topographic places", topographicPlaces.getTopographicPlace().size());
             siteFrame.setTopographicPlaces(topographicPlaces);
         } else {
-            logger.warn("No topographic places found to export");
             siteFrame.setTopographicPlaces(null);
         }
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
+        if (NONE.equals(topographicPlaceExportMode)){
+            removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
+        }
 
         return exportSiteFrame(convertedSiteFrame);
     }
+
+    private void removeVersionFromTopographicPlaceReferences(SiteFrame convertedSiteFrame) {
+        if (convertedSiteFrame.getStopPlaces() != null) {
+            convertedSiteFrame.getStopPlaces().getStopPlace().stream().filter(sp -> sp.getTopographicPlaceRef() != null).forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
+        }
+    }
+
+    private Collection<TopographicPlace> getTopographicPlacesForExport(ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
+        Collection<TopographicPlace> topographicPlacesForExport;
+        if (ALL.equals(topographicPlaceExportMode)) {
+            topographicPlacesForExport = topographicPlaceRepository.findAll();
+            if (topographicPlacesForExport.isEmpty()) {
+                logger.warn("No topographic places found to export");
+            }
+        } else if (RELEVANT.equals(topographicPlaceExportMode)) {
+            Set<TopographicPlace> uniqueTopographicPlaces = new HashSet<>();
+            for (StopPlace stopPlace : stopPlacesInFrame_relStructure.getStopPlace()) {
+                gatherTopographicPlaceTree(stopPlace.getTopographicPlace(), uniqueTopographicPlaces);
+            }
+
+            topographicPlacesForExport = new HashSet<>(uniqueTopographicPlaces);
+        } else {
+            topographicPlacesForExport = new ArrayList<>();
+        }
+        return topographicPlacesForExport;
+    }
+
+    private void gatherTopographicPlaceTree(TopographicPlace topographicPlace, Set<TopographicPlace> target) {
+        if (topographicPlace != null && target.add(topographicPlace)) {
+            TopographicPlaceRefStructure parentRef = topographicPlace.getParentTopographicPlaceRef();
+            if (parentRef != null) {
+                TopographicPlace parent = topographicPlaceRepository.findFirstByNetexIdAndVersion(parentRef.getRef(), Long.valueOf(parentRef.getVersion()));
+                gatherTopographicPlaceTree(parent, target);
+            }
+
+        }
+    }
+
 }

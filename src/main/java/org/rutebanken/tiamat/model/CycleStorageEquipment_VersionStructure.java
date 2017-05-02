@@ -1,14 +1,18 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.math.BigInteger;
 
-
+@MappedSuperclass
 public class CycleStorageEquipment_VersionStructure
         extends PlaceEquipment_VersionStructure {
 
     protected BigInteger numberOfSpaces;
     protected CycleStorageEnumeration cycleStorageType;
+    @Transient
     protected Boolean cage;
+    @Transient
     protected Boolean covered;
 
     public BigInteger getNumberOfSpaces() {

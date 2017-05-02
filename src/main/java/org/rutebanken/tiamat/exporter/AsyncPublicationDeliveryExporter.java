@@ -5,17 +5,13 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -74,11 +70,12 @@ public class AsyncPublicationDeliveryExporter {
         exportService.submit(new Runnable() {
             @Override
             public void run() {
-                logger.info("Started export job {}", exportJob);
-                PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
-                logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
 
                 try {
+                    logger.info("Started export job {}", exportJob);
+                    PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
+                    logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
+
                     logger.info("About to add stop places?");
 
                     final PipedInputStream in = new PipedInputStream();

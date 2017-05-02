@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
+import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -36,15 +38,15 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
      * When importing multiple stop places and those exists, make sure no Lazy Initialization Exception is thrown.
      */
     @Test
-    public void publicationDeliveryWithDuplicateStopPlace() throws Exception {
+    public void publicationDeliveriesWithDuplicateStopPlace() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:123123")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
-                    .withLocation(new LocationStructure()
-                            .withLatitude(new BigDecimal("9"))
-                            .withLongitude(new BigDecimal("71"))));
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopPlace:123123")
@@ -67,8 +69,145 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
     }
 
+    @Test
+    public void publicationDeliveriesWithBusStationStopAndOnStreetBus() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123123")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:987654321")
+                .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+    }
+
+    @Test
+    public void allowOtherWhenMatchingExistingStopPlacesWithImportTypeMATCH() throws Exception {
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:987978")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+        StopPlace incomingStopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123546789")
+                .withVersion("1")
+                .withStopPlaceType(StopTypeEnumeration.OTHER)
+                .withName(new MultilingualString().withValue("somewhere"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(incomingStopPlace);
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.get(0));
+    }
+
+    /**
+     * When sending a stop place wmultiple times with separate 'imported ids' - all 'imported ids' should be kept
+     */
+    @Test
+    public void publicationDeliveryWithImportedIdUpdates() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("RUT:StopPlace:123")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:1234")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+        StopPlace stopPlace3 = new StopPlace()
+                .withId("RUT:StopPlace:12345")
+                .withVersion("any")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withName(new MultilingualString().withValue("Test"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("72"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        PublicationDeliveryStructure response2 = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2);
+
+        PublicationDeliveryStructure publicationDelivery3 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace3);
+        PublicationDeliveryStructure response3 = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery3);
+
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+        List<StopPlace> result2 = publicationDeliveryTestHelper.extractStopPlaces(response2);
+        List<StopPlace> result3 = publicationDeliveryTestHelper.extractStopPlaces(response3);
+
+        assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result2).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result3).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
+        assertThat(result3.get(0).getVersion()).isEqualTo("3");
+    }
+
+
     /**
      * Real life example: Two stops with different IDs should be merged into one, and their quays should be added.
+     *
      * @throws Exception
      */
     @Test
@@ -145,14 +284,14 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                    .withQuayRefOrQuay(new Quay()
-                            .withId("xyz:123")
-                            .withVersion("1")
-                            .withName(new MultilingualString().withValue("quay"))
-                            .withCentroid(new SimplePoint_VersionStructure()
-                                .withLocation(new LocationStructure()
-                                        .withLatitude(new BigDecimal("9.1"))
-                                        .withLongitude(new BigDecimal("71.2"))))));
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:Quay:4")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("quay"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -164,10 +303,10 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay().stream()
-                    .filter(object -> object instanceof Quay)
-                    .map(object -> ((Quay) object))
-                    .findFirst()
-                    .get();
+                .filter(object -> object instanceof Quay)
+                .map(object -> ((Quay) object))
+                .findFirst()
+                .get();
 
 
         assertThat(quay.getName().getValue()).isEqualTo("quay");
@@ -260,7 +399,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1));
         publicationDeliveryStructures.add(publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2));
 
-        for(PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
+        for (PublicationDeliveryStructure pubde : publicationDeliveryStructures) {
             PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(pubde);
             StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
             assertThat(actualStopPlace.getQuays().getQuayRefOrQuay()).hasSize(2);
@@ -328,17 +467,17 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void createdAndChangedTimestampsMustBeSetOnStopPlaceAndQuays() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:4")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                        .withVersion("1")
-                                        .withId("y")
-                                        .withName(new MultilingualString().withValue("new quay"))
-                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("62.799557598196465"))
-                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+                                .withVersion("1")
+                                .withId("XYZ:Quay:5")
+                                .withName(new MultilingualString().withValue("new quay"))
+                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("62.799557598196465"))
+                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -356,7 +495,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void validityMustBeSetOnImportedStop() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:123")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"));
 
@@ -385,7 +524,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void updateStopPlaceShouldHaveItsDateChanged() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("x")
+                .withId("XYZ:StopPlace:123")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"));
 
@@ -397,14 +536,14 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         // Add a Quay to the stop place so that it will be updated.
         stopPlace.withQuays(
-                        new Quays_RelStructure()
-                                .withQuayRefOrQuay(new Quay()
-                                        .withVersion("1")
-                                        .withId("y")
-                                        .withName(new MultilingualString().withValue("new quay"))
-                                        .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("62.799557598196465"))
-                                                .withLongitude(new BigDecimal("7.328336965528884"))))));
+                new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withVersion("1")
+                                .withId("XYZ:Quay:321")
+                                .withName(new MultilingualString().withValue("new quay"))
+                                .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("62.799557598196465"))
+                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
 
         PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
@@ -453,7 +592,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withVersion("1")
-                                .withId(chouetteId+1)
+                                .withId(chouetteId + 1)
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -517,7 +656,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         publicationDeliveryTestHelper.hasOriginalId(originalQuayId, quay);
@@ -554,7 +693,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Steinerskolen Moss");
@@ -593,7 +732,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q-> System.out.println(q))
+                .peek(q -> System.out.println(q))
                 .findFirst().get();
 
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Fleskeby sentrum");
@@ -604,7 +743,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     public void computeStopPlaceCentroid() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
-                .withId("CentroidStopPlace")
+                .withId("XYZ:StopPlace:9")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -612,25 +751,25 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("2"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withId("1")
-                                .withVersion("1")
-                                .withName(new MultilingualString().withValue("quay number one"))
-                                .withCentroid(new SimplePoint_VersionStructure()
-                                        .withId("12")
+                                        .withId("XYZ:Quay:9")
                                         .withVersion("1")
-                                        .withLocation(new LocationStructure()
-                                                .withLatitude(new BigDecimal("10"))
-                                                .withLongitude(new BigDecimal("20")))),
+                                        .withName(new MultilingualString().withValue("quay number one"))
+                                        .withCentroid(new SimplePoint_VersionStructure()
+                                                .withId("12")
+                                                .withVersion("1")
+                                                .withLocation(new LocationStructure()
+                                                        .withLatitude(new BigDecimal("10"))
+                                                        .withLongitude(new BigDecimal("20")))),
                                 new Quay()
-                                        .withId("133")
+                                        .withId("XYZ:Quay:133")
                                         .withVersion("1")
                                         .withName(new MultilingualString().withValue("quay number two"))
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withId("30")
                                                 .withVersion("1")
                                                 .withLocation(new LocationStructure()
-                                                        .withLatitude(new BigDecimal("12"))
-                                                        .withLongitude(new BigDecimal("22"))))));
+                                                        .withLatitude(new BigDecimal("10.0002"))
+                                                        .withLongitude(new BigDecimal("20.0002"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -638,8 +777,8 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
-        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(21.0);
-        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(11.0);
+        assertThat(actualStopPlace.getCentroid().getLocation().getLongitude().doubleValue()).isEqualTo(20.0001);
+        assertThat(actualStopPlace.getCentroid().getLocation().getLatitude().doubleValue()).isEqualTo(10.0001);
     }
 
     @Test
@@ -648,7 +787,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         final int maxdigits = 6;
 
         StopPlace stopPlace = new StopPlace()
-                .withId("CentroidStopPlace")
+                .withId("XYZ:StopPlace:91")
                 .withVersion("1")
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
@@ -656,15 +795,14 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("20.123456789123456789123456789"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                        .withId("1")
+                                .withId("XYZ:Quay:91")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("quay number one"))
+                                .withCentroid(new SimplePoint_VersionStructure()
                                         .withVersion("1")
-                                        .withName(new MultilingualString().withValue("quay number one"))
-                                        .withCentroid(new SimplePoint_VersionStructure()
-                                                .withId("12.")
-                                                .withVersion("1")
-                                                .withLocation(new LocationStructure()
-                                                        .withLatitude(new BigDecimal("10.123456789123456789123456789"))
-                                                        .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10.123456789123456789123456789"))
+                                                .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -681,7 +819,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void receivePublicationDelivery() throws Exception {
+    public void importPublicationDeliveryAndVerifyStatusCode200() throws Exception {
 
         String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\"\n" +
@@ -703,7 +841,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "                    <TransportMode>bus</TransportMode>\n" +
                 "                    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
                 "                    <quays>\n" +
-                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:sp:1:q:1\">\n" +
+                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:Quay:1\">\n" +
                 "                            <Centroid>\n" +
                 "                                <Location srsName=\"WGS84\">\n" +
                 "                                    <Longitude>10.8577903</Longitude>\n" +
@@ -736,32 +874,35 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
      * It should be validated when streaming out.
      */
     @Test
-    public void exportStopPlaces() throws JAXBException, IOException, SAXException {
+    public void exportStopPlacesWithRelevantTopographicPlaces() throws JAXBException, IOException, SAXException {
+        exportStopPlacesAndVerify(true);
+    }
 
-        // Import stop to make sure we have something to export, allthough other tests might have populated the test database.
-        StopPlace stopPlace = new StopPlace()
-                .withId("XYZ:Stopplace:1")
-                .withVersion("1")
-                .withName(new MultilingualString().withValue("Østre gravlund"))
-                .withCentroid(new SimplePoint_VersionStructure()
-                        .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("59.914353"))
-                                .withLongitude(new BigDecimal("10.806387"))));
+    @Test
+    public void exportStopPlacesWithoutTopographicPlaces() throws JAXBException, IOException, SAXException {
+        exportStopPlacesAndVerify(false);
+    }
 
-        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+    private void exportStopPlacesAndVerify(boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
+        // Import stop to make sure we have something to export, although other tests might have populated the test database.
+        // Make ids and search string unique
+
+        insertTestStopWithTopographicPlace();
 
         StopPlaceSearchDto stopPlaceSearch = new StopPlaceSearchDto.Builder()
                 .setQuery("Østre gravlund")
                 .build();
-        Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch);
+        Response response = publicationDeliveryResource.exportStopPlaces(stopPlaceSearch,includeTopographicPlaces);
         assertThat(response.getStatus()).isEqualTo(200);
-
+        // TODO Response is empty. Inserted stop place is somehow not found
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
     }
+
+
 
     /**
      * Partially copied from https://github.com/rutebanken/netex-norway-examples/blob/master/examples/stops/BasicStopPlace_example.xml
@@ -801,5 +942,473 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void importNSBStopPlace() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "   \n" +
+                "   \n" +
+                "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>grailsId</Key>\n" +
+                "                     <Value>3</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>lisaId</Key>\n" +
+                "                     <Value>2146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>jbvCode</Key>\n" +
+                "                     <Value>ADL</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>iffCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>uicCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761037602</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"no\">Arendal</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                     <Latitude>58.465256</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>\n" +
+                "               <PostalAddress id=\"NSB:PostalAddress:3\" version=\"1\">\n" +
+                "                  <AddressLine1>Møllebakken 15</AddressLine1>\n" +
+                "                  <AddressLine2> 4841 Arendal</AddressLine2>\n" +
+                "               </PostalAddress>\n" +
+                "               <AccessibilityAssessment id=\"NSB:AccessibilityAssessment:3\" version=\"1\">\n" +
+                "                  <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                  <limitations>\n" +
+                "                     <AccessibilityLimitation>\n" +
+                "                        <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                        <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                     </AccessibilityLimitation>\n" +
+                "                  </limitations>\n" +
+                "               </AccessibilityAssessment>\n" +
+                "               <placeEquipments>\n" +
+                "                  <WaitingRoomEquipment id=\"NSB:WaitingRoomEquipment:3\" version=\"1\"/>\n" +
+                "                  <SanitaryEquipment id=\"NSB:SanitaryEquipment:3\" version=\"1\">\n" +
+                "                     <Gender>both</Gender>\n" +
+                "                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>\n" +
+                "                  </SanitaryEquipment>\n" +
+                "                  <TicketingEquipment id=\"NSB:TicketingEquipment:3\" version=\"1\">\n" +
+                "                     <NumberOfMachines>1</NumberOfMachines>\n" +
+                "                  </TicketingEquipment>\n" +
+                "               </placeEquipments>\n" +
+                "               <localServices>\n" +
+                "                  <LeftLuggageService id=\"NSB:LeftLuggageService:3\" version=\"1\">\n" +
+                "                     <SelfServiceLockers>true</SelfServiceLockers>\n" +
+                "                  </LeftLuggageService>\n" +
+                "                  <TicketingService id=\"NSB:TicketingService:3\" version=\"1\">\n" +
+                "                     <TicketCounterService>true</TicketCounterService>\n" +
+                "                  </TicketingService>\n" +
+                "               </localServices>\n" +
+                "               <StopPlaceType>railStation</StopPlaceType>\n" +
+                "               <Weighting>interchangeAllowed</Weighting>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"NSB:Quay:0076021461\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>grails-platformId</Key>\n" +
+                "                           <Value>825930</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>uicCode</Key>\n" +
+                "                           <Value>7602146</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                           <Latitude>58.465256</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <PublicCode>1</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void importNSBStopPlaceWithTicketValidatorEquipment() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>grailsId</Key>\n" +
+                "                     <Value>3</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>lisaId</Key>\n" +
+                "                     <Value>2146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>jbvCode</Key>\n" +
+                "                     <Value>ADL</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>iffCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>uicCode</Key>\n" +
+                "                     <Value>7602146</Value>\n" +
+                "                  </KeyValue>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761037602</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"no\">Arendal</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                     <Latitude>58.465256</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>\n" +
+                "               <placeEquipments>\n" +
+                "                  <TicketValidatorEquipment id=\"NSB:TicketValidatorEquipment:88\" version=\"1\">\n" +
+                "                     <TicketValidatorType>contactLess</TicketValidatorType>\n" +
+                "                  </TicketValidatorEquipment>\n" +
+                "               </placeEquipments>\n" +
+                "               <StopPlaceType>railStation</StopPlaceType>\n" +
+                "               <Weighting>interchangeAllowed</Weighting>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"NSB:Quay:0076021461\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>grails-platformId</Key>\n" +
+                "                           <Value>825930</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>uicCode</Key>\n" +
+                "                           <Value>7602146</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
+                "                           <Latitude>58.465256</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <PublicCode>1</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void importBrakarStopPlaceWithGeneralSignEquipment() throws JAXBException, IOException, SAXException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
+                "   <ParticipantRef>NSB</ParticipantRef>\n" +
+                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
+                "   <dataObjects>\n" +
+                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
+                "         <codespaces>\n" +
+                "            <Codespace id=\"nsb\">\n" +
+                "               <Xmlns>NSB</Xmlns>\n" +
+                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
+                "            </Codespace>\n" +
+                "         </codespaces>\n" +
+                "         <stopPlaces>\n" +
+                "           <StopPlace id=\"BRA:StopPlace:06021002\" version=\"1\">\n" +
+                "               <keyList>\n" +
+                "                  <KeyValue>\n" +
+                "                     <Key>imported-id</Key>\n" +
+                "                     <Value>NRI:StopPlace:761023202</Value>\n" +
+                "                  </KeyValue>\n" +
+                "               </keyList>\n" +
+                "               <Name lang=\"nb\">Bragernes torg</Name>\n" +
+                "               <Centroid>\n" +
+                "                  <Location srsName=\"EPSG:4326\">\n" +
+                "                     <Longitude>10.203912</Longitude>\n" +
+                "                     <Latitude>59.743416</Latitude>\n" +
+                "                  </Location>\n" +
+                "               </Centroid>\n" +
+                "               <StopPlaceType>busStation</StopPlaceType>\n" +
+                "               <quays>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100201\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023206</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203526</Longitude>\n" +
+                "                           <Latitude>59.7432</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100201\" version=\"1\">\n" +
+                "                        <RoadName>v/Barista</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100201\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100201\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100201\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som papiroppslag--><GeneralSign id=\"BRA:HeadSign:0602100201\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">Timetable</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>A</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100202\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023204</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203558</Longitude>\n" +
+                "                           <Latitude>59.74361</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100202\" version=\"1\">\n" +
+                "                        <RoadName>Øvre Storgate</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100202\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100202\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som digital skjerm--><GeneralSign id=\"BRA:HeadSign:0602100202\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">RealtimeMonitor</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>B</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100203\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023205</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.203966</Longitude>\n" +
+                "                           <Latitude>59.74358</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100203\" version=\"1\">\n" +
+                "                        <RoadName>mot torget</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100203\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100203\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100203\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som digital skjerm--><GeneralSign id=\"BRA:HeadSign:0602100203\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">RealtimeMonitor</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>C</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "                  <Quay id=\"BRA:Quay:0602100204\" version=\"1\">\n" +
+                "                     <keyList>\n" +
+                "                        <KeyValue>\n" +
+                "                           <Key>imported-id</Key>\n" +
+                "                           <Value>NRI:Quay:762023203</Value>\n" +
+                "                        </KeyValue>\n" +
+                "                     </keyList>\n" +
+                "                     <Centroid>\n" +
+                "                        <Location srsName=\"EPSG:4326\">\n" +
+                "                           <Longitude>10.204596</Longitude>\n" +
+                "                           <Latitude>59.743267</Latitude>\n" +
+                "                        </Location>\n" +
+                "                     </Centroid>\n" +
+                "                     <RoadAddress id=\"BRA:RoadAddress:0602100204\" version=\"1\">\n" +
+                "                        <RoadName>v/Børsen</RoadName>\n" +
+                "                     </RoadAddress>\n" +
+                "                     <AccessibilityAssessment id=\"BRA:AccessibilityAssessment:0602100204\" version=\"1\">\n" +
+                "                        <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
+                "                        <limitations>\n" +
+                "                           <AccessibilityLimitation>\n" +
+                "                              <WheelchairAccess>true</WheelchairAccess>\n" +
+                "                              <StepFreeAccess>true</StepFreeAccess>\n" +
+                "                           </AccessibilityLimitation>\n" +
+                "                        </limitations>\n" +
+                "                     </AccessibilityAssessment>\n" +
+                "                     <Lighting>wellLit</Lighting>\n" +
+                "                     <placeEquipments>\n" +
+                "                        <ShelterEquipment id=\"BRA:ShelterEquipment:0602100204\" version=\"1\">\n" +
+                "                           <Enclosed>true</Enclosed>\n" +
+                "                        </ShelterEquipment>\n" +
+                "                        <GeneralSign id=\"BRA:GeneralSign:0602100204\" version=\"1\">\n" +
+                "                           <PrivateCode>512</PrivateCode>\n" +
+                "                           <SignContentType>transportMode</SignContentType>\n" +
+                "                        </GeneralSign>\n" +
+                "                        <!--TODO markere som papiroppslag--><GeneralSign id=\"BRA:HeadSign:0602100204\" version=\"1\">\n" +
+                "                           <Content lang=\"nb\">Timetable</Content>\n" +
+                "                        </GeneralSign>\n" +
+                "                     </placeEquipments>\n" +
+                "                     <PublicCode>D</PublicCode>\n" +
+                "                  </Quay>\n" +
+                "               </quays>\n" +
+                "            </StopPlace>\n" +
+                "           </stopPlaces>" +
+                "       </SiteFrame>" +
+                "   </dataObjects>" +
+                "</PublicationDelivery>";
+
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
+
+
+    private boolean testStopInserted = false;
+
+    private void insertTestStopWithTopographicPlace() throws JAXBException, IOException, SAXException {
+        if (testStopInserted) {
+            return;
+        }
+        testStopInserted = true;
+        TopographicPlace topographicParent = new TopographicPlace()
+                                                     .withId("KVE:TopographicPlace:1")
+                                                     .withVersion("1")
+                                                     .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Fylke")));
+
+        TopographicPlace topographicPlace = new TopographicPlace()
+                                                    .withId("KVE:TopographicPlace:3")
+                                                    .withVersion("1")
+                                                    .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Kommune")))
+                                                    .withParentTopographicPlaceRef(new TopographicPlaceRefStructure()
+                                                                                           .withRef(topographicParent.getId()));
+        PublicationDeliveryStructure topographicPlacesForImport = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(topographicParent, topographicPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(topographicPlacesForImport);
+
+
+        StopPlace stopPlace = new StopPlace()
+                                      .withId("XYZ:Stopplace:1")
+                                      .withVersion("1")
+                                      .withName(new MultilingualString().withValue("Østre gravlund"))
+                                      .withTopographicPlaceRef(new TopographicPlaceRefStructure()
+                                                                       .withRef(topographicPlace.getId()))
+                                      .withCentroid(new SimplePoint_VersionStructure()
+                                                            .withLocation(new LocationStructure()
+                                                                                  .withLatitude(new BigDecimal("59.914353"))
+                                                                                  .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
     }
 }

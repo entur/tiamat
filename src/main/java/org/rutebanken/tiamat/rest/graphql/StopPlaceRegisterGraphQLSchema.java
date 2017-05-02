@@ -1,13 +1,12 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.Link;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,8 @@ import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateS
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
-public class StopPlaceRegisterGraphQLSchema {
+public class
+StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
@@ -39,6 +39,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private EntityRefObjectTypeCreator entityRefObjectTypeCreator;
+
+    @Autowired
+    private TopographicPlaceObjectTypeCreator topographicPlaceObjectTypeCreator;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -66,7 +69,18 @@ public class StopPlaceRegisterGraphQLSchema {
         commonFieldsList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
-
+        commonFieldsList.add(newFieldDefinition()
+                .name(PLACE_EQUIPMENTS)
+                .type(equipmentType)
+                .dataFetcher(env -> {
+                    if (env.getSource() instanceof StopPlace) {
+                        return ((StopPlace)env.getSource()).getPlaceEquipments();
+                    } else if (env.getSource() instanceof Quay) {
+                        return ((Quay)env.getSource()).getPlaceEquipments();
+                    }
+                    return null;
+                })
+                .build());
         commonFieldsList.add(newFieldDefinition()
                 .name(ACCESSIBILITY_ASSESSMENT)
                 .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
@@ -110,7 +124,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
 
-        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType);
+        GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
+
+        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType, topographicPlaceObjectType);
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -332,7 +348,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
 
     private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList,
-                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType) {
+                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType,
+                                                        GraphQLObjectType topographicPlaceObjectType) {
         return newObject()
                     .name(OUTPUT_TYPE_STOPPLACE)
                     .fields(commonFieldsList)
@@ -354,6 +371,9 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(VALID_BETWEENS)
                             .type(new GraphQLList(validBetweenObjectType)))
+                    .field(newFieldDefinition()
+                            .name(ALTERNATIVE_NAMES)
+                            .type(new GraphQLList(alternativeNameObjectType)))
                     .build();
     }
 
@@ -373,6 +393,9 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(PUBLIC_CODE)
                             .type(GraphQLString))
+                    .field(newFieldDefinition()
+                            .name(ALTERNATIVE_NAMES)
+                            .type(new GraphQLList(alternativeNameObjectType)))
                     .build();
     }
 
@@ -438,6 +461,8 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
+        commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
         commonInputFieldsList.add(
                 newInputObjectField()
                         .name(ACCESSIBILITY_ASSESSMENT)

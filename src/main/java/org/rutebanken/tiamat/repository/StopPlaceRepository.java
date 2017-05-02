@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Iterator;
 import java.util.List;
 
-public interface StopPlaceRepository extends JpaRepository<StopPlace, Long>, StopPlaceRepositoryCustom, IdentifiedEntityRepository<StopPlace> {
+public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityInVersionRepository<StopPlace> {
 
     Page<StopPlace> findAllByOrderByChangedDesc(Pageable pageable);
 

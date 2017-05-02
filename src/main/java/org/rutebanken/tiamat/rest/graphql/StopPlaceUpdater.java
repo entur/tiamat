@@ -6,11 +6,10 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.pelias.CountyAndMunicipalityLookupService;
-import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.rutebanken.tiamat.auth.AuthorizationConstants.ROLE_EDIT_STOPS;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
@@ -39,7 +39,7 @@ class StopPlaceUpdater implements DataFetcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private QuayRepository quayRepository;
+    private EntityManager em;
 
     @Autowired
     private GeometryResolver geometryResolver;
@@ -52,9 +52,6 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
-
-    private static AtomicInteger createdTopographicPlaceCounter = new AtomicInteger();
-
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -80,7 +77,7 @@ class StopPlaceUpdater implements DataFetcher {
                 logger.info("Updating StopPlace {}", netexId);
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
-                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion);
+                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
             } else {
                 logger.info("Creating new StopPlace");
@@ -201,12 +198,24 @@ class StopPlaceUpdater implements DataFetcher {
             entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
             isUpdated = true;
         }
+
+        if (input.get(ALTERNATIVE_NAMES) != null) {
+            List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
+            for (Object alternativeNameObject : alternativeNames) {
+                Map alternativeNameInputMap = (Map) alternativeNameObject;
+                if (populateAlternativeNameFromInput(entity, alternativeNameInputMap)) {
+                    isUpdated = true;
+                } else {
+                    logger.info("AlternativeName not changed");
+                }
+            }
+        }
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY)));
 
             if (entity instanceof StopPlace) {
                 try {
-                    countyAndMunicipalityLookupService.populateCountyAndMunicipality((StopPlace) entity, createdTopographicPlaceCounter);
+                    countyAndMunicipalityLookupService.populateTopographicPlaceRelation((StopPlace) entity);
                 } catch (Exception e) {
                     logger.warn("Setting TopographicPlace on StopPlace failed", e);
                 }
@@ -214,6 +223,69 @@ class StopPlaceUpdater implements DataFetcher {
 
             
             isUpdated = true;
+        }
+
+        if (input.get(PLACE_EQUIPMENTS) != null) {
+            PlaceEquipment equipments = new PlaceEquipment();
+
+            Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
+
+            SanitaryEquipment toalett = null;
+            if (equipmentInput.get(SANITARY_EQUIPMENT) != null) {
+                Map<String, Object> sanitaryEquipment = (Map<String, Object>) equipmentInput.get(SANITARY_EQUIPMENT);
+
+                toalett = new SanitaryEquipment();
+                toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
+                toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
+            }
+            equipments.getInstalledEquipment().add(toalett);
+
+            ShelterEquipment leskur = null;
+            if (equipmentInput.get(SHELTER_EQUIPMENT) != null) {
+                Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
+                leskur = new ShelterEquipment();
+                leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
+                leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
+                leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
+            }
+            equipments.getInstalledEquipment().add(leskur);
+
+            CycleStorageEquipment sykkelskur = null;
+            if (equipmentInput.get(CYCLE_STORAGE_EQUIPMENT) != null) {
+                Map<String, Object> cycleStorageEquipment = (Map<String, Object>) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
+                sykkelskur = new CycleStorageEquipment();
+                sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
+                sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
+            }
+            equipments.getInstalledEquipment().add(sykkelskur);
+
+            WaitingRoomEquipment venterom = null;
+            if (equipmentInput.get(WAITING_ROOM_EQUIPMENT) != null) {
+                Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
+                venterom = new WaitingRoomEquipment();
+                venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
+                venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
+                venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
+            }
+            equipments.getInstalledEquipment().add(venterom);
+
+            TicketingEquipment billettAutomat = null;
+            if (equipmentInput.get(TICKETING_EQUIPMENT) != null) {
+                Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
+                billettAutomat = new TicketingEquipment();
+                billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
+                billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
+                billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+            }
+            equipments.getInstalledEquipment().add(billettAutomat);
+
+
+            if (entity instanceof StopPlace) {
+                ((StopPlace)entity).setPlaceEquipments(equipments);
+            } else if (entity instanceof Quay) {
+                ((Quay)entity).setPlaceEquipments(equipments);
+            }
+
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
@@ -274,4 +346,43 @@ class StopPlaceUpdater implements DataFetcher {
         return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
     }
 
+    private boolean populateAlternativeNameFromInput(SiteElement entity, Map entry) {
+        boolean isUpdated = false;
+        AlternativeName altName;
+
+        NameTypeEnumeration nameType = (NameTypeEnumeration) entry.getOrDefault(NAME_TYPE, NameTypeEnumeration.OTHER);
+        EmbeddableMultilingualString name = getEmbeddableString((Map) entry.get(NAME));
+
+        if (name != null) {
+
+            Optional<AlternativeName> existing = entity.getAlternativeNames()
+                    .stream()
+                    .filter(alternativeName -> alternativeName != null)
+                    .filter(alternativeName -> alternativeName.getName() != null)
+                    .filter(alternativeName -> {
+                            return (alternativeName.getName().getLang() != null &&
+                                    alternativeName.getName().getLang().equals(name.getLang()) &&
+                                    alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
+                    })
+                    .findFirst();
+            if (existing.isPresent()) {
+                altName = existing.get();
+            } else {
+                altName = new AlternativeName();
+            }
+            if (name.getValue() != null) {
+                altName.setName(name);
+                altName.setNameType(nameType);
+                isUpdated = true;
+            }
+
+            if (altName.getName() == null || altName.getName().getValue() == null || altName.getName().getValue().isEmpty()) {
+                entity.getAlternativeNames().remove(altName);
+            } else if (isUpdated && altName.getNetexId() == null) {
+                entity.getAlternativeNames().add(altName);
+            }
+        }
+
+        return isUpdated;
+    }
 }

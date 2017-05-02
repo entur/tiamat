@@ -22,9 +22,6 @@ public abstract class Site_VersionStructure
     protected TopographicPlace topographicPlace;
 
     @Transient
-    protected TopographicPlaceRefStructure topographicPlaceRef;
-
-    @Transient
     protected SiteTypeEnumeration siteType;
 
     @Transient
@@ -52,8 +49,8 @@ public abstract class Site_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @Transient
-    protected PlaceEquipments_RelStructure placeEquipments;
+    @OneToOne (cascade = CascadeType.ALL)
+    protected PlaceEquipment placeEquipments;
 
     @Transient
     protected LocalServices_RelStructure localServices;
@@ -74,20 +71,6 @@ public abstract class Site_VersionStructure
 
     public void setTopographicPlace(TopographicPlace topographicPlace) {
         this.topographicPlace = topographicPlace;
-    }
-
-    /**
-     * Should be removed.
-     */
-    public TopographicPlaceRefStructure getTopographicPlaceRef() {
-        return topographicPlaceRef;
-    }
-
-    /**
-     * NOT for persistance. Should be removed. See TopographicPlace instead.
-     */
-    public void setTopographicPlaceRef(TopographicPlaceRefStructure value) {
-        this.topographicPlaceRef = value;
     }
 
     public SiteTypeEnumeration getSiteType() {
@@ -155,11 +138,11 @@ public abstract class Site_VersionStructure
     }
 
 
-    public PlaceEquipments_RelStructure getPlaceEquipments() {
+    public PlaceEquipment getPlaceEquipments() {
         return placeEquipments;
     }
 
-    public void setPlaceEquipments(PlaceEquipments_RelStructure value) {
+    public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
     }
 

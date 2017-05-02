@@ -1,8 +1,12 @@
 package org.rutebanken.tiamat.geo;
 
+import com.google.common.base.MoreObjects;
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -18,7 +22,14 @@ public class CentroidComputer {
 
     private static final Logger logger = LoggerFactory.getLogger(CentroidComputer.class);
 
+    /**
+     * The threshold in meters for distance between stop place and quay centroid.
+     * If more than this limit, log a warning;
+     */
+    public static final int DISTANCE_WARNING_METERS = 400;
+
     private GeometryFactory geometryFactory;
+
 
     @Autowired
     public CentroidComputer(GeometryFactory geometryFactory) {
@@ -32,6 +43,35 @@ public class CentroidComputer {
             Point point = optionalPoint.get();
             boolean changed = stopPlace.getCentroid() == null || !point.equals(stopPlace.getCentroid());
             stopPlace.setCentroid(point);
+            if(changed) {
+                logger.debug("Created centroid {} for stop place based on quays. {}", point, stopPlace);
+
+                stopPlace.getQuays().forEach(quay -> {
+                    try {
+                        if(quay.getCentroid() != null) {
+                            double distanceInMeters = JTS.orthodromicDistance(
+                                    quay.getCentroid().getCoordinate(),
+                                    stopPlace.getCentroid().getCoordinate(),
+                                    DefaultGeographicCRS.WGS84);
+
+                            if (distanceInMeters > DISTANCE_WARNING_METERS) {
+                                String stopPlaceString = MoreObjects.toStringHelper(stopPlace)
+                                        .omitNullValues()
+                                        .add("name", stopPlace.getName() == null ? null : stopPlace.getName().getValue())
+                                        .add("originalId", stopPlace.getOriginalIds())
+                                        .toString();
+
+                                logger.warn("Calculated stop place centroid with {} meters from quay. {} Quay {}",
+                                        distanceInMeters, stopPlaceString, quay.getOriginalIds());
+                            }
+                        }
+                    } catch (TransformException e) {
+                        logger.warn("Could not determine orthodromic distance between quay and stop place {}", stopPlace);
+                    }
+                });
+
+
+            }
             return changed;
         }
 
@@ -52,7 +92,6 @@ public class CentroidComputer {
         }
         if(anyAdded) {
             Point point = geometryFactory.createPoint(centroidPoint.getCentroid());
-            logger.debug("Created centroid for stop place based on {} quays. {}", quays.size(), point);
             return Optional.of(point);
         }
         else return Optional.empty();

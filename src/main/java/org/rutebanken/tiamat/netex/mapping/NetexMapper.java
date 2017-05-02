@@ -3,13 +3,7 @@ package org.rutebanken.tiamat.netex.mapping;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -27,7 +21,6 @@ public class NetexMapper {
 
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
-                       TopographicPlaceMapper topographicPlaceMapper,
                        DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
                        NetexIdMapper netexIdMapper) {
 
@@ -51,16 +44,29 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
-                .customize(topographicPlaceMapper)
+                .fieldBToA("name", "descriptor.name")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
+                // TODO: Excluding some fields while waiting for NRP-1354
+                .exclude("localServices")
+                .exclude("postalAddress")
+                .exclude("roadAddress")
+                .customize(new StopPlaceMapper())
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
+                .exclude("localServices")
+                .exclude("postalAddress")
+                .exclude("roadAddress")
+                .customize(new QuayMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
                 .byDefault()
                 .register();
 
@@ -69,6 +75,37 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
+                .fieldBToA("netexId", "id")
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(WaitingRoomEquipment.class, org.rutebanken.tiamat.model.WaitingRoomEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TicketingEquipment.class, org.rutebanken.tiamat.model.TicketingEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(ShelterEquipment.class, org.rutebanken.tiamat.model.ShelterEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(CycleStorageEquipment.class, org.rutebanken.tiamat.model.CycleStorageEquipment.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+                .fieldBToA("netexId", "id")
+                .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();
 
@@ -107,7 +144,6 @@ public class NetexMapper {
     public NetexMapper() {
         this(getDefaultConverters(),
                 new KeyListToKeyValuesMapMapper(),
-                new TopographicPlaceMapper(),
                 new DataManagedObjectStructureMapper(new NetexIdMapper()),
                 new NetexIdMapper());
         logger.info("Setting up netexMapper without DI");
@@ -126,9 +162,10 @@ public class NetexMapper {
         converters.add(new DestinationDisplayViewsConverter());
         converters.add(new ZonedDateTimeConverter());
         converters.add(new OffsetDateTimeZonedDateTimeConverter());
-        converters.add(new SimplePointVersionStructureConverter());
+        converters.add(new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory()));
         converters.add(new KeyValuesToKeyListConverter());
         converters.add(new AccessibilityLimitationsListConverter());
+        converters.add(new TariffZonesConverter());
 //        converters.add(new PathLinkEndConverter());
         return converters;
     }
@@ -176,5 +213,9 @@ public class NetexMapper {
 
     public PathLink mapToNetexModel(org.rutebanken.tiamat.model.PathLink pathLink) {
         return facade.map(pathLink, PathLink.class);
+    }
+
+    public MapperFacade getFacade() {
+        return facade;
     }
 }

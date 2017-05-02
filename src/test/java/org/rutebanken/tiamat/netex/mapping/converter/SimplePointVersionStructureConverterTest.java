@@ -5,6 +5,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
+import net.opengis.gml._3.DirectPositionType;
+import org.assertj.core.data.Percentage;
 import org.junit.Test;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
@@ -13,11 +15,12 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 public class SimplePointVersionStructureConverterTest {
 
-    private final SimplePointVersionStructureConverter simplePointVersionStructureConverter = new SimplePointVersionStructureConverter();
+    private final SimplePointVersionStructureConverter simplePointVersionStructureConverter = new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory());
     private final GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
     private final Type<Point> pointType = new TypeBuilder<Point>() {}.build();
     private final Type<SimplePoint_VersionStructure> simplePointVersionStructureType = new TypeBuilder<SimplePoint_VersionStructure>() {}.build();
@@ -99,5 +102,42 @@ public class SimplePointVersionStructureConverterTest {
         SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
                 .withLocation(new LocationStructure().withLatitude(BigDecimal.valueOf(10.00)));
         simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+    }
+
+    @Test
+    public void importUtmGML() {
+
+        SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
+                .withLocation(
+                        new LocationStructure()
+                                .withPos(
+                                        new DirectPositionType()
+                                                .withValue(6583758.0, 514477.0)
+                                                .withSrsName("EPSG:32632")));
+
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        assertNotNull(point);
+
+        assertThat(point.getX()).isCloseTo(9.25, Percentage.withPercentage(2));
+        assertThat(point.getY()).isCloseTo(59.39, Percentage.withPercentage(2));
+
+    }
+
+    @Test
+    public void importUtmLongLat() {
+
+        SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
+                .withLocation(
+                        new LocationStructure()
+                                .withLatitude(BigDecimal.valueOf(6583758.0))
+                                .withLongitude(BigDecimal.valueOf(514477.0))
+                                .withSrsName("EPSG:32632"));
+
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        assertNotNull(point);
+
+        assertThat(point.getX()).isCloseTo(9.25, Percentage.withPercentage(2));
+        assertThat(point.getY()).isCloseTo(59.39, Percentage.withPercentage(2));
+
     }
 }

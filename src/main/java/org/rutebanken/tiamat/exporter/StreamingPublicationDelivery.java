@@ -142,6 +142,8 @@ public class StreamingPublicationDelivery {
 
         int count = 0;
 
+        long startTime = System.currentTimeMillis();
+
         while (iterableStopPlaces.hasNext()) {
             StopPlace stopPlace = iterableStopPlaces.next();
 
@@ -151,7 +153,19 @@ public class StreamingPublicationDelivery {
             }
 
             ++count;
-            logger.debug("Marshalling stop place {}: {}", count, stopPlace);
+
+            if(count % 1000 == 0 && logger.isInfoEnabled()) {
+                String stopPlacesPerSecond = "NA";
+
+                long duration = System.currentTimeMillis() - startTime;
+                if(duration >= 1000) {
+                    stopPlacesPerSecond = String.valueOf(count / (duration / 1000f));
+                }
+                logger.info("Stop places marshalled: {}. Stop places per second: {}", count, stopPlacesPerSecond);
+            } else {
+                logger.debug("Marshalling stop place {}: {}", count, stopPlace);
+            }
+
             org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
             JAXBElement<org.rutebanken.netex.model.StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
             stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);

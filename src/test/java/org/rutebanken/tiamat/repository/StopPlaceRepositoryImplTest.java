@@ -96,11 +96,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     public void findCorrectStopPlaceFromKeyValue() {
         StopPlace anotherStopPlaceWithAnotherValue = new StopPlace();
         anotherStopPlaceWithAnotherValue.getKeyValues().put("key", new Value("anotherValue"));
-        anotherStopPlaceWithAnotherValue.setNetexId("y");
         stopPlaceRepository.save(anotherStopPlaceWithAnotherValue);
 
         StopPlace matchingStopPlace = new StopPlace();
-        matchingStopPlace.setNetexId("x");
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
@@ -549,11 +547,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     public void findStopPlacesByListOfIds() throws Exception {
 
         StopPlace stopPlace1 = new StopPlace();
-        stopPlace1.setNetexId("1");
         stopPlaceRepository.save(stopPlace1);
 
         StopPlace stopPlace2 = new StopPlace();
-        stopPlace2.setNetexId("2");
         stopPlaceRepository.save(stopPlace2);
 
         StopPlace stopPlaceThatShouldNotBeReturned = new StopPlace();
@@ -656,12 +652,39 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     }
 
+    @Test
+    public void findOnlyGivenVersion() {
+        StopPlace versionOne = new StopPlace();
+        versionOne.setVersion(1L);
+        versionOne.setNetexId("NSR:StopPlace:999");
+        StopPlace versionTwo = new StopPlace();
+        versionTwo.setVersion(2L);
+        versionTwo.setNetexId(versionOne.getNetexId());
+
+        versionOne = stopPlaceRepository.save(versionOne);
+        versionTwo = stopPlaceRepository.save(versionTwo);
+
+        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+                                                  .setNetexIdList(Arrays.asList(versionOne.getNetexId())).setVersion(1L)
+                                                  .build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+
+        assertThat(result)
+                .describedAs("Expecting only one stop place in return. Because only the given version should be returned.")
+                .hasSize(1);
+
+        assertThat(result).extracting(StopPlace::getVersion)
+                .contains(1L);
+
+    }
+
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {
         TopographicPlace municipality = new TopographicPlace();
         municipality.setName(new EmbeddableMultilingualString(municipalityName, ""));
 
         if (parentCounty != null) {
-            municipality.setParentTopographicPlace(parentCounty);
+            municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(parentCounty.getNetexId(), String.valueOf(parentCounty.getVersion())));
         }
 
         topographicPlaceRepository.save(municipality);

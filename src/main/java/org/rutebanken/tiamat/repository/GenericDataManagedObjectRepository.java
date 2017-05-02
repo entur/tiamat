@@ -19,8 +19,8 @@ public class GenericDataManagedObjectRepository {
         repositories = new Repositories(appContext);
     }
 
-    public IdentifiedEntityRepository getRepository(Class<? extends EntityInVersionStructure> clazz) {
-        return (IdentifiedEntityRepository) repositories.getRepositoryFor(clazz);
+    public EntityInVersionRepository getRepository(Class<? extends EntityInVersionStructure> clazz) {
+        return (EntityInVersionRepository) repositories.getRepositoryFor(clazz);
     }
 
     public <T extends EntityInVersionStructure> T findFirstByNetexIdOrderByVersionDesc(String netexId, Class<T> clazz) {

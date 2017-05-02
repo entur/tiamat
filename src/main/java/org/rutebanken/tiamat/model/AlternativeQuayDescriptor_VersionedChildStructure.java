@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 public class AlternativeQuayDescriptor_VersionedChildStructure
-        extends AlternativeName_VersionedChildStructure {
+        extends AlternativeName {
 
     protected MultilingualStringEntity crossRoad;
     protected MultilingualStringEntity landmark;

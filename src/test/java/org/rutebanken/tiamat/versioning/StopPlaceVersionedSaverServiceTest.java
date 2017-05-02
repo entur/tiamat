@@ -2,13 +2,11 @@ package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +108,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         String stopPlaceName = null;
         for (int i = 0; i < 3; i++) {
             stopPlaceName = "test " + i;
-            StopPlace sp = stopPlaceVersionedSaverService.createCopy(actualStopPlace);
+            StopPlace sp = stopPlaceVersionedSaverService.createCopy(actualStopPlace, StopPlace.class);
             sp.setName(new EmbeddableMultilingualString(stopPlaceName));
             actualStopPlace = stopPlaceVersionedSaverService.saveNewVersion(actualStopPlace, sp);
 
@@ -154,7 +152,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
             fail("Saving the same version as new version is not allowed");
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).isEqualTo("Existing and new StopPlace must be different objects");
+            assertThat(e.getMessage()).isEqualTo("Existing and new version must be different objects");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
@@ -185,7 +183,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
             fail("Saving new version of different object is not allowed: " + fail);
         } catch (IllegalArgumentException e) {
             //This should be thrown
-            assertThat(e.getMessage()).startsWith("Existing and new StopPlace do not match");
+            assertThat(e.getMessage()).startsWith("Existing and new entity do not match");
             failedAsExpected = true;
         }
         assertThat(failedAsExpected).isTrue();
@@ -205,7 +203,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
@@ -230,7 +228,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2);
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
 
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
@@ -238,6 +236,49 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
 
+    @Test
+    public void createNewVersionOfStopWithPlaceEquipment() {
 
+
+        StopPlace stopPlace = new StopPlace();
+        PlaceEquipment equipment = new PlaceEquipment();
+        SanitaryEquipment sanitaryEquipment = new SanitaryEquipment();
+        sanitaryEquipment.setNumberOfToilets(BigInteger.ONE);
+        equipment.getInstalledEquipment().add(sanitaryEquipment);
+
+        WaitingRoomEquipment waitingRoomEquipment = new WaitingRoomEquipment();
+        waitingRoomEquipment.setHeated(true);
+        equipment.getInstalledEquipment().add(waitingRoomEquipment);
+
+        stopPlace.setPlaceEquipments(equipment);
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
+
+        // Save it. Reference to topographic place should be kept.
+        StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
+        assertThat(stopPlace3.getPlaceEquipments().getInstalledEquipment()).isNotNull();
+    }
+
+
+    @Test
+    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.setVersion(1L);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
+        assertThat(newVersion.getQuays()).isNotEmpty();
+        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
+    }
 
 }

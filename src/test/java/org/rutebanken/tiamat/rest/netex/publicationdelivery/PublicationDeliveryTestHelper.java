@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 
 import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,22 +49,35 @@ public class PublicationDeliveryTestHelper {
     @Autowired
     private PublicationDeliveryResource publicationDeliveryResource;
 
+    public PublicationDeliveryStructure createPublicationDeliveryTopographicPlace(TopographicPlace... topographicPlace) {
+        SiteFrame siteFrame = siteFrame();
+        siteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure().withTopographicPlace(topographicPlace));
+        return publicationDelivery(siteFrame);
+    }
 
-    public PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
-        SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setVersion("1");
-        siteFrame.setId(UUID.randomUUID().toString());
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
+    public PublicationDeliveryStructure publicationDelivery(SiteFrame siteFrame) {
+        return new PublicationDeliveryStructure()
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withVersion("1")
                 .withParticipantRef("test")
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+    }
 
-        return publicationDelivery;
+    public SiteFrame siteFrame() {
+        SiteFrame siteFrame = new SiteFrame();
+        siteFrame.setVersion("1");
+        siteFrame.setId(UUID.randomUUID().toString());
+        return siteFrame;
+    }
+
+
+    public PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
+        SiteFrame siteFrame = siteFrame();
+        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
+                .withStopPlace(stopPlace));
+
+        return publicationDelivery(siteFrame);
     }
 
     public void addPathLinks(PublicationDeliveryStructure publicationDeliveryStructure, PathLink... pathLink) {
@@ -78,11 +93,11 @@ public class PublicationDeliveryTestHelper {
                 .peek(keyValueStructure -> System.out.println(keyValueStructure))
                 .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
                 .map(keyValueStructure -> keyValueStructure.getValue())
+                .map(value -> value.split(","))
+                .flatMap(values -> Stream.of(values))
+                .filter(value -> value.equals(expectedId))
                 .collect(Collectors.toList());
-        assertThat(list).hasSize(1);
-        String originalIdString = list.get(0);
-        assertThat(originalIdString).isNotEmpty();
-        assertThat(originalIdString).isEqualTo(expectedId);
+        assertThat(list).as("Matching original ID "+expectedId).hasSize(1);
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -94,6 +109,16 @@ public class PublicationDeliveryTestHelper {
         SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
         if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getPathLink() != null) {
             return siteFrame.getPathLinks().getPathLink();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public List<TopographicPlace> extractTopographicPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
+
+        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        if(siteFrame.getTopographicPlaces() != null && siteFrame.getTopographicPlaces().getTopographicPlace() != null) {
+            return siteFrame.getTopographicPlaces().getTopographicPlace();
         } else {
             return new ArrayList<>();
         }
@@ -120,7 +145,11 @@ public class PublicationDeliveryTestHelper {
     }
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
-        Response response = postPublicationDelivery(publicationDeliveryStructure);
+        return postAndReturnPublicationDelivery(publicationDeliveryStructure, null);
+    }
+
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
+        Response response = postPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
 
         if(! (response.getEntity() instanceof StreamingOutput)) {
             throw new RuntimeException("Response is not instance of streaming output: "+response);
@@ -156,7 +185,7 @@ public class PublicationDeliveryTestHelper {
 
     }
 
-    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException, IOException, SAXException {
+    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = new ObjectFactory().createPublicationDelivery(publicationDeliveryStructure);
@@ -166,7 +195,7 @@ public class PublicationDeliveryTestHelper {
         marshaller.marshal(jaxPublicationDelivery, outputStream);
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-        return publicationDeliveryResource.receivePublicationDelivery(inputStream);
+        return publicationDeliveryResource.receivePublicationDelivery(inputStream, publicationDeliveryParams);
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {

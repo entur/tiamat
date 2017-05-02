@@ -17,13 +17,14 @@ import java.util.*;
                 @Index(name = "stop_place_type_index", columnList = "stopPlaceType")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "netex_id_version_constraint", columnNames = {"netexId", "version"})}
+                @UniqueConstraint(name = "stop_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
 )
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
+
     protected String publicCode;
 
     @Enumerated(EnumType.STRING)
@@ -55,6 +56,7 @@ public class StopPlace
 
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
+
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
@@ -63,20 +65,27 @@ public class StopPlace
     protected StopTypeEnumeration stopPlaceType;
 
     protected Boolean borderCrossing;
+
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected SitePathLinks_RelStructure pathLinks;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected PathJunctions_RelStructure pathJunctions;
+
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TariffZoneRef> tariffZones = new HashSet<>();
 
     public StopPlace(EmbeddableMultilingualString name) {
         super(name);
@@ -242,6 +251,14 @@ public class StopPlace
         this.quays = quays;
     }
 
+    public Set<TariffZoneRef> getTariffZones() {
+        return tariffZones;
+    }
+
+    public void setTariffZones(Set<TariffZoneRef> tariffZones) {
+        this.tariffZones = tariffZones;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -266,6 +283,8 @@ public class StopPlace
         return MoreObjects.toStringHelper(this)
                 .omitNullValues()
                 .add("id", id)
+                .add("netexId", netexId)
+                .add("version", version)
                 .add("name", name)
                 .add("stopPlaceType", stopPlaceType)
                 .add("centroid", centroid)

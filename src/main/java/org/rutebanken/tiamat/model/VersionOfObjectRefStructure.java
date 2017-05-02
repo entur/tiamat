@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
+import java.util.Objects;
 
 @MappedSuperclass
 public class VersionOfObjectRefStructure implements Serializable {
@@ -44,5 +45,18 @@ public class VersionOfObjectRefStructure implements Serializable {
                 .add("ref", ref)
                 .add("version", version)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        } else if (!(object instanceof VersionOfObjectRefStructure)) {
+            return false;
+        }
+
+        VersionOfObjectRefStructure other = (VersionOfObjectRefStructure) object;
+
+        return Objects.equals(this.ref, other.ref);
     }
 }

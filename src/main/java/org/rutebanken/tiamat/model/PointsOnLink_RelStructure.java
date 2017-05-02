@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-import net.opengis.gml._3.DeprecatedLineStringType;
+import net.opengis.gml.deprecated.DeprecatedLineStringType;
 
 import java.util.ArrayList;
 import java.util.List;

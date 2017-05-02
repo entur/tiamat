@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.auth;
 
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,11 @@ public class MockedRoleAssignmentExtractor implements RoleAssignmentExtractor {
 		nextReturnedRoleAssignmentList = null;
 		return ret;
 
+	}
+
+	@Override
+	public List<RoleAssignment> getRoleAssignmentsForUser(Authentication authentication) {
+		return getRoleAssignmentsForUser();
 	}
 
 	public void setNextReturnedRoleAssignmentList(List<RoleAssignment> nextReturnedRoleAssignmentList) {

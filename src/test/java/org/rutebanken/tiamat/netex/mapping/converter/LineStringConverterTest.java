@@ -10,6 +10,7 @@ import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 
 import java.math.BigInteger;
 
@@ -19,7 +20,7 @@ public class LineStringConverterTest {
 
     private static GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private LineStringConverter lineStringConverter = new LineStringConverter(geometryFactory);
+    private LineStringConverter lineStringConverter = new LineStringConverter(geometryFactory, new DoubleValuesToCoordinateSequence());
 
     @Test
     public void convertFromLineStringToNetexGmlLineStringType() throws Exception {

@@ -1,10 +1,9 @@
 package org.rutebanken.tiamat.model;
 
 import com.vividsolutions.jts.geom.Point;
-import net.opengis.gml._3.PolygonType;
+import com.vividsolutions.jts.geom.Polygon;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 
 @MappedSuperclass
@@ -16,8 +15,12 @@ public class Zone_VersionStructure
 
     protected Point centroid;
 
-    @Transient
-    protected PolygonType polygon;
+    /**
+     * Polygon is wrapped in PersistablePolygon.
+     * Because we want to fetch polygons lazily and using lazy property fetching with byte code enhancement breaks tests.
+     */
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    protected PersistablePolygon polygon = new PersistablePolygon();
 
     @Transient
     protected Projections_RelStructure projections;
@@ -26,6 +29,14 @@ public class Zone_VersionStructure
     protected ZoneRefStructure parentZoneRef;
 
     public Zone_VersionStructure() {
+    }
+
+    public Polygon getPolygon() {
+        return polygon.getPolygon();
+    }
+
+    public void setPolygon(Polygon polygon) {
+        this.polygon.setPolygon(polygon);
     }
 
     public Zone_VersionStructure(EmbeddableMultilingualString name) {
@@ -46,14 +57,6 @@ public class Zone_VersionStructure
 
     public void setCentroid(Point value) {
         this.centroid = value;
-    }
-
-    public PolygonType getPolygon() {
-        return polygon;
-    }
-
-    public void setPolygon(PolygonType value) {
-        this.polygon = value;
     }
 
     public Projections_RelStructure getProjections() {

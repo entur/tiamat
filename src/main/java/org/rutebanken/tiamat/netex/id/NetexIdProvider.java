@@ -1,28 +1,31 @@
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.locks.Lock;
+
+import static org.rutebanken.tiamat.netex.id.ValidPrefixList.ANY_PREFIX;
 
 @Component
 public class NetexIdProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdProvider.class);
 
-
     private final GaplessIdGeneratorService gaplessIdGenerator;
 
+    private final ValidPrefixList validPrefixList;
+
     @Autowired
-    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator) {
+    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList) {
         this.gaplessIdGenerator = gaplessIdGenerator;
+        this.validPrefixList = validPrefixList;
+
+
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
@@ -30,23 +33,28 @@ public class NetexIdProvider {
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
-        return NetexIdMapper.getNetexId(entityTypeName, String.valueOf(longId));
+        return NetexIdHelper.getNetexId(entityTypeName, String.valueOf(longId));
     }
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        if (!NetexIdMapper.isNsrId(identifiedEntity.getNetexId())) {
-            logger.warn("Detected non NSR ID: {}", identifiedEntity.getNetexId());
-        } else {
-            Long claimedId = NetexIdMapper.getNetexIdPostfix(identifiedEntity.getNetexId());
+        String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
+
+        if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
+            logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
+
+            Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
 
             String entityTypeName = key(identifiedEntity);
 
             gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+        } else {
+            logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
         }
     }
 
     private String key(IdentifiedEntity identifiedEntity) {
         return identifiedEntity.getClass().getSimpleName();
     }
+
 }

@@ -10,7 +10,7 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.rutebanken.tiamat.auth.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 
 public class StopPlaceAuthorizationCheckTest {
 

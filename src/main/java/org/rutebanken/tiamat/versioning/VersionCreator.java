@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Creates new version of already existing objects, by mapping with Orika and ignore primary key "id".
@@ -78,9 +79,54 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(PlaceEquipment.class, PlaceEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+
+        mapperFactory.classMap(WaitingRoomEquipment.class, WaitingRoomEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SanitaryEquipment.class, SanitaryEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(TicketingEquipment.class, TicketingEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(ShelterEquipment.class, ShelterEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(CycleStorageEquipment.class, CycleStorageEquipment.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(AlternativeName.class, AlternativeName.class)
+                .exclude(ID_FIELD)
+                .byDefault()
+                .register();
+
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
 
+    /**
+     * Create next version of entity (copy), before changes are made.
+     * Does not increment version. Will be done when saving.
+     * Clears valid betweens
+     *
+     * @param entityInVersionStructure
+     * @param type extends {@link EntityInVersionStructure}
+     * @return a deep copied stop place with incremented version and valid between set.
+     */
     public <T extends EntityInVersionStructure> T createCopy(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
@@ -95,51 +141,13 @@ public class VersionCreator {
         return type.cast(copy);
     }
 
-    /**
-     * Create next version of stop place, before changes are made.
-     * Does not increment version. Will be done when saving.
-     * @param stopPlace
-     * @return a deep copied stop place with incremented version and valid between set.
-     */
-    public StopPlace createCopy(StopPlace stopPlace) {
-        return createCopy(stopPlace, StopPlace.class);
-    }
-
     private <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Initiating first version for entity {}", entityInVersionStructure.getClass().getSimpleName());
         entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
         return type.cast(entityInVersionStructure);
     }
 
-    /**
-     * Increment versions for stop place with children.
-     * The object must have their netexId set, or else they will get an initial version
-     * @param stopPlace with quays and accessibility assessment
-     * @return modified StopPlace
-     */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
-        initiateOrIncrement(stopPlace);
-        initiateOrIncrementVersionsForChildren(stopPlace);
-        ZonedDateTime now = ZonedDateTime.now();
-        stopPlace.setCreated(now);
-        stopPlace.getValidBetweens().add(new ValidBetween(now));
-        return stopPlace;
-    }
-
-    private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
-
-        initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
-
-        if (stopPlaceToSave.getQuays() != null) {
-            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
-            stopPlaceToSave.getQuays().forEach(quay -> {
-                initiateOrIncrement(quay);
-                initiateOrIncrementAccessibilityAssesmentVersion(quay);
-            });
-        }
-    }
-
-    private void initiateOrIncrementAccessibilityAssesmentVersion(SiteElement siteElement) {
+    public void initiateOrIncrementAccessibilityAssesmentVersion(SiteElement siteElement) {
         AccessibilityAssessment accessibilityAssessment = siteElement.getAccessibilityAssessment();
 
         if (accessibilityAssessment != null) {
@@ -152,7 +160,14 @@ public class VersionCreator {
         }
     }
 
-    private void initiateOrIncrement(EntityInVersionStructure entityInVersionStructure) {
+    public void initiateOrIncrementAlternativeNamesVersion(List<AlternativeName> alternativeNames) {
+
+        if (alternativeNames != null) {
+            alternativeNames.forEach(alternativeName -> initiateOrIncrement(alternativeName));
+        }
+    }
+
+    public void initiateOrIncrement(EntityInVersionStructure entityInVersionStructure) {
         if(entityInVersionStructure.getNetexId() == null) {
             initiateFirstVersion(entityInVersionStructure, EntityInVersionStructure.class);
         } else {

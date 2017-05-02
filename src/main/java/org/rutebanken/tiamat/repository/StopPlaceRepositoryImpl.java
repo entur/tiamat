@@ -28,6 +28,8 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.*;
 
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+
 @Repository
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
@@ -77,6 +79,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 						                                        "AND s.stopPlaceType = :stopPlaceType", String.class);
 		query.setParameter("filter", geometryFilter);
 		query.setParameter("stopPlaceType", stopTypeEnumeration);
+		query.setParameter("name", name);
+		return getOneOrNull(query);
+	}
+
+	@Override
+	public String findNearbyStopPlace(Envelope envelope, String name) {
+		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+		TypedQuery<String> query = entityManager
+				.createQuery("SELECT s.netexId FROM StopPlace s " +
+						"WHERE within(s.centroid, :filter) = true " +
+						"AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
+						"AND s.name.value = :name ",
+						String.class);
+		query.setParameter("filter", geometryFilter);
 		query.setParameter("name", name);
 		return getOneOrNull(query);
 	}
@@ -178,15 +195,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
 		String sql = "SELECT vi.items, q.netex_id " +
 				             "FROM quay_key_values qkv " +
-				             "INNER JOIN stop_place_quays spq " +
-				             "ON spq.quays_id = qkv.quay_id " +
-				             "INNER JOIN quay q " +
-				             "ON (spq.quays_id = q.id " +
-								"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
-				             "INNER JOIN value_items vi " +
-				             "ON qkv.key_values_id = vi.value_id " +
-				             "ORDER BY q.netex_id";
+				             	"INNER JOIN stop_place_quays spq " +
+				             		"ON spq.quays_id = qkv.quay_id " +
+				             	"INNER JOIN quay q " +
+				             		"ON (spq.quays_id = q.id " +
+									"AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) "+
+				             	"INNER JOIN value_items vi " +
+									"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :originalIdKey";
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+		nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
 
 		@SuppressWarnings("unchecked")
 		List<Object[]> result = nativeQuery.getResultList();
@@ -204,13 +222,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
 		String sql = "SELECT v.items, s.netex_id " +
 				             "FROM stop_place_key_values spkv " +
-				             "INNER JOIN value_items v " +
-				             "ON spkv.key_values_id = v.value_id " +
-				             "INNER JOIN stop_place s " +
-				             "ON s.id = spkv.stop_place_id " +
-				 			 "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
+				             	"INNER JOIN value_items v " +
+				             		"ON spkv.key_values_key = :originalIdKey AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
+				             	"INNER JOIN stop_place s " +
+				             		"ON s.id = spkv.stop_place_id " +
+				 			 		"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
 
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
+
+		nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
 
 		List<Object[]> result = nativeQuery.getResultList();
 
@@ -275,7 +295,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 					wheres.add("(lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
 				}
 				operators.add("or");
-				wheres.add("netexId like concat('%', :query, '%'))");
+				wheres.add("netexId like concat('%:', :query))");
 				operators.add("and");
 				orderByStatements.add("similarity(stopPlace.name.value, :query) desc");
 			}
@@ -302,12 +322,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 			if (hasCountyFilter && !hasIdFilter) {
 				String suffix = hasMunicipalityFilter ? ")" : "";
-				wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlace.netexId in :countyId)" + suffix);
+				wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
 				parameters.put("countyId", stopPlaceSearch.getCountyIds());
 			}
 		}
 
-		if (!stopPlaceSearch.isAllVersions()) {
+		if (stopPlaceSearch.getVersion() != null) {
+			operators.add("and");
+			wheres.add("stopPlace.version = :version");
+			parameters.put("version", stopPlaceSearch.getVersion());
+		} else if (!stopPlaceSearch.isAllVersions()) {
 			operators.add("and");
 			wheres.add("version = (select max(sv.version) from StopPlace sv where sv.netexId = stopPlace.netexId)");
 		}

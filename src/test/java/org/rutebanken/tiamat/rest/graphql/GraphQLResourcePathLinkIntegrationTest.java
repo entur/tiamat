@@ -14,7 +14,6 @@ import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;

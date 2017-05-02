@@ -4,6 +4,6 @@ import org.rutebanken.tiamat.model.PathLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface PathLinkRepository extends JpaRepository<PathLink, Long>, PathLinkRepositoryCustom, IdentifiedEntityRepository<PathLink> {
+public interface PathLinkRepository extends PathLinkRepositoryCustom, EntityInVersionRepository<PathLink> {
 
 }

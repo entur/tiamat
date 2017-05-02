@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
@@ -342,7 +343,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
-                "  topographicPlace { id topographicPlaceType } " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  } " +
@@ -354,8 +354,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("name.value", equalTo(name))
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
-                    .body("topographicPlace.id", notNullValue())
-                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
@@ -367,6 +365,11 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
+        TopographicPlace parentTopographicPlace = new TopographicPlace(new EmbeddableMultilingualString("countyforinstance"));
+        parentTopographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+
+        topographicPlaceRepository.save(parentTopographicPlace);
+        TopographicPlace topographicPlace = createMunicipalityWithCountyRef("somewhere in space", parentTopographicPlace);
 
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlace.setShortName(new EmbeddableMultilingualString("E"));
@@ -374,14 +377,15 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         stopPlace.setAllAreasWheelchairAccessible(false);
+        stopPlace.setTopographicPlace(topographicPlace);
 
-        stopPlaceRepository.save(stopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         String updatedName = "Testing name ";
         String updatedShortName = "Testing shortname ";
         String updatedDescription = "Testing description ";
-        String fromDate = "2012-04-23T18:25:43.511+0200";
-        String toDate = "2018-04-23T18:25:43.511+0200";
+//        String fromDate = "2012-04-23T18:25:43.511+0200";
+//        String toDate = "2018-04-23T18:25:43.511+0200";
 
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);
@@ -401,13 +405,14 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
-                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
+//                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
+                "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  validBetweens { fromDate toDate } " +
@@ -424,8 +429,13 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible))
-                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
-                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
+                    .body("topographicPlace.id", notNullValue())
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
+                    .body("topographicPlace.parentTopographicPlace", notNullValue())
+                    .body("topographicPlace.parentTopographicPlace.id", notNullValue())
+                    .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()));
+//                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
+//                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
     }
 
 
@@ -727,6 +737,258 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
+    /**
+     * Test that reproduces NRP-1433
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testSimpleMutationUpdateStopPlaceKeepPlaceEquipmentsOnQuay() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Espa"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+        stopPlace.setPlaceEquipments(createPlaceEquipments());
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
+        quay.setPlaceEquipments(createPlaceEquipments());
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String name = "Testing name ";
+        String netexId = stopPlace.getNetexId();
+
+        //Verify that placeEquipments have been set
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
+                "    id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+        ;
+
+        //Update StopPlace name
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "          name: { value:\\\"" + name + "\\\" } " +
+                "       }) { " +
+                "    id " +
+                "    name { value } " +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        waitingRoomEquipment { id }" +
+                "        sanitaryEquipment { id }" +
+                "        ticketingEquipment { id }" +
+                "        cycleStorageEquipment { id }" +
+                "        shelterEquipment { id }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("name.value", comparesEqualTo(name))
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", notNullValue())
+                    .body("placeEquipments", notNullValue())
+                    .body("placeEquipments.waitingRoomEquipment", notNullValue())
+                    .body("placeEquipments.sanitaryEquipment", notNullValue())
+                    .body("placeEquipments.ticketingEquipment", notNullValue())
+                    .body("placeEquipments.cycleStorageEquipment", notNullValue())
+                    .body("placeEquipments.shelterEquipment", notNullValue());
+
+    }
+
+
+    @Test
+    public void testSimpleSaveAlternativeNames() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        AlternativeName altName = new AlternativeName();
+        altName.setNameType(NameTypeEnumeration.ALIAS);
+        altName.setName(new EmbeddableMultilingualString("Navn", "no"));
+
+        AlternativeName altName2 = new AlternativeName();
+        altName2.setNameType(NameTypeEnumeration.ALIAS);
+        altName2.setName(new EmbeddableMultilingualString("Name", "en"));
+
+        stopPlace.getAlternativeNames().add(altName);
+        stopPlace.getAlternativeNames().add(altName2);
+
+        Quay quay = new Quay();
+        quay.setCompassBearing(new Float(90));
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
+        quay.getAlternativeNames().add(altName);
+        quay.getAlternativeNames().add(altName2);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String name = "Testing name ";
+        String netexId = stopPlace.getNetexId();
+
+        //Verify that placeEquipments have been set
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
+                "    id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    quays {" +
+                "      id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", comparesEqualTo(netexId))
+                    .body("alternativeNames", notNullValue())
+                    .body("alternativeNames[0].nameType", notNullValue())
+                    .body("alternativeNames[0].name.value", notNullValue())
+                    .body("alternativeNames[0].name.lang", notNullValue())
+                    .body("alternativeNames[1].nameType", notNullValue())
+                    .body("alternativeNames[1].name.value", notNullValue())
+                    .body("alternativeNames[1].name.lang", notNullValue())
+                .root("data.stopPlace[0].quays[0]")
+                    .body("id", comparesEqualTo(quay.getNetexId()))
+                    .body("alternativeNames", notNullValue())
+                    .body("alternativeNames[0].nameType", notNullValue())
+                    .body("alternativeNames[0].name.value", notNullValue())
+                    .body("alternativeNames[0].name.lang", notNullValue())
+                    .body("alternativeNames[1].nameType", notNullValue())
+                    .body("alternativeNames[1].name.value", notNullValue())
+                    .body("alternativeNames[1].name.lang", notNullValue())
+        ;
+    }
+    @Test
+    public <T extends Comparable<T>> void testSimpleMutateAlternativeNames() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        AlternativeName altName = new AlternativeName();
+        altName.setNameType(NameTypeEnumeration.ALIAS);
+        altName.setName(new EmbeddableMultilingualString("Navn", "no"));
+
+        stopPlace.getAlternativeNames().add(altName);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String netexId = stopPlace.getNetexId();
+
+        String updatedAlternativeNameValue = "UPDATED ALIAS";
+        String updatedAlternativeNameLang = "no";
+
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "      id:\\\"" + netexId + "\\\"" +
+                "      alternativeNames: [" +
+                "        {" +
+                "          nameType: " + altName.getNameType().value() +
+                "          name: {" +
+                "            value: \\\"" + updatedAlternativeNameValue + "\\\"" +
+                "            lang:\\\""+ updatedAlternativeNameLang +"\\\"" +
+                "          }" +
+                "        } " +
+                "      ]" +
+                "    }) " +
+                "    {" +
+                "      id" +
+                "      alternativeNames {" +
+                "        nameType" +
+                "        name {" +
+                "          value" +
+                "          lang" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(netexId))
+                .body("data.stopPlace[0].alternativeNames", notNullValue())
+                .root("data.stopPlace[0].alternativeNames[0]")
+//                .body("nameType", equalTo(altName.getNameType())) //RestAssured apparently does not like comparing response with enums...
+                .body("name.value", comparesEqualTo(updatedAlternativeNameValue))
+                .body("name.lang", comparesEqualTo(updatedAlternativeNameLang))
+        ;
+    }
+
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
@@ -747,12 +1009,42 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN);
         if(county != null) {
-            municipality.setParentTopographicPlace(county);
+            municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county));
         }
         topographicPlaceRepository.save(municipality);
         return municipality;
     }
 
+
+    private PlaceEquipment createPlaceEquipments() {
+        PlaceEquipment equipments = new PlaceEquipment();
+
+        ShelterEquipment leskur = new ShelterEquipment();
+        leskur.setEnclosed(false);
+        leskur.setSeats(BigInteger.valueOf(2));
+
+        WaitingRoomEquipment venterom = new WaitingRoomEquipment();
+        venterom.setSeats(BigInteger.valueOf(25));
+
+        TicketingEquipment billettAutomat = new TicketingEquipment();
+        billettAutomat.setTicketMachines(true);
+        billettAutomat.setNumberOfMachines(BigInteger.valueOf(2));
+
+        SanitaryEquipment toalett = new SanitaryEquipment();
+        toalett.setNumberOfToilets(BigInteger.valueOf(2));
+
+        CycleStorageEquipment sykkelstativ = new CycleStorageEquipment();
+        sykkelstativ.setCycleStorageType(CycleStorageEnumeration.RACKS);
+        sykkelstativ.setNumberOfSpaces(BigInteger.TEN);
+
+        equipments.getInstalledEquipment().add(venterom);
+        equipments.getInstalledEquipment().add(billettAutomat);
+        equipments.getInstalledEquipment().add(toalett);
+        equipments.getInstalledEquipment().add(leskur);
+        equipments.getInstalledEquipment().add(sykkelstativ);
+        return equipments;
+    }
 
 }

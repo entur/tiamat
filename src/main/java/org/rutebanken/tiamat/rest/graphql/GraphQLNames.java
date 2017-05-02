@@ -68,6 +68,27 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = "EmbeddableMultilingualString";
     public static final String INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING = OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_ALTERNATIVE_NAME = "AlternativeName";
+    public static final String INPUT_TYPE_ALTERNATIVE_NAME = OUTPUT_TYPE_ALTERNATIVE_NAME + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
+    public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_SHELTER_EQUIPMENT = "ShelterEquipment";
+    public static final String INPUT_TYPE_SHELTER_EQUIPMENT = OUTPUT_TYPE_SHELTER_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT = "CycleStorageEquipment";
+    public static final String INPUT_TYPE_CYCLE_STORAGE_EQUIPMENT = OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT = "WaitingRoomEquipment";
+    public static final String INPUT_TYPE_WAITING_ROOM_EQUIPMENT = OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_TICKETING_EQUIPMENT = "TicketingEquipment";
+    public static final String INPUT_TYPE_TICKETING_EQUIPMENT = OUTPUT_TYPE_TICKETING_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_SANITARY_EQUIPMENT = "SanitaryEquipment";
+    public static final String INPUT_TYPE_SANITARY_EQUIPMENT = OUTPUT_TYPE_SANITARY_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
@@ -97,6 +118,34 @@ public class GraphQLNames {
     public static final String LIFT_FREE_ACCESS = "liftFreeAccess";
     public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
 
+    public static final String PLACE_EQUIPMENTS = "placeEquipments";
+    public static final String TICKETING_EQUIPMENT = "ticketingEquipment";
+    public static final String SANITARY_EQUIPMENT = "sanitaryEquipment";
+    public static final String SHELTER_EQUIPMENT = "shelterEquipment";
+    public static final String CYCLE_STORAGE_EQUIPMENT = "cycleStorageEquipment";
+    public static final String WAITING_ROOM_EQUIPMENT = "waitingRoomEquipment";
+
+    // SanitaryEquipment
+    public static final String NUMBER_OF_TOILETS = "numberOfToilets";
+    public static final String GENDER = "gender";
+
+    // WaitingRoomEquipment
+    public static final String SEATS = "seats";
+    public static final String STEP_FREE = "stepFree";
+    public static final String HEATED = "heated";
+
+    // ShelterEquipment
+    public static final String ENCLOSED = "enclosed";
+
+
+    // TicketingEquipment
+    public static final String TICKET_MACHINES = "ticketMachines";
+    public static final String TICKET_OFFICE = "ticketOffice";
+    public static final String NUMBER_OF_MACHINES = "numberOfMachines";
+
+    //CycleStorageEquipment
+    public static final String NUMBER_OF_SPACES = "numberOfSpaces";
+    public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
 
     public static final String IMPORTED_ID = "importedId";
     public static final String VERSION = "version";
@@ -127,6 +176,8 @@ public class GraphQLNames {
     public static final String PLACE_REF = "placeRef";
 
     public static final String NAME = "name";
+    public static final String NAME_TYPE = "nameType";
+    public static final String ALTERNATIVE_NAMES = "alternativeNames";
     public static final String TOPOGRAPHIC_PLACE_TYPE_ENUM = "TopographicPlaceType";
     public static final String TOPOGRAPHIC_PLACE_TYPE = "topographicPlaceType";
     public static final String TOPOGRAPHIC_PLACE = "topographicPlace";

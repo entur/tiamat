@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.rest.exception;
 
 import com.google.common.collect.Sets;
+import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,7 +30,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
                 Sets.newHashSet(ValidationException.class, OptimisticLockException.class, EntityNotFoundException.class, DataIntegrityViolationException.class));
         mapping.put(Response.Status.CONFLICT, Sets.newHashSet(EntityExistsException.class));
         mapping.put(Response.Status.FORBIDDEN, Sets.newHashSet(AccessDeniedException.class));
-        mapping.put(Response.Status.UNAUTHORIZED, Sets.newHashSet(NotAuthorizedException.class));
+        mapping.put(Response.Status.UNAUTHORIZED, Sets.newHashSet(NotAuthorizedException.class, NotAuthenticatedException.class));
     }
 
 
