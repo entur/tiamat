@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -46,10 +46,10 @@ public class VersionCreator {
                 .registerConverter(new PassThroughConverter(Point.class));
 
         mapperFactory.getConverterFactory()
-                .registerConverter(new CustomConverter<ZonedDateTime, ZonedDateTime>() {
+                .registerConverter(new CustomConverter<Instant, Instant>() {
                     @Override
-                    public ZonedDateTime convert(ZonedDateTime zonedDateTime, Type<? extends ZonedDateTime> type) {
-                        return ZonedDateTime.from(zonedDateTime);
+                    public Instant convert(Instant instant, Type<? extends Instant> type) {
+                        return Instant.from(instant);
                     }
                 });
 
@@ -130,7 +130,7 @@ public class VersionCreator {
     public <T extends EntityInVersionStructure> T createCopy(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
-        ZonedDateTime newVersionValidFrom = ZonedDateTime.now();
+        Instant newVersionValidFrom = Instant.now();
 
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
@@ -175,7 +175,7 @@ public class VersionCreator {
         }
     }
 
-    public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, ZonedDateTime newVersionValidFrom) {
+    public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, Instant newVersionValidFrom) {
         //TODO: Need to support "valid from" set explicitly
 
         if(entityInVersionStructure == null) {

@@ -10,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -223,8 +222,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
 
         ValidBetween validBetween = new ValidBetween();
-        validBetween.setFromDate(ZonedDateTime.now());
-        validBetween.setToDate(ZonedDateTime.now().plusWeeks(10));
+        validBetween.setFromDate(Instant.now());
+        validBetween.setToDate(Instant.now().plus(70, ChronoUnit.DAYS));
         
         stopPlace.getValidBetweens().add(validBetween);
 
@@ -232,7 +231,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getValidBetweens()).isNotEmpty();
+        assertThat(actualStopPlace.getValidBetweens())
+                .isNotEmpty();
 
         ValidBetween actualValidBetween = actualStopPlace.getValidBetweens().get(0);
         assertThat(actualValidBetween.getFromDate()).isEqualTo(validBetween.getFromDate());
@@ -278,7 +278,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     @Test
     public void persistStopPlaceWithCreatedDate() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setCreated(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
+        stopPlace.setCreated(Instant.ofEpochMilli(10000));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getCreated()).isEqualTo(stopPlace.getCreated());
@@ -287,7 +287,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     @Test
     public void persistStopPlaceWithChangedDate() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(10000), ZoneId.systemDefault()));
+        stopPlace.setChanged(Instant.ofEpochMilli(10000));
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getChanged()).isEqualTo(stopPlace.getChanged());

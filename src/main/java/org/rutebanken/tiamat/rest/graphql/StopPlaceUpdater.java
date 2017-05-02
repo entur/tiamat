@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -134,7 +134,7 @@ class StopPlaceUpdater implements DataFetcher {
             }
         }
         if (isUpdated) {
-            stopPlace.setChanged(ZonedDateTime.now());
+            stopPlace.setChanged(Instant.now());
         }
 
         return isUpdated;
@@ -170,7 +170,7 @@ class StopPlaceUpdater implements DataFetcher {
         }
 
         if (isQuayUpdated) {
-            quay.setChanged(ZonedDateTime.now());
+            quay.setChanged(Instant.now());
 
             if (quay.getNetexId() == null) {
                 stopPlace.getQuays().add(quay);

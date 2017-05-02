@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.service.BlobStoreService;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -44,12 +45,17 @@ public class AsyncPublicationDeliveryExporter {
 
     private final StreamingPublicationDelivery streamingPublicationDelivery;
 
+    private final ExportTimeZone exportTimeZone;
+
     @Autowired
-    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository, BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery) {
+    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository,
+                                                       BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery,
+                                                       ExportTimeZone exportTimeZone) {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
+        this.exportTimeZone = exportTimeZone;
     }
 
     /**
@@ -60,7 +66,7 @@ public class AsyncPublicationDeliveryExporter {
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
-        exportJob.setStarted(ZonedDateTime.now());
+        exportJob.setStarted(Instant.now());
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
@@ -119,7 +125,7 @@ public class AsyncPublicationDeliveryExporter {
 
                     if (!exportJob.getStatus().equals(JobStatus.FAILED)) {
                         exportJob.setStatus(JobStatus.FINISHED);
-                        exportJob.setFinished(ZonedDateTime.now());
+                        exportJob.setFinished(Instant.now());
                         logger.info("Export job {} done", exportJob);
                     }
                 } catch (Exception e) {
@@ -135,8 +141,8 @@ public class AsyncPublicationDeliveryExporter {
         return exportJob;
     }
 
-    public String createFileNameWithoutExtention(long exportJobId, ZonedDateTime started) {
-        return "tiamat-export-" + exportJobId + "-" + started.format(DATE_TIME_FORMATTER);
+    public String createFileNameWithoutExtention(long exportJobId, Instant started) {
+        return "tiamat-export-" + exportJobId + "-" + started.atZone(exportTimeZone.getDefaultTimeZone()).format(DATE_TIME_FORMATTER);
     }
 
     public ExportJob getExportJob(long exportJobId) {

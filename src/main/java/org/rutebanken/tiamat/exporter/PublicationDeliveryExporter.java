@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.*;
@@ -75,7 +75,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportMode topographicPlaceExportMode) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
-        siteFrame.setCreated(ZonedDateTime.now());
+        siteFrame.setCreated(Instant.now());
         siteFrame.setVersion(1L);
         siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
 

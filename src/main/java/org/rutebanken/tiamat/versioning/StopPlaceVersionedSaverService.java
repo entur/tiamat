@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 
 @Transactional
@@ -62,17 +62,17 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             stopPlaceToSave = newVersion;
-            newVersion.setCreated(ZonedDateTime.now());
+            newVersion.setCreated(Instant.now());
         } else {
             stopPlaceToSave = newVersion;
 
-            stopPlaceToSave.setChanged(ZonedDateTime.now());
+            stopPlaceToSave.setChanged(Instant.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            existingStopPlace = versionCreator.terminateVersion(existingStopPlace, ZonedDateTime.now());
+            existingStopPlace = versionCreator.terminateVersion(existingStopPlace, Instant.now());
 
             if (existingStopPlace.getValidBetweens() != null && !existingStopPlace.getValidBetweens().isEmpty()) {
                 validBetweenRepository.save(existingStopPlace.getValidBetweens());
@@ -95,7 +95,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
         versionCreator.initiateOrIncrement(stopPlace);
         initiateOrIncrementVersionsForChildren(stopPlace);
-        ZonedDateTime now = ZonedDateTime.now();
+        Instant now = Instant.now();
 
         ValidBetween validBetween;
         if (!stopPlace.getValidBetweens().isEmpty()) {

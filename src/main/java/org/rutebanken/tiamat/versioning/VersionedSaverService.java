@@ -2,13 +2,11 @@ package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
-import org.rutebanken.tiamat.repository.GenericDataManagedObjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 public abstract class VersionedSaverService<T extends EntityInVersionStructure> {
 
@@ -41,13 +39,13 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         }
 
         if(existingVersion == null) {
-            newVersion.setCreated(ZonedDateTime.now());
+            newVersion.setCreated(Instant.now());
             // If the new incoming version has the version attribute set, reset it.
             // For tiamat, this is the first time this entity with this ID is saved
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
-            existingVersion = versionCreator.terminateVersion(existingVersion, ZonedDateTime.now());
+            existingVersion = versionCreator.terminateVersion(existingVersion, Instant.now());
             getRepository().save(existingVersion);
         }
 

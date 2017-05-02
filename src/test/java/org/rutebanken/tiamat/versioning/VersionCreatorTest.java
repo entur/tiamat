@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +38,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);
 
-        ValidBetween validBetween = new ValidBetween(ZonedDateTime.now());
+        ValidBetween validBetween = new ValidBetween(Instant.now());
         validBetween.getOriginalIds().add("1000");
 
         stopPlace.getValidBetweens().add(validBetween);
@@ -70,7 +71,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         stopPlace.getOriginalIds().add("original-id");
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        ValidBetween validBetween = new ValidBetween(ZonedDateTime.now());
+        ValidBetween validBetween = new ValidBetween(Instant.now());
         validBetween.getOriginalIds().add("1000");
         stopPlace.getValidBetweens().add(validBetween);
 
@@ -86,10 +87,10 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void createNewVersionOfStopWithZonedDateTime() {
+    public void createNewVersionOfStopWithChangeInstance() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);
-        stopPlace.setChanged(ZonedDateTime.now());
+        stopPlace.setChanged(Instant.now());
         stopPlace = stopPlaceRepository.save(stopPlace);
         StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
         assertThat(newVersion.getChanged()).isNotNull();
@@ -119,7 +120,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
         assertThat(newVersion.getVersion())
                 .describedAs("The version of path link should have been incremented")
-                .isEqualTo(pathLink.getVersion()+1);
+                .isEqualTo(pathLink.getVersion() + 1);
 
         newVersion = pathLinkRepository.save(newVersion);
 
@@ -143,16 +144,16 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
         oldVersion.getQuays().add(quay);
 
-        oldVersion.getValidBetweens().add(new ValidBetween(ZonedDateTime.now().minusDays(2)));
+        oldVersion.getValidBetweens().add(new ValidBetween(Instant.now().minus(2, ChronoUnit.DAYS)));
 
         oldVersion = stopPlaceRepository.save(oldVersion);
 
-        ZonedDateTime beforeCreated = ZonedDateTime.now();
+        Instant beforeCreated = Instant.now();
         System.out.println(beforeCreated);
 
         StopPlace newVersion = versionCreator.createCopy(oldVersion, StopPlace.class);
 
-        oldVersion = versionCreator.terminateVersion(oldVersion, ZonedDateTime.now());
+        oldVersion = versionCreator.terminateVersion(oldVersion, Instant.now());
 
         assertThat(newVersion.getValidBetweens())
                 .isNotNull()
@@ -160,11 +161,11 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
                 .hasSize(1);
 
         System.out.println(oldVersion.getValidBetweens().get(0).getToDate());
-        assertThat(oldVersion.getValidBetweens().get(0).getToDate()).isAfterOrEqualTo(beforeCreated);
+        assertThat(oldVersion.getValidBetweens().get(0).getToDate()).isGreaterThanOrEqualTo(beforeCreated);
 
 
         ValidBetween validBetween = newVersion.getValidBetweens().get(0);
-        assertThat(validBetween.getFromDate()).isAfterOrEqualTo(beforeCreated);
+        assertThat(validBetween.getFromDate()).isGreaterThanOrEqualTo(beforeCreated);
         assertThat(validBetween.getToDate()).isNull();
 
     }

@@ -7,14 +7,12 @@ import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -73,8 +71,8 @@ public class QuayMerger {
             } else {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
-                incomingQuay.setCreated(ZonedDateTime.now());
-                incomingQuay.setChanged(ZonedDateTime.now());
+                incomingQuay.setCreated(Instant.now());
+                incomingQuay.setChanged(Instant.now());
                 addedQuaysCounter.incrementAndGet();
             }
         }
@@ -106,7 +104,7 @@ public class QuayMerger {
         boolean changedByMerge = mergeFields(incomingQuay, alreadyAdded);
 
         if(idUpdated || changedByMerge) {
-            alreadyAdded.setChanged(ZonedDateTime.now());
+            alreadyAdded.setChanged(Instant.now());
             updatedQuaysCounter.incrementAndGet();
         }
     }
