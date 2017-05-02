@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Transactional
 @Component
-public class MatchingIdAppendingStopPlacesImporter {
+public class MatchingAppendingIdStopPlacesImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(MatchingIdAppendingStopPlacesImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MatchingAppendingIdStopPlacesImporter.class);
 
     private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
 
