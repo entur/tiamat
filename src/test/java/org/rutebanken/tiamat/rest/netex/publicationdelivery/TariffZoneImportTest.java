@@ -51,10 +51,10 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         TariffZone tariffZone = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
-                .withId("RUT:TariffZone:01");
+                .withId("RUT:TariffZone:05");
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.withId("XYZ:StopPlace:321");
+        stopPlace.withId("XYZ:StopPlace:32111");
         stopPlace.setVersion("1");
         stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
                     .withTariffZoneRef(new TariffZoneRef()
