@@ -32,16 +32,15 @@ public class ParallelInitialStopPlaceImporter {
     @Autowired
     private NetexMapper netexMapper;
 
-    @Autowired
-    private ReferenceVersionUpdater referenceVersionUpdater;
-
-
-
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
 
         return tiamatStops.parallelStream()
                 .map(stopPlace -> {
-                    referenceVersionUpdater.updateReferencesToNewestVersion(stopPlace.getTariffZones(), TariffZoneRef.class);
+
+                    if(stopPlace.getTariffZones() != null) {
+                        stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
+                    }
+
                     return stopPlace;
                 })
                 .map(stopPlace -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace))
