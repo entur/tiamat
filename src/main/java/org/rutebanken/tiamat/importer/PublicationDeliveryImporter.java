@@ -175,22 +175,22 @@ public class PublicationDeliveryImporter {
             final Collection<org.rutebanken.netex.model.StopPlace> importedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
 
-            if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
-                synchronized (STOP_PLACE_IMPORT_LOCK) {
+            synchronized (STOP_PLACE_IMPORT_LOCK) {
+                if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
                     importedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+                } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
+                    importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+                } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
+                    if (publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
+                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
+                        tiamatStops = zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
+                        logger.info("Got {} stops back from zone filter", tiamatStops.size());
+                    }
+                    logger.info("Importing {} stops", tiamatStops.size());
+                    importedNetexStopPlaces = matchingIdAppendingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
+                } else {
+                    throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
                 }
-            } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
-                importedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-            } else if(publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
-                if(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
-                    logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
-                    tiamatStops = zoneCountyFilterer.filterByCountyMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
-                    logger.info("Got {} stops back from zone filter", tiamatStops.size());
-                }
-                logger.info("Importing {} stops", tiamatStops.size());
-                importedNetexStopPlaces = matchingIdAppendingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedOrUpdated);
-            } else {
-                throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
             }
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedOrUpdated);
 
