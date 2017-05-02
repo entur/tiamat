@@ -78,7 +78,7 @@ public class TariffZonesLookupService {
                     .stream()
                     .filter(Optional::isPresent)
                     .map(optional -> optional.get())
-                    .peek(tariffZone -> logger.info("Memoizing tariff zone {} {}", tariffZone.getNetexId(), tariffZone.getVersion()))
+                    .peek(tariffZone -> logger.debug("Memoizing tariff zone {} {}", tariffZone.getNetexId(), tariffZone.getVersion()))
                     .map(tariffZone -> Pair.of(tariffZone.getNetexId(), tariffZone.getPolygon()))
                     .collect(toList());
 
