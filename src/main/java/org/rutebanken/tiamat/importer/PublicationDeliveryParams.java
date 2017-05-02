@@ -22,4 +22,10 @@ public class PublicationDeliveryParams {
 
     @QueryParam(value = "importType")
     public ImportType importType = ImportType.MERGE;
+    
+    @QueryParam(value = "skipOutput")
+    public boolean skipOutput = false;
+    
+    
+    
 }
