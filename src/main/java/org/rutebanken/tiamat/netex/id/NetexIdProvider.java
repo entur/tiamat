@@ -43,11 +43,14 @@ public class NetexIdProvider {
         if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
             logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
 
-            Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
+            if(NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
+                Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
 
-            String entityTypeName = key(identifiedEntity);
+                String entityTypeName = key(identifiedEntity);
 
-            gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+                gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+            }
+            // Because IDs might end with non-numbers we cannot support claiming for any ID other than NSR.
         } else {
             logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
         }
