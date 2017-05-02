@@ -40,3 +40,5 @@ script/gtfs*
 script/*txt
 src/main/resources/stops/stops.txt
 src/main/resources/stops/agency.txt
+
+local_config/
