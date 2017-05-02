@@ -22,13 +22,17 @@ public class StopPlaceSplitter {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceSplitter.class);
 
     public List<StopPlace> split(List<StopPlace> stops) {
-        logger.info("Looking for quays eligible for splitting in {} stop places based on quay distance", stops.size());
+        logger.debug("Looking for quays eligible for splitting in {} stop places based on quay distance", stops.size());
         List<StopPlace> result = new ArrayList<>();
 
         stops.forEach(originalStop -> {
             splitQuaysFromStops(originalStop, result);
         });
-        logger.info("Created {} new stops. Returning {} stop places in total", result.size()-stops.size(), result.size());
+
+        int numberOfStopsCreated = result.size()-stops.size();
+        if(numberOfStopsCreated > 0) {
+            logger.info("Created {} new stops. Returning {} stop places in total", numberOfStopsCreated, result.size());
+        }
 
         return result;
     }
