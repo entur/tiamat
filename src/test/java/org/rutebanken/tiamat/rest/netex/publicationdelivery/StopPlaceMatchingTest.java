@@ -106,4 +106,38 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         assertThat(result).hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId(stopPlace1.getId(), result.get(0));
     }
+
+    @Test
+    public void matchStopsOnQuayImportedId() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace()
+                .withId("RUT:StopPlace:987")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("RUT:Quay:0136068001")
+                                .withVersion("1")));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:666")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("RUT:Quay:0136068001")
+                                .withVersion("1")));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlace1.getId(), result.get(0));
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -46,6 +47,25 @@ public class StopPlaceIdMatcher {
             if(incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
                 logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
                 existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId());
+            } else if(incomingStopPlace.getQuays() != null && !incomingStopPlace.getQuays().isEmpty()) {
+
+                Optional<org.rutebanken.tiamat.model.StopPlace> stopPlaceOptional = incomingStopPlace.getQuays().stream()
+                        .flatMap(quay -> quay.getOriginalIds().stream())
+                        .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
+                        .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
+                        .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())
+                        .map(stopPlaceNetexIds -> stopPlaceNetexIds.get(0))
+                        .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
+                        .filter(stopPlace -> stopPlace != null)
+                        .findFirst();
+
+                if(stopPlaceOptional.isPresent()) {
+                    existingStopPlace = stopPlaceOptional.get();
+                    logger.info("Found stop place from quay imported id: {}", existingStopPlace);
+                } else {
+                    existingStopPlace = null;
+                }
+
             } else {
                 logger.debug("Looking for stop by original id: {}", incomingStopPlace.getOriginalIds());
                 existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);

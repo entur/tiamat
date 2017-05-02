@@ -33,6 +33,8 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
 
+    List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId);
+
     Iterator<StopPlace> scrollStopPlaces() throws InterruptedException;
 
     Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException;
