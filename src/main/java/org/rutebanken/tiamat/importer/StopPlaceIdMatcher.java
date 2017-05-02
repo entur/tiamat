@@ -40,27 +40,25 @@ public class StopPlaceIdMatcher {
 
         List<StopPlace> matchedStopPlaces = new ArrayList<>();
 
-        tiamatStops.forEach(stopPlace -> {
+        tiamatStops.forEach(incomingStopPlace -> {
 
             org.rutebanken.tiamat.model.StopPlace existingStopPlace;
-            if(stopPlace.getNetexId() != null && NetexIdHelper.isNsrId(stopPlace.getNetexId())) {
-                logger.info("Looking for stop by netex id {}", stopPlace.getNetexId());
-                existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+            if(incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
+                logger.info("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
+                existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId());
             } else {
-                logger.info("Looking for stop by original id: {}", stopPlace.getOriginalIds());
-                existingStopPlace = stopPlaceFromOriginalIdFinder.find(stopPlace);
+                logger.info("Looking for stop by original id: {}", incomingStopPlace.getOriginalIds());
+                existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);
             }
 
             if(existingStopPlace == null) {
-                logger.warn("Cannot find nearby stop place from NSR ID or original ID: {}", stopPlace);
+                logger.warn("Cannot find nearby stop place from NSR ID or original ID: {}", incomingStopPlace);
             } else {
                 logger.debug("Found matching stop place {}", existingStopPlace);
 
-                String netexId = stopPlace.getNetexId();
-
                 boolean alreadyAdded = matchedStopPlaces
                         .stream()
-                        .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(netexId));
+                        .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(existingStopPlace.getNetexId()));
 
                 if(!alreadyAdded) {
                     matchedStopPlaces.add(netexMapper.mapToNetexModel(existingStopPlace));
