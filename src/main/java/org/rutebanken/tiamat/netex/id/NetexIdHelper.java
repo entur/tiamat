@@ -53,7 +53,7 @@ public class NetexIdHelper {
      */
     public static long extractIdPostfix(String netexId) {
         try {
-            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1));
+            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1).trim());
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
         }

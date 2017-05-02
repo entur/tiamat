@@ -39,11 +39,11 @@ public class NetexIdMapper {
             tiamatEntity.setNetexId(null);
         } else if(validPrefixList.isValidPrefixForType(NetexIdHelper.extractIdPrefix(netexEntity.getId()), tiamatEntity.getClass())) {
             logger.debug("Detected ID with valid prefix: {}. ", netexEntity.getId());
-            tiamatEntity.setNetexId(netexEntity.getId());
+            tiamatEntity.setNetexId(netexEntity.getId().trim());
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             if(tiamatEntity instanceof  DataManagedObjectStructure) {
-                moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId());
+                moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId().trim());
                 tiamatEntity.setNetexId(null);
             }
         }
@@ -68,14 +68,14 @@ public class NetexIdMapper {
                         if(keyValueStructure.getValue().contains(",")) {
                             String[] originalIds = keyValueStructure.getValue().split(",");
                             for(String originalId : originalIds) {
-                                tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(originalId);
+                                tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(originalId.trim());
                             }
                         } else {
-                            tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(keyValueStructure.getValue());
+                            tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(keyValueStructure.getValue().trim());
                         }
 
                     } else {
-                        tiamatEntity.getOrCreateValues(keyValueStructure.getKey()).add(keyValueStructure.getValue());
+                        tiamatEntity.getOrCreateValues(keyValueStructure.getKey()).add(keyValueStructure.getValue().trim());
                     }
                 }
             }
