@@ -26,9 +26,9 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
-public class CountyAndMunicipalityLookupService {
+public class TopographicPlaceLookupService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceLookupService.class);
 
     private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
 
