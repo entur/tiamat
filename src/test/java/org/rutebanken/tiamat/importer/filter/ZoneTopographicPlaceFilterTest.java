@@ -7,21 +7,19 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ZoneCountyFiltererTest extends TiamatIntegrationTest {
+public class ZoneTopographicPlaceFilterTest extends TiamatIntegrationTest {
 
     @Autowired
-    private ZoneCountyFilterer zoneCountyFilterer;
+    private ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
 
     @Ignore
     @Test
@@ -42,11 +40,11 @@ public class ZoneCountyFiltererTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point);
 
-        List<? extends Zone_VersionStructure> list = zoneCountyFilterer.filterByCountyMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace));
+        List<? extends Zone_VersionStructure> list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace));
 
         assertThat(list).as("List of stops filtered by county").hasSize(1);
 
-        list = zoneCountyFilterer.filterByCountyMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace), true);
+        list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace), true);
 
         assertThat(list).as("Negated list of stops not in county").isEmpty();
 

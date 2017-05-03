@@ -9,7 +9,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
-import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ class StopPlaceUpdater implements DataFetcher {
     private GeometryResolver geometryResolver;
 
     @Autowired
-    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
 
     @Autowired
     private AuthorizationService authorizationService;

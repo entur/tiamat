@@ -1,14 +1,8 @@
 package org.rutebanken.tiamat.importer.filter;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.vividsolutions.jts.geom.Point;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,36 +11,35 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
 
 @Component
 @Transactional
-public class ZoneCountyFilterer {
+public class ZoneTopographicPlaceFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(ZoneCountyFilterer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZoneTopographicPlaceFilter.class);
 
     @Autowired
-    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService topographicPlaceLookupService;
 
 
-    public <T extends Zone_VersionStructure> List<T> filterByCountyMatch(List<String> countyReferences, List<T> zones) {
-        return filterByCountyMatch(countyReferences, zones, false);
+    public <T extends Zone_VersionStructure> List<T> filterByTopographicPlaceMatch(List<String> topographicPlaceReferences, List<T> zones) {
+        return filterByTopographicPlaceMatch(topographicPlaceReferences, zones, false);
     }
 
     /**
-     * Filter zones that does not belong to the given list of county references
+     * Filter zones that does not belong to the given list of topographic place references
      *
-     * @param countyReferences NetexIDs
+     * @param topographicPlaceReferences NetexIDs of topographic places
      * @param zones to filter
-     * @param negate negates the filter. Only stop places that is outside the given counties will be returned.
+     * @param negate negates the filter. Only stop places that is outside the given topographic places will be returned.
      * @return filtered list
      */
-    public <T extends Zone_VersionStructure> List<T> filterByCountyMatch(List<String> countyReferences, List<T> zones, boolean negate) {
+    public <T extends Zone_VersionStructure> List<T> filterByTopographicPlaceMatch(List<String> topographicPlaceReferences, List<T> zones, boolean negate) {
 
-        if(countyReferences == null || countyReferences.isEmpty()) {
-            logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", countyReferences);
+        if(topographicPlaceReferences == null || topographicPlaceReferences.isEmpty()) {
+            logger.info("Cannot filter zones with empty topographic references: {}. Returning all zones.", topographicPlaceReferences);
             return zones;
         }
 
@@ -64,7 +57,7 @@ public class ZoneCountyFilterer {
                     return true;
                 })
                 .filter(zone -> {
-                    Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findCountyMatchingReferences(countyReferences, zone.getCentroid());
+                    Optional<TopographicPlace> topographicPlace = topographicPlaceLookupService.findTopographicPlaceByReference(topographicPlaceReferences, zone.getCentroid());
                     if(topographicPlace.isPresent()) {
                         logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
@@ -72,7 +65,7 @@ public class ZoneCountyFilterer {
                         logger.debug("Keeping {}. Negate: {}", zone, negate);
                         return true;
                     } else {
-                        logger.debug("Filtering out {}. County references: {}. Negate: {}", zone, countyReferences, negate);
+                        logger.debug("Filtering out {}. Topographic references: {}. Negate: {}", zone, topographicPlaceReferences, negate);
                         return false;
                     }
                 })

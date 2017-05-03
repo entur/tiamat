@@ -19,7 +19,7 @@ public class StopPlaceTopographicRefUpdater {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
 
     public boolean update(StopPlace stopPlace) {
         if (stopPlace.getTopographicPlace() == null) {
