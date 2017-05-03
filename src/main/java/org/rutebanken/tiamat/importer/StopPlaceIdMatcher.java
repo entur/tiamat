@@ -1,11 +1,12 @@
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,58 +33,68 @@ public class StopPlaceIdMatcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private QuayRepository quayRepository;
+
+    @Autowired
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
     @Autowired
     private NetexMapper netexMapper;
 
-    public List<StopPlace> matchStopPlaces(List<org.rutebanken.tiamat.model.StopPlace> tiamatStops, AtomicInteger stopPlaceMatched) {
+    public List<org.rutebanken.netex.model.StopPlace> matchStopPlaces(List<org.rutebanken.tiamat.model.StopPlace> tiamatStops, AtomicInteger stopPlaceMatched) {
 
-        List<StopPlace> matchedStopPlaces = new ArrayList<>();
+        List<org.rutebanken.netex.model.StopPlace> matchedStopPlaces = new ArrayList<>();
 
         tiamatStops.forEach(incomingStopPlace -> {
 
-            org.rutebanken.tiamat.model.StopPlace existingStopPlace;
+            Optional<StopPlace> existingStopPlace = Optional.empty();
             if(incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
                 logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
-                existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId());
+                existingStopPlace = Optional.ofNullable(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId()));
             } else if(incomingStopPlace.getQuays() != null && !incomingStopPlace.getQuays().isEmpty()) {
 
-                Optional<org.rutebanken.tiamat.model.StopPlace> stopPlaceOptional = incomingStopPlace.getQuays().stream()
-                        .flatMap(quay -> quay.getOriginalIds().stream())
-                        .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
-                        .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
-                        .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())
-                        .map(stopPlaceNetexIds -> stopPlaceNetexIds.get(0))
-                        .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
-                        .filter(stopPlace -> stopPlace != null)
-                        .findFirst();
+                logger.debug("Looking for stop by quay netex ID");
+                existingStopPlace = incomingStopPlace.getQuays().stream()
+                        .filter(quay -> quay.getNetexId() != null && NetexIdHelper.isNsrId(quay.getNetexId()))
+                        .map(quay -> quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId()))
+                        .filter(quay -> quay != null)
+                        .map(quay -> stopPlaceRepository.findByQuay(quay))
+                        .findAny();
 
-                if(stopPlaceOptional.isPresent()) {
-                    existingStopPlace = stopPlaceOptional.get();
-                    logger.debug("Found stop place from quay imported id: {}", existingStopPlace);
-                } else {
-                    existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);;
+                if(!existingStopPlace.isPresent()) {
+                    logger.debug("Looking for stop by quay original ID");
+                    existingStopPlace = incomingStopPlace.getQuays().stream()
+                            .flatMap(quay -> quay.getOriginalIds().stream())
+                            .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
+                            .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
+                            .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())
+                            .map(stopPlaceNetexIds -> stopPlaceNetexIds.get(0))
+                            .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
+                            .filter(stopPlace -> stopPlace != null)
+                            .findFirst();
                 }
-
-            } else {
-                logger.debug("Looking for stop by original id: {}", incomingStopPlace.getOriginalIds());
-                existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);
             }
 
-            if(existingStopPlace == null) {
-                logger.warn("Cannot find nearby stop place from NSR ID or original ID: {}", incomingStopPlace);
-            } else {
-                logger.debug("Found matching stop place {}", existingStopPlace);
+            if(!existingStopPlace.isPresent()) {
+                logger.debug("Looking for stop by stops original id: {}", incomingStopPlace.getOriginalIds());
+                existingStopPlace = Optional.ofNullable(stopPlaceFromOriginalIdFinder.find(incomingStopPlace));
+            }
+
+            if(existingStopPlace.isPresent()) {
+                StopPlace stopPlaceFound = existingStopPlace.get();
+                logger.debug("Found matching stop place {}", stopPlaceFound);
 
                 boolean alreadyAdded = matchedStopPlaces
                         .stream()
-                        .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(existingStopPlace.getNetexId()));
+                        .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(stopPlaceFound.getNetexId()));
 
                 if(!alreadyAdded) {
-                    matchedStopPlaces.add(netexMapper.mapToNetexModel(existingStopPlace));
+                    matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlaceFound));
                 }
                 stopPlaceMatched.incrementAndGet();
+
+            } else {
+                logger.warn("Cannot find nearby stop place from NSR ID or original ID: {}", incomingStopPlace);
             }
         });
 
