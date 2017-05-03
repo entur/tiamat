@@ -101,7 +101,9 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return findSiteFrame(publicationDeliveryStructure).getStopPlaces().getStopPlace();
+        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
+        return siteFrame.getStopPlaces().getStopPlace();
     }
 
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
