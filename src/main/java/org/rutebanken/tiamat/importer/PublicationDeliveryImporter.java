@@ -173,6 +173,14 @@ public class PublicationDeliveryImporter {
             tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.targetTopographicPlaces, tiamatStops);
             logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.targetTopographicPlaces);
 
+            if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+                numberOfStopBeforeFiltering = tiamatStops.size();
+                logger.info("Filtering stops outside given list of topographic places: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
+                tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatStops, true);
+                logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
+            }
+
+
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
 
@@ -182,12 +190,6 @@ public class PublicationDeliveryImporter {
                 } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                     importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                 } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
-                    if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
-                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
-                        tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatStops, true);
-                        logger.info("Got {} stops back from zone filter", tiamatStops.size());
-                    }
-                    logger.info("Importing {} stops", tiamatStops.size());
                     importedOrMatchedNetexStopPlaces = matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                 } else if(publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
                     importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
