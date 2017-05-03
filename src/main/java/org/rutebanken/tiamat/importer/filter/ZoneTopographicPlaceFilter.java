@@ -39,7 +39,7 @@ public class ZoneTopographicPlaceFilter {
     public <T extends Zone_VersionStructure> List<T> filterByTopographicPlaceMatch(List<String> topographicPlaceReferences, List<T> zones, boolean negate) {
 
         if(topographicPlaceReferences == null || topographicPlaceReferences.isEmpty()) {
-            logger.info("Cannot filter zones with empty county references: {}. Returning all zones.", topographicPlaceReferences);
+            logger.info("Cannot filter zones with empty topographic references: {}. Returning all zones.", topographicPlaceReferences);
             return zones;
         }
 
@@ -65,7 +65,7 @@ public class ZoneTopographicPlaceFilter {
                         logger.debug("Keeping {}. Negate: {}", zone, negate);
                         return true;
                     } else {
-                        logger.debug("Filtering out {}. County references: {}. Negate: {}", zone, topographicPlaceReferences, negate);
+                        logger.debug("Filtering out {}. Topographic references: {}. Negate: {}", zone, topographicPlaceReferences, negate);
                         return false;
                     }
                 })
