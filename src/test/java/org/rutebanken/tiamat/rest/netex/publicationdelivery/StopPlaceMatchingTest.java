@@ -38,11 +38,11 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
 
 
-
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
         publicationDeliveryParams.importType = ImportType.ID_MATCH;
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
 
+        System.out.println("Got response: \n" + response);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 

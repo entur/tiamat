@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -31,6 +33,8 @@ import static javax.xml.bind.JAXBContext.newInstance;
 
 @Component
 public class PublicationDeliveryTestHelper {
+
+    private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryTestHelper.class);
 
     private static final JAXBContext jaxbContext;
 
@@ -101,7 +105,9 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
-        return findSiteFrame(publicationDeliveryStructure).getStopPlaces().getStopPlace();
+        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
+        return siteFrame.getStopPlaces().getStopPlace();
     }
 
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -154,15 +160,7 @@ public class PublicationDeliveryTestHelper {
         if(! (response.getEntity() instanceof StreamingOutput)) {
             throw new RuntimeException("Response is not instance of streaming output: "+response);
         }
-        StreamingOutput output = (StreamingOutput) response.getEntity();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        output.write(outputStream);
-
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
-        return (PublicationDeliveryStructure) element.getValue();
+        return fromResponse(response);
     }
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml) throws JAXBException, IOException, SAXException {
@@ -173,16 +171,23 @@ public class PublicationDeliveryTestHelper {
 
         assertThat(response.getStatus()).isEqualTo(200);
 
+        return fromResponse(response);
+    }
+
+    public PublicationDeliveryStructure fromResponse(Response response) throws IOException, JAXBException {
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
 
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        byte[] bytes = outputStream.toByteArray();
+        logger.info("Printing received publication delivery\n--------------\n{}\n--------------", new String(bytes));
+
+        InputStream inputStream = new ByteArrayInputStream(bytes);
         JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
         return (PublicationDeliveryStructure) element.getValue();
-
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
@@ -209,6 +214,7 @@ public class PublicationDeliveryTestHelper {
                 .findFirst();
 
         if (optionalSiteframe.isPresent()) {
+            logger.info("Found site frame from compositeFrameOrCommonFrame {}", optionalSiteframe.get());
             return optionalSiteframe.get();
         }
 

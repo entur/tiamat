@@ -212,6 +212,7 @@ public class PublicationDeliveryImporter {
             }
 
             if (!importedOrMatchedNetexStopPlaces.isEmpty()) {
+                logger.info("Add {} stops to response site frame", importedOrMatchedNetexStopPlaces.size());
                 responseSiteframe.withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
                                 .withStopPlace(importedOrMatchedNetexStopPlaces));
