@@ -169,9 +169,9 @@ public class PublicationDeliveryImporter {
             tiamatStops = stopPlacePreSteps.run(tiamatStops);
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
-            logger.info("About to filter {} stops based on county references: {}", tiamatStops.size(), publicationDeliveryParams.onlyImportStopsInCounties);
-            tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyImportStopsInCounties, tiamatStops);
-            logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.onlyImportStopsInCounties);
+            logger.info("About to filter {} stops based on topographic references: {}", tiamatStops.size(), publicationDeliveryParams.targetTopographicPlaces);
+            tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.targetTopographicPlaces, tiamatStops);
+            logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.targetTopographicPlaces);
 
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
@@ -182,9 +182,9 @@ public class PublicationDeliveryImporter {
                 } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                     importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                 } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
-                    if (publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null && !publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
-                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties);
-                        tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties, tiamatStops, true);
+                    if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+                        logger.info("Only matching and appending original id for stops that is outside given list of counties: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
+                        tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatStops, true);
                         logger.info("Got {} stops back from zone filter", tiamatStops.size());
                     }
                     logger.info("Importing {} stops", tiamatStops.size());
@@ -227,9 +227,9 @@ public class PublicationDeliveryImporter {
     }
 
     private void validate(PublicationDeliveryParams publicationDeliveryParams) {
-        if(publicationDeliveryParams.onlyImportStopsInCounties != null && publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties != null) {
-            if(!publicationDeliveryParams.onlyImportStopsInCounties.isEmpty() && ! publicationDeliveryParams.onlyMatchAndAppendStopsOutsideCounties.isEmpty()) {
-                throw new IllegalArgumentException("onlyImportStopsInCounties and onlyImportStopsInCounties cannot be specified at the same time!");
+        if(publicationDeliveryParams.targetTopographicPlaces != null && publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null) {
+            if(!publicationDeliveryParams.targetTopographicPlaces.isEmpty() && ! publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+                throw new IllegalArgumentException("targetTopographicPlaces and targetTopographicPlaces cannot be specified at the same time!");
             }
         }
     }

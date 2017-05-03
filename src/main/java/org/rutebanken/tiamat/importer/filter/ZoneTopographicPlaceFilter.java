@@ -21,7 +21,7 @@ public class ZoneTopographicPlaceFilter {
     private static final Logger logger = LoggerFactory.getLogger(ZoneTopographicPlaceFilter.class);
 
     @Autowired
-    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService topographicPlaceLookupService;
 
 
     public <T extends Zone_VersionStructure> List<T> filterByTopographicPlaceMatch(List<String> topographicPlaceReferences, List<T> zones) {
@@ -29,7 +29,7 @@ public class ZoneTopographicPlaceFilter {
     }
 
     /**
-     * Filter zones that does not belong to the given list of county references
+     * Filter zones that does not belong to the given list of topographic place references
      *
      * @param topographicPlaceReferences NetexIDs of topographic places
      * @param zones to filter
@@ -57,7 +57,7 @@ public class ZoneTopographicPlaceFilter {
                     return true;
                 })
                 .filter(zone -> {
-                    Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findTopographicPlaceByReference(topographicPlaceReferences, zone.getCentroid());
+                    Optional<TopographicPlace> topographicPlace = topographicPlaceLookupService.findTopographicPlaceByReference(topographicPlaceReferences, zone.getCentroid());
                     if(topographicPlace.isPresent()) {
                         logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
