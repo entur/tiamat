@@ -63,7 +63,7 @@ public class StopPlaceIdMatcher {
                     existingStopPlace = stopPlaceOptional.get();
                     logger.debug("Found stop place from quay imported id: {}", existingStopPlace);
                 } else {
-                    existingStopPlace = null;
+                    existingStopPlace = stopPlaceFromOriginalIdFinder.find(incomingStopPlace);;
                 }
 
             } else {
