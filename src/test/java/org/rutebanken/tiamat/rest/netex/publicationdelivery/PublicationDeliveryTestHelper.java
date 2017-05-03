@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -31,6 +33,8 @@ import static javax.xml.bind.JAXBContext.newInstance;
 
 @Component
 public class PublicationDeliveryTestHelper {
+
+    private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryTestHelper.class);
 
     private static final JAXBContext jaxbContext;
 
@@ -176,11 +180,10 @@ public class PublicationDeliveryTestHelper {
         output.write(outputStream);
 
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
 
         byte[] bytes = outputStream.toByteArray();
-        System.out.println("Printing received publication delivery --------------");
-        System.out.println(new String(bytes));
-        System.out.println("--------------");
+        logger.info("Printing received publication delivery\n--------------\n{}\n--------------", new String(bytes));
 
         InputStream inputStream = new ByteArrayInputStream(bytes);
         JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
