@@ -214,7 +214,7 @@ public class PublicationDeliveryTestHelper {
                 .findFirst();
 
         if (optionalSiteframe.isPresent()) {
-            logger.info("Found site frame from compositeFrameOrCommonFrame {}", optionalSiteframe.get());
+            logger.info("Found site frame from compositeFrameOrCommonFrame {}", optionalSiteframe.get().getStopPlaces());
             return optionalSiteframe.get();
         }
 
