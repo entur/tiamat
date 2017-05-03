@@ -22,14 +22,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     public void matchImportedStopOnId() throws Exception {
 
         StopPlace stopPlaceToBeMatched = new StopPlace()
-                .withId("RUT:StopPlace:987978")
+                .withId("RUT:StopPlace:187187666")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("somewhere"))
+                .withName(new MultilingualString().withValue("I don't care"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("9"))
-                                .withLongitude(new BigDecimal("71"))));
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))));
 
 
         PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
