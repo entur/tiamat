@@ -74,7 +74,7 @@ public class StopPlaceIdMatcher {
                 stopPlaceMatched.incrementAndGet();
 
             } else {
-                logger.warn("Cannot find nearby stop place from NSR ID or original ID: {}", incomingStopPlace);
+                logger.warn("Cannot find stop place from quay imported-id, stop place nsr id, stop place imported-id or quay nsr id {}", incomingStopPlace);
             }
         });
 
