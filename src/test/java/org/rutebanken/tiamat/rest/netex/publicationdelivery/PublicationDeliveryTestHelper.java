@@ -156,15 +156,7 @@ public class PublicationDeliveryTestHelper {
         if(! (response.getEntity() instanceof StreamingOutput)) {
             throw new RuntimeException("Response is not instance of streaming output: "+response);
         }
-        StreamingOutput output = (StreamingOutput) response.getEntity();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        output.write(outputStream);
-
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
-        return (PublicationDeliveryStructure) element.getValue();
+        return fromResponse(response);
     }
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml) throws JAXBException, IOException, SAXException {
@@ -175,16 +167,24 @@ public class PublicationDeliveryTestHelper {
 
         assertThat(response.getStatus()).isEqualTo(200);
 
+        return fromResponse(response);
+    }
+
+    public PublicationDeliveryStructure fromResponse(Response response) throws IOException, JAXBException {
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        byte[] bytes = outputStream.toByteArray();
+        System.out.println("Printing received publication delivery --------------");
+        System.out.println(new String(bytes));
+        System.out.println("--------------");
+
+        InputStream inputStream = new ByteArrayInputStream(bytes);
         JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
         return (PublicationDeliveryStructure) element.getValue();
-
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
