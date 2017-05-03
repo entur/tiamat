@@ -63,13 +63,13 @@ public class TopographicPlaceLookupService {
                        .findAny();
     }
 
-    public Optional<TopographicPlace> findCountyMatchingReferences(List<String> countyReferences, Point point) {
+    public Optional<TopographicPlace> findTopographicPlaceByReference(List<String> topographicPlaceReferences, Point point) {
         return topographicPlaces.get()
                 .stream()
-                .filter(triple -> triple.getMiddle().equals(TopographicPlaceTypeEnumeration.COUNTY))
+                .filter(triple -> topographicPlaceReferences.contains(triple.getLeft()))
                 .filter(triple -> point.within(triple.getRight()))
                 .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
-                .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
+                .peek(topographicPlace -> logger.debug("Found topographic place match: {}", topographicPlace.getNetexId()))
                 .findAny();
     }
 

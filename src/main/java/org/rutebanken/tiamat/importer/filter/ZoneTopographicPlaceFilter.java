@@ -57,7 +57,7 @@ public class ZoneTopographicPlaceFilter {
                     return true;
                 })
                 .filter(zone -> {
-                    Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findCountyMatchingReferences(topographicPlaceReferences, zone.getCentroid());
+                    Optional<TopographicPlace> topographicPlace = countyAndMunicipalityLookupService.findTopographicPlaceByReference(topographicPlaceReferences, zone.getCentroid());
                     if(topographicPlace.isPresent()) {
                         logger.debug("Found matching topographic place {} for zone {}. Negate: {}", topographicPlace.get().getNetexId(), zone, negate);
                         return negate ? false : true;
