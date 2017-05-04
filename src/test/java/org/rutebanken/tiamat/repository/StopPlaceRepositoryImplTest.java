@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
@@ -14,10 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -316,11 +315,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         List<StopTypeEnumeration> stopTypeEnumerations = Arrays.asList(StopTypeEnumeration.BUS_STATION);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(new StopPlaceSearch.Builder()
-                .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
-                .setStopTypeEnumerations(stopTypeEnumerations)
-                .setPageable(pageable)
-                .build());
+                                                                           .setQuery(stopPlaceName)
+                                                                           .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
+                                                                           .setStopTypeEnumerations(stopTypeEnumerations)
+                                                                           .setPageable(pageable)
+                                                                           .build());
         assertThat(result).isEmpty();
     }
 
@@ -334,9 +333,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Pageable pageable = new PageRequest(0, 10);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
-                .setPageable(pageable).build();
+                                         .setQuery(stopPlaceName)
+                                         .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
+                                         .setPageable(pageable).build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -350,7 +349,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(nesbru);
         stopPlaceRepository.save(bru);
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("bru").build();
+                                         .setQuery("bru").build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -369,7 +368,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(brunesset);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("nesset").build();
+                                         .setQuery("nesset").build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
@@ -390,11 +389,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Pageable pageable = new PageRequest(0, 10);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery(stopPlaceName)
-                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .setPageable(pageable)
-                .build();
+                                         .setQuery(stopPlaceName)
+                                         .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                                         .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                         .setPageable(pageable)
+                                         .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -411,9 +410,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality(stopPlaceName, municipality);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery(stopPlaceName)
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .build();
+                                         .setQuery(stopPlaceName)
+                                         .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                         .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -438,11 +437,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         List<String> municipalityRefs = Arrays.asList(municipality.getNetexId().toString());
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery(stopPlaceName)
-                .setMunicipalityIds(municipalityRefs)
-                .setCountyIds(countyRefs)
-                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
-                .build();
+                                         .setQuery(stopPlaceName)
+                                         .setMunicipalityIds(municipalityRefs)
+                                         .setCountyIds(countyRefs)
+                                         .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
+                                         .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -456,8 +455,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality(stopPlaceName, null);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("lEpEnden")
-                .build();
+                                         .setQuery("lEpEnden")
+                                         .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -477,10 +476,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("Does not matter", municipality);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
-                .build();
+                                         .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                                         .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                         .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
+                                         .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
 
@@ -502,10 +501,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("Name")
-                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .build();
+                                         .setQuery("Name")
+                                         .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                                         .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                         .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
 
@@ -523,9 +522,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("Somewhere else")
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .build();
+                                         .setQuery("Somewhere else")
+                                         .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                         .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
     }
@@ -536,9 +535,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setQuery("Somewhere else")
-                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
-                .build();
+                                         .setQuery("Somewhere else")
+                                         .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                                         .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isEmpty();
     }
@@ -600,11 +599,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceIds.add(stopPlace.getNetexId());
 
         StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
-                .setQuery("FromMu")
-                .setNetexIdList(stopPlaceIds)
-                .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
-                .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                .build();
+                                                  .setQuery("FromMu")
+                                                  .setNetexIdList(stopPlaceIds)
+                                                  .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
+                                                  .setCountyIds(Arrays.asList(county.getNetexId().toString()))
+                                                  .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
         assertThat(result).extracting(StopPlace::getName).extracting(EmbeddableMultilingualString::getValue)
@@ -621,8 +620,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
-                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.AIRPORT))
-                .build();
+                                         .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.AIRPORT))
+                                         .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
 
         Assertions.assertThat(result).isNotEmpty();
@@ -641,8 +640,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         versionTwo = stopPlaceRepository.save(versionTwo);
 
         StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
-                .setNetexIdList(Arrays.asList(versionOne.getNetexId()))
-                .build();
+                                                  .setNetexIdList(Arrays.asList(versionOne.getNetexId()))
+                                                  .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(stopPlaceSearch);
 
@@ -677,6 +676,46 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(result).extracting(StopPlace::getVersion)
                 .contains(1L);
 
+    }
+
+    @Test
+    public void scrollStopsWithEffectiveChangesInPeriod() {
+        Instant endOfPeriod = Instant.now();
+        Instant startOfPeriod = endOfPeriod.minusSeconds(100);
+
+        StopPlace historicVersion = saveStop("NSR:StopPlace:900", 1L, startOfPeriod.minusSeconds(10), startOfPeriod.minusSeconds(2));
+        StopPlace changedInPeriodButNotCurrent = saveStop("NSR:StopPlace:900", 2L, startOfPeriod.minusSeconds(2), startOfPeriod.plusSeconds(5));
+        StopPlace currentVersion = saveStop("NSR:StopPlace:900", 3L, startOfPeriod.plusSeconds(5), endOfPeriod.plusSeconds(2));
+        StopPlace futureVersion = saveStop("NSR:StopPlace:900", 4L, endOfPeriod.plusSeconds(2), null);
+
+        StopPlace expiredInPeriod = saveStop("NSR:StopPlace:901", 1L, startOfPeriod.minusSeconds(2), startOfPeriod.plusSeconds(30));
+        StopPlace notChangedInPeriod = saveStop("NSR:StopPlace:902", 1L, startOfPeriod.minusSeconds(10), null);
+
+
+        Page<StopPlace> changedStopsP0 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(0, 2)));
+
+        Assert.assertTrue(changedStopsP0.hasNext());
+        Page<StopPlace> changedStopsP1 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(1, 2)));
+        Assert.assertFalse(changedStopsP1.hasNext());
+
+        List<StopPlace> accumulatedStops=new ArrayList<>(changedStopsP0.getContent());
+        accumulatedStops.addAll(changedStopsP1.getContent());
+        assertContainsOnlyInExactVersion(accumulatedStops, changedInPeriodButNotCurrent, currentVersion, expiredInPeriod);
+
+    }
+
+    private void assertContainsOnlyInExactVersion(Collection<StopPlace> actual, StopPlace... expected) {
+        List<StopPlace> expectedList = Arrays.asList(expected);
+        Assert.assertEquals(expectedList.size(), actual.size());
+        Assert.assertTrue(expectedList.stream().allMatch(expectedStop -> actual.stream().anyMatch(actualStop -> actualStop.getNetexId().equals(expectedStop.getNetexId()) && actualStop.getVersion() == expectedStop.getVersion())));
+    }
+
+    private StopPlace saveStop(String id, Long version, Instant startOfPeriod, Instant endOfPeriod) {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(version);
+        stopPlace.setNetexId(id);
+        stopPlace.getValidBetweens().add(new ValidBetween(startOfPeriod, endOfPeriod));
+        return stopPlaceRepository.save(stopPlace);
     }
 
     private TopographicPlace createMunicipality(String municipalityName, TopographicPlace parentCounty) {

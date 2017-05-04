@@ -1,29 +1,33 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
+import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
+import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 
 import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
@@ -46,6 +50,7 @@ public class PublicationDeliveryResource {
 
     private final PublicationDeliveryImporter publicationDeliveryImporter;
 
+    private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
 
     @Autowired
     public PublicationDeliveryResource(
@@ -53,7 +58,9 @@ public class PublicationDeliveryResource {
                                               PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                               StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
                                               PublicationDeliveryExporter publicationDeliveryExporter,
-                                              AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter, PublicationDeliveryImporter publicationDeliveryImporter) {
+                                              AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter,
+                                              PublicationDeliveryImporter publicationDeliveryImporter,
+                                              ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
@@ -61,6 +68,7 @@ public class PublicationDeliveryResource {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
+        this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
     }
 
     public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
@@ -132,10 +140,41 @@ public class PublicationDeliveryResource {
     @GET
     @Produces(MediaType.APPLICATION_XML)
     public Response exportStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto,
-                                                @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
+                                            @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch,includeTopographicPlaces);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch, includeTopographicPlaces);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 
+
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("changed")
+    public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
+                                                                        @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces,
+                                                                        @Context UriInfo uriInfo)
+            throws JAXBException, IOException, SAXException {
+
+        ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
+        PublicationDeliveryStructurePage resultPage =
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, includeTopographicPlaces);
+        Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
+
+        if (resultPage.hasNext) {
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), includeTopographicPlaces, uriInfo), "next");
+        }
+
+        return rsp.build();
+    }
+
+    private URI createLinkToNextPage(String from, String to, int page, int perPage, boolean includeTopographicPlaces, UriInfo uriInfo) {
+        UriBuilder linkBuilder = uriInfo.getAbsolutePathBuilder()
+                                         .queryParam("page", page)
+                                         .queryParam("per_page", perPage)
+                                         .queryParam("include_topographic_places", includeTopographicPlaces);
+
+        if (from != null) linkBuilder.queryParam("from", from);
+        if (to != null) linkBuilder.queryParam("to", to);
+        return linkBuilder.build();
+    }
 }

@@ -6,12 +6,15 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +50,12 @@ public class PublicationDeliveryExporter {
         } else {
             return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(stopPlaceSearch), topographicPlaceExportMode);
         }
+    }
+
+    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, boolean includeTopographicPlaces) {
+        ExportMode topographicPlaceExportMode = includeTopographicPlaces ? RELEVANT : NONE;
+        Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
+        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, topographicPlaceExportMode), stopPlacePage.hasNext());
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
