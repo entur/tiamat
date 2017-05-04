@@ -48,7 +48,7 @@ public class CompassBearingRemover {
 
             stopPlace.getQuays().forEach(quay -> {
                 quay.setCompassBearing(null);
-                logger.info("Removing compass bearing for quay as parent stop place type is {}. {}", stopPlace.getStopPlaceType(), quay);
+                logger.debug("Removing compass bearing for quay as parent stop place type is {}. {}", stopPlace.getStopPlaceType(), quay);
             });
         }
         return stopPlace;

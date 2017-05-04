@@ -35,7 +35,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
             if (newVersion.getNetexId() != null) {
                 existingVersion = getRepository().findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
                 if (existingVersion != null) {
-                    logger.info("Found existing entity from netexId {}", existingVersion.getNetexId());
+                    logger.debug("Found existing entity from netexId {}", existingVersion.getNetexId());
                 }
             }
         }

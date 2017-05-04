@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.StopPlaceSearch;
@@ -40,7 +40,7 @@ public class CoordinatesFixerResource {
     private GeometryFactory geometryFactory;
 
     @Autowired
-    private CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
 
 
     @POST

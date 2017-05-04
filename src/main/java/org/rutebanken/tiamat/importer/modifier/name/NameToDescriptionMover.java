@@ -36,10 +36,10 @@ public class NameToDescriptionMover {
             Matcher matcher = pattern.matcher(name);
 
             while (matcher.find()) {
-                logger.info("Matching {}", name);
+                logger.debug("Matching {}", name);
                 if (matcher.groupCount() > 0) {
                     String description = matcher.group(1).trim();
-                    logger.info("Extracted description {}", description);
+                    logger.debug("Extracted description {}", description);
                     entity.setDescription(new EmbeddableMultilingualString(description));
                 }
             }

@@ -5,7 +5,8 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.ValidBetweenRepository;
-import org.rutebanken.tiamat.service.CountyAndMunicipalityLookupService;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
+import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,19 +31,23 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
 
-    private final CountyAndMunicipalityLookupService countyAndMunicipalityLookupService;
+    private final TopographicPlaceLookupService countyAndMunicipalityLookupService;
+
+    private final TariffZonesLookupService tariffZonesLookupService;
 
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
                                           ValidBetweenRepository validBetweenRepository,
                                           VersionCreator versionCreator,
                                           AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
-                                          CountyAndMunicipalityLookupService countyAndMunicipalityLookupService) {
+                                          TopographicPlaceLookupService countyAndMunicipalityLookupService,
+                                          TariffZonesLookupService tariffZonesLookupService) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
+        this.tariffZonesLookupService = tariffZonesLookupService;
     }
 
     @Override
@@ -82,6 +87,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         // Save latest version
         stopPlaceToSave = initiateOrIncrementVersions(stopPlaceToSave);
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlaceToSave);
+        tariffZonesLookupService.populateTariffZone(stopPlaceToSave);
         stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
         return stopPlaceToSave;
     }

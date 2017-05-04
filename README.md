@@ -164,17 +164,17 @@ https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/ti
 
 ## Async NeTEx export *ALL* data from Tiamat
 At the time of writing, you need to export everything with async export.
-#### Start async export:
+### Start async export:
 ```
 curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
 ```
 
-#### Check job status:
+### Check job status:
 ```
 curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
 ```
 
-#### When job is done. Download it:
+### When job is done. Download it:
 ```
 curl https://www-test.rutebanken.org/admin/nsr/jersey/publication_delivery/async/job/130116/content | zcat | xmllint --format - > export.xml
 ```

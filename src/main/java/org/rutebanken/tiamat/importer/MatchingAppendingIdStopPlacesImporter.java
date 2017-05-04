@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Transactional
 @Component
-public class MatchingIdAppendingStopPlacesImporter {
+public class MatchingAppendingIdStopPlacesImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(MatchingIdAppendingStopPlacesImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MatchingAppendingIdStopPlacesImporter.class);
 
     private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
 
@@ -50,7 +50,7 @@ public class MatchingIdAppendingStopPlacesImporter {
             if(existingstopPlace == null) {
                 logger.warn("Cannot find nearby stop place: {}", stopPlace);
             } else {
-                logger.info("Found matching stop place {}", existingstopPlace);
+                logger.debug("Found matching stop place {}", existingstopPlace);
                 keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, stopPlace, existingstopPlace);
 
                 if(stopPlace.getTariffZones() != null) {

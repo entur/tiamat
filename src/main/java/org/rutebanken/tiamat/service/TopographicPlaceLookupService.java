@@ -26,9 +26,9 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
-public class CountyAndMunicipalityLookupService {
+public class TopographicPlaceLookupService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CountyAndMunicipalityLookupService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceLookupService.class);
 
     private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
 
@@ -63,13 +63,13 @@ public class CountyAndMunicipalityLookupService {
                        .findAny();
     }
 
-    public Optional<TopographicPlace> findCountyMatchingReferences(List<String> countyReferences, Point point) {
+    public Optional<TopographicPlace> findTopographicPlaceByReference(List<String> topographicPlaceReferences, Point point) {
         return topographicPlaces.get()
                 .stream()
-                .filter(triple -> triple.getMiddle().equals(TopographicPlaceTypeEnumeration.COUNTY))
+                .filter(triple -> topographicPlaceReferences.contains(triple.getLeft()))
                 .filter(triple -> point.within(triple.getRight()))
                 .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
-                .filter(topographicPlace -> countyReferences.contains(topographicPlace.getNetexId()))
+                .peek(topographicPlace -> logger.debug("Found topographic place match: {}", topographicPlace.getNetexId()))
                 .findAny();
     }
 

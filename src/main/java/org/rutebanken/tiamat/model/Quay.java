@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity
 @Table(
         uniqueConstraints = {
-                @UniqueConstraint(name = "stop_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
+                @UniqueConstraint(name = "quay_netex_id_version_constraint", columnNames = {"netexId", "version"})}
 )
 public class Quay extends StopPlaceSpace_VersionStructure {
 

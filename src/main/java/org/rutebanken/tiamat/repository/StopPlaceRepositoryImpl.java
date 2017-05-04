@@ -242,6 +242,37 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		return mappingResult;
 	}
 
+	@Override
+	public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId) {
+		String sql = "SELECT s.netex_id " +
+				"FROM stop_place s " +
+				"  INNER JOIN stop_place_quays spq " +
+				"    ON s.id = spq.stop_place_id " +
+				"  INNER JOIN quay q " +
+				"    ON spq.quays_id = q.id " +
+				"  INNER JOIN quay_key_values qkv " +
+				"    ON q.id = qkv.quay_id AND qkv.key_values_key = :originalIdKey " +
+				"  INNER JOIN value_items vi " +
+				"    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value ";
+
+		Query query = entityManager.createNativeQuery(sql);
+
+		query.setParameter("value",  "%" + quayOriginalId + "%");
+		query.setParameter("originalIdKey", ORIGINAL_ID_KEY);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<String> results = query.getResultList();
+			if (results.isEmpty()) {
+				return null;
+			} else {
+				return results;
+			}
+		} catch (NoResultException noResultException) {
+			return null;
+		}
+	}
+
 
 	@Override
 	public Iterator<StopPlace> scrollStopPlaces() throws InterruptedException {

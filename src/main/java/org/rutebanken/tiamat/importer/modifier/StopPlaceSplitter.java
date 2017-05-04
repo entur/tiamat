@@ -22,13 +22,17 @@ public class StopPlaceSplitter {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceSplitter.class);
 
     public List<StopPlace> split(List<StopPlace> stops) {
-        logger.info("Looking for quays eligible for splitting in {} stop places based on quay distance", stops.size());
+        logger.debug("Looking for quays eligible for splitting in {} stop places based on quay distance", stops.size());
         List<StopPlace> result = new ArrayList<>();
 
         stops.forEach(originalStop -> {
             splitQuaysFromStops(originalStop, result);
         });
-        logger.info("Created {} new stops. Returning {} stop places in total", result.size()-stops.size(), result.size());
+
+        int numberOfStopsCreated = result.size()-stops.size();
+        if(numberOfStopsCreated > 0) {
+            logger.info("Created {} new stops. Returning {} stop places in total", numberOfStopsCreated, result.size());
+        }
 
         return result;
     }
@@ -65,7 +69,7 @@ public class StopPlaceSplitter {
 
                     if(!wasGrouped) {
                         // Was not grouped. Which means split out and create new group, then break to avoid splitting/grouping more.
-                        logger.debug("Splitting quay {} from stop {} as it is too far away from previous quay.", quay.getOriginalIds(), originalStop.getOriginalIds());
+                        logger.info("Splitting quay {} from stop {} as it is too far away from previous quay.", quay.getOriginalIds(), originalStop.getOriginalIds());
                         quayGroups.add(new ArrayList<>(Arrays.asList(quay)));
 
                     }
