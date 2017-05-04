@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
     @Before
     public void clearGeneratedIds() {
-        Arrays.asList(StopPlace.class.getSimpleName(), Quay.class.getSimpleName()).forEach(entityTypeName -> {
+        Arrays.asList(Parking.class.getSimpleName(), StopPlace.class.getSimpleName(), Quay.class.getSimpleName()).forEach(entityTypeName -> {
             generatedIdState.setLastIdForEntity(entityTypeName, INITIAL_LAST_ID);
             generatedIdState.getQueueForEntity(entityTypeName).clear();
             hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName).clear();
@@ -88,7 +89,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
     /**
      * Was implemented under the supsicion that OptionalIdCreator caused a bug.
-     * But it was a matter of keeping the attached returned entity from save (in case the entity was merged)
+     * But it wasPerPo a matter of keeping the attached returned entity from save (in case the entity was merged)
      * See NRP-1171
      */
     @Test

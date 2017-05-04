@@ -23,6 +23,9 @@ public abstract class TiamatIntegrationTest {
     protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    protected ParkingRepository parkingRepository;
+
+    @Autowired
     protected StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
@@ -61,6 +64,9 @@ public abstract class TiamatIntegrationTest {
 
         topographicPlaceRepository.deleteAll();
         topographicPlaceRepository.flush();
+
+        parkingRepository.deleteAll();
+        parkingRepository.flush();
 
         tariffZoneRepository.deleteAll();
         tariffZoneRepository.flush();

@@ -70,6 +70,16 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+
+        mapperFactory.classMap(Parking.class, org.rutebanken.tiamat.model.Parking.class)
+                .exclude("paymentMethods")
+                .exclude("parkingPaymentProcess")
+                .exclude("cardsAccepted")
+                .exclude("currenciesAccepted")
+                .exclude("accessModes")
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
@@ -183,6 +193,11 @@ public class NetexMapper {
         return facade.map(tiamatStopPlace, StopPlace.class);
     }
 
+
+    public Parking mapToNetexModel(org.rutebanken.tiamat.model.Parking tiamatParking) {
+        return facade.map(tiamatParking, Parking.class);
+    }
+
     public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {
         return facade.map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
     }
@@ -190,6 +205,11 @@ public class NetexMapper {
     public List<org.rutebanken.tiamat.model.StopPlace> mapStopsToTiamatModel(List<StopPlace> stopPlaces) {
         return facade.mapAsList(stopPlaces, org.rutebanken.tiamat.model.StopPlace.class);
     }
+
+    public List<org.rutebanken.tiamat.model.Parking> mapParkingsToTiamatModel(List<Parking> parking) {
+        return facade.mapAsList(parking, org.rutebanken.tiamat.model.Parking.class);
+    }
+
     public List<org.rutebanken.tiamat.model.PathLink> mapPathLinksToTiamatModel(List<PathLink> pathLinks) {
         return facade.mapAsList(pathLinks, org.rutebanken.tiamat.model.PathLink.class);
     }

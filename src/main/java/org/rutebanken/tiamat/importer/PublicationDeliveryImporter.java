@@ -2,17 +2,11 @@ package org.rutebanken.tiamat.importer;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.Common_VersionFrameStructure;
-import org.rutebanken.netex.model.CompositeFrame;
-import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
+import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
@@ -40,6 +34,7 @@ public class PublicationDeliveryImporter {
 
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
     private static final Object STOP_PLACE_IMPORT_LOCK = new Object();
+    private static final Object PARKING_IMPORT_LOCK = new Object();
 
     /**
      * Make this configurable. Export topographic places in response.
@@ -47,6 +42,7 @@ public class PublicationDeliveryImporter {
     private static final boolean EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS = false;
 
     private final TransactionalStopPlacesImporter transactionalStopPlacesImporter;
+    private final TransactionalParkingsImporter transactionalParkingsImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
     private final StopPlacePreSteps stopPlacePreSteps;
@@ -56,6 +52,7 @@ public class PublicationDeliveryImporter {
     private final TariffZoneImporter tariffZoneImporter;
     private final ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
     private final ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter;
+    private final ParallelInitialParkingImporter parallelInitialParkingImporter;
     private final MatchingAppendingIdStopPlacesImporter matchingAppendingIdStopPlacesImporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final StopPlaceIdMatcher stopPlaceIdMatcher;
@@ -63,6 +60,7 @@ public class PublicationDeliveryImporter {
     @Autowired
     public PublicationDeliveryImporter(NetexMapper netexMapper,
                                        TransactionalStopPlacesImporter transactionalStopPlacesImporter,
+                                       TransactionalParkingsImporter transactionalParkingsImporter,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
                                        PathLinksImporter pathLinksImporter,
@@ -71,10 +69,12 @@ public class PublicationDeliveryImporter {
                                        TariffZoneImporter tariffZoneImporter,
                                        ZoneTopographicPlaceFilter zoneTopographicPlaceFilter,
                                        ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter,
+                                       ParallelInitialParkingImporter parallelInitialParkingImporter,
                                        MatchingAppendingIdStopPlacesImporter matchingAppendingIdStopPlacesImporter,
                                        TariffZonesFromStopsExporter tariffZonesFromStopsExporter, StopPlaceIdMatcher stopPlaceIdMatcher) {
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
+        this.transactionalParkingsImporter = transactionalParkingsImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
         this.pathLinksImporter = pathLinksImporter;
@@ -83,6 +83,7 @@ public class PublicationDeliveryImporter {
         this.tariffZoneImporter = tariffZoneImporter;
         this.zoneTopographicPlaceFilter = zoneTopographicPlaceFilter;
         this.parallelInitialStopPlaceImporter = parallelInitialStopPlaceImporter;
+        this.parallelInitialParkingImporter = parallelInitialParkingImporter;
         this.matchingAppendingIdStopPlacesImporter = matchingAppendingIdStopPlacesImporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.stopPlaceIdMatcher = stopPlaceIdMatcher;
@@ -110,6 +111,7 @@ public class PublicationDeliveryImporter {
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
         AtomicInteger stopPlacesCreatedOrUpdated = new AtomicInteger(0);
+        AtomicInteger parkingsCreatedOrUpdated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCounter = new AtomicInteger(0);
         SiteFrame netexSiteFrame = findSiteFrame(incomingPublicationDelivery);
 
@@ -146,6 +148,7 @@ public class PublicationDeliveryImporter {
             }
 
             handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
+            handleParkings(netexSiteFrame, publicationDeliveryParams, parkingsCreatedOrUpdated, responseSiteframe);
 
             if(netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
                 List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
@@ -162,6 +165,36 @@ public class PublicationDeliveryImporter {
             loggerTimer.cancel();
         }
     }
+
+    private void handleParkings(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger parkingsCreatedOrUpdated, SiteFrame responseSiteframe) {
+
+        if (hasParkings(netexSiteFrame)) {
+            logger.info("Should have handled {} parkings!!", netexSiteFrame.getParkings().getParking().size());
+            List<org.rutebanken.tiamat.model.Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
+
+            Collection<Parking> importedParkings;
+
+            if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
+                synchronized (PARKING_IMPORT_LOCK) {
+                    importedParkings = transactionalParkingsImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
+                }
+            } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
+                importedParkings = parallelInitialParkingImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
+            } else {
+                throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+            }
+
+            if (!importedParkings.isEmpty()) {
+                responseSiteframe.withParkings(
+                        new ParkingsInFrame_RelStructure()
+                                .withParking(importedParkings));
+            }
+
+            logger.info("Mapped {} parkings!!", tiamatParking.size());
+
+        }
+    }
+
 
     private void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if(hasStops(netexSiteFrame)) {
@@ -258,6 +291,10 @@ public class PublicationDeliveryImporter {
 
     private boolean hasStops(SiteFrame siteFrame) {
         return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace() != null;
+    }
+
+    private boolean hasParkings(SiteFrame siteFrame) {
+        return siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null;
     }
 
     private int numberOfStops(SiteFrame netexSiteFrame) {
