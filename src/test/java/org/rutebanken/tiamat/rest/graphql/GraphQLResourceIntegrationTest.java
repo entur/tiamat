@@ -390,6 +390,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         Float updatedLon = new Float(10.11111);
         Float updatedLat = new Float(59.11111);
 
+        String versionComment = "Stop place moved 100 meters";
+
         Boolean allAreasWheelchairAccessible = Boolean.TRUE;
 
         String graphQlJsonQuery = "{" +
@@ -400,6 +402,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
                 "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
                 "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
+                "          versionComment: \\\""+ versionComment + "\\\"" +
                 "          geometry: {" +
                 "            type: Point" +
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
@@ -412,6 +415,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
+                "  versionComment " +
                 "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
                 "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
@@ -425,6 +429,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                    .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))

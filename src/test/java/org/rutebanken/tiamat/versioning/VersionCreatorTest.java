@@ -20,6 +20,16 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     @Autowired
     private VersionCreator versionCreator;
 
+    @Test
+    public void versionCommentShouldNotBeCopied() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setVersionComment("stopp flyttet 100 meter nordover");
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
+        assertThat(newVersion.getVersionComment()).isNull();
+    }
 
     @Test
     public void createCopyOfStopWithGeometry() {

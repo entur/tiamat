@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +26,8 @@ public class VersionCreator {
     private static final Logger logger = LoggerFactory.getLogger(VersionCreator.class);
 
     private static final String ID_FIELD = "id";
+
+    private static final String VERSION_COMMENT_FIELD = "versionComment";
 
     private final VersionIncrementor versionIncrementor;
 
@@ -53,67 +56,32 @@ public class VersionCreator {
                     }
                 });
 
-        mapperFactory.classMap(StopPlace.class, StopPlace.class)
-                .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
 
         mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
                 .exclude(ID_FIELD)
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(TopographicPlace.class, TopographicPlace.class)
+        mapperFactory.classMap(StopPlace.class, StopPlace.class)
+                .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
                 .exclude(ID_FIELD)
+                .exclude(VERSION_COMMENT_FIELD)
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(PathLink.class, PathLink.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(ValidBetween.class, ValidBetween.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(PlaceEquipment.class, PlaceEquipment.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
+        List<Class<? extends EntityInVersionStructure>> commonClassesToConfigure =
+                Arrays.asList(TopographicPlace.class,
+                        PathLink.class, ValidBetween.class, PlaceEquipment.class,
+                        WaitingRoomEquipment.class, SanitaryEquipment.class,
+                        TicketingEquipment.class, ShelterEquipment.class,
+                        CycleStorageEquipment.class, AlternativeName.class);
 
 
-        mapperFactory.classMap(WaitingRoomEquipment.class, WaitingRoomEquipment.class)
+        commonClassesToConfigure.forEach(clazz -> mapperFactory.classMap(clazz, clazz)
+                .exclude(VERSION_COMMENT_FIELD)
                 .exclude(ID_FIELD)
                 .byDefault()
-                .register();
-
-        mapperFactory.classMap(SanitaryEquipment.class, SanitaryEquipment.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(TicketingEquipment.class, TicketingEquipment.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(ShelterEquipment.class, ShelterEquipment.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(CycleStorageEquipment.class, CycleStorageEquipment.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-        mapperFactory.classMap(AlternativeName.class, AlternativeName.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
+                .register());
 
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
