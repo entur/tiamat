@@ -12,15 +12,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidBetweenConverter extends BidirectionalConverter<ValidBetween, org.rutebanken.tiamat.model.ValidBetween> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ValidBetweenConverter.class);
-
     @Autowired
     private ExportTimeZone exportTimeZone;
 
     @Override
-    public org.rutebanken.tiamat.model.ValidBetween convertTo(ValidBetween validBetween, Type<org.rutebanken.tiamat.model.ValidBetween> type) {
-        logger.debug("Ignoring incoming availability conditions {}", validBetween);
-        return null;
+    public org.rutebanken.tiamat.model.ValidBetween convertTo(ValidBetween netexValidBetween, Type<org.rutebanken.tiamat.model.ValidBetween> type) {
+        org.rutebanken.tiamat.model.ValidBetween validBetween = new org.rutebanken.tiamat.model.ValidBetween();
+
+        if (netexValidBetween.getFromDate() != null) {
+            validBetween.setFromDate(netexValidBetween.getFromDate().toInstant());
+        }
+
+        if (netexValidBetween.getToDate() != null) {
+            validBetween.setToDate(netexValidBetween.getToDate().toInstant());
+        }
+
+        return validBetween;
     }
 
     @Override
