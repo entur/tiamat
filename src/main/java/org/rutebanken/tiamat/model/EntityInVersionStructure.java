@@ -11,6 +11,8 @@ public class EntityInVersionStructure extends EntityStructure {
     @OneToMany(cascade = CascadeType.ALL)
     private final List<ValidBetween> validBetweens = new ArrayList<>();
 
+    private String versionComment;
+
     @Transient
     protected String dataSourceRef;
 
@@ -136,4 +138,11 @@ public class EntityInVersionStructure extends EntityStructure {
         this.derivedFromObjectRef = value;
     }
 
+    public String getVersionComment() {
+        return versionComment;
+    }
+
+    public void setVersionComment(String versionComment) {
+        this.versionComment = versionComment;
+    }
 }

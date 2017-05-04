@@ -53,6 +53,12 @@ public class VersionCreator {
                     }
                 });
 
+        mapperFactory.classMap(EntityInVersionStructure.class, EntityInVersionStructure.class)
+                .exclude(ID_FIELD)
+                .exclude("versionComment")
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(StopPlace.class, StopPlace.class)
                 .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
                 .exclude(ID_FIELD)
