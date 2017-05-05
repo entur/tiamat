@@ -7,10 +7,8 @@ import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +33,7 @@ public class QuayMerger {
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
-    public boolean addNewQuaysOrAppendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace) {
+    public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
         AtomicInteger addedQuays = new AtomicInteger();
@@ -46,7 +44,7 @@ public class QuayMerger {
             newStopPlace.setQuays(new HashSet<>());
         }
 
-        Set<Quay> result = addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays);
+        Set<Quay> result = appendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays);
 
         existingStopPlace.setQuays(result);
 
@@ -54,7 +52,7 @@ public class QuayMerger {
         return addedQuays.get() > 0 || updatedQuays.get() > 0;
     }
 
-    public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
+    public Set<Quay> appendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
 
         Set<Quay> result = new HashSet<>();
         if(existingQuays != null) {
@@ -70,12 +68,14 @@ public class QuayMerger {
 
             if(matchingQuay.isPresent()) {
                 updateIfChanged(matchingQuay.get(), incomingQuay, updatedQuaysCounter);
-            } else {
+            } else if(addNewQuays) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
                 incomingQuay.setCreated(ZonedDateTime.now());
                 incomingQuay.setChanged(ZonedDateTime.now());
                 addedQuaysCounter.incrementAndGet();
+            } else {
+                logger.warn("Found no match for incoming quay {}. Looking in list of quays: {}", incomingQuay, result);
             }
         }
 
@@ -135,7 +135,7 @@ public class QuayMerger {
                 && publicCodeMatch) {
             return true;
         } else if(nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
-            logger.debug("Name and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
+            logger.debug("Name, public code and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
             if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
                 return true;
@@ -216,7 +216,7 @@ public class QuayMerger {
                     quay2.getCentroid().getCoordinate(),
                     DefaultGeographicCRS.WGS84);
 
-            logger.info("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
+            logger.debug("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
 
             return distanceInMeters < mergeDistanceInMeters;
         } catch (TransformException e) {
