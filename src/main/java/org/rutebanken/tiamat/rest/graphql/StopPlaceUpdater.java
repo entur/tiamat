@@ -113,6 +113,10 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
 
+        if (input.get(VERSION_COMMENT) != null) {
+            stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
+        }
+
         if (input.get(VALID_BETWEENS) != null) {
             List values = (List) input.get(VALID_BETWEENS);
             stopPlace.getValidBetweens().clear();
