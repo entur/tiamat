@@ -36,7 +36,8 @@ public class DtoStopPlaceResource {
     @Path("/id_mapping")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
 
-        logger.debug("Getting ID mapping for stop places");
+        logger.info("Fetching StopPlace mapping table...");
+
         return Response.ok().entity((StreamingOutput) output -> {
 
             int recordPosition = 0;
