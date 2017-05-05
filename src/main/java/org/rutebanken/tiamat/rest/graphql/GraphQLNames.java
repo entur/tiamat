@@ -98,11 +98,19 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
 
+
+    public static final String OUTPUT_TYPE_PARKING = "Parking";
+    public static final String INPUT_TYPE_PARKING = OUTPUT_TYPE_PARKING + INPUT_TYPE_POSTFIX;
+
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
+
+    public static final String PARKING_TYPE_ENUM = "ParkingType";
+
+    public static final String PARKING_VEHICLE_ENUM = "ParkingVehicleType";
 
     public static final String ID = "id";
     public static final String STOP_PLACE_TYPE = "stopPlaceType";
@@ -185,13 +193,20 @@ public class GraphQLNames {
     public static final String VALUE = "value";
     public static final String LANG = "lang";
 
+    public static final String TOTAL_CAPACITY = "totalCapacity";
+    public static final String PARKING_TYPE = "parkingType";
+    public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
+
+
     public static final String FIND_STOPPLACE = "stopPlace";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";
+    public static final String FIND_PARKING = "parking";
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
+    public static final String MUTATE_PARKINGS = "mutateParking";
 }

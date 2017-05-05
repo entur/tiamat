@@ -42,7 +42,33 @@ public class CustomGraphQLTypes {
             .value("other", StopTypeEnumeration.OTHER)
             .build();
 
-    public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
+        public static GraphQLEnumType parkingVehicleEnum = GraphQLEnumType.newEnum()
+                .name(PARKING_VEHICLE_ENUM)
+                .value("car", ParkingVehicleEnumeration.CAR)
+                .value("bus", ParkingVehicleEnumeration.BUS)
+                .value("pedalCycle", ParkingVehicleEnumeration.PEDAL_CYCLE)
+                .value("motorcycle", ParkingVehicleEnumeration.MOTORCYCLE)
+                .build();
+
+        public static GraphQLEnumType parkingTypeEnum = GraphQLEnumType.newEnum()
+                .name(PARKING_TYPE_ENUM)
+                .value("parkAndRide", ParkingTypeEnumeration.PARK_AND_RIDE)
+                .value("liftShareParking", ParkingTypeEnumeration.LIFT_SHARE_PARKING)
+                .value("urbanParking", ParkingTypeEnumeration.URBAN_PARKING)
+                .value("airportParking", ParkingTypeEnumeration.AIRPORT_PARKING)
+                .value("trainStationParking", ParkingTypeEnumeration.TRAIN_STATION_PARKING)
+                .value("exhibitionCentreParking", ParkingTypeEnumeration.EXHIBITION_CENTRE_PARKING)
+                .value("rentalCarParking", ParkingTypeEnumeration.RENTAL_CAR_PARKING)
+                .value("shoppingCentreParking", ParkingTypeEnumeration.SHOPPING_CENTRE_PARKING)
+                .value("motorwayParking", ParkingTypeEnumeration.MOTORWAY_PARKING)
+                .value("roadside", ParkingTypeEnumeration.ROADSIDE)
+                .value("parkingZone", ParkingTypeEnumeration.PARKING_ZONE)
+                .value("undefined", ParkingTypeEnumeration.UNDEFINED)
+                .value("cycleRental", ParkingTypeEnumeration.CYCLE_RENTAL)
+                .value("other", ParkingTypeEnumeration.OTHER)
+                .build();
+
+        public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
             .name(GEOMETRY_TYPE_ENUM)
             .value("Point")
             .value("LineString")
@@ -116,6 +142,21 @@ public class CustomGraphQLTypes {
                     .type(new GraphQLNonNull(GraphQLGeoJSONCoordinates))
                     .build())
             .build();
+
+
+        public static GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
+                .name(GEOMETRY)
+                .type(geoJsonObjectType)
+                .dataFetcher(env -> {
+                        if (env.getSource() instanceof Zone_VersionStructure) {
+                                Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
+                                return source.getCentroid();
+                        } else if(env.getSource() instanceof Link) {
+                                Link link = (Link) env.getSource();
+                                return link.getLineString();
+                        }
+                        return null;
+                }).build();
 
     public static GraphQLObjectType embeddableMultilingualStringObjectType = newObject()
             .name(OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
@@ -556,4 +597,51 @@ public class CustomGraphQLTypes {
                     .type(geoJsonInputType))
             .description("Transfer durations in seconds")
             .build();
+
+        public static GraphQLObjectType parkingObjectType = newObject()
+                .name(OUTPUT_TYPE_PARKING)
+                .field(netexIdFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(TOTAL_CAPACITY)
+                        .type(GraphQLBigInteger))
+                .field(newFieldDefinition()
+                        .name(PARKING_TYPE)
+                        .type(parkingTypeEnum))
+                .field(newFieldDefinition()
+                        .name(PARKING_VEHICLE_TYPES)
+                        .type(new GraphQLList(parkingVehicleEnum)))
+                .field(geometryFieldDefinition)
+                .build();
+
+
+        public static GraphQLInputObjectType parkingObjectInputType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_PARKING)
+                .field(newInputObjectField()
+                        .name(ID)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(NAME)
+                        .type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField()
+                        .name(TOTAL_CAPACITY)
+                        .type(GraphQLBigInteger))
+                .field(newInputObjectField()
+                        .name(PARKING_TYPE)
+                        .type(parkingTypeEnum))
+                .field(newInputObjectField()
+                        .name(PARKING_VEHICLE_TYPES)
+                        .type(new GraphQLList(parkingVehicleEnum)))
+                .field(newInputObjectField()
+                        .name(GEOMETRY)
+                        .type(geoJsonInputType))
+                .description("Transfer durations in seconds")
+                .build();
+
+
 }
