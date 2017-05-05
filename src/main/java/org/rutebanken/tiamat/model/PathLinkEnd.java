@@ -8,7 +8,7 @@ import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import javax.persistence.*;
 
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
 public class PathLinkEnd extends IdentifiedEntity {
 
     @Embedded

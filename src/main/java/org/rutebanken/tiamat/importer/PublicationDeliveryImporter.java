@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;

@@ -16,7 +16,8 @@ public abstract class Site_VersionStructure
     private final List<Level> levels = new ArrayList<>();
 
     @org.hibernate.annotations.Cache(
-            usage = CacheConcurrencyStrategy.READ_WRITE
+            usage = CacheConcurrencyStrategy.READ_WRITE,
+            region = "tiamatEntityCacheRegion"
     )
     @OneToOne(fetch = FetchType.LAZY)
     protected TopographicPlace topographicPlace;

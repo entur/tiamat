@@ -17,7 +17,7 @@ import java.util.Set;
 public abstract class DataManagedObjectStructure
         extends EntityInVersionStructure {
 
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final Map<String, Value> keyValues = new HashMap<>();
 

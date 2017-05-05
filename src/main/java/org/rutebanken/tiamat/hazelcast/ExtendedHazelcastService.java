@@ -1,21 +1,16 @@
 package org.rutebanken.tiamat.hazelcast;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.core.*;
-
+import com.hazelcast.config.EvictionPolicy;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MaxSizeConfig;
+import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
 
-
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
 public class ExtendedHazelcastService extends HazelCastService {
 
@@ -24,6 +19,18 @@ public class ExtendedHazelcastService extends HazelCastService {
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
     }
+
+    @Override
+    public List<MapConfig> getAdditionalMapConfigurations() {
+
+        MapConfig mapConfig = new MapConfig("tiamatEntityCacheRegion")
+                .setEvictionPolicy(EvictionPolicy.LRU)
+                .setTimeToLiveSeconds(604800)
+                .setMaxSizeConfig(new MaxSizeConfig(100000, MaxSizeConfig.MaxSizePolicy.PER_NODE));
+
+        return Arrays.asList(mapConfig);
+    }
+
 
     public HazelcastInstance getHazelcastInstance() {
         return hazelcast;
