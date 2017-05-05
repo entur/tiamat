@@ -158,6 +158,11 @@ public class PublicationDeliveryResource {
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
                 publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, includeTopographicPlaces);
+
+        if (resultPage.totalElements == 0) {
+            return Response.noContent().build();
+        }
+
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {

@@ -55,7 +55,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, boolean includeTopographicPlaces) {
         ExportMode topographicPlaceExportMode = includeTopographicPlaces ? RELEVANT : NONE;
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, topographicPlaceExportMode), stopPlacePage.hasNext());
+        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, topographicPlaceExportMode), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
     }
 
     public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {

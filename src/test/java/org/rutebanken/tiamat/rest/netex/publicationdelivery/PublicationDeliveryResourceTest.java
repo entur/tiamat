@@ -6,11 +6,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Link;
@@ -954,7 +957,16 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         Assert.assertNotNull(link);
     }
 
+    @Test
+    public void exportStopPlacesWithEffectiveChangedInPeriodNoContent() throws Exception {
+        String historicTime = "2012-04-23T18:25:43.511+0100";
 
+        UriInfo uriInfoMock = Mockito.mock(UriInfo.class);
+        ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(historicTime, historicTime, 0, 1);
+
+        Response response = publicationDeliveryResource.exportStopPlacesWithEffectiveChangedInPeriod(search, false, uriInfoMock);
+        Assert.assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value());
+    }
 
     /**
      * Partially copied from https://github.com/rutebanken/netex-norway-examples/blob/master/examples/stops/BasicStopPlace_example.xml
