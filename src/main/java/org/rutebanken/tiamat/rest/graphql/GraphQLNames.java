@@ -209,5 +209,5 @@ public class GraphQLNames {
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
-    public static final String MUTATE_PARKINGS = "mutateParking";
+    public static final String MUTATE_PARKING = "mutateParking";
 }

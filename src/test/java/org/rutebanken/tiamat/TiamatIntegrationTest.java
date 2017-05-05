@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +24,13 @@ public abstract class TiamatIntegrationTest {
     protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    protected StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
+
+    @Autowired
     protected ParkingRepository parkingRepository;
 
     @Autowired
-    protected StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
+    protected ParkingVersionedSaverService parkingVersionedSaverService;
 
     @Autowired
     protected TopographicPlaceRepository topographicPlaceRepository;

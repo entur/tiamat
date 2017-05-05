@@ -204,7 +204,7 @@ StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(pathLinkUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(parkingObjectType))
-                        .name(MUTATE_PARKINGS)
+                        .name(MUTATE_PARKING)
                         .description("Create new or update existing Parking")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)

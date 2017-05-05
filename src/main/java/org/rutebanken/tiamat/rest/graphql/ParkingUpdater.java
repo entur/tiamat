@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
 
@@ -106,7 +105,7 @@ class ParkingUpdater implements DataFetcher {
         }
 
         if (isUpdated) {
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedParking);
+//            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedParking);
 
             updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
 
