@@ -1,15 +1,21 @@
 package org.rutebanken.tiamat.hazelcast;
 
+import com.hazelcast.config.Config;
 import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class ExtendedHazelcastService extends HazelCastService {
@@ -21,14 +27,16 @@ public class ExtendedHazelcastService extends HazelCastService {
     }
 
     @Override
-    public List<MapConfig> getAdditionalMapConfigurations() {
+    public void updateDefaultMapConfig(MapConfig mapConfig) {
 
-        MapConfig mapConfig = new MapConfig("tiamatEntityCacheRegion")
+        mapConfig
                 .setEvictionPolicy(EvictionPolicy.LRU)
                 .setTimeToLiveSeconds(604800)
-                .setMaxSizeConfig(new MaxSizeConfig(100000, MaxSizeConfig.MaxSizePolicy.PER_NODE));
+                .setMaxSizeConfig(
+                        new MaxSizeConfig(70, MaxSizeConfig.MaxSizePolicy.USED_HEAP_PERCENTAGE));
 
-        return Arrays.asList(mapConfig);
+        logger.info("Map config: {}", mapConfig);
+
     }
 
 
