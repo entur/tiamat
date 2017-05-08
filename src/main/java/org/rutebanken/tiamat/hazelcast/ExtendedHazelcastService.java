@@ -31,8 +31,7 @@ public class ExtendedHazelcastService extends HazelCastService {
 
     @Override
     public List<MapConfig> getAdditionalMapConfigurations() {
-
-        List<MapConfig> mapConfigs = new ArrayList<>();
+        List<MapConfig> mapConfigs = super.getAdditionalMapConfigurations();
 
         mapConfigs.add(
                 // Configure map for last entity identificators
