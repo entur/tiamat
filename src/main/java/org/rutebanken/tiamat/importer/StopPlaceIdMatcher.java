@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -107,6 +108,14 @@ public class StopPlaceIdMatcher {
             logger.info("Looking for stop by quay original ID");
             return incomingStopPlace.getQuays().stream()
                     .flatMap(quay -> quay.getOriginalIds().stream())
+                    .map(quayOriginalId -> {
+                        try {
+                            // Extract last part of ID. Remove zero padding. Fall back to string ID.
+                            return String.valueOf(NetexIdHelper.extractIdPostfix(quayOriginalId));
+                        } catch (NumberFormatException e) {
+                            return quayOriginalId;
+                        }
+                    })
                     .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
                     .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
                     .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())

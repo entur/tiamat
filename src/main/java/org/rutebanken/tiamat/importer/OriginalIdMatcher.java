@@ -55,7 +55,7 @@ public class OriginalIdMatcher {
         return !Collections.disjoint(originalIds, otherOriginalIds);
     }
 
-    private Set<Integer> convertPostfixToNumber(Set<String> stringOriginalIds) {
+    public Set<Integer> convertPostfixToNumber(Set<String> stringOriginalIds) {
         return stringOriginalIds
                 .stream()
                 .filter(originalId -> originalId.contains(":"))
