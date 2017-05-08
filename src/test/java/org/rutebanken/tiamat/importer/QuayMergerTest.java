@@ -22,7 +22,7 @@ public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private QuayMerger quayMerger = new QuayMerger();
+    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher());
 
 
     @Test

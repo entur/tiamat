@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,13 @@ public class QuayMerger {
 
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
+
+    private final OriginalIdMatcher originalIdMatcher;
+
+    @Autowired
+    public QuayMerger(OriginalIdMatcher originalIdMatcher) {
+        this.originalIdMatcher = originalIdMatcher;
+    }
 
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
@@ -93,7 +101,7 @@ public class QuayMerger {
 
     private Optional<Quay> findMatchOnOriginalId(Quay incomingQuay, Set<Quay> result) {
         for(Quay alreadyAdded : result) {
-            if(matchesOnOriginalId(incomingQuay, alreadyAdded)) {
+            if(originalIdMatcher.matchesOnOriginalId(incomingQuay, alreadyAdded)) {
                 return Optional.of(alreadyAdded);
             }
         }
@@ -144,35 +152,6 @@ public class QuayMerger {
         return false;
     }
 
-    /**
-     * If the incoming Quay has an original ID that matches on any original ID on an existing Quay.
-     * @param incomingQuay incoming Quay
-     * @param alreadyAdded the quay that is already added to the stop place's list of quays
-     * @return true if found match
-     */
-    private boolean matchesOnOriginalId(Quay incomingQuay, Quay alreadyAdded) {
-        Set<String> strippedAlreadyAddedIds = removePrefixesFromIds(alreadyAdded.getOriginalIds());
-        Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
-
-        if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
-            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getNetexId());
-            return true;
-        }
-        return false;
-    }
-
-    private Set<String> removePrefixesFromIds(Set<String> originalIds) {
-        Set<String> strippedIds = new HashSet<>(originalIds.size());
-        originalIds.forEach(completeId -> {
-            if(completeId.contains(":")) {
-                strippedIds.add(completeId.substring(completeId.indexOf(':')));
-            } else {
-                logger.info("Cannot strip prefix from ID {} as it does not contain colon", completeId);
-                strippedIds.add(completeId);
-            }
-        });
-        return strippedIds;
-    }
 
     public boolean haveMatchingNameOrOneIsMissing(Quay quay1, Quay quay2) {
         boolean quay1HasName = hasNameValue(quay1.getName());
