@@ -142,7 +142,11 @@ public class PublicationDeliveryImporter {
             if(hasTariffZones(netexSiteFrame)) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
-                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneImporter.importTariffZones(tiamatTariffZones)));
+                List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
+                logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
+                if(!importedTariffZones.isEmpty()) {
+                    responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
+                }
             }
 
             handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
