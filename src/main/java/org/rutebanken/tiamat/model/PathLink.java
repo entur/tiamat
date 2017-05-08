@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLink extends Link {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

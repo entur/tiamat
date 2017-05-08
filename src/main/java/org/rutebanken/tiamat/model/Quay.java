@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(
         uniqueConstraints = {

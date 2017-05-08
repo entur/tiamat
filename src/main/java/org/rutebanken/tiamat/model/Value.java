@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class Value implements Serializable {
 

@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(
         indexes = {

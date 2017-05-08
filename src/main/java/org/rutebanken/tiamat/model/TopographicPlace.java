@@ -6,7 +6,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "tiamatEntityCacheRegion")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(
         indexes = {
