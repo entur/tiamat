@@ -10,34 +10,11 @@ public class Parking
         extends Site_VersionStructure {
 
     @Transient
-    protected SitePathLinks_RelStructure pathLinks;
-    @Transient
-    protected PathJunctions_RelStructure pathJunctions;
-    @Transient
     protected Accesses_RelStructure accesses;
-    @Transient
-    protected NavigationPaths_RelStructure navigationPaths;
     @Transient
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
-
-    @Enumerated(EnumType.STRING)
-    protected ParkingTypeEnumeration parkingType;
-
-    @ElementCollection(targetClass = ParkingVehicleEnumeration.class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
-
-    protected ParkingLayoutEnumeration parkingLayout;
-    protected BigInteger numberOfParkingLevels;
-    protected BigInteger principalCapacity;
-    protected BigInteger totalCapacity;
-    protected Boolean overnightParkingPermitted;
-    protected Boolean prohibitedForHazardousMaterials;
-    protected Boolean rechargingAvailable;
-    protected Boolean secure;
-    protected Boolean realTimeOccupancyAvailable;
     @Transient
     protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
     @Transient
@@ -49,19 +26,41 @@ public class Parking
     @Transient
     protected List<String> cardsAccepted;
     @Transient
-    protected ParkingReservationEnumeration parkingReservation;
-    @Transient
-    protected String bookingUrl;
-    @Transient
     protected PaymentByMobileStructure paymentByMobile;
     @Transient
-    protected Boolean freeParkingOutOfHours;
-    @Transient
-    protected ParkingProperties_RelStructure parkingProperties;
-    @Transient
-    protected ParkingAreas_RelStructure parkingAreas;
-    @Transient
     protected ParkingEntrancesForVehicles_RelStructure vehicleEntrances;
+
+    @Transient
+    protected SitePathLinks_RelStructure pathLinks;
+    @Transient
+    protected PathJunctions_RelStructure pathJunctions;
+    @Transient
+    protected NavigationPaths_RelStructure navigationPaths;
+
+    @Enumerated(EnumType.STRING)
+    protected ParkingTypeEnumeration parkingType;
+
+    @ElementCollection(targetClass = ParkingVehicleEnumeration.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
+    protected ParkingLayoutEnumeration parkingLayout;
+    protected BigInteger numberOfParkingLevels;
+    protected BigInteger principalCapacity;
+    protected BigInteger totalCapacity;
+    protected Boolean overnightParkingPermitted;
+    protected Boolean prohibitedForHazardousMaterials;
+    protected Boolean rechargingAvailable;
+    protected Boolean secure;
+    protected Boolean realTimeOccupancyAvailable;
+    protected ParkingReservationEnumeration parkingReservation;
+    protected String bookingUrl;
+    protected Boolean freeParkingOutOfHours;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<ParkingProperties> parkingProperties;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<ParkingArea> parkingAreas;
 
     public SitePathLinks_RelStructure getPathLinks() {
         return pathLinks;
@@ -266,19 +265,19 @@ public class Parking
         this.freeParkingOutOfHours = value;
     }
 
-    public ParkingProperties_RelStructure getParkingProperties() {
+    public List<ParkingProperties> getParkingProperties() {
         return parkingProperties;
     }
 
-    public void setParkingProperties(ParkingProperties_RelStructure value) {
+    public void setParkingProperties(List<ParkingProperties> value) {
         this.parkingProperties = value;
     }
 
-    public ParkingAreas_RelStructure getParkingAreas() {
+    public List<ParkingArea> getParkingAreas() {
         return parkingAreas;
     }
 
-    public void setParkingAreas(ParkingAreas_RelStructure value) {
+    public void setParkingAreas(List<ParkingArea> value) {
         this.parkingAreas = value;
     }
 

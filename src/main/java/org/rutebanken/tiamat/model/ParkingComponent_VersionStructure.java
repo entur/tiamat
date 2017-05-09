@@ -7,7 +7,7 @@ public class ParkingComponent_VersionStructure
         extends SiteComponent_VersionStructure {
 
     protected String parkingPaymentCode;
-    protected MultilingualStringEntity label;
+    protected EmbeddableMultilingualString label;
     protected BigDecimal maximumLength;
     protected BigDecimal maximumWidth;
     protected BigDecimal maximumHeight;
@@ -21,11 +21,11 @@ public class ParkingComponent_VersionStructure
         this.parkingPaymentCode = value;
     }
 
-    public MultilingualStringEntity getLabel() {
+    public EmbeddableMultilingualString getLabel() {
         return label;
     }
 
-    public void setLabel(MultilingualStringEntity value) {
+    public void setLabel(EmbeddableMultilingualString value) {
         this.label = value;
     }
 
