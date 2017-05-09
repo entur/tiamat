@@ -371,6 +371,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         stopPlace.setAllAreasWheelchairAccessible(false);
         stopPlace.setTopographicPlace(topographicPlace);
+        stopPlace.setWeighting(InterchangeWeightingEnumeration.NO_INTERCHANGE);
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
@@ -385,6 +386,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String versionComment = "Stop place moved 100 meters";
 
+        InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
+
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
@@ -398,6 +401,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            type: Point" +
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
+                "          weighting:" + weighting.value() +
 //                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
@@ -407,6 +411,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  stopPlaceType " +
                 "  versionComment " +
                 "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
+                "  weighting " +
                 "  geometry { type coordinates } " +
                 "  validBetweens { fromDate toDate } " +
                 "  } " +
@@ -422,6 +427,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
+                    .body("weighting", equalTo(weighting.value()))
                     .body("topographicPlace.id", notNullValue())
                     .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("topographicPlace.parentTopographicPlace", notNullValue())

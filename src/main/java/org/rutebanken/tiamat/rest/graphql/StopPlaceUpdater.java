@@ -124,6 +124,10 @@ class StopPlaceUpdater implements DataFetcher {
             }
             isUpdated = true;
         }
+        if (input.get(WEIGHTING) != null) {
+            stopPlace.setWeighting((InterchangeWeightingEnumeration) input.get(WEIGHTING));
+            isUpdated = true;
+        }
 
         if (input.get(QUAYS) != null) {
             List quays = (List) input.get(QUAYS);

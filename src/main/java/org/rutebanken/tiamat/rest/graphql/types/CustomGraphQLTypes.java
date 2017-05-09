@@ -42,7 +42,15 @@ public class CustomGraphQLTypes {
             .value("other", StopTypeEnumeration.OTHER)
             .build();
 
-    public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
+     public static GraphQLEnumType interchangeWeightingEnum = GraphQLEnumType.newEnum()
+             .name(INTERCHANGE_WEIGHTING_TYPE_ENUM)
+             .value("noInterchange", InterchangeWeightingEnumeration.NO_INTERCHANGE)
+             .value("interchangeAllowed", InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED)
+             .value("preferredInterchange", InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE)
+             .value("recommendedInterchange", InterchangeWeightingEnumeration.RECOMMENDED_INTERCHANGE)
+             .build();
+
+        public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
             .name(GEOMETRY_TYPE_ENUM)
             .value("Point")
             .value("LineString")
