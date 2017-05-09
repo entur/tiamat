@@ -20,7 +20,7 @@ public class Zone_VersionStructure
      * Because we want to fetch polygons lazily and using lazy property fetching with byte code enhancement breaks tests.
      */
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    protected PersistablePolygon polygon = new PersistablePolygon();
+    protected PersistablePolygon polygon;
 
     @Transient
     protected Projections_RelStructure projections;
@@ -32,11 +32,19 @@ public class Zone_VersionStructure
     }
 
     public Polygon getPolygon() {
-        return polygon.getPolygon();
+        if (polygon != null) {
+            return polygon.getPolygon();
+        }
+        return null;
     }
 
     public void setPolygon(Polygon polygon) {
-        this.polygon.setPolygon(polygon);
+        if (polygon != null) {
+            if (this.polygon == null) {
+                this.polygon = new PersistablePolygon();
+            }
+            this.polygon.setPolygon(polygon);
+        }
     }
 
     public Zone_VersionStructure(EmbeddableMultilingualString name) {
