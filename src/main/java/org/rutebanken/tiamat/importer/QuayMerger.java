@@ -7,7 +7,6 @@ import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,17 @@ public class QuayMerger {
     @Value("${quayMerger.maxCompassBearingDifference:60}")
     private final int maxCompassBearingDifference = 60;
 
+    private final OriginalIdMatcher originalIdMatcher;
+
+    @Autowired
+    public QuayMerger(OriginalIdMatcher originalIdMatcher) {
+        this.originalIdMatcher = originalIdMatcher;
+    }
+
     /**
      * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
      */
-    public boolean addNewQuaysOrAppendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace) {
+    public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
         AtomicInteger addedQuays = new AtomicInteger();
@@ -46,7 +52,7 @@ public class QuayMerger {
             newStopPlace.setQuays(new HashSet<>());
         }
 
-        Set<Quay> result = addNewQuaysOrAppendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays);
+        Set<Quay> result = appendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays);
 
         existingStopPlace.setQuays(result);
 
@@ -54,7 +60,7 @@ public class QuayMerger {
         return addedQuays.get() > 0 || updatedQuays.get() > 0;
     }
 
-    public Set<Quay> addNewQuaysOrAppendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter) {
+    public Set<Quay> appendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
 
         Set<Quay> result = new HashSet<>();
         if(existingQuays != null) {
@@ -70,12 +76,14 @@ public class QuayMerger {
 
             if(matchingQuay.isPresent()) {
                 updateIfChanged(matchingQuay.get(), incomingQuay, updatedQuaysCounter);
-            } else {
+            } else if(addNewQuays) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
                 incomingQuay.setCreated(ZonedDateTime.now());
                 incomingQuay.setChanged(ZonedDateTime.now());
                 addedQuaysCounter.incrementAndGet();
+            } else {
+                logger.warn("Found no match for incoming quay {}. Looking in list of quays: {}", incomingQuay, result);
             }
         }
 
@@ -93,7 +101,7 @@ public class QuayMerger {
 
     private Optional<Quay> findMatchOnOriginalId(Quay incomingQuay, Set<Quay> result) {
         for(Quay alreadyAdded : result) {
-            if(matchesOnOriginalId(incomingQuay, alreadyAdded)) {
+            if(originalIdMatcher.matchesOnOriginalId(incomingQuay, alreadyAdded)) {
                 return Optional.of(alreadyAdded);
             }
         }
@@ -135,7 +143,7 @@ public class QuayMerger {
                 && publicCodeMatch) {
             return true;
         } else if(nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
-            logger.debug("Name and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
+            logger.debug("Name, public code and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
             if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
                 return true;
@@ -144,35 +152,6 @@ public class QuayMerger {
         return false;
     }
 
-    /**
-     * If the incoming Quay has an original ID that matches on any original ID on an existing Quay.
-     * @param incomingQuay incoming Quay
-     * @param alreadyAdded the quay that is already added to the stop place's list of quays
-     * @return true if found match
-     */
-    private boolean matchesOnOriginalId(Quay incomingQuay, Quay alreadyAdded) {
-        Set<String> strippedAlreadyAddedIds = removePrefixesFromIds(alreadyAdded.getOriginalIds());
-        Set<String> strippedIncomingIds = removePrefixesFromIds(incomingQuay.getOriginalIds());
-
-        if(!Collections.disjoint(strippedAlreadyAddedIds, strippedIncomingIds)) {
-            logger.info("New quay matches on original ID: {}. Adding all new IDs if any. Existing quay ID: {}", incomingQuay, alreadyAdded.getNetexId());
-            return true;
-        }
-        return false;
-    }
-
-    private Set<String> removePrefixesFromIds(Set<String> originalIds) {
-        Set<String> strippedIds = new HashSet<>(originalIds.size());
-        originalIds.forEach(completeId -> {
-            if(completeId.contains(":")) {
-                strippedIds.add(completeId.substring(completeId.indexOf(':')));
-            } else {
-                logger.info("Cannot strip prefix from ID {} as it does not contain colon", completeId);
-                strippedIds.add(completeId);
-            }
-        });
-        return strippedIds;
-    }
 
     public boolean haveMatchingNameOrOneIsMissing(Quay quay1, Quay quay2) {
         boolean quay1HasName = hasNameValue(quay1.getName());
@@ -216,7 +195,7 @@ public class QuayMerger {
                     quay2.getCentroid().getCoordinate(),
                     DefaultGeographicCRS.WGS84);
 
-            logger.info("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
+            logger.debug("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
 
             return distanceInMeters < mergeDistanceInMeters;
         } catch (TransformException e) {

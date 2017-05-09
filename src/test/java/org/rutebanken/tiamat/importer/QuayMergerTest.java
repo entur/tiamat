@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -11,10 +12,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
@@ -24,7 +22,7 @@ public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private QuayMerger quayMerger = new QuayMerger();
+    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher());
 
 
     @Test
@@ -48,7 +46,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(quay2);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter, true);
         assertThat(result).hasSize(1);
     }
 
@@ -74,7 +72,7 @@ public class QuayMergerTest {
         incomingQuays.add(quay2);
 
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter);
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, updatedQuaysCounter, createQuaysCounter, true);
         assertThat(result).hasSize(1);
     }
 
@@ -100,7 +98,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(east);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Number of quays in response").hasSize(2);
     }
 
@@ -169,7 +167,7 @@ public class QuayMergerTest {
         incomingQuays.add(quay2);
         incomingQuays.add(quay1);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter);
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter, true);
         assertThat(result).hasSize(1);
     }
 
@@ -190,7 +188,7 @@ public class QuayMergerTest {
         incomingQuays.add(quay2);
         incomingQuays.add(quay1);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter);
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, new HashSet<>(), updatedQuaysCounter, createQuaysCounter, true);
 
         assertThat(result).hasSize(1);
 
@@ -231,7 +229,7 @@ public class QuayMergerTest {
         incomingQuays.add(incomingQuay2);
         incomingQuays.add(incomingQuay1);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).hasSize(2);
 
         List<String> actualOriginalIds = result.stream()
@@ -317,7 +315,7 @@ public class QuayMergerTest {
         Set<Quay> existingQuays = new HashSet<>(Arrays.asList(existingQuay, unrelatedExistingQuay));
         Set<Quay> newQuays = new HashSet<>(Arrays.asList(unrelatedExistingQuay));
 
-        Set<Quay> actual = quayMerger.addNewQuaysOrAppendImportIds(newQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> actual = quayMerger.appendImportIds(newQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(actual).as("The same quay object as existingQuay should be returned").contains(existingQuay);
     }
 
@@ -345,7 +343,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Number of quays in response should be one. Because one quay lacks compass bearing").hasSize(1);
     }
 
@@ -370,7 +368,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Number of quays in response should be two. Because name differs.").hasSize(2);
     }
 
@@ -394,7 +392,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Quays should have been merged.").hasSize(1);
         Quay actual = result.iterator().next();
         assertThat(actual.getName()).describedAs("name should not be null").isNotNull();
@@ -420,7 +418,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Quays should have been merged.").hasSize(1);
         Quay actual = result.iterator().next();
         assertThat(actual.getCompassBearing()).describedAs("compass bearing should not be null").isNotNull();
@@ -448,7 +446,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Quays should have been merged.").hasSize(1);
         Quay actual = result.iterator().next();
 
@@ -474,7 +472,7 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Quays should NOT have been merged, because the distance between them exceeds extended merge distance.").hasSize(2);
         Quay actual = result.iterator().next();
 
@@ -499,8 +497,53 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.addNewQuaysOrAppendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger());
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
         assertThat(result).as("Quays should NOT have been merged. Public Code is different").hasSize(2);
+    }
+
+    /**
+     * Found no match for incoming quay Quay{version=1, centroid=POINT (11.576607 60.19752), publicCode=1, keyValues={
+     * imported-id=Value{id=0, items=[RUT:Quay:236040101, NRI:Quay:762010606, RUT:Quay:0236040101]}}}. Looking in list of quays: [Quay{id=18775, netexId=NSR:Quay:21454, version=1, centroid=POINT (11.577104 60.197563), b
+     * earing=1.0, publicCode=2, keyValues={imported-id=Value{id=32160, items=[RUT:Quay:236040102, NRI:Quay:762010607, HED:Quay:0419020102, RUT:Quay:0236040102]}}}, Quay{id=18776, netexId=NSR:Quay:21455, version=1, cent
+     * roid=POINT (11.57647 60.197437), publicCode=1, keyValues={imported-id=Value{id=32161, items=[HED:Quay:0419020101]}}}]
+     */
+    @Test
+    public void dysterudBru() {
+        Quay incomingQuay = new Quay();
+        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.576007, 60.19752)));
+        incomingQuay.setPublicCode("1");
+        incomingQuay.getOriginalIds().addAll(Arrays.asList("RUT:Quay:236040101", "NRI:Quay:762010606", "RUT:Quay:0236040101"));
+
+        // Adding compass bearing, because the extended matching limit must be used to match incoming quay and existingQuay2 (~27 meters from each other)
+        incomingQuay.setCompassBearing(4.0f);
+
+        Set<Quay> incomingQuays = new HashSet<>(Sets.newHashSet(incomingQuay));
+
+        Quay existingQuay1 = new Quay();
+        existingQuay1.setNetexId("NSR:Quay:21454");
+        existingQuay1.setCentroid(geometryFactory.createPoint(new Coordinate(11.577104, 60.197563)));
+        existingQuay1.setCompassBearing(1.0f);
+        existingQuay1.setPublicCode("2");
+        existingQuay1.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("RUT:Quay:236040102", "NRI:Quay:762010607", "HED:Quay:0419020102", "RUT:Quay:0236040102")));
+
+        Quay existingQuay2 = new Quay();
+        existingQuay2.setNetexId("NSR:Quay:21455");
+        existingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(11.57647, 60.197437)));
+        existingQuay2.setPublicCode("1");
+        existingQuay2.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("HED:Quay:0419020101")));
+        existingQuay2.setCompassBearing(14.0f);
+
+        Set<Quay> existingQuays = new HashSet<>(Sets.newHashSet(existingQuay1, existingQuay2));
+
+        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), false);
+        assertThat(result).hasSize(2);
+        assertThat(result
+                .stream()
+                .filter(quay -> quay.getNetexId().equals(existingQuay2.getNetexId()))
+                .anyMatch(quay -> quay.getOriginalIds().containsAll(incomingQuay.getOriginalIds())))
+                .as("new quay original IDs should have been appended " + incomingQuay.getOriginalIds())
+                .isTrue();
+
     }
 
 

@@ -142,6 +142,40 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void matchStopsWithZeroPaddedQuayOriginalId() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace()
+                .withId("RUT:StopPlace:987999")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("BRA:Quay:8888888")
+                                .withVersion("1")));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("BRA:StopPlace:99999")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("RUT:Quay:08888888")
+                                .withVersion("1")));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlace1.getId(), result.get(0));
+    }
+
+    @Test
     public void matchStopsOnQuayNetexId() throws Exception {
 
         StopPlace stopPlace1 = new StopPlace()

@@ -144,7 +144,11 @@ public class PublicationDeliveryImporter {
             if(hasTariffZones(netexSiteFrame)) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
-                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneImporter.importTariffZones(tiamatTariffZones)));
+                List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
+                logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
+                if(!importedTariffZones.isEmpty()) {
+                    responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
+                }
             }
 
             handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
@@ -233,6 +237,12 @@ public class PublicationDeliveryImporter {
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedMatchedOrUpdated);
 
             tariffZonesFromStopsExporter.resolveTariffZones(importedOrMatchedNetexStopPlaces, responseSiteframe);
+
+            if(responseSiteframe.getTariffZones() != null
+                    && responseSiteframe.getTariffZones().getTariffZone() != null
+                    && responseSiteframe.getTariffZones().getTariffZone().isEmpty()) {
+                responseSiteframe.setTariffZones(null);
+            }
 
             if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
                 List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));

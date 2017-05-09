@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,6 +30,8 @@ public class MatchingAppendingIdStopPlacesImporter {
 
     private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
 
+    private static final boolean CREATE_NEW_QUAYS = false;
+
     @Autowired
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
@@ -36,6 +40,9 @@ public class MatchingAppendingIdStopPlacesImporter {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private QuayMerger quayMerger;
 
     @Autowired
     private NetexMapper netexMapper;
@@ -59,6 +66,9 @@ public class MatchingAppendingIdStopPlacesImporter {
                     }
                     existingstopPlace.getTariffZones().addAll(stopPlace.getTariffZones());
                 }
+
+                quayMerger.appendImportIds(stopPlace, existingstopPlace, CREATE_NEW_QUAYS);
+
                 stopPlace = stopPlaceRepository.save(existingstopPlace);
                 String netexId = stopPlace.getNetexId();
 
@@ -68,7 +78,7 @@ public class MatchingAppendingIdStopPlacesImporter {
                         .findAny().isPresent();
 
                 if(!alreadyAdded) {
-                    matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlace));
+                    matchedStopPlaces.add(netexMapper.mapToNetexModel(existingstopPlace));
                 }
                 stopPlacesCreatedOrUpdated.incrementAndGet();
             }

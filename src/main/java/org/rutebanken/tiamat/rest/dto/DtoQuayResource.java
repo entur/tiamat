@@ -34,6 +34,8 @@ public class DtoQuayResource {
     @Path("/id_mapping")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip) {
 
+        logger.info("Fetching Quay mapping table...");
+
         return Response.ok().entity((StreamingOutput) output -> {
 
             int recordPosition = 0;
