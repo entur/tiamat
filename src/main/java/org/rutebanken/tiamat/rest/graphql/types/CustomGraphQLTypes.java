@@ -42,6 +42,13 @@ public class CustomGraphQLTypes {
             .value("other", StopTypeEnumeration.OTHER)
             .build();
 
+     public static GraphQLEnumType interchangeWeightingEnum = GraphQLEnumType.newEnum()
+             .name(INTERCHANGE_WEIGHTING_TYPE_ENUM)
+             .value("noInterchange", InterchangeWeightingEnumeration.NO_INTERCHANGE)
+             .value("interchangeAllowed", InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED)
+             .value("preferredInterchange", InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE)
+             .value("recommendedInterchange", InterchangeWeightingEnumeration.RECOMMENDED_INTERCHANGE)
+             .build();
         public static GraphQLEnumType parkingVehicleEnum = GraphQLEnumType.newEnum()
                 .name(PARKING_VEHICLE_ENUM)
                 .value("car", ParkingVehicleEnumeration.CAR)
@@ -102,7 +109,7 @@ public class CustomGraphQLTypes {
                 .value("cycleRental", ParkingTypeEnumeration.CYCLE_RENTAL)
                 .value("other", ParkingTypeEnumeration.OTHER)
                 .build();
-
+        
         public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
             .name(GEOMETRY_TYPE_ENUM)
             .value("Point")

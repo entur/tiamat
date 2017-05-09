@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
-import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.importer.finder.StopPlaceByIdFinder;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -47,30 +47,42 @@ public class MatchingAppendingIdStopPlacesImporter {
     @Autowired
     private NetexMapper netexMapper;
 
+    @Autowired
+    private StopPlaceByIdFinder stopPlaceByIdFinder;
+
     public List<StopPlace> importStopPlaces(List<org.rutebanken.tiamat.model.StopPlace> tiamatStops, AtomicInteger stopPlacesCreatedOrUpdated) {
 
         List<StopPlace> matchedStopPlaces = new ArrayList<>();
 
-        tiamatStops.forEach(stopPlace -> {
+        tiamatStops.forEach(incomingStopPlace -> {
 
-            org.rutebanken.tiamat.model.StopPlace existingstopPlace = nearbyStopPlaceFinder.find(stopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH);
-            if(existingstopPlace == null) {
-                logger.warn("Cannot find nearby stop place: {}", stopPlace);
+
+            Optional<org.rutebanken.tiamat.model.StopPlace> foundStopPlace = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
+
+            if(!foundStopPlace.isPresent()) {
+                foundStopPlace = Optional.ofNullable(nearbyStopPlaceFinder.find(incomingStopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH));
+            }
+
+            if(!foundStopPlace.isPresent()) {
+                logger.warn("Cannot find stop place: {}", incomingStopPlace);
             } else {
-                logger.debug("Found matching stop place {}", existingstopPlace);
-                keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, stopPlace, existingstopPlace);
 
-                if(stopPlace.getTariffZones() != null) {
+                org.rutebanken.tiamat.model.StopPlace existingstopPlace = foundStopPlace.get();
+
+                logger.debug("Found matching stop place {}", existingstopPlace);
+                keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, existingstopPlace);
+
+                if(incomingStopPlace.getTariffZones() != null) {
                     if (existingstopPlace.getTariffZones() == null) {
                         existingstopPlace.setTariffZones(new HashSet<>());
                     }
-                    existingstopPlace.getTariffZones().addAll(stopPlace.getTariffZones());
+                    existingstopPlace.getTariffZones().addAll(incomingStopPlace.getTariffZones());
                 }
 
-                quayMerger.appendImportIds(stopPlace, existingstopPlace, CREATE_NEW_QUAYS);
+                quayMerger.appendImportIds(incomingStopPlace, existingstopPlace, CREATE_NEW_QUAYS);
 
-                stopPlace = stopPlaceRepository.save(existingstopPlace);
-                String netexId = stopPlace.getNetexId();
+                incomingStopPlace = stopPlaceRepository.save(existingstopPlace);
+                String netexId = incomingStopPlace.getNetexId();
 
                 boolean alreadyAdded = matchedStopPlaces
                         .stream()

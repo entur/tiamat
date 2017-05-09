@@ -125,6 +125,10 @@ class StopPlaceUpdater implements DataFetcher {
             }
             isUpdated = true;
         }
+        if (input.get(WEIGHTING) != null) {
+            stopPlace.setWeighting((InterchangeWeightingEnumeration) input.get(WEIGHTING));
+            isUpdated = true;
+        }
 
         if (input.get(QUAYS) != null) {
             List quays = (List) input.get(QUAYS);
@@ -197,10 +201,6 @@ class StopPlaceUpdater implements DataFetcher {
         }
         if (input.get(DESCRIPTION) != null) {
             entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
-            isUpdated = true;
-        }
-        if (input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE) != null) {
-            entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
             isUpdated = true;
         }
 

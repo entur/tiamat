@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
+import com.google.common.base.Strings;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
@@ -63,22 +64,51 @@ public class NetexIdMapper {
     public void copyKeyValuesToTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
         if(netexEntity.getKeyList() != null) {
             if(netexEntity.getKeyList().getKeyValue() != null) {
+
                 for(KeyValueStructure keyValueStructure : netexEntity.getKeyList().getKeyValue()) {
                     if(keyValueStructure.getKey().equals(ORIGINAL_ID_KEY)) {
+
                         if(keyValueStructure.getValue().contains(",")) {
                             String[] originalIds = keyValueStructure.getValue().split(",");
                             for(String originalId : originalIds) {
-                                tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(originalId.trim());
+                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, stripLeadinZeros(originalId));
                             }
                         } else {
-                            tiamatEntity.getOrCreateValues(ORIGINAL_ID_KEY).add(keyValueStructure.getValue().trim());
+                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, stripLeadinZeros(keyValueStructure.getValue()));
                         }
 
                     } else {
-                        tiamatEntity.getOrCreateValues(keyValueStructure.getKey()).add(keyValueStructure.getValue().trim());
+                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue());
                     }
                 }
             }
+        }
+    }
+
+    private String stripLeadinZeros(String originalIdValue) {
+        try {
+            long numeric = NetexIdHelper.extractIdPostfix(originalIdValue);
+            String type = NetexIdHelper.extractIdType(originalIdValue);
+            String prefix = NetexIdHelper.extractIdPrefix(originalIdValue);
+            if(numeric == 0L || Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(prefix)) {
+                logger.warn("Cannot parse original ID '{}' into preifx:type:number. Keeping value as is", originalIdValue);
+            }
+
+            logger.debug("Extracted prefix: {}, type: {} and numeric value: {}", prefix, type, numeric);
+            return prefix +":"+type+":"+String.valueOf(numeric);
+
+        } catch (NumberFormatException nfe) {
+            return originalIdValue;
+        }
+    }
+
+    private void addKeyValueAvoidEmpty(DataManagedObjectStructure tiamatEntity, final String key, final String value) {
+
+        String keytoAdd = key.trim();
+        String valueToAdd = value.trim();
+
+        if(!Strings.isNullOrEmpty(keytoAdd) && !Strings.isNullOrEmpty(valueToAdd)) {
+            tiamatEntity.getOrCreateValues(keytoAdd).add(valueToAdd);
         }
     }
 

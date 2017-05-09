@@ -115,6 +115,7 @@ public class GraphQLNames {
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
+    public static final String INTERCHANGE_WEIGHTING_TYPE_ENUM = "InterchangeWeightingType";
 
     public static final String PARKING_TYPE_ENUM = "ParkingType";
 
@@ -171,7 +172,7 @@ public class GraphQLNames {
     public static final String VERSION = "version";
     public static final String VERSION_COMMENT = "versionComment";
     public static final String PUBLIC_CODE = "publicCode";
-    public static final String ALL_AREAS_WHEELCHAIR_ACCESSIBLE = "allAreasWheelchairAccessible";
+    public static final String WEIGHTING = "weighting";
 
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String COUNTY_REF = "countyReference";
