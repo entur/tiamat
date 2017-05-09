@@ -77,6 +77,7 @@ public class StopPlaceByIdFinder {
                             return quayOriginalId;
                         }
                     })
+                    .peek(quayOriginalId -> logger.trace("looking for stop place by quay original id: {}", quayOriginalId))
                     .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
                     .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
                     .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())
