@@ -1,20 +1,25 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.junit.Test;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.SiteFrame;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.model.StopPlace;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexIdMapperTest {
+    private NetexIdMapper netexIdMapper = new NetexIdMapper();
+
     @Test
     public void mapSiteFrameIdToNetex() throws Exception {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setNetexId("NSR:SiteFrame:123123");
 
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
-        new NetexIdMapper().toNetexModel(siteFrame, netexSiteFrame);
+        netexIdMapper.toNetexModel(siteFrame, netexSiteFrame);
 
         assertThat(netexSiteFrame.getId()).isNotEmpty();
         assertThat(netexSiteFrame.getId()).isEqualToIgnoringCase("NSR:SiteFrame:123123");
@@ -26,11 +31,45 @@ public class NetexIdMapperTest {
         accessibilityAssessment.setNetexId("NSR:AccessibilityAssesment:123124");
 
         org.rutebanken.netex.model.AccessibilityAssessment netexAccessibilityAssesment = new org.rutebanken.netex.model.AccessibilityAssessment();
-        new NetexIdMapper().toNetexModel(accessibilityAssessment, netexAccessibilityAssesment);
+        netexIdMapper.toNetexModel(accessibilityAssessment, netexAccessibilityAssesment);
 
         assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
         assertThat(netexAccessibilityAssesment.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssesment:123124");
     }
 
+    @Test
+    public void copyKeyValuesStripZeroPaddedNumericOriginalId() throws Exception {
 
+        String originalId = "RUT:StopPlace:012345670";
+
+        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.StopPlace()
+                .withKeyList(new KeyListStructure()
+                        .withKeyValue(new KeyValueStructure()
+                                .withKey(ORIGINAL_ID_KEY)
+                                .withValue(originalId)));
+
+        StopPlace stopPlace = new StopPlace();
+
+        netexIdMapper.copyKeyValuesToTiamatModel(netexEntity, stopPlace);
+
+        assertThat(stopPlace.getOriginalIds().iterator().next()).isEqualTo("RUT:StopPlace:12345670");
+    }
+
+    @Test
+    public void copyKeyValuesAvoidEmptyOriginalId() throws Exception {
+
+        String originalId = "RUT:StopPlace:1,,RUT:StopPlace:2";
+
+        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.StopPlace()
+                .withKeyList(new KeyListStructure()
+                        .withKeyValue(new KeyValueStructure()
+                                .withKey(ORIGINAL_ID_KEY)
+                                .withValue(originalId)));
+
+        StopPlace stopPlace = new StopPlace();
+
+        netexIdMapper.copyKeyValuesToTiamatModel(netexEntity, stopPlace);
+
+        assertThat(stopPlace.getOriginalIds()).hasSize(2);
+    }
 }
