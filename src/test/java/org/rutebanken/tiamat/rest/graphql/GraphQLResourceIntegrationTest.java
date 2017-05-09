@@ -323,8 +323,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
 
-        Boolean allAreasWheelchairAccessible = Boolean.TRUE;
-
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
@@ -336,14 +334,12 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            type: Point" +
                 "            coordinates: [[" + lon + "," + lat + "]] " +
                 "          }" +
-                "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
                 "  shortName { value } " +
                 "  description { value } " +
                 "  stopPlaceType " +
-                "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
@@ -357,10 +353,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
-                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible));
-
-
+                    .body("geometry.coordinates[0][1]", comparesEqualTo(lat));
     }
 
     @Test
@@ -392,8 +385,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
 
         String versionComment = "Stop place moved 100 meters";
 
-        Boolean allAreasWheelchairAccessible = Boolean.TRUE;
-
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
@@ -407,7 +398,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "            type: Point" +
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
-                "          allAreasWheelchairAccessible:" + allAreasWheelchairAccessible +
 //                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
@@ -417,7 +407,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "  stopPlaceType " +
                 "  versionComment " +
                 "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
-                "  allAreasWheelchairAccessible " +
                 "  geometry { type coordinates } " +
                 "  validBetweens { fromDate toDate } " +
                 "  } " +
@@ -433,7 +422,6 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(updatedLon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
-                    .body("allAreasWheelchairAccessible", equalTo(allAreasWheelchairAccessible))
                     .body("topographicPlace.id", notNullValue())
                     .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
                     .body("topographicPlace.parentTopographicPlace", notNullValue())

@@ -151,7 +151,6 @@ public class GraphQLNames {
     public static final String VERSION = "version";
     public static final String VERSION_COMMENT = "versionComment";
     public static final String PUBLIC_CODE = "publicCode";
-    public static final String ALL_AREAS_WHEELCHAIR_ACCESSIBLE = "allAreasWheelchairAccessible";
 
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String COUNTY_REF = "countyReference";

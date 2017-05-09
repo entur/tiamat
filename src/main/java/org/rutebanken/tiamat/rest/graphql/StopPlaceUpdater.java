@@ -198,10 +198,6 @@ class StopPlaceUpdater implements DataFetcher {
             entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
             isUpdated = true;
         }
-        if (input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE) != null) {
-            entity.setAllAreasWheelchairAccessible((Boolean) input.get(ALL_AREAS_WHEELCHAIR_ACCESSIBLE));
-            isUpdated = true;
-        }
 
         if (input.get(ALTERNATIVE_NAMES) != null) {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
