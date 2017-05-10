@@ -16,7 +16,7 @@ import static junit.framework.TestCase.assertTrue;
 public class CustomGraphQLTypesTest {
 
     @Test
-    public void testCustomEnums() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public void testAllCustomGraphQLEnumTypes() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Field[] declaredFields = new CustomGraphQLTypes().getClass().getFields();
         final AtomicInteger counter = new AtomicInteger(0);
         for (Field enumField : declaredFields) {
@@ -27,8 +27,11 @@ public class CustomGraphQLTypesTest {
                 for (GraphQLEnumValueDefinition value : values) {
 
 
-                    if (value.getValue() instanceof Enum &&
-                            !(value.getValue() instanceof LimitationStatusEnumeration)) {
+                    if (value.getValue() instanceof Enum) {
+                        if (value.getValue() instanceof LimitationStatusEnumeration) {
+                            // Exception from the rule to avoid colliding with Boolean-values
+                            continue;
+                        }
 
                         //Calculate enum-object from name
                         Method m = value.getValue().getClass().getMethod("fromValue", String.class);

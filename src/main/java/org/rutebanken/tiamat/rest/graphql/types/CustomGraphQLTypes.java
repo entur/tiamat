@@ -78,7 +78,7 @@ public class CustomGraphQLTypes {
         public static GraphQLEnumType parkingStayEnum = GraphQLEnumType.newEnum()
                 .name(PARKING_STAY_TYPE_ENUM)
                 .value("shortStay", ParkingStayEnumeration.SHORT_STAY)
-                .value("longStay", ParkingStayEnumeration.LONG_TERM)
+                .value("longTerm", ParkingStayEnumeration.LONG_TERM)
                 .value("dropoff", ParkingStayEnumeration.DROPOFF)
                 .value("unlimited", ParkingStayEnumeration.UNLIMITED)
                 .build();
