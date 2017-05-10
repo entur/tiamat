@@ -92,7 +92,12 @@ public class MatchingAppendingIdStopPlacesImporter {
                 if(!alreadyAdded) {
                     matchedStopPlaces.add(netexMapper.mapToNetexModel(existingstopPlace));
                 }
+
                 stopPlacesCreatedOrUpdated.incrementAndGet();
+
+                if(stopPlacesCreatedOrUpdated.get() % 100 == 0) {
+                    stopPlaceRepository.flush();
+                }
             }
         });
 
