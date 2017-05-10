@@ -38,7 +38,7 @@ public class StopPlaceByQuayOriginalIdFinder {
                     .map(this::find)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
+                    .map(stopPlaceRepository::findFirstByNetexIdOrderByVersionDesc)
                     .filter(stopPlace -> stopPlace != null)
                     .findFirst();
         }
