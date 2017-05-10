@@ -234,64 +234,78 @@ class StopPlaceUpdater implements DataFetcher {
 
             Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
 
-            SanitaryEquipment toalett = null;
             if (equipmentInput.get(SANITARY_EQUIPMENT) != null) {
-                Map<String, Object> sanitaryEquipment = (Map<String, Object>) equipmentInput.get(SANITARY_EQUIPMENT);
 
-                toalett = new SanitaryEquipment();
-                toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
-                toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
+                List equipment = (List) equipmentInput.get(SANITARY_EQUIPMENT);
+                for (Object item : equipment) {
+                    Map<String, Object> sanitaryEquipment = (Map<String, Object>) item;
+
+                    SanitaryEquipment toalett = new SanitaryEquipment();
+                    toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
+                    toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
+                    equipments.getInstalledEquipment().add(toalett);
+                }
             }
-            equipments.getInstalledEquipment().add(toalett);
 
-            ShelterEquipment leskur = null;
             if (equipmentInput.get(SHELTER_EQUIPMENT) != null) {
-                Map<String, Object> shelterEquipment = (Map<String, Object>) equipmentInput.get(SHELTER_EQUIPMENT);
-                leskur = new ShelterEquipment();
-                leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
-                leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
-                leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
-            }
-            equipments.getInstalledEquipment().add(leskur);
 
-            CycleStorageEquipment sykkelskur = null;
+                List equipment = (List) equipmentInput.get(SHELTER_EQUIPMENT);
+                for (Object item : equipment) {
+                    Map<String, Object> shelterEquipment = (Map<String, Object>) item;
+                    ShelterEquipment leskur = new ShelterEquipment();
+                    leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
+                    leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
+                    leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
+                    equipments.getInstalledEquipment().add(leskur);
+                }
+            }
+
             if (equipmentInput.get(CYCLE_STORAGE_EQUIPMENT) != null) {
-                Map<String, Object> cycleStorageEquipment = (Map<String, Object>) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
-                sykkelskur = new CycleStorageEquipment();
-                sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
-                sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
-            }
-            equipments.getInstalledEquipment().add(sykkelskur);
 
-            WaitingRoomEquipment venterom = null;
+                List equipment = (List) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
+                for (Object item : equipment) {
+                    Map<String, Object> cycleStorageEquipment = (Map<String, Object>) item;
+                    CycleStorageEquipment sykkelskur = new CycleStorageEquipment();
+                    sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
+                    sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
+                    equipments.getInstalledEquipment().add(sykkelskur);
+                }
+            }
+
             if (equipmentInput.get(WAITING_ROOM_EQUIPMENT) != null) {
-                Map<String, Object> waitingRoomEquipment = (Map<String, Object>) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
-                venterom = new WaitingRoomEquipment();
-                venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
-                venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
-                venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
-            }
-            equipments.getInstalledEquipment().add(venterom);
 
-            TicketingEquipment billettAutomat = null;
+                List equipment = (List) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
+                for (Object item : equipment) {
+                    Map<String, Object> waitingRoomEquipment = (Map<String, Object>) item;
+                    WaitingRoomEquipment venterom = new WaitingRoomEquipment();
+                    venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
+                    venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
+                    venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
+                    equipments.getInstalledEquipment().add(venterom);
+                }
+            }
+
             if (equipmentInput.get(TICKETING_EQUIPMENT) != null) {
-                Map<String, Object> ticketingEquipment = (Map<String, Object>) equipmentInput.get(TICKETING_EQUIPMENT);
-                billettAutomat = new TicketingEquipment();
-                billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
-                billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
-                billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+
+                List equipment = (List) equipmentInput.get(TICKETING_EQUIPMENT);
+                for (Object item : equipment) {
+                    Map<String, Object> ticketingEquipment = (Map<String, Object>) item;
+                    TicketingEquipment billettAutomat = new TicketingEquipment();
+                    billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
+                    billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
+                    billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+                    equipments.getInstalledEquipment().add(billettAutomat);
+                }
             }
-            equipments.getInstalledEquipment().add(billettAutomat);
 
-            GeneralSign skilt  = null;
-            if (equipmentInput.get(GENERAL_SIGN_EQUIPMENT) != null) {
+            if (equipmentInput.get(GENERAL_SIGN) != null) {
 
-                List generalSigns = (List) equipmentInput.get(GENERAL_SIGN_EQUIPMENT);
-                for (Object generalSign : generalSigns) {
+                List equipment = (List) equipmentInput.get(GENERAL_SIGN);
+                for (Object item : equipment) {
 
-                    Map<String, Object> generalSignEquipment = (Map<String, Object>) generalSign;
+                    Map<String, Object> generalSignEquipment = (Map<String, Object>) item;
 
-                    skilt = new GeneralSign();
+                    GeneralSign skilt = new GeneralSign();
                     PrivateCodeStructure privateCode = new PrivateCodeStructure();
                     privateCode.setValue((String) generalSignEquipment.get(PRIVATE_CODE));
                     skilt.setPrivateCode(privateCode);

@@ -216,15 +216,15 @@ public class CustomGraphQLTypes {
             .name(OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT)
             .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
-                    .name(PRIVATE_CODE)
-                    .type(GraphQLString)
-                    .dataFetcher(env -> {
-                            PrivateCodeStructure privateCode = ((GeneralSign) env.getSource()).getPrivateCode();
-                            if (privateCode != null) {
-                                    return privateCode.getValue();
-                            }
-                            return null;
-                    })
+                            .name(PRIVATE_CODE)
+                            .type(GraphQLString)
+                            .dataFetcher(env -> {
+                                    PrivateCodeStructure privateCode = ((GeneralSign) env.getSource()).getPrivateCode();
+                                    if (privateCode != null) {
+                                            return privateCode.getValue();
+                                    }
+                                    return null;
+                            })
             )
             .field(newFieldDefinition()
                     .name(CONTENT)
@@ -303,107 +303,69 @@ public class CustomGraphQLTypes {
             .field(netexIdFieldDefinition)
             .field(newFieldDefinition()
                             .name(WAITING_ROOM_EQUIPMENT)
-                            .type(waitingRoomEquipmentType)
-                            .dataFetcher(env -> {
-                                    List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                                    for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                            if (ie instanceof WaitingRoomEquipment) {
-                                                    return ie;
-                                            }
-                                    }
-                                    return null;
-                            })
+                            .type(new GraphQLList(waitingRoomEquipmentType))
+                            .dataFetcher(env -> getEquipmentOfType(WaitingRoomEquipment.class, env))
             )
             .field(newFieldDefinition()
-                    .name(SANITARY_EQUIPMENT)
-                    .type(sanitaryEquipmentType)
-                    .dataFetcher(env -> {
-                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                    if (ie instanceof SanitaryEquipment) {
-                                            return ie;
-                                    }
-                            }
-                            return null;
-                    })
+                            .name(SANITARY_EQUIPMENT)
+                            .type(new GraphQLList(sanitaryEquipmentType))
+                            .dataFetcher(env -> getEquipmentOfType(SanitaryEquipment.class, env))
             )
             .field(newFieldDefinition()
-                    .name(TICKETING_EQUIPMENT)
-                    .type(ticketingEquipmentType)
-                    .dataFetcher(env -> {
-                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                    if (ie instanceof TicketingEquipment) {
-                                            return ie;
-                                    }
-                            }
-                            return null;
-                    })
+                            .name(TICKETING_EQUIPMENT)
+                            .type(new GraphQLList(ticketingEquipmentType))
+                            .dataFetcher(env -> getEquipmentOfType(TicketingEquipment.class, env))
             )
             .field(newFieldDefinition()
-                    .name(SHELTER_EQUIPMENT)
-                    .type(shelterEquipmentType)
-                    .dataFetcher(env -> {
-                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                    if (ie instanceof ShelterEquipment) {
-                                            return ie;
-                                    }
-                            }
-                            return null;
-                    })
+                            .name(SHELTER_EQUIPMENT)
+                            .type(new GraphQLList(shelterEquipmentType))
+                            .dataFetcher(env -> getEquipmentOfType(ShelterEquipment.class, env))
             )
             .field(newFieldDefinition()
-                    .name(CYCLE_STORAGE_EQUIPMENT)
-                    .type(cycleStorageEquipmentType)
-                    .dataFetcher(env -> {
-                            List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                            for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                    if (ie instanceof CycleStorageEquipment) {
-                                            return ie;
-                                    }
-                            }
-                            return null;
-                    })
+                            .name(CYCLE_STORAGE_EQUIPMENT)
+                            .type(new GraphQLList(cycleStorageEquipmentType))
+                            .dataFetcher(env -> getEquipmentOfType(CycleStorageEquipment.class, env))
             )
             .field(newFieldDefinition()
-                            .name(GENERAL_SIGN_EQUIPMENT)
-                            .type(new GraphQLList(generalSignEquipmentType))
-                            .dataFetcher(env -> {
-                                    List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
-                                    List<GeneralSign> signs = new ArrayList<>();
-                                    for (InstalledEquipment_VersionStructure ie : installedEquipment) {
-                                            if (ie instanceof GeneralSign) {
-                                                    signs.add((GeneralSign) ie);
-                                            }
-                                    }
-                                    if (!signs.isEmpty()) {
-                                            return signs;
-                                    }
-                                    return null;
-                            })
-            )
+                    .name(GENERAL_SIGN)
+                    .type(new GraphQLList(generalSignEquipmentType))
+                    .dataFetcher(env -> getEquipmentOfType(GeneralSign.class, env)))
             .build();
 
-    public static GraphQLInputObjectType equipmentInputType = GraphQLInputObjectType.newInputObject()
+        private static List getEquipmentOfType(Class clazz, DataFetchingEnvironment env) {
+                List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                List equipments = new ArrayList<>();
+                for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                        if (clazz.isInstance(ie)) {
+                                equipments.add(ie);
+                        }
+                }
+
+                if (!equipments.isEmpty()) {
+                        return equipments;
+                }
+                return null;
+        }
+
+        public static GraphQLInputObjectType equipmentInputType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_PLACE_EQUIPMENTS)
             .field(newInputObjectField()
                     .name(WAITING_ROOM_EQUIPMENT)
-                    .type(waitingRoomEquipmentInputType))
+                    .type(new GraphQLList(waitingRoomEquipmentInputType)))
             .field(newInputObjectField()
                     .name(SANITARY_EQUIPMENT)
-                    .type(sanitaryEquipmentInputType))
+                    .type(new GraphQLList(sanitaryEquipmentInputType)))
             .field(newInputObjectField()
                     .name(TICKETING_EQUIPMENT)
-                    .type(ticketingEquipmentInputType))
+                    .type(new GraphQLList(ticketingEquipmentInputType)))
             .field(newInputObjectField()
                     .name(SHELTER_EQUIPMENT)
-                    .type(shelterEquipmentInputType))
+                    .type(new GraphQLList(shelterEquipmentInputType)))
             .field(newInputObjectField()
                     .name(CYCLE_STORAGE_EQUIPMENT)
-                    .type(cycleStorageEquipmentInputType))
+                    .type(new GraphQLList(cycleStorageEquipmentInputType)))
             .field(newInputObjectField()
-                    .name(GENERAL_SIGN_EQUIPMENT)
+                    .name(GENERAL_SIGN)
                     .type(new GraphQLList(generalSignEquipmentInputType)))
             .build();
 

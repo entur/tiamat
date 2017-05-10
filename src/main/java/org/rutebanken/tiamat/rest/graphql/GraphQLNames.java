@@ -128,7 +128,7 @@ public class GraphQLNames {
     public static final String SHELTER_EQUIPMENT = "shelterEquipment";
     public static final String CYCLE_STORAGE_EQUIPMENT = "cycleStorageEquipment";
     public static final String WAITING_ROOM_EQUIPMENT = "waitingRoomEquipment";
-    public static final String GENERAL_SIGN_EQUIPMENT = "generalSignEquipment";
+    public static final String GENERAL_SIGN = "generalSign";
 
     // SanitaryEquipment
     public static final String NUMBER_OF_TOILETS = "numberOfToilets";
