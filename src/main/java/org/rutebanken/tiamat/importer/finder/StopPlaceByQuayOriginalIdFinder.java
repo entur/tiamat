@@ -30,7 +30,6 @@ public class StopPlaceByQuayOriginalIdFinder {
 
     public Optional<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
-            logger.info("Looking for stop by quay original ID");
             return incomingStopPlace.getQuays().stream()
                     .flatMap(quay -> quay.getOriginalIds().stream())
                     .map(this::extractNumericValueIfPossible)
