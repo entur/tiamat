@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.stream.Collectors;
 
 
 @Transactional
@@ -35,19 +37,22 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final TariffZonesLookupService tariffZonesLookupService;
 
+    private final StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder;
+
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
                                           ValidBetweenRepository validBetweenRepository,
                                           VersionCreator versionCreator,
                                           AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
                                           TopographicPlaceLookupService countyAndMunicipalityLookupService,
-                                          TariffZonesLookupService tariffZonesLookupService) {
+                                          TariffZonesLookupService tariffZonesLookupService, StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.tariffZonesLookupService = tariffZonesLookupService;
+        this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
     }
 
     @Override
@@ -89,6 +94,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlaceToSave);
         tariffZonesLookupService.populateTariffZone(stopPlaceToSave);
         stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
+
+        if(stopPlaceToSave.getQuays() != null) {
+            stopPlaceByQuayOriginalIdFinder.updateCache(stopPlaceToSave.getNetexId(),
+                    stopPlaceToSave.getQuays()
+                            .stream()
+                            .flatMap(q -> q.getOriginalIds().stream())
+                            .collect(Collectors.toList()));
+        }
         return stopPlaceToSave;
     }
 
