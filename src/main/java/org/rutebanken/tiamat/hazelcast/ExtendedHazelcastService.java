@@ -23,7 +23,7 @@ public class ExtendedHazelcastService extends HazelCastService {
 
     private static final int DEFAULT_BACKUP_COUNT = 2;
 
-    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 50;
+    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 30;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
