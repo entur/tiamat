@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -268,8 +269,8 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 .map(KeyValueStructure::getValue)
                 .findFirst()
                 .get();
-        assertThat(importedIds).contains(stopPlace.getId());
-        assertThat(importedIds).contains(stopPlace2.getId());
+        assertThat(importedIds).contains(NetexIdHelper.stripLeadingZeros(stopPlace.getId()));
+        assertThat(importedIds).contains(NetexIdHelper.stripLeadingZeros(stopPlace2.getId()));
         assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(2);
     }
 
@@ -412,7 +413,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                     .map(keyValue -> keyValue.getValue())
                     .map(value -> value.split(","))
                     .flatMap(values -> Stream.of(values))
-                    .filter(value -> value.equals("RUT:StopArea:0229012202") || value.equals("RUT:StopArea:0229012201"))
+                    .filter(value -> value.equals("RUT:StopArea:229012202") || value.equals("RUT:StopArea:229012201"))
                     .count();
             assertThat(matches)
                     .as("Expecting quay to contain two matching orignal IDs in key val")

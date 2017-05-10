@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.id;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
@@ -69,6 +70,23 @@ public class NetexIdHelper {
         }
 
         return netexId.substring(0, netexId.indexOf(':'));
+    }
+
+    public static String stripLeadingZeros(String originalIdValue) {
+        try {
+            long numeric = NetexIdHelper.extractIdPostfix(originalIdValue);
+            String type = NetexIdHelper.extractIdType(originalIdValue);
+            String prefix = NetexIdHelper.extractIdPrefix(originalIdValue);
+            if(numeric == 0L || Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(prefix)) {
+                logger.warn("Cannot parse original ID '{}' into preifx:type:number. Keeping value as is", originalIdValue);
+            }
+
+            logger.debug("Extracted prefix: {}, type: {} and numeric value: {}", prefix, type, numeric);
+            return prefix +":"+type+":"+String.valueOf(numeric);
+
+        } catch (NumberFormatException nfe) {
+            return originalIdValue;
+        }
     }
 
     public static Optional<String> getOptionalTiamatId(String netexId) {
