@@ -52,16 +52,26 @@ public class NetexIdHelper {
      * @param netexId Id with long value after last colon.
      * @return long value
      */
-    public static long extractIdPostfix(String netexId) {
+    public static long extractIdPostfixNumeric(String netexId) {
         try {
-            return Long.valueOf(netexId.substring(netexId.lastIndexOf(':') + 1).trim());
+            return Long.valueOf(extractIdPostfix(netexId));
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("Cannot parse NeTEx ID into internal ID: '" + netexId +"'");
+            throw new NumberFormatException("Cannot parse NeTEx ID PostFix into numberic valueID: '" + netexId +"'");
         }
     }
 
+    public static String extractIdPostfix(String netexId) {
+        return netexId.substring(netexId.lastIndexOf(':') + 1).trim();
+    }
+
     public static String extractIdType(String netexId) {
-        return netexId.substring(netexId.indexOf(':')+1, netexId.lastIndexOf(':'));
+        try {
+            return netexId.substring(netexId.indexOf(':') + 1, netexId.lastIndexOf(':'));
+        } catch (StringIndexOutOfBoundsException e) {
+
+            throw new StringIndexOutOfBoundsException("Cannot extract ID type for netexId: "+ netexId);
+
+        }
     }
 
     public static String extractIdPrefix(String netexId) {
@@ -74,7 +84,7 @@ public class NetexIdHelper {
 
     public static String stripLeadingZeros(String originalIdValue) {
         try {
-            long numeric = NetexIdHelper.extractIdPostfix(originalIdValue);
+            long numeric = NetexIdHelper.extractIdPostfixNumeric(originalIdValue);
             String type = NetexIdHelper.extractIdType(originalIdValue);
             String prefix = NetexIdHelper.extractIdPrefix(originalIdValue);
             if(numeric == 0L || Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(prefix)) {
@@ -84,7 +94,8 @@ public class NetexIdHelper {
             logger.debug("Extracted prefix: {}, type: {} and numeric value: {}", prefix, type, numeric);
             return prefix +":"+type+":"+String.valueOf(numeric);
 
-        } catch (NumberFormatException nfe) {
+        } catch (IllegalArgumentException e) {
+            logger.info("Got exception while stripping leading zeros from numeric ID in {}. Returning value as is. Ex message: {}", originalIdValue, e.getMessage(), e);
             return originalIdValue;
         }
     }

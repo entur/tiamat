@@ -4,12 +4,7 @@ import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static org.rutebanken.tiamat.netex.id.ValidPrefixList.ANY_PREFIX;
 
 @Component
 public class NetexIdProvider {
@@ -44,7 +39,7 @@ public class NetexIdProvider {
             logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
 
             if(NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
-                Long claimedId = NetexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
+                Long claimedId = NetexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());
 
                 String entityTypeName = key(identifiedEntity);
 

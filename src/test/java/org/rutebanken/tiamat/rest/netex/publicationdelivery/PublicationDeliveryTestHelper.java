@@ -105,8 +105,17 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
+        return extractStopPlaces(publicationDeliveryStructure, true);
+    }
+
+    public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure, boolean verifyNotNull) {
         SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
-        assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
+        if(verifyNotNull) {
+            assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
+            assertThat(siteFrame.getStopPlaces().getStopPlace()).as("Site frame stop places getStopPlace").isNotNull();
+        } else if(siteFrame.getStopPlaces() == null || siteFrame.getStopPlaces().getStopPlace() == null) {
+            return new ArrayList<>();
+        }
         return siteFrame.getStopPlaces().getStopPlace();
     }
 

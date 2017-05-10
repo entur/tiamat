@@ -51,6 +51,99 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void matchImportedStopOnNonNumericId() throws Exception {
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:xxxxxx")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("14"))
+                                .withLongitude(new BigDecimal("75"))));
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        System.out.println("Got response: \n" + response);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
+    }
+
+    @Test
+    public void doNotmatchStopOnSimilarOriginalId() throws Exception {
+
+        StopPlace stopPlaceNotToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:212345678910")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("15"))
+                                .withLongitude(new BigDecimal("76"))));
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        System.out.println("Got response: \n" + response);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response, false);
+
+        assertThat(result).as("no match as stop has different ID").hasSize(0);
+    }
+
+    @Test
+    public void matchImportedStopOnLeadingZeroOriginalId() throws Exception {
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:0111111111")
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("11"))
+                                .withLongitude(new BigDecimal("77"))));
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        stopPlaceToBeMatched.setId("AKT:StopPlace:0111111111");
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        System.out.println("Got response: \n" + response);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:111111111", result.get(0));
+    }
+
+    @Test
     public void avoidDuplicatesInOutput() throws Exception {
 
 
@@ -124,6 +217,40 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
                                 .withId("RUT:Quay:0136068001")
+                                .withVersion("1")));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlace1.getId(), result.get(0));
+    }
+
+    @Test
+    public void matchStopsOnQuayNonNumericImportedId() throws Exception {
+
+        StopPlace stopPlace1 = new StopPlace()
+                .withId("RUT:StopPlace:xyz")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("RUT:Quay:zzzz")
+                                .withVersion("1")));
+
+        StopPlace stopPlace2 = new StopPlace()
+                .withId("RUT:StopPlace:ppp")
+                .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("RUT:Quay:zzzz")
                                 .withVersion("1")));
 
         PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();

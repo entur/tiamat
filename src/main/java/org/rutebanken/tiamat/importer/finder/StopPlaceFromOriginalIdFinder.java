@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.importer.finder;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -67,8 +70,20 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
     }
 
     private StopPlace findByKeyValue(Set<String> originalIds) {
-        for(String originalId : originalIds) {
-            String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
+
+        Set<String> postFixesOrFulloriginalIds = originalIds.stream()
+                .map(originalId -> {
+                    try {
+                        return String.valueOf(":"+NetexIdHelper.extractIdPostfixNumeric(originalId));
+                    } catch (NumberFormatException e) {
+                        return originalId;
+                    }
+                })
+                .collect(Collectors.toSet());
+
+        for(String postFixOrOriginalId : postFixesOrFulloriginalIds) {
+
+            String cacheKey = keyValKey(ORIGINAL_ID_KEY, postFixOrOriginalId);
             Optional<String> matchingStopPlaceNetexId = keyValueCache.getIfPresent(cacheKey);
             if(matchingStopPlaceNetexId != null && matchingStopPlaceNetexId.isPresent()) {
                 logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId.get());
@@ -76,8 +91,10 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
             }
         }
 
+        logger.debug("Looking for stop places from original IDs: {}", postFixesOrFulloriginalIds);
+
         // No cache match
-        String stopPlaceNetexId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, originalIds);
+        String stopPlaceNetexId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, postFixesOrFulloriginalIds);
         if(stopPlaceNetexId != null) {
             return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
         }

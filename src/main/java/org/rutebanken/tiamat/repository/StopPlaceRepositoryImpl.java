@@ -136,18 +136,37 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	@Override
 	public String findByKeyValue(String key, Set<String> values) {
 
-		Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
-				                                              "FROM stop_place s " +
-				                                              "INNER JOIN stop_place_key_values spkv " +
-				                                              "ON spkv.stop_place_id = s.id " +
-				                                              "INNER JOIN value_items v " +
-				                                              "ON spkv.key_values_id = v.value_id " +
-				                                              "WHERE spkv.key_values_key = :key " +
-				                                              "AND v.items IN ( :values ) " +
-				                                              "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)");
+		StringBuilder sqlQuery = new StringBuilder("SELECT s.netex_id " +
+				"FROM stop_place s " +
+				"INNER JOIN stop_place_key_values spkv " +
+				"ON spkv.stop_place_id = s.id " +
+				"INNER JOIN value_items v " +
+				"ON spkv.key_values_id = v.value_id " +
+				"WHERE spkv.key_values_key = :key " +
+				"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id) ");
 
+
+		List<String> parameters = new ArrayList<>(values.size());
+		List<String> parametervalues = new ArrayList<>(values.size());
+		final String parameterPrefix = "value";
+		sqlQuery.append(" AND (");
+		Iterator<String> valuesIterator = values.iterator();
+		for (int parameterCounter = 0; parameterCounter < values.size(); parameterCounter++) {
+			sqlQuery.append(" v.items LIKE :value").append(parameterCounter);
+			parameters.add(parameterPrefix + parameterCounter);
+			parametervalues.add("%"+valuesIterator.next());
+			if (parameterCounter + 1 < values.size()) {
+				sqlQuery.append(" OR ");
+			}
+		}
+
+		sqlQuery.append(" )");
+
+		Query query = entityManager.createNativeQuery(sqlQuery.toString());
+
+		Iterator<String> iterator = parametervalues.iterator();
+		parameters.forEach(parameter -> query.setParameter(parameter, iterator.next()));
 		query.setParameter("key", key);
-		query.setParameter("values", values);
 
 		try {
 			@SuppressWarnings("unchecked")

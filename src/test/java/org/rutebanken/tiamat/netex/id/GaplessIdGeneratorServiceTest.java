@@ -83,7 +83,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         Quay quay = new Quay();
         quayRepository.save(quay);
-        assertThat(NetexIdHelper.extractIdPostfix(quay.getNetexId())).isEqualTo(31);
+        assertThat(NetexIdHelper.extractIdPostfixNumeric(quay.getNetexId())).isEqualTo(31);
     }
 
     /**
