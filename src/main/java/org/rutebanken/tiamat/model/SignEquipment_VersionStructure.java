@@ -1,14 +1,18 @@
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
-
+@MappedSuperclass
 public abstract class SignEquipment_VersionStructure
         extends InstalledEquipment_VersionStructure {
 
     protected BigDecimal height;
     protected BigDecimal width;
     protected BigDecimal heightFromFloor;
+
+    @Transient
     protected MultilingualStringEntity placement;
     protected String brandGraphic;
     protected String signGraphic;

@@ -283,13 +283,33 @@ class StopPlaceUpdater implements DataFetcher {
             }
             equipments.getInstalledEquipment().add(billettAutomat);
 
+            GeneralSign skilt  = null;
+            if (equipmentInput.get(GENERAL_SIGN_EQUIPMENT) != null) {
+
+                List generalSigns = (List) equipmentInput.get(GENERAL_SIGN_EQUIPMENT);
+                for (Object generalSign : generalSigns) {
+
+                    Map<String, Object> generalSignEquipment = (Map<String, Object>) generalSign;
+
+                    skilt = new GeneralSign();
+                    PrivateCodeStructure privateCode = new PrivateCodeStructure();
+                    privateCode.setValue((String) generalSignEquipment.get(PRIVATE_CODE));
+                    skilt.setPrivateCode(privateCode);
+                    if (generalSignEquipment.get(CONTENT) != null) {
+                        skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
+                    }
+                    skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
+                    equipments.getInstalledEquipment().add(skilt);
+                }
+            }
+
 
             if (entity instanceof StopPlace) {
                 ((StopPlace)entity).setPlaceEquipments(equipments);
             } else if (entity instanceof Quay) {
                 ((Quay)entity).setPlaceEquipments(equipments);
             }
-
+            isUpdated = true;
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {

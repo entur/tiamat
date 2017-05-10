@@ -770,6 +770,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "        ticketingEquipment { id }" +
                 "        cycleStorageEquipment { id }" +
                 "        shelterEquipment { id }" +
+                "        generalSign { id }" +
                 "      }" +
                 "    quays {" +
                 "      id" +
@@ -779,6 +780,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "        ticketingEquipment { id }" +
                 "        cycleStorageEquipment { id }" +
                 "        shelterEquipment { id }" +
+                "        generalSign { id }" +
                 "      }" +
                 "    }" +
                 "  }" +
@@ -793,6 +795,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("placeEquipments.ticketingEquipment", notNullValue())
                     .body("placeEquipments.cycleStorageEquipment", notNullValue())
                     .body("placeEquipments.shelterEquipment", notNullValue())
+                    .body("placeEquipments.generalSign", notNullValue())
                 .root("data.stopPlace[0].quays[0]")
                     .body("id", notNullValue())
                     .body("placeEquipments", notNullValue())
@@ -801,6 +804,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("placeEquipments.ticketingEquipment", notNullValue())
                     .body("placeEquipments.cycleStorageEquipment", notNullValue())
                     .body("placeEquipments.shelterEquipment", notNullValue())
+                    .body("placeEquipments.generalSign", notNullValue())
         ;
 
         //Update StopPlace name
@@ -818,6 +822,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "        ticketingEquipment { id }" +
                 "        cycleStorageEquipment { id }" +
                 "        shelterEquipment { id }" +
+                "        generalSign { id }" +
                 "      }" +
                 "    quays {" +
                 "      id" +
@@ -827,6 +832,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                 "        ticketingEquipment { id }" +
                 "        cycleStorageEquipment { id }" +
                 "        shelterEquipment { id }" +
+                "        generalSign { id }" +
                 "      }" +
                 "    }" +
                 "  }" +
@@ -842,6 +848,7 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("placeEquipments.ticketingEquipment", notNullValue())
                     .body("placeEquipments.cycleStorageEquipment", notNullValue())
                     .body("placeEquipments.shelterEquipment", notNullValue())
+                    .body("placeEquipments.generalSign", notNullValue())
                 .root("data.stopPlace[0].quays[0]")
                     .body("id", notNullValue())
                     .body("placeEquipments", notNullValue())
@@ -849,7 +856,8 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("placeEquipments.sanitaryEquipment", notNullValue())
                     .body("placeEquipments.ticketingEquipment", notNullValue())
                     .body("placeEquipments.cycleStorageEquipment", notNullValue())
-                    .body("placeEquipments.shelterEquipment", notNullValue());
+                    .body("placeEquipments.shelterEquipment", notNullValue())
+                    .body("placeEquipments.generalSign", notNullValue());
 
     }
 
@@ -1038,11 +1046,18 @@ public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceInteg
         sykkelstativ.setCycleStorageType(CycleStorageEnumeration.RACKS);
         sykkelstativ.setNumberOfSpaces(BigInteger.TEN);
 
+        GeneralSign skilt = new GeneralSign();
+        skilt.setSignContentType(SignContentEnumeration.TRANSPORT_MODE);
+        PrivateCodeStructure privCode = new PrivateCodeStructure();
+        privCode.setValue("512");
+        skilt.setPrivateCode(privCode);
+
         equipments.getInstalledEquipment().add(venterom);
         equipments.getInstalledEquipment().add(billettAutomat);
         equipments.getInstalledEquipment().add(toalett);
         equipments.getInstalledEquipment().add(leskur);
         equipments.getInstalledEquipment().add(sykkelstativ);
+        equipments.getInstalledEquipment().add(skilt);
         return equipments;
     }
 

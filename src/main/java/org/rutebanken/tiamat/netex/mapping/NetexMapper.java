@@ -103,6 +103,10 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(GeneralSign.class, org.rutebanken.tiamat.model.GeneralSign.class)
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
                 .fieldBToA("netexId", "id")
                 .customize(new PlaceEquipmentMapper())

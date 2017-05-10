@@ -1,6 +1,10 @@
 package org.rutebanken.tiamat.model;
 
-public class PrivateCodeStructure {
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+public class PrivateCodeStructure implements Serializable {
 
     protected String value;
     protected String type;

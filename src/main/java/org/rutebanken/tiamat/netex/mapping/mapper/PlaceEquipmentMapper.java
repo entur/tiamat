@@ -30,7 +30,8 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                             equipment instanceof TicketingEquipment |
                             equipment instanceof WaitingRoomEquipment |
                             equipment instanceof CycleStorageEquipment |
-                            equipment instanceof ShelterEquipment);
+                            equipment instanceof ShelterEquipment |
+                            equipment instanceof GeneralSign);
                 })
                 .map(jaxbElement -> (InstalledEquipment_VersionStructure)jaxbElement.getValue())
                 .collect(Collectors.toList());
@@ -53,7 +54,8 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                         equipment instanceof TicketingEquipment |
                         equipment instanceof WaitingRoomEquipment |
                         equipment instanceof CycleStorageEquipment |
-                        equipment instanceof ShelterEquipment))
+                        equipment instanceof ShelterEquipment |
+                        equipment instanceof GeneralSign))
                 .map(equipment -> {
                     if (equipment instanceof SanitaryEquipment) {
                         return objectFactory.createSanitaryEquipment((SanitaryEquipment) equipment);
@@ -65,6 +67,8 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                         return objectFactory.createCycleStorageEquipment((CycleStorageEquipment) equipment);
                     } else if (equipment instanceof ShelterEquipment) {
                         return objectFactory.createShelterEquipment((ShelterEquipment) equipment);
+                    } else if (equipment instanceof GeneralSign) {
+                        return objectFactory.createGeneralSign((GeneralSign) equipment);
                     }
                     return null;
                 })

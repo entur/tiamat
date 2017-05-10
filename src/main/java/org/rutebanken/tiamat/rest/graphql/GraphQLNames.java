@@ -89,6 +89,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_SANITARY_EQUIPMENT = "SanitaryEquipment";
     public static final String INPUT_TYPE_SANITARY_EQUIPMENT = OUTPUT_TYPE_SANITARY_EQUIPMENT + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT = "GeneralSign";
+    public static final String INPUT_TYPE_GENERAL_SIGN_EQUIPMENT = OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
@@ -125,6 +128,7 @@ public class GraphQLNames {
     public static final String SHELTER_EQUIPMENT = "shelterEquipment";
     public static final String CYCLE_STORAGE_EQUIPMENT = "cycleStorageEquipment";
     public static final String WAITING_ROOM_EQUIPMENT = "waitingRoomEquipment";
+    public static final String GENERAL_SIGN_EQUIPMENT = "generalSignEquipment";
 
     // SanitaryEquipment
     public static final String NUMBER_OF_TOILETS = "numberOfToilets";
@@ -147,6 +151,11 @@ public class GraphQLNames {
     //CycleStorageEquipment
     public static final String NUMBER_OF_SPACES = "numberOfSpaces";
     public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
+    //GeneralSign
+
+    public static final String PRIVATE_CODE = "privateCode";
+    public static final String CONTENT = "content";
+    public static final String SIGN_CONTENT_TYPE = "signContentType";
 
     public static final String IMPORTED_ID = "importedId";
     public static final String VERSION = "version";

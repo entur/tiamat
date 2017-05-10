@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import static graphql.Scalars.*;
@@ -111,6 +112,17 @@ public class CustomGraphQLTypes {
             .build();
 
 
+        public static GraphQLInputObjectType embeddableMultiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
+                .field(newInputObjectField()
+                        .name(VALUE)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(LANG)
+                        .type(GraphQLString))
+                .build();
+
+
         public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
                 .name(ID)
                 .type(GraphQLString)
@@ -198,6 +210,42 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(CYCLE_STORAGE_TYPE)
                     .type(cycleStorageTypeEnum))
+            .build();
+
+    public static GraphQLObjectType generalSignEquipmentType = newObject()
+            .name(OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(PRIVATE_CODE)
+                    .type(GraphQLString)
+                    .dataFetcher(env -> {
+                            PrivateCodeStructure privateCode = ((GeneralSign) env.getSource()).getPrivateCode();
+                            if (privateCode != null) {
+                                    return privateCode.getValue();
+                            }
+                            return null;
+                    })
+            )
+            .field(newFieldDefinition()
+                    .name(CONTENT)
+                    .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+                    .name(SIGN_CONTENT_TYPE)
+                    .type(signContentTypeEnum))
+            .build();
+
+
+    public static GraphQLInputObjectType generalSignEquipmentInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_GENERAL_SIGN_EQUIPMENT)
+            .field(newInputObjectField()
+                    .name(PRIVATE_CODE)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(CONTENT)
+                    .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                    .name(SIGN_CONTENT_TYPE)
+                    .type(signContentTypeEnum))
             .build();
 
     public static GraphQLObjectType waitingRoomEquipmentType = newObject()
@@ -318,6 +366,23 @@ public class CustomGraphQLTypes {
                             return null;
                     })
             )
+            .field(newFieldDefinition()
+                            .name(GENERAL_SIGN_EQUIPMENT)
+                            .type(new GraphQLList(generalSignEquipmentType))
+                            .dataFetcher(env -> {
+                                    List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
+                                    List<GeneralSign> signs = new ArrayList<>();
+                                    for (InstalledEquipment_VersionStructure ie : installedEquipment) {
+                                            if (ie instanceof GeneralSign) {
+                                                    signs.add((GeneralSign) ie);
+                                            }
+                                    }
+                                    if (!signs.isEmpty()) {
+                                            return signs;
+                                    }
+                                    return null;
+                            })
+            )
             .build();
 
     public static GraphQLInputObjectType equipmentInputType = GraphQLInputObjectType.newInputObject()
@@ -337,6 +402,9 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(CYCLE_STORAGE_EQUIPMENT)
                     .type(cycleStorageEquipmentInputType))
+            .field(newInputObjectField()
+                    .name(GENERAL_SIGN_EQUIPMENT)
+                    .type(new GraphQLList(generalSignEquipmentInputType)))
             .build();
 
         public static GraphQLObjectType accessibilityLimitationsObjectType = newObject()
@@ -422,16 +490,6 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(LIMITATIONS)
                         .type(accessibilityLimitationsInputObjectType))
-            .build();
-
-    public static GraphQLInputObjectType embeddableMultiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
-            .name(INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
-            .field(newInputObjectField()
-                    .name(VALUE)
-                    .type(GraphQLString))
-            .field(newInputObjectField()
-                    .name(LANG)
-                    .type(GraphQLString))
             .build();
 
     public static GraphQLObjectType alternativeNameObjectType = newObject()

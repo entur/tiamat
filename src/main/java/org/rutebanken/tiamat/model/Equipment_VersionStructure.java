@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 @MappedSuperclass
 public abstract class Equipment_VersionStructure
@@ -9,7 +8,12 @@ public abstract class Equipment_VersionStructure
 
     @Transient
     protected MultilingualStringEntity name;
-    @Transient
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "private_code_value")),
+            @AttributeOverride(name = "type", column = @Column(name = "private_code_type"))
+    })
+    @Embedded
     protected PrivateCodeStructure privateCode;
     @Transient
     protected PrivateCodeStructure publicCode;

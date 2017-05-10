@@ -74,7 +74,8 @@ public class VersionCreator {
                         PathLink.class, ValidBetween.class, PlaceEquipment.class,
                         WaitingRoomEquipment.class, SanitaryEquipment.class,
                         TicketingEquipment.class, ShelterEquipment.class,
-                        CycleStorageEquipment.class, AlternativeName.class);
+                        CycleStorageEquipment.class, GeneralSign.class,
+                        AlternativeName.class);
 
 
         commonClassesToConfigure.forEach(clazz -> mapperFactory.classMap(clazz, clazz)
