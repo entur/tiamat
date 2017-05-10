@@ -13,6 +13,7 @@ CREATE TABLE id_generator(table_name text, id_value bigint, CONSTRAINT id_constr
 
 CREATE index table_name_index ON id_generator(table_name);
 CREATE index id_value_index ON id_generator(id_value);
+CREATE INDEX items_trgm_gin_index ON value_items USING gin (items gin_trgm_ops);
 
 CREATE index value_id_index ON value_items (value_id);
 
