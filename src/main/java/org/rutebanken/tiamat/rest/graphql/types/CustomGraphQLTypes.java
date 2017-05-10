@@ -5,6 +5,7 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static graphql.Scalars.*;
@@ -15,40 +16,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
 
 public class CustomGraphQLTypes {
-
-    public static GraphQLEnumType topographicPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(TOPOGRAPHIC_PLACE_TYPE_ENUM)
-            .value(TopographicPlaceTypeEnumeration.COUNTY.value(), TopographicPlaceTypeEnumeration.COUNTY)
-            .value(TopographicPlaceTypeEnumeration.TOWN.value(), TopographicPlaceTypeEnumeration.TOWN)
-            .value(TopographicPlaceTypeEnumeration.STATE.value(), TopographicPlaceTypeEnumeration.STATE)
-            .value(TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST.value(), TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST)
-            .build();
-
-    public static GraphQLEnumType stopPlaceTypeEnum = GraphQLEnumType.newEnum()
-            .name(STOP_PLACE_TYPE_ENUM)
-            .value("onstreetBus", StopTypeEnumeration.ONSTREET_BUS)
-            .value("onstreetTram", StopTypeEnumeration.ONSTREET_TRAM)
-            .value("airport", StopTypeEnumeration.AIRPORT)
-            .value("railStation", StopTypeEnumeration.RAIL_STATION)
-            .value("metroStation", StopTypeEnumeration.METRO_STATION)
-            .value("busStation", StopTypeEnumeration.BUS_STATION)
-            .value("coachStation", StopTypeEnumeration.COACH_STATION)
-            .value("tramStation", StopTypeEnumeration.TRAM_STATION)
-            .value("harbourPort", StopTypeEnumeration.HARBOUR_PORT)
-            .value("ferryPort", StopTypeEnumeration.FERRY_PORT)
-            .value("ferryStop", StopTypeEnumeration.FERRY_STOP)
-            .value("liftStation", StopTypeEnumeration.LIFT_STATION)
-            .value("vehicleRailInterchange", StopTypeEnumeration.VEHICLE_RAIL_INTERCHANGE)
-            .value("other", StopTypeEnumeration.OTHER)
-            .build();
-
-     public static GraphQLEnumType interchangeWeightingEnum = GraphQLEnumType.newEnum()
-             .name(INTERCHANGE_WEIGHTING_TYPE_ENUM)
-             .value("noInterchange", InterchangeWeightingEnumeration.NO_INTERCHANGE)
-             .value("interchangeAllowed", InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED)
-             .value("preferredInterchange", InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE)
-             .value("recommendedInterchange", InterchangeWeightingEnumeration.RECOMMENDED_INTERCHANGE)
-             .build();
 
         public static GraphQLEnumType geometryTypeEnum = GraphQLEnumType.newEnum()
             .name(GEOMETRY_TYPE_ENUM)
@@ -69,31 +36,39 @@ public class CustomGraphQLTypes {
             .value("UNKNOWN", LimitationStatusEnumeration.UNKNOWN)
             .build();
 
-        public static  GraphQLEnumType cycleStorageTypeEnum = GraphQLEnumType.newEnum()
-            .name(CYCLE_STORAGE_TYPE)
-            .value("bars", CycleStorageEnumeration.BARS)
-            .value("racks", CycleStorageEnumeration.RACKS)
-            .value("railings", CycleStorageEnumeration.RAILINGS)
-            .value("cycleScheme", CycleStorageEnumeration.CYCLE_SCHEME)
-            .value("other", CycleStorageEnumeration.OTHER)
-            .build();
+        public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
 
-        public static  GraphQLEnumType genderTypeEnum = GraphQLEnumType.newEnum()
-            .name(GENDER)
-            .value("both", GenderLimitationEnumeration.BOTH)
-            .value("femaleOnly", GenderLimitationEnumeration.FEMALE_ONLY)
-            .value("maleOnly", GenderLimitationEnumeration.MALE_ONLY)
-            .value("sameSexOnly", GenderLimitationEnumeration.SAME_SEX_ONLY)
-            .build();
+        public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
 
-        public static GraphQLEnumType nameTypeEnum = GraphQLEnumType.newEnum()
-                .name(NAME_TYPE)
-                .value("alias", NameTypeEnumeration.ALIAS)
-                .value("copy", NameTypeEnumeration.COPY)
-                .value("label", NameTypeEnumeration.LABEL)
-                .value("translation", NameTypeEnumeration.TRANSLATION)
-                .value("other", NameTypeEnumeration.OTHER)
-                .build();
+        public static GraphQLEnumType interchangeWeightingEnum = createCustomEnumType(INTERCHANGE_WEIGHTING_TYPE_ENUM, InterchangeWeightingEnumeration.class);
+
+        public static  GraphQLEnumType cycleStorageTypeEnum = createCustomEnumType(CYCLE_STORAGE_TYPE, CycleStorageEnumeration.class);
+
+        public static GraphQLEnumType signContentTypeEnum = createCustomEnumType(SIGN_CONTENT_TYPE, SignContentEnumeration.class);
+
+        public static GraphQLEnumType genderTypeEnum = createCustomEnumType(GENDER, GenderLimitationEnumeration.class);
+
+        public static GraphQLEnumType nameTypeEnum = createCustomEnumType(NAME_TYPE, NameTypeEnumeration.class);
+
+        private static GraphQLEnumType createCustomEnumType(String name, Class c) {
+
+                Object[] enumConstants = c.getEnumConstants();
+
+                GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(name);
+                for (Object enumObj : enumConstants) {
+                        Method[] methods = enumObj.getClass().getMethods();
+                        for (Method method : methods) {
+                                if (method.getParameterCount() == 0 && "value".equals(method.getName())) {
+                                        try {
+                                                builder.value((String) method.invoke(enumObj), enumObj);
+                                        } catch (Exception e) {
+                                                throw new ExceptionInInitializerError(e);
+                                        }
+                                }
+                        }
+                }
+                return builder.build();
+        }
 
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
