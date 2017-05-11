@@ -56,7 +56,7 @@ public class StopPlaceByIdFinder {
 
     public Optional<StopPlace> findByQuayNetexId(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
-            logger.info("Looking for stop by quay netex ID");
+            logger.debug("Looking for stop by quay netex ID");
             return incomingStopPlace.getQuays().stream()
                     .filter(quay -> quay.getNetexId() != null && NetexIdHelper.isNsrId(quay.getNetexId()))
                     .map(quay -> quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId()))
@@ -70,7 +70,7 @@ public class StopPlaceByIdFinder {
 
 
     public Optional<StopPlace> findByStopPlaceOriginalId(StopPlace incomingStopPlace) {
-        logger.info("Looking for stop by stops by original id: {}", incomingStopPlace.getOriginalIds());
+        logger.debug("Looking for stop by stops by original id: {}", incomingStopPlace.getOriginalIds());
         return Optional.ofNullable(stopPlaceFromOriginalIdFinder.find(incomingStopPlace));
     }
 }
