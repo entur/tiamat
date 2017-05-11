@@ -94,7 +94,7 @@ public class NetexIdMapper {
 
         if(ignoreEmptyPostfix) {
             if(Strings.isNullOrEmpty(NetexIdHelper.extractIdPostfix(valueToAdd))) {
-                logger.info("Ignoring empty postfix for key value: key {} and value '{}'", keytoAdd, valueToAdd);
+                logger.debug("Ignoring empty postfix for key value: key {} and value '{}'", keytoAdd, valueToAdd);
                 return;
             }
         }
