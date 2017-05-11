@@ -37,67 +37,18 @@ public class CustomGraphQLTypes {
             .value("UNKNOWN", LimitationStatusEnumeration.UNKNOWN)
             .build();
         
-        public static GraphQLEnumType parkingVehicleEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_VEHICLE_ENUM)
-                .value("car", ParkingVehicleEnumeration.CAR)
-                .value("bus", ParkingVehicleEnumeration.BUS)
-                .value("pedalCycle", ParkingVehicleEnumeration.PEDAL_CYCLE)
-                .value("motorcycle", ParkingVehicleEnumeration.MOTORCYCLE)
-                .build();
+        public static GraphQLEnumType parkingVehicleEnum = createCustomEnumType(PARKING_VEHICLE_ENUM, ParkingVehicleEnumeration.class);
 
-        public static GraphQLEnumType parkingLayoutEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_LAYOUT_ENUM)
-                .value("covered", ParkingLayoutEnumeration.COVERED)
-                .value("openSpace", ParkingLayoutEnumeration.OPEN_SPACE)
-                .value("multistorey", ParkingLayoutEnumeration.MULTISTOREY)
-                .value("underground", ParkingLayoutEnumeration.UNDERGROUND)
-                .value("roadside", ParkingLayoutEnumeration.ROADSIDE)
-                .value("other", ParkingLayoutEnumeration.OTHER)
-                .build();
+        public static GraphQLEnumType parkingLayoutEnum = createCustomEnumType(PARKING_LAYOUT_ENUM, ParkingLayoutEnumeration.class);
 
-        public static GraphQLEnumType parkingUserEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_USER_ENUM)
-                .value("all", ParkingUserEnumeration.ALL)
-                .value("registered", ParkingUserEnumeration.REGISTERED)
-                .value("registeredDisabled", ParkingUserEnumeration.REGISTERED_DISABLED)
-                .value("residentsWithPermits", ParkingUserEnumeration.RESIDENTS_WITH_PERMITS)
-                .build();
+        public static GraphQLEnumType parkingUserEnum = createCustomEnumType(PARKING_USER_ENUM, ParkingUserEnumeration.class);
 
-        public static GraphQLEnumType parkingStayEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_STAY_TYPE_ENUM)
-                .value("shortStay", ParkingStayEnumeration.SHORT_STAY)
-                .value("longTerm", ParkingStayEnumeration.LONG_TERM)
-                .value("dropoff", ParkingStayEnumeration.DROPOFF)
-                .value("unlimited", ParkingStayEnumeration.UNLIMITED)
-                .build();
+        public static GraphQLEnumType parkingStayEnum = createCustomEnumType(PARKING_STAY_TYPE_ENUM, ParkingStayEnumeration.class);
 
-        public static GraphQLEnumType parkingReservationEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_RESERVATION_ENUM)
-                .value("noReservations", ParkingReservationEnumeration.NO_RESERVATIONS)
-                .value("registrationRequired", ParkingReservationEnumeration.REGISTRATION_REQUIRED)
-                .value("reservationRequired", ParkingReservationEnumeration.RESERVATION_REQUIRED)
-                .value("reservationAllowed", ParkingReservationEnumeration.RESERVATION_ALLOWED)
-                .value("other", ParkingReservationEnumeration.OTHER)
-                .build();
+        public static GraphQLEnumType parkingReservationEnum = createCustomEnumType(PARKING_RESERVATION_ENUM, ParkingReservationEnumeration.class);
 
-        public static GraphQLEnumType parkingTypeEnum = GraphQLEnumType.newEnum()
-                .name(PARKING_TYPE_ENUM)
-                .value("parkAndRide", ParkingTypeEnumeration.PARK_AND_RIDE)
-                .value("liftShareParking", ParkingTypeEnumeration.LIFT_SHARE_PARKING)
-                .value("urbanParking", ParkingTypeEnumeration.URBAN_PARKING)
-                .value("airportParking", ParkingTypeEnumeration.AIRPORT_PARKING)
-                .value("trainStationParking", ParkingTypeEnumeration.TRAIN_STATION_PARKING)
-                .value("exhibitionCentreParking", ParkingTypeEnumeration.EXHIBITION_CENTRE_PARKING)
-                .value("rentalCarParking", ParkingTypeEnumeration.RENTAL_CAR_PARKING)
-                .value("shoppingCentreParking", ParkingTypeEnumeration.SHOPPING_CENTRE_PARKING)
-                .value("motorwayParking", ParkingTypeEnumeration.MOTORWAY_PARKING)
-                .value("roadside", ParkingTypeEnumeration.ROADSIDE)
-                .value("parkingZone", ParkingTypeEnumeration.PARKING_ZONE)
-                .value("undefined", ParkingTypeEnumeration.UNDEFINED)
-                .value("cycleRental", ParkingTypeEnumeration.CYCLE_RENTAL)
-                .value("other", ParkingTypeEnumeration.OTHER)
-                .build();
-        
+        public static GraphQLEnumType parkingTypeEnum = createCustomEnumType(PARKING_TYPE_ENUM, ParkingTypeEnumeration.class);
+
         public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
 
         public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
