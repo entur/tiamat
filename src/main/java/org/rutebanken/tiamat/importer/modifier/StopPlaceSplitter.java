@@ -69,7 +69,7 @@ public class StopPlaceSplitter {
 
                     if(!wasGrouped) {
                         // Was not grouped. Which means split out and create new group, then break to avoid splitting/grouping more.
-                        logger.info("Splitting quay {} from stop {} as it is too far away from previous quay.", quay.getOriginalIds(), originalStop.getOriginalIds());
+                        logger.info("Splitting quay {} from stop {} {} as it is too far away from previous quay.", quay.getOriginalIds(), originalStop.getName(),originalStop.getOriginalIds());
                         quayGroups.add(new ArrayList<>(Arrays.asList(quay)));
 
                     }
