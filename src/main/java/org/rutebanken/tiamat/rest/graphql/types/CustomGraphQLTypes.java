@@ -187,6 +187,18 @@ public class CustomGraphQLTypes {
                     .type(GraphQLString))
             .build();
 
+
+        public static GraphQLInputObjectType embeddableMultiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
+                .field(newInputObjectField()
+                        .name(VALUE)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(LANG)
+                        .type(GraphQLString))
+                .build();
+
+
         public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
                 .name(ID)
                 .type(GraphQLString)
@@ -516,16 +528,6 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(LIMITATIONS)
                         .type(accessibilityLimitationsInputObjectType))
-            .build();
-
-    public static GraphQLInputObjectType embeddableMultiLingualStringInputObjectType = GraphQLInputObjectType.newInputObject()
-            .name(INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
-            .field(newInputObjectField()
-                    .name(VALUE)
-                    .type(GraphQLString))
-            .field(newInputObjectField()
-                    .name(LANG)
-                    .type(GraphQLString))
             .build();
 
     public static GraphQLObjectType alternativeNameObjectType = newObject()
