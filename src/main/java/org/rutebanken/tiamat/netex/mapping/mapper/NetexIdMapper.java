@@ -46,7 +46,7 @@ public class NetexIdMapper {
         } else {
             logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
             if(tiamatEntity instanceof  DataManagedObjectStructure) {
-                moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId().trim());
+                moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId());
                 tiamatEntity.setNetexId(null);
             }
         }
@@ -73,24 +73,35 @@ public class NetexIdMapper {
                         if(keyValueStructure.getValue().contains(",")) {
                             String[] originalIds = keyValueStructure.getValue().split(",");
                             for(String originalId : originalIds) {
-                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, stripLeadingZeros(originalId));
+                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, originalId, true, true);
                             }
                         } else {
-                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, stripLeadingZeros(keyValueStructure.getValue()));
+                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, keyValueStructure.getValue(), true, true);
                         }
 
                     } else {
-                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue());
+                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue(), false, false);
                     }
                 }
             }
         }
     }
 
-    private void addKeyValueAvoidEmpty(DataManagedObjectStructure tiamatEntity, final String key, final String value) {
+    private void addKeyValueAvoidEmpty(DataManagedObjectStructure tiamatEntity, final String key, final String value, boolean ignoreEmptyPostfix, boolean stripLeadingZeros) {
 
         String keytoAdd = key.trim();
         String valueToAdd = value.trim();
+
+        if(ignoreEmptyPostfix) {
+            if(Strings.isNullOrEmpty(NetexIdHelper.extractIdPostfix(valueToAdd))) {
+                logger.info("Ignoring empty postfix for key value: key {} and value '{}'", keytoAdd, valueToAdd);
+                return;
+            }
+        }
+
+        if(stripLeadingZeros) {
+            valueToAdd = stripLeadingZeros(valueToAdd);
+        }
 
         if(!Strings.isNullOrEmpty(keytoAdd) && !Strings.isNullOrEmpty(valueToAdd)) {
             logger.trace("Adding key {} and value {}", keytoAdd, valueToAdd);
@@ -104,7 +115,7 @@ public class NetexIdMapper {
      * @param netexId The id to add to values, using the key #{ORIGINAL_ID_KEY}
      */
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        addKeyValueAvoidEmpty(dataManagedObjectStructure, ORIGINAL_ID_KEY, stripLeadingZeros(netexId));
+        addKeyValueAvoidEmpty(dataManagedObjectStructure, ORIGINAL_ID_KEY, netexId, true, true);
     }
 
 }
