@@ -56,7 +56,7 @@ public class NetexIdHelper {
         try {
             return Long.valueOf(extractIdPostfix(netexId));
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("Cannot parse NeTEx ID PostFix into numberic valueID: '" + netexId +"'");
+            throw new NumberFormatException("Cannot parse NeTEx ID postfix into numeric valueID: '" + netexId +"'");
         }
     }
 
