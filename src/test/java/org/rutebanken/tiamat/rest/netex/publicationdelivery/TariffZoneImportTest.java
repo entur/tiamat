@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -200,7 +201,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .withId("NTR:TariffZone:03");
 
         StopPlace stopPlace2 = new StopPlace()
-                .withId("ATB:StopPlace:322")
+                .withId("NTR:StopPlace:322")
                 .withVersion("2")
                 .withTariffZones(new TariffZoneRefs_RelStructure()
                         .withTariffZoneRef(new TariffZoneRef()
@@ -225,6 +226,10 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
         assertThat(actualZones).hasSize(2);
+
+        List<StopPlace> actualStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
+        assertThat(actualStopPlaces).hasSize(1);
+        assertThat(actualStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
     }
 }
