@@ -499,7 +499,7 @@ public class QuayMergerTest {
         incomingQuays.add(second);
 
         // Add stop place to manually check that we are logging stop place's original ID
-        StopPlace stopPlaceForLogging = new StopPlace();
+        StopPlace stopPlaceForLogging = new StopPlace(new EmbeddableMultilingualString("Asker"));
         stopPlaceForLogging.getOriginalIds().add("12341234");
 
         Set<Quay> result = quayMerger.appendImportIds(stopPlaceForLogging, incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), false);

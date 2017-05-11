@@ -98,7 +98,11 @@ public class QuayMerger {
                 incomingQuay.setChanged(ZonedDateTime.now());
                 addedQuaysCounter.incrementAndGet();
             } else {
-                logger.warn("No match for quay belonging to stop place {}. Quay: {}. Full incoming quay toString: {}. Was looking in list of quays for match: {}", newStopPlace.getOriginalIds(), incomingQuay.getOriginalIds(), incomingQuay, result);
+                logger.warn("No match for quay belonging to stop place {} - {}. Quay: {}. Full incoming quay toString: {}. Was looking in list of quays for match: {}",
+                        newStopPlace.getOriginalIds(),
+                        newStopPlace.getName() != null ? newStopPlace.getName().getValue() : "",
+                        incomingQuay.getOriginalIds(),
+                        incomingQuay, result);
             }
         }
 
