@@ -218,18 +218,31 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
 
         // Second import should match and merge tariffzones
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
+        publicationDeliveryParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
 
-        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
         assertThat(actualZones).hasSize(2);
 
-        List<StopPlace> actualStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
-        assertThat(actualStopPlaces).hasSize(1);
-        assertThat(actualStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
+        assertThat(actualIdMatchedStopPlaces).hasSize(1);
+        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+
+        PublicationDeliveryStructure idMatchResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
+
+        actualZones = publicationDeliveryTestHelper.findSiteFrame(idMatchResponse)
+                .getTariffZones().getTariffZone();
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones).hasSize(2);
+
+        actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
+        assertThat(actualIdMatchedStopPlaces).hasSize(1);
+        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
     }
 }
