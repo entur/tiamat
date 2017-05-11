@@ -34,7 +34,7 @@ public class OriginalIdMatcher {
         }
 
         if(match) {
-            logger.info("Object matches on original ID: {}. Existing object ID: {}", dataManagedObject, dataManagedObject.getNetexId());
+            logger.debug("Object matches on original ID: {}. Existing object ID: {}", dataManagedObject, dataManagedObject.getNetexId());
             return true;
         }
 

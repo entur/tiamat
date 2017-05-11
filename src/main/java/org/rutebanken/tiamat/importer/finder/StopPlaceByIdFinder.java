@@ -26,10 +26,13 @@ public class StopPlaceByIdFinder {
     private QuayRepository quayRepository;
 
     @Autowired
+    private StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder;
+
+    @Autowired
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
     private List<Function<StopPlace, Function<Boolean, Optional<StopPlace>>>> findFunctionList = Arrays.asList(
-            stopPlace -> hasQuays -> findByQuayOriginalId(stopPlace, hasQuays),
+            stopPlace -> hasQuays -> stopPlaceByQuayOriginalIdFinder.find(stopPlace, hasQuays),
             stopPlace -> hasQuays -> findByStopPlaceOriginalId(stopPlace),
             stopPlace -> hasQuays -> findByNetexId(stopPlace),
             stopPlace -> hasQuays -> findByQuayNetexId(stopPlace, hasQuays));
@@ -64,30 +67,7 @@ public class StopPlaceByIdFinder {
         return Optional.empty();
     }
 
-    public Optional<StopPlace> findByQuayOriginalId(StopPlace incomingStopPlace, boolean hasQuays) {
-        if (hasQuays) {
-            logger.info("Looking for stop by quay original ID");
-            return incomingStopPlace.getQuays().stream()
-                    .flatMap(quay -> quay.getOriginalIds().stream())
-                    .map(quayOriginalId -> {
-                        try {
-                            // Extract last part of ID. Remove zero padding. Fall back to string ID.
-                            return String.valueOf(NetexIdHelper.extractIdPostfix(quayOriginalId));
-                        } catch (NumberFormatException e) {
-                            return quayOriginalId;
-                        }
-                    })
-                    .peek(quayOriginalId -> logger.trace("looking for stop place by quay original id: {}", quayOriginalId))
-                    .map(quayOriginalId -> stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId))
-                    .filter(stopPlaceNetexIds -> stopPlaceNetexIds != null)
-                    .filter(stopPlaceNetexIds -> !stopPlaceNetexIds.isEmpty())
-                    .map(stopPlaceNetexIds -> stopPlaceNetexIds.get(0))
-                    .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
-                    .filter(stopPlace -> stopPlace != null)
-                    .findFirst();
-        }
-        return Optional.empty();
-    }
+
 
     public Optional<StopPlace> findByStopPlaceOriginalId(StopPlace incomingStopPlace) {
         logger.info("Looking for stop by stops original id: {}", incomingStopPlace.getOriginalIds());
