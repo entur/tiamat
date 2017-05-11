@@ -53,7 +53,9 @@ public class StopPlaceIdMatcher {
                 stopPlaceMatched.incrementAndGet();
 
             } else {
-                logger.warn("Cannot find stop place from quay imported-id, stop place nsr id, stop place imported-id or quay nsr id {}", incomingStopPlace);
+                logger.warn("Cannot find stop place from IDs: {}. StopPlace toString: {}.",
+                        incomingStopPlace.importedIdAndNameToString(),
+                        incomingStopPlace);
             }
         });
 

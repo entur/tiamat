@@ -85,6 +85,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     public void doNotmatchStopOnSimilarOriginalId() throws Exception {
 
         StopPlace stopPlaceNotToBeMatched = new StopPlace()
+                .withName(new MultilingualString().withValue("Hest"))
                 .withId("RUT:StopPlace:212345678910")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")

@@ -70,7 +70,7 @@ public class StopPlaceByIdFinder {
 
 
     public Optional<StopPlace> findByStopPlaceOriginalId(StopPlace incomingStopPlace) {
-        logger.info("Looking for stop by stops original id: {}", incomingStopPlace.getOriginalIds());
+        logger.info("Looking for stop by stops by original id: {}", incomingStopPlace.getOriginalIds());
         return Optional.ofNullable(stopPlaceFromOriginalIdFinder.find(incomingStopPlace));
     }
 }

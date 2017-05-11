@@ -81,4 +81,7 @@ public abstract class GroupOfEntities_VersionStructure
         this.privateCode = value;
     }
 
+    public String importedIdAndNameToString() {
+        return getOriginalIds() + " - " + getName() != null ? getName().getValue() : "";
+    }
 }
