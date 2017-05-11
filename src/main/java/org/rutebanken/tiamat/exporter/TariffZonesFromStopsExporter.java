@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+
 @Component
 @Transactional
 public class TariffZonesFromStopsExporter {
@@ -50,15 +52,16 @@ public class TariffZonesFromStopsExporter {
                     return responseSiteFrame.getTariffZones()
                             .getTariffZone()
                             .stream()
-                            .peek(tariffZone -> logger.debug("Tariffzone: {} - Tariffzone ref {}", tariffZone.getId(), tariffZoneRef.getRef()))
-                            .noneMatch(tariffZone -> tariffZone.getId().equals(tariffZoneRef.getRef()));
+                            .peek(tariffZone -> logger.debug("Tariffzone added: {} - {} ref candidate: Tariffzone ref {} - {}", tariffZone.getId(), tariffZone.getVersion(), tariffZoneRef.getRef(), tariffZoneRef.getVersion()))
+                            .noneMatch(alreadyAddedTariffZone ->
+                                    alreadyAddedTariffZone.getId().equals(tariffZoneRef.getRef())
+                                    && (alreadyAddedTariffZone.getVersion().equals(tariffZoneRef.getVersion())
+                                    || alreadyAddedTariffZone.getVersion() == null || tariffZoneRef.getVersion() == null));
                 })
-                .map(tariffZoneRef -> {
-                    TariffZoneRef tiamatRef = new TariffZoneRef();
-                    tiamatRef.setRef(tariffZoneRef.getRef());
-                    return tiamatRef;
-                })
-                .map(tariffZoneRef -> referenceResolver.resolve(tariffZoneRef))
+                .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
+                .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
+                .map(mappedTariffZoneRef -> referenceResolver.resolve(mappedTariffZoneRef))
+                .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
                 .distinct()
                 .collect(Collectors.toList());
