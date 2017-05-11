@@ -10,6 +10,6 @@ public class ImportLogger extends Timer {
     public ImportLogger(ImportLoggerTask importLoggerTask) {
         super(ImportLogger.class.getSimpleName()+"-logger");
         this.importLoggerTask = importLoggerTask;
-        scheduleAtFixedRate(this.importLoggerTask, 2000, 2000);
+        scheduleAtFixedRate(this.importLoggerTask, 10000, 10000);
     }
 }
