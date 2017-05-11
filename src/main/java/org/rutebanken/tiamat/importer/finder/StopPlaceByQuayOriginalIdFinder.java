@@ -47,7 +47,7 @@ public class StopPlaceByQuayOriginalIdFinder {
     private String extractNumericValueIfPossible(String quayOriginalId) {
         try {
             // Extract last part of ID. Remove zero padding. Fall back to string ID.
-            return String.valueOf(NetexIdHelper.extractIdPostfix(quayOriginalId));
+            return String.valueOf(NetexIdHelper.extractIdPostfixNumeric(quayOriginalId));
         } catch (NumberFormatException e) {
             return quayOriginalId;
         }

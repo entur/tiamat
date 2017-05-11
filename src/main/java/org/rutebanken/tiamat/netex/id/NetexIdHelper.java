@@ -95,7 +95,7 @@ public class NetexIdHelper {
             return prefix +":"+type+":"+String.valueOf(numeric);
 
         } catch (IllegalArgumentException e) {
-            logger.info("Got exception while stripping leading zeros from numeric ID in {}. Returning value as is. Ex message: {}", originalIdValue, e.getMessage(), e);
+            logger.info("Got exception while stripping leading zeros from numeric ID in {}. Returning value as is. Ex message: {}", originalIdValue, e.getMessage());
             return originalIdValue;
         }
     }
