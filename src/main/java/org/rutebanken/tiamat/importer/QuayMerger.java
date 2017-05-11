@@ -52,7 +52,7 @@ public class QuayMerger {
             newStopPlace.setQuays(new HashSet<>());
         }
 
-        Set<Quay> result = appendImportIds(newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays);
+        Set<Quay> result = appendImportIds(newStopPlace, newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays);
 
         existingStopPlace.setQuays(result);
 
@@ -61,6 +61,21 @@ public class QuayMerger {
     }
 
     public Set<Quay> appendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
+        return appendImportIds(null, newQuays, existingQuays, updatedQuaysCounter, addedQuaysCounter, addNewQuays);
+    }
+
+    /**
+     * Match new quays with existing quays, based on fields like geographic coordinates, compass bearing, name, original IDs and public code.
+     *
+     * @param newStopPlace only used for logging
+     * @param newQuays incoming quays to match
+     * @param existingQuays existing quays to match against
+     * @param updatedQuaysCounter how many quays were updated
+     * @param addedQuaysCounter how many quays were added
+     * @param addNewQuays if allowed to add quays if not match found
+     * @return the resulting set of quays after matching, appending and adding.
+     */
+     public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
 
         Set<Quay> result = new HashSet<>();
         if(existingQuays != null) {
@@ -83,7 +98,7 @@ public class QuayMerger {
                 incomingQuay.setChanged(ZonedDateTime.now());
                 addedQuaysCounter.incrementAndGet();
             } else {
-                logger.warn("Found no match for incoming quay {}. Looking in list of quays: {}", incomingQuay, result);
+                logger.warn("No match for quay belonging to stop place {}. Quay: {}. Full incoming quay toString: {}. Was looking in list of quays for match: {}", newStopPlace.getOriginalIds(), incomingQuay.getOriginalIds(), incomingQuay, result);
             }
         }
 

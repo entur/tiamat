@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
@@ -497,8 +498,12 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
-        assertThat(result).as("Quays should NOT have been merged. Public Code is different").hasSize(2);
+        // Add stop place to manually check that we are logging stop place's original ID
+        StopPlace stopPlaceForLogging = new StopPlace();
+        stopPlaceForLogging.getOriginalIds().add("12341234");
+
+        Set<Quay> result = quayMerger.appendImportIds(stopPlaceForLogging, incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), false);
+        assertThat(result).as("Quay should NOT have been added. Public Code is different").hasSize(1);
     }
 
     /**
