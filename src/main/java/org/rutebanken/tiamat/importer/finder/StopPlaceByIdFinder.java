@@ -39,7 +39,7 @@ public class StopPlaceByIdFinder {
 
     public Optional<StopPlace> findByNetexId(StopPlace incomingStopPlace) {
         if (incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
-            logger.info("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
+            logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
             return Optional.ofNullable(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId()));
         }
         return Optional.empty();
