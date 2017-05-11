@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -61,6 +63,12 @@ StopPlaceRegisterGraphQLSchema {
     @Autowired
     DataFetcher stopPlaceUpdater;
 
+    @Autowired
+    DataFetcher parkingFetcher;
+
+    @Autowired
+    DataFetcher parkingUpdater;
+
 
     @PostConstruct
     public void init() {
@@ -87,20 +95,6 @@ StopPlaceRegisterGraphQLSchema {
                 .type(accessibilityAssessmentObjectType)
                 .build()
         );
-
-        GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
-                .name(GEOMETRY)
-                .type(geoJsonObjectType)
-                .dataFetcher(env -> {
-                            if (env.getSource() instanceof Zone_VersionStructure) {
-                                Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
-                                return source.getCentroid();
-                            } else if(env.getSource() instanceof Link) {
-                                Link link = (Link) env.getSource();
-                                return link.getLineString();
-                            }
-                            return null;
-                        }).build();
 
         commonFieldsList.add(geometryFieldDefinition);
 
@@ -170,6 +164,12 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Find path links")
                         .argument(createFindPathLinkArguments(allVersionsArgument))
                         .dataFetcher(pathLinkFetcher))
+                .field(newFieldDefinition()
+                        .name(FIND_PARKING)
+                        .type(new GraphQLList(parkingObjectType))
+                        .description("Find parking")
+                        .argument(createFindParkingArguments(allVersionsArgument))
+                        .dataFetcher(parkingFetcher))
                 .build();
 
 
@@ -200,8 +200,17 @@ StopPlaceRegisterGraphQLSchema {
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PATH_LINK)
                                 .type(new GraphQLList(pathLinkObjectInputType)))
-                        .description("Create new or update existing "+OUTPUT_TYPE_PATH_LINK)
+                        .description("Create new or update existing " + OUTPUT_TYPE_PATH_LINK)
                         .dataFetcher(pathLinkUpdater))
+                .field(newFieldDefinition()
+                        .type(new GraphQLList(parkingObjectType))
+                        .name(MUTATE_PARKING)
+                        .description("Create new or update existing Parking")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_PARKING)
+                                .type(parkingObjectInputType))
+                        .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
+                        .dataFetcher(parkingUpdater))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
@@ -231,6 +240,21 @@ StopPlaceRegisterGraphQLSchema {
                 .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
                 .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindParkingArguments(GraphQLArgument allVersionsArgument) {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
+                .build());
+        arguments.addAll(createPageAndSizeArguments());
+        arguments.add(allVersionsArgument);
         return arguments;
     }
 

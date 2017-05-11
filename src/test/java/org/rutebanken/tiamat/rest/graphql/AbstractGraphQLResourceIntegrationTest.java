@@ -28,6 +28,7 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatInteg
                 .port(port)
                 .contentType(ContentType.JSON)
                 .body(graphQlJsonQuery)
+                .log().body()
            .when()
                 .post(BASE_URI_GRAPHQL)
                 .then()

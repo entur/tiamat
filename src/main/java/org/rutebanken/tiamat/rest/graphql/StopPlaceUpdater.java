@@ -25,6 +25,7 @@ import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
 
 @Service("stopPlaceUpdater")
 @Transactional
@@ -378,10 +379,6 @@ class StopPlaceUpdater implements DataFetcher {
         limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
         limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
         return limitation;
-    }
-
-    private EmbeddableMultilingualString getEmbeddableString(Map map) {
-        return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
     }
 
     private boolean populateAlternativeNameFromInput(SiteElement entity, Map entry) {

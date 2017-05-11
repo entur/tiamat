@@ -8,21 +8,21 @@ public abstract class GroupOfEntities_VersionStructure
 
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "name_value")),
-            @AttributeOverride(name = "lang", column = @Column(name = "name_lang"))
+            @AttributeOverride(name = "lang", column = @Column(name = "name_lang", length = 5))
     })
     @Embedded
     protected EmbeddableMultilingualString name;
 
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "short_name_value")),
-            @AttributeOverride(name = "lang", column = @Column(name = "short_name_lang"))
+            @AttributeOverride(name = "lang", column = @Column(name = "short_name_lang", length = 5))
     })
     @Embedded
     protected EmbeddableMultilingualString shortName;
 
     @AttributeOverrides({
-            @AttributeOverride(name = "value", column = @Column(name = "description_value")),
-            @AttributeOverride(name = "lang", column = @Column(name = "description_lang"))
+            @AttributeOverride(name = "value", column = @Column(name = "description_value", length = 4000)),
+            @AttributeOverride(name = "lang", column = @Column(name = "description_lang", length = 5))
     })
     @Embedded
     protected EmbeddableMultilingualString description;

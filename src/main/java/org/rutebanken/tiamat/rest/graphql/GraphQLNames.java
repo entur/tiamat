@@ -101,12 +101,32 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_PARKING = "Parking";
+    public static final String INPUT_TYPE_PARKING = OUTPUT_TYPE_PARKING + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_PARKING_PROPERTIES = "ParkingProperties";
+    public static final String INPUT_TYPE_PARKING_PROPERTIES = OUTPUT_TYPE_PARKING_PROPERTIES + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_PARKING_CAPACITY = "ParkingCapacity";
+    public static final String INPUT_TYPE_PARKING_CAPACITY = OUTPUT_TYPE_PARKING_CAPACITY + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_PARKING_AREA = "ParkingArea";
+    public static final String INPUT_TYPE_PARKING_AREA = OUTPUT_TYPE_PARKING_AREA + INPUT_TYPE_POSTFIX;
+
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
     public static final String INTERCHANGE_WEIGHTING_TYPE_ENUM = "InterchangeWeightingType";
+
+    public static final String PARKING_TYPE_ENUM = "ParkingType";
+
+    public static final String PARKING_VEHICLE_ENUM = "ParkingVehicleType";
+    public static final String PARKING_LAYOUT_ENUM = "ParkingLayoutType";
+    public static final String PARKING_RESERVATION_ENUM = "ParkingReservationType";
+    public static final String PARKING_USER_ENUM = "ParkingUserType";
+    public static final String PARKING_STAY_TYPE_ENUM = "ParkingStayType";
 
     public static final String ID = "id";
     public static final String STOP_PLACE_TYPE = "stopPlaceType";
@@ -196,13 +216,39 @@ public class GraphQLNames {
     public static final String VALUE = "value";
     public static final String LANG = "lang";
 
+    public static final String TOTAL_CAPACITY = "totalCapacity";
+
+
+    public static final String PARKING_TYPE = "parkingType";
+    public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
+    public static final String PARKING_VEHICLE_TYPE = "parkingVehicleType";
+    public static final String PARKING_USER_TYPES = "parkingUserTypes";
+    public static final String MAXIMUM_STAY = "maximumStay";
+    public static final String PARKING_STAY_TYPE = "parkingStayType";
+    public static final String SPACES = "spaces";
+    public static final String PARKING_PROPERTIES = "parkingProperties";
+    public static final String PARKING_LAYOUT = "parkingLayout";
+    public static final String PARKING_AREAS = "parkingAreas";
+    public static final String PRINCIPAL_CAPACITY = "principalCapacity";
+    public static final String OVERNIGHT_PARKING_PERMITTED = "overnightParkingPermitted";
+    public static final String RECHARGING_AVAILABLE = "rechargingAvailable";
+    public static final String SECURE = "secure";
+    public static final String REAL_TIME_OCCUPANCY_AVAILABLE = "realTimeOccupancyAvailable";
+    public static final String PARKING_RESERVATION = "parkingReservation";
+    public static final String BOOKING_URL = "bookingUrl";
+    public static final String FREE_PARKING_OUT_OF_HOURS = "freeParkingOutOfHours";
+    public static final String LABEL = "label";
+    public static final String PARENT_SITE_REF = "parentSiteRef";
+
     public static final String FIND_STOPPLACE = "stopPlace";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";
+    public static final String FIND_PARKING = "parking";
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
+    public static final String MUTATE_PARKING = "mutateParking";
 }
