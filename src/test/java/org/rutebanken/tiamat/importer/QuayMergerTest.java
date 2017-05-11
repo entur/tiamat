@@ -554,14 +554,13 @@ public class QuayMergerTest {
 
     @Test
     public void matchQuaysIfMissingPublicCode() {
-
         Quay existingQuay = new Quay();
         existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502, 68.59)));
         existingQuay.setPublicCode("01");
         existingQuay.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("TRO:Quay:1903208101")));
 
         Quay incomingQuay = new Quay();
-        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502405, 68.590161)));
+        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502, 68.59)));
         incomingQuay.setCompassBearing(353.0f);
         incomingQuay.getOriginalIds().addAll(Arrays.asList("NOR:Quay:2001208101"));
 
