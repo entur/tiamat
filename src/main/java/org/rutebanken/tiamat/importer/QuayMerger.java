@@ -99,7 +99,7 @@ public class QuayMerger {
                 addedQuaysCounter.incrementAndGet();
             } else {
                 logger.warn("No match for quay belonging to stop place {}. Quay: {}. Full incoming quay toString: {}. Was looking in list of quays for match: {}",
-                        newStopPlace.importedIdAndNameToString(),
+                        newStopPlace != null ? newStopPlace.importedIdAndNameToString() : null,
                         incomingQuay.getOriginalIds(),
                         incomingQuay, result);
             }
@@ -153,7 +153,7 @@ public class QuayMerger {
 
     private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
         boolean nameMatch = haveMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
-        boolean publicCodeMatch = haveMatchingPublicCode(incomingQuay, alreadyAdded);
+        boolean publicCodeMatch = haveMatchingPublicCodeOrOneIsMissing(incomingQuay, alreadyAdded);
 
         if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS)
                 && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
@@ -252,7 +252,12 @@ public class QuayMerger {
         return true;
     }
 
-    private boolean haveMatchingPublicCode(Quay quay1, Quay quay2) {
+    private boolean haveMatchingPublicCodeOrOneIsMissing(Quay quay1, Quay quay2) {
+        if((quay1.getPublicCode() == null && quay2.getPublicCode() != null)
+                || (quay1.getPublicCode() != null && quay1.getPublicCode() == null)) {
+            return true;
+        }
+
         return Objects.equals(quay1.getPublicCode(), quay2.getPublicCode());
     }
 

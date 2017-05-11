@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 
 public class QuayMergerTest {
 
@@ -551,6 +552,25 @@ public class QuayMergerTest {
 
     }
 
+    @Test
+    public void matchQuaysIfMissingPublicCode() {
+
+        Quay existingQuay = new Quay();
+        existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502, 68.59)));
+        existingQuay.setPublicCode("01");
+        existingQuay.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("TRO:Quay:1903208101")));
+
+        Quay incomingQuay = new Quay();
+        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502405, 68.590161)));
+        incomingQuay.setCompassBearing(353.0f);
+        incomingQuay.getOriginalIds().addAll(Arrays.asList("NOR:Quay:2001208101"));
+
+        Set<Quay> result = quayMerger.appendImportIds(Sets.newHashSet(incomingQuay), Sets.newHashSet(existingQuay), new AtomicInteger(), new AtomicInteger(), false);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next()).isEqualTo(existingQuay);
+        assertThat(result.iterator().next().getOriginalIds()).contains(incomingQuay.getOriginalIds().iterator().next());
+    }
 
     private Point getOffsetPoint(Point point, int offsetMeters, int azimuth) {
         GeodeticCalculator calc = new GeodeticCalculator();
