@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class NetexIdHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetexIdHelper.class);
 
     // TODO: make it configurable, maybe in ValidPrefixList
     public static final String NSR = "NSR";
