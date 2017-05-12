@@ -141,7 +141,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:111111111", result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:0111111111", result.get(0));
     }
 
     @Test
