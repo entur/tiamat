@@ -73,21 +73,21 @@ public class NetexIdMapper {
                         if(keyValueStructure.getValue().contains(",")) {
                             String[] originalIds = keyValueStructure.getValue().split(",");
                             for(String originalId : originalIds) {
-                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, originalId, true, true);
+                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, originalId, true);
                             }
                         } else {
-                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, keyValueStructure.getValue(), true, true);
+                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, keyValueStructure.getValue(), true);
                         }
 
                     } else {
-                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue(), false, false);
+                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue(), false);
                     }
                 }
             }
         }
     }
 
-    private void addKeyValueAvoidEmpty(DataManagedObjectStructure tiamatEntity, final String key, final String value, boolean ignoreEmptyPostfix, boolean stripLeadingZeros) {
+    private void addKeyValueAvoidEmpty(DataManagedObjectStructure tiamatEntity, final String key, final String value, boolean ignoreEmptyPostfix) {
 
         String keytoAdd = key.trim();
         String valueToAdd = value.trim();
@@ -99,9 +99,6 @@ public class NetexIdMapper {
             }
         }
 
-        if(stripLeadingZeros) {
-            valueToAdd = stripLeadingZeros(valueToAdd);
-        }
 
         if(!Strings.isNullOrEmpty(keytoAdd) && !Strings.isNullOrEmpty(valueToAdd)) {
             logger.trace("Adding key {} and value {}", keytoAdd, valueToAdd);
@@ -115,7 +112,7 @@ public class NetexIdMapper {
      * @param netexId The id to add to values, using the key #{ORIGINAL_ID_KEY}
      */
     public void moveOriginalIdToKeyValueList(DataManagedObjectStructure dataManagedObjectStructure, String netexId) {
-        addKeyValueAvoidEmpty(dataManagedObjectStructure, ORIGINAL_ID_KEY, netexId, true, true);
+        addKeyValueAvoidEmpty(dataManagedObjectStructure, ORIGINAL_ID_KEY, netexId, true);
     }
 
 }
