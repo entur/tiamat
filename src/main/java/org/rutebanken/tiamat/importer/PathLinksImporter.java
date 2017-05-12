@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,14 +56,14 @@ public class PathLinksImporter {
                         PathLink existing = optionalPathLink.get();
                         boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing);
                         if(changed) {
-                            existing.setChanged(ZonedDateTime.now());
+                            existing.setChanged(Instant.now());
                         }
                         // Update place ref?
                         versionIncrementor.incrementVersion(existing);
                         return existing;
                     } else {
                         logger.debug("No existing path link. Using incoming {}", pathLink);
-                        pathLink.setCreated(ZonedDateTime.now());
+                        pathLink.setCreated(Instant.now());
                         pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);
 
                         resolveAndFixPlaceRefs(pathLink.getFrom());

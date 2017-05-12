@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
@@ -21,7 +22,6 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.GraphQLDateScalar;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
@@ -68,6 +68,9 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher parkingUpdater;
+
+    @Autowired
+    DateScalar dateScalar;
 
 
     @PostConstruct
@@ -428,11 +431,11 @@ StopPlaceRegisterGraphQLSchema {
                 .name(OUTPUT_TYPE_VALID_BETWEEN)
                 .field(newFieldDefinition()
                         .name(VALID_BETWEEN_FROM_DATE)
-                        .type(GraphQLDateScalar)
+                        .type(dateScalar.getGraphQLDateScalar())
                         .description(DATE_SCALAR_DESCRIPTION))
                 .field(newFieldDefinition()
                         .name(VALID_BETWEEN_TO_DATE)
-                        .type(GraphQLDateScalar)
+                        .type(dateScalar.getGraphQLDateScalar())
                         .description(DATE_SCALAR_DESCRIPTION))
                 .build();
     }
@@ -442,11 +445,11 @@ StopPlaceRegisterGraphQLSchema {
                 .name(INPUT_TYPE_VALID_BETWEEN)
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN_FROM_DATE)
-                        .type(new GraphQLNonNull(GraphQLDateScalar))
+                        .type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar()))
                         .description("When the new version is valid from"))
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN_TO_DATE)
-                        .type(GraphQLDateScalar)
+                        .type(dateScalar.getGraphQLDateScalar())
                         .description("When the version is no longer valid"))
                 .build();
     }

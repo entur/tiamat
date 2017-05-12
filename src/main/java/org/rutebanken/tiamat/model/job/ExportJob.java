@@ -5,13 +5,8 @@ import com.google.common.base.MoreObjects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.concurrent.Future;
+import java.time.Instant;
 
 @Entity
 @XmlRootElement
@@ -26,8 +21,8 @@ public class ExportJob {
 
     private String message;
 
-    private ZonedDateTime started;
-    private ZonedDateTime finished;
+    private Instant started;
+    private Instant finished;
 
     private  JobStatus status;
 
@@ -76,19 +71,19 @@ public class ExportJob {
         this.fileName = fileName;
     }
 
-    public ZonedDateTime getStarted() {
+    public Instant getStarted() {
         return started;
     }
 
-    public void setStarted(ZonedDateTime started) {
+    public void setStarted(Instant started) {
         this.started = started;
     }
 
-    public ZonedDateTime getFinished() {
+    public Instant getFinished() {
         return finished;
     }
 
-    public void setFinished(ZonedDateTime finished) {
+    public void setFinished(Instant finished) {
         this.finished = finished;
     }
 

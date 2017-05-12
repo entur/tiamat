@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +16,9 @@ public class EntityInVersionStructure extends EntityStructure {
     @Transient
     protected String dataSourceRef;
 
-    protected ZonedDateTime created;
+    protected Instant created;
 
-    protected ZonedDateTime changed;
+    protected Instant changed;
 
     @Transient
     protected ModificationEnumeration modification;
@@ -51,22 +51,22 @@ public class EntityInVersionStructure extends EntityStructure {
     }
 
 
-    public ZonedDateTime getCreated() {
+    public Instant getCreated() {
         return created;
     }
 
 
-    public void setCreated(ZonedDateTime value) {
+    public void setCreated(Instant value) {
         this.created = value;
     }
 
 
-    public ZonedDateTime getChanged() {
+    public Instant getChanged() {
         return changed;
     }
 
 
-    public void setChanged(ZonedDateTime value) {
+    public void setChanged(Instant value) {
         this.changed = value;
     }
 

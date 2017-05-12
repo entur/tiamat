@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.service;
 
 import graphql.GraphQLException;
-
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
@@ -16,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -95,7 +94,7 @@ public class PathLinkUpdaterService {
 
                 if(changed) {
                     logger.debug("Existing pathLink changed");
-                    existingPathLink.setChanged(ZonedDateTime.now());
+                    existingPathLink.setChanged(Instant.now());
                 }
             }
 

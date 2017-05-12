@@ -2,18 +2,16 @@ package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
 import org.junit.Assert;
+import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,8 +22,8 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		StopPlace stopPlaceOlder = new StopPlace();
 		StopPlace stopPlaceNewer = new StopPlace();
 
-		stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
-		stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
+		stopPlaceOlder.setChanged(Instant.ofEpochMilli(50));
+		stopPlaceNewer.setChanged(Instant.ofEpochMilli(100));
 
 		stopPlaceRepository.save(stopPlaceNewer);
 		stopPlaceRepository.save(stopPlaceOlder);
@@ -44,10 +42,10 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		StopPlace stopPlaceOlder = new StopPlace();
 		StopPlace stopPlaceNewer = new StopPlace();
 
-		stopPlaceOlder.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(50), ZoneId.systemDefault()));
+		stopPlaceOlder.setChanged(Instant.ofEpochMilli(50));
 		stopPlaceOlder.setName(new EmbeddableMultilingualString("it's older", "en"));
 
-		stopPlaceNewer.setChanged(ZonedDateTime.ofInstant(Instant.ofEpochMilli(100), ZoneId.systemDefault()));
+		stopPlaceNewer.setChanged(Instant.ofEpochMilli(100));
 		stopPlaceNewer.setName(new EmbeddableMultilingualString("it's newer", "en"));
 
 		stopPlaceRepository.save(stopPlaceNewer);

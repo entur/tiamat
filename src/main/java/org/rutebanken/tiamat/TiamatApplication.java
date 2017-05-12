@@ -8,13 +8,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @Configuration
 @EnableAutoConfiguration
 @EnableTransactionManagement
 @EnableCaching
-@EntityScan(basePackageClasses={StopPlace.class})
+@EntityScan(basePackageClasses = {StopPlace.class, Jsr310JpaConverters.class})
 @ComponentScan
 public class TiamatApplication {
 
@@ -25,3 +26,4 @@ public class TiamatApplication {
         SpringApplication.run(TiamatApplication.class, args);
     }
 }
+

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -94,8 +94,8 @@ public class QuayMerger {
             } else if(addNewQuays) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
-                incomingQuay.setCreated(ZonedDateTime.now());
-                incomingQuay.setChanged(ZonedDateTime.now());
+                incomingQuay.setCreated(Instant.now());
+                incomingQuay.setChanged(Instant.now());
                 addedQuaysCounter.incrementAndGet();
             } else {
                 logger.warn("No match for quay belonging to stop place {}. Quay: {}. Full incoming quay toString: {}. Was looking in list of quays for match: {}",
@@ -132,7 +132,7 @@ public class QuayMerger {
         boolean changedByMerge = mergeFields(incomingQuay, alreadyAdded);
 
         if(idUpdated || changedByMerge) {
-            alreadyAdded.setChanged(ZonedDateTime.now());
+            alreadyAdded.setChanged(Instant.now());
             updatedQuaysCounter.incrementAndGet();
         }
     }

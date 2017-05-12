@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class QuayTest extends TiamatIntegrationTest {
     public void persistQuayWithCommonValues() throws ParseException {
         Quay quay = new Quay();
         quay.setVersion(1L);
-        quay.setCreated(ZonedDateTime.parse("2010-04-17T09:30:47Z"));
+        quay.setCreated(Instant.parse("2010-04-17T09:30:47Z"));
         quay.setDataSourceRef("nptg:DataSource:NaPTAN");
         quay.setResponsibilitySetRef("nptg:ResponsibilitySet:082");
 

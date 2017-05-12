@@ -1,43 +1,40 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 @Entity
 public class ValidBetween extends ValidityCondition {
 
-    private ZonedDateTime fromDate;
+    private Instant fromDate;
 
-    private ZonedDateTime toDate;
+    private Instant toDate;
 
-    public ValidBetween(ZonedDateTime fromDate, ZonedDateTime toDate) {
+    public ValidBetween(Instant fromDate, Instant toDate) {
         this.fromDate = fromDate;
         this.toDate = toDate;
     }
 
-    public ValidBetween(ZonedDateTime fromDate) {
+    public ValidBetween(Instant fromDate) {
         this.fromDate = fromDate;
     }
 
     public ValidBetween() {
     }
 
-    public ZonedDateTime getFromDate() {
+    public Instant getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(ZonedDateTime fromDate) {
+    public void setFromDate(Instant fromDate) {
         this.fromDate = fromDate;
     }
 
-    public ZonedDateTime getToDate() {
+    public Instant getToDate() {
         return toDate;
     }
 
-    public void setToDate(ZonedDateTime toDate) {
+    public void setToDate(Instant toDate) {
         this.toDate = toDate;
     }
 }
