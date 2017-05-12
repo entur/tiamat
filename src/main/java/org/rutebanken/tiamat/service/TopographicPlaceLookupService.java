@@ -6,6 +6,7 @@ import com.google.common.base.Suppliers;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
@@ -34,6 +35,8 @@ public class TopographicPlaceLookupService {
 
 
     private final Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 10, TimeUnit.HOURS);
+
+//    private final ResettableMemoizer<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> memoizedTopographicPlaces = new ResettableMemoizer<>(getTopographicPlaceSupplier2());
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -74,6 +77,19 @@ public class TopographicPlaceLookupService {
                 .peek(topographicPlace -> logger.debug("Found topographic place match: {}", topographicPlace.getNetexId()))
                 .findAny();
     }
+
+//    private java.util.function.Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier2() {
+//        return () -> {
+//            logger.info("Fetching topographic places from repository");
+//            return topographicPlaceRepository.findAllMaxVersion()
+//                    .stream()
+//                    .filter(topographicPlace -> topographicPlace.getPolygon() != null)
+//                    .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
+//                    .sorted(new TopographicPlaceByAdminLevelComparator())
+//                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getPolygon()))
+//                    .collect(toList());
+//        };
+//    }
 
     private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier() {
         return () -> {
