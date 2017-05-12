@@ -114,9 +114,9 @@ public class StopPlaceSplitter {
             if(quay == alreadyAddedQuay) {
                 logger.debug("Quay already added {}", quay.getOriginalIds());
                 return true;
-            } else if(quay.getCentroid() == null && alreadyAddedQuay.getCentroid() != null) {
+            } else if(oneNull(quay.getCentroid(), alreadyAddedQuay.getCentroid())) {
                 return false;
-            } else if (quay.getCentroid() == null && alreadyAddedQuay.getCentroid() == null) {
+            } else if (bothNull(quay.getCentroid(), alreadyAddedQuay.getCentroid())) {
                 alreadyAddedQuayIterator.add(quay);
                 return true;
             } else if(close(quay, alreadyAddedQuay)) {
@@ -126,6 +126,14 @@ public class StopPlaceSplitter {
             }
         }
         return false;
+    }
+
+    private boolean bothNull(Object o1, Object o2) {
+        return o1 == null && o2 == null;
+    }
+
+    private boolean oneNull(Object o1, Object o2) {
+        return (o1 == null && o2 != null) || (o1 != null && o2 == null);
     }
 
     private boolean close(Quay quay1, Quay quay2) {

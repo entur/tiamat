@@ -42,6 +42,29 @@ public class StopPlaceSplitterTest {
         assertThat(actual).hasSize(2);
     }
 
+    /**
+     * NRP-1511
+     */
+    @Test
+    public void oneQuayLacksCoordinates() {
+
+        StopPlace stopPlace = new StopPlace();
+
+        Quay quay = new Quay();
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 30)));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(null);
+
+
+        stopPlace.getQuays().add(quay);
+        stopPlace.getQuays().add(quay2);
+
+        List<StopPlace> actual = stopPlaceSplitter.split(Arrays.asList(stopPlace));
+
+        assertThat(actual).hasSize(2);
+    }
+
     @Test
     public void splitMultipleQuays() {
 
