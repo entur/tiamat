@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.ZonedDateTime;
 
 @Component
 public class ValidBetweenConverter extends BidirectionalConverter<ValidBetween, org.rutebanken.tiamat.model.ValidBetween> {
@@ -18,7 +17,16 @@ public class ValidBetweenConverter extends BidirectionalConverter<ValidBetween, 
     @Override
     public org.rutebanken.tiamat.model.ValidBetween convertTo(ValidBetween validBetween, Type<org.rutebanken.tiamat.model.ValidBetween> type) {
         logger.debug("Ignoring incoming availability conditions {}", validBetween);
-        return null;
+
+        org.rutebanken.tiamat.model.ValidBetween tiamatValidBetween = new org.rutebanken.tiamat.model.ValidBetween();
+        if (validBetween.getFromDate() != null) {
+            tiamatValidBetween.setFromDate(ZonedDateTime.from(validBetween.getFromDate()));
+        }
+        if (validBetween.getToDate() != null) {
+            tiamatValidBetween.setToDate(ZonedDateTime.from(validBetween.getToDate()));
+        }
+
+        return tiamatValidBetween;
     }
 
     @Override

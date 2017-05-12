@@ -832,6 +832,9 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
                 "            <stopPlaces>\n" +
                 "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
+                "                    <ValidBetween>\n" +
+                "                        <FromDate>2017-05-11T10:20:27.394+02:00</FromDate>\n" +
+                "                    </ValidBetween>" +
                 "                    <Name lang=\"no-NO\">Krokstien</Name>\n" +
                 "                    <Centroid>\n" +
                 "                        <Location srsName=\"WGS84\">\n" +
