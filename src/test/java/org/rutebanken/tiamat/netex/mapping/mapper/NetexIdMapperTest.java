@@ -39,24 +39,6 @@ public class NetexIdMapperTest {
     }
 
     @Test
-    public void copyKeyValuesStripZeroPaddedNumericOriginalId() throws Exception {
-
-        String originalId = "RUT:StopPlace:012345670";
-
-        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.StopPlace()
-                .withKeyList(new KeyListStructure()
-                        .withKeyValue(new KeyValueStructure()
-                                .withKey(ORIGINAL_ID_KEY)
-                                .withValue(originalId)));
-
-        StopPlace stopPlace = new StopPlace();
-
-        netexIdMapper.copyKeyValuesToTiamatModel(netexEntity, stopPlace);
-
-        assertThat(stopPlace.getOriginalIds().iterator().next()).isEqualTo("RUT:StopPlace:12345670");
-    }
-
-    @Test
     public void copyKeyValuesAvoidEmptyOriginalId() throws Exception {
 
         String originalId = "RUT:StopPlace:1,,RUT:StopPlace:2";
