@@ -298,11 +298,13 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         stopPlaceRepository.save(stopPlace);
 
+        H2Functions.setSimilarity(0.1);
         // Stop place coordinates within envelope
         Envelope envelope = new Envelope(14, 16, 50, 70);
 
         String result = stopPlaceRepository.findNearbyStopPlace(envelope, "Another stop place which does not exist", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNull();
+        H2Functions.setSimilarity(1);
     }
 
     @Test
