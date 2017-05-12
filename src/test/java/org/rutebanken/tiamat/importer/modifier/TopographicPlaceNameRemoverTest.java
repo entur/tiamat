@@ -33,6 +33,57 @@ public class TopographicPlaceNameRemoverTest {
     }
 
     @Test
+    public void doNotRemoveNameStartingWithTopographicPlaceName() {
+
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Klæbu"));
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Klæbu sentrum"));
+
+        stopPlace.setTopographicPlace(topographicPlace);
+
+        TopographicPlaceNameRemover topographicPlaceNameRemover = new TopographicPlaceNameRemover(mock(ReferenceResolver.class));
+
+        StopPlace actual = topographicPlaceNameRemover.removeIfmatch(stopPlace);
+
+        assertThat(actual.getName().getValue()).isEqualTo("Klæbu sentrum");
+
+    }
+
+    @Test
+    public void doNotRemoveNameIfNameSameAsTopographicPlaceName() {
+
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Asker"));
+
+        stopPlace.setTopographicPlace(topographicPlace);
+
+        TopographicPlaceNameRemover topographicPlaceNameRemover = new TopographicPlaceNameRemover(mock(ReferenceResolver.class));
+
+        StopPlace actual = topographicPlaceNameRemover.removeIfmatch(stopPlace);
+
+        assertThat(actual.getName().getValue()).isEqualTo("Asker");
+
+    }
+
+    @Test
+    public void doNotRemoveNameIfNoSpace() {
+
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Klæbu"));
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("SomethingKlæbu"));
+
+        stopPlace.setTopographicPlace(topographicPlace);
+
+        TopographicPlaceNameRemover topographicPlaceNameRemover = new TopographicPlaceNameRemover(mock(ReferenceResolver.class));
+
+        StopPlace actual = topographicPlaceNameRemover.removeIfmatch(stopPlace);
+
+        assertThat(actual.getName().getValue()).isEqualTo("SomethingKlæbu");
+
+    }
+
+    @Test
     public void removeTopographicPlaceCountyAndTownName() {
 
         TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("Akershus"));

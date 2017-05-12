@@ -23,35 +23,15 @@ public class StopPlacePreSteps {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlacePreSteps.class);
 
-    private final StopPlaceNameCleaner stopPlaceNameCleaner;
-    private final NameToDescriptionMover nameToDescriptionMover;
-    private final QuayNameRemover quayNameRemover;
-    private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
-    private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
-    private final CompassBearingRemover compassBearingRemover;
     private final CentroidComputer centroidComputer;
     private final StopPlaceSplitter stopPlaceSplitter;
-    private final TopographicPlaceNameRemover topographicPlaceNameRemover;
-    private final TopographicPlaceLookupService topographicPlaceLookupService;
-
 
     @Autowired
-    public StopPlacePreSteps(StopPlaceNameCleaner stopPlaceNameCleaner,
-                             NameToDescriptionMover nameToDescriptionMover,
-                             QuayNameRemover quayNameRemover,
-                             StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
-                             QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer, StopPlaceSplitter stopPlaceSplitter, TopographicPlaceNameRemover topographicPlaceNameRemover, TopographicPlaceLookupService topographicPlaceLookupService) {
-        this.stopPlaceNameCleaner = stopPlaceNameCleaner;
-        this.nameToDescriptionMover = nameToDescriptionMover;
-        this.quayNameRemover = quayNameRemover;
-        this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
-        this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
-        this.compassBearingRemover = compassBearingRemover;
+    public StopPlacePreSteps(CentroidComputer centroidComputer,
+                             StopPlaceSplitter stopPlaceSplitter) {
+
         this.centroidComputer = centroidComputer;
         this.stopPlaceSplitter = stopPlaceSplitter;
-        this.topographicPlaceNameRemover = topographicPlaceNameRemover;
-        this.topographicPlaceLookupService = topographicPlaceLookupService;
     }
 
     public List<StopPlace> run(List<StopPlace> stops) {
@@ -63,14 +43,6 @@ public class StopPlacePreSteps {
                     centroidComputer.computeCentroidForStopPlace(stopPlace);
                     return stopPlace;
                 })
-                .map(stopPlace -> compassBearingRemover.remove(stopPlace))
-                .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
-                .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
-                .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
-                .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
-                .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
-                .peek(stopPlace -> topographicPlaceLookupService.populateTopographicPlaceRelation(stopPlace))
-                .map(stopPlace -> topographicPlaceNameRemover.removeIfmatch(stopPlace))
                 .collect(toList());
         return stops;
     }
