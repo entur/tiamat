@@ -79,6 +79,8 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
                         return originalId;
                     }
                 })
+                // Search for both stripped postfixes and full original
+                .flatMap(x -> originalIds.stream())
                 .collect(Collectors.toSet());
 
         for(String postFixOrOriginalId : postFixesOrFulloriginalIds) {
