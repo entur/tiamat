@@ -77,6 +77,8 @@ public class NetexMapper {
                 .exclude("cardsAccepted")
                 .exclude("currenciesAccepted")
                 .exclude("accessModes")
+                .fieldBToA("netexId", "id")
+                .customize(new ParkingMapper())
                 .byDefault()
                 .register();
 

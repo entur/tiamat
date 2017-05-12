@@ -3,6 +3,12 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.hibernate.Criteria;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -65,6 +72,32 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         }
     }
 
+    @Override
+    public Iterator<Parking> scrollParkings() throws InterruptedException {
+        return scrollParkings(null);
+    }
+
+    @Override
+    public Iterator<Parking> scrollParkings(List<String> parkingNetexIds) throws InterruptedException {
+
+        final int fetchSize = 100;
+
+        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+
+        Criteria query = session.createCriteria(Parking.class);
+        if (parkingNetexIds != null) {
+            query.add(Restrictions.in("netexId", parkingNetexIds));
+        }
+
+        query.setReadOnly(true);
+        query.setFetchSize(fetchSize);
+        query.setCacheable(false);
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+
+        ScrollableResultIterator<Parking> parkingEntityIterator = new ScrollableResultIterator<>(results, fetchSize, session);
+
+        return parkingEntityIterator;
+    }
     @Override
     public String findNearbyParking(Envelope envelope, String name, ParkingTypeEnumeration parkingTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);

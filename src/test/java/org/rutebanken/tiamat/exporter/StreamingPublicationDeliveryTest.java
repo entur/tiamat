@@ -4,13 +4,17 @@ import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,8 +28,9 @@ import static org.mockito.Mockito.mock;
 public class StreamingPublicationDeliveryTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
+    private ParkingRepository parkingRepository = mock(ParkingRepository.class);
 
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, new NetexMapper());
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, new NetexMapper());
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
@@ -49,12 +54,43 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
         assertThat(xml)
                 .contains("<StopPlace")
+                .contains("</PublicationDelivery")
+                .contains("</dataObjects>");
+    }
+    @Test
+    public void streamParkingIntoPublicationDelivery() throws Exception {
+
+        String publicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
+                "    <PublicationTimestamp>2017-01-06T13:09:42.338+01:00</PublicationTimestamp>\n" +
+                "    <ParticipantRef>NSR</ParticipantRef>\n" +
+                "    <dataObjects>\n" +
+                "        <SiteFrame created=\"2017-01-06T13:09:42.272+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
+                "        </SiteFrame>\n" +
+                "   </dataObjects>\n" +
+                "</PublicationDelivery>\n";
+
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        Parking parking = new Parking();
+        parking.setNetexId(NetexIdHelper.generateRandomizedNetexId(parking));
+
+        List<Parking> parkings = new ArrayList<>(2);
+        parkings.add(parking);
+
+        streamingPublicationDelivery.stream(publicationDeliveryXml, new ArrayList().iterator(), parkings.iterator(), byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        assertThat(xml)
+                .contains("<Parking")
                 .contains("</PublicationDelivery")
                 .contains("</dataObjects>");
     }
@@ -91,7 +127,7 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -136,7 +172,7 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(1);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
         System.out.println(xml);
