@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,8 +31,8 @@ public class StopPlaceFromOriginalIdFinderTest {
 
         when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId())).thenReturn(stopPlace);
         when(stopPlaceRepository
-                .findByKeyValue(ORIGINAL_ID_KEY, stopPlace.getKeyValues().get(ORIGINAL_ID_KEY).getItems()))
-                .thenReturn(stopPlace.getNetexId());
+                .findByKeyValue(anyString(), anySet()))
+                .thenAnswer(invocationOnMock -> !Collections.disjoint((Collection<?>) invocationOnMock.getArguments()[1], stopPlace.getOriginalIds()) ? stopPlace.getNetexId() : null);
 
         StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
         assertThat(actual).isNotNull();

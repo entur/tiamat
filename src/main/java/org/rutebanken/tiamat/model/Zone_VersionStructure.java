@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -85,5 +86,16 @@ public class Zone_VersionStructure
 
     public boolean hasCoordinates() {
         return centroid != null;
+    }
+
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("netexId", netexId)
+                .add("version", version)
+                .add("name", name)
+                .toString();
     }
 }

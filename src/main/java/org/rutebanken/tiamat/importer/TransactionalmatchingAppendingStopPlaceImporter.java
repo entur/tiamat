@@ -59,7 +59,9 @@ public class TransactionalmatchingAppendingStopPlaceImporter {
         }
 
         if(!foundStopPlace.isPresent()) {
-            logger.warn("Cannot find stop place: {}", incomingStopPlace);
+            logger.warn("Cannot find stop place from IDs or location: {}. StopPlace toString: {}",
+                    incomingStopPlace.importedIdAndNameToString(),
+                    incomingStopPlace);
         } else {
 
             org.rutebanken.tiamat.model.StopPlace existingStopPlace = foundStopPlace.get();

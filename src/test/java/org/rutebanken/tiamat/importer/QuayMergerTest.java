@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 
 public class QuayMergerTest {
 
@@ -497,8 +499,12 @@ public class QuayMergerTest {
         Set<Quay> incomingQuays = new HashSet<>();
         incomingQuays.add(second);
 
-        Set<Quay> result = quayMerger.appendImportIds(incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), true);
-        assertThat(result).as("Quays should NOT have been merged. Public Code is different").hasSize(2);
+        // Add stop place to manually check that we are logging stop place's original ID
+        StopPlace stopPlaceForLogging = new StopPlace(new EmbeddableMultilingualString("Asker"));
+        stopPlaceForLogging.getOriginalIds().add("12341234");
+
+        Set<Quay> result = quayMerger.appendImportIds(stopPlaceForLogging, incomingQuays, existingQuays, new AtomicInteger(), new AtomicInteger(), false);
+        assertThat(result).as("Quay should NOT have been added. Public Code is different").hasSize(1);
     }
 
     /**
@@ -546,6 +552,24 @@ public class QuayMergerTest {
 
     }
 
+    @Test
+    public void matchQuaysIfMissingPublicCode() {
+        Quay existingQuay = new Quay();
+        existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502, 68.59)));
+        existingQuay.setPublicCode("01");
+        existingQuay.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("TRO:Quay:1903208101")));
+
+        Quay incomingQuay = new Quay();
+        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(16.502, 68.59)));
+        incomingQuay.setCompassBearing(353.0f);
+        incomingQuay.getOriginalIds().addAll(Arrays.asList("NOR:Quay:2001208101"));
+
+        Set<Quay> result = quayMerger.appendImportIds(Sets.newHashSet(incomingQuay), Sets.newHashSet(existingQuay), new AtomicInteger(), new AtomicInteger(), false);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next()).isEqualTo(existingQuay);
+        assertThat(result.iterator().next().getOriginalIds()).contains(incomingQuay.getOriginalIds().iterator().next());
+    }
 
     private Point getOffsetPoint(Point point, int offsetMeters, int azimuth) {
         GeodeticCalculator calc = new GeodeticCalculator();

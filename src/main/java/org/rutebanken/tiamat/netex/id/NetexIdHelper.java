@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class NetexIdHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetexIdHelper.class);
 
     // TODO: make it configurable, maybe in ValidPrefixList
     public static final String NSR = "NSR";
@@ -56,7 +56,7 @@ public class NetexIdHelper {
         try {
             return Long.valueOf(extractIdPostfix(netexId));
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("Cannot parse NeTEx ID PostFix into numberic valueID: '" + netexId +"'");
+            throw new NumberFormatException("Cannot parse NeTEx ID postfix into numeric valueID: '" + netexId +"'");
         }
     }
 
@@ -95,7 +95,7 @@ public class NetexIdHelper {
             return prefix +":"+type+":"+String.valueOf(numeric);
 
         } catch (IllegalArgumentException e) {
-            logger.info("Got exception while stripping leading zeros from numeric ID in {}. Returning value as is. Ex message: {}", originalIdValue, e.getMessage());
+            logger.debug("Cannot strip leading zeros from numeric ID in {}. Returning value as is. Message: {}", originalIdValue, e.getMessage());
             return originalIdValue;
         }
     }
