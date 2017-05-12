@@ -36,7 +36,7 @@ public class CustomGraphQLTypes {
             .value("PARTIAL", LimitationStatusEnumeration.PARTIAL)
             .value("UNKNOWN", LimitationStatusEnumeration.UNKNOWN)
             .build();
-        
+
         public static GraphQLEnumType parkingVehicleEnum = createCustomEnumType(PARKING_VEHICLE_ENUM, ParkingVehicleEnumeration.class);
 
         public static GraphQLEnumType parkingLayoutEnum = createCustomEnumType(PARKING_LAYOUT_ENUM, ParkingLayoutEnumeration.class);
