@@ -71,14 +71,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	public String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration) {
 		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-		TypedQuery<String> query = entityManager
-				                           .createQuery("SELECT s.netexId FROM StopPlace s " +
-						                                        "WHERE within(s.centroid, :filter) = true " +
-						                                        "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
-						                                        "AND s.name.value = :name " +
-						                                        "AND s.stopPlaceType = :stopPlaceType", String.class);
+		String sql = "SELECT sub.netex_id FROM " +
+				"(SELECT s.netex_id AS netex_id, similarity(s.name_value, :name) AS sim FROM stop_place s " +
+					"WHERE ST_Within(s.centroid, :filter) = true " +
+					"AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id) " +
+					"AND s.stop_place_type = :stopPlaceType) sub " +
+				"WHERE sub.sim > 0.6 " +
+				"ORDER BY sub.sim DESC LIMIT 1";
+
+		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("filter", geometryFilter);
-		query.setParameter("stopPlaceType", stopTypeEnumeration);
+		query.setParameter("stopPlaceType", stopTypeEnumeration.toString());
 		query.setParameter("name", name);
 		return getOneOrNull(query);
 	}
@@ -103,6 +106,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 			List<T> resultList = query.getResultList();
 			return resultList.isEmpty() ? null : resultList.get(0);
 		} catch (NoResultException e) {
+			return null;
+		}
+	}
+
+	private String getOneOrNull(Query query) {
+		try {
+			@SuppressWarnings("unchecked")
+			List<String> results = query.getResultList();
+			if (results.isEmpty()) {
+				return null;
+			} else {
+				return results.get(0);
+			}
+		} catch (NoResultException noResultException) {
 			return null;
 		}
 	}
@@ -168,17 +185,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		parameters.forEach(parameter -> query.setParameter(parameter, iterator.next()));
 		query.setParameter("key", key);
 
-		try {
-			@SuppressWarnings("unchecked")
-			List<String> results = query.getResultList();
-			if (results.isEmpty()) {
-				return null;
-			} else {
-				return results.get(0);
-			}
-		} catch (NoResultException noResultException) {
-			return null;
-		}
+		return getOneOrNull(query);
 	}
 
 	public List<String> searchByKeyValue(String key, String value) {

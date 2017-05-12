@@ -18,6 +18,8 @@ public class H2Functions implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(H2Functions.class);
 
+    private static double similarity = 1;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -30,7 +32,15 @@ public class H2Functions implements InitializingBean {
         }
     }
 
+    /**
+     * @param value from 0 to 1
+     */
+    public static void setSimilarity(double value) {
+        similarity = value;
+    }
+
     public static double similarity(String value, String value2) {
-        return 1;
+        logger.info("Return similarity 1");
+        return similarity;
     }
 }
