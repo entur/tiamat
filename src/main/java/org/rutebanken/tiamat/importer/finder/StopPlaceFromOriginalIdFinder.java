@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -87,13 +89,21 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
         String stringPostfix = NetexIdHelper.extractIdPostfix(originalId);
 
         if(stringPostfix.equals(originalId)) {
-            // Postfix cannot be extracted.
+            logger.debug("Postfix cannot be extracted, leaving value as is: {}", originalId);
             return Stream.of(originalId);
         }
 
         try {
-            return Stream.of(colonPrefixed(String.valueOf(NetexIdHelper.extractIdPostfixNumeric(originalId))),
-                    colonPrefixed(stringPostfix));
+            Long numericPostFix = NetexIdHelper.extractIdPostfixNumeric(originalId);
+
+            // Both these should be added:
+            // Rut:StopPlace:1232123213
+            // Rut:StopPlace:01232123213
+
+            String stringNumericPostfix = String.valueOf(numericPostFix);
+            String leadingZeroNumericPostfix = "0"+stringNumericPostfix;
+
+            return Sets.newHashSet(colonPrefixed(stringPostfix), colonPrefixed(leadingZeroNumericPostfix), colonPrefixed(stringNumericPostfix)).stream();
         } catch (NumberFormatException e) {
             return Stream.of(colonPrefixed(stringPostfix));
         }

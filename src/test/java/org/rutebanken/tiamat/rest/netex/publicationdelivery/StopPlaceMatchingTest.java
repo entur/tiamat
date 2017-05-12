@@ -100,6 +100,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
 
+        // ID is similar, but does not start with 2
         stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
@@ -114,7 +115,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void matchImportedStopOnLeadingZeroOriginalId() throws Exception {
+    public void matchImportedStopWithoutLeadingZeroOriginalId() throws Exception {
 
         StopPlace stopPlaceToBeMatched = new StopPlace()
                 .withId("RUT:StopPlace:0111111111")
@@ -130,7 +131,8 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
 
-        stopPlaceToBeMatched.setId("AKT:StopPlace:0111111111");
+        // match even without leading zero and different prefix
+        stopPlaceToBeMatched.setId("AKT:StopPlace:111111111");
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
         publicationDeliveryParams.importType = ImportType.ID_MATCH;
@@ -142,6 +144,41 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
         assertThat(result).hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:0111111111", result.get(0));
+    }
+
+    @Test
+    public void matchImportedStopOnLeadingZeroOriginalId() throws Exception {
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("RUT:StopPlace:111111111")
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("11"))
+                                .withLongitude(new BigDecimal("77"))));
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        // match when stop place does not have leading zero, but the incoming has.
+        stopPlaceToBeMatched.setId("AKT:StopPlace:0111111111");
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        System.out.println("Got response: \n" + response);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:111111111", result.get(0));
+
+        // When the import type is ID_MATCH, no original ID is appended
+        // publicationDeliveryTestHelper.hasOriginalId("AKT:StopPlace:0111111111", result.get(0));
     }
 
     @Test
