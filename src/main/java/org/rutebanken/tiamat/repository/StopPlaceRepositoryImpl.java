@@ -67,6 +67,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
 	}
 
+	/**
+	 * This query contains a fuzzy similarity check on name.
+	 * @param envelope bounding box
+	 * @param name name to fuzzy match
+	 * @param stopTypeEnumeration stop place type
+	 * @return the stop place within bounding box if equal type, within envelope and closest similarity in name
+	 */
 	@Override
 	public String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration) {
 		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
