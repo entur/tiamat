@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -30,6 +31,8 @@ public class StopPlacePreSteps {
     private final CompassBearingRemover compassBearingRemover;
     private final CentroidComputer centroidComputer;
     private final StopPlaceSplitter stopPlaceSplitter;
+    private final TopographicPlaceNameRemover topographicPlaceNameRemover;
+    private final TopographicPlaceLookupService topographicPlaceLookupService;
 
 
     @Autowired
@@ -38,7 +41,7 @@ public class StopPlacePreSteps {
                              QuayNameRemover quayNameRemover,
                              StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
                              QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer, StopPlaceSplitter stopPlaceSplitter) {
+                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer, StopPlaceSplitter stopPlaceSplitter, TopographicPlaceNameRemover topographicPlaceNameRemover, TopographicPlaceLookupService topographicPlaceLookupService) {
         this.stopPlaceNameCleaner = stopPlaceNameCleaner;
         this.nameToDescriptionMover = nameToDescriptionMover;
         this.quayNameRemover = quayNameRemover;
@@ -47,6 +50,8 @@ public class StopPlacePreSteps {
         this.compassBearingRemover = compassBearingRemover;
         this.centroidComputer = centroidComputer;
         this.stopPlaceSplitter = stopPlaceSplitter;
+        this.topographicPlaceNameRemover = topographicPlaceNameRemover;
+        this.topographicPlaceLookupService = topographicPlaceLookupService;
     }
 
     public List<StopPlace> run(List<StopPlace> stops) {
@@ -64,6 +69,8 @@ public class StopPlacePreSteps {
                 .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
                 .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
                 .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
+                .peek(stopPlace -> topographicPlaceLookupService.populateTopographicPlaceRelation(stopPlace))
+                .map(stopPlace -> topographicPlaceNameRemover.removeIfmatch(stopPlace))
                 .collect(toList());
         return stops;
     }

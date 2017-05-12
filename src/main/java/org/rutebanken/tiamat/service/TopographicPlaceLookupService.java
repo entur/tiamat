@@ -38,10 +38,10 @@ public class TopographicPlaceLookupService {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    public void populateTopographicPlaceRelation(Site_VersionStructure siteVersionStructure) {
+    public boolean populateTopographicPlaceRelation(Site_VersionStructure siteVersionStructure) {
 
         if (!siteVersionStructure.hasCoordinates()) {
-            return;
+            return false;
         }
 
         Optional<TopographicPlace> topographicPlace = findTopographicPlace(siteVersionStructure.getCentroid());
@@ -49,8 +49,10 @@ public class TopographicPlaceLookupService {
         if (topographicPlace.isPresent()) {
             logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
             siteVersionStructure.setTopographicPlace(topographicPlace.get());
+            return true;
         } else {
             logger.warn("Could not find topographic places from site's point: {}", siteVersionStructure);
+            return false;
         }
     }
 
