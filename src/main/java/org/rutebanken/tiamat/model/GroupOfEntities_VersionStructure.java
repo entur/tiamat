@@ -82,6 +82,6 @@ public abstract class GroupOfEntities_VersionStructure
     }
 
     public String importedIdAndNameToString() {
-        return getOriginalIds() + " - " + getName() != null ? getName().getValue() : "";
+        return getOriginalIds() + " - " + (getName() != null ? getName().getValue() : "");
     }
 }
