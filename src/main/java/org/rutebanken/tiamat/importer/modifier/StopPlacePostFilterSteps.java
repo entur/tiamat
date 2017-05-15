@@ -64,6 +64,7 @@ public class StopPlacePostFilterSteps {
                 .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                 .peek(stopPlace -> topographicPlaceLookupService.populateTopographicPlaceRelation(stopPlace))
                 .map(stopPlace -> topographicPlaceNameRemover.removeIfmatch(stopPlace))
+                .peek(stopPlace -> logger.debug("Stop place: {}", stopPlace))
                 .collect(toList());
         return stops;
     }
