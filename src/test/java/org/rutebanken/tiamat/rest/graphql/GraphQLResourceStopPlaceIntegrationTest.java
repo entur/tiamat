@@ -12,7 +12,7 @@ import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
 
-public class GraphQLResourceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
     public void retrieveStopPlaceWithTwoQuays() throws Exception {
