@@ -9,7 +9,7 @@ public class ResettableMemoizer<T> {
 
     private final Supplier<T> supplier;
 
-    private transient volatile boolean resetOrNotInitialized;
+    private transient volatile boolean isEmpty = true;
 
     private T value;
 
@@ -22,9 +22,9 @@ public class ResettableMemoizer<T> {
     public T get() {
         lock.lock();
         try {
-            if(resetOrNotInitialized) {
+            if(isEmpty) {
                 value = supplier.get();
-                resetOrNotInitialized = false;
+                isEmpty = false;
             }
             return value;
 
@@ -37,7 +37,7 @@ public class ResettableMemoizer<T> {
         lock.lock();
         try {
             value = null;
-            resetOrNotInitialized = true;
+            isEmpty = true;
         } finally {
             lock.unlock();
         }
