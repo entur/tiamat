@@ -32,7 +32,9 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
                 alternativeNames.add(tiamatAltName);
             }
 
-            stopPlace2.getAlternativeNames().addAll(alternativeNames);
+            if (!alternativeNames.isEmpty()) {
+                stopPlace2.getAlternativeNames().addAll(alternativeNames);
+            }
         }
     }
 
@@ -58,9 +60,11 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
                 netexAlternativeNames.add(netexAltName);
             }
 
-            AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
-            altName.getAlternativeName().addAll(netexAlternativeNames);
-            stopPlace2.setAlternativeNames(altName);
+            if (!netexAlternativeNames.isEmpty()) {
+                AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
+                altName.getAlternativeName().addAll(netexAlternativeNames);
+                stopPlace2.setAlternativeNames(altName);
+            }
         } else {
             stopPlace2.setAlternativeNames(null);
         }

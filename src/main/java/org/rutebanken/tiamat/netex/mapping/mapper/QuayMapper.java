@@ -32,7 +32,9 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                 alternativeNames.add(tiamatAltName);
             }
 
-            quay2.getAlternativeNames().addAll(alternativeNames);
+            if (!alternativeNames.isEmpty()) {
+                quay2.getAlternativeNames().addAll(alternativeNames);
+            }
         }
     }
 
@@ -58,9 +60,11 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                 netexAlternativeNames.add(netexAltName);
             }
 
-            AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
-            altName.getAlternativeName().addAll(netexAlternativeNames);
-            quay2.setAlternativeNames(altName);
+            if (!netexAlternativeNames.isEmpty()) {
+                AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
+                altName.getAlternativeName().addAll(netexAlternativeNames);
+                quay2.setAlternativeNames(altName);
+            }
         } else {
             quay2.setAlternativeNames(null);
         }

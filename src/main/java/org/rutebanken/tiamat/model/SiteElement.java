@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class SiteElement extends AddressablePlace {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+    private List<AlternativeName> alternativeNames;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
     @Transient
@@ -72,6 +72,9 @@ public abstract class SiteElement extends AddressablePlace {
     }
 
     public List<AlternativeName> getAlternativeNames() {
+        if (alternativeNames == null) {
+            alternativeNames = new ArrayList<>();
+        }
         return alternativeNames;
     }
 
