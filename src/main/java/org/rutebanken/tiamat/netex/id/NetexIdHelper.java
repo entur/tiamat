@@ -22,7 +22,7 @@ public class NetexIdHelper {
     // TODO: make it configurable, maybe in ValidPrefixList
     public static final String NSR = "NSR";
 
-    private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w{3,}");
+    private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
 
     public static String getNetexId(String type, String id) {
         return NSR + ":" + type + ":" + id;
