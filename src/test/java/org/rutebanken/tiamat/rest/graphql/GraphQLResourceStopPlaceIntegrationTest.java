@@ -146,6 +146,53 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     }
 
     @Test
+    public void searchForStopPlaceNsrIdInQuery() throws Exception {
+        String stopPlaceName = "Jålefjellet";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + stopPlace.getNetexId() + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    @Test
+    public void searchForQuayNsrIdInQuery() throws Exception {
+        String stopPlaceName = "Solkroken";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        Quay quay = new Quay();
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + quay.getNetexId() + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    @Test
     public void searchForStopPlaceNoParams() throws Exception {
         String stopPlaceName = "Eselstua";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
