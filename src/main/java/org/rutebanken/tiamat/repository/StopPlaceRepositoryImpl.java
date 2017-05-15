@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 
+import com.google.api.client.util.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -9,10 +10,12 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.jdbc.internal.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Repository
@@ -36,9 +40,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 	private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
+	private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
+
 	@Autowired
 	private EntityManager entityManager;
-
 	@Autowired
 	private GeometryFactory geometryFactory;
 
@@ -337,7 +342,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 	@Override
 	public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
 
-		StringBuilder queryString = new StringBuilder("select stopPlace from StopPlace stopPlace ");
+		StringBuilder queryString = new StringBuilder("select * from stop_place s ");
 
 		List<String> wheres = new ArrayList<>();
 		Map<String, Object> parameters = new HashMap<>();
@@ -347,26 +352,38 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
 		if (hasIdFilter) {
-			wheres.add("stopPlace.netexId in :netexIdList");
+			wheres.add("s.netex_id in :netexIdList");
 			parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
 		} else {
 			if (stopPlaceSearch.getQuery() != null) {
-				parameters.put("query", stopPlaceSearch.getQuery());
 
-				if (stopPlaceSearch.getQuery().length() <= 3) {
-					wheres.add("(lower(stopPlace.name.value) like concat(lower(:query), '%')");
+				if(NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
+					String netexId = stopPlaceSearch.getQuery();
+
+					if(StopPlace.class.getSimpleName().equals(NetexIdHelper.extractIdType(netexId))) {
+						wheres.add("index(s.keyValues) = :originalIdKey");
+						parameters.put("originalIdKey", ORIGINAL_ID_KEY);
+//						parameters.put("query", com.google.common.collect.Sets.newHashSet(netexId));
+					}
+
 				} else {
-					wheres.add("(lower(stopPlace.name.value) like concat('%', lower(:query), '%')");
+					parameters.put("query", stopPlaceSearch.getQuery());
+
+					if (stopPlaceSearch.getQuery().length() <= 3) {
+						wheres.add("(lower(s.name_value) like concat(lower(:query), '%')");
+					} else {
+						wheres.add("(lower(s.name_value) like concat('%', lower(:query), '%')");
+					}
+					operators.add("or");
+					wheres.add("netex_id like concat('%:', :query))");
+					operators.add("and");
+					orderByStatements.add("similarity(s.name_value, :query) desc");
 				}
-				operators.add("or");
-				wheres.add("netexId like concat('%:', :query))");
-				operators.add("and");
-				orderByStatements.add("similarity(stopPlace.name.value, :query) desc");
 			}
 
 			if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
-				wheres.add("stopPlace.stopPlaceType in :stopPlaceTypes");
-				parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations());
+				wheres.add("s.stop_place_type in :stopPlaceTypes");
+				parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations().stream().map(StopTypeEnumeration::toString).collect(toList()));
 				operators.add("and");
 			}
 
@@ -380,24 +397,24 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 					prefix = "(";
 				} else prefix = "";
 
-				wheres.add(prefix + "stopPlace.topographicPlace.netexId in :municipalityId");
+				wheres.add(prefix + "s.topographic_place_id = (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
 				parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
 			}
 
 			if (hasCountyFilter && !hasIdFilter) {
 				String suffix = hasMunicipalityFilter ? ")" : "";
-				wheres.add("stopPlace.topographicPlace.netexId in (select municipality.netexId from TopographicPlace municipality where municipality.parentTopographicPlaceRef.ref in :countyId)" + suffix);
+				wheres.add("s.topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)" + suffix);
 				parameters.put("countyId", stopPlaceSearch.getCountyIds());
 			}
 		}
 
 		if (stopPlaceSearch.getVersion() != null) {
 			operators.add("and");
-			wheres.add("stopPlace.version = :version");
+			wheres.add("s.version = :version");
 			parameters.put("version", stopPlaceSearch.getVersion());
 		} else if (!stopPlaceSearch.isAllVersions()) {
 			operators.add("and");
-			wheres.add("version = (select max(sv.version) from StopPlace sv where sv.netexId = stopPlace.netexId)");
+			wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
 		}
 
 		for (int i = 0; i < wheres.size(); i++) {
@@ -409,7 +426,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 			queryString.append(' ').append(wheres.get(i)).append(' ');
 		}
 
-		orderByStatements.add("netexId, version asc");
+		orderByStatements.add("netex_id, version asc");
 		queryString.append(" order by");
 
 		for (int i = 0; i < orderByStatements.size(); i++) {
@@ -419,8 +436,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 			queryString.append(' ').append(orderByStatements.get(i)).append(' ');
 		}
 
-		logger.debug("{}", queryString);
-		final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString.toString(), StopPlace.class);
+		final String generatedSql = basicFormatter.format(queryString.toString());
+
+		if(logger.isDebugEnabled()) {
+			logger.debug("{}", generatedSql);
+		}
+
+		final Query typedQuery = entityManager.createNativeQuery(generatedSql, StopPlace.class);
 
 		parameters.forEach(typedQuery::setParameter);
 
