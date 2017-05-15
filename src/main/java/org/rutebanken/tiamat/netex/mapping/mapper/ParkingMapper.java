@@ -13,10 +13,13 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     @Override
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
-        if (parking.getParkingAreas().getParkingAreaRefOrParkingArea() != null &&
+        if (parking.getParkingAreas() != null &&
+                parking.getParkingAreas().getParkingAreaRefOrParkingArea() != null &&
                 !parking.getParkingAreas().getParkingAreaRefOrParkingArea().isEmpty()) {
             List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea(), org.rutebanken.tiamat.model.ParkingArea.class, context);
-            parking2.setParkingAreas(parkingAreas);
+            if (!parkingAreas.isEmpty()) {
+                parking2.setParkingAreas(parkingAreas);
+            }
         }
     }
 
@@ -27,10 +30,12 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 !parking.getParkingAreas().isEmpty()) {
 
             List<ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas(), ParkingArea.class, context);
-            ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-            parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(parkingAreas);
+            if (!parkingAreas.isEmpty()) {
+                ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(parkingAreas);
 
-            parking2.setParkingAreas(parkingAreas_relStructure);
+                parking2.setParkingAreas(parkingAreas_relStructure);
+            }
         }
     }
 }
