@@ -6,12 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class NetexIdHelperTest {
+
     @Test
     public void extractIdPostfix() throws Exception {
         long last = NetexIdHelper.extractIdPostfixNumeric("NOR:TariffZone:19215 ");
         assertThat(last).isEqualTo(19215L);
     }
-
 
     @Test
     public void stopPlaceIdIsNetexId() {
@@ -29,7 +29,12 @@ public class NetexIdHelperTest {
     }
 
     @Test
-    public void idWithThreeColonIsNotNetexId() {
-        assertThat(NetexIdHelper.isNetexId("AVI:StopPlace:OSL")).isTrue();
+    public void idWithMoreThanThreeColonIsNotNetexId() {
+        assertThat(NetexIdHelper.isNetexId("AVI:StopPlace:123:2")).isFalse();
+    }
+
+    @Test
+    public void idWithLessThanThreeColonIsNotNetexId() {
+        assertThat(NetexIdHelper.isNetexId("AVI:StopPlace321")).isFalse();
     }
 }
