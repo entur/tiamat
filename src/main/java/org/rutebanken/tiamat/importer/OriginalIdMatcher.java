@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -55,20 +56,14 @@ public class OriginalIdMatcher {
         return !Collections.disjoint(originalIds, otherOriginalIds);
     }
 
-    public Set<Integer> convertPostfixToNumber(Set<String> stringOriginalIds) {
+    public Set<Long> convertPostfixToNumber(Set<String> stringOriginalIds) {
         return stringOriginalIds
                 .stream()
-                .filter(originalId -> originalId.contains(":"))
-                .map(originalId -> originalId.split(":"))
-                .filter(array -> array.length == 3)
-                .map(array -> array[2])
-                .map(String::trim)
-                .filter(postFix -> !postFix.isEmpty())
-                .map(postFix -> {
+                .map(netexId -> {
                     try {
-                        return Integer.parseInt(postFix);
+                        return NetexIdHelper.extractIdPostfixNumeric(netexId);
                     } catch (NumberFormatException nfe) {
-                        logger.info("Cannot parse original ID postfix {} to Integer", postFix);
+                        logger.info("Cannot parse original ID postfix {} to Integer", netexId);
                         return null;
                     }
                 })
