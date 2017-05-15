@@ -357,25 +357,43 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		} else {
 			if (stopPlaceSearch.getQuery() != null) {
 
-				if(NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
-					String netexId = stopPlaceSearch.getQuery();
+                parameters.put("query", stopPlaceSearch.getQuery());
+                operators.add("and");
 
-					if(StopPlace.class.getSimpleName().equals(NetexIdHelper.extractIdType(netexId))) {
-						wheres.add("index(s.keyValues) = :originalIdKey");
-						parameters.put("originalIdKey", ORIGINAL_ID_KEY);
-//						parameters.put("query", com.google.common.collect.Sets.newHashSet(netexId));
-					}
+                if(NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
+                    String netexId = stopPlaceSearch.getQuery();
 
-				} else {
-					parameters.put("query", stopPlaceSearch.getQuery());
+                    String netexIdType = NetexIdHelper.extractIdType(netexId);
 
+                    // Detect non NSR NetexId and search in original ID
+                    if(!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
+                        parameters.put("originalIdKey", ORIGINAL_ID_KEY);
+
+                        if(StopPlace.class.getSimpleName().equals(netexIdType)) {
+                            wheres.add("s.id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where spkv.key_values_key = :originalIdKey and v.items = :query)");
+                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
+                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where qkv.key_values_key = :originalIdKey and v.items = :query)");
+                        } else {
+                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                        }
+                    } else {
+                        // NSR ID detected
+
+                        if(StopPlace.class.getSimpleName().equals(netexIdType)) {
+                            wheres.add("netex_id = :query");
+                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
+                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
+                        } else {
+                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                        }
+                    }
+                } else {
 					if (stopPlaceSearch.getQuery().length() <= 3) {
-						wheres.add("(lower(s.name_value) like concat(lower(:query), '%')");
-					} else {
-						wheres.add("(lower(s.name_value) like concat('%', lower(:query), '%')");
-					}
-					operators.add("or");
-					wheres.add("netex_id like concat('%:', :query))");
+                        wheres.add("lower(s.name_value) like concat(lower(:query), '%')");
+                    } else {
+                        wheres.add("lower(s.name_value) like concat('%', lower(:query), '%')");
+                    }
+
 					operators.add("and");
 					orderByStatements.add("similarity(s.name_value, :query) desc");
 				}
@@ -397,7 +415,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 					prefix = "(";
 				} else prefix = "";
 
-				wheres.add(prefix + "s.topographic_place_id = (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
+				wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
 				parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
 			}
 
@@ -440,6 +458,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 		if(logger.isDebugEnabled()) {
 			logger.debug("{}", generatedSql);
+            logger.debug("params: {}", parameters.toString());
 		}
 
 		final Query typedQuery = entityManager.createNativeQuery(generatedSql, StopPlace.class);
