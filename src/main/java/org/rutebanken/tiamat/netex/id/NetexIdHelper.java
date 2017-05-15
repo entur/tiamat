@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class NetexIdHelper {
 
@@ -20,6 +21,8 @@ public class NetexIdHelper {
 
     // TODO: make it configurable, maybe in ValidPrefixList
     public static final String NSR = "NSR";
+
+    private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w{3,}");
 
     public static String getNetexId(String type, String id) {
         return NSR + ":" + type + ":" + id;
@@ -107,6 +110,10 @@ public class NetexIdHelper {
         } else {
             return Optional.empty();
         }
+    }
+
+    public static boolean isNetexId(String string) {
+        return NETEX_ID_PATTERN.matcher(string).matches();
     }
 
     private static String determineIdType(IdentifiedEntity identifiedEntity) {

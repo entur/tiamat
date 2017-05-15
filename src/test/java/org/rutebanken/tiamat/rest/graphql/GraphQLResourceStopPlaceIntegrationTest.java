@@ -53,6 +53,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
     }
 
+    /**
+     * Use explicit parameter for original ID search
+     */
     @Test
     public void searchForStopPlaceByOriginalId() throws Exception {
         String stopPlaceName = "Eselstua";
@@ -61,13 +64,75 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
         String originalId = "RUT:Stop:1234";
-        org.rutebanken.tiamat.model.Value value = new org.rutebanken.tiamat.model.Value(originalId);
+        Value value = new Value(originalId);
         stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value);
         stopPlaceRepository.save(stopPlace);
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
                 " (" + GraphQLNames.IMPORTED_ID_QUERY + ":\\\"" + originalId + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    /**
+     * Use query parameter for original ID search
+     */
+    @Test
+    public void searchForStopPlaceByOriginalIdQuery() throws Exception {
+        String stopPlaceName = "Fleskeberget";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String originalId = "BRA:StopPlace:666";
+        Value value = new Value(originalId);
+        stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value);
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + originalId + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    /**
+     * Search for stop place by quay original ID
+     */
+    @Test
+    public void searchForStopPlaceByQuayOriginalIdQuery() throws Exception {
+        String stopPlaceName = "Hesteløpsbanen";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+
+        String quayOriginalId = "BRA:Quay:187";
+        Quay quay = new Quay();
+        quay.getOriginalIds().add(quayOriginalId);
+
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + quayOriginalId + "\\\")" +
                 " { " +
                 "  id " +
                 "  name { value } " +

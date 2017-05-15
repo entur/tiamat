@@ -12,4 +12,24 @@ public class NetexIdHelperTest {
         assertThat(last).isEqualTo(19215L);
     }
 
+
+    @Test
+    public void stopPlaceIdIsNetexId() {
+        assertThat(NetexIdHelper.isNetexId("RUT:StopPlace:313")).isTrue();
+    }
+
+    @Test
+    public void quayIdIsNetexId() {
+        assertThat(NetexIdHelper.isNetexId("RUT:Quay:313")).isTrue();
+    }
+
+    @Test
+    public void idWithStringPostfixIsNetexId() {
+        assertThat(NetexIdHelper.isNetexId("AVI:StopPlace:OSL")).isTrue();
+    }
+
+    @Test
+    public void idWithThreeColonIsNotNetexId() {
+        assertThat(NetexIdHelper.isNetexId("AVI:StopPlace:OSL")).isTrue();
+    }
 }
