@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ public class RunnableUnmarshaller implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RunnableUnmarshaller.class);
 
     public static final StopPlace POISON_STOP_PLACE = new StopPlace().withId("-100");
+    public static final Parking POISON_PARKING = new Parking().withId("-100");
 
     private final InputStream inputStream;
     private final Unmarshaller unmarshaller;
@@ -35,6 +37,7 @@ public class RunnableUnmarshaller implements Runnable {
     public void run() {
         final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
         AtomicInteger stops = new AtomicInteger();
+        AtomicInteger parkings = new AtomicInteger();
 
         final XMLEventReader xmlEventReader;
         try {
@@ -60,12 +63,27 @@ public class RunnableUnmarshaller implements Runnable {
                         }
                         continue;
                     }
+
+                    if (localPartOfName.equals("Parking")) {
+                        Parking parking = unmarshaller.unmarshal(xmlEventReader, Parking.class).getValue();
+                        parkings.incrementAndGet();
+                        unmarshalResult.getParkingQueue().put(parking);
+
+                        if (parkings.get() % 20 == 0) {
+                            logger.info("Unmarshalled parking number {}", parkings.get());
+                        }
+                        continue;
+                    }
                 } else if (xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
                     String localPartOfName = endElement.getName().getLocalPart();
                     if (localPartOfName.equals("stopPlaces")) {
                         logger.info("End of stop places in incoming XML. Counter ended at {}. Adding poison pill to the queue.", stops.get());
                         unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+                    }
+                    if (localPartOfName.equals("parkings")) {
+                        logger.info("End of parkings in incoming XML. Counter ended at {}. Adding poison pill to the queue.", parkings.get());
+                        unmarshalResult.getParkingQueue().put(POISON_PARKING);
                     }
                 }
                 xmlEventReader.next();

@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.StopPlace;
 import org.xml.sax.SAXException;
 
@@ -115,6 +116,7 @@ public class PublicationDeliveryPartialUnmarshallerTest {
         UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(new FileInputStream(file));
         assertThat(unmarshalResult).isNotNull();
         readAndVerifyStops(unmarshalResult, 19);
+        readAndVerifyParkings(unmarshalResult, 2);
     }
 
     private void readAndVerifyStops(UnmarshalResult unmarshalResult, int expectedStopCount) throws InterruptedException {
@@ -129,6 +131,21 @@ public class PublicationDeliveryPartialUnmarshallerTest {
         }
 
         assertThat(stops).isEqualTo(expectedStopCount);
+    }
+
+
+    private void readAndVerifyParkings(UnmarshalResult unmarshalResult, int expectedParkingCount) throws InterruptedException {
+        int parkings = 0;
+        while (true) {
+            Parking parking = unmarshalResult.getParkingQueue().take();
+            if (parking.getId().equals(RunnableUnmarshaller.POISON_PARKING.getId())) {
+                System.out.println("Finished importing parkings");
+                break;
+            }
+            parkings++;
+        }
+
+        assertThat(parkings).isEqualTo(expectedParkingCount);
     }
 
 

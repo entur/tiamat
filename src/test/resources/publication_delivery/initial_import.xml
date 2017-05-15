@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="any">
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" version="any">
   <PublicationTimestamp>2017-02-06T10:09:14.496+01:00</PublicationTimestamp>
   <ParticipantRef>NSR</ParticipantRef>
   <dataObjects>
@@ -3975,7 +3975,7 @@
         </TopographicPlace>
       </topographicPlaces>
       <stopPlaces>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:48.461+01:00" changed="2017-02-02T13:14:43.763+01:00" modification="new" version="6" id="NSR:StopPlace:2" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:48.461+01:00" changed="2017-02-02T13:14:43.763+01:00" modification="new" version="6" id="NSR:StopPlace:2" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4014,7 +4014,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:49.912+01:00" changed="2017-01-27T15:50:49.912+01:00" modification="new" version="6" id="NSR:StopPlace:5" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:49.912+01:00" changed="2017-01-27T15:50:49.912+01:00" modification="new" version="6" id="NSR:StopPlace:5" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4069,7 +4069,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:50.309+01:00" changed="2017-01-27T15:50:50.309+01:00" modification="new" version="6" id="NSR:StopPlace:6" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:50.309+01:00" changed="2017-01-27T15:50:50.309+01:00" modification="new" version="6" id="NSR:StopPlace:6" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4107,7 +4107,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:50.683+01:00" changed="2017-01-30T12:30:36.561+01:00" modification="new" version="8" id="NSR:StopPlace:7" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:50.683+01:00" changed="2017-01-30T12:30:36.561+01:00" modification="new" version="8" id="NSR:StopPlace:7" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4177,7 +4177,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:51.153+01:00" changed="2017-01-27T15:50:51.153+01:00" modification="new" version="6" id="NSR:StopPlace:8" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:51.153+01:00" changed="2017-01-27T15:50:51.153+01:00" modification="new" version="6" id="NSR:StopPlace:8" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4215,7 +4215,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.053+01:00" changed="2017-01-27T15:50:52.053+01:00" modification="new" version="6" id="NSR:StopPlace:10" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.053+01:00" changed="2017-01-27T15:50:52.053+01:00" modification="new" version="6" id="NSR:StopPlace:10" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4253,7 +4253,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.554+01:00" changed="2017-01-27T15:50:52.555+01:00" modification="new" version="6" id="NSR:StopPlace:11" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.554+01:00" changed="2017-01-27T15:50:52.555+01:00" modification="new" version="6" id="NSR:StopPlace:11" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4290,7 +4290,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.903+01:00" changed="2017-01-30T12:30:37.495+01:00" modification="new" version="7" id="NSR:StopPlace:12" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:52.903+01:00" changed="2017-01-30T12:30:37.495+01:00" modification="new" version="7" id="NSR:StopPlace:12" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4410,7 +4410,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:53.353+01:00" changed="2017-01-27T15:50:53.353+01:00" modification="new" version="6" id="NSR:StopPlace:13" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:53.353+01:00" changed="2017-01-27T15:50:53.353+01:00" modification="new" version="6" id="NSR:StopPlace:13" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4448,7 +4448,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:54.132+01:00" changed="2017-01-27T15:50:54.132+01:00" modification="new" version="6" id="NSR:StopPlace:15" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:54.132+01:00" changed="2017-01-27T15:50:54.132+01:00" modification="new" version="6" id="NSR:StopPlace:15" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4486,7 +4486,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:55.054+01:00" changed="2017-01-27T15:50:55.054+01:00" modification="new" version="6" id="NSR:StopPlace:17" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:55.054+01:00" changed="2017-01-27T15:50:55.054+01:00" modification="new" version="6" id="NSR:StopPlace:17" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4524,7 +4524,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:55.551+01:00" changed="2017-01-27T15:50:55.551+01:00" modification="new" version="6" id="NSR:StopPlace:18" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:55.551+01:00" changed="2017-01-27T15:50:55.551+01:00" modification="new" version="6" id="NSR:StopPlace:18" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4562,7 +4562,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.057+01:00" changed="2017-01-27T15:50:56.057+01:00" modification="new" version="6" id="NSR:StopPlace:19" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.057+01:00" changed="2017-01-27T15:50:56.057+01:00" modification="new" version="6" id="NSR:StopPlace:19" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4600,7 +4600,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.452+01:00" changed="2017-01-30T12:30:54.04+01:00" modification="new" version="8" id="NSR:StopPlace:20" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.452+01:00" changed="2017-01-30T12:30:54.04+01:00" modification="new" version="8" id="NSR:StopPlace:20" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4687,7 +4687,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.952+01:00" changed="2017-01-27T15:50:56.952+01:00" modification="new" version="6" id="NSR:StopPlace:21" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:56.952+01:00" changed="2017-01-27T15:50:56.952+01:00" modification="new" version="6" id="NSR:StopPlace:21" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4725,7 +4725,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:57.852+01:00" changed="2017-01-27T15:50:57.852+01:00" modification="new" version="6" id="NSR:StopPlace:23" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:50:57.852+01:00" changed="2017-01-27T15:50:57.852+01:00" modification="new" version="6" id="NSR:StopPlace:23" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4763,7 +4763,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.065+01:00" changed="2017-01-27T15:51:00.065+01:00" modification="new" version="6" id="NSR:StopPlace:24" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.065+01:00" changed="2017-01-27T15:51:00.065+01:00" modification="new" version="6" id="NSR:StopPlace:24" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4818,7 +4818,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.454+01:00" changed="2017-01-27T15:51:00.454+01:00" modification="new" version="6" id="NSR:StopPlace:25" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.454+01:00" changed="2017-01-27T15:51:00.454+01:00" modification="new" version="6" id="NSR:StopPlace:25" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4873,7 +4873,7 @@
             </Quay>
           </quays>
         </StopPlace>
-        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.861+01:00" changed="2017-01-30T12:28:47.754+01:00" modification="new" version="8" id="NSR:StopPlace:26" xsi:schemaLocation="">
+        <StopPlace xmlns="http://www.netex.org.uk/netex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2017-01-27T15:51:00.861+01:00" changed="2017-01-30T12:28:47.754+01:00" modification="new" version="8" id="NSR:StopPlace:26" xsi:schemaLocation="">
           <keyList>
             <KeyValue>
               <Key>imported-id</Key>
@@ -4961,6 +4961,45 @@
           </quays>
         </StopPlace>
       </stopPlaces>
+      <parkings>
+        <Parking created="2017-05-15T09:09:13.979+02:00" modification="new" version="1" id="NSR:Parking:1" xsi:schemaLocation="" xmlns="http://www.netex.org.uk/netex"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <keyList>
+            <KeyValue>
+              <Key>imported-id</Key>
+              <Value>NSB:Parking:3car</Value>
+            </KeyValue>
+          </keyList>
+          <Name lang="no">Arendal</Name>
+          <Centroid>
+            <Location>
+              <Longitude>8.769146</Longitude>
+              <Latitude>58.465256</Latitude>
+            </Location>
+          </Centroid>
+          <ParkingVehicleTypes>car</ParkingVehicleTypes>
+          <TotalCapacity>20</TotalCapacity>
+        </Parking>
+        <Parking created="2017-05-15T09:09:14.335+02:00" modification="new" version="1" id="NSR:Parking:2"
+                 xsi:schemaLocation="" xmlns="http://www.netex.org.uk/netex"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <keyList>
+            <KeyValue>
+              <Key>imported-id</Key>
+              <Value>NSB:Parking:9car</Value>
+            </KeyValue>
+          </keyList>
+          <Name lang="no">Alvdal</Name>
+          <Centroid>
+            <Location>
+              <Longitude>10.633281</Longitude>
+              <Latitude>62.108757</Latitude>
+            </Location>
+          </Centroid>
+          <ParkingVehicleTypes>car</ParkingVehicleTypes>
+          <TotalCapacity>33</TotalCapacity>
+        </Parking>
+      </parkings>
     </SiteFrame>
   </dataObjects>
 </PublicationDelivery>

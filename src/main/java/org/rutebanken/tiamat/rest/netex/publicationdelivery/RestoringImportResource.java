@@ -2,8 +2,10 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hazelcast.core.HazelcastInstance;
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -44,13 +46,15 @@ public class RestoringImportResource {
     private final PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller;
     private final NetexMapper netexMapper;
     private final RestoringStopPlaceImporter restoringStopPlaceImporter;
+    private final RestoringParkingImporter restoringParkingImporter;
     private final HazelcastInstance hazelcastInstance;
 
     @Autowired
-    public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, NetexMapper netexMapper, RestoringStopPlaceImporter restoringStopPlaceImporter, HazelcastInstance hazelcastInstance) {
+    public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, NetexMapper netexMapper, RestoringStopPlaceImporter restoringStopPlaceImporter, RestoringParkingImporter restoringParkingImporter, HazelcastInstance hazelcastInstance) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
         this.restoringStopPlaceImporter = restoringStopPlaceImporter;
+        this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
     }
 
@@ -92,12 +96,12 @@ public class RestoringImportResource {
 
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
 
-                AtomicBoolean stopExecution = new AtomicBoolean(false);
+                AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
 
                 for(int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
-                            while (!Thread.currentThread().isInterrupted() && !stopExecution.get()) {
+                            while (!Thread.currentThread().isInterrupted() && !stopStopPlaceExecution.get()) {
                                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().poll(1, TimeUnit.SECONDS);
 
                                 if(stopPlace == null) {
@@ -106,7 +110,7 @@ public class RestoringImportResource {
 
                                 if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
                                     logger.info("Finished importing stops");
-                                    stopExecution.set(true);
+                                    stopStopPlaceExecution.set(true);
                                     break;
                                 }
 
@@ -115,11 +119,49 @@ public class RestoringImportResource {
                         } catch (InterruptedException e) {
                             logger.warn("Interrupted. Stopping all jobs");
                             Thread.currentThread().interrupt();
-                            stopExecution.set(true);
+                            stopStopPlaceExecution.set(true);
                             return;
                         } catch (Exception e) {
                             logger.warn("Caught exception while importing stop", e);
-                            stopExecution.set(true);
+                            stopStopPlaceExecution.set(true);
+                        }
+                    });
+                }
+
+                logger.info("Importing parkings");
+
+                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
+                AtomicInteger parkingsImported = new AtomicInteger(0);
+
+                for(int i = 0; i < threads; i++) {
+                    executorService.submit(() -> {
+                        try {
+
+                            while (!Thread.currentThread().isInterrupted() && !stopParkingExecution.get()) {
+                                Parking parking = unmarshalResult.getParkingQueue().poll(1, TimeUnit.SECONDS);
+
+                                if(parking == null) {
+                                    continue;
+                                }
+
+                                if (parking.getId().equals(RunnableUnmarshaller.POISON_PARKING.getId())) {
+                                    logger.info("Finished importing parking");
+                                    stopParkingExecution.set(true);
+                                    break;
+                                }
+
+                                restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
+                            }
+
+
+                        } catch (InterruptedException e) {
+                            logger.warn("Interrupted. Stopping all jobs");
+                            Thread.currentThread().interrupt();
+                            stopParkingExecution.set(true);
+                            return;
+                        } catch (Exception e) {
+                            logger.warn("Caught exception while importing stop", e);
+                            stopParkingExecution.set(true);
                         }
                     });
                 }
@@ -129,7 +171,7 @@ public class RestoringImportResource {
                 executorService.shutdown();
                 executorService.awaitTermination(150, TimeUnit.MINUTES);
 
-                return Response.ok("Imported " + stopPlacesImported.get() + " stop places.").build();
+                return Response.ok("Imported " + stopPlacesImported.get() + " stop places, " + parkingsImported.get() + " parkings.").build();
 
             } catch (Exception e) {
                 logger.error("Caught exception while importing publication delivery initially", e);

@@ -233,6 +233,11 @@ public class NetexMapper {
         return facade.map(netexQuay, org.rutebanken.tiamat.model.Quay.class);
     }
 
+
+    public org.rutebanken.tiamat.model.Parking mapToTiamatModel(Parking netexParking) {
+        return facade.map(netexParking, org.rutebanken.tiamat.model.Parking.class);
+    }
+
     public Quay mapToNetexModel(org.rutebanken.tiamat.model.Quay tiamatQuay) {
         return facade.map(tiamatQuay, Quay.class);
     }
