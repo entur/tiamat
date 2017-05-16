@@ -179,6 +179,19 @@ public class PublicationDeliveryImporter {
 
             List<org.rutebanken.tiamat.model.Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
 
+            int numberOfParkingsBeforeFiltering = tiamatParking.size();
+            logger.info("About to filter {} parkings based on topographic references: {}", tiamatParking.size(), publicationDeliveryParams.targetTopographicPlaces);
+            tiamatParking = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.targetTopographicPlaces, tiamatParking);
+            logger.info("Got {} parkings (was {}) after filtering by: {}", tiamatParking.size(), numberOfParkingsBeforeFiltering, publicationDeliveryParams.targetTopographicPlaces);
+
+            if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+                numberOfParkingsBeforeFiltering = tiamatParking.size();
+                logger.info("Filtering parkings outside given list of topographic places: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
+                tiamatParking = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatParking, true);
+                logger.info("Got {} parkings (was {}) after filtering", tiamatParking.size(), numberOfParkingsBeforeFiltering);
+            }
+
+
             Collection<Parking> importedParkings;
 
             if(publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
