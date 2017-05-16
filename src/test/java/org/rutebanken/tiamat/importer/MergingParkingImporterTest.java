@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.importer;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -19,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test stop place importer with geodb and repository.
- * See also {@link MergingParkingImporterTest}
+ * Test parking importer with geodb and repository.
+ * See also {@link MergingStopPlaceImporterTest}
  */
 @Transactional
 public class MergingParkingImporterTest extends TiamatIntegrationTest {
@@ -68,7 +67,6 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
      * The second time the stop place is imported, the type must be updated if it was empty.
      */
     @Test
-    @Ignore(value = "Causes GaplessIdGeneratorServiceTest to fail with ConstraintViolationException")
     public void updateParkingType() throws ExecutionException, InterruptedException {
 
         Point point = point(10.7096245, 59.9086885);
@@ -95,7 +93,6 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     }
 
     @Test
-    @Ignore(value = "Causes GaplessIdGeneratorServiceTest to fail with ConstraintViolationException")
     public void detectAndMergeParkingVehicleTypesFromTwoSimilarParkings() throws ExecutionException, InterruptedException {
 
         Parking firstParking = new Parking();
@@ -119,6 +116,60 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         assertThat(importResult.getNetexId()).isEqualTo(firstParking.getNetexId());
         assertThat(importResult.getVersion()).isEqualTo(2L);
         assertThat(importResult.getParkingVehicleTypes()).containsExactly(ParkingVehicleEnumeration.CAR, ParkingVehicleEnumeration.PEDAL_CYCLE);
+    }
+
+    @Test
+    public void testHandleAlreadyExistingParkingNoChange() {
+
+        Parking firstParking = new Parking();
+        firstParking.setCentroid(point(60.000, 10.78));
+        firstParking.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
+        firstParking.setVersion(1L);
+        firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
+        firstParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+
+        Parking secondParking = new Parking();
+        secondParking.setCentroid(point(60.000, 10.78));
+        secondParking.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
+        secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
+        secondParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+
+        Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
+
+        assertThat(parking.getName().getValue()).isEqualTo(firstParking.getName().getValue());
+        assertThat(parking.getParkingType()).isEqualTo(firstParking.getParkingType());
+        assertThat(parking.getParkingVehicleTypes()).containsAll(firstParking.getParkingVehicleTypes());
+    }
+
+    @Test
+    public void testHandleAlreadyExistingParkingNullParkingType() {
+
+        Parking firstParking = new Parking();
+        firstParking.setParkingType(null);
+
+        Parking secondParking = new Parking();
+        secondParking.setParkingType(null);
+
+        Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
+
+        assertThat(parking).isNotNull();
+        assertThat(parking.getParkingType()).isNull();
+    }
+
+    @Test
+    public void testHandleAlreadyExistingParkingUpdatedParkingVehicleTypes() {
+
+        Parking firstParking = new Parking();
+
+        Parking secondParking = new Parking();
+
+        Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
+
+        assertThat(parking).isNotNull();
+        assertThat(parking.getParkingVehicleTypes()).isNotNull();
+        assertThat(parking.getParkingVehicleTypes()).isEmpty();
     }
 
     private Point point(double longitude, double latitude) {
