@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Remove certain words from strings.
  * Typically words with brackets from stop place or quay names.
@@ -25,11 +27,11 @@ public class WordsRemover {
     public WordsRemover(List<String> words) {
 
         for(String word : words) {
-            patterns.add(Pattern.compile("\\("+word+"\\)", Pattern.CASE_INSENSITIVE));
-            patterns.add(Pattern.compile("\\["+word+"\\]", Pattern.CASE_INSENSITIVE));
-            patterns.add(Pattern.compile(",\\s"+word, Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile("\\("+word+"\\)\\s*$", Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile("\\["+word+"\\]\\s*$", Pattern.CASE_INSENSITIVE));
+            patterns.add(Pattern.compile(",\\s"+word+"\\s*$", Pattern.CASE_INSENSITIVE));
         }
-        logger.info("Patterns: {}", patterns);
+        logger.info("Patterns: {}", patterns.stream().map(pattern -> "\""+pattern+"\"").collect(toList()));
     }
 
     public String remove(String name) {
