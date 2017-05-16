@@ -97,7 +97,7 @@ public class RunnableUnmarshaller implements Runnable {
                 logger.warn("Interrupted when adding poison stop place to queue", e2);
             }
         }
-        logger.info("Unmarshalling thread finished after {} stops", stops.get());
+        logger.info("Unmarshalling thread finished after {} stops, {} parkings.", stops.get(), parkings.get());
     }
 
 }
