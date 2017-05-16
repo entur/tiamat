@@ -23,13 +23,20 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
         if (stopPlace.getAlternativeNames() != null &&
                 stopPlace.getAlternativeNames().getAlternativeName() != null &&
                 !stopPlace.getAlternativeNames().getAlternativeName().isEmpty()) {
+
             List<AlternativeName> netexAlternativeName = stopPlace.getAlternativeNames().getAlternativeName();
             List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
 
             for (AlternativeName netexAltName : netexAlternativeName) {
-                org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
-                mapperFacade.map(netexAltName, tiamatAltName);
-                alternativeNames.add(tiamatAltName);
+                if (netexAltName != null
+                        && netexAltName.getName() != null
+                        && netexAltName.getName().getValue() != null
+                        && !netexAltName.getName().getValue().isEmpty()) {
+                    //Only include non-empty alternative names
+                    org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
+                    mapperFacade.map(netexAltName, tiamatAltName);
+                    alternativeNames.add(tiamatAltName);
+                }
             }
 
             if (!alternativeNames.isEmpty()) {
@@ -54,10 +61,16 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             List<AlternativeName> netexAlternativeNames = new ArrayList<>();
 
             for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
-                AlternativeName netexAltName = new AlternativeName();
-                mapperFacade.map(alternativeName, netexAltName);
-                netexAltName.setId(alternativeName.getNetexId());
-                netexAlternativeNames.add(netexAltName);
+                if (alternativeName != null
+                        && alternativeName.getName() != null
+                        && alternativeName.getName().getValue() != null
+                        && !alternativeName.getName().getValue().isEmpty()) {
+                    //Only include non-empty alternative names
+                    AlternativeName netexAltName = new AlternativeName();
+                    mapperFacade.map(alternativeName, netexAltName);
+                    netexAltName.setId(alternativeName.getNetexId());
+                    netexAlternativeNames.add(netexAltName);
+                }
             }
 
             if (!netexAlternativeNames.isEmpty()) {

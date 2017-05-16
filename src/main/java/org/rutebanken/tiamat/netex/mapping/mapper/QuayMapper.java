@@ -27,9 +27,15 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
 
             for (org.rutebanken.netex.model.AlternativeName netexAltName : netexAlternativeName) {
-                org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
-                mapperFacade.map(netexAltName, tiamatAltName);
-                alternativeNames.add(tiamatAltName);
+                if (netexAltName != null
+                        && netexAltName.getName() != null
+                        && netexAltName.getName().getValue() != null
+                        && !netexAltName.getName().getValue().isEmpty()) {
+                    //Only include non-empty alternative names
+                    org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
+                    mapperFacade.map(netexAltName, tiamatAltName);
+                    alternativeNames.add(tiamatAltName);
+                }
             }
 
             if (!alternativeNames.isEmpty()) {
@@ -54,10 +60,16 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
 
             for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
-                org.rutebanken.netex.model.AlternativeName netexAltName = new org.rutebanken.netex.model.AlternativeName();
-                mapperFacade.map(alternativeName, netexAltName);
-                netexAltName.setId(alternativeName.getNetexId());
-                netexAlternativeNames.add(netexAltName);
+                if (alternativeName != null
+                        && alternativeName.getName() != null
+                        && alternativeName.getName().getValue() != null
+                        && !alternativeName.getName().getValue().isEmpty()) {
+                    //Only include non-empty alternative names
+                    org.rutebanken.netex.model.AlternativeName netexAltName = new org.rutebanken.netex.model.AlternativeName();
+                    mapperFacade.map(alternativeName, netexAltName);
+                    netexAltName.setId(alternativeName.getNetexId());
+                    netexAlternativeNames.add(netexAltName);
+                }
             }
 
             if (!netexAlternativeNames.isEmpty()) {
