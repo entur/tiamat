@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheStats;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -26,6 +29,8 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
     private static final Logger logger = LoggerFactory.getLogger(NearbyStopPlaceFinder.class);
 
     private StopPlaceRepository stopPlaceRepository;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private final Map<StopTypeEnumeration, List<StopTypeEnumeration>> alternativeTypesMap;
 
@@ -44,12 +49,23 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
         this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
+                .recordStats()
                 .build();
 
         alternativeTypesMap = new HashMap<>();
         alternativeTypesMap.put(StopTypeEnumeration.BUS_STATION, Arrays.asList(StopTypeEnumeration.ONSTREET_BUS));
         alternativeTypesMap.put(StopTypeEnumeration.ONSTREET_BUS, Arrays.asList(StopTypeEnumeration.BUS_STATION));
 
+        final CacheStats[] last = {null};
+
+        scheduler.scheduleAtFixedRate(() -> {
+            CacheStats newStats = nearbyStopCache.stats();
+            if (last[0] == null || !newStats.toString().equals(last[0].toString())) {
+                logger.info("{}", newStats);
+            }
+            last[0] = newStats;
+
+        }, 1, 2, TimeUnit.MINUTES);
     }
 
     @Override
@@ -68,8 +84,10 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
             return null;
         }
 
+        final String key = createKey(stopPlace);
+
         try {
-            Optional<String> stopPlaceNetexId = nearbyStopCache.get(createKey(stopPlace), () -> {
+            Optional<String> stopPlaceNetexId = nearbyStopCache.get(key, () -> {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
 
                 String matchingStopPlaceId;
@@ -97,6 +115,8 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
                 return Optional.ofNullable(matchingStopPlaceId);
             });
             if(stopPlaceNetexId.isPresent()) {
+                // Update cache for incoming envelope, so the same key will hopefullly match again
+                nearbyStopCache.put(key, stopPlaceNetexId);
                 return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId.get());
             }
             return null;
@@ -106,6 +126,11 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
         }
     }
 
+    /**
+     * Update cache. For instance after modifying and saving stop place.
+     *
+     * @param savedStopPlace
+     */
     public void update(StopPlace savedStopPlace) {
         if(savedStopPlace.hasCoordinates() && savedStopPlace.getStopPlaceType() != null) {
             nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getNetexId()));

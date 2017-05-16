@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.time.Instant;
 
@@ -40,13 +40,17 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder;
 
+    private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
+
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
                                           ValidBetweenRepository validBetweenRepository,
                                           VersionCreator versionCreator,
                                           AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
                                           TopographicPlaceLookupService countyAndMunicipalityLookupService,
-                                          TariffZonesLookupService tariffZonesLookupService, StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder) {
+                                          TariffZonesLookupService tariffZonesLookupService,
+                                          StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
+                                          NearbyStopPlaceFinder nearbyStopPlaceFinder) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
@@ -54,6 +58,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
+        this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
     }
 
     @Override
@@ -103,6 +108,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                             .flatMap(q -> q.getOriginalIds().stream())
                             .collect(Collectors.toList()));
         }
+        nearbyStopPlaceFinder.update(stopPlaceToSave);
         return stopPlaceToSave;
     }
 
