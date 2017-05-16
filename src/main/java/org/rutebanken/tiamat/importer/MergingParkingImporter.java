@@ -46,11 +46,11 @@ public class MergingParkingImporter {
     }
 
     /**
-     * When importing site frames in multiple threads, and those site frames might contain different stop places that will be merged,
-     * we run into the risk of having multiple threads trying to save the same stop place.
+     * When importing site frames in multiple threads, and those site frames might contain different parkings that will be merged,
+     * we run into the risk of having multiple threads trying to save the same parking.
      * <p>
-     * That's why we use a striped semaphore to not work on the same stop place concurrently. (SiteFrameImporter)
-     * it is important to flush the session between each stop place, *before* the semaphore has been released.
+     * That's why we use a striped semaphore to not work on the same parking concurrently. (SiteFrameImporter)
+     * it is important to flush the session between each parking, *before* the semaphore has been released.
      * <p>
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
@@ -83,14 +83,14 @@ public class MergingParkingImporter {
     public Parking handleCompletelyNewParking(Parking incomingParking) throws ExecutionException {
 
         if (incomingParking.getNetexId() != null) {
-            // This should not be necesarry.
+            // This should not be necessary.
             // Because this is a completely new parking.
             // And original netex ID should have been moved to key values.
             incomingParking.setNetexId(null);
         }
 
-        // Ignore incoming version. Always set version to 1 for new stop places.
-        logger.debug("New stop place: {}. Setting version to \"1\"", incomingParking.getName());
+        // Ignore incoming version. Always set version to 1 for new parkings.
+        logger.debug("New parking: {}. Setting version to \"1\"", incomingParking.getName());
         parkingVersionedSaverService.createCopy(incomingParking, Parking.class);
 
         incomingParking = parkingVersionedSaverService.saveNewVersion(incomingParking);
@@ -98,7 +98,7 @@ public class MergingParkingImporter {
     }
 
     public Parking handleAlreadyExistingParking(Parking existingParking, Parking incomingParking) {
-        logger.debug("Found existing stop place {} from incoming {}", existingParking, incomingParking);
+        logger.debug("Found existing parking {} from incoming {}", existingParking, incomingParking);
 
         Parking copy = parkingVersionedSaverService.createCopy(existingParking, Parking.class);
 
@@ -116,10 +116,8 @@ public class MergingParkingImporter {
         }
 
         boolean vehicleType = false;
-        if ((copy.getParkingVehicleTypes() == null && incomingParking.getParkingVehicleTypes() != null) ||
-                (copy.getParkingVehicleTypes() != null && incomingParking.getParkingVehicleTypes() != null &&
-                (!copy.getParkingVehicleTypes().containsAll(incomingParking.getParkingVehicleTypes()) ||
-                        !incomingParking.getParkingVehicleTypes().containsAll(copy.getParkingVehicleTypes())) )) {
+        if (!copy.getParkingVehicleTypes().containsAll(incomingParking.getParkingVehicleTypes()) ||
+                        !incomingParking.getParkingVehicleTypes().containsAll(copy.getParkingVehicleTypes()) ) {
             copy.getParkingVehicleTypes().clear();
             copy.getParkingVehicleTypes().addAll(incomingParking.getParkingVehicleTypes());
             logger.info("Updated parkingVehicleTypes to {} for parking {}", copy.getParkingVehicleTypes(), copy);
@@ -133,7 +131,7 @@ public class MergingParkingImporter {
             return updateCache(copy);
         }
 
-        logger.debug("No changes. Returning existing stop {}", existingParking);
+        logger.debug("No changes. Returning existing parking {}", existingParking);
         return existingParking;
 
     }
@@ -143,7 +141,7 @@ public class MergingParkingImporter {
 
         parkingFromOriginalIdFinder.update(parking);
         nearbyParkingFinder.update(parking);
-        logger.info("Saved stop place {}", parking);
+        logger.info("Saved parking {}", parking);
         return parking;
     }
 
@@ -157,18 +155,10 @@ public class MergingParkingImporter {
         if (newParking.getName() != null) {
             final Parking nearbyParking = nearbyParkingFinder.find(newParking);
             if (nearbyParking != null) {
-                logger.debug("Found nearby stop place with name: {}, id: {}", nearbyParking.getName(), nearbyParking.getNetexId());
+                logger.debug("Found nearby parking with name: {}, id: {}", nearbyParking.getName(), nearbyParking.getNetexId());
                 return nearbyParking;
             }
         }
-
-//        // Find existing nearby stop place based on type
-//        final List<Parking> nearbyStopsWithSameType = nearbyParkingsWithSameTypeFinder.find(newParking);
-//        if (!nearbyStopsWithSameType.isEmpty()) {
-//            Parking nearbyStopWithSameType = nearbyStopsWithSameType.get(0);
-//            logger.debug("Found nearby stop place with same type: {}", nearbyStopWithSameType);
-//            return nearbyStopWithSameType;
-//        }
         return null;
     }
 

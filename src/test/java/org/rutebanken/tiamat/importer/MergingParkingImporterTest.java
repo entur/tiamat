@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -162,14 +163,16 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     public void testHandleAlreadyExistingParkingUpdatedParkingVehicleTypes() {
 
         Parking firstParking = new Parking();
+        firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
 
         Parking secondParking = new Parking();
+        secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
 
         Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
 
         assertThat(parking).isNotNull();
-        assertThat(parking.getParkingVehicleTypes()).isNotNull();
-        assertThat(parking.getParkingVehicleTypes()).isEmpty();
+        assertThat(parking.getParkingVehicleTypes()).containsAll(Arrays.asList(ParkingVehicleEnumeration.CAR, ParkingVehicleEnumeration.PEDAL_CYCLE));
     }
 
     private Point point(double longitude, double latitude) {
