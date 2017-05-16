@@ -20,9 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Transactional(propagation = Propagation.REQUIRES_NEW)
-public class TransactionalmatchingAppendingStopPlaceImporter {
+public class TransactionalMatchingAppendingStopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalmatchingAppendingStopPlaceImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionalMatchingAppendingStopPlaceImporter.class);
 
     private static final boolean CREATE_NEW_QUAYS = false;
 

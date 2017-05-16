@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
-import org.rutebanken.tiamat.importer.finder.StopPlaceByIdFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,7 +23,7 @@ public class MatchingAppendingIdStopPlacesImporter {
 
 
     @Autowired
-    private TransactionalmatchingAppendingStopPlaceImporter transactionalmatchingAppendingStopPlaceImporter;
+    private TransactionalMatchingAppendingStopPlaceImporter transactionalMatchingAppendingStopPlaceImporter;
 
     public List<StopPlace> importStopPlaces(List<org.rutebanken.tiamat.model.StopPlace> tiamatStops, AtomicInteger stopPlacesCreatedOrUpdated) {
 
@@ -34,7 +31,7 @@ public class MatchingAppendingIdStopPlacesImporter {
 
         tiamatStops.forEach(incomingStopPlace -> {
 
-            transactionalmatchingAppendingStopPlaceImporter.findAppendAndAdd(incomingStopPlace, matchedStopPlaces, stopPlacesCreatedOrUpdated);
+            transactionalMatchingAppendingStopPlaceImporter.findAppendAndAdd(incomingStopPlace, matchedStopPlaces, stopPlacesCreatedOrUpdated);
 
         });
 
