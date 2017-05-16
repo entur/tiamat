@@ -393,8 +393,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     } else {
                         wheres.add("lower(s.name_value) like concat('%', lower(:query), '%')");
                     }
-
-					operators.add("and");
+					
 					orderByStatements.add("similarity(s.name_value, :query) desc");
 				}
 			}
