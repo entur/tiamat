@@ -173,7 +173,7 @@ public class PublicationDeliveryImporter {
     private void handleParkings(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger parkingsCreatedOrUpdated, SiteFrame responseSiteframe) {
 
         if (hasParkings(netexSiteFrame)) {
-            logger.info("Should have handled {} parkings!!", netexSiteFrame.getParkings().getParking().size());
+
             List<org.rutebanken.tiamat.model.Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
 
             Collection<Parking> importedParkings;
