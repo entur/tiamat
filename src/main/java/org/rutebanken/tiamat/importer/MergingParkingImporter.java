@@ -116,10 +116,8 @@ public class MergingParkingImporter {
         }
 
         boolean vehicleType = false;
-        if ((copy.getParkingVehicleTypes() == null && incomingParking.getParkingVehicleTypes() != null) ||
-                (copy.getParkingVehicleTypes() != null && incomingParking.getParkingVehicleTypes() != null &&
-                (!copy.getParkingVehicleTypes().containsAll(incomingParking.getParkingVehicleTypes()) ||
-                        !incomingParking.getParkingVehicleTypes().containsAll(copy.getParkingVehicleTypes())) )) {
+        if (!copy.getParkingVehicleTypes().containsAll(incomingParking.getParkingVehicleTypes()) ||
+                        !incomingParking.getParkingVehicleTypes().containsAll(copy.getParkingVehicleTypes()) ) {
             copy.getParkingVehicleTypes().clear();
             copy.getParkingVehicleTypes().addAll(incomingParking.getParkingVehicleTypes());
             logger.info("Updated parkingVehicleTypes to {} for parking {}", copy.getParkingVehicleTypes(), copy);
