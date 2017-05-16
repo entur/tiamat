@@ -21,10 +21,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBElement;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -188,7 +185,8 @@ public class PublicationDeliveryImporter {
             } else if(publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                 importedParkings = parallelInitialParkingImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
             } else {
-                throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+                logger.warn("Import type " + publicationDeliveryParams.importType + " not implemented. Will not match parking.");
+                importedParkings = new ArrayList<>(0);
             }
 
             if (!importedParkings.isEmpty()) {
