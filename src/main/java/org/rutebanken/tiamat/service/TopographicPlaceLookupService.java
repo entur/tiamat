@@ -1,11 +1,9 @@
 package org.rutebanken.tiamat.service;
 
-
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
@@ -21,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 
@@ -32,16 +31,15 @@ public class TopographicPlaceLookupService {
 
     private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
 
-
-    private final Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> topographicPlaces = Suppliers.memoizeWithExpiration(getTopographicPlaceSupplier(), 10, TimeUnit.HOURS);
+    private final ResettableMemoizer<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> memoizedTopographicPlaces = new ResettableMemoizer<>(getTopographicPlaceSupplier());
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
-    public void populateTopographicPlaceRelation(Site_VersionStructure siteVersionStructure) {
+    public boolean populateTopographicPlaceRelation(Site_VersionStructure siteVersionStructure) {
 
         if (!siteVersionStructure.hasCoordinates()) {
-            return;
+            return false;
         }
 
         Optional<TopographicPlace> topographicPlace = findTopographicPlace(siteVersionStructure.getCentroid());
@@ -49,13 +47,15 @@ public class TopographicPlaceLookupService {
         if (topographicPlace.isPresent()) {
             logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
             siteVersionStructure.setTopographicPlace(topographicPlace.get());
+            return true;
         } else {
             logger.warn("Could not find topographic places from site's point: {}", siteVersionStructure);
+            return false;
         }
     }
 
     public Optional<TopographicPlace> findTopographicPlace(Point point) {
-        return topographicPlaces.get()
+        return memoizedTopographicPlaces.get()
                        .stream()
                        .filter(triple -> point.within(triple.getRight()))
                        .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
@@ -64,13 +64,17 @@ public class TopographicPlaceLookupService {
     }
 
     public Optional<TopographicPlace> findTopographicPlaceByReference(List<String> topographicPlaceReferences, Point point) {
-        return topographicPlaces.get()
+        return memoizedTopographicPlaces.get()
                 .stream()
                 .filter(triple -> topographicPlaceReferences.contains(triple.getLeft()))
                 .filter(triple -> point.within(triple.getRight()))
                 .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
                 .peek(topographicPlace -> logger.debug("Found topographic place match: {}", topographicPlace.getNetexId()))
                 .findAny();
+    }
+
+    public void reset() {
+        memoizedTopographicPlaces.reset();
     }
 
     private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier() {

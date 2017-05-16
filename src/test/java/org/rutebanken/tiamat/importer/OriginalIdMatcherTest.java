@@ -21,4 +21,15 @@ public class OriginalIdMatcherTest {
 
         assertThat(originalIdMatcher.matchesOnOriginalId(dataManagedObject, otherDataManagedObject)).isTrue();
     }
+
+    @Test
+    public void handleLongValues() throws Exception {
+        DataManagedObjectStructure dataManagedObject = new Quay();
+        dataManagedObject.getOriginalIds().add("RUT:Quay:0124000000000000");
+
+        DataManagedObjectStructure otherDataManagedObject = new Quay();
+        otherDataManagedObject.getOriginalIds().add("BRA:Quay:124000000000000");
+
+        assertThat(originalIdMatcher.matchesOnOriginalId(dataManagedObject, otherDataManagedObject)).isTrue();
+    }
 }

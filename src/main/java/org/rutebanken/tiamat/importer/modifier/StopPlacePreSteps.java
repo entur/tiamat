@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -22,29 +23,13 @@ public class StopPlacePreSteps {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlacePreSteps.class);
 
-    private final StopPlaceNameCleaner stopPlaceNameCleaner;
-    private final NameToDescriptionMover nameToDescriptionMover;
-    private final QuayNameRemover quayNameRemover;
-    private final StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover;
-    private final QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor;
-    private final CompassBearingRemover compassBearingRemover;
     private final CentroidComputer centroidComputer;
     private final StopPlaceSplitter stopPlaceSplitter;
 
-
     @Autowired
-    public StopPlacePreSteps(StopPlaceNameCleaner stopPlaceNameCleaner,
-                             NameToDescriptionMover nameToDescriptionMover,
-                             QuayNameRemover quayNameRemover,
-                             StopPlaceNameNumberToQuayMover stopPlaceNameNumberToQuayMover,
-                             QuayDescriptionPlatformCodeExtractor quayDescriptionPlatformCodeExtractor,
-                             CompassBearingRemover compassBearingRemover, CentroidComputer centroidComputer, StopPlaceSplitter stopPlaceSplitter) {
-        this.stopPlaceNameCleaner = stopPlaceNameCleaner;
-        this.nameToDescriptionMover = nameToDescriptionMover;
-        this.quayNameRemover = quayNameRemover;
-        this.stopPlaceNameNumberToQuayMover = stopPlaceNameNumberToQuayMover;
-        this.quayDescriptionPlatformCodeExtractor = quayDescriptionPlatformCodeExtractor;
-        this.compassBearingRemover = compassBearingRemover;
+    public StopPlacePreSteps(CentroidComputer centroidComputer,
+                             StopPlaceSplitter stopPlaceSplitter) {
+
         this.centroidComputer = centroidComputer;
         this.stopPlaceSplitter = stopPlaceSplitter;
     }
@@ -58,12 +43,6 @@ public class StopPlacePreSteps {
                     centroidComputer.computeCentroidForStopPlace(stopPlace);
                     return stopPlace;
                 })
-                .map(stopPlace -> compassBearingRemover.remove(stopPlace))
-                .map(stopPlace -> stopPlaceNameCleaner.cleanNames(stopPlace))
-                .map(stopPlace -> nameToDescriptionMover.updateDescriptionFromName(stopPlace))
-                .map(stopPlace -> quayNameRemover.removeQuayNameIfEqualToStopPlaceName(stopPlace))
-                .map(stopPlace -> stopPlaceNameNumberToQuayMover.moveNumberEndingToQuay(stopPlace))
-                .map(stopPlace -> quayDescriptionPlatformCodeExtractor.extractPlatformCodes(stopPlace))
                 .collect(toList());
         return stops;
     }

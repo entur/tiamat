@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
+import org.rutebanken.tiamat.importer.modifier.StopPlacePostFilterSteps;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class PublicationDeliveryImporter {
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
     private final StopPlacePreSteps stopPlacePreSteps;
+    private final StopPlacePostFilterSteps stopPlacePostFilterSteps;
     private final PathLinksImporter pathLinksImporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TopographicPlaceImporter topographicPlaceImporter;
@@ -63,7 +65,7 @@ public class PublicationDeliveryImporter {
                                        TransactionalParkingsImporter transactionalParkingsImporter,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        StopPlacePreSteps stopPlacePreSteps,
-                                       PathLinksImporter pathLinksImporter,
+                                       StopPlacePostFilterSteps stopPlacePostFilterSteps, PathLinksImporter pathLinksImporter,
                                        TopographicPlacesExporter topographicPlacesExporter,
                                        TopographicPlaceImporter topographicPlaceImporter,
                                        TariffZoneImporter tariffZoneImporter,
@@ -77,6 +79,7 @@ public class PublicationDeliveryImporter {
         this.transactionalParkingsImporter = transactionalParkingsImporter;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.stopPlacePreSteps = stopPlacePreSteps;
+        this.stopPlacePostFilterSteps = stopPlacePostFilterSteps;
         this.pathLinksImporter = pathLinksImporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.topographicPlaceImporter = topographicPlaceImporter;
@@ -203,6 +206,7 @@ public class PublicationDeliveryImporter {
     private void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if(hasStops(netexSiteFrame)) {
             List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
+            logger.info("Running stop place pre steps");
             tiamatStops = stopPlacePreSteps.run(tiamatStops);
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
@@ -217,6 +221,8 @@ public class PublicationDeliveryImporter {
                 logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
             }
 
+            logger.info("Running stop place post filter steps");
+            tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
 
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);

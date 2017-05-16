@@ -46,7 +46,7 @@ class StopPlaceUpdater implements DataFetcher {
     private GeometryResolver geometryResolver;
 
     @Autowired
-    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
+    private TopographicPlaceLookupService topographicPlaceLookupService;
 
     @Autowired
     private AuthorizationService authorizationService;
@@ -220,7 +220,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             if (entity instanceof StopPlace) {
                 try {
-                    countyAndMunicipalityLookupService.populateTopographicPlaceRelation((StopPlace) entity);
+                    topographicPlaceLookupService.populateTopographicPlaceRelation((StopPlace) entity);
                 } catch (Exception e) {
                     logger.warn("Setting TopographicPlace on StopPlace failed", e);
                 }
