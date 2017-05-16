@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
@@ -45,12 +46,14 @@ public class MergingStopPlaceImporter {
 
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
+    private final ZoneDistanceChecker zoneDistanceChecker;
+
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
@@ -59,6 +62,7 @@ public class MergingStopPlaceImporter {
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
+        this.zoneDistanceChecker = zoneDistanceChecker;
     }
 
     /**
@@ -83,7 +87,12 @@ public class MergingStopPlaceImporter {
     }
 
     public StopPlace importStopPlaceWithoutNetexMapping(StopPlace incomingStopPlace) throws InterruptedException, ExecutionException {
-        final StopPlace foundStopPlace = findNearbyOrExistingStopPlace(incomingStopPlace);
+        StopPlace foundStopPlace = findNearbyOrExistingStopPlace(incomingStopPlace);
+
+        if(zoneDistanceChecker.exceedsLimit(incomingStopPlace, foundStopPlace)) {
+            logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}", ZoneDistanceChecker.DEFAULT_MAX_DISTANCE, incomingStopPlace, foundStopPlace);
+            foundStopPlace = null;
+        }
 
         final StopPlace stopPlace;
         if (foundStopPlace != null) {

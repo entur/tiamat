@@ -195,7 +195,6 @@ public class MergingStopPlaceImporterTest extends TiamatIntegrationTest {
         final String chouetteQuayId = "OPP:Quays:3333";
 
         StopPlace firstStopPlace = new StopPlace();
-        firstStopPlace.setCentroid(point(70.933307, 10.775973));
         firstStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
         Quay terminal1 = new Quay();
@@ -206,8 +205,7 @@ public class MergingStopPlaceImporterTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(firstStopPlace);
 
         StopPlace secondStopPlace = new StopPlace();
-        // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
-        secondStopPlace.setCentroid(point(80.000, 20.78));
+
         // Set same ID as first stop place
         secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
 
@@ -233,7 +231,6 @@ public class MergingStopPlaceImporterTest extends TiamatIntegrationTest {
         final String chouetteId = "OPP:StopArea:123123";
 
         StopPlace firstStopPlace = new StopPlace();
-        firstStopPlace.setCentroid(point(70.933307, 10.775973));
 
         Quay terminal1 = new Quay();
         terminal1.setCentroid(point(70.000, 10.78));
@@ -244,8 +241,6 @@ public class MergingStopPlaceImporterTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(firstStopPlace);
 
         StopPlace secondStopPlace = new StopPlace();
-        // Intentionally setting centroid way off the first stop place. Because the importer should match the chouette ID
-        secondStopPlace.setCentroid(point(80.000, 20.78));
 
         // Set same ID as first stop place
         secondStopPlace.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add(chouetteId);
