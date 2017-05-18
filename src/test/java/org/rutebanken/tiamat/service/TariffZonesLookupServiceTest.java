@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.springframework.data.util.Pair;
@@ -26,7 +27,6 @@ public class TariffZonesLookupServiceTest {
 
     private TariffZonesLookupService tariffZonesLookupService = new TariffZonesLookupService(tariffZoneRepository);
 
-    @Ignore
     @Test
     public void getTariffZones() {
 
@@ -52,7 +52,7 @@ public class TariffZonesLookupServiceTest {
         when(tariffZoneRepository.findAll()).thenReturn(Arrays.asList(firstVersion, secondVersion, anotherOne));
 
 
-        Supplier<List<Pair<String, Polygon>>> actual = tariffZonesLookupService.getTariffZones();
+        java.util.function.Supplier<List<Pair<String, Polygon>>> actual = tariffZonesLookupService.getTariffZones();
 
         assertThat(actual.get()).hasSize(2);
 

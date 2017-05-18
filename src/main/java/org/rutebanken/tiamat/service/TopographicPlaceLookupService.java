@@ -56,7 +56,7 @@ public class TopographicPlaceLookupService {
     public Optional<TopographicPlace> findTopographicPlace(Point point) {
         return memoizedTopographicPlaces.get()
                 .stream()
-                .filter(triple -> point.within(triple.getRight()))
+                .filter(triple -> point.coveredBy(triple.getRight()))
                 .peek(triple -> logger.debug("Found matching topographic place {} for point {}", triple.getLeft(), point))
                 .map(triple -> {
                     TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft());
@@ -73,7 +73,7 @@ public class TopographicPlaceLookupService {
         return memoizedTopographicPlaces.get()
                 .stream()
                 .filter(triple -> topographicPlaceReferences.contains(triple.getLeft()))
-                .filter(triple -> point.within(triple.getRight()))
+                .filter(triple -> point.coveredBy(triple.getRight()))
                 .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
                 .peek(topographicPlace -> logger.debug("Found topographic place match: {}", topographicPlace.getNetexId()))
                 .findAny();

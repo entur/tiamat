@@ -282,7 +282,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 	@Override
 	public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId) {
-		String sql = "SELECT s.netex_id " +
+		String sql = "SELECT DISTINCT s.netex_id " +
 				"FROM stop_place s " +
 				"  INNER JOIN stop_place_quays spq " +
 				"    ON s.id = spq.stop_place_id " +
