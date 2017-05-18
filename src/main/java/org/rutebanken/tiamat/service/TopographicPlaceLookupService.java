@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
@@ -56,11 +55,12 @@ public class TopographicPlaceLookupService {
 
     public Optional<TopographicPlace> findTopographicPlace(Point point) {
         return memoizedTopographicPlaces.get()
-                       .stream()
-                       .filter(triple -> point.within(triple.getRight()))
-                       .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
-                       .filter(topographicPlace -> topographicPlace != null)
-                       .findAny();
+                .stream()
+                .filter(triple -> point.within(triple.getRight()))
+                .peek(triple -> logger.debug("Found matching topographic place {} for point {}", triple.getLeft(), point))
+                .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
+                .filter(topographicPlace -> topographicPlace != null)
+                .findAny();
     }
 
     public Optional<TopographicPlace> findTopographicPlaceByReference(List<String> topographicPlaceReferences, Point point) {
@@ -80,13 +80,15 @@ public class TopographicPlaceLookupService {
     private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier() {
         return () -> {
             logger.info("Fetching topographic places from repository");
-            return topographicPlaceRepository.findAllMaxVersion()
+            List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>> topographicPlaces = topographicPlaceRepository.findAllMaxVersion()
                     .stream()
                     .filter(topographicPlace -> topographicPlace.getPolygon() != null)
                     .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
                     .sorted(new TopographicPlaceByAdminLevelComparator())
                     .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getPolygon()))
                     .collect(toList());
+            logger.info("Fetched {} topographic places from repository", topographicPlaces.size());
+            return topographicPlaces;
         };
     }
 
