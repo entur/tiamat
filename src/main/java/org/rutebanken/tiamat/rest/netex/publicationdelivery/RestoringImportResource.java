@@ -8,6 +8,7 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
@@ -28,12 +29,17 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_PARKING;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_STOP_PLACE;
 
 @Component
 @Produces("application/xml")
@@ -91,92 +97,30 @@ public class RestoringImportResource {
                 SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(unmarshalResult.getPublicationDeliveryStructure());
                 List<org.rutebanken.netex.model.TopographicPlace> netexTopographicPlaces = publicationDeliveryHelper.extractTopographicPlaces(netexSiteFrame);
 
-                if(netexTopographicPlaces != null) {
+                if (netexTopographicPlaces != null) {
                     logger.info("Importing {} topographic places", netexTopographicPlaces.size());
                     restoringTopographicPlaceImporter.importTopographicPlaces(topographicPlacesCounter, netexTopographicPlaces);
                     logger.info("Finished importing {} topographic places", topographicPlacesCounter);
                 }
 
                 logger.info("Importing stops");
-
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
-
-                AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
-
-                for (int i = 0; i < threads; i++) {
-                    executorService.submit(() -> {
-                        try {
-                            while (!Thread.currentThread().isInterrupted() && !stopStopPlaceExecution.get()) {
-                                StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().poll(1, TimeUnit.SECONDS);
-
-                                if (stopPlace == null) {
-                                    continue;
-                                }
-
-                                if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
-                                    logger.info("Finished importing stops");
-                                    stopStopPlaceExecution.set(true);
-                                    break;
-                                }
-
-                                restoringStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
-                            }
-                        } catch (InterruptedException e) {
-                            logger.warn("Interrupted. Stopping all jobs");
-                            Thread.currentThread().interrupt();
-                            stopStopPlaceExecution.set(true);
-                            return;
-                        } catch (Exception e) {
-                            logger.warn("Caught exception while importing stop", e);
-                            stopStopPlaceExecution.set(true);
-                        }
-                    });
-                }
+                final AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
+                Consumer<StopPlace> stopPlaceConsumer = stopPlace -> restoringStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
+                submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getStopPlaceQueue(), stopStopPlaceExecution, stopPlaceConsumer, POISON_STOP_PLACE));
 
                 logger.info("Importing parkings");
-
-                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
                 AtomicInteger parkingsImported = new AtomicInteger(0);
-
-                for (int i = 0; i < threads; i++) {
-                    executorService.submit(() -> {
-                        try {
-
-                            while (!Thread.currentThread().isInterrupted() && !stopParkingExecution.get()) {
-                                Parking parking = unmarshalResult.getParkingQueue().poll(1, TimeUnit.SECONDS);
-
-                                if (parking == null) {
-                                    continue;
-                                }
-
-                                if (parking.getId().equals(RunnableUnmarshaller.POISON_PARKING.getId())) {
-                                    logger.info("Finished importing parking");
-                                    stopParkingExecution.set(true);
-                                    break;
-                                }
-
-                                restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
-                            }
-
-
-                        } catch (InterruptedException e) {
-                            logger.warn("Interrupted. Stopping all jobs");
-                            Thread.currentThread().interrupt();
-                            stopParkingExecution.set(true);
-                            return;
-                        } catch (Exception e) {
-                            logger.warn("Caught exception while importing stop", e);
-                            stopParkingExecution.set(true);
-                        }
-                    });
-                }
+                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
+                Consumer<Parking> parkingConsumer = parking -> restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
+                submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getParkingQueue(), stopParkingExecution, parkingConsumer, POISON_PARKING));
 
                 logger.info("Waiting for all import tasks to finish");
 
                 executorService.shutdown();
                 executorService.awaitTermination(150, TimeUnit.MINUTES);
 
-                return Response.ok("Imported " + stopPlacesImported.get() + " stop places, " + parkingsImported.get() + " parkings.").build();
+                return Response.ok("Imported " + stopPlacesImported.get() + " stop places, " + parkingsImported.get() + " parkings, " + topographicPlacesCounter.get() + " topographic places.").build();
 
             } catch (Exception e) {
                 logger.error("Caught exception while importing publication delivery initially", e);
@@ -187,5 +131,11 @@ public class RestoringImportResource {
             }
         }
         return Response.status(Response.Status.CONFLICT).entity("There is already an import job running").build();
+    }
+
+    private void submitNTimes(int times, ExecutorService executorService, EntityQueueProcessor task) {
+        for (int i = 0; i < times; i++) {
+            executorService.submit(task);
+        }
     }
 }
