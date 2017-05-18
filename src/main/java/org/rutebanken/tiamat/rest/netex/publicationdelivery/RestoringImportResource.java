@@ -7,10 +7,11 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
+import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -26,14 +27,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
-
-import static org.rutebanken.tiamat.importer.PublicationDeliveryImporter.IMPORT_CORRELATION_ID;
 
 @Component
 @Produces("application/xml")
@@ -45,17 +45,26 @@ public class RestoringImportResource {
 
     private final PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller;
     private final NetexMapper netexMapper;
-    private final RestoringStopPlaceImporter restoringStopPlaceImporter;
+    private final RestoringTopographicPlaceImporter restoringTopographicPlaceImporter;
     private final RestoringParkingImporter restoringParkingImporter;
+    private final RestoringStopPlaceImporter restoringStopPlaceImporter;
     private final HazelcastInstance hazelcastInstance;
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
 
     @Autowired
-    public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller, NetexMapper netexMapper, RestoringStopPlaceImporter restoringStopPlaceImporter, RestoringParkingImporter restoringParkingImporter, HazelcastInstance hazelcastInstance) {
+    public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller,
+                                   NetexMapper netexMapper,
+                                   RestoringTopographicPlaceImporter restoringTopographicPlaceImporter,
+                                   RestoringStopPlaceImporter restoringStopPlaceImporter,
+                                   RestoringParkingImporter restoringParkingImporter,
+                                   HazelcastInstance hazelcastInstance, PublicationDeliveryHelper publicationDeliveryHelper) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
+        this.restoringTopographicPlaceImporter = restoringTopographicPlaceImporter;
         this.restoringStopPlaceImporter = restoringStopPlaceImporter;
         this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
     }
 
     /**
@@ -78,19 +87,15 @@ public class RestoringImportResource {
             try {
                 UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(inputStream);
                 AtomicInteger topographicPlacesCounter = new AtomicInteger();
-                org.rutebanken.tiamat.model.SiteFrame siteFrame = unmarshalResult.getPublicationDeliveryStructure().getDataObjects().getCompositeFrameOrCommonFrame()
-                        .stream()
-                        .filter(element -> element.getValue() instanceof SiteFrame)
-                        .map(element -> (SiteFrame) element.getValue())
-                        .peek(netexSiteFrame -> {
-                            MDC.put(IMPORT_CORRELATION_ID, netexSiteFrame.getId());
-                            logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
-                        })
-                        .map(netexSiteFrame -> netexMapper.mapToTiamatModel(netexSiteFrame))
-                        .findFirst().get();
 
+                SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(unmarshalResult.getPublicationDeliveryStructure());
+                List<org.rutebanken.netex.model.TopographicPlace> netexTopographicPlaces = publicationDeliveryHelper.extractTopographicPlaces(netexSiteFrame);
 
-                // Todo: import topographic places
+                if(netexTopographicPlaces != null) {
+                    logger.info("Importing {} topographic places", netexTopographicPlaces.size());
+                    restoringTopographicPlaceImporter.importTopographicPlaces(topographicPlacesCounter, netexTopographicPlaces);
+                    logger.info("Finnished importing {} topographic places", topographicPlacesCounter);
+                }
 
                 logger.info("Importing stops");
 
@@ -98,13 +103,13 @@ public class RestoringImportResource {
 
                 AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
 
-                for(int i = 0; i < threads; i++) {
+                for (int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
                             while (!Thread.currentThread().isInterrupted() && !stopStopPlaceExecution.get()) {
                                 StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().poll(1, TimeUnit.SECONDS);
 
-                                if(stopPlace == null) {
+                                if (stopPlace == null) {
                                     continue;
                                 }
 
@@ -133,14 +138,14 @@ public class RestoringImportResource {
                 AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
                 AtomicInteger parkingsImported = new AtomicInteger(0);
 
-                for(int i = 0; i < threads; i++) {
+                for (int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
 
                             while (!Thread.currentThread().isInterrupted() && !stopParkingExecution.get()) {
                                 Parking parking = unmarshalResult.getParkingQueue().poll(1, TimeUnit.SECONDS);
 
-                                if(parking == null) {
+                                if (parking == null) {
                                     continue;
                                 }
 

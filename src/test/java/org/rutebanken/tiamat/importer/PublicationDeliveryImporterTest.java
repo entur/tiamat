@@ -7,6 +7,8 @@ import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,7 +19,7 @@ import static org.mockito.Mockito.mock;
 public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
 
     @Autowired
-    private PublicationDeliveryImporter publicationDeliveryImporter;
+    private PublicationDeliveryHelper publicationDeliveryHelper;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -33,7 +35,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                                         .withFrames(new Frames_RelStructure()
                                                             .withCommonFrame(objectFactory.createCommonFrame(new SiteFrame()))))));
 
-        SiteFrame siteFrame = publicationDeliveryImporter.findSiteFrame(publicationDeliveryStructure);
+        SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
         assertThat(siteFrame).isNotNull();
     }
 
@@ -48,7 +50,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 .withCompositeFrameOrCommonFrame(
                                         objectFactory.createCommonFrame(new SiteFrame())));
 
-        SiteFrame siteFrame = publicationDeliveryImporter.findSiteFrame(publicationDeliveryStructure);
+        SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
         assertThat(siteFrame).isNotNull();
     }
 

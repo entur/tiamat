@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePostFilterSteps;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.JAXBElement;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -39,6 +39,7 @@ public class PublicationDeliveryImporter {
      */
     private static final boolean EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS = false;
 
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final TransactionalStopPlacesImporter transactionalStopPlacesImporter;
     private final TransactionalParkingsImporter transactionalParkingsImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
@@ -57,7 +58,7 @@ public class PublicationDeliveryImporter {
     private final StopPlaceIdMatcher stopPlaceIdMatcher;
 
     @Autowired
-    public PublicationDeliveryImporter(NetexMapper netexMapper,
+    public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
                                        TransactionalStopPlacesImporter transactionalStopPlacesImporter,
                                        TransactionalParkingsImporter transactionalParkingsImporter,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
@@ -71,6 +72,7 @@ public class PublicationDeliveryImporter {
                                        ParallelInitialParkingImporter parallelInitialParkingImporter,
                                        MatchingAppendingIdStopPlacesImporter matchingAppendingIdStopPlacesImporter,
                                        TariffZonesFromStopsExporter tariffZonesFromStopsExporter, StopPlaceIdMatcher stopPlaceIdMatcher) {
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.transactionalStopPlacesImporter = transactionalStopPlacesImporter;
         this.transactionalParkingsImporter = transactionalParkingsImporter;
@@ -113,11 +115,11 @@ public class PublicationDeliveryImporter {
         AtomicInteger stopPlacesCreatedOrUpdated = new AtomicInteger(0);
         AtomicInteger parkingsCreatedOrUpdated = new AtomicInteger(0);
         AtomicInteger topographicPlacesCounter = new AtomicInteger(0);
-        SiteFrame netexSiteFrame = findSiteFrame(incomingPublicationDelivery);
+        SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(incomingPublicationDelivery);
 
         String requestId = netexSiteFrame.getId();
 
-        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreatedOrUpdated, numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
+        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreatedOrUpdated, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
 
         try {
             SiteFrame responseSiteframe = new SiteFrame();
@@ -127,7 +129,7 @@ public class PublicationDeliveryImporter {
 
             responseSiteframe.withId(requestId + "-response").withVersion("1");
 
-            if(hasTopographicPlaces(netexSiteFrame)) {
+            if(publicationDeliveryHelper.hasTopographicPlaces(netexSiteFrame)) {
                 logger.info("Publication delivery contains {} topographic places for import.", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
 
                 logger.info("About to map {} topographic places to internal model", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
@@ -141,7 +143,7 @@ public class PublicationDeliveryImporter {
             }
 
 
-            if(hasTariffZones(netexSiteFrame) && publicationDeliveryParams.importType != ImportType.ID_MATCH) {
+            if(publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryParams.importType != ImportType.ID_MATCH) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
                 List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
@@ -172,7 +174,7 @@ public class PublicationDeliveryImporter {
 
     private void handleParkings(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger parkingsCreatedOrUpdated, SiteFrame responseSiteframe) {
 
-        if (hasParkings(netexSiteFrame)) {
+        if (publicationDeliveryHelper.hasParkings(netexSiteFrame)) {
 
             List<org.rutebanken.tiamat.model.Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
 
@@ -215,7 +217,7 @@ public class PublicationDeliveryImporter {
 
 
     private void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
-        if(hasStops(netexSiteFrame)) {
+        if(publicationDeliveryHelper.hasStops(netexSiteFrame)) {
             List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
 
             boolean isImportTypeIdMatch = publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH);
@@ -292,10 +294,6 @@ public class PublicationDeliveryImporter {
         }
     }
 
-    private boolean hasTariffZones(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
-    }
-
     private void validate(PublicationDeliveryParams publicationDeliveryParams) {
         if(publicationDeliveryParams.targetTopographicPlaces != null && publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null) {
             if(!publicationDeliveryParams.targetTopographicPlaces.isEmpty() && ! publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
@@ -318,46 +316,4 @@ public class PublicationDeliveryImporter {
                 .collect(Collectors.toList());
     }
 
-    private boolean hasTopographicPlaces(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getTopographicPlaces() != null
-                && netexSiteFrame.getTopographicPlaces().getTopographicPlace() != null
-                && !netexSiteFrame.getTopographicPlaces().getTopographicPlace().isEmpty();
-    }
-
-    private boolean hasStops(SiteFrame siteFrame) {
-        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace() != null;
-    }
-
-    private boolean hasParkings(SiteFrame siteFrame) {
-        return siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null;
-    }
-
-    private int numberOfStops(SiteFrame netexSiteFrame) {
-        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace().size() : 0;
-    }
-
-    public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
-
-        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
-
-        Optional<SiteFrame> optionalSiteframe = compositeFrameOrCommonFrame
-                .stream()
-                .filter(element -> element.getValue() instanceof SiteFrame)
-                .map(element -> (SiteFrame) element.getValue())
-                .findFirst();
-
-        if (optionalSiteframe.isPresent()) {
-            return optionalSiteframe.get();
-        }
-
-        return compositeFrameOrCommonFrame
-                .stream()
-                .filter(element -> element.getValue() instanceof CompositeFrame)
-                .map(element -> (CompositeFrame) element.getValue())
-                .map(compositeFrame -> compositeFrame.getFrames())
-                .flatMap(frames -> frames.getCommonFrame().stream())
-                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
-                .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
-                .findAny().get();
-    }
 }
