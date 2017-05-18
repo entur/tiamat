@@ -118,7 +118,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
      */
     @Test
     public void searchForStopPlaceByQuayOriginalIdQuery() throws Exception {
-        String stopPlaceName = "Hesteløpsbanen";
+//        String stopPlaceName = "Hesteløpsbanen";
+        String stopPlaceName = "Travbanen";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
 
 
@@ -147,7 +148,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
     @Test
     public void searchForStopPlaceNsrIdInQuery() throws Exception {
-        String stopPlaceName = "Jålefjellet";
+//        String stopPlaceName = "Jålefjellet";
+        String stopPlaceName = "Jallafjellet";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
 
         stopPlaceRepository.save(stopPlace);
