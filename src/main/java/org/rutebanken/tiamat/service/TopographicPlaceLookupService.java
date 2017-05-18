@@ -58,7 +58,13 @@ public class TopographicPlaceLookupService {
                 .stream()
                 .filter(triple -> point.within(triple.getRight()))
                 .peek(triple -> logger.debug("Found matching topographic place {} for point {}", triple.getLeft(), point))
-                .map(triple -> topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft()))
+                .map(triple -> {
+                    TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(triple.getLeft());
+                    if(topographicPlace == null) {
+                        logger.warn("Cannot find topographic place from ID: {}", triple.getLeft());
+                    }
+                    return topographicPlace;
+                })
                 .filter(topographicPlace -> topographicPlace != null)
                 .findAny();
     }
