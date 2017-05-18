@@ -94,7 +94,7 @@ public class RestoringImportResource {
                 if(netexTopographicPlaces != null) {
                     logger.info("Importing {} topographic places", netexTopographicPlaces.size());
                     restoringTopographicPlaceImporter.importTopographicPlaces(topographicPlacesCounter, netexTopographicPlaces);
-                    logger.info("Finnished importing {} topographic places", topographicPlacesCounter);
+                    logger.info("Finished importing {} topographic places", topographicPlacesCounter);
                 }
 
                 logger.info("Importing stops");
