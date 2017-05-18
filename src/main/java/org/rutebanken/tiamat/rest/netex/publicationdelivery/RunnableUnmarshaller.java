@@ -93,10 +93,20 @@ public class RunnableUnmarshaller implements Runnable {
             logger.error("Could not read netex from events. Stopping. " + e.getMessage(), e);
             try {
                 unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+                unmarshalResult.getParkingQueue().put(POISON_PARKING);
             } catch (InterruptedException e2) {
                 logger.warn("Interrupted when adding poison stop place to queue", e2);
             }
         }
+        try {
+            // Do this regardless of processing above. If parking is empty, make sure threads can exit.
+            // After all, the queue is blocking.
+            unmarshalResult.getParkingQueue().put(POISON_PARKING);
+            unmarshalResult.getStopPlaceQueue().put(POISON_STOP_PLACE);
+        } catch (InterruptedException e) {
+            // Intentionally empty
+        }
+
         logger.info("Unmarshalling thread finished after {} stops, {} parkings.", stops.get(), parkings.get());
     }
 
