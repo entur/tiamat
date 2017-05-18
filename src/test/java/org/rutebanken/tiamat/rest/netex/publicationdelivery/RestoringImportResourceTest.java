@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -29,6 +31,12 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private ParkingRepository parkingRepository;
+
     @Test
     public void restoringImport() throws IOException, InterruptedException, ParserConfigurationException, JAXBException, SAXException, XMLStreamException {
 
@@ -40,6 +48,8 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
         restoringImportResource.importPublicationDeliveryOnEmptyDatabase(new FileInputStream(file));
         assertThat(topographicPlaceRepository.findAllMaxVersion()).isNotEmpty();
 
+        assertThat(stopPlaceRepository.findAll()).isNotEmpty();
+        assertThat(parkingRepository.findAll()).isNotEmpty();
     }
 
 }
