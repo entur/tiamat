@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importer;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByIdFinder;
+import org.rutebanken.tiamat.model.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -20,9 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Transactional(propagation = Propagation.REQUIRES_NEW)
-public class TransactionalmatchingAppendingStopPlaceImporter {
+public class TransactionalMatchingAppendingStopPlaceImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalmatchingAppendingStopPlaceImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionalMatchingAppendingStopPlaceImporter.class);
 
     private static final boolean CREATE_NEW_QUAYS = false;
 
@@ -46,6 +47,9 @@ public class TransactionalmatchingAppendingStopPlaceImporter {
     @Autowired
     private StopPlaceByIdFinder stopPlaceByIdFinder;
 
+    @Autowired
+    private ZoneDistanceChecker zoneDistanceChecker;
+
 
     public void findAppendAndAdd(org.rutebanken.tiamat.model.StopPlace incomingStopPlace,
                                  List<StopPlace> matchedStopPlaces,
@@ -65,6 +69,11 @@ public class TransactionalmatchingAppendingStopPlaceImporter {
         } else {
 
             org.rutebanken.tiamat.model.StopPlace existingStopPlace = foundStopPlace.get();
+
+            if(zoneDistanceChecker.exceedsLimit(incomingStopPlace, existingStopPlace)) {
+                logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}", ZoneDistanceChecker.DEFAULT_MAX_DISTANCE, incomingStopPlace, existingStopPlace);
+                return;
+            }
 
 
             logger.debug("Found matching stop place {}", existingStopPlace);

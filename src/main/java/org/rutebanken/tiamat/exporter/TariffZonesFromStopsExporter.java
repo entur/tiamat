@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
 @Transactional
@@ -39,38 +39,30 @@ public class TariffZonesFromStopsExporter {
      * @param responseSiteFrame the site fra to append or add tariff zones to
      */
     public void resolveTariffZones(Collection<StopPlace> importedNetexStopPlaces, SiteFrame responseSiteFrame) {
-        List<TariffZone> relatedTariffZones = importedNetexStopPlaces.stream()
+
+        Map<String, TariffZone> tariffZoneMap = new HashMap<>();
+
+        if(responseSiteFrame.getTariffZones() != null && responseSiteFrame.getTariffZones().getTariffZone() != null) {
+            responseSiteFrame.getTariffZones().getTariffZone()
+                    .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
+        }
+
+        importedNetexStopPlaces.stream()
                 .filter(stopPlace -> stopPlace.getTariffZones() != null)
                 .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
-                .peek(tariffZoneRef -> logger.debug("Looking at tariffZoneRef: {}", tariffZoneRef))
-                .filter(tariffZoneRef -> {
-                    if(responseSiteFrame.getTariffZones() == null || responseSiteFrame.getTariffZones().getTariffZone() == null) {
-                        return true;
-                    }
-
-                    // Check tariffzones already added to the response site frame
-                    return responseSiteFrame.getTariffZones()
-                            .getTariffZone()
-                            .stream()
-                            .peek(tariffZone -> logger.debug("Tariffzone added: {} - {} ref candidate: Tariffzone ref {} - {}", tariffZone.getId(), tariffZone.getVersion(), tariffZoneRef.getRef(), tariffZoneRef.getVersion()))
-                            .noneMatch(alreadyAddedTariffZone ->
-                                    alreadyAddedTariffZone.getId().equals(tariffZoneRef.getRef())
-                                    && (alreadyAddedTariffZone.getVersion().equals(tariffZoneRef.getVersion())
-                                    || alreadyAddedTariffZone.getVersion() == null || tariffZoneRef.getVersion() == null));
-                })
+                .filter(tariffZoneRef -> !tariffZoneMap.containsKey(key(tariffZoneRef.getRef(), tariffZoneRef.getVersion())))
                 .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
                 .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
                 .map(mappedTariffZoneRef -> referenceResolver.resolve(mappedTariffZoneRef))
                 .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
-                .distinct()
-                .collect(Collectors.toList());
+                .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
 
-        if(responseSiteFrame.getTariffZones() != null) {
-            responseSiteFrame.getTariffZones().getTariffZone().addAll(relatedTariffZones);
-        } else if(!relatedTariffZones.isEmpty()){
-            responseSiteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(relatedTariffZones));
-        }
+        responseSiteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneMap.values()));
+    }
+
+    private String key(String id, String version) {
+        return id + "-" + version;
     }
 
 }

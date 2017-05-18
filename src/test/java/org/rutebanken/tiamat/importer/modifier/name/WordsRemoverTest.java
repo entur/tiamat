@@ -28,7 +28,7 @@ public class WordsRemoverTest {
     }
 
     @Test
-    public void removeBusTerminalInBraces() {
+    public void removeBusTerminalInBracesWithTrailingSpaces() {
         String actual = wordsRemover.remove("Helsfyr T (Bussterminal)      ");
         assertThat(actual).isEqualTo("Helsfyr T");
     }
@@ -49,6 +49,12 @@ public class WordsRemoverTest {
     public void removeByBaneStopp() {
         String actual = wordsRemover.remove("Byparken, bybanestopp");
         assertThat(actual).isEqualTo("Byparken");
+    }
+
+    @Test
+    public void doNotRemoveBåtHavn() {
+        String actual = wordsRemover.remove("Sæbøvik, båthavn");
+        assertThat(actual).isEqualTo("Sæbøvik, båthavn");
     }
 
 }
