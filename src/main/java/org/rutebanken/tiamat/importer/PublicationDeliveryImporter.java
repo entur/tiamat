@@ -204,8 +204,14 @@ public class PublicationDeliveryImporter {
     private void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if(hasStops(netexSiteFrame)) {
             List<org.rutebanken.tiamat.model.StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
-            logger.info("Running stop place pre steps");
-            tiamatStops = stopPlacePreSteps.run(tiamatStops);
+
+            boolean isImportTypeIdMatch = publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH);
+
+            if(!isImportTypeIdMatch) {
+                logger.info("Running stop place pre steps");
+                tiamatStops = stopPlacePreSteps.run(tiamatStops);
+            }
+
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
             logger.info("About to filter {} stops based on topographic references: {}", tiamatStops.size(), publicationDeliveryParams.targetTopographicPlaces);
@@ -219,8 +225,10 @@ public class PublicationDeliveryImporter {
                 logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
             }
 
-            logger.info("Running stop place post filter steps");
-            tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
+            if(!isImportTypeIdMatch) {
+                logger.info("Running stop place post filter steps");
+                tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
+            }
 
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
