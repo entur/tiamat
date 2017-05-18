@@ -1,10 +1,9 @@
 package org.rutebanken.tiamat.service;
 
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TariffZoneRef;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -28,7 +28,7 @@ public class TariffZonesLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(TariffZonesLookupService.class);
 
-    private final Supplier<List<Pair<String, Polygon>>> tariffZones = Suppliers.memoizeWithExpiration(getTariffZones(), 10, TimeUnit.HOURS);
+    private final ResettableMemoizer<List<Pair<String, Polygon>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
 
     private final TariffZoneRepository tariffZoneRepository;
 
@@ -59,7 +59,7 @@ public class TariffZonesLookupService {
     public List<TariffZone> findTariffZones(Point point) {
         return tariffZones.get()
                        .stream()
-                       .filter(pair -> point.within(pair.getSecond()))
+                       .filter(pair -> point.coveredBy(pair.getSecond()))
                        .map(pair -> tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
                        .filter(tariffZone -> tariffZone != null)
                        .collect(toList());
@@ -83,6 +83,10 @@ public class TariffZonesLookupService {
                     .collect(toList());
 
         };
+    }
+
+    public void reset() {
+        tariffZones.reset();
     }
 
 
