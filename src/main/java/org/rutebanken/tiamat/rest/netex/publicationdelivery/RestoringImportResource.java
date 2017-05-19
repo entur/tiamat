@@ -111,7 +111,7 @@ public class RestoringImportResource {
 
                 logger.info("Importing parkings");
                 AtomicInteger parkingsImported = new AtomicInteger(0);
-                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
+                final AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
                 Consumer<Parking> parkingConsumer = parking -> restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
                 submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getParkingQueue(), stopParkingExecution, parkingConsumer, POISON_PARKING));
 
