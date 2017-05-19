@@ -6,8 +6,13 @@ import org.rutebanken.netex.model.StopPlace;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_PARKING;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_STOP_PLACE;
 
 public class PublicationDeliveryPartialUnmarshallerTest {
 
@@ -115,38 +120,19 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
         UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(new FileInputStream(file));
         assertThat(unmarshalResult).isNotNull();
-        readAndVerifyStops(unmarshalResult, 19);
+        readAndVerifyStops(unmarshalResult, 6);
         readAndVerifyParkings(unmarshalResult, 2);
     }
 
     private void readAndVerifyStops(UnmarshalResult unmarshalResult, int expectedStopCount) throws InterruptedException {
-        int stops = 0;
-        while (true) {
-            StopPlace stopPlace = unmarshalResult.getStopPlaceQueue().take();
-            if (stopPlace.getId().equals(RunnableUnmarshaller.POISON_STOP_PLACE.getId())) {
-                System.out.println("Finished importing stops");
-                break;
-            }
-            stops++;
-        }
-
-        assertThat(stops).isEqualTo(expectedStopCount);
+        AtomicInteger stops = new AtomicInteger();
+        new EntityQueueProcessor<>(unmarshalResult.getStopPlaceQueue(), new AtomicBoolean(false), stopPlace -> stops.incrementAndGet(), POISON_STOP_PLACE).run();
+        assertThat(stops.get()).isEqualTo(expectedStopCount);
     }
-
 
     private void readAndVerifyParkings(UnmarshalResult unmarshalResult, int expectedParkingCount) throws InterruptedException {
-        int parkings = 0;
-        while (true) {
-            Parking parking = unmarshalResult.getParkingQueue().take();
-            if (parking.getId().equals(RunnableUnmarshaller.POISON_PARKING.getId())) {
-                System.out.println("Finished importing parkings");
-                break;
-            }
-            parkings++;
-        }
-
-        assertThat(parkings).isEqualTo(expectedParkingCount);
+        AtomicInteger parkings = new AtomicInteger();
+        new EntityQueueProcessor<>(unmarshalResult.getParkingQueue(), new AtomicBoolean(false), stopPlace -> parkings.incrementAndGet(), POISON_PARKING).run();
+        assertThat(parkings.get()).isEqualTo(expectedParkingCount);
     }
-
-
 }
