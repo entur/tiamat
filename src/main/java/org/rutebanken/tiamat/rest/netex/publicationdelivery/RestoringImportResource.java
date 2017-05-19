@@ -136,7 +136,10 @@ public class RestoringImportResource {
                 for(int i = 0; i < threads; i++) {
                     executorService.submit(() -> {
                         try {
-
+                            if (unmarshalResult.getParkingQueue().isEmpty()) {
+                                logger.info("No parkings found in import.");
+                                return;
+                            }
                             while (!Thread.currentThread().isInterrupted() && !stopParkingExecution.get()) {
                                 Parking parking = unmarshalResult.getParkingQueue().poll(1, TimeUnit.SECONDS);
 
