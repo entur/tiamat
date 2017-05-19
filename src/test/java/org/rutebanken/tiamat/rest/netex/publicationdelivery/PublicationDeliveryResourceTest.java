@@ -1,18 +1,30 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
+import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
 
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
@@ -832,9 +845,6 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                 "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
                 "            <stopPlaces>\n" +
                 "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
-                "                    <ValidBetween>\n" +
-                "                        <FromDate>2017-05-11T10:20:27.394+02:00</FromDate>\n" +
-                "                    </ValidBetween>" +
                 "                    <Name lang=\"no-NO\">Krokstien</Name>\n" +
                 "                    <Centroid>\n" +
                 "                        <Location srsName=\"WGS84\">\n" +
@@ -907,6 +917,56 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     }
 
 
+    @Test
+    public void exportStopPlacesWithEffectiveChangedInPeriod() throws Exception {
+        OffsetDateTime validFrom = OffsetDateTime.now().minusDays(3);
+        StopPlace stopPlace1 = new StopPlace()
+                                       .withId("XYZ:Stopplace:1")
+                                       .withVersion("1")
+                                       .withName(new MultilingualString().withValue("Changed stop1"))
+                                       .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                                       .withCentroid(new SimplePoint_VersionStructure()
+                                                             .withLocation(new LocationStructure()
+                                                                                   .withLatitude(new BigDecimal("59.914353"))
+                                                                                   .withLongitude(new BigDecimal("10.806387"))));
+
+        StopPlace stopPlace2 = new StopPlace()
+                                       .withId("XYZ:Stopplace:2")
+                                       .withVersion("1")
+                                       .withName(new MultilingualString().withValue("Changed stop2"))
+                                       .withValidBetween(new ValidBetween().withFromDate(validFrom.plusDays(1)))
+                                       .withCentroid(new SimplePoint_VersionStructure()
+                                                             .withLocation(new LocationStructure()
+                                                                                   .withLatitude(new BigDecimal("22.914353"))
+                                                                                   .withLongitude(new BigDecimal("11.806387"))));
+
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1, stopPlace2);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        UriInfo uriInfoMock = Mockito.mock(UriInfo.class);
+        Mockito.when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(JerseyUriBuilder.fromPath("http://test"));
+        ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(null, null, 0, 1);
+
+        Response response = publicationDeliveryResource.exportStopPlacesWithEffectiveChangedInPeriod(search, false, uriInfoMock);
+        List<StopPlace> changedStopPlaces = extractStopPlaces(response);
+        Assert.assertEquals(1, changedStopPlaces.size());
+        Assert.assertEquals(stopPlace1.getName(), changedStopPlaces.get(0).getName());
+
+        Link link = response.getLink("next");
+        Assert.assertNotNull(link);
+    }
+
+    @Test
+    public void exportStopPlacesWithEffectiveChangedInPeriodNoContent() throws Exception {
+        String historicTime = "2012-04-23T18:25:43.511+0100";
+
+        UriInfo uriInfoMock = Mockito.mock(UriInfo.class);
+        ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(historicTime, historicTime, 0, 1);
+
+        Response response = publicationDeliveryResource.exportStopPlacesWithEffectiveChangedInPeriod(search, false, uriInfoMock);
+        Assert.assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value());
+    }
 
     /**
      * Partially copied from https://github.com/rutebanken/netex-norway-examples/blob/master/examples/stops/BasicStopPlace_example.xml
@@ -1378,7 +1438,6 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
     }
 
 
-
     private boolean testStopInserted = false;
 
     private void insertTestStopWithTopographicPlace() throws JAXBException, IOException, SAXException {
@@ -1414,5 +1473,47 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+    }
+
+
+    private List<StopPlace> extractStopPlaces(Response response) throws Exception {
+        Assert.assertEquals(200, response.getStatus());
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        PublicationDeliveryStructure deliveryStructure = unmarshal(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+
+        List<StopPlace> stopPlaces = new ArrayList<>();
+        for (JAXBElement<? extends Common_VersionFrameStructure> frameStructureElmt : deliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame()) {
+            Common_VersionFrameStructure frameStructure = frameStructureElmt.getValue();
+            if (frameStructure instanceof Site_VersionFrameStructure) {
+                Site_VersionFrameStructure siteFrame = (Site_VersionFrameStructure) frameStructure;
+
+                if (siteFrame.getStopPlaces() != null) {
+                    stopPlaces.addAll(siteFrame.getStopPlaces().getStopPlace());
+                }
+            }
+        }
+        return stopPlaces;
+
+    }
+
+    private static final JAXBContext jaxbContext;
+
+    static {
+        try {
+            jaxbContext = newInstance(PublicationDeliveryStructure.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException {
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+        JAXBElement<PublicationDeliveryStructure> jaxbElement = jaxbUnmarshaller.unmarshal(new StreamSource(inputStream), PublicationDeliveryStructure.class);
+        PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
+
+        return publicationDeliveryStructure;
     }
 }

@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.time.Instant;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -487,4 +488,31 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 		typedQuery.setParameter("quay", quay);
 		return getOneOrNull(typedQuery);
 	}
+
+    public Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
+        final String queryString = "select s " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by vb.fromDate";
+        List<StopPlace> stopPlaces = entityManager.createQuery(queryString, StopPlace.class)
+                                             .setParameter("from", search.getFrom())
+                                             .setParameter("to", search.getTo())
+                                             .setFirstResult(search.getPageable().getOffset())
+                                             .setMaxResults(search.getPageable().getPageSize())
+                                             .getResultList();
+
+        int totalCnt = stopPlaces.size();
+        if (totalCnt == search.getPageable().getPageSize()) {
+            totalCnt = countStopPlacesWithEffectiveChangeInPeriod(search);
+        }
+
+        return new PageImpl<>(stopPlaces, search.getPageable(), totalCnt);
+    }
+
+    private int countStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
+        String queryString = "select count(s) " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE;
+        return entityManager.createQuery(queryString, Long.class).setParameter("from", search.getFrom())
+                       .setParameter("to", search.getTo()).getSingleResult().intValue();
+    }
+
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from StopPlace s join s.validBetweens vb where " +
+                                                                                      "(vb.fromDate BETWEEN :from and :to or vb.toDate  BETWEEN :from and :to) ";
 }
+
