@@ -116,7 +116,7 @@ public class PublicationDeliveryPartialUnmarshallerTest {
     @Test
     public void testImportingPublicationDeliveryFromFile() throws Exception {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("publication_delivery/initial_import.xml").getFile());
+        File file = new File(classLoader.getResource("publication_delivery/restoring_import.xml").getFile());
 
         UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(new FileInputStream(file));
         assertThat(unmarshalResult).isNotNull();

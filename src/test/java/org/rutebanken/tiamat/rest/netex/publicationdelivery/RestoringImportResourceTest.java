@@ -45,7 +45,7 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
     public void restoringImport() throws IOException, InterruptedException, ParserConfigurationException, JAXBException, SAXException, XMLStreamException {
 
 
-        File file = new File(getClass().getClassLoader().getResource("publication_delivery/initial_import.xml").getFile());
+        File file = new File(getClass().getClassLoader().getResource("publication_delivery/restoring_import.xml").getFile());
 
         assertThat(topographicPlaceRepository.findAll()).isEmpty();
 
