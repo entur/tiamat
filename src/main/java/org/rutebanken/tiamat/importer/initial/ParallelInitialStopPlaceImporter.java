@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.initial;
 
+import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TariffZoneRef;
@@ -30,6 +31,9 @@ public class ParallelInitialStopPlaceImporter {
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
+    private StopPlaceTopographicPlaceReferenceUpdater stopPlaceTopographicPlaceReferenceUpdater;
+
+    @Autowired
     private NetexMapper netexMapper;
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
@@ -43,6 +47,7 @@ public class ParallelInitialStopPlaceImporter {
 
                     return stopPlace;
                 })
+                .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
                 .map(stopPlace -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace))
                 .peek(stopPlace -> stopPlacesCreated.incrementAndGet())
                 .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))

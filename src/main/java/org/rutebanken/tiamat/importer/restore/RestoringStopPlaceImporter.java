@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.importer.restore;
 
 
+import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -24,27 +25,20 @@ public class RestoringStopPlaceImporter {
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    private final TopographicPlaceRepository topographicPlaceRepository;
+    private final StopPlaceTopographicPlaceReferenceUpdater stopPlaceTopographicPlaceReferenceUpdater;
 
     private final NetexMapper netexMapper;
 
     @Autowired
-    public RestoringStopPlaceImporter(StopPlaceRepository stopPlaceRepository, TopographicPlaceRepository topographicPlaceRepository, NetexMapper netexMapper) {
+    public RestoringStopPlaceImporter(StopPlaceRepository stopPlaceRepository, StopPlaceTopographicPlaceReferenceUpdater stopPlaceTopographicPlaceReferenceUpdater, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
-        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.stopPlaceTopographicPlaceReferenceUpdater = stopPlaceTopographicPlaceReferenceUpdater;
         this.netexMapper = netexMapper;
     }
 
     public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger stopPlacesImported, StopPlace stopPlace) {
 
-        if(stopPlace.getTopographicPlace() != null) {
-
-            String netexId = stopPlace.getTopographicPlace().getNetexId();
-            Long version = stopPlace.getTopographicPlace().getVersion();
-
-            stopPlace.setTopographicPlace(topographicPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
-            logger.trace("Resolved topographic place from {}:{} for stop place {}:{}", netexId, version, stopPlace.getNetexId(), stopPlace.getVersion());
-        }
+        stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
 
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {}, version {}, netex ID: {}", stopPlace.getName(), stopPlace.getVersion(), stopPlace.getNetexId());

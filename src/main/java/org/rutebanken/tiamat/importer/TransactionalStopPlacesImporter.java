@@ -23,9 +23,12 @@ public class TransactionalStopPlacesImporter {
 
     private final MergingStopPlaceImporter mergingStopPlaceImporter;
 
+    private final StopPlaceTopographicPlaceReferenceUpdater topographicPlaceReferenceUpdater;
+
     @Autowired
-    public TransactionalStopPlacesImporter(MergingStopPlaceImporter mergingStopPlaceImporter) {
+    public TransactionalStopPlacesImporter(MergingStopPlaceImporter mergingStopPlaceImporter, StopPlaceTopographicPlaceReferenceUpdater topographicPlaceReferenceUpdater) {
         this.mergingStopPlaceImporter = mergingStopPlaceImporter;
+        this.topographicPlaceReferenceUpdater = topographicPlaceReferenceUpdater;
     }
 
     public Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> stopPlaces, AtomicInteger stopPlacesCreated) {
@@ -36,6 +39,7 @@ public class TransactionalStopPlacesImporter {
                 .map(stopPlace -> {
                     org.rutebanken.netex.model.StopPlace importedStop = null;
                     try {
+                        topographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
                         importedStop = mergingStopPlaceImporter.importStopPlace(stopPlace);
                     } catch (Exception e) {
                         throw new RuntimeException("Could not import stop place " + stopPlace, e);
