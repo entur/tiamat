@@ -571,6 +571,52 @@ public class QuayMergerTest {
         assertThat(result.iterator().next().getOriginalIds()).contains(incomingQuay.getOriginalIds().iterator().next());
     }
 
+    /**
+     * NRP-1556 Even if there is an id match, prefer closer quays...
+     * Reason: Inconsistency in stop place data
+     */
+    @Test
+    public void matchCloseQuaysBeforeIdMatch() {
+
+        // Existing
+        Quay existingQuay = new Quay();
+        existingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(12.315012269, 64.637640437)));
+        existingQuay.setPublicCode("01");
+        existingQuay.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("NTR:Quay:1743901001")));
+
+        Quay existingQuay2 = new Quay();
+        existingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(12.315137008, 64.638370312)));
+        existingQuay2.setPublicCode("02");
+        existingQuay2.getOriginalIds().addAll(new ArrayList<>(Arrays.asList("NTR:Quay:1743901002")));
+
+
+        // Incoming
+        Quay incomingQuay = new Quay();
+        incomingQuay.setCentroid(geometryFactory.createPoint(new Coordinate(12.315004, 64.637639)));
+        incomingQuay.setCompassBearing(16.0f);
+        incomingQuay.getOriginalIds().addAll(Arrays.asList("NOR:Quay:21439010", "NOR:Quay:2143901001"));
+
+        Quay incomingQuay2 = new Quay();
+        incomingQuay2.setCentroid(geometryFactory.createPoint(new Coordinate(12.315136, 64.638373)));
+        incomingQuay2.setCompassBearing(191.0f);
+        incomingQuay2.getOriginalIds().addAll(Arrays.asList("NOR:Quay:17439010", "NOR:Quay:1743901001"));
+
+        // Merge
+        Set<Quay> result = quayMerger.appendImportIds(Sets.newHashSet(incomingQuay2, incomingQuay ), Sets.newHashSet(existingQuay2, existingQuay), new AtomicInteger(), new AtomicInteger(), false);
+
+        assertThat(result).hasSize(2);
+        assertThat(existingQuay.getOriginalIds()).containsAll(incomingQuay.getOriginalIds());
+        assertThat(existingQuay.getPublicCode()).isEqualTo("01");
+        assertThat(existingQuay.getCompassBearing()).isEqualTo(incomingQuay.getCompassBearing());
+        assertThat(existingQuay.getOriginalIds()).doesNotContainAnyElementsOf(incomingQuay2.getOriginalIds());
+
+        assertThat(existingQuay2.getOriginalIds()).containsAll(incomingQuay2.getOriginalIds());
+        assertThat(existingQuay2.getPublicCode()).isEqualTo("02");
+        assertThat(existingQuay2.getCompassBearing()).isEqualTo(incomingQuay2.getCompassBearing());
+        assertThat(existingQuay2.getOriginalIds()).doesNotContainAnyElementsOf(incomingQuay.getOriginalIds());
+
+    }
+
     private Point getOffsetPoint(Point point, int offsetMeters, int azimuth) {
         GeodeticCalculator calc = new GeodeticCalculator();
         calc.setStartingGeographicPoint(point.getX(), point.getY());

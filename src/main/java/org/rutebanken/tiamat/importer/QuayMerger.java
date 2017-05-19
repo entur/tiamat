@@ -22,6 +22,12 @@ public class QuayMerger {
 
     private static final Logger logger = LoggerFactory.getLogger(QuayMerger.class);
 
+    /**
+     * If two quays closed than this value, treat as match if no other conflict.
+     */
+    @Value("${quayMerger.mergeDistanceMetersIgnoreIdMatch:3}")
+    public final double MERGE_DISTANCE_METERS_IGNORE_ID_MATCH = 3;
+
     @Value("${quayMerger.mergeDistanceMeters:10}")
     public final double MERGE_DISTANCE_METERS = 10;
 
@@ -83,10 +89,15 @@ public class QuayMerger {
         }
 
         for(Quay incomingQuay : newQuays) {
-            Optional<Quay> matchingQuay = findMatchOnOriginalId(incomingQuay, result);
+
+            Optional<Quay> matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS_IGNORE_ID_MATCH);
 
             if(!matchingQuay.isPresent()) {
-                matchingQuay = findMatch(incomingQuay, result);
+                matchingQuay = findMatchOnOriginalId(incomingQuay, result);
+            }
+
+            if(!matchingQuay.isPresent()) {
+                matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS);
             }
 
             if(matchingQuay.isPresent()) {
@@ -108,9 +119,9 @@ public class QuayMerger {
         return result;
     }
 
-    private Optional<Quay> findMatch(Quay incomingQuay, Set<Quay> result) {
+    private Optional<Quay> findMatch(Quay incomingQuay, Set<Quay> result, double mergeDistanceMeters) {
         for (Quay alreadyAdded : result) {
-            if (matches(incomingQuay, alreadyAdded)) {
+            if (matches(incomingQuay, alreadyAdded, mergeDistanceMeters)) {
                 return Optional.of(alreadyAdded);
             }
         }
@@ -151,11 +162,11 @@ public class QuayMerger {
         return changed;
     }
 
-    private boolean matches(Quay incomingQuay, Quay alreadyAdded) {
+    private boolean matches(Quay incomingQuay, Quay alreadyAdded, double mergeDistance) {
         boolean nameMatch = haveMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
         boolean publicCodeMatch = haveMatchingPublicCodeOrOneIsMissing(incomingQuay, alreadyAdded);
 
-        if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS)
+        if (areClose(incomingQuay, alreadyAdded, mergeDistance)
                 && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
                 && nameMatch
                 && publicCodeMatch) {
