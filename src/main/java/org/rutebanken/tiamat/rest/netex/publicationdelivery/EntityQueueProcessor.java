@@ -47,11 +47,11 @@ public class EntityQueueProcessor<T extends EntityInVersionStructure> implements
             }
         } catch (InterruptedException e) {
             logger.warn("Interrupted. Stopping all jobs for {}", type);
-            Thread.currentThread().interrupt();
             stopExecution.set(true);
+            Thread.currentThread().interrupt();
             return;
         } catch (Exception e) {
-            logger.warn("Caught exception while importing {}", type);
+            logger.warn("Caught exception while importing {}", type, e);
             stopExecution.set(true);
         }
     }

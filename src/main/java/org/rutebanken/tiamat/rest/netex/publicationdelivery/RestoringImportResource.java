@@ -8,13 +8,14 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.Consumes;
@@ -29,7 +30,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -44,10 +44,11 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmar
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RestoringImportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(RestoringImportResource.class);
-    private static final String KEY_INITIAL_IMPORT_LOCK = "initial_import_lock";
+    private static final String KEY_RESTORING_IMPORT_LOCK = "restoring_import_lock";
 
     private final PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller;
     private final NetexMapper netexMapper;
@@ -79,12 +80,12 @@ public class RestoringImportResource {
      * TODO: Move this to PublicationDeliveryImporter class
      */
     @POST
-    @Path("initial_import")
+    @Path("restoring_import")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
     public Response importPublicationDeliveryOnEmptyDatabase(InputStream inputStream) throws IOException, JAXBException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
 
-        Lock lock = hazelcastInstance.getLock(KEY_INITIAL_IMPORT_LOCK);
+        Lock lock = hazelcastInstance.getLock(KEY_RESTORING_IMPORT_LOCK);
 
         if (lock.tryLock()) {
             int threads = Runtime.getRuntime().availableProcessors();
@@ -105,13 +106,13 @@ public class RestoringImportResource {
 
                 logger.info("Importing stops");
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
-                final AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
+                AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
                 Consumer<StopPlace> stopPlaceConsumer = stopPlace -> restoringStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
                 submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getStopPlaceQueue(), stopStopPlaceExecution, stopPlaceConsumer, POISON_STOP_PLACE));
 
                 logger.info("Importing parkings");
                 AtomicInteger parkingsImported = new AtomicInteger(0);
-                final AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
+                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
                 Consumer<Parking> parkingConsumer = parking -> restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
                 submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getParkingQueue(), stopParkingExecution, parkingConsumer, POISON_PARKING));
 

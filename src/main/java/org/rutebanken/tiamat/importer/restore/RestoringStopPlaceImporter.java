@@ -1,9 +1,11 @@
 package org.rutebanken.tiamat.importer.restore;
 
 
+import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +25,21 @@ public class RestoringStopPlaceImporter {
 
     private final StopPlaceRepository stopPlaceRepository;
 
+    private final StopPlaceTopographicPlaceReferenceUpdater stopPlaceTopographicPlaceReferenceUpdater;
+
     private final NetexMapper netexMapper;
 
     @Autowired
-    public RestoringStopPlaceImporter(StopPlaceRepository stopPlaceRepository, NetexMapper netexMapper) {
+    public RestoringStopPlaceImporter(StopPlaceRepository stopPlaceRepository, StopPlaceTopographicPlaceReferenceUpdater stopPlaceTopographicPlaceReferenceUpdater, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.stopPlaceTopographicPlaceReferenceUpdater = stopPlaceTopographicPlaceReferenceUpdater;
         this.netexMapper = netexMapper;
     }
 
     public org.rutebanken.netex.model.StopPlace importStopPlace(AtomicInteger stopPlacesImported, StopPlace stopPlace) {
+
+        stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
+
         stopPlaceRepository.save(stopPlace);
         logger.debug("Saving stop place {}, version {}, netex ID: {}", stopPlace.getName(), stopPlace.getVersion(), stopPlace.getNetexId());
         stopPlacesImported.incrementAndGet();
