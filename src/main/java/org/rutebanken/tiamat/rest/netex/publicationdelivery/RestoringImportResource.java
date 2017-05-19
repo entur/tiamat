@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.Consumes;
@@ -44,6 +46,7 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmar
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RestoringImportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(RestoringImportResource.class);
@@ -105,13 +108,13 @@ public class RestoringImportResource {
 
                 logger.info("Importing stops");
                 AtomicInteger stopPlacesImported = new AtomicInteger(0);
-                final AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
+                AtomicBoolean stopStopPlaceExecution = new AtomicBoolean(false);
                 Consumer<StopPlace> stopPlaceConsumer = stopPlace -> restoringStopPlaceImporter.importStopPlace(stopPlacesImported, netexMapper.mapToTiamatModel(stopPlace));
                 submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getStopPlaceQueue(), stopStopPlaceExecution, stopPlaceConsumer, POISON_STOP_PLACE));
 
                 logger.info("Importing parkings");
                 AtomicInteger parkingsImported = new AtomicInteger(0);
-                final AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
+                AtomicBoolean stopParkingExecution = new AtomicBoolean(false);
                 Consumer<Parking> parkingConsumer = parking -> restoringParkingImporter.importParking(parkingsImported, netexMapper.mapToTiamatModel(parking));
                 submitNTimes(threads, executorService, new EntityQueueProcessor<>(unmarshalResult.getParkingQueue(), stopParkingExecution, parkingConsumer, POISON_PARKING));
 
