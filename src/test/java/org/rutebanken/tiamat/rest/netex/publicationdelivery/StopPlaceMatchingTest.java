@@ -6,11 +6,19 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.xml.sax.SAXException;
 
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class StopPlaceMatchingTest extends TiamatIntegrationTest {
@@ -372,5 +380,206 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
         assertThat(result).hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId(stopPlace1.getId(), result.get(0));
+    }
+
+    /**
+     * https://rutebanken.atlassian.net/browse/NRP-1558
+     */
+    @Test
+    public void matchOneIncomingStopToMultipleTiamatStops() throws JAXBException, IOException, SAXException {
+
+        String initiallyImportedStops = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "  <PublicationTimestamp>2017-05-05T15:12:33.618+02:00</PublicationTimestamp>\n" +
+                "  <ParticipantRef>XYZ</ParticipantRef>\n" +
+                "  <dataObjects>\n" +
+                "    <SiteFrame id=\"initial\" version=\"1\">\n" +
+                "      <stopPlaces>\n" +
+                "        <StopPlace id=\"SOF:StopPlace:14162447Bus\" version=\"1\">\n" +
+                "          <keyList>\n" +
+                "            <KeyValue>\n" +
+                "              <Key>imported-id</Key>\n" +
+                "              <Value>SOF:StopPlace:14162447,NRI:StopPlace:761115465</Value>\n" +
+                "            </KeyValue>\n" +
+                "          </keyList>\n" +
+                "          <Name lang=\"no\">Nordeide kai</Name>\n" +
+                "          <Centroid>\n" +
+                "            <Location srsName=\"EPSG:4326\">\n" +
+                "              <Longitude>5.98568</Longitude>\n" +
+                "              <Latitude>61.172894</Latitude>\n" +
+                "            </Location>\n" +
+                "          </Centroid>\n" +
+                "          <AccessibilityAssessment id=\"SOF:AccessibilityAssessment:14162447Bus\" version=\"1\">\n" +
+                "            <MobilityImpairedAccess>unknown</MobilityImpairedAccess>\n" +
+                "            <limitations>\n" +
+                "              <AccessibilityLimitation>\n" +
+                "                <WheelchairAccess>unknown</WheelchairAccess>\n" +
+                "                <StepFreeAccess>unknown</StepFreeAccess>\n" +
+                "              </AccessibilityLimitation>\n" +
+                "            </limitations>\n" +
+                "          </AccessibilityAssessment>\n" +
+                "          <StopPlaceType>onstreetBus</StopPlaceType>\n" +
+                "          <Weighting>interchangeAllowed</Weighting>\n" +
+                "          <quays>\n" +
+                "            <n:Quay xmlns:n=\"http://www.netex.org.uk/netex\" id=\"SOF:Quay:1416244702\" version=\"1\">\n" +
+                "              <keyList>\n" +
+                "                <KeyValue>\n" +
+                "                  <Key>imported-id</Key>\n" +
+                "                  <Value>NRI:Quay:762132224</Value>\n" +
+                "                </KeyValue>\n" +
+                "              </keyList>\n" +
+                "              <Centroid>\n" +
+                "                <Location srsName=\"EPSG:4326\">\n" +
+                "                  <Longitude>5.9861436</Longitude>\n" +
+                "                  <Latitude>61.173157</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "              <Lighting>unknown</Lighting>\n" +
+                "              <PublicCode>2</PublicCode>\n" +
+                "              <!--Enriched CompassBearing-->\n" +
+                "              <n:CompassBearing>311.0</n:CompassBearing>\n" +
+                "            </n:Quay>\n" +
+                "            <n:Quay xmlns:n=\"http://www.netex.org.uk/netex\" id=\"SOF:Quay:1416244701\" version=\"1\">\n" +
+                "              <keyList>\n" +
+                "                <KeyValue>\n" +
+                "                  <Key>imported-id</Key>\n" +
+                "                  <Value>NRI:Quay:762054659</Value>\n" +
+                "                </KeyValue>\n" +
+                "              </keyList>\n" +
+                "              <Centroid>\n" +
+                "                <Location srsName=\"EPSG:4326\">\n" +
+                "                  <Longitude>5.9847283</Longitude>\n" +
+                "                  <Latitude>61.172707</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "              <Lighting>unknown</Lighting>\n" +
+                "              <PublicCode>1</PublicCode>\n" +
+                "              <!--Enriched CompassBearing-->\n" +
+                "              <n:CompassBearing>233.0</n:CompassBearing>\n" +
+                "            </n:Quay>\n" +
+                "          </quays>\n" +
+                "        </StopPlace>\n" +
+                "        <StopPlace id=\"SOF:StopPlace:14162447Ferje\" version=\"1\">\n" +
+                "          <keyList>\n" +
+                "            <KeyValue>\n" +
+                "              <Key>imported-id</Key>\n" +
+                "              <Value>SOF:StopPlace:14162447,NRI:StopPlace:761115465</Value>\n" +
+                "            </KeyValue>\n" +
+                "          </keyList>\n" +
+                "          <Name lang=\"no\">Nordeide kai</Name>\n" +
+                "          <Centroid>\n" +
+                "            <Location srsName=\"EPSG:4326\">\n" +
+                "              <Longitude>5.98568</Longitude>\n" +
+                "              <Latitude>61.172894</Latitude>\n" +
+                "            </Location>\n" +
+                "          </Centroid>\n" +
+                "          <AccessibilityAssessment id=\"SOF:AccessibilityAssessment:14162447Ferje\" version=\"1\">\n" +
+                "            <MobilityImpairedAccess>unknown</MobilityImpairedAccess>\n" +
+                "            <limitations>\n" +
+                "              <AccessibilityLimitation>\n" +
+                "                <WheelchairAccess>unknown</WheelchairAccess>\n" +
+                "                <StepFreeAccess>unknown</StepFreeAccess>\n" +
+                "              </AccessibilityLimitation>\n" +
+                "            </limitations>\n" +
+                "          </AccessibilityAssessment>\n" +
+                "          <StopPlaceType>harbourPort</StopPlaceType>\n" +
+                "          <Weighting>interchangeAllowed</Weighting>\n" +
+                "          <quays>\n" +
+                "            <n:Quay xmlns:n=\"http://www.netex.org.uk/netex\" id=\"SOF:Quay:1416244703\" version=\"1\">\n" +
+                "              <keyList>\n" +
+                "                <KeyValue>\n" +
+                "                  <Key>imported-id</Key>\n" +
+                "                  <Value>NRI:Quay:762054660</Value>\n" +
+                "                </KeyValue>\n" +
+                "              </keyList>\n" +
+                "              <Centroid>\n" +
+                "                <Location srsName=\"EPSG:4326\">\n" +
+                "                  <Longitude>5.986519</Longitude>\n" +
+                "                  <Latitude>61.173313</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "              <Lighting>unknown</Lighting>\n" +
+                "              <PublicCode>3</PublicCode>\n" +
+                "              <!--Enriched CompassBearing-->\n" +
+                "              <n:CompassBearing>132.0</n:CompassBearing>\n" +
+                "            </n:Quay>\n" +
+                "          </quays>\n" +
+                "        </StopPlace>\n" +
+                "      </stopPlaces>\n" +
+                "    </SiteFrame>\n" +
+                "  </dataObjects>\n" +
+                "</PublicationDelivery>\n";
+
+        String idMatch = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
+                "  <PublicationTimestamp>2017-05-05T15:12:33.618+02:00</PublicationTimestamp>\n" +
+                "  <ParticipantRef>ZZZ</ParticipantRef>\n" +
+                "  <dataObjects>\n" +
+                "    <SiteFrame id=\"idmatch\" version=\"1\">\n" +
+                "      <stopPlaces>\n" +
+                "        <StopPlace version=\"1\" id=\"SOF:StopPlace:14162447\">\n" +
+                "          <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +
+                "          <Centroid>\n" +
+                "            <Location>\n" +
+                "              <Longitude>5.985714134603235</Longitude>\n" +
+                "              <Latitude>61.1729031032732</Latitude>\n" +
+                "            </Location>\n" +
+                "          </Centroid>\n" +
+                "          <StopPlaceType>onstreetBus</StopPlaceType>\n" +
+                "          <quays>\n" +
+                "            <Quay version=\"1\" id=\"SOF:Quay:1416244704\">\n" +
+                "              <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +
+                "              <Centroid>\n" +
+                "                <Location>\n" +
+                "                  <Longitude>5.98541250888936193774725325056351721286773681640625</Longitude>\n" +
+                "                  <Latitude>61.17240898514889835269059403799474239349365234375</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "            </Quay>\n" +
+                "            <Quay version=\"1\" id=\"SOF:Quay:1416244703\">\n" +
+                "              <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +
+                "              <Centroid>\n" +
+                "                <Location>\n" +
+                "                  <Longitude>5.98656984073603748441882999031804502010345458984375</Longitude>\n" +
+                "                  <Latitude>61.17334218350138286268702358938753604888916015625</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "            </Quay>\n" +
+                "            <Quay version=\"1\" id=\"SOF:Quay:1416244702\">\n" +
+                "              <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +
+                "              <Centroid>\n" +
+                "                <Location>\n" +
+                "                  <Longitude>5.98614141196775673137153717107139527797698974609375</Longitude>\n" +
+                "                  <Latitude>61.17315295435830790893305675126612186431884765625</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "              <CompassBearing>132.0</CompassBearing>\n" +
+                "            </Quay>\n" +
+                "            <Quay version=\"1\" id=\"SOF:Quay:1416244701\">\n" +
+                "              <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +
+                "              <Centroid>\n" +
+                "                <Location>\n" +
+                "                  <Longitude>5.98473277681978288455866277217864990234375</Longitude>\n" +
+                "                  <Latitude>61.1727082900842020762866013683378696441650390625</Latitude>\n" +
+                "                </Location>\n" +
+                "              </Centroid>\n" +
+                "            </Quay>\n" +
+                "          </quays>\n" +
+                "        </StopPlace>\n" +
+                "      </stopPlaces>\n" +
+                "    </SiteFrame>\n" +
+                "  </dataObjects>\n" +
+                "</PublicationDelivery>\n";
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initiallyImportedStops, publicationDeliveryParams);
+
+        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(idMatch, publicationDeliveryParams);
+
+        List<StopPlace> stops = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(stops).hasSize(2);
     }
 }

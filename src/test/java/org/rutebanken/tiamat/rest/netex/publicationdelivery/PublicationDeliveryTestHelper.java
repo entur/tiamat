@@ -173,10 +173,14 @@ public class PublicationDeliveryTestHelper {
     }
 
     public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml) throws JAXBException, IOException, SAXException {
+        return postAndReturnPublicationDelivery(publicationDeliveryXml, null);
+    }
+
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
 
         InputStream stream = new ByteArrayInputStream(publicationDeliveryXml.getBytes(StandardCharsets.UTF_8));
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.receivePublicationDelivery(stream, publicationDeliveryParams);
 
         assertThat(response.getStatus()).isEqualTo(200);
 
