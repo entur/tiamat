@@ -50,6 +50,8 @@ public class NetexMapper {
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
+                .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
+                .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
                 // TODO: Excluding some fields while waiting for NRP-1354
                 .exclude("localServices")
                 .exclude("postalAddress")
