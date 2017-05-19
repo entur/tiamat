@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -42,6 +43,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
+    private final EntityChangedListener entityChangedListener;
+
+
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
                                           ValidBetweenRepository validBetweenRepository,
@@ -50,7 +54,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                                           TopographicPlaceLookupService countyAndMunicipalityLookupService,
                                           TariffZonesLookupService tariffZonesLookupService,
                                           StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
-                                          NearbyStopPlaceFinder nearbyStopPlaceFinder) {
+                                          NearbyStopPlaceFinder nearbyStopPlaceFinder,
+                                          EntityChangedListener entityChangedListener) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
@@ -59,6 +64,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
+        this.entityChangedListener = entityChangedListener;
     }
 
     @Override
@@ -109,6 +115,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                             .collect(Collectors.toList()));
         }
         nearbyStopPlaceFinder.update(stopPlaceToSave);
+        entityChangedListener.onChange(stopPlaceToSave);
         return stopPlaceToSave;
     }
 
