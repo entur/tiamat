@@ -21,6 +21,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
 
     private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceRefConverter.class);
 
+    // TODO: a mapper or converter should ideally not use repositories
     private final TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
