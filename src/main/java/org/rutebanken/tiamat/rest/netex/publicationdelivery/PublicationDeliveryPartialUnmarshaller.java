@@ -102,7 +102,7 @@ public class PublicationDeliveryPartialUnmarshaller {
      */
     private PublicationDeliveryStructure readPublicationDeliveryStructure(XMLInputFactory xmlInputFactory, InputStream inputStream, Unmarshaller unmarshaller) throws FileNotFoundException, XMLStreamException, JAXBException {
 
-        EventFilter eventFilter = new TypesEventFilter("stopPlaces", "navigationPaths");
+        EventFilter eventFilter = new TypesEventFilter("stopPlaces", "navigationPaths", "parkings");
 
         XMLEventReader xmlEventReader = xmlInputFactory.createFilteredReader(xmlInputFactory.createXMLEventReader(inputStream), eventFilter);
         PublicationDeliveryStructure publicationDeliveryStructure = unmarshaller.unmarshal(xmlEventReader, PublicationDeliveryStructure.class).getValue();
