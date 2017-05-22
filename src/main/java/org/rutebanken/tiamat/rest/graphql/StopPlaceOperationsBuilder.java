@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
@@ -27,19 +28,24 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 @Transactional
 public class StopPlaceOperationsBuilder {
 
-    private final String STOP_PLACE_ID = "stopPlaceId";
-    private final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
-    private final String TO_STOP_PLACE_ID = "toStopPlaceId";
-    private final String FROM_QUAY_ID = "fromQuayId";
-    private final String TO_QUAY_ID = "toQuayId";
-    private final String MERGE_STOP_PLACES = "mergeStopPlaces";
-    private final String MERGE_QUAYS = "mergeQuays";
+    private static final String STOP_PLACE_ID = "stopPlaceId";
+    private static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
+    public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
+    private static final String FROM_QUAY_ID = "fromQuayId";
+    private static final String TO_QUAY_ID = "toQuayId";
+    private static final String MERGE_STOP_PLACES = "mergeStopPlaces";
+    private static final String MERGE_QUAYS = "mergeQuays";
+    public static final String MOVE_QUAYS_TO_STOP = "moveQuaysToStop";
+    public static final String QUAY_IDS = "quayIds";
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private StopPlaceQuayMover stopPlaceQuayMover;
 
     public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -63,6 +69,21 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(FROM_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(TO_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .dataFetcher(environment -> mergeQuays(environment.getArgument(STOP_PLACE_ID), environment.getArgument(FROM_QUAY_ID), environment.getArgument(TO_QUAY_ID)))
+                .build());
+
+        operations.add(newFieldDefinition()
+                .type(stopPlaceObjectType)
+                .name(MOVE_QUAYS_TO_STOP)
+                .description("Moves one or more quays to a new or existing stop place. Returns the destination stop place.")
+                .argument(newArgument()
+                        .name(QUAY_IDS)
+                        .description("A list of Quay IDs to move to the destination stop place. Quays must belong to the same stop place.")
+                        .type(new GraphQLList(new GraphQLNonNull(GraphQLString))))
+                .argument(newArgument()
+                        .name(TO_STOP_PLACE_ID)
+                        .description("The target stop place ID to move quays to. If not specified, a new stop place will be created.")
+                        .type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayMover.moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID)))
                 .build());
 
         return operations;
