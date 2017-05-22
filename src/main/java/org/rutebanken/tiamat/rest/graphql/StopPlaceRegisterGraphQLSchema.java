@@ -49,6 +49,9 @@ StopPlaceRegisterGraphQLSchema {
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Autowired
+    private StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
+
+    @Autowired
     DataFetcher stopPlaceFetcher;
 
     @Autowired
@@ -214,6 +217,7 @@ StopPlaceRegisterGraphQLSchema {
                                 .type(parkingObjectInputType))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
+                .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
