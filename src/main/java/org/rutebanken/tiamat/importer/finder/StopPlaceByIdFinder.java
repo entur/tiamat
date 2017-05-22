@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.importer.finder;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -9,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class StopPlaceByIdFinder {
@@ -31,30 +32,31 @@ public class StopPlaceByIdFinder {
     @Autowired
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
-    private List<Function<StopPlace, Function<Boolean, Optional<StopPlace>>>> findFunctionList = Arrays.asList(
+    private List<Function<StopPlace, Function<Boolean, Set<StopPlace>>>> findFunctionList = Arrays.asList(
             stopPlace -> hasQuays -> stopPlaceByQuayOriginalIdFinder.find(stopPlace, hasQuays),
             stopPlace -> hasQuays -> findByStopPlaceOriginalId(stopPlace),
             stopPlace -> hasQuays -> findByNetexId(stopPlace),
             stopPlace -> hasQuays -> findByQuayNetexId(stopPlace, hasQuays));
 
-    public Optional<StopPlace> findByNetexId(StopPlace incomingStopPlace) {
+    public Set<StopPlace> findByNetexId(StopPlace incomingStopPlace) {
         if (incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
             logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
-            return Optional.ofNullable(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId()));
+            return Sets.newHashSet(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId()));
         }
-        return Optional.empty();
+        return new HashSet<>(0);
     }
 
-    public Optional<StopPlace> findStopPlace(StopPlace incomingStopPlace) {
+    public Set<StopPlace> findStopPlace(StopPlace incomingStopPlace) {
         boolean hasQuays = incomingStopPlace.getQuays() != null && !incomingStopPlace.getQuays().isEmpty();
         return findFunctionList.stream()
                 .map(function -> function.apply(incomingStopPlace).apply(hasQuays))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+                .filter(set -> !set.isEmpty())
+                .flatMap(set -> set.stream())
+                .filter(Objects::nonNull)
+                .collect(toSet());
     }
 
-    public Optional<StopPlace> findByQuayNetexId(StopPlace incomingStopPlace, boolean hasQuays) {
+    public Set<StopPlace> findByQuayNetexId(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
             logger.debug("Looking for stop by quay netex ID");
             return incomingStopPlace.getQuays().stream()
@@ -62,15 +64,15 @@ public class StopPlaceByIdFinder {
                     .map(quay -> quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId()))
                     .filter(quay -> quay != null)
                     .map(quay -> stopPlaceRepository.findByQuay(quay))
-                    .findAny();
+                    .collect(toSet());
         }
-        return Optional.empty();
+        return new HashSet<>(0);
     }
 
 
 
-    public Optional<StopPlace> findByStopPlaceOriginalId(StopPlace incomingStopPlace) {
+    public Set<StopPlace> findByStopPlaceOriginalId(StopPlace incomingStopPlace) {
         logger.debug("Looking for stop by stops by original id: {}", incomingStopPlace.getOriginalIds());
-        return Optional.ofNullable(stopPlaceFromOriginalIdFinder.find(incomingStopPlace));
+        return Sets.newHashSet(stopPlaceFromOriginalIdFinder.find(incomingStopPlace));
     }
 }

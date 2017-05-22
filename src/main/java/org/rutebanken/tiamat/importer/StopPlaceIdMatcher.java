@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -37,27 +38,31 @@ public class StopPlaceIdMatcher {
 
         tiamatStops.forEach(incomingStopPlace -> {
 
-            Optional<StopPlace> existingStopPlace = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
+                    Set<StopPlace> existingStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
 
-            if (existingStopPlace.isPresent()) {
-                StopPlace stopPlaceFound = existingStopPlace.get();
-                logger.debug("Found matching stop place {}", stopPlaceFound);
+                    if(existingStopPlaces.isEmpty()){
+                        logger.warn("Cannot find stop place from IDs: {}. StopPlace toString: {}.",
+                                incomingStopPlace.importedIdAndNameToString(),
+                                incomingStopPlace);
+                    }
 
-                boolean alreadyAdded = matchedStopPlaces
-                        .stream()
-                        .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(stopPlaceFound.getNetexId()));
+                    for (StopPlace stopPlaceFound : existingStopPlaces) {
+                        logger.debug("Found matching stop place {}", stopPlaceFound);
 
-                if (!alreadyAdded) {
-                    matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlaceFound));
+                        boolean alreadyAdded = matchedStopPlaces
+                                .stream()
+                                .anyMatch(alreadyAddedStop -> alreadyAddedStop.getId().equals(stopPlaceFound.getNetexId()));
+
+                        if (!alreadyAdded) {
+                            matchedStopPlaces.add(netexMapper.mapToNetexModel(stopPlaceFound));
+                        }
+                        stopPlaceMatched.incrementAndGet();
+
+                    }
+
+
                 }
-                stopPlaceMatched.incrementAndGet();
-
-            } else {
-                logger.warn("Cannot find stop place from IDs: {}. StopPlace toString: {}.",
-                        incomingStopPlace.importedIdAndNameToString(),
-                        incomingStopPlace);
-            }
-        });
+        );
 
         return matchedStopPlaces;
     }

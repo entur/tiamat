@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class StopPlaceByQuayOriginalIdFinder {
@@ -28,7 +28,7 @@ public class StopPlaceByQuayOriginalIdFinder {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    public Optional<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
+    public Set<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
             return incomingStopPlace.getQuays().stream()
                     .flatMap(quay -> quay.getOriginalIds().stream())
@@ -40,9 +40,9 @@ public class StopPlaceByQuayOriginalIdFinder {
                     .peek(stopPlaceNetexId -> logger.debug("Found stop place {}", stopPlaceNetexId))
                     .map(stopPlaceRepository::findFirstByNetexIdOrderByVersionDesc)
                     .filter(stopPlace -> stopPlace != null)
-                    .findFirst();
+                    .collect(toSet());
         }
-        return Optional.empty();
+        return new HashSet<>();
     }
 
     private String extractNumericValueIfPossible(String quayOriginalId) {
