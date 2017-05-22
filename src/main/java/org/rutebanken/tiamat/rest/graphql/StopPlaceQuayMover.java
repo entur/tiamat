@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -30,6 +31,9 @@ public class StopPlaceQuayMover {
     private QuayRepository quayRepository;
 
     @Autowired
+    private CentroidComputer centroidComputer;
+
+    @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId) {
@@ -51,7 +55,7 @@ public class StopPlaceQuayMover {
 
         // Old and new version of destination
         Pair<StopPlace, StopPlace> pair = resolve(destinationStopPlaceId);
-
+        centroidComputer.computeCentroidForStopPlace(pair.getRight());
         pair.getRight().getQuays().addAll(quaysToMove);
         StopPlace savedDestinationStopPlace = stopPlaceVersionedSaverService.saveNewVersion(pair.getLeft(), pair.getRight());
 
@@ -60,6 +64,10 @@ public class StopPlaceQuayMover {
         return savedDestinationStopPlace;
     }
 
+    /**
+     * @param destinationStopPlaceId netex nsr id of stop place
+     * @return Returns new stop place if destinationStopPlaceId is null. If destinationStopPlaceId is set, returns a copy of existing stop place.
+     */
     private Pair<StopPlace, StopPlace> resolve(String destionationStopPlaceId) {
         if (destionationStopPlaceId == null) {
             return Pair.of(null, new StopPlace());
@@ -97,22 +105,5 @@ public class StopPlaceQuayMover {
         return quays.stream()
                 .map(stopPlaceRepository::findByQuay)
                 .collect(toSet());
-    }
-
-    /**
-     * @param destinationStopPlaceId
-     * @return Returns new stop place if destinationStopPlaceId is null. If destinationStopPlaceId is set, returns a copy of existing stop place.
-     */
-    private Pair<StopPlace, StopPlace> resolveAndTerminateOrNew(String destinationStopPlaceId) {
-        if (destinationStopPlaceId == null) {
-            return Pair.of(null, new StopPlace());
-        } else {
-            StopPlace targetStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(destinationStopPlaceId);
-            if (targetStopPlace == null) {
-                throw new IllegalArgumentException("Cannot resolve target stop place from ID " + destinationStopPlaceId);
-            }
-
-            return Pair.of(targetStopPlace, stopPlaceVersionedSaverService.createCopy(targetStopPlace, StopPlace.class));
-        }
     }
 }
