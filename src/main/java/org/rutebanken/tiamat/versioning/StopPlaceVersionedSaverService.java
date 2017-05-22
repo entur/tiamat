@@ -80,15 +80,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        StopPlace stopPlaceToSave;
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            stopPlaceToSave = newVersion;
             newVersion.setCreated(Instant.now());
         } else {
-            stopPlaceToSave = newVersion;
-
-            stopPlaceToSave.setChanged(Instant.now());
+            newVersion.setChanged(Instant.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
@@ -102,21 +98,21 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         }
 
         // Save latest version
-        stopPlaceToSave = initiateOrIncrementVersions(stopPlaceToSave);
-        countyAndMunicipalityLookupService.populateTopographicPlaceRelation(stopPlaceToSave);
-        tariffZonesLookupService.populateTariffZone(stopPlaceToSave);
-        stopPlaceToSave = stopPlaceRepository.save( stopPlaceToSave);
+        newVersion = initiateOrIncrementVersions(newVersion);
+        countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
+        tariffZonesLookupService.populateTariffZone(newVersion);
+        newVersion = stopPlaceRepository.save( newVersion);
 
-        if(stopPlaceToSave.getQuays() != null) {
-            stopPlaceByQuayOriginalIdFinder.updateCache(stopPlaceToSave.getNetexId(),
-                    stopPlaceToSave.getQuays()
+        if(newVersion.getQuays() != null) {
+            stopPlaceByQuayOriginalIdFinder.updateCache(newVersion.getNetexId(),
+                    newVersion.getQuays()
                             .stream()
                             .flatMap(q -> q.getOriginalIds().stream())
                             .collect(Collectors.toList()));
         }
-        nearbyStopPlaceFinder.update(stopPlaceToSave);
-        entityChangedListener.onChange(stopPlaceToSave);
-        return stopPlaceToSave;
+        nearbyStopPlaceFinder.update(newVersion);
+        entityChangedListener.onChange(newVersion);
+        return newVersion;
     }
 
     /**
