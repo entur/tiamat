@@ -248,17 +248,19 @@ public class PublicationDeliveryImporter {
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
 
-            synchronized (STOP_PLACE_IMPORT_LOCK) {
-                if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
-                    importedOrMatchedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
-                    importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
-                    importedOrMatchedNetexStopPlaces = matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                } else if(publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
-                    importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                } else {
-                    throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+            if(publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
+                importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+            } else {
+                synchronized (STOP_PLACE_IMPORT_LOCK) {
+                    if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
+                        importedOrMatchedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+                    } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
+                        importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+                    } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
+                        importedOrMatchedNetexStopPlaces = matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+                    } else {
+                        throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+                    }
                 }
             }
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedMatchedOrUpdated);

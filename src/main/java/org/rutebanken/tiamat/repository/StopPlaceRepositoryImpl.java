@@ -415,7 +415,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 					prefix = "(";
 				} else prefix = "";
 
-				wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
+				wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
 				parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
 			}
 
