@@ -61,7 +61,10 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
         Set<org.rutebanken.tiamat.model.StopPlace> foundStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
 
         if(foundStopPlaces.isEmpty()) {
-            foundStopPlaces = Sets.newHashSet(nearbyStopPlaceFinder.find(incomingStopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH));
+            org.rutebanken.tiamat.model.StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(incomingStopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH);
+            if(nearbyStopPlace !=  null) {
+                foundStopPlaces = Sets.newHashSet(nearbyStopPlace);
+            }
         }
 
         if(foundStopPlaces.isEmpty()) {
