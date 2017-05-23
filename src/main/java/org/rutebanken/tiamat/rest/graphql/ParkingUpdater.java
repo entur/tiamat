@@ -17,7 +17,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
@@ -43,13 +47,14 @@ class ParkingUpdater implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
-        Map input = environment.getArgument(OUTPUT_TYPE_PARKING);
-        Parking parking = null;
+        List<Map> input = environment.getArgument(OUTPUT_TYPE_PARKING);
+        List<Parking> parkings = null;
         if (input != null) {
-
-            parking = createOrUpdateParking(input);
+            parkings = input.stream()
+             .map(m -> createOrUpdateParking(m))
+            .collect(Collectors.toList());
         }
-        return Arrays.asList(parking);
+        return parkings;
     }
 
     private Parking createOrUpdateParking(Map input) {
