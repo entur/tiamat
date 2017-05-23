@@ -33,7 +33,7 @@ public class ParallelInitialParkingImporter {
 
     public List<org.rutebanken.netex.model.Parking> importParkings(List<Parking> tiamatParkings, AtomicInteger parkingsCreated) {
 
-        return tiamatParkings.stream()
+        return tiamatParkings.parallelStream()
                 .filter(parking -> parking != null)
                 .map(parking -> {
                     if (parking.getParentSiteRef() != null) {
