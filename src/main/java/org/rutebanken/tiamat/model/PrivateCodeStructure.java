@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
