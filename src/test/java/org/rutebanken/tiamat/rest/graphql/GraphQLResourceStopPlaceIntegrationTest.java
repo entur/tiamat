@@ -678,6 +678,33 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
 
     @Test
+    public void testMoveQuayToNewStop() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+
+        Quay quay = new Quay();
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + StopPlaceOperationsBuilder.MOVE_QUAYS_TO_STOP + " ("+StopPlaceOperationsBuilder.QUAY_IDS+": \\\""+quay.getNetexId()+"\\\") { " +
+                "  id " +
+                "    quays {" +
+                "      id " +
+                "    } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace.id", not(comparesEqualTo(stopPlace.getNetexId())))
+                .root("data.stopPlace.quays[0]")
+                    .body("id", comparesEqualTo(quay.getNetexId()));
+    }
+
+
+    @Test
     public void testSimpleMutationAddSecondQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
