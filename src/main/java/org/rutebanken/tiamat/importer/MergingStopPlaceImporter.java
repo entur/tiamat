@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.tiamat.diff.EntityInVersionDiffer;
 import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
@@ -49,14 +48,12 @@ public class MergingStopPlaceImporter {
 
     private final ZoneDistanceChecker zoneDistanceChecker;
 
-    private final EntityInVersionDiffer entityInVersionDiffer;
-
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     CentroidComputer centroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker, EntityInVersionDiffer entityInVersionDiffer) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
@@ -66,7 +63,6 @@ public class MergingStopPlaceImporter {
         this.netexMapper = netexMapper;
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
         this.zoneDistanceChecker = zoneDistanceChecker;
-        this.entityInVersionDiffer = entityInVersionDiffer;
     }
 
     /**
@@ -155,8 +151,6 @@ public class MergingStopPlaceImporter {
         if (quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
             logger.info("Updated existing stop place {}. ", copy);
             copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
-
-            logger.info("{}", entityInVersionDiffer.diff(existingStopPlace, copy));
             return updateCache(copy);
         }
 
