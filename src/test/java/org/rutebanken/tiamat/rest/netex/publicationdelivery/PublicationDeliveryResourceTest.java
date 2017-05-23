@@ -301,6 +301,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new Quay()
                                 .withId("XYZ:Quay:4")
                                 .withVersion("1")
+                                .withPrivateCode(new PrivateCodeStructure().withValue("B02").withType("type"))
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
@@ -325,6 +326,8 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
         assertThat(quay.getName().getValue()).isEqualTo("quay");
         assertThat(quay.getId()).isNotNull();
+        assertThat(quay.getPrivateCode().getValue()).isEqualTo("B02");
+        assertThat(quay.getPrivateCode().getType()).isEqualTo("type");
 
     }
 
