@@ -173,7 +173,11 @@ public class GraphQLNames {
     public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
     //GeneralSign
 
+
+    public static final String OUTPUT_TYPE_PRIVATE_CODE = "PrivateCode";
     public static final String PRIVATE_CODE = "privateCode";
+    public static final String INPUT_TYPE_PRIVATE_CODE = OUTPUT_TYPE_PRIVATE_CODE + INPUT_TYPE_POSTFIX;
+
     public static final String CONTENT = "content";
     public static final String SIGN_CONTENT_TYPE = "signContentType";
 

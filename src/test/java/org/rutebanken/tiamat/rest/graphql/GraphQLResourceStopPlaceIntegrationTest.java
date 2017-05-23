@@ -564,6 +564,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String description = "Testing description ";
         String publicCode = "publicCode 2";
 
+        String privateCodeValue = "PB03";
+        String privateCodeType = "Type";
+
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
 
@@ -577,6 +580,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
                 "            publicCode:\\\"" + publicCode + "\\\"" +
+                "            privateCode:{ value:\\\"" + privateCodeValue + "\\\", type:\\\"" + privateCodeType + "\\\" }" +
                 "            geometry: {" +
                 "              type: Point" +
                 "              coordinates: [[" + lon + "," + lat + "]] " +
@@ -588,6 +592,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "  quays {" +
                 "    id " +
                 "    publicCode " +
+                "    privateCode { value type }" +
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
@@ -605,6 +610,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("publicCode", equalTo(publicCode))
+                    .body("privateCode.value", equalTo(privateCodeValue))
+                    .body("privateCode.type", equalTo(privateCodeType))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat));

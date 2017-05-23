@@ -30,7 +30,11 @@ public abstract class GroupOfEntities_VersionStructure
     @Transient
     protected PurposeOfGroupingRefStructure purposeOfGroupingRef;
 
-    @Transient
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "private_code_value")),
+            @AttributeOverride(name = "type", column = @Column(name = "private_code_type"))
+    })
+    @Embedded
     protected PrivateCodeStructure privateCode;
 
 

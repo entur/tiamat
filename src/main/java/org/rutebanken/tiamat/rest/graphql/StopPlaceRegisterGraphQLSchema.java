@@ -424,6 +424,7 @@ StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(PUBLIC_CODE)
                             .type(GraphQLString))
+                    .field(privateCodeFieldDefinition)
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
@@ -508,6 +509,7 @@ StopPlaceRegisterGraphQLSchema {
         return commonInputFieldsList;
     }
 
+
     private GraphQLInputObjectType createQuayInputObjectType(List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList) {
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_QUAY)
@@ -518,6 +520,9 @@ StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(PUBLIC_CODE)
                         .type(GraphQLString))
+                .field(newInputObjectField()
+                    .name(PRIVATE_CODE)
+                    .type(privateCodeInputType))
                 .build();
     }
 }

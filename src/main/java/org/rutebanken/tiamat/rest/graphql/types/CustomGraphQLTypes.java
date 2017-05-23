@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.rest.graphql.PrivateCodeFetcher;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -239,20 +240,41 @@ public class CustomGraphQLTypes {
                     .type(cycleStorageTypeEnum))
             .build();
 
+    /**
+     * Not using DI here because everything here is made evil static
+     */
+    private static PrivateCodeFetcher privateCodeFetcher = new PrivateCodeFetcher();
+
+    public static GraphQLObjectType privateCodeObjectType = newObject()
+            .name(OUTPUT_TYPE_PRIVATE_CODE)
+            .field(newFieldDefinition()
+                    .name(TYPE)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(VALUE)
+                    .type(new GraphQLNonNull(GraphQLString)))
+            .build();
+
+    public static GraphQLFieldDefinition privateCodeFieldDefinition = newFieldDefinition()
+            .name(PRIVATE_CODE)
+            .type(privateCodeObjectType)
+            .dataFetcher(privateCodeFetcher)
+            .build();
+
+    public static GraphQLInputObjectType privateCodeInputType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_PRIVATE_CODE)
+                .field(newInputObjectField()
+                        .name(TYPE)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(VALUE)
+                        .type(GraphQLString))
+                .build();
+
     public static GraphQLObjectType generalSignEquipmentType = newObject()
             .name(OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT)
             .field(netexIdFieldDefinition)
-            .field(newFieldDefinition()
-                            .name(PRIVATE_CODE)
-                            .type(GraphQLString)
-                            .dataFetcher(env -> {
-                                    PrivateCodeStructure privateCode = ((GeneralSign) env.getSource()).getPrivateCode();
-                                    if (privateCode != null) {
-                                            return privateCode.getValue();
-                                    }
-                                    return null;
-                            })
-            )
+            .field(privateCodeFieldDefinition)
             .field(newFieldDefinition()
                     .name(CONTENT)
                     .type(embeddableMultilingualStringObjectType))

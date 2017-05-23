@@ -4,6 +4,7 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.geolatte.geom.V;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -175,6 +176,16 @@ class StopPlaceUpdater implements DataFetcher {
         }
         if (quayInputMap.get(PUBLIC_CODE) != null) {
             quay.setPublicCode((String) quayInputMap.get(PUBLIC_CODE));
+            isQuayUpdated = true;
+        }
+
+        if(quayInputMap.get(PRIVATE_CODE) != null) {
+            Map privateCodeInputMap = (Map) quayInputMap.get(PRIVATE_CODE);
+            if(quay.getPrivateCode() == null) {
+                quay.setPrivateCode(new PrivateCodeStructure());
+            }
+            quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
+            quay.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
             isQuayUpdated = true;
         }
 
