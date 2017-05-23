@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 
 
+@MappedSuperclass
 @Embeddable
 public class AddressablePlaceRefStructure extends PlaceRefStructure {
 

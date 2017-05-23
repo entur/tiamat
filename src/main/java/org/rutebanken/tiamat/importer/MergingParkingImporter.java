@@ -2,9 +2,11 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
 import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,13 +35,16 @@ public class MergingParkingImporter {
 
     private final ParkingFromOriginalIdFinder parkingFromOriginalIdFinder;
 
+    private final ReferenceResolver referenceResolver;
+
     @Autowired
     public MergingParkingImporter(ParkingFromOriginalIdFinder parkingFromOriginalIdFinder,
-                                  NearbyParkingFinder nearbyParkingFinder,
+                                  NearbyParkingFinder nearbyParkingFinder, ReferenceResolver referenceResolver,
                                   KeyValueListAppender keyValueListAppender, NetexMapper netexMapper,
                                   ParkingVersionedSaverService parkingVersionedSaverService) {
         this.parkingFromOriginalIdFinder = parkingFromOriginalIdFinder;
         this.nearbyParkingFinder = nearbyParkingFinder;
+        this.referenceResolver = referenceResolver;
         this.keyValueListAppender = keyValueListAppender;
         this.netexMapper = netexMapper;
         this.parkingVersionedSaverService = parkingVersionedSaverService;
@@ -76,7 +81,16 @@ public class MergingParkingImporter {
             parking = handleCompletelyNewParking(newParking);
         }
 
+        resolveAndFixParentSiteRef(parking);
+
         return parking;
+    }
+
+    private void resolveAndFixParentSiteRef(Parking parking) {
+        if (parking != null && parking.getParentSiteRef() != null) {
+            DataManagedObjectStructure referencedStopPlace = referenceResolver.resolve(parking.getParentSiteRef());
+            parking.getParentSiteRef().setRef(referencedStopPlace.getNetexId());
+        }
     }
 
 

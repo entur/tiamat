@@ -260,6 +260,10 @@ StopPlaceRegisterGraphQLSchema {
                 .name(VERSION)
                 .type(GraphQLInt)
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
         arguments.addAll(createPageAndSizeArguments());
         arguments.add(allVersionsArgument);
         return arguments;
