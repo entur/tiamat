@@ -17,5 +17,12 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
     Iterator<Parking> scrollParkings() throws InterruptedException;
 
     Iterator<Parking> scrollParkings(List<String> parkingNetexIds) throws InterruptedException;
+
+    /**
+     * Find parkings that belong to StopPlace
+     * @param netexStopPlaceId
+     * @return list of parkings referencing to stopPlace
+     */
+    List<String> findByStopPlaceNetexId(String netexStopPlaceId);
 }
 
