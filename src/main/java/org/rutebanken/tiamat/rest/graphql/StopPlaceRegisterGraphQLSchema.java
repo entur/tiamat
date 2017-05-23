@@ -214,7 +214,7 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing Parking")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)
-                                .type(parkingObjectInputType))
+                                .type(new GraphQLList(parkingObjectInputType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
