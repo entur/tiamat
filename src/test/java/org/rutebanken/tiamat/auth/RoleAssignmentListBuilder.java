@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.auth;
 
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import java.util.ArrayList;
@@ -36,6 +37,10 @@ public class RoleAssignmentListBuilder {
 
 		roleAssignments.add(allStopPlaceAccess);
 		return this;
+	}
+
+	public RoleAssignmentListBuilder withParkingOfType(ParkingTypeEnumeration type) {
+		return withParkingOfType(type.value());
 	}
 
 	public RoleAssignmentListBuilder withParkingOfType(String type) {
