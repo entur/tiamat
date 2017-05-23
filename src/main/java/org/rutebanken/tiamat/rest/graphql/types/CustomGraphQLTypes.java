@@ -288,7 +288,7 @@ public class CustomGraphQLTypes {
             .name(INPUT_TYPE_GENERAL_SIGN_EQUIPMENT)
             .field(newInputObjectField()
                     .name(PRIVATE_CODE)
-                    .type(GraphQLString))
+                    .type(privateCodeInputType))
             .field(newInputObjectField()
                     .name(CONTENT)
                     .type(embeddableMultiLingualStringInputObjectType))
