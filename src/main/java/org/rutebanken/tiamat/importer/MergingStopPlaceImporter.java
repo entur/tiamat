@@ -149,7 +149,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            logger.info("Updated existing stop place {}. ", copy);
+            logger.info("Updated existing stop place {}. ", existingStopPlace);
             copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
             return updateCache(copy);
         }
@@ -175,7 +175,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (newStopPlace.getName() != null) {
-            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace, true);
             if (nearbyStopPlace != null) {
                 logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getNetexId());
                 return nearbyStopPlace;
