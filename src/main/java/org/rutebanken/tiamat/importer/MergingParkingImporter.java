@@ -87,8 +87,10 @@ public class MergingParkingImporter {
     }
 
     private void resolveAndFixParentSiteRef(Parking parking) {
-        DataManagedObjectStructure referencedStopPlace = referenceResolver.resolve(parking.getParentSiteRef());
-        parking.getParentSiteRef().setRef(referencedStopPlace.getNetexId());
+        if (parking != null && parking.getParentSiteRef() != null) {
+            DataManagedObjectStructure referencedStopPlace = referenceResolver.resolve(parking.getParentSiteRef());
+            parking.getParentSiteRef().setRef(referencedStopPlace.getNetexId());
+        }
     }
 
 

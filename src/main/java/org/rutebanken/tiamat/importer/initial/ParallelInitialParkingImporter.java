@@ -34,9 +34,12 @@ public class ParallelInitialParkingImporter {
     public List<org.rutebanken.netex.model.Parking> importParkings(List<Parking> tiamatParkings, AtomicInteger parkingsCreated) {
 
         return tiamatParkings.stream()
-                .map(parking ->  {
-                    DataManagedObjectStructure referencedStopPlace = referenceResolver.resolve(parking.getParentSiteRef());
-                    parking.getParentSiteRef().setRef(referencedStopPlace.getNetexId());
+                .filter(parking -> parking != null)
+                .map(parking -> {
+                    if (parking.getParentSiteRef() != null) {
+                        DataManagedObjectStructure referencedStopPlace = referenceResolver.resolve(parking.getParentSiteRef());
+                        parking.getParentSiteRef().setRef(referencedStopPlace.getNetexId());
+                    }
                     return parking;
                 })
                 .map(parking -> parkingVersionedSaverService.saveNewVersion(parking))
