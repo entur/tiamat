@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
 
@@ -71,6 +72,21 @@ class ParkingUpdater implements DataFetcher {
             logger.info("Creating new Parking");
             updatedParking = new Parking();
         }
+        boolean isUpdated = populateParking(input, updatedParking);
+
+        if (isUpdated) {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedParking);
+
+            updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
+
+            return updatedParking;
+        } else {
+            logger.info("No changes - Parking {} NOT updated", netexId);
+        }
+        return existingVersion;
+    }
+
+    private boolean populateParking(Map input, Parking updatedParking) {
         boolean isUpdated = false;
         if (input.get(NAME) != null) {
             EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
@@ -180,17 +196,7 @@ class ParkingUpdater implements DataFetcher {
             isUpdated = true;
             updatedParking.setParkingAreas(parkingAreasList);
         }
-
-        if (isUpdated) {
-//            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedParking);
-
-            updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
-
-            return updatedParking;
-        } else {
-            logger.info("No changes - Parking {} NOT updated", netexId);
-        }
-        return existingVersion;
+        return isUpdated;
     }
 
     private List<ParkingProperties> resolveParkingPropertiesList(List propertyList) {

@@ -23,6 +23,14 @@ public class AuthorizationCheckFactory {
 				return new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, administrativeZone);
 			}
 		}
+		if (entity instanceof Parking) {
+			Parking parking = (Parking) entity;
+			if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
+					StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
+					return new StopPlaceAuthorizationCheck(stopPlace, roleAssignment, administrativeZone);
+			}
+			return new ParkingAuthorizationCheck(parking, roleAssignment, administrativeZone);
+		}
 		if (entity instanceof Place) {
 			return new PlaceAuthorizationCheck<>((Place) entity, roleAssignment, administrativeZone);
 		}
