@@ -64,14 +64,14 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
         String updatedParkingTypeValue = ParkingTypeEnumeration.PARKING_ZONE.value();
         String version_2_GraphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: [{" +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
                 "        id:\\\"" + netexId + "\\\" " +
                 "        parkingType: " + updatedParkingTypeValue +
                 "       }) { " +
                 "      id " +
                 "      version " +
                 "      parkingType " +
-                "    }] " +
+                "    } " +
                 "}\"," +
                 "\"variables\":\"\"}";
 
