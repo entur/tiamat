@@ -10,8 +10,6 @@ import org.javers.core.metamodel.clazz.EntityDefinition;
 import org.javers.core.metamodel.object.InstanceId;
 import org.javers.core.metamodel.object.ValueObjectId;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.PersistablePolygon;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,7 +28,7 @@ public class EntityInVersionDiffer {
     private Javers javers;
     public EntityInVersionDiffer() {
         //javers = JaversBuilder.javers().registerEntity(new EntityDefinition(EntityInVersionStructure.class, "netexId", Arrays.asList("id"))).build();
-        javers = JaversBuilder.javers().registerValueObject(IdentifiedEntity.class).registerValueObject(PersistablePolygon.class).build();
+        javers = JaversBuilder.javers().registerValueObject(EntityInVersionStructure.class).build();
     }
 
     public Diff diff(EntityInVersionStructure first, EntityInVersionStructure secoond) {
