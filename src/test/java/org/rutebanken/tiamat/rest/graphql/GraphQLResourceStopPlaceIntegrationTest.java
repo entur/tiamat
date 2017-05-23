@@ -426,6 +426,33 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()));
     }
 
+    @Test
+    public void getTariffZonesForStop() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+
+        TariffZone tariffZone = new TariffZone();
+        tariffZone.setName(new EmbeddableMultilingualString("V02"));
+        tariffZone.setVersion(1L);
+        tariffZoneRepository.save(tariffZone);
+
+        stopPlace.getTariffZones().add(new TariffZoneRef(tariffZone));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
+                " (id:\\\""+ stopPlace.getNetexId() +"\\\") {" +
+                "id " +
+                "tariffZones { id version name { value }} " +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                    .body("tariffZones[0].id", equalTo(tariffZone.getNetexId()))
+                    .body("tariffZones[0].name.value", equalTo(tariffZone.getName().getValue()));
+    }
 
     @Test
     public void testSimpleMutationCreateStopPlace() throws Exception {
