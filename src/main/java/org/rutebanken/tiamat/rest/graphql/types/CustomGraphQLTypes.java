@@ -252,7 +252,7 @@ public class CustomGraphQLTypes {
                     .type(GraphQLString))
             .field(newFieldDefinition()
                     .name(VALUE)
-                    .type(new GraphQLNonNull(GraphQLString)))
+                    .type(GraphQLString))
             .build();
 
     public static GraphQLFieldDefinition privateCodeFieldDefinition = newFieldDefinition()
@@ -268,7 +268,7 @@ public class CustomGraphQLTypes {
                         .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(VALUE)
-                        .type(GraphQLString))
+                        .type(new GraphQLNonNull(GraphQLString)))
                 .build();
 
     public static GraphQLObjectType generalSignEquipmentType = newObject()
