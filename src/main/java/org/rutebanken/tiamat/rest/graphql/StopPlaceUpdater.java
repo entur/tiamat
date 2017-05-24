@@ -4,7 +4,6 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.geolatte.geom.V;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -27,6 +26,7 @@ import java.util.*;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getPrivateCodeStructure;
 
 @Service("stopPlaceUpdater")
 @Transactional
@@ -318,12 +318,8 @@ class StopPlaceUpdater implements DataFetcher {
                     Map<String, Object> generalSignEquipment = (Map<String, Object>) item;
 
                     GeneralSign skilt = new GeneralSign();
-                    PrivateCodeStructure privateCode = new PrivateCodeStructure();
-                    privateCode.setValue((String) generalSignEquipment.get(PRIVATE_CODE));
-                    skilt.setPrivateCode(privateCode);
-                    if (generalSignEquipment.get(CONTENT) != null) {
-                        skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
-                    }
+                    skilt.setPrivateCode(getPrivateCodeStructure((Map) generalSignEquipment.get(PRIVATE_CODE)));
+                    skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
                     skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
                     equipments.getInstalledEquipment().add(skilt);
                 }

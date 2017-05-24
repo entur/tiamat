@@ -1171,6 +1171,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     }
 
 
+    @Test
+    public void testSimpleMutatePlaceEquipmentSignPrivateCode() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String netexId = stopPlace.getNetexId();
+
+        String type = "StopPoint";
+        String value = "512";
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "      id:\\\"" + netexId + "\\\"" +
+                "      placeEquipments: {" +
+                "        generalSign:  [{" +
+                "          signContentType: TransportModePoint" +
+                "          privateCode: {" +
+                "            value: \\\"" + value + "\\\"" +
+                "            type:\\\"" + type + "\\\"" +
+                "          }" +
+                "        }]" +
+                "      }" +
+                "    }) " +
+                "    {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        generalSign {" +
+                "          privateCode { value, type } " +
+                "          signContentType " +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(netexId))
+                .body("data.stopPlace[0].placeEquipments", notNullValue())
+                .root("data.stopPlace[0].placeEquipments")
+//                .body("nameType", equalTo(altName.getNameType())) //RestAssured apparently does not like comparing response with enums...
+                .body("generalSign[0]", notNullValue())
+                .body("generalSign[0].privateCode.type", comparesEqualTo(type))
+                .body("generalSign[0].privateCode.value", comparesEqualTo(value))
+        ;
+    }
+
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
