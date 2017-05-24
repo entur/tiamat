@@ -554,7 +554,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
                 "  weighting " +
                 "  geometry { type coordinates } " +
-                "  validBetweens { fromDate toDate } " +
+                "  validBetween { fromDate toDate } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 

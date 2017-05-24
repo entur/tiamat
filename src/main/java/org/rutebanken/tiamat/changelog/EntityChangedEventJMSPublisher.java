@@ -48,10 +48,10 @@ public class EntityChangedEventJMSPublisher implements EntityChangedListener {
     }
 
     private boolean isDeactivated(EntityInVersionStructure entity) {
-        if (entity.getValidBetweens() == null) {
+        if (entity.getValidBetween() == null) {
             return false;
         }
-        return entity.getValidBetweens().stream().allMatch(vb -> vb.getToDate() != null);
+        return entity.getValidBetween().getToDate() != null;
     }
 
     private boolean isLoggedEntity(EntityStructure entity) {

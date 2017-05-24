@@ -147,7 +147,7 @@ public class NetexMapper {
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
                 .fieldBToA("keyValues", "keyList")
-                .field("validBetween", "validBetweens")
+                .field("validBetween[0]", "validBetween")
                 .customize(dataManagedObjectStructureMapper)
                 .exclude("id")
                 .exclude("keyList")

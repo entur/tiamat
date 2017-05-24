@@ -400,8 +400,8 @@ StopPlaceRegisterGraphQLSchema {
                             .name(QUAYS)
                             .type(new GraphQLList(quayObjectType)))
                     .field(newFieldDefinition()
-                            .name(VALID_BETWEENS)
-                            .type(new GraphQLList(validBetweenObjectType)))
+                            .name(VALID_BETWEEN)
+                            .type(validBetweenObjectType))
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
@@ -481,8 +481,8 @@ StopPlaceRegisterGraphQLSchema {
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectInputType)))
                 .field(newInputObjectField()
-                        .name(VALID_BETWEENS)
-                        .type(new GraphQLList(validBetweenInputObjectType)))
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenInputObjectType))
                 .build();
     }
 
