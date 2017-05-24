@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,7 +50,14 @@ public class TariffZonesFromStopsExporter {
                 .filter(tariffZoneRef -> !tariffZoneMap.containsKey(key(tariffZoneRef.getRef(), tariffZoneRef.getVersion())))
                 .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
                 .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
-                .map(mappedTariffZoneRef -> referenceResolver.resolve(mappedTariffZoneRef))
+                .map(mappedTariffZoneRef -> {
+                    org.rutebanken.tiamat.model.TariffZone tiamatTariffZone = referenceResolver.resolve(mappedTariffZoneRef);
+                    if(tiamatTariffZone == null) {
+                        logger.warn("Resolved tariff zone to null from reference: {}", mappedTariffZoneRef);
+                    }
+                    return tiamatTariffZone;
+                })
+                .filter(Objects::nonNull)
                 .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
                 .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
