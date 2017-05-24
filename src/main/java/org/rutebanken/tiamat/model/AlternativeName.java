@@ -30,11 +30,19 @@ public class AlternativeName
     @Embedded
     protected EmbeddableMultilingualString shortName;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualStringEntity abbreviation;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "abbreviation_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "abbreviation_lang"))
+    })
+    @Embedded
+    protected EmbeddableMultilingualString abbreviation;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    protected MultilingualStringEntity qualifierName;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "qualifier_name_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "qualifier_name_lang"))
+    })
+    @Embedded
+    protected EmbeddableMultilingualString qualifierName;
 
     @Transient
     protected BigInteger order;
@@ -87,19 +95,19 @@ public class AlternativeName
         this.shortName = value;
     }
 
-    public MultilingualStringEntity getAbbreviation() {
+    public EmbeddableMultilingualString getAbbreviation() {
         return abbreviation;
     }
 
-    public void setAbbreviation(MultilingualStringEntity value) {
+    public void setAbbreviation(EmbeddableMultilingualString value) {
         this.abbreviation = value;
     }
 
-    public MultilingualStringEntity getQualifierName() {
+    public EmbeddableMultilingualString getQualifierName() {
         return qualifierName;
     }
 
-    public void setQualifierName(MultilingualStringEntity value) {
+    public void setQualifierName(EmbeddableMultilingualString value) {
         this.qualifierName = value;
     }
 

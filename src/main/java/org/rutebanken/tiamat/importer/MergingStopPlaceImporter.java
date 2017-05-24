@@ -30,6 +30,16 @@ public class MergingStopPlaceImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(MergingStopPlaceImporter.class);
 
+    /**
+     * Enable short distance check for quay merging when merging existing stop places
+     */
+    public static final boolean EXISTING_STOP_QUAY_MERGE_SHORT_DISTANCE_CHECK_BEFORE_ID_MATCH = false;
+
+    /**
+     * Allow the quay merger to add new quays if no match found
+     */
+    public static final boolean ADD_NEW_QUAYS = true;
+
     private final StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
     private final NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder;
@@ -118,7 +128,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (incomingStopPlace.getQuays() != null) {
-            Set<Quay> quays = quayMerger.appendImportIds(incomingStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger(), true);
+            Set<Quay> quays = quayMerger.appendImportIds(incomingStopPlace.getQuays(), null, new AtomicInteger(), new AtomicInteger(), ADD_NEW_QUAYS);
             incomingStopPlace.setQuays(quays);
             logger.trace("Importing quays for new stop place {}", incomingStopPlace);
         }
@@ -137,7 +147,7 @@ public class MergingStopPlaceImporter {
 
         StopPlace copy = stopPlaceVersionedSaverService.createCopy(existingStopPlace, StopPlace.class);
 
-        boolean quayChanged = quayMerger.appendImportIds(incomingStopPlace, copy, true);
+        boolean quayChanged = quayMerger.appendImportIds(incomingStopPlace, copy, ADD_NEW_QUAYS, EXISTING_STOP_QUAY_MERGE_SHORT_DISTANCE_CHECK_BEFORE_ID_MATCH);
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, copy);
         boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(copy);
 
@@ -149,7 +159,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            logger.info("Updated existing stop place {}. ", copy);
+            logger.info("Updated existing stop place {}. ", existingStopPlace);
             copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
             return updateCache(copy);
         }
@@ -175,7 +185,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (newStopPlace.getName() != null) {
-            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace);
+            final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace, true);
             if (nearbyStopPlace != null) {
                 logger.debug("Found nearby stop place with name: {}, id: {}", nearbyStopPlace.getName(), nearbyStopPlace.getNetexId());
                 return nearbyStopPlace;

@@ -44,10 +44,15 @@ public class QuayMerger {
         this.originalIdMatcher = originalIdMatcher;
     }
 
-    /**
-     * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
-     */
     public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays) {
+        return appendImportIds(newStopPlace, existingStopPlace, addNewQuays, true);
+    }
+
+
+        /**
+         * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
+         */
+    public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays, boolean lowDistanceCheckBeforeIdMatch) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
         AtomicInteger addedQuays = new AtomicInteger();
@@ -58,7 +63,7 @@ public class QuayMerger {
             newStopPlace.setQuays(new HashSet<>());
         }
 
-        Set<Quay> result = appendImportIds(newStopPlace, newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays);
+        Set<Quay> result = appendImportIds(newStopPlace, newStopPlace.getQuays(), existingStopPlace.getQuays(), updatedQuays, addedQuays, addNewQuays, lowDistanceCheckBeforeIdMatch);
 
         existingStopPlace.setQuays(result);
 
@@ -67,7 +72,11 @@ public class QuayMerger {
     }
 
     public Set<Quay> appendImportIds(Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
-        return appendImportIds(null, newQuays, existingQuays, updatedQuaysCounter, addedQuaysCounter, addNewQuays);
+        return appendImportIds(null, newQuays, existingQuays, updatedQuaysCounter, addedQuaysCounter, addNewQuays, true);
+    }
+
+    public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
+        return appendImportIds(newStopPlace, newQuays, existingQuays, updatedQuaysCounter, addedQuaysCounter, addNewQuays, true);
     }
 
     /**
@@ -81,7 +90,7 @@ public class QuayMerger {
      * @param addNewQuays if allowed to add quays if not match found
      * @return the resulting set of quays after matching, appending and adding.
      */
-     public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays) {
+     public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays, boolean lowDistanceCheckBeforeIdMatch) {
 
         Set<Quay> result = new HashSet<>();
         if(existingQuays != null) {
@@ -90,7 +99,12 @@ public class QuayMerger {
 
         for(Quay incomingQuay : newQuays) {
 
-            Optional<Quay> matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS_IGNORE_ID_MATCH);
+            Optional<Quay> matchingQuay;
+            if(lowDistanceCheckBeforeIdMatch) {
+                matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS_IGNORE_ID_MATCH);
+            } else {
+                matchingQuay = Optional.empty();
+            }
 
             if(!matchingQuay.isPresent()) {
                 matchingQuay = findMatchOnOriginalId(incomingQuay, result);
@@ -143,6 +157,8 @@ public class QuayMerger {
         boolean changedByMerge = mergeFields(incomingQuay, alreadyAdded);
 
         if(idUpdated || changedByMerge) {
+            logger.debug("Quay changed. idUpdated: {}, merged fields? {}. Quay: {}", idUpdated, changedByMerge, alreadyAdded);
+
             alreadyAdded.setChanged(Instant.now());
             updatedQuaysCounter.incrementAndGet();
         }
@@ -165,14 +181,15 @@ public class QuayMerger {
     private boolean matches(Quay incomingQuay, Quay alreadyAdded, double mergeDistance) {
         boolean nameMatch = haveMatchingNameOrOneIsMissing(incomingQuay, alreadyAdded);
         boolean publicCodeMatch = haveMatchingPublicCodeOrOneIsMissing(incomingQuay, alreadyAdded);
-
+        boolean haveSimilarOrNullCompassBearing = haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded);
         if (areClose(incomingQuay, alreadyAdded, mergeDistance)
-                && haveSimilarOrAnyNullCompassBearing(incomingQuay, alreadyAdded)
+                && haveSimilarOrNullCompassBearing
                 && nameMatch
                 && publicCodeMatch) {
+            logger.trace("Matches: nameMatch {}, publicCodeMatch: {}, haveSimilarOrAnyNullCompassBearing: {}", nameMatch, publicCodeMatch, haveSimilarOrNullCompassBearing);
             return true;
         } else if(nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
-            logger.debug("Name, public code and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
+            logger.trace("Name, public code and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
             if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
                 return true;

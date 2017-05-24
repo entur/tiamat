@@ -58,6 +58,16 @@ public class QuayTest extends TiamatIntegrationTest {
         assertThat(actual.getCompassBearing()).isEqualTo(quay.getCompassBearing());
     }
 
+    @Test
+    public void persistQuayWithPrivateCode() {
+        Quay quay = new Quay();
+
+        quay.setPrivateCode(new PrivateCodeStructure("P01", "type"));
+        quayRepository.save(quay);
+
+        Quay actual = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
+        assertThat(actual.getPrivateCode()).isEqualTo(quay.getPrivateCode());
+    }
 
     @Ignore
     @Test

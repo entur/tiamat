@@ -26,6 +26,23 @@ public class QuayMergerTest {
 
     private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher());
 
+    @Test
+    public void disableMatchingQuaysWithinLowDistanceBeforeIdMatch() {
+
+        Quay quay1 = new Quay();
+        quay1.getOriginalIds().add("BRA:Quay:12321234");
+        quay1.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+
+
+        Quay quay2 = new Quay();
+        quay2.getOriginalIds().add("BRA:Quay:12321234");
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(59, 10)));
+
+        Set<Quay> result = quayMerger.appendImportIds(null, Sets.newHashSet(quay2), Sets.newHashSet(quay1), new AtomicInteger(), new AtomicInteger(), true, false);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getChanged()).isNull();
+    }
 
     @Test
     public void twoQuaysWithSameOriginalIdAfterPrefixShouldBeTreatedAsSame() {
