@@ -4,9 +4,11 @@ import org.rutebanken.netex.model.*;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Component
 public class PublicationDeliveryHelper {
@@ -64,5 +66,18 @@ public class PublicationDeliveryHelper {
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
                 .findAny().get();
+    }
+
+    public Set<String> getImportedIds(DataManagedObjectStructure dataManagedObject) {
+
+        return Stream.of(dataManagedObject)
+                .filter(Objects::nonNull)
+                .map(object -> object.getKeyList())
+                .flatMap(keyList -> keyList.getKeyValue().stream())
+                .filter(keyValueStructure -> keyValueStructure.getKey().equals(ORIGINAL_ID_KEY))
+                .map(keyValue -> keyValue.getValue())
+                .map(value -> value.split(","))
+                .flatMap(values -> Stream.of(values))
+                .collect(toSet());
     }
 }
