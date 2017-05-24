@@ -426,6 +426,33 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()));
     }
 
+    @Test
+    public void getTariffZonesForStop() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+
+        TariffZone tariffZone = new TariffZone();
+        tariffZone.setName(new EmbeddableMultilingualString("V02"));
+        tariffZone.setVersion(1L);
+        tariffZoneRepository.save(tariffZone);
+
+        stopPlace.getTariffZones().add(new TariffZoneRef(tariffZone));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
+                " (id:\\\""+ stopPlace.getNetexId() +"\\\") {" +
+                "id " +
+                "tariffZones { id version name { value }} " +
+                "}" +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                    .body("tariffZones[0].id", equalTo(tariffZone.getNetexId()))
+                    .body("tariffZones[0].name.value", equalTo(tariffZone.getName().getValue()));
+    }
 
     @Test
     public void testSimpleMutationCreateStopPlace() throws Exception {
@@ -564,6 +591,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String description = "Testing description ";
         String publicCode = "publicCode 2";
 
+        String privateCodeValue = "PB03";
+        String privateCodeType = "Type";
+
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
 
@@ -577,6 +607,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "            shortName:{ value:\\\"" + shortName + "\\\" } " +
                 "            description:{ value:\\\"" + description + "\\\" }" +
                 "            publicCode:\\\"" + publicCode + "\\\"" +
+                "            privateCode:{ value:\\\"" + privateCodeValue + "\\\", type:\\\"" + privateCodeType + "\\\" }" +
                 "            geometry: {" +
                 "              type: Point" +
                 "              coordinates: [[" + lon + "," + lat + "]] " +
@@ -588,6 +619,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "  quays {" +
                 "    id " +
                 "    publicCode " +
+                "    privateCode { value type }" +
                 "    name { value } " +
                 "    shortName { value } " +
                 "    description { value } " +
@@ -605,6 +637,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("publicCode", equalTo(publicCode))
+                    .body("privateCode.value", equalTo(privateCodeValue))
+                    .body("privateCode.type", equalTo(privateCodeType))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat));
@@ -1133,6 +1167,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 //                .body("nameType", equalTo(altName.getNameType())) //RestAssured apparently does not like comparing response with enums...
                 .body("name.value", comparesEqualTo(updatedAlternativeNameValue))
                 .body("name.lang", comparesEqualTo(updatedAlternativeNameLang))
+        ;
+    }
+
+
+    @Test
+    public void testSimpleMutatePlaceEquipmentSignPrivateCode() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String netexId = stopPlace.getNetexId();
+
+        String type = "StopPoint";
+        String value = "512";
+        String graphQlStopPlaceQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "      id:\\\"" + netexId + "\\\"" +
+                "      placeEquipments: {" +
+                "        generalSign:  [{" +
+                "          signContentType: TransportModePoint" +
+                "          privateCode: {" +
+                "            value: \\\"" + value + "\\\"" +
+                "            type:\\\"" + type + "\\\"" +
+                "          }" +
+                "        }]" +
+                "      }" +
+                "    }) " +
+                "    {" +
+                "      id" +
+                "      placeEquipments {" +
+                "        generalSign {" +
+                "          privateCode { value, type } " +
+                "          signContentType " +
+                "        }" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlStopPlaceQuery)
+                .body("data.stopPlace[0].id", comparesEqualTo(netexId))
+                .body("data.stopPlace[0].placeEquipments", notNullValue())
+                .root("data.stopPlace[0].placeEquipments")
+//                .body("nameType", equalTo(altName.getNameType())) //RestAssured apparently does not like comparing response with enums...
+                .body("generalSign[0]", notNullValue())
+                .body("generalSign[0].privateCode.type", comparesEqualTo(type))
+                .body("generalSign[0].privateCode.value", comparesEqualTo(value))
         ;
     }
 

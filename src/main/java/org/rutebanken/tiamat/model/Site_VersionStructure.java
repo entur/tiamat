@@ -36,7 +36,7 @@ public abstract class Site_VersionStructure
 
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
-            @AttributeOverride(name = "version", column = @Column(name = "parent_site_version"))
+            @AttributeOverride(name = "version", column = @Column(name = "parent_site_ref_version"))
     })
     @Embedded
     protected SiteRefStructure parentSiteRef;

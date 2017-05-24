@@ -18,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -98,6 +99,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
         return parkingEntityIterator;
     }
+
     @Override
     public String findNearbyParking(Envelope envelope, String name, ParkingTypeEnumeration parkingTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
@@ -116,6 +118,29 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
             query.setParameter("parkingType", parkingTypeEnumeration);
         }
         return getOneOrNull(query);
+    }
+
+
+    @Override
+    public List<String> findByStopPlaceNetexId(String netexStopPlaceId) {
+
+        String sql = "SELECT p.netex_id " +
+                "FROM parking p " +
+                "WHERE p.parent_site_ref = :netexStopPlaceId " +
+                "AND p.version = (SELECT MAX(pv.version) FROM Parking pv WHERE pv.netex_id = p.netex_id) "
+                ;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("netexStopPlaceId", netexStopPlaceId);
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> results = query.getResultList();
+            return results;
+
+        } catch (NoResultException noResultException) {
+            return new ArrayList<>();
+        }
     }
 
     private <T> T getOneOrNull(TypedQuery<T> query) {

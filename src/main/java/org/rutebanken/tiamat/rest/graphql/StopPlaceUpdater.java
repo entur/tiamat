@@ -26,6 +26,7 @@ import java.util.*;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getPrivateCodeStructure;
 
 @Service("stopPlaceUpdater")
 @Transactional
@@ -178,6 +179,16 @@ class StopPlaceUpdater implements DataFetcher {
             isQuayUpdated = true;
         }
 
+        if(quayInputMap.get(PRIVATE_CODE) != null) {
+            Map privateCodeInputMap = (Map) quayInputMap.get(PRIVATE_CODE);
+            if(quay.getPrivateCode() == null) {
+                quay.setPrivateCode(new PrivateCodeStructure());
+            }
+            quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
+            quay.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
+            isQuayUpdated = true;
+        }
+
         if (isQuayUpdated) {
             quay.setChanged(Instant.now());
 
@@ -307,12 +318,8 @@ class StopPlaceUpdater implements DataFetcher {
                     Map<String, Object> generalSignEquipment = (Map<String, Object>) item;
 
                     GeneralSign skilt = new GeneralSign();
-                    PrivateCodeStructure privateCode = new PrivateCodeStructure();
-                    privateCode.setValue((String) generalSignEquipment.get(PRIVATE_CODE));
-                    skilt.setPrivateCode(privateCode);
-                    if (generalSignEquipment.get(CONTENT) != null) {
-                        skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
-                    }
+                    skilt.setPrivateCode(getPrivateCodeStructure((Map) generalSignEquipment.get(PRIVATE_CODE)));
+                    skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
                     skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
                     equipments.getInstalledEquipment().add(skilt);
                 }

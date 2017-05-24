@@ -5,8 +5,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -82,6 +81,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].parkingType", equalTo(updatedParkingTypeValue))
         ;
     }
+
     @Test
     public void testMutateParking() throws Exception {
 
@@ -202,6 +202,44 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                     .body("parkingAreas.label.value", notNullValue())
                     .body("parkingAreas.totalCapacity", notNullValue())
                     .body("parkingAreas.parkingProperties", notNullValue())
+                ;
+
+    }
+
+
+    @Test
+    public void testMutateMultipleParkings() throws Exception {
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : [{" +
+                "     name: {" +
+                "      value: \\\"Parking name\\\" " +
+                "      lang: \\\"no\\\" " +
+                "    }" +
+                "    geometry: { " +
+                "      type:Point " +
+                "      coordinates:[[59.0, 10.5]] " +
+                "    }" +
+                "  }, {" +
+                "     name: {" +
+                "      value: \\\"Parking name\\\" " +
+                "      lang: \\\"no\\\" " +
+                "    }" +
+                "    geometry: { " +
+                "      type:Point " +
+                "      coordinates:[[59.0, 10.5]] " +
+                "    }" +
+                "  }] ) {" +
+                "    id, " +
+                "    name {value lang}, " +
+
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery)
+                .body("data.parking", notNullValue())
+                .body("data.parking", hasSize(2))
                 ;
 
     }

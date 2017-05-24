@@ -37,6 +37,10 @@ public class GraphQLNames {
     public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity. Specify \"any\" to always reference the newest version";
     public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
+    public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
+    public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
+    public static final String TARIFF_ZONES = "tariffZones";
+
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
     public static final String OUTPUT_TYPE_VALID_BETWEEN = "ValidBetween";
@@ -173,7 +177,11 @@ public class GraphQLNames {
     public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
     //GeneralSign
 
+
+    public static final String OUTPUT_TYPE_PRIVATE_CODE = "PrivateCode";
     public static final String PRIVATE_CODE = "privateCode";
+    public static final String INPUT_TYPE_PRIVATE_CODE = OUTPUT_TYPE_PRIVATE_CODE + INPUT_TYPE_POSTFIX;
+
     public static final String CONTENT = "content";
     public static final String SIGN_CONTENT_TYPE = "signContentType";
 

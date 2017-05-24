@@ -4,23 +4,23 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
-import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
@@ -46,10 +46,19 @@ StopPlaceRegisterGraphQLSchema {
     private TopographicPlaceObjectTypeCreator topographicPlaceObjectTypeCreator;
 
     @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+    private StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
 
     @Autowired
-    private StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
+    private ZoneCommonFieldListCreator zoneCommonFieldListCreator;
+
+    @Autowired
+    private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
+
+    @Autowired
+    private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
+
+    @Autowired
+    private ReferenceResolver referenceResolver;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -79,10 +88,10 @@ StopPlaceRegisterGraphQLSchema {
     @PostConstruct
     public void init() {
 
+        /**
+         * Common field list for quays, stop places and addressable place.
+         */
         List<GraphQLFieldDefinition> commonFieldsList = new ArrayList<>();
-        commonFieldsList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
-        commonFieldsList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
-        commonFieldsList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
         commonFieldsList.add(newFieldDefinition()
                 .name(PLACE_EQUIPMENTS)
                 .type(equipmentType)
@@ -102,23 +111,9 @@ StopPlaceRegisterGraphQLSchema {
                 .build()
         );
 
-        commonFieldsList.add(geometryFieldDefinition);
+        List<GraphQLFieldDefinition> zoneCommondFieldList = zoneCommonFieldListCreator.create();
 
-        commonFieldsList.add(newFieldDefinition()
-                .name(IMPORTED_ID)
-                .type(new GraphQLList(GraphQLString))
-                .dataFetcher(env -> {
-                    DataManagedObjectStructure source = (DataManagedObjectStructure) env.getSource();
-                    if (source != null) {
-                        return source.getOriginalIds();
-                    } else {
-                        return null;
-                    }
-                })
-                .build());
-
-
-        commonFieldsList.add(netexIdFieldDefinition);
+        commonFieldsList.addAll(zoneCommondFieldList);
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
@@ -126,7 +121,9 @@ StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
-        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType, topographicPlaceObjectType);
+        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommondFieldList);
+
+        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType, topographicPlaceObjectType, tariffZoneObjectType);
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -214,7 +211,7 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing Parking")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)
-                                .type(parkingObjectInputType))
+                                .type(new GraphQLList(parkingObjectInputType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
@@ -230,9 +227,6 @@ StopPlaceRegisterGraphQLSchema {
         return newObject()
                 .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
                 .fields(commonFieldsList)
-                .field(newFieldDefinition()
-                        .name(VERSION)
-                        .type(GraphQLString))
                 .build();
     }
 
@@ -259,6 +253,10 @@ StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(VERSION)
                 .type(GraphQLInt)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
                 .build());
         arguments.addAll(createPageAndSizeArguments());
         arguments.add(allVersionsArgument);
@@ -379,8 +377,10 @@ StopPlaceRegisterGraphQLSchema {
 
 
     private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList,
-                                                        GraphQLObjectType quayObjectType, GraphQLObjectType validBetweenObjectType,
-                                                        GraphQLObjectType topographicPlaceObjectType) {
+                                                        GraphQLObjectType quayObjectType,
+                                                        GraphQLObjectType validBetweenObjectType,
+                                                        GraphQLObjectType topographicPlaceObjectType,
+                                                        GraphQLObjectType tariffZoneObjectType) {
         return newObject()
                     .name(OUTPUT_TYPE_STOPPLACE)
                     .fields(commonFieldsList)
@@ -394,9 +394,6 @@ StopPlaceRegisterGraphQLSchema {
                             .name(WEIGHTING)
                             .type(interchangeWeightingEnum))
                     .field(newFieldDefinition()
-                            .name(VERSION)
-                            .type(GraphQLString))
-                    .field(newFieldDefinition()
                             .name(VERSION_COMMENT)
                             .type(GraphQLString))
                     .field(newFieldDefinition()
@@ -408,6 +405,10 @@ StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
+                    .field(newFieldDefinition()
+                            .name(TARIFF_ZONES)
+                            .type(new GraphQLList(tariffZoneObjectType))
+                            .dataFetcher(stopPlaceTariffZoneFetcher))
                     .build();
     }
 
@@ -419,11 +420,9 @@ StopPlaceRegisterGraphQLSchema {
                             .name(COMPASS_BEARING)
                             .type(GraphQLBigDecimal))
                     .field(newFieldDefinition()
-                            .name(VERSION)
-                            .type(GraphQLString))
-                    .field(newFieldDefinition()
                             .name(PUBLIC_CODE)
                             .type(GraphQLString))
+                    .field(privateCodeFieldDefinition)
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
@@ -508,6 +507,7 @@ StopPlaceRegisterGraphQLSchema {
         return commonInputFieldsList;
     }
 
+
     private GraphQLInputObjectType createQuayInputObjectType(List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList) {
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_QUAY)
@@ -518,6 +518,9 @@ StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(PUBLIC_CODE)
                         .type(GraphQLString))
+                .field(newInputObjectField()
+                    .name(PRIVATE_CODE)
+                    .type(privateCodeInputType))
                 .build();
     }
 }
