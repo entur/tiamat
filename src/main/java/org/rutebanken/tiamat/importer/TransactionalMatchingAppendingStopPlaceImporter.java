@@ -74,7 +74,7 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
         } else {
 
             if(foundStopPlaces.size() > 1) {
-                logger.warn("Found {} matches for incoming stop place {}", foundStopPlaces.size(), incomingStopPlace);
+                logger.warn("Found {} matches for incoming stop place {}. Matches: {}", foundStopPlaces.size(), incomingStopPlace, foundStopPlaces);
             }
 
             for(org.rutebanken.tiamat.model.StopPlace existingStopPlace : foundStopPlaces) {
