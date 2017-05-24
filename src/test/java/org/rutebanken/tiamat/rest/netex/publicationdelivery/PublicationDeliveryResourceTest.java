@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,8 +35,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,6 +49,9 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
+
+    @Autowired
+    private PublicationDeliveryHelper publicationDeliveryHelper;
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
@@ -328,6 +334,62 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(quay.getId()).isNotNull();
         assertThat(quay.getPrivateCode().getValue()).isEqualTo("B02");
         assertThat(quay.getPrivateCode().getType()).isEqualTo("type");
+
+    }
+
+    /**
+     * When importing a stop place witch is a direct match with import type MERGE. No changes should be made to the stop place.
+     *
+     * https://rutebanken.atlassian.net/browse/NRP-1587
+     */
+    @Test
+    public void initialImportThenMergeShouldNotMergeNearbyQuays() throws Exception {
+
+        // Quays with different original ID
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:123123")
+                .withVersion("1")
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:Quay:4")
+                                .withVersion("1")
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2")))))
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:Quay:5")
+                                .withVersion("1")
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.1"))
+                                                .withLongitude(new BigDecimal("71.2"))))));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        publicationDeliveryParams.importType = ImportType.MERGE;
+        PublicationDeliveryStructure mergeResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(mergeResponse);
+
+        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+
+        List<Quay> quays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
+
+        assertThat(quays).hasSize(2);
+
+        quays.forEach(quay -> {
+            Set<String> importedIds = publicationDeliveryHelper.getImportedIds(quay);
+            assertThat(importedIds).hasSize(1);
+        });
 
     }
 
