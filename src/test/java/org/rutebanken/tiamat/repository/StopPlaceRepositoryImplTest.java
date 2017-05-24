@@ -711,7 +711,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace futureVersion = saveStop("NSR:StopPlace:900", 4L, endOfPeriod.plusSeconds(2), null);
 
         StopPlace expiredInPeriod = saveStop("NSR:StopPlace:901", 1L, startOfPeriod.minusSeconds(2), startOfPeriod.plusSeconds(30));
-        StopPlace notChangedInPeriod = saveStop("NSR:StopPlace:902", 1L, startOfPeriod.minusSeconds(10), null);
+        StopPlace newInPeriod = saveStop("NSR:StopPlace:902", 1L, startOfPeriod.plusSeconds(2), null);
+        StopPlace notChangedInPeriod = saveStop("NSR:StopPlace:903", 1L, startOfPeriod.minusSeconds(10), null);
 
 
         Page<StopPlace> changedStopsP0 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(0, 2)));
@@ -722,7 +723,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         List<StopPlace> accumulatedStops=new ArrayList<>(changedStopsP0.getContent());
         accumulatedStops.addAll(changedStopsP1.getContent());
-        assertContainsOnlyInExactVersion(accumulatedStops, changedInPeriodButNotCurrent, currentVersion, expiredInPeriod);
+        assertContainsOnlyInExactVersion(accumulatedStops, currentVersion, expiredInPeriod, newInPeriod);
 
     }
 
