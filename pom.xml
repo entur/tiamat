@@ -119,7 +119,16 @@
 
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.vividsolutions/jts -->
+
+
+        <!-- https://mvnrepository.com/artifact/de.danielbechler/java-object-diff -->
+        <dependency>
+            <groupId>de.danielbechler</groupId>
+            <artifactId>java-object-diff</artifactId>
+            <version>0.94</version>
+        </dependency>
+
+
         <dependency>
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
