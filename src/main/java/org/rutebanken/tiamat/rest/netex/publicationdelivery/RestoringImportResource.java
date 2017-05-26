@@ -5,9 +5,11 @@ import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.importer.restore.GenericRestoringImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
+import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
@@ -57,6 +59,7 @@ public class RestoringImportResource {
     private final RestoringStopPlaceImporter restoringStopPlaceImporter;
     private final HazelcastInstance hazelcastInstance;
     private final PublicationDeliveryHelper publicationDeliveryHelper;
+    private final GenericRestoringImporter<org.rutebanken.tiamat.model.TariffZone> tariffZoneGenericRestoringImporter;
 
     @Autowired
     public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller,
@@ -64,7 +67,8 @@ public class RestoringImportResource {
                                    RestoringTopographicPlaceImporter restoringTopographicPlaceImporter,
                                    RestoringStopPlaceImporter restoringStopPlaceImporter,
                                    RestoringParkingImporter restoringParkingImporter,
-                                   HazelcastInstance hazelcastInstance, PublicationDeliveryHelper publicationDeliveryHelper) {
+                                   HazelcastInstance hazelcastInstance, PublicationDeliveryHelper publicationDeliveryHelper,
+                                   GenericRestoringImporter<org.rutebanken.tiamat.model.TariffZone> tariffZoneGenericRestoringImporter) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
         this.restoringTopographicPlaceImporter = restoringTopographicPlaceImporter;
@@ -72,6 +76,7 @@ public class RestoringImportResource {
         this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
         this.publicationDeliveryHelper = publicationDeliveryHelper;
+        this.tariffZoneGenericRestoringImporter = tariffZoneGenericRestoringImporter;
     }
 
     /**
@@ -102,6 +107,12 @@ public class RestoringImportResource {
                     logger.info("Importing {} topographic places", netexTopographicPlaces.size());
                     restoringTopographicPlaceImporter.importTopographicPlaces(topographicPlacesCounter, netexTopographicPlaces);
                     logger.info("Finished importing {} topographic places", topographicPlacesCounter);
+                }
+
+                if(publicationDeliveryHelper.hasTariffZones(netexSiteFrame)) {
+                    tariffZoneGenericRestoringImporter.importObjects(new AtomicInteger(), netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
+                } else {
+                    logger.info("No tariff zones detected");
                 }
 
                 logger.info("Importing stops");

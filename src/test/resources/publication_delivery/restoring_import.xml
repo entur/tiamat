@@ -365,6 +365,9 @@
           </alternativeNames>
           <TopographicPlaceRef ref="KVE:TopographicPlace:2002" created="2017-05-19T10:24:48.509+02:00" version="1"/>
           <OtherTransportModes/>
+          <tariffZones>
+            <TariffZoneRef ref="RUT:TariffZone:05"/>
+          </tariffZones>
           <StopPlaceType>onstreetBus</StopPlaceType>
           <Weighting>noInterchange</Weighting>
           <quays>
@@ -510,6 +513,11 @@
           <TotalCapacity>33</TotalCapacity>
         </Parking>
       </parkings>
+      <tariffZones>
+        <TariffZone created="2017-05-26T09:59:46.905+02:00" modification="new" version="1" id="RUT:TariffZone:05">
+          <Name>V02</Name>
+        </TariffZone>
+      </tariffZones>
     </SiteFrame>
   </dataObjects>
 </PublicationDelivery>

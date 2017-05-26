@@ -31,6 +31,10 @@ public class GenericDataManagedObjectRepository {
         return clazz.cast(getRepository(clazz).findFirstByNetexIdAndVersion(netexId, version));
     }
 
+    public <T extends EntityInVersionStructure> T save(EntityInVersionStructure entityInVersionStructure, Class<T> clazz) {
+        return clazz.cast(getRepository(clazz).save(entityInVersionStructure));
+    }
+
     public String findByKeyValue(String key, Set<String> values, Class<? extends DataManagedObjectStructure> clazz) {
         DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) repositories.getRepositoryFor(clazz);
         String netexId = repository.findByKeyValue(key, values);

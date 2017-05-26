@@ -5,8 +5,10 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,6 +44,9 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private ParkingRepository parkingRepository;
+
+    @Autowired
+    private ReferenceResolver referenceResolver;
 
     @Test
     public void restoringImport() throws IOException, InterruptedException, ParserConfigurationException, JAXBException, SAXException, XMLStreamException {
@@ -65,9 +72,20 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
             org.rutebanken.tiamat.model.TopographicPlace topographicPlace = stopPlace.getTopographicPlace();
             assertThat(topographicPlace).as("stop place's topographic place "+stopPlace.getNetexId()).isNotNull();
             assertThat(NetexIdHelper.isNetexId(topographicPlace.getNetexId())).as("Topographic place has valid netexID").isTrue();
+
+            Stream.of(stopPlace.getTariffZones())
+                    .filter(Objects::nonNull)
+                    .flatMap(tariffZoneRefs -> tariffZoneRefs.stream())
+                    .forEach(tariffZoneRefs -> {
+                        TariffZone tariffZone = referenceResolver.resolve(tariffZoneRefs);
+                        assertThat(tariffZone).as("resolved tariff zone from imported stop place").isNotNull();
+                    });
+
         });
 
         assertThat(parkingRepository.findAll()).as("imported parkings in repository").isNotEmpty();
+
+        assertThat(tariffZoneRepository.findAll()).as("tariff zones in repository").isNotEmpty();
     }
 
 }

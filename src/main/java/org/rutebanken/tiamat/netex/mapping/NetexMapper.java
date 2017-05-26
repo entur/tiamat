@@ -3,7 +3,25 @@ package org.rutebanken.tiamat.netex.mapping;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.AccessibilityAssessment;
+import org.rutebanken.netex.model.CycleStorageEquipment;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.EntityInVersionStructure;
+import org.rutebanken.netex.model.GeneralSign;
+import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.netex.model.Parking;
+import org.rutebanken.netex.model.PathLink;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SanitaryEquipment;
+import org.rutebanken.netex.model.ShelterEquipment;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.TicketingEquipment;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -208,6 +226,10 @@ public class NetexMapper {
 
     public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {
         return facade.map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
+    }
+
+    public org.rutebanken.tiamat.model.TariffZone mapToTiamatModel(TariffZone tariffZone) {
+        return facade.map(tariffZone, org.rutebanken.tiamat.model.TariffZone.class);
     }
 
     public List<org.rutebanken.tiamat.model.StopPlace> mapStopsToTiamatModel(List<StopPlace> stopPlaces) {
