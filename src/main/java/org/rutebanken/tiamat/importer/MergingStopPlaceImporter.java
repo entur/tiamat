@@ -159,7 +159,7 @@ public class MergingStopPlaceImporter {
         }
 
         if (quayChanged || keyValuesChanged || centroidChanged || typeChanged) {
-            logger.info("Updated existing stop place {}. ", existingStopPlace);
+            logger.info("Updating existing stop place. quays changed {}, key values changed: {}, centroid changed: {}, type changed:{} - {}", existingStopPlace);
             copy = stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, copy);
             return updateCache(copy);
         }
