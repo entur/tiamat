@@ -109,8 +109,9 @@ public class RestoringImportResource {
                     logger.info("Finished importing {} topographic places", topographicPlacesCounter);
                 }
 
+                AtomicInteger tariffZonesCounter = new AtomicInteger();
                 if(publicationDeliveryHelper.hasTariffZones(netexSiteFrame)) {
-                    tariffZoneGenericRestoringImporter.importObjects(new AtomicInteger(), netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
+                    tariffZoneGenericRestoringImporter.importObjects(tariffZonesCounter, netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
                 } else {
                     logger.info("No tariff zones detected");
                 }
@@ -132,7 +133,11 @@ public class RestoringImportResource {
                 executorService.shutdown();
                 executorService.awaitTermination(150, TimeUnit.MINUTES);
 
-                return Response.ok("Imported " + stopPlacesImported.get() + " stop places, " + parkingsImported.get() + " parkings, " + topographicPlacesCounter.get() + " topographic places.").build();
+                return Response.ok("Imported " + stopPlacesImported.get() + " stop places, "
+                        + parkingsImported.get() + " parkings, "
+                        + topographicPlacesCounter.get() + " topographic places."
+                        + tariffZonesCounter + " tariff zones")
+                        .build();
 
             } catch (Exception e) {
                 logger.error("Caught exception while importing publication delivery initially", e);
