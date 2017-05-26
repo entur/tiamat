@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class GenericRestoringImporter<T extends EntityInVersionStructure> {
+public class GenericRestoringImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericRestoringImporter.class);
 
@@ -27,7 +27,7 @@ public class GenericRestoringImporter<T extends EntityInVersionStructure> {
 
 
 
-    public void importObjects(AtomicInteger objectsImported, List<? extends org.rutebanken.netex.model.DataManagedObjectStructure> dataManagedObjects, Class<T> tiamatType) {
+    public <T extends EntityInVersionStructure> void importObjects(AtomicInteger objectsImported, List<? extends org.rutebanken.netex.model.DataManagedObjectStructure> dataManagedObjects, Class<T> tiamatType) {
 
         if (dataManagedObjects.isEmpty()) {
             logger.info("No objects for type {}", tiamatType);

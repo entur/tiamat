@@ -59,7 +59,7 @@ public class RestoringImportResource {
     private final RestoringStopPlaceImporter restoringStopPlaceImporter;
     private final HazelcastInstance hazelcastInstance;
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final GenericRestoringImporter<org.rutebanken.tiamat.model.TariffZone> tariffZoneGenericRestoringImporter;
+    private final GenericRestoringImporter tariffZoneGenericRestoringImporter;
 
     @Autowired
     public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller,
@@ -68,7 +68,7 @@ public class RestoringImportResource {
                                    RestoringStopPlaceImporter restoringStopPlaceImporter,
                                    RestoringParkingImporter restoringParkingImporter,
                                    HazelcastInstance hazelcastInstance, PublicationDeliveryHelper publicationDeliveryHelper,
-                                   GenericRestoringImporter<org.rutebanken.tiamat.model.TariffZone> tariffZoneGenericRestoringImporter) {
+                                   GenericRestoringImporter GenericRestoringImporter) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
         this.restoringTopographicPlaceImporter = restoringTopographicPlaceImporter;
@@ -76,7 +76,7 @@ public class RestoringImportResource {
         this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.tariffZoneGenericRestoringImporter = tariffZoneGenericRestoringImporter;
+        this.tariffZoneGenericRestoringImporter = GenericRestoringImporter;
     }
 
     /**
