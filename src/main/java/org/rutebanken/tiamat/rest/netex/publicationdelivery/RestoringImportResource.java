@@ -68,7 +68,7 @@ public class RestoringImportResource {
                                    RestoringStopPlaceImporter restoringStopPlaceImporter,
                                    RestoringParkingImporter restoringParkingImporter,
                                    HazelcastInstance hazelcastInstance, PublicationDeliveryHelper publicationDeliveryHelper,
-                                   GenericRestoringImporter GenericRestoringImporter) {
+                                   GenericRestoringImporter genericRestoringImporter) {
         this.publicationDeliveryPartialUnmarshaller = publicationDeliveryPartialUnmarshaller;
         this.netexMapper = netexMapper;
         this.restoringTopographicPlaceImporter = restoringTopographicPlaceImporter;
@@ -76,7 +76,7 @@ public class RestoringImportResource {
         this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.tariffZoneGenericRestoringImporter = GenericRestoringImporter;
+        this.tariffZoneGenericRestoringImporter = genericRestoringImporter;
     }
 
     /**
