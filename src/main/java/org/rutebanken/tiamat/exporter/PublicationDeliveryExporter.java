@@ -6,15 +6,11 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,14 +28,19 @@ public class PublicationDeliveryExporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
     private StopPlaceRepository stopPlaceRepository;
     private TopographicPlaceRepository topographicPlaceRepository;
+    private TariffZoneRepository tariffZoneRepository;
     private NetexMapper netexMapper;
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
     @Autowired
-    public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository, TopographicPlaceRepository topographicPlaceRepository, NetexMapper netexMapper) {
+    public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
+                                       TopographicPlaceRepository topographicPlaceRepository,
+                                       TariffZoneRepository tariffZoneRepository,
+                                       NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.tariffZoneRepository = tariffZoneRepository;
         this.netexMapper = netexMapper;
     }
 
@@ -114,6 +115,9 @@ public class PublicationDeliveryExporter {
         } else {
             siteFrame.setTopographicPlaces(null);
         }
+
+        exportTariffZones(siteFrame);
+
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
@@ -121,7 +125,19 @@ public class PublicationDeliveryExporter {
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 
+
         return exportSiteFrame(convertedSiteFrame);
+    }
+
+    public void exportTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+        logger.info("Adding tariffZone");
+
+        List<TariffZone> tariffZones = tariffZoneRepository.findAll();
+        if (!tariffZones.isEmpty()) {
+            siteFrame.setTariffZones(new TariffZonesInFrame_RelStructure(tariffZones));
+        } else {
+            logger.info("No tariff zones found");
+        }
     }
 
     private void removeVersionFromTopographicPlaceReferences(SiteFrame convertedSiteFrame) {
