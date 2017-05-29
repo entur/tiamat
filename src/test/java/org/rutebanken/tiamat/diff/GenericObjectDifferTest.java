@@ -179,7 +179,7 @@ public class GenericObjectDifferTest {
     }
 
     public String compareObjectsAndPrint(Object oldObject, Object newObject) throws IllegalAccessException {
-        List<GenericObjectDiffer.Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId");
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId");
         String diff = differences.stream().map(difference -> difference.toString()).collect(Collectors.joining("\n"));
 
         System.out.println("-----------");

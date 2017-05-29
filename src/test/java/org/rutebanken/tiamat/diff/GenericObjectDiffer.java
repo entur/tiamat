@@ -119,25 +119,6 @@ public class GenericObjectDiffer {
         }
     }
 
-    public class Difference {
-
-        public Difference(String property, Object oldValue, Object newValue) {
-            this.property = property;
-            this.oldValue = oldValue;
-            this.newValue = newValue;
-        }
-
-        public String property;
-        public Object oldValue;
-        public Object newValue;
-
-
-        public String toString() {
-            return property + ": " + oldValue + " => " + newValue;
-        }
-
-    }
-
     private Field identifierField(String identifierPropertyName, Field[] fields) {
         return Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().orElse(null);
     }
