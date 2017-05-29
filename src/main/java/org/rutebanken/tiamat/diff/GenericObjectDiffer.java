@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.diff;
 
+import javassist.util.proxy.MethodHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,56 +38,66 @@ public class GenericObjectDiffer {
 
         for (Field field : fields) {
 
-            field.setAccessible(true);
+            try {
 
-            Object oldValue = field.get(oldObject);
-            Object newValue = field.get(newObject);
+                if (field.getType().isAssignableFrom(MethodHandler.class)) {
+                    logger.info("Ignoring field {}", field);
+                    continue;
+                }
 
-            if (oldValue == null && newValue == null) {
-                continue;
-            }
+                field.setAccessible(true);
 
-            if (oldValue == null && newValue != null || oldValue != null && newValue == null) {
-                differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
-                continue;
-            }
+                Object oldValue = field.get(oldObject);
+                Object newValue = field.get(newObject);
 
-            if (Collection.class.isAssignableFrom(field.getType())) {
+                if (oldValue == null && newValue == null) {
+                    continue;
+                }
 
-                Collection oldCollection = (Collection) oldValue;
-                Collection newCollection = (Collection) newValue;
+                if (oldValue == null && newValue != null || oldValue != null && newValue == null) {
+                    differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
+                    continue;
+                }
+
+                if (Collection.class.isAssignableFrom(field.getType())) {
+
+                    Collection oldCollection = (Collection) oldValue;
+                    Collection newCollection = (Collection) newValue;
 
 
-                compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields, ignoreFields);
-                continue;
+                    compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields, ignoreFields);
+                    continue;
 
-            } else if (Map.class.isAssignableFrom(field.getType())) {
+                } else if (Map.class.isAssignableFrom(field.getType())) {
 
-                Map<?, ?> oldMap = (Map) oldValue;
-                Map<?, ?> newMap = (Map) newValue;
+                    Map<?, ?> oldMap = (Map) oldValue;
+                    Map<?, ?> newMap = (Map) newValue;
 
-                String mapPropertyName = property + "." + field.getName();
+                    String mapPropertyName = property + "." + field.getName();
 
-                compareMap(oldMap, newMap, differences, false, mapPropertyName, ignoreFields);
+                    compareMap(oldMap, newMap, differences, false, mapPropertyName, ignoreFields);
 
-                continue;
+                    continue;
 
-            }
+                }
 
-            if (oldValue == newValue) {
-                continue;
-            }
+                if (oldValue == newValue) {
+                    continue;
+                }
 
-            if (oldValue.equals(newValue)) {
-                continue;
-            }
+                if (oldValue.equals(newValue)) {
+                    continue;
+                }
 
-            String propertyName = property + '.' + field.getName();
+                String propertyName = property + '.' + field.getName();
 
-            if(isPrimitive(oldValue)) {
-                differences.add(new Difference(propertyName, oldValue, newValue));
-            } else {
-                differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName, ignoreFields));
+                if (isPrimitive(oldValue)) {
+                    differences.add(new Difference(propertyName, oldValue, newValue));
+                } else {
+                    differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName, ignoreFields));
+                }
+            } catch (IllegalAccessException | IllegalArgumentException e) {
+                throw new RuntimeException("Could not compare field '" + field + "'. old object " + oldObject + " new object " + newObject, e);
             }
         }
 
