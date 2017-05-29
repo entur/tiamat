@@ -184,6 +184,7 @@ public class GenericObjectDifferTest {
 
         System.out.println("-----------");
         System.out.println(diff);
+        System.out.println("-----------");
         return diff;
     }
 }

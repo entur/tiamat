@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.repository.ValidBetweenRepository;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
+import org.rutebanken.tiamat.diff.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 import java.time.Instant;
+
 
 
 @Transactional
@@ -44,6 +46,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
     private final EntityChangedListener entityChangedListener;
+
+    private final GenericObjectDiffer genericObjectDiffer;
 
 
     @Autowired
