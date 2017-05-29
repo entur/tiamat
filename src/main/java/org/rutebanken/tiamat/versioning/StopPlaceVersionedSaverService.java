@@ -59,7 +59,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                                           TariffZonesLookupService tariffZonesLookupService,
                                           StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
                                           NearbyStopPlaceFinder nearbyStopPlaceFinder,
-                                          EntityChangedListener entityChangedListener) {
+                                          EntityChangedListener entityChangedListener, GenericObjectDiffer genericObjectDiffer) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
@@ -69,6 +69,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
         this.entityChangedListener = entityChangedListener;
+        this.genericObjectDiffer = genericObjectDiffer;
     }
 
     @Override
@@ -106,6 +107,13 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);
+        if(existingVersion != null) {
+            try {
+                logger.info("{}", genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, "netexId")));
+            } catch (Exception e) {
+                logger.warn("Could not diff stop places. Existing version: {}. New version: {}", existingVersion, newVersion);
+            }
+        }
 
         if(newVersion.getQuays() != null) {
             stopPlaceByQuayOriginalIdFinder.updateCache(newVersion.getNetexId(),

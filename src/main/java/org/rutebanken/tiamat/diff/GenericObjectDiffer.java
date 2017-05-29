@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -198,4 +199,7 @@ public class GenericObjectDiffer {
         return fields.toArray(new Field[]{});
     }
 
+    public String diffListToString(List<Difference> differences) {
+        return differences.stream().map(difference -> difference.toString()).collect(Collectors.joining("\n", "\n", "\n"));
+    }
 }
