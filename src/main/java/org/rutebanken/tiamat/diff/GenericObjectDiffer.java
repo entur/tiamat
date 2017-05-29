@@ -198,11 +198,11 @@ public class GenericObjectDiffer {
 
             if (!foundMatchOnId) {
                 if (reverse && !collectionRight.contains(itemLeft)) {
-                    differences.add(new Difference(propertyName + "[] added", null, itemLeft));
+                    differences.add(new Difference(DiffType.COLLECTION_ADD, propertyName + "[]", null, itemLeft));
                     break;
 
                 } else if (!collectionRight.contains(itemLeft)) {
-                    differences.add(new Difference(propertyName + "[] removed", itemLeft, null));
+                    differences.add(new Difference(DiffType.COLLECTION_REMOVE, propertyName + "[]", itemLeft, null));
                 }
             }
         }
