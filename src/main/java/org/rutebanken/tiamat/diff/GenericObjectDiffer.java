@@ -14,17 +14,17 @@ public class GenericObjectDiffer {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericObjectDiffer.class);
 
-    public List<Difference> compareObjects(Object oldObject, Object newObject, String identifierPropertyName) throws IllegalAccessException {
-        return compareObjects(null, oldObject, newObject, identifierPropertyName);
+    public List<Difference> compareObjects(Object oldObject, Object newObject, String identifierPropertyName, Set<String> ingoreFields) throws IllegalAccessException {
+        return compareObjects(null, oldObject, newObject, identifierPropertyName, ingoreFields);
     }
 
 
-    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, String identifierPropertyName) throws IllegalAccessException {
+    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, String identifierPropertyName, Set<String> ignoreFields) throws IllegalAccessException {
         List<Difference> differences = new ArrayList<>();
 
         Class clazz = oldObject.getClass();
 
-        Field[] fields = getAllFields(clazz);
+        Field[] fields = getAllFields(clazz, ignoreFields);
         Field identifierField = identifierField(identifierPropertyName, fields);
 
         if (property == null) {
@@ -57,7 +57,7 @@ public class GenericObjectDiffer {
                 Collection newCollection = (Collection) newValue;
 
 
-                compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields);
+                compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields, ignoreFields);
                 continue;
 
             } else if (Map.class.isAssignableFrom(field.getType())) {
@@ -67,7 +67,7 @@ public class GenericObjectDiffer {
 
                 String mapPropertyName = property + "." + field.getName();
 
-                compareMap(oldMap, newMap, differences, false, mapPropertyName);
+                compareMap(oldMap, newMap, differences, false, mapPropertyName, ignoreFields);
 
                 continue;
 
@@ -86,7 +86,7 @@ public class GenericObjectDiffer {
             if(isPrimitive(oldValue)) {
                 differences.add(new Difference(propertyName, oldValue, newValue));
             } else {
-                differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName));
+                differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName, ignoreFields));
             }
         }
 
@@ -97,7 +97,7 @@ public class GenericObjectDiffer {
         return value instanceof Number || value instanceof String || value instanceof Boolean;
     }
 
-    public void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName) throws IllegalAccessException {
+    public void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName, Set<String> ignoreFields) throws IllegalAccessException {
 
         Map<?, ?> leftMap;
         Map<?, ?> rightMap;
@@ -124,7 +124,7 @@ public class GenericObjectDiffer {
                 logger.debug("right map contain key {}", leftMapKey);
 
                 String childProperty = mapPropertyName + "{" + leftMapKey + "}";
-                differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), null));
+                differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), null, ignoreFields));
             }
         }
     }
@@ -133,7 +133,7 @@ public class GenericObjectDiffer {
         return Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().orElse(null);
     }
 
-    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field[] fields) throws IllegalAccessException {
+    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field[] fields, Set<String> ignoreFields) throws IllegalAccessException {
 
         if (oldCollection == null && newCollection == null) {
             return;
@@ -150,13 +150,13 @@ public class GenericObjectDiffer {
             Field identifierField = identifierField(identifierPropertyName, fields);
 
             Set<Object> ignoreIdentifiers = new HashSet<>();
-            compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false);
-            compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true);
+            compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false, ignoreFields);
+            compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true, ignoreFields);
 
         }
     }
 
-    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse) throws IllegalAccessException {
+    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse, Set<String> ignoreFields) throws IllegalAccessException {
 
         for (Object itemLeft : collectionLeft) {
 
@@ -178,7 +178,7 @@ public class GenericObjectDiffer {
 
                         String newProperty = propertyName + "[" + itemRightIdentifier + "]";
                         ignoreIdentifiers.add(itemLeftIdentitier);
-                        differences.addAll(compareObjects(newProperty, itemLeft, itemRight, identifierPropertyName));
+                        differences.addAll(compareObjects(newProperty, itemLeft, itemRight, identifierPropertyName, ignoreFields));
                         foundMatchOnId = true;
                         break;
                     }
@@ -198,13 +198,15 @@ public class GenericObjectDiffer {
 
     }
 
-    public Field[] getAllFields(Class clazz) {
+    public Field[] getAllFields(Class clazz, Set<String> ignoreFields) {
         List<Field> fields = new ArrayList<>();
         fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
         if (clazz.getSuperclass() != null) {
-            fields.addAll(Arrays.asList(getAllFields(clazz.getSuperclass())));
+            fields.addAll(Arrays.asList(getAllFields(clazz.getSuperclass(), ignoreFields)));
         }
-        return fields.toArray(new Field[]{});
+        return fields.stream()
+                .filter(field -> !ignoreFields.contains(field.getName()))
+                .collect(Collectors.toList()).toArray(new Field[]{});
     }
 
     public String diffListToString(List<Difference> differences) {

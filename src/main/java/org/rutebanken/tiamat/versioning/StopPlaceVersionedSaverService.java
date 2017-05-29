@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.time.Instant;
 
@@ -28,6 +30,7 @@ import java.time.Instant;
 public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
+    private static final Set<String> DIFF_IGNORE_FIELDS = Sets.newHashSet("id", "version", "changed", "status", "modification");
 
     private final StopPlaceRepository stopPlaceRepository;
 
@@ -109,7 +112,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         newVersion = stopPlaceRepository.save( newVersion);
         if(existingVersion != null) {
             try {
-                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, "netexId")));
+                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, "netexId", DIFF_IGNORE_FIELDS)));
             } catch (Exception e) {
                 logger.warn("Could not diff stop places. Existing version: {}. New version: {}", existingVersion, newVersion);
             }

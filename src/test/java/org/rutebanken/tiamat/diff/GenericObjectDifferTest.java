@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.diff;
 
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
@@ -218,7 +219,7 @@ public class GenericObjectDifferTest {
     }
 
     public String compareObjectsAndPrint(Object oldObject, Object newObject) throws IllegalAccessException {
-        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId");
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId", Sets.newHashSet("id"));
         String diff = genericObjectDiffer.diffListToString(differences);
 
         System.out.println("-----------");
