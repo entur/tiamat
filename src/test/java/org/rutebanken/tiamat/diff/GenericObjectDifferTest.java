@@ -5,11 +5,14 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
+import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -175,6 +178,42 @@ public class GenericObjectDifferTest {
 
 
         compareObjectsAndPrint(oldStopPlace, newStopPlace);
+
+    }
+
+    @Test
+    public void diffStopPlaceAccessibilityLimitation() throws IllegalAccessException {
+        StopPlace stopPlace = new StopPlace();
+
+        AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
+        accessibilityLimitation.setNetexId("NSR:AccessibilityLimitation:1");
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setNetexId("NSR:AccessibilityAssessment:1");
+
+        accessibilityAssessment.setLimitations(Arrays.asList(accessibilityLimitation));
+
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        StopPlace stopPlace2 = new StopPlace();
+
+        AccessibilityLimitation accessibilityLimitation2 = new AccessibilityLimitation();
+        accessibilityLimitation2.setNetexId("NSR:AccessibilityLimitation:1");
+        accessibilityLimitation2.setChanged(Instant.now());
+
+        AccessibilityAssessment accessibilityAssessment2 = new AccessibilityAssessment();
+        accessibilityAssessment2.setNetexId("NSR:AccessibilityAssessment:1");
+        accessibilityAssessment2.setVersion(2L);
+
+        accessibilityAssessment2.setLimitations(Arrays.asList(accessibilityLimitation2));
+
+        stopPlace2.setAccessibilityAssessment(accessibilityAssessment2);
+
+        String diff = compareObjectsAndPrint(stopPlace, stopPlace2);
+        assertThat(diff)
+                .contains("accessibilityAssessment")
+                .contains("limitations")
+                .contains("version");
 
     }
 
