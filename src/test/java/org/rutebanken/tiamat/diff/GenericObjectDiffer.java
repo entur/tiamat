@@ -20,13 +20,15 @@ public class GenericObjectDiffer {
         Class clazz = oldObject.getClass();
 
         Field[] fields = getAllFields(clazz);
-        Field identifierField  = Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().get();
+        Field identifierField  = identifierField(identifierPropertyName, fields);
 
         if(property == null) {
             property = oldObject.getClass().getSimpleName();
         }
 
-        identifierField.setAccessible(true);
+        if(identifierField != null) {
+            identifierField.setAccessible(true);
+        }
 
         for (Field field : fields) {
 
@@ -52,15 +54,15 @@ public class GenericObjectDiffer {
 
                 compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields);
                 continue;
+
             } else if(Map.class.isAssignableFrom(field.getType())) {
-                System.out.println("map not supported yet!");
 
+                Map<?, ?> oldMap = (Map) oldValue;
+                Map<?, ?> newMap = (Map) newValue;
 
-                Map oldMap = (Map) oldValue;
-                Map newMap = (Map) newValue;
+                String mapPropertyName = property + "." + field.getName();
 
-//                compareMap(property + '.' + field.getName())
-//
+                compareMap(oldMap, newMap, differences, false, mapPropertyName);
 
                 continue;
 
@@ -78,8 +80,43 @@ public class GenericObjectDiffer {
             differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
         }
 
-
         return differences;
+    }
+
+    public void compareMap(Map<?, ?> map1, Map<?,?> map2, List<Difference> differences, boolean reverse, String mapPropertyName) throws IllegalAccessException {
+
+        Map<?, ?> leftMap;
+        Map<?, ?> rightMap;
+
+        if(reverse) {
+            leftMap = map2;
+            rightMap = map1;
+            System.out.println("reverse matching prop: " + mapPropertyName + " left:  "+leftMap + " right: " +rightMap);
+        } else {
+            leftMap = map1;
+            rightMap = map2;
+            System.out.println("matching prop: " + mapPropertyName + " left:  "+leftMap + " right: " +rightMap);
+        }
+
+        for(Object leftMapKey : leftMap.keySet()) {
+            System.out.println(leftMapKey);
+
+            Object leftMapValue = leftMap.get(leftMapKey);
+
+            if(!rightMap.containsKey(leftMapKey)) {
+                System.out.println("right map does not contain key "+ leftMapKey);
+
+                differences.add(new Difference(mapPropertyName +"{"+leftMapKey+"}", leftMapValue, null));
+
+            } else if(rightMap.containsKey(leftMapKey)) {
+
+                System.out.println("right map contains left map key "+ leftMapKey);
+
+                String childProperty = mapPropertyName  +"{"+leftMapKey+"}";
+                differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), null));
+
+            }
+        }
     }
 
     public class Difference {
@@ -101,6 +138,10 @@ public class GenericObjectDiffer {
 
     }
 
+    private Field identifierField(String identifierPropertyName, Field[] fields) {
+        return Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().orElse(null);
+    }
+
     public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field[] fields) throws IllegalAccessException {
 
         if(oldCollection == null && newCollection == null) {
@@ -113,43 +154,54 @@ public class GenericObjectDiffer {
             differences.add(new Difference(propertyName, oldCollection.size(), null));
         } else if(oldCollection.isEmpty() && newCollection.isEmpty()) {
             return;
-        } else if(Collections.disjoint(oldCollection, newCollection)) {
-            Field identifierField  = Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().get();
+        } else //if(Collections.disjoint(oldCollection, newCollection)) {
+        {
+            Field identifierField = identifierField(identifierPropertyName, fields);
 
             Set<Object> ignoreIdentifiers = new HashSet<>();
-            compareListItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false);
-            compareListItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true);
+            System.out.println("Compare items for "+ propertyName + " left right");
+            compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false);
+            compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true);
 
         }
     }
 
-    public void compareListItems(String propertyName, Collection collection1, Collection collection2, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse) throws IllegalAccessException {
+    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse) throws IllegalAccessException {
 
-        for(Object collection1Item : collection1) {
+        for(Object itemLeft : collectionLeft) {
 
-            Object collection1ItemIdentifier = identifierField.get(collection1Item);
-            if(ignoreIdentifiers.contains(collection1ItemIdentifier)) {
-                continue;
+            Object itemLeftIdentitier;
+            if(identifierField != null) {
+                itemLeftIdentitier = identifierField.get(itemLeft);
+                if (ignoreIdentifiers.contains(itemLeftIdentitier)) {
+                    continue;
+                }
+            } else {
+                itemLeftIdentitier = null;
             }
 
             boolean foundMatchOnId = false;
-            for(Object collection2Item : collection2) {
-                Object collection2ItemIdentifier = identifierField.get(collection2Item);
-                if(collection1ItemIdentifier.equals(collection2ItemIdentifier)) {
+            for(Object itemRight : collectionRight) {
+                if(identifierField != null && itemLeftIdentitier != null) {
+                    Object itemRightIdentifier = identifierField.get(itemRight);
+                    if (itemLeftIdentitier.equals(itemRightIdentifier)) {
 
-                    String newProperty = propertyName + "[" + collection2ItemIdentifier + "]";
-                    ignoreIdentifiers.add(collection1ItemIdentifier);
-                    differences.addAll(compareObjects(newProperty, collection1Item, collection2Item, identifierPropertyName));
-                    foundMatchOnId = true;
-                    break;
+                        String newProperty = propertyName + "[" + itemRightIdentifier + "]";
+                        ignoreIdentifiers.add(itemLeftIdentitier);
+                        differences.addAll(compareObjects(newProperty, itemLeft, itemRight, identifierPropertyName));
+                        foundMatchOnId = true;
+                        break;
+                    }
                 }
             }
 
             if(!foundMatchOnId) {
-                if(reverse) {
-                    differences.add(new Difference(propertyName + "[] added", null, collection1Item));
-                } else {
-                    differences.add(new Difference(propertyName + "[] removed", collection1Item, null));
+                if(reverse && !collectionRight.contains(itemLeft)) {
+                    differences.add(new Difference(propertyName + "[] added", null, itemLeft));
+                    break;
+
+                } else if(!collectionRight.contains(itemLeft)){
+                    differences.add(new Difference(propertyName + "[] removed", itemLeft, null));
                 }
             }
         }

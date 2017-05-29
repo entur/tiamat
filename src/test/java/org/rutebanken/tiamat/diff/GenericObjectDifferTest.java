@@ -93,20 +93,47 @@ public class GenericObjectDifferTest {
     }
 
     @Test
-    public void diffChangeQuayImportedId() throws IllegalAccessException {
+    public void diffAddQuayImportedId() throws IllegalAccessException {
         StopPlace oldStopPlace = new StopPlace();
+        Quay oldQuay = new Quay();
+        oldQuay.setNetexId("NSR:Quay:3");
+        oldQuay.getOriginalIds().add("HED:Quay:2");
+        oldStopPlace.getQuays().add(oldQuay);
+
         StopPlace newStopPlace = new StopPlace();
+        Quay newQuay = new Quay();
+        newQuay.setNetexId("NSR:Quay:3");
+        newQuay.getOriginalIds().add("HED:Quay:2");
+        newQuay.getOriginalIds().add("OPP:Quay:1");
+        newStopPlace.getQuays().add(newQuay);
 
-        Quay quay = new Quay(new EmbeddableMultilingualString("new stop place quay"));
-        quay.setNetexId("NSR:Quay:3");
-        ;
-
-        newStopPlace.getQuays().add(quay);
         String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
 
         assertThat(diffString)
-                .contains("new stop place quay");
+                .contains("OPP:Quay:1");
     }
+
+    @Test
+    public void diffRemoveQuayImportedId() throws IllegalAccessException {
+        StopPlace oldStopPlace = new StopPlace();
+        Quay oldQuay = new Quay();
+        oldQuay.setNetexId("NSR:Quay:3");
+        oldQuay.getOriginalIds().add("HED:Quay:2");
+        oldQuay.getOriginalIds().add("OPP:Quay:1");
+        oldStopPlace.getQuays().add(oldQuay);
+
+        StopPlace newStopPlace = new StopPlace();
+        Quay newQuay = new Quay();
+        newQuay.setNetexId("NSR:Quay:3");
+        newQuay.getOriginalIds().add("HED:Quay:2");
+        newStopPlace.getQuays().add(newQuay);
+
+        String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
+
+        assertThat(diffString)
+                .contains("OPP:Quay:1");
+    }
+
 
     @Test
     public void diffChangeQuay() throws IllegalAccessException {
@@ -131,7 +158,7 @@ public class GenericObjectDifferTest {
     }
 
     @Test
-    public void testRecursive() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public void detectDifferencesInQuayOnNetexId() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Quay oldQuay = new Quay(new EmbeddableMultilingualString("old quay"));
         oldQuay.setVersion(1L);
         oldQuay.setNetexId("NSR:Quay:1");
