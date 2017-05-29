@@ -2,28 +2,16 @@ package org.rutebanken.tiamat.diff;
 
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import de.danielbechler.diff.ObjectDiffer;
-import de.danielbechler.diff.ObjectDifferBuilder;
-import de.danielbechler.diff.circular.CircularReferenceMatchingMode;
-import de.danielbechler.diff.identity.EqualsIdentityStrategy;
-import de.danielbechler.diff.node.DiffNode;
-import de.danielbechler.diff.node.Visit;
-import org.assertj.core.util.Strings;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -94,7 +82,8 @@ public class GenericObjectDifferTest {
         StopPlace newStopPlace = new StopPlace();
 
         Quay quay = new Quay(new EmbeddableMultilingualString("new stop place quay"));
-        quay.setNetexId("NSR:Quay:3");;
+        quay.setNetexId("NSR:Quay:3");
+        ;
 
         newStopPlace.getQuays().add(quay);
         String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
@@ -109,7 +98,8 @@ public class GenericObjectDifferTest {
         StopPlace newStopPlace = new StopPlace();
 
         Quay quay = new Quay(new EmbeddableMultilingualString("new stop place quay"));
-        quay.setNetexId("NSR:Quay:3");;
+        quay.setNetexId("NSR:Quay:3");
+        ;
 
         newStopPlace.getQuays().add(quay);
         String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
