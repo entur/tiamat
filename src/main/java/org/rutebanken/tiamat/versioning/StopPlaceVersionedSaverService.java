@@ -30,7 +30,7 @@ import java.time.Instant;
 public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
-    private static final Set<String> DIFF_IGNORE_FIELDS = Sets.newHashSet("id", "version", "changed", "status", "modification");
+    private static final Set<String> DIFF_IGNORE_FIELDS = Sets.newHashSet("id", "version", "changed", "status", "modification", "envelope");
 
     private final StopPlaceRepository stopPlaceRepository;
 

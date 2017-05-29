@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -28,7 +29,9 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(NearbyStopPlaceFinder.class);
 
-    private StopPlaceRepository stopPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
+
+    private final GeometryFactory geometryFactory;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -42,10 +45,11 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     @Autowired
     public NearbyStopPlaceFinder(StopPlaceRepository stopPlaceRepository,
-                                         @Value("${nearbyStopPlaceFinderCache.maxSize:50000}") int maximumSize,
-                                         @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
-                                         @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
+                                 @Value("${nearbyStopPlaceFinderCache.maxSize:50000}") int maximumSize,
+                                 @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
+                                 @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit, GeometryFactory geometryFactory) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.geometryFactory = geometryFactory;
         this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
