@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -31,8 +30,6 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    private final GeometryFactory geometryFactory;
-
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private final Map<StopTypeEnumeration, List<StopTypeEnumeration>> alternativeTypesMap;
@@ -47,9 +44,8 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
     public NearbyStopPlaceFinder(StopPlaceRepository stopPlaceRepository,
                                  @Value("${nearbyStopPlaceFinderCache.maxSize:50000}") int maximumSize,
                                  @Value("${nearbyStopPlaceFinderCache.expiresAfter:30}") int expiresAfter,
-                                 @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit, GeometryFactory geometryFactory) {
+                                 @Value("${nearbyStopPlaceFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
         this.stopPlaceRepository = stopPlaceRepository;
-        this.geometryFactory = geometryFactory;
         this.nearbyStopCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
@@ -79,11 +75,11 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
     public StopPlace find(StopPlace stopPlace, boolean allowOther) {
 
-        if(!stopPlace.hasCoordinates()) {
+        if (!stopPlace.hasCoordinates()) {
             return null;
         }
 
-        if(stopPlace.getStopPlaceType() == null) {
+        if (stopPlace.getStopPlaceType() == null) {
             logger.warn("Stop place does not have type. Cannot check for similar stop places. {}", stopPlace);
             return null;
         }
@@ -95,9 +91,9 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
                 Envelope boundingBox = createBoundingBox(stopPlace.getCentroid());
 
                 String matchingStopPlaceId;
-                if(stopPlace.getStopPlaceType().equals(StopTypeEnumeration.OTHER) && allowOther) {
+                if (stopPlace.getStopPlaceType().equals(StopTypeEnumeration.OTHER) && allowOther) {
                     // Allow finding stop places of any type if stop place type is other and allowOther is true
-                    matchingStopPlaceId =  stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
+                    matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue());
                 } else {
                     matchingStopPlaceId = stopPlaceRepository.findNearbyStopPlace(boundingBox, stopPlace.getName().getValue(), stopPlace.getStopPlaceType());
 
@@ -118,7 +114,7 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
 
                 return Optional.ofNullable(matchingStopPlaceId);
             });
-            if(stopPlaceNetexId.isPresent()) {
+            if (stopPlaceNetexId.isPresent()) {
                 // Update cache for incoming envelope, so the same key will hopefullly match again
                 nearbyStopCache.put(key, stopPlaceNetexId);
                 return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId.get());
@@ -136,7 +132,7 @@ public class NearbyStopPlaceFinder implements StopPlaceFinder {
      * @param savedStopPlace
      */
     public void update(StopPlace savedStopPlace) {
-        if(savedStopPlace.hasCoordinates() && savedStopPlace.getStopPlaceType() != null) {
+        if (savedStopPlace.hasCoordinates() && savedStopPlace.getStopPlaceType() != null) {
             nearbyStopCache.put(createKey(savedStopPlace), Optional.ofNullable(savedStopPlace.getNetexId()));
         }
     }
