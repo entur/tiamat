@@ -81,11 +81,22 @@ public class GenericObjectDiffer {
                 continue;
             }
 
+            System.out.println("Compare old: "+oldValue +" new: "+newValue);
 
-            differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
+            String propertyName = property + '.' + field.getName();
+
+            if(isPrimitive(oldValue)) {
+                differences.add(new Difference(propertyName, oldValue, newValue));
+            } else {
+                differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName));
+            }
         }
 
         return differences;
+    }
+
+    public boolean isPrimitive(Object value) {
+        return value instanceof Number || value instanceof String || value instanceof Boolean;
     }
 
     public void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName) throws IllegalAccessException {
