@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.diff;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -8,6 +10,8 @@ import java.util.stream.Stream;
 
 @Component
 public class GenericObjectDiffer {
+
+    private static final Logger logger = LoggerFactory.getLogger(GenericObjectDiffer.class);
 
     public List<Difference> compareObjects(Object oldObject, Object newObject, String identifierPropertyName) throws IllegalAccessException {
         return compareObjects(null, oldObject, newObject, identifierPropertyName);
@@ -20,13 +24,13 @@ public class GenericObjectDiffer {
         Class clazz = oldObject.getClass();
 
         Field[] fields = getAllFields(clazz);
-        Field identifierField  = identifierField(identifierPropertyName, fields);
+        Field identifierField = identifierField(identifierPropertyName, fields);
 
-        if(property == null) {
+        if (property == null) {
             property = oldObject.getClass().getSimpleName();
         }
 
-        if(identifierField != null) {
+        if (identifierField != null) {
             identifierField.setAccessible(true);
         }
 
@@ -37,16 +41,16 @@ public class GenericObjectDiffer {
             Object oldValue = field.get(oldObject);
             Object newValue = field.get(newObject);
 
-            if (oldValue == null && newValue == null){
+            if (oldValue == null && newValue == null) {
                 continue;
             }
 
-            if(oldValue == null && newValue != null || oldValue != null && newValue == null) {
-                differences.add(new Difference(property + '.'+ field.getName(), oldValue, newValue));
+            if (oldValue == null && newValue != null || oldValue != null && newValue == null) {
+                differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
                 continue;
             }
 
-            if(Collection.class.isAssignableFrom(field.getType())) {
+            if (Collection.class.isAssignableFrom(field.getType())) {
 
                 Collection oldCollection = (Collection) oldValue;
                 Collection newCollection = (Collection) newValue;
@@ -55,7 +59,7 @@ public class GenericObjectDiffer {
                 compareCollection(property + '.' + field.getName(), oldCollection, newCollection, differences, identifierPropertyName, fields);
                 continue;
 
-            } else if(Map.class.isAssignableFrom(field.getType())) {
+            } else if (Map.class.isAssignableFrom(field.getType())) {
 
                 Map<?, ?> oldMap = (Map) oldValue;
                 Map<?, ?> newMap = (Map) newValue;
@@ -68,11 +72,11 @@ public class GenericObjectDiffer {
 
             }
 
-            if(oldValue == newValue) {
+            if (oldValue == newValue) {
                 continue;
             }
 
-            if(oldValue.equals(newValue)) {
+            if (oldValue.equals(newValue)) {
                 continue;
             }
 
@@ -83,38 +87,35 @@ public class GenericObjectDiffer {
         return differences;
     }
 
-    public void compareMap(Map<?, ?> map1, Map<?,?> map2, List<Difference> differences, boolean reverse, String mapPropertyName) throws IllegalAccessException {
+    public void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName) throws IllegalAccessException {
 
         Map<?, ?> leftMap;
         Map<?, ?> rightMap;
 
-        if(reverse) {
+        if (reverse) {
             leftMap = map2;
             rightMap = map1;
-            System.out.println("reverse matching prop: " + mapPropertyName + " left:  "+leftMap + " right: " +rightMap);
         } else {
             leftMap = map1;
             rightMap = map2;
-            System.out.println("matching prop: " + mapPropertyName + " left:  "+leftMap + " right: " +rightMap);
         }
 
-        for(Object leftMapKey : leftMap.keySet()) {
+        for (Object leftMapKey : leftMap.keySet()) {
             System.out.println(leftMapKey);
 
             Object leftMapValue = leftMap.get(leftMapKey);
 
-            if(!rightMap.containsKey(leftMapKey)) {
-                System.out.println("right map does not contain key "+ leftMapKey);
+            if (!rightMap.containsKey(leftMapKey)) {
+                logger.debug("right map does not contain key {}", leftMapKey);
 
-                differences.add(new Difference(mapPropertyName +"{"+leftMapKey+"}", leftMapValue, null));
+                differences.add(new Difference(mapPropertyName + "{" + leftMapKey + "}", leftMapValue, null));
 
-            } else if(rightMap.containsKey(leftMapKey)) {
+            } else if (rightMap.containsKey(leftMapKey)) {
 
-                System.out.println("right map contains left map key "+ leftMapKey);
+                logger.debug("right map contain key {}", leftMapKey);
 
-                String childProperty = mapPropertyName  +"{"+leftMapKey+"}";
+                String childProperty = mapPropertyName + "{" + leftMapKey + "}";
                 differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), null));
-
             }
         }
     }
@@ -125,22 +126,21 @@ public class GenericObjectDiffer {
 
     public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field[] fields) throws IllegalAccessException {
 
-        if(oldCollection == null && newCollection == null) {
+        if (oldCollection == null && newCollection == null) {
             return;
         }
 
-        if(oldCollection == null && newCollection != null) {
+        if (oldCollection == null && newCollection != null) {
             differences.add(new Difference(propertyName, null, newCollection.size()));
-        } else if(oldCollection != null && newCollection == null) {
+        } else if (oldCollection != null && newCollection == null) {
             differences.add(new Difference(propertyName, oldCollection.size(), null));
-        } else if(oldCollection.isEmpty() && newCollection.isEmpty()) {
+        } else if (oldCollection.isEmpty() && newCollection.isEmpty()) {
             return;
         } else //if(Collections.disjoint(oldCollection, newCollection)) {
         {
             Field identifierField = identifierField(identifierPropertyName, fields);
 
             Set<Object> ignoreIdentifiers = new HashSet<>();
-            System.out.println("Compare items for "+ propertyName + " left right");
             compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false);
             compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true);
 
@@ -149,10 +149,10 @@ public class GenericObjectDiffer {
 
     public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse) throws IllegalAccessException {
 
-        for(Object itemLeft : collectionLeft) {
+        for (Object itemLeft : collectionLeft) {
 
             Object itemLeftIdentitier;
-            if(identifierField != null) {
+            if (identifierField != null) {
                 itemLeftIdentitier = identifierField.get(itemLeft);
                 if (ignoreIdentifiers.contains(itemLeftIdentitier)) {
                     continue;
@@ -162,8 +162,8 @@ public class GenericObjectDiffer {
             }
 
             boolean foundMatchOnId = false;
-            for(Object itemRight : collectionRight) {
-                if(identifierField != null && itemLeftIdentitier != null) {
+            for (Object itemRight : collectionRight) {
+                if (identifierField != null && itemLeftIdentitier != null) {
                     Object itemRightIdentifier = identifierField.get(itemRight);
                     if (itemLeftIdentitier.equals(itemRightIdentifier)) {
 
@@ -176,12 +176,12 @@ public class GenericObjectDiffer {
                 }
             }
 
-            if(!foundMatchOnId) {
-                if(reverse && !collectionRight.contains(itemLeft)) {
+            if (!foundMatchOnId) {
+                if (reverse && !collectionRight.contains(itemLeft)) {
                     differences.add(new Difference(propertyName + "[] added", null, itemLeft));
                     break;
 
-                } else if(!collectionRight.contains(itemLeft)){
+                } else if (!collectionRight.contains(itemLeft)) {
                     differences.add(new Difference(propertyName + "[] removed", itemLeft, null));
                 }
             }
