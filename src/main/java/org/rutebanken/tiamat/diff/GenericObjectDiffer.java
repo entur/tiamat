@@ -81,8 +81,6 @@ public class GenericObjectDiffer {
                 continue;
             }
 
-            System.out.println("Compare old: "+oldValue +" new: "+newValue);
-
             String propertyName = property + '.' + field.getName();
 
             if(isPrimitive(oldValue)) {
@@ -113,7 +111,6 @@ public class GenericObjectDiffer {
         }
 
         for (Object leftMapKey : leftMap.keySet()) {
-            System.out.println(leftMapKey);
 
             Object leftMapValue = leftMap.get(leftMapKey);
 
