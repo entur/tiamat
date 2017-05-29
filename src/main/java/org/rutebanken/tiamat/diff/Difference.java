@@ -1,14 +1,11 @@
 package org.rutebanken.tiamat.diff;
 
-import org.geotools.data.Diff;
-
 public class Difference {
 
     public DiffType diffType;
     public String property;
     public Object oldValue;
     public Object newValue;
-
 
 
     public Difference(String property, Object oldValue, Object newValue) {
@@ -28,11 +25,11 @@ public class Difference {
 
     public String toString() {
 
-        if(DiffType.COLLECTION_ADD.equals(diffType)) {
+        if (DiffType.COLLECTION_ADD.equals(diffType)) {
             return property + ": added " + newValue;
         }
 
-        if(DiffType.COLLECTION_REMOVE.equals(diffType)) {
+        if (DiffType.COLLECTION_REMOVE.equals(diffType)) {
             return property + ": removed " + oldValue;
         }
 
