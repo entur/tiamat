@@ -25,7 +25,7 @@ public class NearbyStopPlaceFinderTest {
 
     @Test
     public void nullCentroid() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, geometryFactory);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS);
         StopPlace stopPlace = new StopPlace();
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
         assertThat(actual).isNull();
@@ -33,7 +33,7 @@ public class NearbyStopPlaceFinderTest {
 
     @Test
     public void nullPoint() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, geometryFactory);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS);
         StopPlace stopPlace = new StopPlace();
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
         assertThat(actual).isNull();
@@ -41,7 +41,7 @@ public class NearbyStopPlaceFinderTest {
 
     @Test
     public void nullType() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, geometryFactory);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS);
         StopPlace stopPlace = new StopPlace();
         nearbyStopPlaceFinder.update(stopPlace);
     }
@@ -50,7 +50,7 @@ public class NearbyStopPlaceFinderTest {
     public void leakingEnvelope() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, geometryFactory);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
 
         String stopPlaceId = "NSR:StopPlace:1";
 
