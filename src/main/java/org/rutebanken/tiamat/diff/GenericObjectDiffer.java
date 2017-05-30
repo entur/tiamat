@@ -101,7 +101,10 @@ public class GenericObjectDiffer {
                     differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, identifierPropertyName, recursiveStatus));
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
-                throw new RuntimeException("Could not compare field '" + field + "'. old object " + oldObject + " new object " + newObject, e);
+                throw new RuntimeException("Could not compare property " + property
+                        + ", field '" + field + ". ex:\""
+                        + e.getMessage() + "\". old object "
+                        + oldObject + " new object " + newObject, e);
             }
         }
 
