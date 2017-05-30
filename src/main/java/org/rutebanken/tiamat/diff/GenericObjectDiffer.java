@@ -76,7 +76,7 @@ public class GenericObjectDiffer {
                 }
 
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, identifierPropertyName, fields, recursiveStatus);
+                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, identifierPropertyName, identifierField, recursiveStatus);
                     continue;
 
                 } else if (Map.class.isAssignableFrom(field.getType())) {
@@ -144,7 +144,7 @@ public class GenericObjectDiffer {
         }
     }
 
-    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field[] fields, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, String identifierPropertyName, Field identifierField, RecursiveStatus recursiveStatus) throws IllegalAccessException {
 
         if (oldCollection == null && newCollection == null) {
             return;
@@ -156,14 +156,10 @@ public class GenericObjectDiffer {
             differences.add(new Difference(propertyName, oldCollection.size(), null));
         } else if (oldCollection.isEmpty() && newCollection.isEmpty()) {
             return;
-        } else //if(Collections.disjoint(oldCollection, newCollection)) {
-        {
-            Field identifierField = identifierField(identifierPropertyName, fields);
-
+        } else {
             Set<Object> ignoreIdentifiers = new HashSet<>();
             compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false, recursiveStatus);
             compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true, recursiveStatus);
-
         }
     }
 
@@ -186,7 +182,6 @@ public class GenericObjectDiffer {
                 if (identifierField != null && itemLeftIdentitier != null) {
                     Object itemRightIdentifier = identifierField.get(itemRight);
                     if (itemLeftIdentitier.equals(itemRightIdentifier)) {
-
                         String newProperty = propertyName + "[" + itemRightIdentifier + "]";
                         ignoreIdentifiers.add(itemLeftIdentitier);
                         differences.addAll(compareObjects(newProperty, itemLeft, itemRight, identifierPropertyName, recursiveStatus));
