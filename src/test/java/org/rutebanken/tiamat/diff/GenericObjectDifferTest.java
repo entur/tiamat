@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.diff.generic.Difference;
+import org.rutebanken.tiamat.diff.generic.GenericDiffConfig;
 import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
 import org.rutebanken.tiamat.model.*;
 
@@ -246,9 +247,11 @@ public class GenericObjectDifferTest {
         StopPlace newStopPlace = new StopPlace();
         newStopPlace.getQuays().add(changedQuay);
 
+        GenericDiffConfig genericDiffConfig = GenericDiffConfig.builder()
+                .identifiers(Sets.newHashSet("netexId"))
+                .ignoreFields(Sets.newHashSet("id", "name")).build();
 
-        List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace,
-                newStopPlace, Sets.newHashSet("netexId"), Sets.newHashSet("id", "name"), Sets.newHashSet());
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace, newStopPlace, genericDiffConfig);
         assertThat(differences).hasSize(0);
     }
 
@@ -298,12 +301,18 @@ public class GenericObjectDifferTest {
         addRecursively(recursiveObject2, 20, 40);
 
 
-        List<Difference> differences = genericObjectDiffer.compareObjects(recursiveObject1, recursiveObject2, null, Sets.newHashSet(), Sets.newHashSet());
+        List<Difference> differences = genericObjectDiffer.compareObjects(recursiveObject1, recursiveObject2, commonDiffConfig);
         System.out.println(genericObjectDiffer.diffListToString(differences));
 
         assertThat(differences).hasSize(10);
 
     }
+
+    private static GenericDiffConfig commonDiffConfig = GenericDiffConfig.builder()
+                .onlyDoEqualsCheck(Sets.newHashSet(Geometry.class))
+                .ignoreFields(Sets.newHashSet("id"))
+                .identifiers(Sets.newHashSet("netexId", "ref"))
+                .build();
 
     public void addRecursively(RecursiveObject recursiveObject, int depth, int maxDepth) {
 
@@ -317,7 +326,9 @@ public class GenericObjectDifferTest {
     }
 
     public String compareObjectsAndPrint(Object oldObject, Object newObject) throws IllegalAccessException {
-        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, Sets.newHashSet("netexId", "ref"), Sets.newHashSet("id"), Sets.newHashSet(Geometry.class));
+
+
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, commonDiffConfig);
         String diff = genericObjectDiffer.diffListToString(differences);
 
         System.out.println("-----------");

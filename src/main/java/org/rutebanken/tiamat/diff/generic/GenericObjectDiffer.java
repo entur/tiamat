@@ -17,20 +17,6 @@ public class GenericObjectDiffer {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericObjectDiffer.class);
 
-    public List<Difference> compareObjects(Object oldObject, Object newObject, Set<String> identifiers, Set<String> ingoreFields, Set<Class> onlyEqualCheckTypes) throws IllegalAccessException {
-        return compareObjects(null, oldObject, newObject, identifiers, ingoreFields, onlyEqualCheckTypes, 0);
-    }
-
-    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, Set<String> identifiers, Set<String> ignoreFields, Set<Class> onlyEqualCheckTypes, int depth) throws IllegalAccessException {
-        GenericDiffConfig genericDiffConfig = GenericDiffConfig.builder()
-                .onlyDoEqualsCheck(onlyEqualCheckTypes)
-                .ignoreFields(ignoreFields)
-                .identifiers(identifiers)
-                .build();
-        genericDiffConfig.depth = depth;
-        return compareObjects(property, oldObject, newObject, genericDiffConfig);
-    }
-
     public List<Difference> compareObjects(Object oldObject, Object newObject, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
         genericDiffConfig.depth = 0;
         return compareObjects(null, oldObject, newObject, genericDiffConfig);
