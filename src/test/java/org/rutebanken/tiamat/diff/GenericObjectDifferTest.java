@@ -45,6 +45,18 @@ public class GenericObjectDifferTest {
     }
 
     @Test
+    public void diffStopPlaceWithTariffZones() throws IllegalAccessException {
+        StopPlace oldStopPlace = new StopPlace();
+        StopPlace newStopPlace = new StopPlace();
+
+        newStopPlace.getTariffZones().add(new TariffZoneRef(new TariffZone()));
+
+        String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
+        assertThat(diffString)
+                .contains("tariffZone");
+    }
+
+    @Test
     public void diffAddQuayCoordinate() throws IllegalAccessException {
         StopPlace oldStopPlace = new StopPlace();
         Quay quay = new Quay();
