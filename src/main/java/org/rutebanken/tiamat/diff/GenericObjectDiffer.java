@@ -170,14 +170,12 @@ public class GenericObjectDiffer {
             // Get identifierField for left item.
             Field identifierField = identifierField(identifierPropertyName, getAllFields(itemLeft.getClass(), recursiveStatus.ignoreFields));
             if (identifierField != null) {
-                try {
-                    itemLeftIdentifier = identifierField.get(itemLeft);
-                    if (ignoreIdentifiers.contains(itemLeftIdentifier)) {
-                        continue;
-                    }
-                } catch (IllegalArgumentException e) {
-                    itemLeftIdentifier = null;
+
+                itemLeftIdentifier = identifierField.get(itemLeft);
+                if (ignoreIdentifiers.contains(itemLeftIdentifier)) {
+                    continue;
                 }
+
             } else {
                 itemLeftIdentifier = null;
             }
@@ -235,7 +233,7 @@ public class GenericObjectDiffer {
     }
 
     private static class RecursiveStatus {
-        
+
         /**
          * Current depth of recursive progression
          */
