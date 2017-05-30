@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.diff;
+package org.rutebanken.tiamat.diff.generic;
 
 import javassist.util.proxy.MethodHandler;
 import org.slf4j.Logger;
@@ -22,29 +22,37 @@ public class GenericObjectDiffer {
     }
 
     public List<Difference> compareObjects(String property, Object oldObject, Object newObject, Set<String> identifiers, Set<String> ignoreFields, Set<Class> onlyEqualCheckTypes, int depth) throws IllegalAccessException {
-        RecursiveStatus recursiveStatus = new RecursiveStatus();
-        recursiveStatus.depth = depth;
-        recursiveStatus.ignoreFields = ignoreFields;
-        recursiveStatus.identifiers = identifiers;
-        recursiveStatus.onlyDoEqualsCheck = onlyEqualCheckTypes;
-
-        return compareObjects(property, oldObject, newObject, recursiveStatus);
+        GenericDiffConfig genericDiffConfig = GenericDiffConfig.builder()
+                .onlyDoEqualsCheck(onlyEqualCheckTypes)
+                .ignoreFields(ignoreFields)
+                .identifiers(identifiers)
+                .build();
+        genericDiffConfig.depth = depth;
+        return compareObjects(property, oldObject, newObject, genericDiffConfig);
     }
 
+    public List<Difference> compareObjects(Object oldObject, Object newObject, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
+        genericDiffConfig.depth = 0;
+        return compareObjects(null, oldObject, newObject, genericDiffConfig);
+    }
 
-    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    public String diffListToString(List<Difference> differences) {
+        return differences.stream().map(difference -> difference.toString()).collect(Collectors.joining("\n", "\n", "\n"));
+    }
+
+    private List<Difference> compareObjects(String property, Object oldObject, Object newObject, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
 
         List<Difference> differences = new ArrayList<>();
 
-        if(recursiveStatus.depth > MAX_DEPTH) {
+        if (genericDiffConfig.depth > MAX_DEPTH) {
             logger.debug("Reached max depth of {}", MAX_DEPTH);
             return differences;
         }
-        recursiveStatus.depth++;
+        genericDiffConfig.depth++;
 
         Class clazz = oldObject.getClass();
 
-        Field[] fields = getAllFields(clazz, recursiveStatus.ignoreFields);
+        Field[] fields = getAllFields(clazz, genericDiffConfig.ignoreFields);
 
         if (property == null) {
             property = oldObject.getClass().getSimpleName();
@@ -74,12 +82,12 @@ public class GenericObjectDiffer {
                 }
 
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, recursiveStatus);
+                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, genericDiffConfig);
                     continue;
 
                 } else if (Map.class.isAssignableFrom(field.getType())) {
                     String mapPropertyName = property + "." + field.getName();
-                    compareMap((Map) oldValue, (Map) newValue, differences, false, mapPropertyName, recursiveStatus);
+                    compareMap((Map) oldValue, (Map) newValue, differences, false, mapPropertyName, genericDiffConfig);
                     continue;
                 }
 
@@ -95,12 +103,12 @@ public class GenericObjectDiffer {
 
                 if (isPrimitive(oldValue)) {
                     differences.add(new Difference(childProperty, oldValue, newValue));
-                } else if(recursiveStatus.onlyDoEqualsCheck.stream().anyMatch(type -> type.isAssignableFrom(oldValue.getClass()))) {
-                    if(!oldValue.equals(newValue)) {
+                } else if (genericDiffConfig.onlyDoEqualsCheck.stream().anyMatch(type -> type.isAssignableFrom(oldValue.getClass()))) {
+                    if (!oldValue.equals(newValue)) {
                         differences.add(new Difference(childProperty, oldValue, newValue));
                     }
                 } else {
-                    differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, recursiveStatus));
+                    differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, genericDiffConfig));
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
                 throw new RuntimeException("Could not compare property " + property
@@ -113,11 +121,11 @@ public class GenericObjectDiffer {
         return differences;
     }
 
-    public boolean isPrimitive(Object value) {
+    private boolean isPrimitive(Object value) {
         return value instanceof Number || value instanceof String || value instanceof Boolean;
     }
 
-    public void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    private void compareMap(Map<?, ?> map1, Map<?, ?> map2, List<Difference> differences, boolean reverse, String mapPropertyName, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
 
         Map<?, ?> leftMap;
         Map<?, ?> rightMap;
@@ -144,12 +152,12 @@ public class GenericObjectDiffer {
                 logger.debug("right map contain key {}", leftMapKey);
 
                 String childProperty = mapPropertyName + "{" + leftMapKey + "}";
-                differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), recursiveStatus));
+                differences.addAll(compareObjects(childProperty, leftMapValue, rightMap.get(leftMapKey), genericDiffConfig));
             }
         }
     }
 
-    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    private void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
 
         if (oldCollection == null && newCollection == null) {
             return;
@@ -161,21 +169,21 @@ public class GenericObjectDiffer {
             differences.add(new Difference(propertyName, oldCollection.size(), null));
         } else if (oldCollection.isEmpty() && newCollection.isEmpty()) {
             return;
-        } else  {
+        } else {
             Set<Object> ignoreIdentifiers = new HashSet<>();
-            compareCollectionItems(propertyName, oldCollection, newCollection, differences, ignoreIdentifiers, false, recursiveStatus);
-            compareCollectionItems(propertyName, newCollection, oldCollection, differences, ignoreIdentifiers, true, recursiveStatus);
+            compareCollectionItems(propertyName, oldCollection, newCollection, differences, ignoreIdentifiers, false, genericDiffConfig);
+            compareCollectionItems(propertyName, newCollection, oldCollection, differences, ignoreIdentifiers, true, genericDiffConfig);
 
         }
     }
 
-    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, List<Difference> differences, Set<Object> ignoreIdentifiers, boolean reverse, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    private void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, List<Difference> differences, Set<Object> ignoreIdentifiers, boolean reverse, GenericDiffConfig genericDiffConfig) throws IllegalAccessException {
 
         for (Object itemLeft : collectionLeft) {
 
             Object itemLeftIdentifier;
             // Get identifierField for left item.
-            Field identifierField = identifierField(recursiveStatus.identifiers, getAllFields(itemLeft.getClass(), recursiveStatus.ignoreFields));
+            Field identifierField = identifierField(genericDiffConfig.identifiers, getAllFields(itemLeft.getClass(), genericDiffConfig.ignoreFields));
             if (identifierField != null) {
 
                 itemLeftIdentifier = identifierField.get(itemLeft);
@@ -195,7 +203,7 @@ public class GenericObjectDiffer {
 
                         String newProperty = propertyName + "[" + itemRightIdentifier + "]";
                         ignoreIdentifiers.add(itemLeftIdentifier);
-                        differences.addAll(compareObjects(newProperty, itemLeft, itemRight, recursiveStatus));
+                        differences.addAll(compareObjects(newProperty, itemLeft, itemRight, genericDiffConfig));
                         foundMatchOnId = true;
                         break;
                     }
@@ -226,10 +234,6 @@ public class GenericObjectDiffer {
                 .collect(Collectors.toList()).toArray(new Field[]{});
     }
 
-    public String diffListToString(List<Difference> differences) {
-        return differences.stream().map(difference -> difference.toString()).collect(Collectors.joining("\n", "\n", "\n"));
-    }
-
     private Field identifierField(Set<String> identifiers, Field[] fields) {
         return Stream.of(fields)
                 .filter(field -> identifiers.contains(field.getName()))
@@ -238,27 +242,4 @@ public class GenericObjectDiffer {
                 .orElse(null);
     }
 
-    private static class RecursiveStatus {
-
-        /**
-         * Current depth of recursive progression
-         */
-        public int depth;
-
-        /**
-         * Common field names to ignore for all objects
-         */
-        public Set<String> ignoreFields;
-
-
-        /**
-         * Fields to be treated as identifiers in collections (if they apply for type)
-         */
-        public Set<String> identifiers;
-
-        /**
-         * Do not compare these types recursively. Only check the equals method.
-         */
-        public Set<Class> onlyDoEqualsCheck;
-    }
 }

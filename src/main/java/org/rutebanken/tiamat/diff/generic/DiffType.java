@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.diff;
+package org.rutebanken.tiamat.diff.generic;
 
 public enum DiffType {
     COLLECTION_ADD,

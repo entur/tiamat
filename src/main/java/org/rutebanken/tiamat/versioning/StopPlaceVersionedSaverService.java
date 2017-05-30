@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.versioning;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
+import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -13,7 +15,6 @@ import org.rutebanken.tiamat.repository.ValidBetweenRepository;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
-import org.rutebanken.tiamat.diff.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import java.time.Instant;
 public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
-    private static final Set<String> DIFF_IGNORE_FIELDS = Sets.newHashSet("id", "version", "changed", "status", "modification", "envelope");
 
     private final StopPlaceRepository stopPlaceRepository;
 
@@ -51,7 +51,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final EntityChangedListener entityChangedListener;
 
-    private final GenericObjectDiffer genericObjectDiffer;
+    private final TiamatObjectDiffer tiamatObjectDiffer;
 
 
     @Autowired
@@ -63,7 +63,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                                           TariffZonesLookupService tariffZonesLookupService,
                                           StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
                                           NearbyStopPlaceFinder nearbyStopPlaceFinder,
-                                          EntityChangedListener entityChangedListener, GenericObjectDiffer genericObjectDiffer) {
+                                          EntityChangedListener entityChangedListener,
+                                          TiamatObjectDiffer tiamatObjectDiffer) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
@@ -73,7 +74,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
         this.entityChangedListener = entityChangedListener;
-        this.genericObjectDiffer = genericObjectDiffer;
+        this.tiamatObjectDiffer = tiamatObjectDiffer;
     }
 
     @Override
@@ -112,13 +113,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);
         if(existingVersion != null) {
-            try {
-                // TODO: Builder pattern. Configure differ in separate class
-                String diff = genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, Sets.newHashSet("netexId", "ref"), DIFF_IGNORE_FIELDS, Sets.newHashSet(Geometry.class)));
-                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), diff);
-            } catch (Exception e) {
-                logger.warn("Could not diff stop places. Existing version: {}. New version: {}", existingVersion, newVersion, e);
-            }
+           tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
 
         if(newVersion.getQuays() != null) {
