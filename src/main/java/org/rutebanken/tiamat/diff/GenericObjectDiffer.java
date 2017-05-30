@@ -42,14 +42,9 @@ public class GenericObjectDiffer {
         Class clazz = oldObject.getClass();
 
         Field[] fields = getAllFields(clazz, recursiveStatus.ignoreFields);
-        Field identifierField = identifierField(identifierPropertyName, fields);
 
         if (property == null) {
             property = oldObject.getClass().getSimpleName();
-        }
-
-        if (identifierField != null) {
-            identifierField.setAccessible(true);
         }
 
         for (Field field : fields) {
@@ -159,39 +154,42 @@ public class GenericObjectDiffer {
             differences.add(new Difference(propertyName, oldCollection.size(), null));
         } else if (oldCollection.isEmpty() && newCollection.isEmpty()) {
             return;
-        } else //if(Collections.disjoint(oldCollection, newCollection)) {
-        {
-            Field identifierField = identifierField(identifierPropertyName, fields);
-
+        } else  {
             Set<Object> ignoreIdentifiers = new HashSet<>();
-            compareCollectionItems(propertyName, oldCollection, newCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, false, recursiveStatus);
-            compareCollectionItems(propertyName, newCollection, oldCollection, identifierField, differences, identifierPropertyName, ignoreIdentifiers, true, recursiveStatus);
+            compareCollectionItems(propertyName, oldCollection, newCollection, differences, identifierPropertyName, ignoreIdentifiers, false, recursiveStatus);
+            compareCollectionItems(propertyName, newCollection, oldCollection, differences, identifierPropertyName, ignoreIdentifiers, true, recursiveStatus);
 
         }
     }
 
-    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, Field identifierField, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    public void compareCollectionItems(String propertyName, Collection collectionLeft, Collection collectionRight, List<Difference> differences, String identifierPropertyName, Set<Object> ignoreIdentifiers, boolean reverse, RecursiveStatus recursiveStatus) throws IllegalAccessException {
 
         for (Object itemLeft : collectionLeft) {
 
-            Object itemLeftIdentitier;
+            Object itemLeftIdentifier;
+            // Get identifierField for left item.
+            Field identifierField = identifierField(identifierPropertyName, getAllFields(itemLeft.getClass(), recursiveStatus.ignoreFields));
             if (identifierField != null) {
-                itemLeftIdentitier = identifierField.get(itemLeft);
-                if (ignoreIdentifiers.contains(itemLeftIdentitier)) {
-                    continue;
+                try {
+                    itemLeftIdentifier = identifierField.get(itemLeft);
+                    if (ignoreIdentifiers.contains(itemLeftIdentifier)) {
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    itemLeftIdentifier = null;
                 }
             } else {
-                itemLeftIdentitier = null;
+                itemLeftIdentifier = null;
             }
 
             boolean foundMatchOnId = false;
             for (Object itemRight : collectionRight) {
-                if (identifierField != null && itemLeftIdentitier != null) {
+                if (identifierField != null && itemLeftIdentifier != null) {
                     Object itemRightIdentifier = identifierField.get(itemRight);
-                    if (itemLeftIdentitier.equals(itemRightIdentifier)) {
+                    if (itemLeftIdentifier.equals(itemRightIdentifier)) {
 
                         String newProperty = propertyName + "[" + itemRightIdentifier + "]";
-                        ignoreIdentifiers.add(itemLeftIdentitier);
+                        ignoreIdentifiers.add(itemLeftIdentifier);
                         differences.addAll(compareObjects(newProperty, itemLeft, itemRight, identifierPropertyName, recursiveStatus));
                         foundMatchOnId = true;
                         break;
@@ -228,11 +226,24 @@ public class GenericObjectDiffer {
     }
 
     private Field identifierField(String identifierPropertyName, Field[] fields) {
-        return Stream.of(fields).filter(field -> field.getName().equals(identifierPropertyName)).findFirst().orElse(null);
+        return Stream.of(fields)
+                .filter(field -> field.getName()
+                        .equals(identifierPropertyName))
+                .peek(identifierField -> identifierField.setAccessible(true))
+                .findFirst()
+                .orElse(null);
     }
 
     private static class RecursiveStatus {
+        
+        /**
+         * Current depth of recursive progression
+         */
         public int depth;
+
+        /**
+         * Common field names to ignore for all objects
+         */
         public Set<String> ignoreFields;
     }
 }

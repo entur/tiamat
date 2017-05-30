@@ -53,7 +53,7 @@ public class GenericObjectDifferTest {
 
         String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
         assertThat(diffString)
-                .contains("tariffZone");
+                .contains("tariffZones");
     }
 
     @Test
@@ -209,7 +209,8 @@ public class GenericObjectDifferTest {
         newStopPlace.getQuays().add(changedQuay);
 
 
-        List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace, newStopPlace, "netexId", Sets.newHashSet("id", "name"));
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace,
+                newStopPlace, "netexId", Sets.newHashSet("id", "name"));
         assertThat(differences).hasSize(0);
     }
 
