@@ -183,6 +183,25 @@ public class GenericObjectDifferTest {
     }
 
     @Test
+    public void ignoreCertainFields() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Quay oldQuay = new Quay(new EmbeddableMultilingualString("quay 1"));
+        oldQuay.setNetexId("NSR:Quay:1");
+
+        StopPlace oldStopPlace = new StopPlace();
+        oldStopPlace.getQuays().add(oldQuay);
+
+        Quay changedQuay = new Quay(new EmbeddableMultilingualString("quay 2", "NO"));
+        changedQuay.setNetexId("NSR:Quay:1");
+
+        StopPlace newStopPlace = new StopPlace();
+        newStopPlace.getQuays().add(changedQuay);
+
+
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace, newStopPlace, "netexId", Sets.newHashSet("id", "name"));
+        assertThat(differences).hasSize(0);
+    }
+
+    @Test
     public void diffStopPlaceAccessibilityLimitation() throws IllegalAccessException {
         StopPlace stopPlace = new StopPlace();
 
