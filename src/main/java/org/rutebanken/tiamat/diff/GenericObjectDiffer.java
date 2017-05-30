@@ -37,7 +37,7 @@ public class GenericObjectDiffer {
         List<Difference> differences = new ArrayList<>();
 
         if(recursiveStatus.depth > MAX_DEPTH) {
-            logger.warn("Reached max depth of {}", MAX_DEPTH);
+            logger.debug("Reached max depth of {}", MAX_DEPTH);
             return differences;
         }
         recursiveStatus.depth++;
