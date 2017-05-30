@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.diff;
 
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Point;
 import javassist.util.proxy.MethodHandler;
+import org.rutebanken.tiamat.pelias.model.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -95,6 +97,10 @@ public class GenericObjectDiffer {
 
                 if (isPrimitive(oldValue)) {
                     differences.add(new Difference(propertyName, oldValue, newValue));
+                } else if(oldValue instanceof Geometry) {
+                    if(!oldValue.equals(newValue)) {
+                        differences.add(new Difference(propertyName, oldValue, newValue));
+                    }
                 } else {
                     differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, recursiveStatus));
                 }
@@ -251,5 +257,7 @@ public class GenericObjectDiffer {
          * Fields to be treated as identifiers in collections (if they apply for type)
          */
         public Set<String> identifiers;
+
+        public Set<Class> onlyEqualCheck;
     }
 }
