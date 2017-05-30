@@ -7,15 +7,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.versioning.VersionCreator;
-import org.rutebanken.tiamat.versioning.VersionIncrementor;
-import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -218,6 +214,34 @@ public class GenericObjectDifferTest {
 
     }
 
+    @Test
+    public void maxDepth() throws IllegalAccessException {
+
+        RecursiveObject recursiveObject1 = new RecursiveObject();
+        RecursiveObject recursiveObject2 = new RecursiveObject();
+
+        addRecursively(recursiveObject1, 0, 20);
+        addRecursively(recursiveObject2, 20, 40);
+
+
+        List<Difference> differences = genericObjectDiffer.compareObjects(recursiveObject1, recursiveObject2, null, Sets.newHashSet());
+        System.out.println(genericObjectDiffer.diffListToString(differences));
+
+        assertThat(differences).hasSize(10);
+
+    }
+
+    public void addRecursively(RecursiveObject recursiveObject, int depth, int maxDepth) {
+
+        if(depth >= maxDepth) {
+            return;
+        }
+        RecursiveObject newChild = new RecursiveObject();
+        newChild.value = depth;
+        recursiveObject.child = newChild;
+        addRecursively(newChild, ++depth, maxDepth);
+    }
+
     public String compareObjectsAndPrint(Object oldObject, Object newObject) throws IllegalAccessException {
         List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId", Sets.newHashSet("id"));
         String diff = genericObjectDiffer.diffListToString(differences);
@@ -226,5 +250,22 @@ public class GenericObjectDifferTest {
         System.out.println(diff);
         System.out.println("-----------");
         return diff;
+    }
+
+    private static class RecursiveObject {
+
+        private RecursiveObject child;
+
+        public int value;
+
+        public RecursiveObject() {
+        }
+
+        @Override
+        public String toString() {
+            return "depth: "+ value;
+        }
+
+
     }
 }
