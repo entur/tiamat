@@ -74,7 +74,7 @@ public class GenericObjectDiffer {
                 }
 
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, fields, recursiveStatus);
+                    compareCollection(property + '.' + field.getName(), (Collection) oldValue, (Collection) newValue, differences, recursiveStatus);
                     continue;
 
                 } else if (Map.class.isAssignableFrom(field.getType())) {
@@ -145,7 +145,7 @@ public class GenericObjectDiffer {
         }
     }
 
-    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, Field[] fields, RecursiveStatus recursiveStatus) throws IllegalAccessException {
+    public void compareCollection(final String propertyName, Collection oldCollection, Collection newCollection, List<Difference> differences, RecursiveStatus recursiveStatus) throws IllegalAccessException {
 
         if (oldCollection == null && newCollection == null) {
             return;
