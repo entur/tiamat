@@ -112,7 +112,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         newVersion = stopPlaceRepository.save( newVersion);
         if(existingVersion != null) {
             try {
-                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, "netexId", DIFF_IGNORE_FIELDS)));
+                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, Sets.newHashSet("netexId"), DIFF_IGNORE_FIELDS)));
             } catch (Exception e) {
                 logger.warn("Could not diff stop places. Existing version: {}. New version: {}", existingVersion, newVersion, e);
             }

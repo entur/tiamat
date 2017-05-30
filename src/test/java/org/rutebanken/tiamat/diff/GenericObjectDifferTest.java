@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.model.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class GenericObjectDifferTest {
     }
 
     @Test
-    public void diffStopPlaceWithTariffZones() throws IllegalAccessException {
+    public void diffStopPlaceWithTariffZone() throws IllegalAccessException {
         StopPlace oldStopPlace = new StopPlace();
         StopPlace newStopPlace = new StopPlace();
 
@@ -54,6 +55,27 @@ public class GenericObjectDifferTest {
         String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
         assertThat(diffString)
                 .contains("tariffZones");
+    }
+
+    /**
+     * If objects have their equal / hash code method implemented and are equal, they should not be treated as different.
+     * Also, if the objects have the same identifier, they should not be treated as equal.
+     *
+     * @throws IllegalAccessException
+     */
+    @Test
+    public void diffStopPlaceWithTariffZones() throws IllegalAccessException {
+        StopPlace oldStopPlace = new StopPlace();
+        TariffZoneRef tariffZoneRef1 = new TariffZoneRef("NSR:TariffZone:1");
+        oldStopPlace.getTariffZones().add(tariffZoneRef1);
+
+        StopPlace newStopPlace = new StopPlace();
+        TariffZoneRef tariffZoneRef2 = new TariffZoneRef("NSR:TariffZone:1");
+        newStopPlace.getTariffZones().add(tariffZoneRef2);
+
+        String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
+        assertThat(diffString)
+                .doesNotContain("tariffZones");
     }
 
     @Test
@@ -210,7 +232,7 @@ public class GenericObjectDifferTest {
 
 
         List<Difference> differences = genericObjectDiffer.compareObjects(oldStopPlace,
-                newStopPlace, "netexId", Sets.newHashSet("id", "name"));
+                newStopPlace, Sets.newHashSet("netexId"), Sets.newHashSet("id", "name"));
         assertThat(differences).hasSize(0);
     }
 
@@ -279,7 +301,7 @@ public class GenericObjectDifferTest {
     }
 
     public String compareObjectsAndPrint(Object oldObject, Object newObject) throws IllegalAccessException {
-        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, "netexId", Sets.newHashSet("id"));
+        List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, Sets.newHashSet("netexId", "ref"), Sets.newHashSet("id"));
         String diff = genericObjectDiffer.diffListToString(differences);
 
         System.out.println("-----------");
