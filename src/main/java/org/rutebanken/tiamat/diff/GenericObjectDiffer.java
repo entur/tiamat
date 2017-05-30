@@ -224,11 +224,7 @@ public class GenericObjectDiffer {
     }
 
     private static class RecursiveStatus {
-
         public int depth;
-        public Set<Object> ignoreIdentitifers;
-
-
         public Set<String> ignoreFields;
     }
 }
