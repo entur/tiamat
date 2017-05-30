@@ -166,7 +166,7 @@ public class GenericObjectDifferTest {
         StopPlace oldStopPlace = new StopPlace();
         oldStopPlace.getQuays().add(oldQuay);
 
-        Quay changedQuay = new Quay(new EmbeddableMultilingualString("quay changed"));
+        Quay changedQuay = new Quay(new EmbeddableMultilingualString("quay changed", "NO"));
         changedQuay.setVersion(2L);
         changedQuay.setNetexId("NSR:Quay:1");
 
@@ -174,7 +174,11 @@ public class GenericObjectDifferTest {
         newStopPlace.getQuays().add(changedQuay);
 
 
-        compareObjectsAndPrint(oldStopPlace, newStopPlace);
+        String diffString = compareObjectsAndPrint(oldStopPlace, newStopPlace);
+        assertThat(diffString)
+                .contains(changedQuay.getName().getValue())
+                .contains(oldQuay.getName().getValue())
+                .contains("NO");
 
     }
 
