@@ -1,9 +1,6 @@
 package org.rutebanken.tiamat.diff;
 
-import com.google.common.collect.Sets;
-import com.vividsolutions.jts.geom.Point;
 import javassist.util.proxy.MethodHandler;
-import org.rutebanken.tiamat.pelias.model.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,15 +17,16 @@ public class GenericObjectDiffer {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericObjectDiffer.class);
 
-    public List<Difference> compareObjects(Object oldObject, Object newObject, Set<String> identifiers, Set<String> ingoreFields) throws IllegalAccessException {
-        return compareObjects(null, oldObject, newObject, identifiers, ingoreFields, 0);
+    public List<Difference> compareObjects(Object oldObject, Object newObject, Set<String> identifiers, Set<String> ingoreFields, Set<Class> onlyEqualCheckTypes) throws IllegalAccessException {
+        return compareObjects(null, oldObject, newObject, identifiers, ingoreFields, onlyEqualCheckTypes, 0);
     }
 
-    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, Set<String> identifiers, Set<String> ignoreFields, int depth) throws IllegalAccessException {
+    public List<Difference> compareObjects(String property, Object oldObject, Object newObject, Set<String> identifiers, Set<String> ignoreFields, Set<Class> onlyEqualCheckTypes, int depth) throws IllegalAccessException {
         RecursiveStatus recursiveStatus = new RecursiveStatus();
         recursiveStatus.depth = depth;
         recursiveStatus.ignoreFields = ignoreFields;
         recursiveStatus.identifiers = identifiers;
+        recursiveStatus.onlyDoEqualsCheck = onlyEqualCheckTypes;
 
         return compareObjects(property, oldObject, newObject, recursiveStatus);
     }
@@ -57,7 +55,7 @@ public class GenericObjectDiffer {
             try {
 
                 if (field.getType().isAssignableFrom(MethodHandler.class)) {
-                    logger.info("Ignoring field {}", field);
+                    logger.debug("Ignoring field {} as its assignable from {}", field, MethodHandler.class);
                     continue;
                 }
 
@@ -93,13 +91,13 @@ public class GenericObjectDiffer {
                     continue;
                 }
 
-                String propertyName = property + '.' + field.getName();
+                String childProperty = property + '.' + field.getName();
 
                 if (isPrimitive(oldValue)) {
-                    differences.add(new Difference(propertyName, oldValue, newValue));
-                } else if(oldValue instanceof Geometry) {
+                    differences.add(new Difference(childProperty, oldValue, newValue));
+                } else if(recursiveStatus.onlyDoEqualsCheck.stream().anyMatch(type -> type.isAssignableFrom(oldValue.getClass()))) {
                     if(!oldValue.equals(newValue)) {
-                        differences.add(new Difference(propertyName, oldValue, newValue));
+                        differences.add(new Difference(childProperty, oldValue, newValue));
                     }
                 } else {
                     differences.addAll(compareObjects(property + '.' + field.getName(), oldValue, newValue, recursiveStatus));
@@ -258,6 +256,9 @@ public class GenericObjectDiffer {
          */
         public Set<String> identifiers;
 
-        public Set<Class> onlyEqualCheck;
+        /**
+         * Do not compare these types recursively. Only check the equals method.
+         */
+        public Set<Class> onlyDoEqualsCheck;
     }
 }

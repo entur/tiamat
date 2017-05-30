@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
@@ -112,7 +113,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         newVersion = stopPlaceRepository.save( newVersion);
         if(existingVersion != null) {
             try {
-                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, Sets.newHashSet("netexId"), DIFF_IGNORE_FIELDS)));
+                // TODO: Builder pattern. Configure differ in separate class
+                String diff = genericObjectDiffer.diffListToString(genericObjectDiffer.compareObjects(existingVersion, newVersion, Sets.newHashSet("netexId", "ref"), DIFF_IGNORE_FIELDS, Sets.newHashSet(Geometry.class)));
+                logger.info("Difference from previous version of {}: {}", newVersion.getNetexId(), diff);
             } catch (Exception e) {
                 logger.warn("Could not diff stop places. Existing version: {}. New version: {}", existingVersion, newVersion, e);
             }
