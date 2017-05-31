@@ -35,7 +35,6 @@ public class GaplessIdGeneratorService {
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
-    private static AtomicBoolean isH2 = null;
     private final EntityManagerFactory entityManagerFactory;
     private final HazelcastInstance hazelcastInstance;
     private final GeneratedIdState generatedIdState;
@@ -144,13 +143,8 @@ public class GaplessIdGeneratorService {
     private List<Long> retrieveIds(String entityTypeName, EntityManager entityManager, long claimedId) {
         long lastId = generatedIdState.getLastIdForEntity(entityTypeName);
 
-        List<Long> retrievedIds;
-        if (isH2()) {
-            // Because of issues using generate_series or query with system range with H2.
-            retrievedIds = generateNextAvailableH2Ids(entityTypeName, claimedId);
-        } else {
-            retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
-        }
+        List<Long> retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
+
         logger.debug("Generated for {}: {}", entityTypeName, retrievedIds);
 
         if (retrievedIds.isEmpty()) {
@@ -207,9 +201,8 @@ public class GaplessIdGeneratorService {
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        String sql = "SELECT generated FROM generate_series(" + lastId + "," + (lastId + FETCH_SIZE - 1) + ") AS generated " +
-                "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " +
-                "ORDER BY generated";
+        String sql = "SELECT * FROM generate_series(" + lastId + "," + (lastId + FETCH_SIZE - 1) + ")  " +
+                "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " ;
 
         Query sqlQuery = entityManager.createNativeQuery(sql);
 
@@ -221,34 +214,6 @@ public class GaplessIdGeneratorService {
                 .collect(toList());
     }
 
-    /**
-     * Generate new in-memory IDs for H2.
-     */
-    private List<Long> generateNextAvailableH2Ids(String entityTypeName, long claimedId) {
-
-        logger.debug("H2: About to retrieve new IDs for {}", entityTypeName);
-        List<Long> retrievedIds = new ArrayList<>();
-
-        List<Long> usedH2Ids = hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName);
-
-        Long idCandidate = generatedIdState.getLastIdForEntity(entityTypeName);
-        Long counter = 0L;
-
-        while (counter < FETCH_SIZE) {
-            if (usedH2Ids.contains(idCandidate)) {
-                logger.debug("Looking for next available ID for {}. {} is taken", entityTypeName, idCandidate);
-            } else {
-                retrievedIds.add(idCandidate);
-                usedH2Ids.add(idCandidate);
-            }
-
-            idCandidate++;
-            counter++;
-        }
-
-        logger.debug("H2: Created {} Ids for {}", retrievedIds.size(), entityTypeName);
-        return retrievedIds;
-    }
 
     private void rollbackAndThrow(EntityTransaction transaction, RuntimeException e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
@@ -258,19 +223,5 @@ public class GaplessIdGeneratorService {
     public static String entityLockString(String entityTypeName) {
         return REENTRANT_LOCK_PREFIX + entityTypeName;
     }
-
-    private boolean isH2() {
-        if (isH2 == null) {
-            try {
-                EntityManager entityManager = entityManagerFactory.createEntityManager();
-                isH2 = new AtomicBoolean(entityManager.unwrap(SessionImpl.class).getPersistenceContext().getSession().connection().getMetaData().getDatabaseProductName().contains("H2"));
-                logger.debug("Detected H2: {}", isH2);
-            } catch (SQLException e) {
-                throw new RuntimeException("Could not determine database provider", e);
-            }
-        }
-        return isH2.get();
-    }
-
 
 }
