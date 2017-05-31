@@ -115,8 +115,8 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     }
 
     /**
-     * Was implemented under the supsicion that OptionalIdCreator caused a bug.
-     * But it wasPerPo a matter of keeping the attached returned entity from save (in case the entity was merged)
+     * Was implemented under the supsicion that {@link GaplessIdGeneratorService} caused a bug.
+     * But it was instead a matter of keeping the attached returned entity from save (in case the entity was merged)
      * See NRP-1171
      */
     @Test
