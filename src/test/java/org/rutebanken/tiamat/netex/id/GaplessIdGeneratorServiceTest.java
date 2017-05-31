@@ -54,10 +54,11 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     @Test
     public void explicitIdMustBeInsertedIntoHelperTable() {
 
-        String wantedId = NetexIdHelper.getNetexId("Quay", "1");
+        long wantedId = 1L;
+        String wantedNetexIdId = NetexIdHelper.getNetexId("Quay", wantedId);
 
         Quay quay = new Quay();
-        quay.setNetexId(wantedId);
+        quay.setNetexId(wantedNetexIdId);
 
         quayRepository.save(quay);
 
@@ -66,6 +67,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         SQLQuery query = session.createSQLQuery("SELECT id_value FROM id_generator WHERE table_name = '" + Quay.class.getSimpleName() + "' AND id_value = '" + wantedId + "'");
 
         List list = query.list();
+        assertThat(list).hasSize(1);
         BigInteger actual = (BigInteger) list.get(0);
 
         assertThat(actual.longValue()).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
@@ -77,7 +79,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         // Use first 500 IDs
         for(long explicitId = 1; explicitId <= 30; explicitId ++) {
             Quay quay = new Quay();
-            quay.setNetexId(NetexIdHelper.getNetexId(Quay.class.getSimpleName(), String.valueOf(explicitId)));
+            quay.setNetexId(NetexIdHelper.getNetexId(Quay.class.getSimpleName(), explicitId));
             quayRepository.save(quay);
             System.out.println("Saved quay: " + quay.getNetexId());
         }

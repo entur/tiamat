@@ -28,7 +28,7 @@ public class NetexIdProvider {
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
-        return NetexIdHelper.getNetexId(entityTypeName, String.valueOf(longId));
+        return NetexIdHelper.getNetexId(entityTypeName, longId);
     }
 
     public void claimId(IdentifiedEntity identifiedEntity) {

@@ -44,8 +44,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
     @Test
     public void fillGapsInStopPlaces() {
-        int explicitIdPostfix = 20000;
-        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), String.valueOf(explicitIdPostfix));
+        long explicitIdPostfix = 20000;
+        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), explicitIdPostfix);
         StopPlace explicitIdStopPlace = new StopPlace();
         explicitIdStopPlace.setNetexId(explicitId);
         explicitIdStopPlace = stopPlaceRepository.save(explicitIdStopPlace);
