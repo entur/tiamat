@@ -5,6 +5,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Component
 @Transactional
@@ -46,6 +48,9 @@ public class StopPlaceOperationsBuilder {
 
     @Autowired
     private StopPlaceQuayMover stopPlaceQuayMover;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -96,6 +101,8 @@ public class StopPlaceOperationsBuilder {
         Preconditions.checkArgument(fromStopPlace != null, "Attempting merge from StopPlace [id = %s], but StopPlace does not exist.", fromStopPlaceId);
         Preconditions.checkArgument(toStopPlace != null, "Attempting merge to StopPlace [id = %s], but StopPlace does not exist.", toStopPlaceId);
 
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, fromStopPlace, toStopPlace);
+
         StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
         terminateEntity(fromStopPlaceToTerminate);
 
@@ -122,6 +129,8 @@ public class StopPlaceOperationsBuilder {
     protected StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
         Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
+
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace);
 
         StopPlace updatedStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
