@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +30,10 @@ public class GaplessIdGeneratorService {
 
     public static final long INITIAL_LAST_ID = 1;
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
-    private static final int FETCH_SIZE = 10000;
+    private static final int FETCH_SIZE = 2000;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
+
+    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     private static AtomicBoolean isH2 = null;
     private final EntityManagerFactory entityManagerFactory;
@@ -92,7 +95,7 @@ public class GaplessIdGeneratorService {
         try {
             transaction.begin();
 
-            if(!isH2() && !claimedIds.isEmpty()) {
+            if(!claimedIds.isEmpty()) {
                 insertIds(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
@@ -122,11 +125,8 @@ public class GaplessIdGeneratorService {
             retrievedIds.addAll(retrieveIds(entityTypeName, entityManager, claimedId));
         }
 
-        if (!isH2()) {
-            logger.debug("Inserting retrieved IDs: {}", retrievedIds);
-
-            insertIds(entityTypeName, retrievedIds, entityManager);
-        }
+        logger.debug("Inserting retrieved IDs: {}", retrievedIds);
+        insertIds(entityTypeName, retrievedIds, entityManager);
 
         for (long retrievedId : retrievedIds) {
             if (retrievedId != claimedId) {
@@ -161,25 +161,48 @@ public class GaplessIdGeneratorService {
         return retrievedIds;
     }
 
+    /**
+     * Insert used IDs into the helper table.
+     * @param tableName the entity name. Typically class.getSimpleName value
+     * @param list list of long values to reserve
+     * @param entityManager for the current transaction
+     */
     private void insertIds(String tableName, List<Long> list, EntityManager entityManager) {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
         }
 
-        StringBuilder insertUsedIdsSql = new StringBuilder("INSERT INTO id_generator(table_name, id_value) VALUES");
+        StringBuilder insertUsedIdsSql = new StringBuilder("insert into id_generator(table_name, id_value) ")
+                .append("select id1.table_name, id1.id_value ")
+                .append("from ( ")
+                .append("select cast('")
+                .append(tableName)
+                .append("' as varchar) ")
+                .append("as table_name, ")
+                .append(list.get(0)) // First value
+                .append(" as id_value ");
 
-        for (int i = 0; i < list.size(); i++) {
-            insertUsedIdsSql.append("('").append(tableName).append("',").append(list.get(i)).append(")");
-            if (i < list.size() - 1) {
-                insertUsedIdsSql.append(',');
-            }
+        for (int i = 1; i < list.size(); i++) {
+            insertUsedIdsSql.append("union all ")
+                    .append("select '")
+                    .append(tableName)
+                    .append("',")
+                    .append(list.get(i))
+                    .append(" ");
         }
-        insertUsedIdsSql.append(" ON CONFLICT DO NOTHING");
-        Query query = entityManager.createNativeQuery(insertUsedIdsSql.toString());
-        query.executeUpdate();
+
+        insertUsedIdsSql.append(" ) as id1 ")
+                .append("where not exists (select 1 from id_generator id2 where id2.id_value = id1.id_value and id2.table_name = id1.table_name)");
+
+        // Format the sql for logging
+        String sql = basicFormatter.format(insertUsedIdsSql.toString());
+
+        Query query = entityManager.createNativeQuery(sql);
+        logger.trace(sql);
+        int result = query.executeUpdate();
+        logger.trace("Inserted {}", result);
         entityManager.flush();
     }
-
 
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);

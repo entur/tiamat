@@ -5,7 +5,6 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -50,27 +49,53 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         assertThat(stopPlace.getNetexId()).isNotNull();
     }
 
-    @Ignore // Using H2 with unique constraint for id_generator table.
     @Test
     public void explicitIdMustBeInsertedIntoHelperTable() {
 
-        long wantedId = 1L;
-        String wantedNetexIdId = NetexIdHelper.getNetexId("Quay", wantedId);
+        long wantedId = 11L;
+        insertQuay(wantedId, new Quay());;
 
-        Quay quay = new Quay();
-        quay.setNetexId(wantedNetexIdId);
+        long actual = selectSingleInsertedId(Quay.class.getSimpleName(), wantedId);
 
-        quayRepository.save(quay);
+        assertThat(actual).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
+    }
 
+    @Test
+    public void multipleExplicitIdMustBeInsertedIntoHelperTable() {
+
+        long wantedId1 = 12L;
+        insertQuay(wantedId1, new Quay());;
+
+        // first one will be inserted as level is low
+
+        long wantedId2 = 10L;
+        insertQuay(wantedId2, new Quay());;
+
+        // second with not be inserted because level is not low - insertion
+
+        long actualWantedId1 = selectSingleInsertedId(Quay.class.getSimpleName(), wantedId1);
+        assertThat(actualWantedId1).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId1);
+
+        // We cannot check that the second value was insterted, because the first call will, because of the low level create new available IDs.
+        // But, we can check that the second claimed ID is not available anymore
+        assertThat(generatedIdState.getQueueForEntity(Quay.class.getSimpleName())).doesNotContain(wantedId2);
+    }
+
+    private long selectSingleInsertedId(String tableName, long expectedId) {
         Session session = hibernateEntityManagerFactory.getSessionFactory().openSession();
-
-        SQLQuery query = session.createSQLQuery("SELECT id_value FROM id_generator WHERE table_name = '" + Quay.class.getSimpleName() + "' AND id_value = '" + wantedId + "'");
+        SQLQuery query = session.createSQLQuery("SELECT id_value FROM id_generator WHERE table_name = '" + tableName + "' AND id_value = '" + expectedId + "'");
 
         List list = query.list();
         assertThat(list).hasSize(1);
         BigInteger actual = (BigInteger) list.get(0);
+        return actual.longValue();
+    }
 
-        assertThat(actual.longValue()).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId);
+    private Quay insertQuay(long wantedId, Quay quay) {
+        String wantedNetexIdId = NetexIdHelper.getNetexId("Quay", wantedId);
+        quay.setNetexId(wantedNetexIdId);
+        quayRepository.save(quay);
+        return quay;
     }
 
     @Test
