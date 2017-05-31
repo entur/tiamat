@@ -20,7 +20,8 @@ public class RoleAssignmentListBuilder {
 	}
 
 	public RoleAssignmentListBuilder withAccessAllAreas() {
-		return withStopPlaceOfType(AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
+		return withStopPlaceOfType(AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES)
+				.withParkingOfType(AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
 	}
 
 
@@ -34,6 +35,15 @@ public class RoleAssignmentListBuilder {
 				                                    .withEntityClassification("StopPlace", type).build();
 
 		roleAssignments.add(allStopPlaceAccess);
+		return this;
+	}
+
+	public RoleAssignmentListBuilder withParkingOfType(String type) {
+		RoleAssignment allParkings = RoleAssignment.builder().withRole(AuthorizationConstants.ROLE_EDIT_STOPS)
+				                                    .withOrganisation("NOT_YET_CHECKED")
+				                                    .withEntityClassification("Parking", type).build();
+
+		roleAssignments.add(allParkings);
 		return this;
 	}
 
