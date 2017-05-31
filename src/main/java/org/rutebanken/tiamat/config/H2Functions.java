@@ -1,5 +1,8 @@
 package org.rutebanken.tiamat.config;
 
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -7,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.math.BigInteger;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -29,6 +34,9 @@ public class H2Functions implements InitializingBean {
             logger.info("H2 detected. Creating alias to method similarity.");
             jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS similarity FOR \"org.rutebanken.tiamat.config.H2Functions.similarity\"");
 
+            logger.info("H2. Creating alias to method generate_series");
+            jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_series FOR \"org.rutebanken.tiamat.config.H2Functions.generateSeries\"");
+
         }
     }
 
@@ -42,5 +50,9 @@ public class H2Functions implements InitializingBean {
     public static double similarity(String value, String value2) {
         logger.info("Return similarity 1");
         return similarity;
+    }
+
+    public static Set<BigInteger> generateSeries(BigInteger start, BigInteger stop) {
+        return ContiguousSet.create(Range.closedOpen(start, stop), DiscreteDomain.bigIntegers());
     }
 }
