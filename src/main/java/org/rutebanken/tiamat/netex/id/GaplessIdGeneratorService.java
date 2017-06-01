@@ -15,7 +15,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
@@ -106,27 +108,40 @@ public class GaplessIdGeneratorService {
         List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
 
-        try {
-            transaction.begin();
 
+        executeInTransaction(() -> {
             if(!claimedIds.isEmpty()) {
                 // Ignore duplicates because claimed ids could already have been inserted as available IDs previously
                 insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
             logger.debug("Generating new available IDs for {}", entityTypeName);
-            generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
+            try {
+                generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }, entityManager);
+    }
 
+    private void executeInTransaction(Runnable runnable, EntityManager entityManager) throws InterruptedException {
+        EntityTransaction transaction = entityManager.getTransaction();
+
+        try {
+            transaction.begin();
+            runnable.run();
             transaction.commit();
 
         } catch (RuntimeException e) {
+            rollbackAndThrow(transaction, e);
+        } catch (Exception e) {
             rollbackAndThrow(transaction, e);
         } finally {
             entityManager.close();
         }
     }
+
 
     /**
      * Generate new IDs for entity.
@@ -265,9 +280,9 @@ public class GaplessIdGeneratorService {
     }
 
 
-    private void rollbackAndThrow(EntityTransaction transaction, RuntimeException e) {
+    private void rollbackAndThrow(EntityTransaction transaction, Exception e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
-        throw e;
+        throw new RuntimeException(e);
     }
 
     public static String entityLockString(String entityTypeName) {
