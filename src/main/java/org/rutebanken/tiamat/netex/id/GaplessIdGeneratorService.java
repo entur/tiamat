@@ -31,7 +31,7 @@ public class GaplessIdGeneratorService {
 
     public static final long INITIAL_LAST_ID = 0;
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
-    public static final int INSERT_CLAIMED_ID_THRESHOLD = 10;
+    public static final int INSERT_CLAIMED_ID_THRESHOLD = 1000;
     private static final int DEFAULT_FETCH_SIZE = 2000;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
@@ -117,6 +117,7 @@ public class GaplessIdGeneratorService {
         executeInTransaction(() -> {
             if(!claimedIds.isEmpty()) {
                 // Ignore duplicates because claimed ids could already have been inserted as available IDs previously
+                logger.debug("Inserting {} claimed IDs", claimedIds.size());
                 insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
