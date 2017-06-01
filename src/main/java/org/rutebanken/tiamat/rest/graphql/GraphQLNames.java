@@ -259,4 +259,15 @@ public class GraphQLNames {
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
+
+
+    public static final String STOP_PLACE_ID = "stopPlaceId";
+    public static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
+    public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
+    public static final String FROM_QUAY_ID = "fromQuayId";
+    public static final String TO_QUAY_ID = "toQuayId";
+    public static final String MERGE_STOP_PLACES = "mergeStopPlaces";
+    public static final String MERGE_QUAYS = "mergeQuays";
+    public static final String MOVE_QUAYS_TO_STOP = "moveQuaysToStop";
+    public static final String QUAY_IDS = "quayIds";
 }

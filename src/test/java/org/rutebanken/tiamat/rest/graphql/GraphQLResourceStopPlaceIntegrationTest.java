@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -721,18 +722,22 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
+        String versionComment = "moving quays";
+
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + StopPlaceOperationsBuilder.MOVE_QUAYS_TO_STOP + " ("+StopPlaceOperationsBuilder.QUAY_IDS+": \\\""+quay.getNetexId()+"\\\") { " +
+                "  stopPlace: " + MOVE_QUAYS_TO_STOP + " ("+QUAY_IDS+": \\\""+quay.getNetexId()+"\\\" " + VERSION_COMMENT + ":\\\"" + versionComment + "\\\") { " +
                 "  id " +
                 "    quays {" +
                 "      id " +
                 "    } " +
+                "    versionComment " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace.id", not(comparesEqualTo(stopPlace.getNetexId())))
+                .body("data.stopPlace.versionComment", equalTo(versionComment))
                 .root("data.stopPlace.quays[0]")
                     .body("id", comparesEqualTo(quay.getNetexId()));
     }
