@@ -112,7 +112,8 @@ public class GaplessIdGeneratorService {
             transaction.begin();
 
             if(!claimedIds.isEmpty()) {
-                insertIds(entityTypeName, claimedIds, entityManager);
+                // Ignore duplicates because claimed ids could already have been inserted as available IDs previously
+                insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
             logger.debug("Generating new available IDs for {}", entityTypeName);
@@ -194,6 +195,43 @@ public class GaplessIdGeneratorService {
         }
 
         // Format the sql for logging
+        String sql = insertUsedIdsSql.toString();
+
+        Query query = entityManager.createNativeQuery(sql);
+        logger.trace(sql);
+        int result = query.executeUpdate();
+        logger.trace("Inserted {}", result);
+        entityManager.flush();
+    }
+
+    private void insertIdsIgnoreDuplicates(String tableName, List<Long> list, EntityManager entityManager) {
+        if (list.isEmpty()) {
+            throw new IllegalArgumentException("No IDs to insert");
+        }
+
+        StringBuilder insertUsedIdsSql = new StringBuilder("insert into id_generator(table_name, id_value) ")
+                .append("select id1.table_name, id1.id_value ")
+                .append("from ( ")
+                .append("select cast('")
+                .append(tableName)
+                .append("' as varchar) ")
+                .append("as table_name, ")
+                .append(list.get(0)) // First value
+                .append(" as id_value ");
+
+        for (int i = 1; i < list.size(); i++) {
+            insertUsedIdsSql.append("union all ")
+                    .append("select '")
+                    .append(tableName)
+                    .append("',")
+                    .append(list.get(i))
+                    .append(" ");
+        }
+
+        insertUsedIdsSql.append(" ) as id1 ")
+                .append("where not exists (select 1 from id_generator id2 where id2.id_value = id1.id_value and id2.table_name = id1.table_name)");
+
+        // Format the sql for logging
         String sql = basicFormatter.format(insertUsedIdsSql.toString());
 
         Query query = entityManager.createNativeQuery(sql);
@@ -202,6 +240,7 @@ public class GaplessIdGeneratorService {
         logger.trace("Inserted {}", result);
         entityManager.flush();
     }
+
 
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
