@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 public class StopPlaceOperationsBuilderTest extends AbstractGraphQLResourceIntegrationTest  {
 
     @Autowired
-    StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
+    StopPlaceQuayMerger stopPlaceQuayMerger;
 
     @Test
     @Transactional
@@ -55,7 +55,7 @@ public class StopPlaceOperationsBuilderTest extends AbstractGraphQLResourceInteg
 
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceOperationsBuilder.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId());
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null);
 
         assertThat(mergedStopPlace).isNotNull();
 
@@ -206,7 +206,7 @@ public class StopPlaceOperationsBuilderTest extends AbstractGraphQLResourceInteg
 
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceOperationsBuilder.mergeQuays(fromStopPlace.getNetexId(), fromQuay.getNetexId(), toQuay.getNetexId());
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeQuays(fromStopPlace.getNetexId(), fromQuay.getNetexId(), toQuay.getNetexId(), null);
 
         assertThat(mergedStopPlace).isNotNull();
         assertThat(mergedStopPlace.getOriginalIds()).isNotEmpty();
