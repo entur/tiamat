@@ -139,7 +139,7 @@ public class GaplessIdGeneratorService {
         List<Long> retrievedIds = new ArrayList<>();
 
         while (retrievedIds.isEmpty()) {
-            retrievedIds.addAll(retrieveIds(entityTypeName, entityManager, claimedId));
+            retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
         }
 
         logger.debug("Inserting retrieved IDs: {}", retrievedIds);
@@ -158,7 +158,7 @@ public class GaplessIdGeneratorService {
      * @return list of available IDs for table.
      */
     @SuppressWarnings(value = "unchecked")
-    private List<Long> retrieveIds(String entityTypeName, EntityManager entityManager, long claimedId) {
+    private List<Long> retrieveIds(String entityTypeName, EntityManager entityManager) {
         long lastId = generatedIdState.getLastIdForEntity(entityTypeName);
 
         List<Long> retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
