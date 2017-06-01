@@ -221,6 +221,7 @@ public class GaplessIdGeneratorService {
 
         return results.stream()
                 .map(bigInteger -> bigInteger.longValue())
+                .sorted((v1, v2) -> Long.compare(v1, v2))
                 .collect(toList());
     }
 
