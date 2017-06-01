@@ -82,16 +82,15 @@ public class GaplessIdGeneratorService {
             if(claimedId > 0) {
                 if (availableIds.remove(claimedId)) {
                     logger.trace("Removed claimed ID {} from list of available IDs for entity{}: {}", claimedId, entityTypeName, availableIds.stream().collect(toList()));
-                } else if(! claimedIds.contains(claimedId)){
+                } else {
                     claimedIds.add(claimedId);
                 }
             }
 
-            boolean lowLevelAvailableIds = availableIds.size() < LOW_LEVEL_AVAILABLE_IDS;
-            boolean timeToInsertClaimedIds = claimedIds.size() > INSERT_CLAIMED_ID_THRESHOLD;
+            boolean timeToGenerateAvailableIds = availableIds.size() < LOW_LEVEL_AVAILABLE_IDS;
 
-            if (lowLevelAvailableIds || timeToInsertClaimedIds) {
-                generateInTransaction(entityTypeName, claimedId);
+            if (timeToGenerateAvailableIds || claimedIds.size() > INSERT_CLAIMED_ID_THRESHOLD) {
+                generateInTransaction(entityTypeName, timeToGenerateAvailableIds);
             }
 
             if(claimedId > 0) {
@@ -108,7 +107,7 @@ public class GaplessIdGeneratorService {
         }
     }
 
-    private void generateInTransaction(String entityTypeName, long claimedId) throws InterruptedException {
+    private void generateInTransaction(String entityTypeName, boolean timeToGenerateAvailableIds) throws InterruptedException {
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
         List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
@@ -121,11 +120,13 @@ public class GaplessIdGeneratorService {
                 insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
-            logger.debug("Generating new available IDs for {}", entityTypeName);
-            try {
-                generateNewIds(entityTypeName, availableIds, claimedId, entityManager);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if(timeToGenerateAvailableIds) {
+                logger.debug("Generating new available IDs for {}", entityTypeName);
+                try {
+                    generateNewIds(entityTypeName, availableIds, entityManager);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }, entityManager);
     }
@@ -137,7 +138,7 @@ public class GaplessIdGeneratorService {
      * @param availableIds   The (empty) queue of available IDs to fill
      * @param claimedId
      */
-    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds, long claimedId, EntityManager entityManager) throws InterruptedException {
+    private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds, EntityManager entityManager) throws InterruptedException {
         List<Long> retrievedIds = new ArrayList<>();
 
         while (retrievedIds.isEmpty()) {
@@ -148,9 +149,7 @@ public class GaplessIdGeneratorService {
         insertIds(entityTypeName, retrievedIds, entityManager);
 
         for (long retrievedId : retrievedIds) {
-            if (retrievedId != claimedId) {
-                availableIds.put(retrievedId);
-            }
+            availableIds.put(retrievedId);
         }
     }
 
@@ -266,7 +265,6 @@ public class GaplessIdGeneratorService {
                 .collect(toList());
     }
 
-
     private void executeInTransaction(Runnable runnable, EntityManager entityManager) throws InterruptedException {
         EntityTransaction transaction = entityManager.getTransaction();
 
@@ -283,7 +281,6 @@ public class GaplessIdGeneratorService {
             entityManager.close();
         }
     }
-
 
     private void rollbackAndThrow(EntityTransaction transaction, Exception e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
