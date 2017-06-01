@@ -138,6 +138,14 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         long lastId = generatedIdState.getLastIdForEntity(testEntityName);
         assertThat(lastId).as("last id for entity after generation same as max value in last ids").isEqualTo(Collections.max(lastIds));
+
+        // Verify claiming
+        long explicityClaimed = gaplessIdGeneratorService.getNextIdForEntity(testEntityName, 3L);
+        assertThat(explicityClaimed).isEqualTo(3L);
+
+        // Verify hole filled
+        long nextGenerated = gaplessIdGeneratorService.getNextIdForEntity(testEntityName);
+        assertThat(nextGenerated).isEqualTo(2L);
     }
 
     /**
