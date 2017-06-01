@@ -53,6 +53,8 @@ public class H2Functions implements InitializingBean {
     }
 
     public static Set<BigInteger> generateSeries(BigInteger start, BigInteger stop) {
-        return ContiguousSet.create(Range.closedOpen(start, stop), DiscreteDomain.bigIntegers());
+        Set<BigInteger> rangeSet = ContiguousSet.create(Range.closed(start, stop), DiscreteDomain.bigIntegers());
+        logger.info("Generated range set: {}", rangeSet);
+        return rangeSet;
     }
 }
