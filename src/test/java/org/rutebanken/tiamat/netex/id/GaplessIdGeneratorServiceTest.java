@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
@@ -13,14 +14,19 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManagerFactory;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
+import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.LOW_LEVEL_AVAILABLE_IDS;
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.USED_H2_IDS_BY_ENTITY;
+import static org.rutebanken.tiamat.netex.id.GeneratedIdState.LAST_IDS_FOR_ENTITY;
 
 public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
@@ -32,6 +38,9 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private HazelcastInstance hazelcastInstance;
+
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     @Before
     public void clearGeneratedIds() {
@@ -112,6 +121,23 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         Quay quay = new Quay();
         quayRepository.save(quay);
         assertThat(NetexIdHelper.extractIdPostfixNumeric(quay.getNetexId())).isEqualTo(31);
+    }
+
+    @Test
+    public void testIdGeneration() {
+
+        final String testEntityName = "testEntityName";
+        int fetchSize = LOW_LEVEL_AVAILABLE_IDS;
+        GaplessIdGeneratorService gaplessIdGeneratorService = new GaplessIdGeneratorService(entityManagerFactory, hazelcastInstance, generatedIdState, fetchSize);
+        long actual = gaplessIdGeneratorService.getNextIdForEntity(testEntityName);
+
+        assertThat(actual).as("generated id is last id plus one").isEqualTo(1L);
+
+        IQueue<Long> lastIds = generatedIdState.getQueueForEntity(testEntityName);
+        assertThat(lastIds).as("Last ids for "+testEntityName +" is fetch size minus one used").hasSize(fetchSize-1);
+
+        long lastId = generatedIdState.getLastIdForEntity(testEntityName);
+        assertThat(lastId).as("last id for entity after generation same as max value in last ids").isEqualTo(Collections.max(lastIds));
     }
 
     /**
