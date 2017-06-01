@@ -2,9 +2,9 @@ package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -12,11 +12,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
@@ -28,21 +27,39 @@ public class GaplessIdGeneratorService {
 
     public static final String REENTRANT_LOCK_PREFIX = "entity_lock_";
 
-    public static final long INITIAL_LAST_ID = 1;
+    public static final long INITIAL_LAST_ID = 0;
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
-    private static final int FETCH_SIZE = 2000;
+    private static final int DEFAULT_FETCH_SIZE = 2000;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
+
+    private final int fetchSize;
 
     private final EntityManagerFactory entityManagerFactory;
     private final HazelcastInstance hazelcastInstance;
     private final GeneratedIdState generatedIdState;
 
+    @Autowired
     public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState) {
         this.entityManagerFactory = entityManagerFactory;
         this.hazelcastInstance = hazelcastInstance;
         this.generatedIdState = generatedIdState;
+        this.fetchSize = DEFAULT_FETCH_SIZE;
+    }
+
+    public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState, int fetchSize) {
+        this.entityManagerFactory = entityManagerFactory;
+        this.hazelcastInstance = hazelcastInstance;
+        this.generatedIdState = generatedIdState;
+
+        if(fetchSize < LOW_LEVEL_AVAILABLE_IDS) {
+            logger.warn("Fetch size {} cannot be lower than LOW LEVEL AVAILABLE IDS {}. Setting fetch size to {}", fetchSize, LOW_LEVEL_AVAILABLE_IDS, LOW_LEVEL_AVAILABLE_IDS);
+            fetchSize = LOW_LEVEL_AVAILABLE_IDS;
+        }
+
+        this.fetchSize = fetchSize;
+
     }
 
     public long getNextIdForEntity(String entityTypeName) {
@@ -148,9 +165,10 @@ public class GaplessIdGeneratorService {
         logger.debug("Generated for {}: {}", entityTypeName, retrievedIds);
 
         if (retrievedIds.isEmpty()) {
-            generatedIdState.setLastIdForEntity(entityTypeName, lastId + FETCH_SIZE);
+            generatedIdState.setLastIdForEntity(entityTypeName, lastId + fetchSize);
         } else {
-            generatedIdState.setLastIdForEntity(entityTypeName, retrievedIds.get(retrievedIds.size() - 1));
+
+            generatedIdState.setLastIdForEntity(entityTypeName, Collections.max(retrievedIds));
         }
         return retrievedIds;
     }
@@ -166,27 +184,14 @@ public class GaplessIdGeneratorService {
             throw new IllegalArgumentException("No IDs to insert");
         }
 
-        StringBuilder insertUsedIdsSql = new StringBuilder("insert into id_generator(table_name, id_value) ")
-                .append("select id1.table_name, id1.id_value ")
-                .append("from ( ")
-                .append("select cast('")
-                .append(tableName)
-                .append("' as varchar) ")
-                .append("as table_name, ")
-                .append(list.get(0)) // First value
-                .append(" as id_value ");
+        StringBuilder insertUsedIdsSql = new StringBuilder("INSERT INTO id_generator(table_name, id_value) VALUES");
 
-        for (int i = 1; i < list.size(); i++) {
-            insertUsedIdsSql.append("union all ")
-                    .append("select '")
-                    .append(tableName)
-                    .append("',")
-                    .append(list.get(i))
-                    .append(" ");
+        for (int i = 0; i < list.size(); i++) {
+            insertUsedIdsSql.append("('").append(tableName).append("',").append(list.get(i)).append(")");
+            if (i < list.size() - 1) {
+                insertUsedIdsSql.append(',');
+            }
         }
-
-        insertUsedIdsSql.append(" ) as id1 ")
-                .append("where not exists (select 1 from id_generator id2 where id2.id_value = id1.id_value and id2.table_name = id1.table_name)");
 
         // Format the sql for logging
         String sql = basicFormatter.format(insertUsedIdsSql.toString());
@@ -201,13 +206,18 @@ public class GaplessIdGeneratorService {
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        String sql = "SELECT * FROM generate_series(" + lastId + "," + (lastId + FETCH_SIZE - 1) + ")  " +
+        long lastIdPlusOne = lastId+1;
+        long upperBound = lastId + fetchSize;
+
+        String sql = "SELECT * FROM generate_series(" + lastIdPlusOne + "," + upperBound + ")  " +
                 "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " ;
 
         Query sqlQuery = entityManager.createNativeQuery(sql);
 
         @SuppressWarnings("unchecked")
         List<BigInteger> results = sqlQuery.getResultList();
+
+        logger.debug("Got generated values: {}", results);
 
         return results.stream()
                 .map(bigInteger -> bigInteger.longValue())
