@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -15,9 +16,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Observable;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
@@ -33,7 +33,6 @@ public class GaplessIdGeneratorService {
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
     public static final int INSERT_CLAIMED_ID_THRESHOLD = 1000;
     private static final int DEFAULT_FETCH_SIZE = 2000;
-    public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
@@ -56,7 +55,7 @@ public class GaplessIdGeneratorService {
         this.hazelcastInstance = hazelcastInstance;
         this.generatedIdState = generatedIdState;
 
-        if(fetchSize < LOW_LEVEL_AVAILABLE_IDS) {
+        if (fetchSize < LOW_LEVEL_AVAILABLE_IDS) {
             logger.warn("Fetch size {} cannot be lower than LOW LEVEL AVAILABLE IDS {}. Setting fetch size to {}", fetchSize, LOW_LEVEL_AVAILABLE_IDS, LOW_LEVEL_AVAILABLE_IDS);
             fetchSize = LOW_LEVEL_AVAILABLE_IDS;
         }
@@ -79,7 +78,7 @@ public class GaplessIdGeneratorService {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
             List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
-            if(claimedId > 0) {
+            if (claimedId > 0) {
                 if (availableIds.remove(claimedId)) {
                     logger.trace("Removed claimed ID {} from list of available IDs for entity{}: {}", claimedId, entityTypeName, availableIds.stream().collect(toList()));
                 } else {
@@ -93,13 +92,11 @@ public class GaplessIdGeneratorService {
                 generateInTransaction(entityTypeName, timeToGenerateAvailableIds);
             }
 
-            if(claimedId > 0) {
+            if (claimedId > 0) {
                 return claimedId;
             } else {
                 return availableIds.remove();
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while generating ID. This is not expected", e);
         } catch (Exception e) {
             throw new IdGeneratorException("Caught exception when generating IDs for entity " + entityTypeName, e);
         } finally {
@@ -107,7 +104,7 @@ public class GaplessIdGeneratorService {
         }
     }
 
-    private void generateInTransaction(String entityTypeName, boolean timeToGenerateAvailableIds) throws InterruptedException {
+    private void generateInTransaction(String entityTypeName, boolean timeToGenerateAvailableIds) {
         BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
         List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
@@ -115,13 +112,13 @@ public class GaplessIdGeneratorService {
 
 
         executeInTransaction(() -> {
-            if(!claimedIds.isEmpty()) {
+            if (!claimedIds.isEmpty()) {
                 // Ignore duplicates because claimed ids could already have been inserted as available IDs previously
                 logger.debug("Inserting {} claimed IDs", claimedIds.size());
                 insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
                 claimedIds.clear();
             }
-            if(timeToGenerateAvailableIds) {
+            if (timeToGenerateAvailableIds) {
                 logger.debug("Generating new available IDs for {}", entityTypeName);
                 try {
                     generateNewIds(entityTypeName, availableIds, entityManager);
@@ -179,8 +176,9 @@ public class GaplessIdGeneratorService {
 
     /**
      * Insert used IDs into the helper table.
-     * @param tableName the entity name. Typically class.getSimpleName value
-     * @param list list of long values to reserve
+     *
+     * @param tableName     the entity name. Typically class.getSimpleName value
+     * @param list          list of long values to reserve
      * @param entityManager for the current transaction
      */
     private void insertIds(String tableName, List<Long> list, EntityManager entityManager) {
@@ -247,11 +245,11 @@ public class GaplessIdGeneratorService {
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
-        long lastIdPlusOne = lastId+1;
+        long lastIdPlusOne = lastId + 1;
         long upperBound = lastId + fetchSize;
 
         String sql = "SELECT * FROM generate_series(" + lastIdPlusOne + "," + upperBound + ")  " +
-                "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') " ;
+                "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') ";
 
         Query sqlQuery = entityManager.createNativeQuery(sql);
 
@@ -266,7 +264,45 @@ public class GaplessIdGeneratorService {
                 .collect(toList());
     }
 
-    private void executeInTransaction(Runnable runnable, EntityManager entityManager) throws InterruptedException {
+    public void writeStateWhenshuttingDown() {
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        logger.info("shutdown");
+        generatedIdState.getRegisteredEntityNames().forEach(entityTypeName -> {
+            final Lock lock = hazelcastInstance.getLock(entityTypeName);
+            boolean gotLock;
+            final int secondsToWait = 4;
+            try {
+                gotLock = lock.tryLock(secondsToWait, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("Could not get lock for entity {} during shutdown after {} seconds. Giving up.", secondsToWait, entityTypeName);
+                gotLock = false;
+            }
+
+            if(gotLock) {
+                try {
+                    executeInTransaction(() -> {
+                        List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
+                        if(!claimedIds.isEmpty()) {
+                            logger.info("About to write {} claimed IDs to db for {}", claimedIds.size(), entityTypeName);
+                            insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);
+
+                            generatedIdState.getClaimedIdListForEntity(entityTypeName).clear();
+                        } else {
+                            logger.info("No claimed IDs to insert for {}", entityTypeName);
+                        }
+                    }, entityManager);
+                } catch (Exception e) {
+                  logger.warn("Error writing claimed IDs in transaction when shutting down", e);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
+    }
+
+    private void executeInTransaction(Runnable runnable, EntityManager entityManager) {
         EntityTransaction transaction = entityManager.getTransaction();
 
         try {
