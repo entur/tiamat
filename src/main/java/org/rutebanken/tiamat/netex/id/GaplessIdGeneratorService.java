@@ -31,6 +31,7 @@ public class GaplessIdGeneratorService {
 
     public static final long INITIAL_LAST_ID = 0;
     public static final int LOW_LEVEL_AVAILABLE_IDS = 10;
+    public static final int INSERT_CLAIMED_ID_THRESHOLD = 10;
     private static final int DEFAULT_FETCH_SIZE = 2000;
     public static final String USED_H2_IDS_BY_ENTITY = "used-h2-ids-by-entity-";
 
@@ -85,7 +86,11 @@ public class GaplessIdGeneratorService {
                     claimedIds.add(claimedId);
                 }
             }
-            if (availableIds.size() < LOW_LEVEL_AVAILABLE_IDS) {
+
+            boolean lowLevelAvailableIds = availableIds.size() < LOW_LEVEL_AVAILABLE_IDS;
+            boolean timeToInsertClaimedIds = claimedIds.size() > INSERT_CLAIMED_ID_THRESHOLD;
+
+            if (lowLevelAvailableIds || timeToInsertClaimedIds) {
                 generateInTransaction(entityTypeName, claimedId);
             }
 
