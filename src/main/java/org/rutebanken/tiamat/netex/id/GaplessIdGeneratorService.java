@@ -130,24 +130,6 @@ public class GaplessIdGeneratorService {
         }, entityManager);
     }
 
-    private void executeInTransaction(Runnable runnable, EntityManager entityManager) throws InterruptedException {
-        EntityTransaction transaction = entityManager.getTransaction();
-
-        try {
-            transaction.begin();
-            runnable.run();
-            transaction.commit();
-
-        } catch (RuntimeException e) {
-            rollbackAndThrow(transaction, e);
-        } catch (Exception e) {
-            rollbackAndThrow(transaction, e);
-        } finally {
-            entityManager.close();
-        }
-    }
-
-
     /**
      * Generate new IDs for entity.
      *
@@ -171,6 +153,7 @@ public class GaplessIdGeneratorService {
             }
         }
     }
+
 
     /**
      * Fetch new IDs when all previously fetched IDs taken.
@@ -261,7 +244,6 @@ public class GaplessIdGeneratorService {
         entityManager.flush();
     }
 
-
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
@@ -282,6 +264,24 @@ public class GaplessIdGeneratorService {
                 .map(bigInteger -> bigInteger.longValue())
                 .sorted((v1, v2) -> Long.compare(v1, v2))
                 .collect(toList());
+    }
+
+
+    private void executeInTransaction(Runnable runnable, EntityManager entityManager) throws InterruptedException {
+        EntityTransaction transaction = entityManager.getTransaction();
+
+        try {
+            transaction.begin();
+            runnable.run();
+            transaction.commit();
+
+        } catch (RuntimeException e) {
+            rollbackAndThrow(transaction, e);
+        } catch (Exception e) {
+            rollbackAndThrow(transaction, e);
+        } finally {
+            entityManager.close();
+        }
     }
 
 
