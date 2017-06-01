@@ -146,7 +146,7 @@ public class GaplessIdGeneratorService {
             retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
         }
 
-        logger.debug("Inserting retrieved IDs: {}", retrievedIds);
+        logger.trace("Inserting retrieved IDs: {}", retrievedIds);
         insertIds(entityTypeName, retrievedIds, entityManager);
 
         for (long retrievedId : retrievedIds) {
@@ -166,7 +166,7 @@ public class GaplessIdGeneratorService {
 
         List<Long> retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
 
-        logger.debug("Generated for {}: {}", entityTypeName, retrievedIds);
+        logger.trace("Generated for {}: {}", entityTypeName, retrievedIds);
 
         if (retrievedIds.isEmpty()) {
             generatedIdState.setLastIdForEntity(entityTypeName, lastId + fetchSize);
@@ -258,7 +258,7 @@ public class GaplessIdGeneratorService {
         @SuppressWarnings("unchecked")
         List<BigInteger> results = sqlQuery.getResultList();
 
-        logger.debug("Got generated values: {}", results);
+        logger.trace("Got generated values: {}", results);
 
         return results.stream()
                 .map(bigInteger -> bigInteger.longValue())
