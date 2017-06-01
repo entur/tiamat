@@ -110,6 +110,7 @@ public abstract class TiamatIntegrationTest {
         generatedIdState.getRegisteredEntityNames().forEach(entityName -> {
             hazelcastInstance.getQueue(entityName).clear();
             generatedIdState.setLastIdForEntity(entityName, INITIAL_LAST_ID);
+            generatedIdState.getClaimedIdListForEntity(entityName).clear();
         });
 
         int updated = entityManager.createNativeQuery("DELETE FROM id_generator").executeUpdate();
