@@ -42,15 +42,6 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
-    @Before
-    public void clearGeneratedIds() {
-        Arrays.asList(Parking.class.getSimpleName(), StopPlace.class.getSimpleName(), Quay.class.getSimpleName()).forEach(entityTypeName -> {
-            generatedIdState.setLastIdForEntity(entityTypeName, INITIAL_LAST_ID);
-            generatedIdState.getQueueForEntity(entityTypeName).clear();
-            hazelcastInstance.getList(USED_H2_IDS_BY_ENTITY + entityTypeName).clear();
-        });
-    }
-
     @Test
     public void verifyNetexIdAssignedToStop() {
         StopPlace stopPlace = new StopPlace();
