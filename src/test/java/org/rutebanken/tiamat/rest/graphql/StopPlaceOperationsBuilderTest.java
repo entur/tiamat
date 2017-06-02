@@ -73,7 +73,7 @@ public class StopPlaceOperationsBuilderTest extends AbstractGraphQLResourceInteg
             if (quay.getNetexId().equals(fromQuay.getNetexId())) {
 
                 //The from-Quay has increased its version twice - once for terminating 'from', once for adding to 'to'
-                assertThat(quay.getVersion()).isEqualTo(fromQuay.getVersion() + 2);
+                assertThat(quay.getVersion()).isEqualTo(1 + fromQuay.getVersion());
                 assertThat(quay.equals(fromQuay));
 
             } else if (quay.getNetexId().equals(toQuay.getNetexId())){
