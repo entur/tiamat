@@ -36,7 +36,7 @@ public class NetexIdProvider {
         String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
 
         if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
-            logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
+            logger.debug("Claimed ID {} contains valid prefix for claiming: {}", identifiedEntity.getNetexId(), prefix);
 
             if(NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
                 Long claimedId = NetexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());
