@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -53,12 +54,30 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
     private ZoneDistanceChecker zoneDistanceChecker;
 
 
-    public void findAppendAndAdd(org.rutebanken.tiamat.model.StopPlace incomingStopPlace,
+    public void findAppendAndAdd(final org.rutebanken.tiamat.model.StopPlace incomingStopPlace,
                                  List<StopPlace> matchedStopPlaces,
                                  AtomicInteger stopPlacesCreatedOrUpdated) {
 
 
         Set<org.rutebanken.tiamat.model.StopPlace> foundStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
+
+        if(!foundStopPlaces.isEmpty()) {
+
+            Set<org.rutebanken.tiamat.model.StopPlace> filteredStopPlaces = foundStopPlaces
+                    .stream()
+                    .filter(foundStopPlace -> {
+                        if(zoneDistanceChecker.exceedsLimit(incomingStopPlace, foundStopPlace)) {
+                            logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}",
+                                    ZoneDistanceChecker.DEFAULT_MAX_DISTANCE,
+                                    incomingStopPlace,
+                                    foundStopPlace);
+                            return false;
+                        }
+                        return true;
+                    }).collect(Collectors.toSet());
+
+            foundStopPlaces = filteredStopPlaces;
+        }
 
         if(foundStopPlaces.isEmpty()) {
             org.rutebanken.tiamat.model.StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(incomingStopPlace, ALLOW_OTHER_TYPE_AS_ANY_MATCH);
@@ -79,11 +98,6 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
 
             for(org.rutebanken.tiamat.model.StopPlace existingStopPlace : foundStopPlaces) {
 
-                if (zoneDistanceChecker.exceedsLimit(incomingStopPlace, existingStopPlace)) {
-                    logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}", ZoneDistanceChecker.DEFAULT_MAX_DISTANCE, incomingStopPlace, existingStopPlace);
-                    continue;
-                }
-
                 logger.debug("Found matching stop place {}", existingStopPlace);
 
                 keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, existingStopPlace);
@@ -97,18 +111,13 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
 
                 quayMerger.appendImportIds(incomingStopPlace, existingStopPlace, CREATE_NEW_QUAYS);
 
-                incomingStopPlace = stopPlaceRepository.save(existingStopPlace);
+                existingStopPlace = stopPlaceRepository.save(existingStopPlace);
                 String netexId = incomingStopPlace.getNetexId();
 
-                boolean alreadyAdded = matchedStopPlaces
-                        .stream()
-                        .filter(alreadyAddedStop -> alreadyAddedStop.getId().equals(netexId))
-                        .findAny().isPresent();
+                matchedStopPlaces.removeIf(stopPlace -> stopPlace.getId().equals(netexId));
 
-                if (!alreadyAdded) {
-                    matchedStopPlaces.add(netexMapper.mapToNetexModel(existingStopPlace));
-                }
-
+                matchedStopPlaces.add(netexMapper.mapToNetexModel(existingStopPlace));
+                
                 stopPlacesCreatedOrUpdated.incrementAndGet();
                 break;
             }
