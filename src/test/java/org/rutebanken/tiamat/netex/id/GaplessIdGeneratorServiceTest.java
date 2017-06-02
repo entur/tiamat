@@ -165,7 +165,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void claimIdsAndWriteWhenShuttingDown() throws InterruptedException {
+    public void claimIds() {
 
         String entityName = "testEntityName2";
 
@@ -186,7 +186,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         assertThat(generatedIdState.getQueueForEntity(entityName)).as("available ids for entity after claiming").doesNotContainAnyElementsOf(claimedIds);
 
-        gaplessIdGeneratorService.writeStateWhenshuttingDown();
+        gaplessIdGeneratorService.persistClaimedIds();
 
         assertThat(generatedIdState.getQueueForEntity(entityName)).as("available ids for entity after writing claimed ids").doesNotContainAnyElementsOf(claimedIds);
 
@@ -197,6 +197,19 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         }
 
         assertThat(generatedIdState.getClaimedIdListForEntity(entityName)).as("claimed ids for entity after writing").doesNotContainAnyElementsOf(claimedIds);
+    }
+
+    @Test
+    public void ignoreDuplicateIdsOnInsert() {
+        String entityName = "testEntityName2";
+        int fetchSize = LOW_LEVEL_AVAILABLE_IDS;
+        GaplessIdGeneratorService gaplessIdGeneratorService = new GaplessIdGeneratorService(entityManagerFactory, hazelcastInstance, generatedIdState, fetchSize);
+        Set<Long> claimedIds = new HashSet<>();
+        claimedIds.add(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L));
+        gaplessIdGeneratorService.persistClaimedIds();
+        claimedIds.add(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L));
+        gaplessIdGeneratorService.persistClaimedIds();
+
     }
 
 }
