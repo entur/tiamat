@@ -23,7 +23,7 @@ public class NetexIdProvider {
 
     }
 
-    public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
+    public String getGeneratedId(IdentifiedEntity identifiedEntity) {
         String entityTypeName = key(identifiedEntity);
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
