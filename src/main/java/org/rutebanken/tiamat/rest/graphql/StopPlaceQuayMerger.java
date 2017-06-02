@@ -43,28 +43,27 @@ public class StopPlaceQuayMerger {
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, fromStopPlace, toStopPlace);
 
         StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
-        terminateEntity(fromStopPlaceToTerminate);
-
-        //Terminate validity of from-StopPlace
-        fromStopPlaceToTerminate = stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
-
-        // create new, detached copy of from-StopPlace to move quays/attributes
-        fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlaceToTerminate, StopPlace.class);
 
         //New version of merged StopPlace
-        StopPlace mergedStopPlace = stopPlaceVersionedSaverService.createCopy(toStopPlace, StopPlace.class);
+        final StopPlace mergedStopPlace = stopPlaceVersionedSaverService.createCopy(toStopPlace, StopPlace.class);
+
+        //Transfer quays
+        fromStopPlaceToTerminate.getQuays().stream()
+                .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
 
         // Keep importedId
         mergedStopPlace.getOriginalIds().addAll(fromStopPlaceToTerminate.getOriginalIds());
 
-        //Transfer quays
-        mergedStopPlace.getQuays().addAll(fromStopPlaceToTerminate.getQuays());
+        //Remove quays from from-StopPlace
+        fromStopPlaceToTerminate.getQuays().clear();
+
+        //Terminate validity of from-StopPlace
+        terminateEntity(fromStopPlaceToTerminate);
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
 
         mergedStopPlace.setVersionComment(versionComment);
 
-        mergedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
-
-        return mergedStopPlace;
+        return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
     }
 
     protected StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment) {
