@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importer;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
+import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
@@ -27,38 +28,31 @@ public class PublicationDeliveryImporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryImporter.class);
 
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
-    private static final Object PARKING_IMPORT_LOCK = new Object();
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final TransactionalParkingsImporter transactionalParkingsImporter;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
     private final PathLinksImporter pathLinksImporter;
     private final TopographicPlaceImporter topographicPlaceImporter;
     private final TariffZoneImporter tariffZoneImporter;
-    private final ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
-    private final ParallelInitialParkingImporter parallelInitialParkingImporter;
     private final StopPlaceImportHandler stopPlaceImportHandler;
+    private final ParkingsImportHandler parkingsImportHandler;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
-                                       TransactionalParkingsImporter transactionalParkingsImporter,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                        PathLinksImporter pathLinksImporter,
                                        TopographicPlaceImporter topographicPlaceImporter,
                                        TariffZoneImporter tariffZoneImporter,
-                                       ZoneTopographicPlaceFilter zoneTopographicPlaceFilter,
-                                       ParallelInitialParkingImporter parallelInitialParkingImporter,
-                                       StopPlaceImportHandler stopPlaceImportHandler) {
+                                       StopPlaceImportHandler stopPlaceImportHandler,
+                                       ParkingsImportHandler parkingsImportHandler) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
-        this.transactionalParkingsImporter = transactionalParkingsImporter;
+        this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.pathLinksImporter = pathLinksImporter;
         this.topographicPlaceImporter = topographicPlaceImporter;
         this.tariffZoneImporter = tariffZoneImporter;
-        this.zoneTopographicPlaceFilter = zoneTopographicPlaceFilter;
-        this.parallelInitialParkingImporter = parallelInitialParkingImporter;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
     }
 
@@ -113,7 +107,6 @@ public class PublicationDeliveryImporter {
                 logger.info("Finished importing topographic places");
             }
 
-
             if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryParams.importType != ImportType.ID_MATCH) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
@@ -125,7 +118,7 @@ public class PublicationDeliveryImporter {
             }
 
             stopPlaceImportHandler.handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
-            handleParkings(netexSiteFrame, publicationDeliveryParams, parkingsCreatedOrUpdated, responseSiteframe);
+            parkingsImportHandler.handleParkings(netexSiteFrame, publicationDeliveryParams, parkingsCreatedOrUpdated, responseSiteframe);
 
             if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
                 List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
@@ -140,49 +133,6 @@ public class PublicationDeliveryImporter {
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();
-        }
-    }
-
-    private void handleParkings(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger parkingsCreatedOrUpdated, SiteFrame responseSiteframe) {
-
-        if (publicationDeliveryHelper.hasParkings(netexSiteFrame)) {
-
-            List<org.rutebanken.tiamat.model.Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
-
-            int numberOfParkingsBeforeFiltering = tiamatParking.size();
-            logger.info("About to filter {} parkings based on topographic references: {}", tiamatParking.size(), publicationDeliveryParams.targetTopographicPlaces);
-            tiamatParking = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.targetTopographicPlaces, tiamatParking);
-            logger.info("Got {} parkings (was {}) after filtering by: {}", tiamatParking.size(), numberOfParkingsBeforeFiltering, publicationDeliveryParams.targetTopographicPlaces);
-
-            if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
-                numberOfParkingsBeforeFiltering = tiamatParking.size();
-                logger.info("Filtering parkings outside given list of topographic places: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
-                tiamatParking = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatParking, true);
-                logger.info("Got {} parkings (was {}) after filtering", tiamatParking.size(), numberOfParkingsBeforeFiltering);
-            }
-
-
-            Collection<Parking> importedParkings;
-
-            if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
-                synchronized (PARKING_IMPORT_LOCK) {
-                    importedParkings = transactionalParkingsImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
-                }
-            } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
-                importedParkings = parallelInitialParkingImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
-            } else {
-                logger.warn("Import type " + publicationDeliveryParams.importType + " not implemented. Will not match parking.");
-                importedParkings = new ArrayList<>(0);
-            }
-
-            if (!importedParkings.isEmpty()) {
-                responseSiteframe.withParkings(
-                        new ParkingsInFrame_RelStructure()
-                                .withParking(importedParkings));
-            }
-
-            logger.info("Mapped {} parkings!!", tiamatParking.size());
-
         }
     }
 
