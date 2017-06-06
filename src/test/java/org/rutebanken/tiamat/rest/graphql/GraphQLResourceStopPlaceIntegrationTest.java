@@ -580,6 +580,41 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
 
     @Test
+    public void testSimpleMutationUpdateKayValuesStopPlace() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Espa");
+        stopPlace.setShortName(new EmbeddableMultilingualString("E"));
+        stopPlace.setDescription(new EmbeddableMultilingualString("E6s beste boller"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        stopPlace.setAllAreasWheelchairAccessible(false);
+        stopPlace.setWeighting(InterchangeWeightingEnumeration.NO_INTERCHANGE);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "          keyValues: [{" +
+                "            key: \\\"jbvId\\\"" +
+                "            values: [\\\"1234\\\", ]" +
+                "          }]" +
+                "       }) { " +
+                "  id " +
+                "  keyValues { key values } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                    .body("id", equalTo(stopPlace.getNetexId()))
+                    .body("keyValues[0].key", equalTo("jbvId"))
+                    .body("keyValues[0].values[0]", equalTo("1234"));
+    }
+
+
+    @Test
     public void testSimpleMutationCreateQuay() throws Exception {
 
         StopPlace stopPlace = createStopPlace("Espa");
