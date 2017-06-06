@@ -10,6 +10,8 @@ import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.*;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
+import org.rutebanken.tiamat.importer.matching.MatchingAppendingIdStopPlacesImporter;
+import org.rutebanken.tiamat.importer.matching.StopPlaceIdMatcher;
 import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePostFilterSteps;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;

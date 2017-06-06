@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.matching;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;

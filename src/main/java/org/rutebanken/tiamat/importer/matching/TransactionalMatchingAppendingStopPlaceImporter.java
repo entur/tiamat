@@ -1,7 +1,8 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.matching;
 
 import com.google.common.collect.Sets;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByIdFinder;
 import org.rutebanken.tiamat.importer.merging.QuayMerger;

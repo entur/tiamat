@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.matching;
 
 import org.rutebanken.netex.model.StopPlace;
 import org.slf4j.Logger;

@@ -1,6 +1,7 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.matching;
 
 import org.junit.Test;
+import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Quay;
 
