@@ -215,6 +215,22 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
 
+
+        if (input.get(KEY_VALUES) != null) {
+            List<Map> keyValues = (List) input.get(KEY_VALUES);
+
+            entity.getKeyValues().clear();
+
+            keyValues.forEach(inputMap-> {
+                String key = (String)inputMap.get(KEY);
+                List<String> values = (List<String>)inputMap.get(VALUES);
+                Value value = new Value(values);
+                entity.getKeyValues().put(key, value);
+            });
+
+            isUpdated = true;
+        }
+
         if (input.get(ALTERNATIVE_NAMES) != null) {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
             for (Object alternativeNameObject : alternativeNames) {

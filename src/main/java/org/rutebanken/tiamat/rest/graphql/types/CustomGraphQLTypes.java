@@ -150,8 +150,28 @@ public class CustomGraphQLTypes {
                         .type(GraphQLString))
                 .build();
 
+    public static GraphQLObjectType keyValuesObjectType = newObject()
+            .name(OUTPUT_TYPE_KEY_VALUES)
+            .field(newFieldDefinition()
+                    .name(KEY)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(VALUES)
+                    .type(new GraphQLList(GraphQLString)))
+            .build();
 
-        public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
+
+    public static GraphQLInputObjectType keyValuesObjectInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_KEY_VALUES)
+            .field(newInputObjectField()
+                    .name(KEY)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(VALUES)
+                    .type(new GraphQLList(GraphQLString)))
+            .build();
+
+    public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
                 .name(ID)
                 .type(GraphQLString)
                 .dataFetcher(env -> {

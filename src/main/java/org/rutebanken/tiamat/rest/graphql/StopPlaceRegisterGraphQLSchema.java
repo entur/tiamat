@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
@@ -14,13 +13,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
@@ -496,6 +493,7 @@ StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)).build());
         commonInputFieldsList.add(
                 newInputObjectField()
                         .name(ACCESSIBILITY_ASSESSMENT)
