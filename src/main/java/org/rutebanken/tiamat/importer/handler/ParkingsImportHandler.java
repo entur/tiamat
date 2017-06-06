@@ -4,7 +4,7 @@ import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
-import org.rutebanken.tiamat.importer.TransactionalMergingParkingsImporter;
+import org.rutebanken.tiamat.importer.merging.TransactionalMergingParkingsImporter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.model.Parking;

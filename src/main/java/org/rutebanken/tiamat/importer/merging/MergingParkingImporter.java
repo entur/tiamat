@@ -1,5 +1,6 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.merging;
 
+import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
 import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;

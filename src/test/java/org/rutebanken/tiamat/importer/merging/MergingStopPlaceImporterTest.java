@@ -1,8 +1,6 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.merging;
 
-import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
@@ -11,14 +9,10 @@ import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.when;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 /**
  * Test stop place importer with geodb and repository.

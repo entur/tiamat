@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.merging;
 
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -7,6 +7,8 @@ import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.importer.OriginalIdMatcher;
+import org.rutebanken.tiamat.importer.merging.QuayMerger;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -18,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 
 public class QuayMergerTest {
 

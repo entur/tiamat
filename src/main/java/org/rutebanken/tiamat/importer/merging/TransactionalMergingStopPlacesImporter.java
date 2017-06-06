@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer.merging;
 
-import org.rutebanken.tiamat.importer.MergingStopPlaceImporter;
 import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;

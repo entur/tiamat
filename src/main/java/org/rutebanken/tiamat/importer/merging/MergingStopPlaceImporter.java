@@ -1,6 +1,7 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.merging;
 
 import org.rutebanken.tiamat.geo.CentroidComputer;
+import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;

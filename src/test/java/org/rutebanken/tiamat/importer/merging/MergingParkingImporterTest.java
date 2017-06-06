@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer;
+package org.rutebanken.tiamat.importer.merging;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;

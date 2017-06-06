@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.importer.merging;
 
-import org.rutebanken.tiamat.importer.MergingParkingImporter;
 import org.rutebanken.tiamat.model.Parking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

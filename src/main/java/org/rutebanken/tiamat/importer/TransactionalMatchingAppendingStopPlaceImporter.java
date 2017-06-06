@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByIdFinder;
+import org.rutebanken.tiamat.importer.merging.QuayMerger;
 import org.rutebanken.tiamat.model.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -30,6 +30,8 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
 
     private static final boolean CREATE_NEW_QUAYS = false;
 
+    private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
+
     @Autowired
     private KeyValueListAppender keyValueListAppender;
 
@@ -41,11 +43,9 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
 
     @Autowired
     private NetexMapper netexMapper;
-    private static final boolean ALLOW_OTHER_TYPE_AS_ANY_MATCH = true;
 
     @Autowired
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
-
 
     @Autowired
     private StopPlaceByIdFinder stopPlaceByIdFinder;
