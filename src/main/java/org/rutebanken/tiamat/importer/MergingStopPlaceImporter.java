@@ -99,11 +99,6 @@ public class MergingStopPlaceImporter {
     public StopPlace importStopPlaceWithoutNetexMapping(StopPlace incomingStopPlace) throws InterruptedException, ExecutionException {
         StopPlace foundStopPlace = findNearbyOrExistingStopPlace(incomingStopPlace);
 
-        if(zoneDistanceChecker.exceedsLimit(incomingStopPlace, foundStopPlace)) {
-            logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}", ZoneDistanceChecker.DEFAULT_MAX_DISTANCE, incomingStopPlace, foundStopPlace);
-            foundStopPlace = null;
-        }
-
         final StopPlace stopPlace;
         if (foundStopPlace != null) {
             stopPlace = handleAlreadyExistingStopPlace(foundStopPlace, incomingStopPlace);
@@ -182,7 +177,14 @@ public class MergingStopPlaceImporter {
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
         final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
         if (existingStopPlace != null) {
-            return existingStopPlace;
+
+            if(zoneDistanceChecker.exceedsLimit(newStopPlace, existingStopPlace)) {
+                logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}",
+                        ZoneDistanceChecker.DEFAULT_MAX_DISTANCE,
+                        newStopPlace, existingStopPlace);
+            } else {
+                return existingStopPlace;
+            }
         }
 
         if (newStopPlace.getName() != null) {

@@ -58,7 +58,10 @@ public class PublicationDeliveryPartialUnmarshaller {
 
     private final NeTExValidator neTExValidator;
 
-    @Value("${publicationDeliveryUnmarshaller.validateAgainstSchema:true}")
+    /**
+     * Validating large incoming XMLs against schema often leads to StackOverFlowException.
+     */
+    @Value("${publicationDeliveryPartialUnmarshaller.validateAgainstSchema:false}")
     private boolean validateAgainstSchema;
 
     public PublicationDeliveryPartialUnmarshaller() throws IOException, SAXException {
