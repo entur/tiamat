@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.*;
 
-public class StopPlaceOperationsBuilderTest extends AbstractGraphQLResourceIntegrationTest  {
+public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest  {
 
     @Autowired
     StopPlaceQuayMerger stopPlaceQuayMerger;
