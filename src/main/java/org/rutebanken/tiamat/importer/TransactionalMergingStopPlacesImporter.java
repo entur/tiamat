@@ -17,16 +17,16 @@ import static java.util.stream.Collectors.toList;
  */
 @Component
 @Transactional
-public class TransactionalStopPlacesImporter {
+public class TransactionalMergingStopPlacesImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalStopPlacesImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionalMergingStopPlacesImporter.class);
 
     private final MergingStopPlaceImporter mergingStopPlaceImporter;
 
     private final StopPlaceTopographicPlaceReferenceUpdater topographicPlaceReferenceUpdater;
 
     @Autowired
-    public TransactionalStopPlacesImporter(MergingStopPlaceImporter mergingStopPlaceImporter, StopPlaceTopographicPlaceReferenceUpdater topographicPlaceReferenceUpdater) {
+    public TransactionalMergingStopPlacesImporter(MergingStopPlaceImporter mergingStopPlaceImporter, StopPlaceTopographicPlaceReferenceUpdater topographicPlaceReferenceUpdater) {
         this.mergingStopPlaceImporter = mergingStopPlaceImporter;
         this.topographicPlaceReferenceUpdater = topographicPlaceReferenceUpdater;
     }
