@@ -7,7 +7,9 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
-import org.rutebanken.tiamat.importer.*;
+import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.filter.StopPlaceTypeFilter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
 import org.rutebanken.tiamat.importer.matching.MatchingAppendingIdStopPlacesImporter;
@@ -55,6 +57,12 @@ public class StopPlaceImportHandler {
     private ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
 
     @Autowired
+    private TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
+
+    @Autowired
+    private StopPlaceTypeFilter stopPlaceTypeFilter;
+
+    @Autowired
     private StopPlacePostFilterSteps stopPlacePostFilterSteps;
 
     @Autowired
@@ -70,22 +78,24 @@ public class StopPlaceImportHandler {
     private MatchingAppendingIdStopPlacesImporter matchingAppendingIdStopPlacesImporter;
 
     @Autowired
-    private TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
-
-    @Autowired
     private TopographicPlacesExporter topographicPlacesExporter;
 
 
     public void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
-        if(publicationDeliveryHelper.hasStops(netexSiteFrame)) {
+        if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
             List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
 
+            tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, publicationDeliveryParams.allowOnlyStopTypes);
+
+            if (publicationDeliveryParams.ignoreStopTypes != null && !publicationDeliveryParams.ignoreStopTypes.isEmpty()) {
+                tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, publicationDeliveryParams.ignoreStopTypes, true);
+            }
+
             boolean isImportTypeIdMatch = publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH);
-            if(!isImportTypeIdMatch) {
+            if (!isImportTypeIdMatch) {
                 logger.info("Running stop place pre steps");
                 tiamatStops = stopPlacePreSteps.run(tiamatStops);
             }
-
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
             logger.info("About to filter {} stops based on topographic references: {}", tiamatStops.size(), publicationDeliveryParams.targetTopographicPlaces);
@@ -99,7 +109,7 @@ public class StopPlaceImportHandler {
                 logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
             }
 
-            if(!isImportTypeIdMatch) {
+            if (!isImportTypeIdMatch) {
                 logger.info("Running stop place post filter steps");
                 tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
             }
@@ -107,7 +117,7 @@ public class StopPlaceImportHandler {
             final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
 
-            if(publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
+            if (publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
                 synchronized (STOP_PLACE_IMPORT_LOCK) {
@@ -126,7 +136,7 @@ public class StopPlaceImportHandler {
 
             tariffZonesFromStopsExporter.resolveTariffZones(importedOrMatchedNetexStopPlaces, responseSiteframe);
 
-            if(responseSiteframe.getTariffZones() != null
+            if (responseSiteframe.getTariffZones() != null
                     && responseSiteframe.getTariffZones().getTariffZone() != null
                     && responseSiteframe.getTariffZones().getTariffZone().isEmpty()) {
                 responseSiteframe.setTariffZones(null);

@@ -1,16 +1,29 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import com.google.common.collect.Sets;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.PrivateCodeStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopTypeEnumeration;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.rutebanken.netex.model.TopographicPlaceRefStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +138,47 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+    }
+
+    @Test
+    public void ignoreStopPlaceTypes() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:321")
+                .withVersion("3")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.ignoreStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.BUS_STATION);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response, false);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void allowOnlyStopPlaceTypes() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:3231")
+                .withVersion("2")
+                .withStopPlaceType(StopTypeEnumeration.METRO_STATION);
+
+        StopPlace other = new StopPlace()
+                .withId("XYZ:StopPlace:9988")
+                .withVersion("2")
+                .withStopPlaceType(StopTypeEnumeration.AIRPORT);
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.allowOnlyStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.METRO_STATION);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace, other);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStopPlaceType().equals(StopTypeEnumeration.METRO_STATION));
     }
 
     @Test
