@@ -25,7 +25,7 @@ public class StopPlaceTypeFilter {
         }
 
         return stopPlaceList.stream()
-                .filter(stopPlace -> allowedTypes.contains(stopPlace.getStopPlaceType()) && ! negate)
+                .filter(stopPlace -> negate ? ! allowedTypes.contains(stopPlace.getStopPlaceType()) : allowedTypes.contains(stopPlace.getStopPlaceType()))
                 .collect(Collectors.toList());
     }
 
