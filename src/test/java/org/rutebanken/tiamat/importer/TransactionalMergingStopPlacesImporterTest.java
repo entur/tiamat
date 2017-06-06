@@ -4,6 +4,7 @@ package org.rutebanken.tiamat.importer;
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
@@ -18,10 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TransactionalStopPlacesImporterTest extends TiamatIntegrationTest {
+public class TransactionalMergingStopPlacesImporterTest extends TiamatIntegrationTest {
 
     @Autowired
-    private TransactionalStopPlacesImporter siteFrameImporter;
+    private TransactionalMergingStopPlacesImporter siteFrameImporter;
 
     /**
      * This test is implemented to reproduce an issue we had with lazy initialization exception
