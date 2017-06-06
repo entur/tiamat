@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.google.api.client.util.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -38,7 +37,7 @@ public class StopPlaceQuayMoverTest extends TiamatIntegrationTest {
         destinationStopPlace.setVersion(1L);
         stopPlaceRepository.save(destinationStopPlace);
 
-        StopPlace result = stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), destinationStopPlace.getNetexId());
+        StopPlace result = stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), destinationStopPlace.getNetexId(), null);
 
         assertThat(result.getNetexId()).isEqualTo(destinationStopPlace.getNetexId());
         assertThat(result.getQuays()).hasSize(1);
@@ -68,7 +67,7 @@ public class StopPlaceQuayMoverTest extends TiamatIntegrationTest {
         fromStopPlace.setVersion(1L);
         stopPlaceRepository.save(fromStopPlace);
 
-        StopPlace result = stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), null);
+        StopPlace result = stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), null, null);
 
         fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlace.getNetexId());
         assertThat(fromStopPlace.getQuays()).isEmpty();
@@ -86,7 +85,7 @@ public class StopPlaceQuayMoverTest extends TiamatIntegrationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAcceptInvalidQuayId() {
-        stopPlaceQuayMover.moveQuays(Arrays.asList("NSR:Quay:99999999"), null);
+        stopPlaceQuayMover.moveQuays(Arrays.asList("NSR:Quay:99999999"), null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -99,6 +98,6 @@ public class StopPlaceQuayMoverTest extends TiamatIntegrationTest {
         fromStopPlace.setVersion(1L);
         stopPlaceRepository.save(fromStopPlace);
 
-        stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), "NSR:StopPlace:91919191");
+        stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), "NSR:StopPlace:91919191", null);
     }
 }
