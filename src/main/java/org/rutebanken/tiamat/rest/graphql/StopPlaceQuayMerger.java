@@ -99,10 +99,10 @@ public class StopPlaceQuayMerger {
 
     private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
         // Terminate validity for "from"-stopPlace
-        if (entity.getValidBetweens() != null && !entity.getValidBetweens().isEmpty()) {
-            entity.getValidBetweens().get(0).setToDate(Instant.now());
+        if (entity.getValidBetween()!=null) {
+            entity.getValidBetween().setToDate(Instant.now());
         } else {
-            entity.getValidBetweens().add(new ValidBetween(null, Instant.now()));
+            entity.setValidBetween(new ValidBetween(null, Instant.now()));
         }
         return entity;
     }

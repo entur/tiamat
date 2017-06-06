@@ -986,6 +986,39 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
 
     @Test
+    public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
+        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
+        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        StopPlace stopPlace1 = new StopPlace()
+                                       .withId("XYZ:Stopplace:1")
+                                       .withVersion("1")
+                                       .withName(new MultilingualString().withValue("New stop1"))
+                                       .withValidBetween(new ValidBetween().withFromDate(firstValidFrom).withToDate(secondValidFrom), new ValidBetween().withFromDate(secondValidFrom))
+                                       .withCentroid(new SimplePoint_VersionStructure()
+                                                             .withLocation(new LocationStructure()
+                                                                                   .withLatitude(new BigDecimal("59.914353"))
+                                                                                   .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<StopPlace> changedStopPlaces = extractStopPlaces(response);
+        Assert.assertEquals(1, changedStopPlaces.size());
+        StopPlace stopPlace = changedStopPlaces.get(0);
+
+        List<ValidBetween> actualValidBetween = stopPlace.getValidBetween();
+
+        assertThat(actualValidBetween)
+                .as("Stop Place should have actualValidBetween set")
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        assertThat(actualValidBetween.get(0).getFromDate()).isEqualTo(firstValidFrom);
+    }
+
+
+    @Test
     public void exportStopPlacesWithEffectiveChangedInPeriod() throws Exception {
         OffsetDateTime validFrom = OffsetDateTime.now().minusDays(3);
         StopPlace stopPlace1 = new StopPlace()
@@ -1550,6 +1583,11 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         PublicationDeliveryStructure deliveryStructure = unmarshal(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        return extractStopPlaces(deliveryStructure);
+    }
+
+    private List<StopPlace> extractStopPlaces(PublicationDeliveryStructure deliveryStructure) throws JAXBException {
+
 
         List<StopPlace> stopPlaces = new ArrayList<>();
         for (JAXBElement<? extends Common_VersionFrameStructure> frameStructureElmt : deliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame()) {
@@ -1563,7 +1601,6 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
             }
         }
         return stopPlaces;
-
     }
 
     private static final JAXBContext jaxbContext;

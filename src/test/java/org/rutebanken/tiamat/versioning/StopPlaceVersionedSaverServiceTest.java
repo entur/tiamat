@@ -50,7 +50,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
-        assertThat(actualStopPlace.getQuays().iterator().next().getValidBetweens()).isEmpty();
+        assertThat(actualStopPlace.getQuays().iterator().next().getValidBetween()).isNull();
     }
 
     @Test(expected = IllegalArgumentException.class)

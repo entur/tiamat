@@ -216,7 +216,7 @@ public class GraphQLNames {
     public static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
-    public static final String VALID_BETWEENS = "validBetweens";
+    public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";
 
