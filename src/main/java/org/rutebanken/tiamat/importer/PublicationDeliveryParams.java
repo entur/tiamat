@@ -20,8 +20,7 @@ public class PublicationDeliveryParams {
      * If there is a match, only append the original ID.
      */
     @QueryParam(value = "onlyMatchOutsideTopographicPlaces")
-        public List<String> onlyMatchOutsideTopographicPlaces = new ArrayList<>();
-
+    public List<String> onlyMatchOutsideTopographicPlaces = new ArrayList<>();
 
     @QueryParam(value = "importType")
     public ImportType importType = ImportType.MERGE;
