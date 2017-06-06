@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.rest.graphql.fetcher.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetcher.OriginalIdsDataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import java.util.List;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
@@ -25,6 +24,9 @@ public class ZoneCommonFieldListCreator {
 
     @Autowired
     private OriginalIdsDataFetcher originalIdsDataFetcher;
+
+    @Autowired
+    private KeyValuesDataFetcher keyValuesDataFetcher;
 
     public List<GraphQLFieldDefinition> create() {
 
@@ -38,8 +40,15 @@ public class ZoneCommonFieldListCreator {
 
         zoneFieldList.add(newFieldDefinition()
                 .name(IMPORTED_ID)
+                .deprecate("Moved to keyValues")
                 .type(new GraphQLList(GraphQLString))
                 .dataFetcher(originalIdsDataFetcher)
+                .build());
+
+        zoneFieldList.add(newFieldDefinition()
+                .name(KEY_VALUES)
+                .type(new GraphQLList(keyValuesObjectType))
+                .dataFetcher(keyValuesDataFetcher)
                 .build());
 
         return zoneFieldList;

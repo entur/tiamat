@@ -96,6 +96,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT = "GeneralSign";
     public static final String INPUT_TYPE_GENERAL_SIGN_EQUIPMENT = OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_KEY_VALUES = "KeyValues";
+    public static final String INPUT_TYPE_KEY_VALUES = OUTPUT_TYPE_KEY_VALUES + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
@@ -186,6 +189,9 @@ public class GraphQLNames {
     public static final String SIGN_CONTENT_TYPE = "signContentType";
 
     public static final String IMPORTED_ID = "importedId";
+    public static final String KEY_VALUES = "keyValues";
+    public static final String KEY = "key";
+    public static final String VALUES = "values";
     public static final String VERSION = "version";
     public static final String VERSION_COMMENT = "versionComment";
     public static final String PUBLIC_CODE = "publicCode";
