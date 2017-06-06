@@ -4,7 +4,7 @@ import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
-import org.rutebanken.tiamat.importer.TransactionalParkingsImporter;
+import org.rutebanken.tiamat.importer.TransactionalMergingParkingsImporter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.model.Parking;
@@ -37,7 +37,7 @@ public class ParkingsImportHandler {
     private ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
 
     @Autowired
-    private TransactionalParkingsImporter transactionalParkingsImporter;
+    private TransactionalMergingParkingsImporter transactionalMergingParkingsImporter;
 
     @Autowired
     private ParallelInitialParkingImporter parallelInitialParkingImporter;
@@ -65,7 +65,7 @@ public class ParkingsImportHandler {
 
             if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
                 synchronized (PARKING_IMPORT_LOCK) {
-                    importedParkings = transactionalParkingsImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
+                    importedParkings = transactionalMergingParkingsImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
                 }
             } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                 importedParkings = parallelInitialParkingImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);

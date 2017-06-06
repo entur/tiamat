@@ -17,14 +17,14 @@ import static java.util.stream.Collectors.toList;
  */
 @Component
 @Transactional
-public class TransactionalParkingsImporter {
+public class TransactionalMergingParkingsImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalParkingsImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionalMergingParkingsImporter.class);
 
     private final MergingParkingImporter mergingParkingImporter;
 
     @Autowired
-    public TransactionalParkingsImporter(MergingParkingImporter mergingParkingImporter) {
+    public TransactionalMergingParkingsImporter(MergingParkingImporter mergingParkingImporter) {
         this.mergingParkingImporter = mergingParkingImporter;
     }
 
