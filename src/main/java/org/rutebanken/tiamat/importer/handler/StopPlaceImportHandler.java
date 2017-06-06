@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.*;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
+import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePostFilterSteps;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -58,7 +59,7 @@ public class StopPlaceImportHandler {
     private StopPlaceIdMatcher stopPlaceIdMatcher;
 
     @Autowired
-    private TransactionalStopPlacesImporter transactionalStopPlacesImporter;
+    private TransactionalMergingStopPlacesImporter transactionalMergingStopPlacesImporter;
 
     @Autowired
     private ParallelInitialStopPlaceImporter parallelInitialStopPlaceImporter;
@@ -109,7 +110,7 @@ public class StopPlaceImportHandler {
             } else {
                 synchronized (STOP_PLACE_IMPORT_LOCK) {
                     if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
-                        importedOrMatchedNetexStopPlaces = transactionalStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+                        importedOrMatchedNetexStopPlaces = transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                     } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
                         importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                     } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
