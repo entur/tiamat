@@ -1,8 +1,11 @@
 package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+
 import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class PublicationDeliveryParams {
 
@@ -25,7 +28,10 @@ public class PublicationDeliveryParams {
     
     @QueryParam(value = "skipOutput")
     public boolean skipOutput = false;
-    
-    
-    
+
+    @QueryParam(value = "ignoreStopTypes")
+    public Set<StopTypeEnumeration> ignoreStopTypes;
+
+    @QueryParam(value = "allowOnlyStopTypes")
+    public Set<StopTypeEnumeration> allowOnlyStopTypes;
 }
