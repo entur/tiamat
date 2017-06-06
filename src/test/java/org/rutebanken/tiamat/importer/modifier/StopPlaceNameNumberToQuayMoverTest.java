@@ -1,6 +1,7 @@
-package org.rutebanken.tiamat.importer.modifier.name;
+package org.rutebanken.tiamat.importer.modifier;
 
 import org.junit.Test;
+import org.rutebanken.tiamat.importer.modifier.StopPlaceNameNumberToQuayMover;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;

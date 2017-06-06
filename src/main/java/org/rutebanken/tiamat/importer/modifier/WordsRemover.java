@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer.modifier.name;
+package org.rutebanken.tiamat.importer.modifier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
-package org.rutebanken.tiamat.importer.modifier.name;
+package org.rutebanken.tiamat.importer.modifier;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.modifier.name.WordsRemover;
+import org.rutebanken.tiamat.importer.modifier.WordsRemover;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

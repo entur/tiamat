@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importer.modifier.name;
+package org.rutebanken.tiamat.importer.modifier;
 
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
