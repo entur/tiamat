@@ -105,6 +105,15 @@ public class PolygonConverterTest {
         List<Double> values = polygonConverter.extractValues(actual.getExterior());
         assertThat(values).hasSize(coordinates.length * 2);
 
+
+        // Tiamat is storing polygons with X, Y
+        // In NeTEx we receive polygons with Y, X
+        // Expect Y, X when converting to PolygonType (Netex)
+        int counter = 0;
+        for(Coordinate coordinate : coordinates) {
+            assertThat(values.get(counter++).doubleValue()).isEqualTo(coordinate.y);
+            assertThat(values.get(counter++).doubleValue()).isEqualTo(coordinate.x);
+        }
     }
 
     @Test
