@@ -491,7 +491,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     public Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
-        final String queryString = "select sp.* " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by vb.from_Date";
+        final String queryString = "select sp.* " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by sp.from_Date";
         List<StopPlace> stopPlaces = entityManager.createNativeQuery(queryString, StopPlace.class)
                                              .setParameter("from", Date.from(search.getFrom()))
                                              .setParameter("to", Date.from(search.getTo()))
@@ -508,18 +508,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     private int countStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
-        String queryString = "select count(*) " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE;
+        String queryString = "select count(sp.id) " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE;
         return ((Number)entityManager.createNativeQuery(queryString).setParameter("from", Date.from(search.getFrom()))
                        .setParameter("to",  Date.from(search.getTo())).getSingleResult()).intValue();
     }
 
-    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from  stop_place sp inner join stop_place_valid_betweens vbsp on sp.id=vbsp.stop_place_id" +
-                                                                                      " inner join valid_between vb on vbsp.valid_betweens_id=vb.id inner join " +
-                                                                                      "(select spinner.netex_id, max(vbinner.from_date) as maxFromDate from stop_place spinner " +
-                                                                                      " inner join stop_place_valid_betweens vbspinner on spinner.id=vbspinner.stop_place_id " +
-                                                                                      " inner join valid_between vbinner on vbspinner.valid_betweens_id=vbinner.id where (vbinner.from_date" +
-                                                                                      " between  :from and :to or vbinner.to_date between  :from and :to ) " +
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from  stop_place sp inner join " +
+                                                                                      "(select spinner.netex_id, max(spinner.from_date) as maxFromDate from stop_place spinner " +
+                                                                                      " where (spinner.from_date between  :from and :to or spinner.to_date between  :from and :to ) " +
                                                                                       " group by  spinner.netex_id" +
-                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxFromDate=vb.from_date";
+                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxFromDate=sp.from_date";
 }
 

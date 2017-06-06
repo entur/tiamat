@@ -1,12 +1,10 @@
 package org.rutebanken.tiamat.model;
 
-import com.google.common.base.MoreObjects;
-
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import java.time.Instant;
 
-@Entity
-public class ValidBetween extends ValidityCondition {
+@Embeddable
+public class ValidBetween  {
 
     private Instant fromDate;
 

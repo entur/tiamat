@@ -118,12 +118,8 @@ class StopPlaceUpdater implements DataFetcher {
             stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
         }
 
-        if (input.get(VALID_BETWEENS) != null) {
-            List values = (List) input.get(VALID_BETWEENS);
-            stopPlace.getValidBetweens().clear();
-            for (Object value : values) {
-                stopPlace.getValidBetweens().add(validBetweenMapper.map((Map) value));
-            }
+        if (input.get(VALID_BETWEEN) != null) {
+            stopPlace.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
             isUpdated = true;
         }
         if (input.get(WEIGHTING) != null) {

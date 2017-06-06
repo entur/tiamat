@@ -8,8 +8,8 @@ import java.util.List;
 @MappedSuperclass
 public class EntityInVersionStructure extends EntityStructure {
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private final List<ValidBetween> validBetweens = new ArrayList<>();
+    @Embedded
+    private ValidBetween validBetween;
 
     private String versionComment;
 
@@ -36,10 +36,6 @@ public class EntityInVersionStructure extends EntityStructure {
 
     @Transient
     protected String derivedFromObjectRef;
-
-    public List<ValidBetween> getValidBetweens() {
-        return validBetweens;
-    }
 
     public String getDataSourceRef() {
         return dataSourceRef;
@@ -70,6 +66,13 @@ public class EntityInVersionStructure extends EntityStructure {
         this.changed = value;
     }
 
+    public ValidBetween getValidBetween() {
+        return validBetween;
+    }
+
+    public void setValidBetween(ValidBetween validBetween) {
+        this.validBetween = validBetween;
+    }
 
     public ModificationEnumeration getModification() {
         if (modification == null) {

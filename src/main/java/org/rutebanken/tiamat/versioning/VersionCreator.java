@@ -72,7 +72,7 @@ public class VersionCreator {
 
         List<Class<? extends EntityInVersionStructure>> commonClassesToConfigure =
                 Arrays.asList(TopographicPlace.class,
-                        PathLink.class, ValidBetween.class, PlaceEquipment.class,
+                        PathLink.class, PlaceEquipment.class,
                         WaitingRoomEquipment.class, SanitaryEquipment.class,
                         TicketingEquipment.class, ShelterEquipment.class,
                         CycleStorageEquipment.class, GeneralSign.class,
@@ -105,8 +105,7 @@ public class VersionCreator {
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
 
-        copy.getValidBetweens().clear();
-        copy.getValidBetweens().add(new ValidBetween(newVersionValidFrom));
+        copy.setValidBetween(new ValidBetween(newVersionValidFrom));
 
         return type.cast(copy);
     }
@@ -153,8 +152,8 @@ public class VersionCreator {
         }
 
         logger.debug("New version valid from {}", newVersionValidFrom);
-        if (entityInVersionStructure.getValidBetweens() != null && !entityInVersionStructure.getValidBetweens().isEmpty()) {
-            ValidBetween validBetween = entityInVersionStructure.getValidBetweens().get(0);
+        if (entityInVersionStructure.getValidBetween() != null ) {
+            ValidBetween validBetween = entityInVersionStructure.getValidBetween();
             validBetween.setToDate(newVersionValidFrom);
         }
         return entityInVersionStructure;

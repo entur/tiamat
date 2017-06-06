@@ -48,29 +48,15 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);
 
-        ValidBetween validBetween = new ValidBetween(Instant.now());
-        validBetween.getOriginalIds().add("1000");
-
-        stopPlace.getValidBetweens().add(validBetween);
-
         // Save first version
         stopPlace = stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
-
-        Object firstVersionValidBetweenId = getIdValue(stopPlace.getValidBetweens().get(0));
-        assertThat(firstVersionValidBetweenId).isNotNull();
 
         // Create new version
         StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
 
         Object actualStopPlaceId = getIdValue(newVersion);
         assertThat(actualStopPlaceId).isNull();
-
-        // Check that ID of ValidBetween has been excluded in the new version
-        Object actualValidBetweenId = getIdValue(newVersion.getValidBetweens().get(0));
-        assertThat(actualValidBetweenId)
-                .as("The id value of valid between should not have been mapped by orika: " + actualValidBetweenId)
-                .isNull();
     }
 
     @Ignore
@@ -81,13 +67,8 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         stopPlace.getOriginalIds().add("original-id");
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        ValidBetween validBetween = new ValidBetween(Instant.now());
-        validBetween.getOriginalIds().add("1000");
-        stopPlace.getValidBetweens().add(validBetween);
-
         StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
         assertThat(newVersion.getOriginalIds()).hasSize(1);
-        assertThat(newVersion.getValidBetweens().get(0).getOriginalIds()).hasSize(1);
     }
 
     private Object getIdValue(IdentifiedEntity entity) throws NoSuchFieldException, IllegalAccessException {
@@ -154,7 +135,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
         oldVersion.getQuays().add(quay);
 
-        oldVersion.getValidBetweens().add(new ValidBetween(Instant.now().minus(2, ChronoUnit.DAYS)));
+        oldVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, ChronoUnit.DAYS)));
 
         oldVersion = stopPlaceRepository.save(oldVersion);
 
@@ -165,16 +146,14 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
         oldVersion = versionCreator.terminateVersion(oldVersion, Instant.now());
 
-        assertThat(newVersion.getValidBetweens())
-                .isNotNull()
-                .isNotEmpty()
-                .hasSize(1);
+        assertThat(newVersion.getValidBetween())
+                .isNotNull();
 
-        System.out.println(oldVersion.getValidBetweens().get(0).getToDate());
-        assertThat(oldVersion.getValidBetweens().get(0).getToDate()).isGreaterThanOrEqualTo(beforeCreated);
+        System.out.println(oldVersion.getValidBetween().getToDate());
+        assertThat(oldVersion.getValidBetween().getToDate()).isGreaterThanOrEqualTo(beforeCreated);
 
 
-        ValidBetween validBetween = newVersion.getValidBetweens().get(0);
+        ValidBetween validBetween = newVersion.getValidBetween();
         assertThat(validBetween.getFromDate()).isGreaterThanOrEqualTo(beforeCreated);
         assertThat(validBetween.getToDate()).isNull();
 
