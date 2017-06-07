@@ -1,12 +1,13 @@
 package org.rutebanken.tiamat.rest.graphql;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.ValidatableResponse;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import org.junit.Before;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 
 
 public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
