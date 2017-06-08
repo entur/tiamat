@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -20,8 +21,12 @@ public class StopPlaceOperationsBuilder {
 
     @Autowired
     private StopPlaceQuayMover stopPlaceQuayMover;
+
     @Autowired
     private StopPlaceQuayMerger stopPlaceQuayMerger;
+
+    @Autowired
+    private StopPlaceQuayDeleter stopPlaceQuayDeleter;
 
     public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -63,6 +68,25 @@ public class StopPlaceOperationsBuilder {
                         .type(GraphQLString))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
                 .dataFetcher(environment -> stopPlaceQuayMover.moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
+                .build());
+
+        //Delete StopPlace
+        operations.add(newFieldDefinition()
+                .type(GraphQLBoolean)
+                .name(DELETE_STOP_PLACE)
+                .description("!!! Deletes all versions of StopPlace from database - use with caution !!!")
+                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
+                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
+                .build());
+
+        //Delete Quay from StopPlace
+        operations.add(newFieldDefinition()
+                .type(stopPlaceObjectType)
+                .name(DELETE_QUAY_FROM_STOP_PLACE)
+                .description("Removes quay from StopPlace")
+                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
+                .argument(newArgument().name(QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
+                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID)))
                 .build());
 
         return operations;

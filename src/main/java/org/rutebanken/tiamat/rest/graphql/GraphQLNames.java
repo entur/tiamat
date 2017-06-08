@@ -267,6 +267,7 @@ public class GraphQLNames {
     public static final String MUTATE_PARKING = "mutateParking";
 
 
+    public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";
     public static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
     public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
@@ -276,4 +277,6 @@ public class GraphQLNames {
     public static final String MERGE_QUAYS = "mergeQuays";
     public static final String MOVE_QUAYS_TO_STOP = "moveQuaysToStop";
     public static final String QUAY_IDS = "quayIds";
+    public static final String DELETE_STOP_PLACE = "deleteStopPlace";
+    public static final String DELETE_QUAY_FROM_STOP_PLACE = "deleteQuay";
 }
