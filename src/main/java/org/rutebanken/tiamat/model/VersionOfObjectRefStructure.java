@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -57,6 +58,13 @@ public class VersionOfObjectRefStructure implements Serializable {
 
         VersionOfObjectRefStructure other = (VersionOfObjectRefStructure) object;
 
-        return Objects.equals(this.ref, other.ref);
+        return Objects.equals(this.ref, other.ref)
+                && Objects.equals(this.version, other.version);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ref, version);
+    }
+
 }

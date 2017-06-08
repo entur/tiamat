@@ -58,6 +58,68 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
     }
 
+    /**
+     * See https://rutebanken.atlassian.net/browse/NRP-1601
+     *
+     * IDs might match incorrectly because of bad data.
+     * Make sure if we got a ID match, the distance should be checked.
+     * If the existing stop place and the incoming stop place is too far away from each other,
+     * fall back to look for nearby stops.
+     */
+    @Test
+    public void matchNearByStopPlaceIfIDMatchIsTooFarAway() throws Exception {
+
+        StopPlace tooFarAwayStopPlace = new StopPlace()
+                .withId("RUT:StopPlace:187187666")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Too far away"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("74"))
+                                .withLongitude(new BigDecimal("10"))));
+
+        StopPlace nearbyStopPlace = new StopPlace()
+                .withId("CBS:StopPlace:321")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Some stop place"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("74.2"))
+                                .withLongitude(new BigDecimal("10.2"))));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(tooFarAwayStopPlace, nearbyStopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+        StopPlace stopPlaceToBeMerged = new StopPlace()
+                .withId("RUT:StopPlace:187187666") // Same as the ID of the stop place which is too far away
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Some stop place"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("74.2002"))
+                                .withLongitude(new BigDecimal("10.20001"))));
+
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMerged);
+        publicationDeliveryParams.importType = ImportType.MERGE;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        StopPlace actualStopPlace = result.get(0);
+        publicationDeliveryTestHelper.hasOriginalId(nearbyStopPlace.getId(), actualStopPlace);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMerged.getId(), actualStopPlace);
+
+        assertThat(actualStopPlace.getName().getValue()).isNotEqualTo(tooFarAwayStopPlace.getName().getValue());
+        assertThat(actualStopPlace.getName().getValue()).isEqualTo(nearbyStopPlace.getName().getValue());
+
+    }
+
     @Test
     public void matchImportedStopOnNonNumericId() throws Exception {
 

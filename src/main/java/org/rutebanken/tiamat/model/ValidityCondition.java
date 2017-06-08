@@ -6,11 +6,19 @@ import javax.persistence.*;
 @MappedSuperclass
 public abstract class ValidityCondition extends DataManagedObjectStructure {
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private MultilingualStringEntity name;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "name_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "name_lang"))
+    })
+    @Embedded
+    private EmbeddableMultilingualString name;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private MultilingualStringEntity description;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "description_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "description_lang"))
+    })
+    @Embedded
+    private EmbeddableMultilingualString description;
 
     @Transient
     private VersionOfObjectRefStructure conditionedObjectRef;
@@ -18,11 +26,11 @@ public abstract class ValidityCondition extends DataManagedObjectStructure {
     @Transient
     private ValidityConditionRefStructure withConditionRef;
 
-    public MultilingualStringEntity getDescription() {
+    public EmbeddableMultilingualString getDescription() {
         return description;
     }
 
-    public void setDescription(MultilingualStringEntity description) {
+    public void setDescription(EmbeddableMultilingualString description) {
         this.description = description;
     }
 
@@ -43,11 +51,11 @@ public abstract class ValidityCondition extends DataManagedObjectStructure {
     }
 
 
-    public MultilingualStringEntity getName() {
+    public EmbeddableMultilingualString getName() {
         return name;
     }
 
-    public void setName(MultilingualStringEntity name) {
+    public void setName(EmbeddableMultilingualString name) {
         this.name = name;
     }
 }

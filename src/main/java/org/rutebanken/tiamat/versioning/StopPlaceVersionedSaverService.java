@@ -1,15 +1,18 @@
 package org.rutebanken.tiamat.versioning;
 
+import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
+import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.ValidBetweenRepository;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.time.Instant;
+import java.util.stream.Collectors;
+
 
 
 @Transactional
@@ -28,8 +34,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
 
     private final StopPlaceRepository stopPlaceRepository;
-
-    private final ValidBetweenRepository validBetweenRepository;
 
     private final VersionCreator versionCreator;
 
@@ -45,19 +49,20 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private final EntityChangedListener entityChangedListener;
 
+    private final TiamatObjectDiffer tiamatObjectDiffer;
+
 
     @Autowired
     public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
-                                          ValidBetweenRepository validBetweenRepository,
                                           VersionCreator versionCreator,
                                           AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
                                           TopographicPlaceLookupService countyAndMunicipalityLookupService,
                                           TariffZonesLookupService tariffZonesLookupService,
                                           StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
                                           NearbyStopPlaceFinder nearbyStopPlaceFinder,
-                                          EntityChangedListener entityChangedListener) {
+                                          EntityChangedListener entityChangedListener,
+                                          TiamatObjectDiffer tiamatObjectDiffer) {
         this.stopPlaceRepository = stopPlaceRepository;
-        this.validBetweenRepository = validBetweenRepository;
         this.versionCreator = versionCreator;
         this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
         this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
@@ -65,6 +70,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
         this.entityChangedListener = entityChangedListener;
+        this.tiamatObjectDiffer = tiamatObjectDiffer;
     }
 
     @Override
@@ -90,11 +96,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            existingStopPlace = versionCreator.terminateVersion(existingStopPlace, Instant.now());
-
-            if (existingStopPlace.getValidBetweens() != null && !existingStopPlace.getValidBetweens().isEmpty()) {
-                validBetweenRepository.save(existingStopPlace.getValidBetweens());
-            }
+            versionCreator.terminateVersion(existingStopPlace, Instant.now());
         }
 
         // Save latest version
@@ -102,6 +104,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);
+        if(existingVersion != null) {
+           tiamatObjectDiffer.logDifference(existingVersion, newVersion);
+        }
 
         if(newVersion.getQuays() != null) {
             stopPlaceByQuayOriginalIdFinder.updateCache(newVersion.getNetexId(),
@@ -127,11 +132,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         Instant now = Instant.now();
 
         ValidBetween validBetween;
-        if (!stopPlace.getValidBetweens().isEmpty()) {
-            validBetween = stopPlace.getValidBetweens().get(0);
+        if (stopPlace.getValidBetween() != null) {
+            validBetween = stopPlace.getValidBetween();
         } else {
             validBetween = new ValidBetween();
-            stopPlace.getValidBetweens().add(validBetween);
+            stopPlace.setValidBetween(validBetween);
         }
 
         if (validBetween.getFromDate() == null) {

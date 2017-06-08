@@ -61,7 +61,7 @@
         <assertj-core.version>3.2.0</assertj-core.version>
         <rest-assured.version>2.9.0</rest-assured.version>
         <javax.el.version>2.2.4</javax.el.version>
-        <com.h2database.version>1.4.191</com.h2database.version>
+        <com.h2database.version>1.4.193</com.h2database.version>
         <hikariCP.version>2.6.1</hikariCP.version>
         <commons.lang3.version>3.4</commons.lang3.version>
         <orika-core.version>1.4.6</orika-core.version>
@@ -159,7 +159,12 @@
             <artifactId>hazelcast-hibernate5</artifactId>
             <version>${hazelcast-hibernate5.version}</version>
         </dependency>
-
+        <!-- Due to maven artifact cache, this dependency needs to be explicit -->
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>

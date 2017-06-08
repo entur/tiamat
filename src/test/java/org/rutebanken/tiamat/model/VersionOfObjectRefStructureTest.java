@@ -12,8 +12,8 @@ public class VersionOfObjectRefStructureTest {
         VersionOfObjectRefStructure ref1 = new VersionOfObjectRefStructure("ref", "version");
         VersionOfObjectRefStructure ref2 = new VersionOfObjectRefStructure("ref", "version2");
 
-        // Should two references with different versions be equal?
-        assertThat(ref1).isEqualTo(ref2);
+        // Should two references with different versions be equal? NO
+        assertThat(ref1).isNotEqualTo(ref2);
     }
 
 }

@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -52,4 +54,16 @@ public class AccessibilityAssessment_VersionedChildStructure
         this.comment = value;
     }
 
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("id", id)
+                .add("netexId", netexId)
+                .add("version", version)
+                .add("mobilityImpairedAccess", mobilityImpairedAccess)
+                .add("limitations", limitations)
+                .toString();
+    }
 }

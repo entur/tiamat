@@ -1,10 +1,11 @@
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import java.time.Instant;
+import com.google.common.base.MoreObjects;
 
-@Entity
-public class ValidBetween extends ValidityCondition {
+import javax.persistence.Embeddable;
+import java.time.Instant;
+@Embeddable
+public class ValidBetween  {
 
     private Instant fromDate;
 
@@ -36,5 +37,14 @@ public class ValidBetween extends ValidityCondition {
 
     public void setToDate(Instant toDate) {
         this.toDate = toDate;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("from", fromDate)
+                .add("to", toDate)
+                .toString();
     }
 }

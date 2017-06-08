@@ -23,12 +23,12 @@ public class NetexIdProvider {
 
     }
 
-    public String getGeneratedId(IdentifiedEntity identifiedEntity) throws InterruptedException {
+    public String getGeneratedId(IdentifiedEntity identifiedEntity) {
         String entityTypeName = key(identifiedEntity);
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
-        return NetexIdHelper.getNetexId(entityTypeName, String.valueOf(longId));
+        return NetexIdHelper.getNetexId(entityTypeName, longId);
     }
 
     public void claimId(IdentifiedEntity identifiedEntity) {
@@ -36,7 +36,7 @@ public class NetexIdProvider {
         String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
 
         if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
-            logger.debug("Claimed ID contains valid prefix for claiming: {}", prefix);
+            logger.debug("Claimed ID {} contains valid prefix for claiming: {}", identifiedEntity.getNetexId(), prefix);
 
             if(NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
                 Long claimedId = NetexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());

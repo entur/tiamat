@@ -36,7 +36,7 @@ public class StopPlaceQuayMover {
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
-    public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId) {
+    public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId, String versionComment) {
 
         Set<StopPlace> sourceStopPlaces = resolveSourceStopPlaces(resolveQuays(quayIds));
 
@@ -57,6 +57,8 @@ public class StopPlaceQuayMover {
         Pair<StopPlace, StopPlace> pair = resolve(destinationStopPlaceId);
         centroidComputer.computeCentroidForStopPlace(pair.getRight());
         pair.getRight().getQuays().addAll(quaysToMove);
+        pair.getRight().setVersionComment(versionComment);
+
         StopPlace savedDestinationStopPlace = stopPlaceVersionedSaverService.saveNewVersion(pair.getLeft(), pair.getRight());
 
         logger.debug("Saved stop place with new quays {} {}", quayIds, savedDestinationStopPlace);

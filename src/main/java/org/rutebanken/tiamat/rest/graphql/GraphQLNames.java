@@ -37,6 +37,10 @@ public class GraphQLNames {
     public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity. Specify \"any\" to always reference the newest version";
     public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
+    public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
+    public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
+    public static final String TARIFF_ZONES = "tariffZones";
+
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
     public static final String OUTPUT_TYPE_VALID_BETWEEN = "ValidBetween";
@@ -91,6 +95,9 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT = "GeneralSign";
     public static final String INPUT_TYPE_GENERAL_SIGN_EQUIPMENT = OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_KEY_VALUES = "KeyValues";
+    public static final String INPUT_TYPE_KEY_VALUES = OUTPUT_TYPE_KEY_VALUES + INPUT_TYPE_POSTFIX;
 
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
@@ -182,6 +189,9 @@ public class GraphQLNames {
     public static final String SIGN_CONTENT_TYPE = "signContentType";
 
     public static final String IMPORTED_ID = "importedId";
+    public static final String KEY_VALUES = "keyValues";
+    public static final String KEY = "key";
+    public static final String VALUES = "values";
     public static final String VERSION = "version";
     public static final String VERSION_COMMENT = "versionComment";
     public static final String PUBLIC_CODE = "publicCode";
@@ -206,7 +216,7 @@ public class GraphQLNames {
     public static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
-    public static final String VALID_BETWEENS = "validBetweens";
+    public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";
 
@@ -255,4 +265,15 @@ public class GraphQLNames {
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
+
+
+    public static final String STOP_PLACE_ID = "stopPlaceId";
+    public static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
+    public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
+    public static final String FROM_QUAY_ID = "fromQuayId";
+    public static final String TO_QUAY_ID = "toQuayId";
+    public static final String MERGE_STOP_PLACES = "mergeStopPlaces";
+    public static final String MERGE_QUAYS = "mergeQuays";
+    public static final String MOVE_QUAYS_TO_STOP = "moveQuaysToStop";
+    public static final String QUAY_IDS = "quayIds";
 }

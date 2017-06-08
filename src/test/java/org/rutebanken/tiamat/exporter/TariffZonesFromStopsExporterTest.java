@@ -44,6 +44,25 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void handleUnresolvableTariffZoneRef() {
+
+        TariffZone tariffZone = new TariffZone();
+        tariffZone.setNetexId("VKT:TariffZone:201");
+        tariffZone.setVersion(1L);
+        tariffZoneRepository.save(tariffZone);
+
+        StopPlace netexStopPlace = new StopPlace();
+        netexStopPlace.setId("NSR:StopPlace:1");
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new TariffZoneRef().withRef("NSR:TariffZone:1")));
+
+        SiteFrame siteFrame = new SiteFrame();
+        tariffZonesFromStopsExporter.resolveTariffZones(Arrays.asList(netexStopPlace), siteFrame);
+
+        assertThat(siteFrame.getTariffZones().getTariffZone()).as("Number of tariffzones returned").hasSize(0);
+
+    }
+
+    @Test
     public void keepExistingTariffZones() {
 
         TariffZone tariffZone = new TariffZone();

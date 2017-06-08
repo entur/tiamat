@@ -4,7 +4,6 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.geolatte.geom.V;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -27,6 +26,7 @@ import java.util.*;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getPrivateCodeStructure;
 
 @Service("stopPlaceUpdater")
 @Transactional
@@ -118,12 +118,8 @@ class StopPlaceUpdater implements DataFetcher {
             stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
         }
 
-        if (input.get(VALID_BETWEENS) != null) {
-            List values = (List) input.get(VALID_BETWEENS);
-            stopPlace.getValidBetweens().clear();
-            for (Object value : values) {
-                stopPlace.getValidBetweens().add(validBetweenMapper.map((Map) value));
-            }
+        if (input.get(VALID_BETWEEN) != null) {
+            stopPlace.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
             isUpdated = true;
         }
         if (input.get(WEIGHTING) != null) {
@@ -212,6 +208,22 @@ class StopPlaceUpdater implements DataFetcher {
         }
         if (input.get(DESCRIPTION) != null) {
             entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
+            isUpdated = true;
+        }
+
+
+        if (input.get(KEY_VALUES) != null) {
+            List<Map> keyValues = (List) input.get(KEY_VALUES);
+
+            entity.getKeyValues().clear();
+
+            keyValues.forEach(inputMap-> {
+                String key = (String)inputMap.get(KEY);
+                List<String> values = (List<String>)inputMap.get(VALUES);
+                Value value = new Value(values);
+                entity.getKeyValues().put(key, value);
+            });
+
             isUpdated = true;
         }
 
@@ -318,12 +330,8 @@ class StopPlaceUpdater implements DataFetcher {
                     Map<String, Object> generalSignEquipment = (Map<String, Object>) item;
 
                     GeneralSign skilt = new GeneralSign();
-                    PrivateCodeStructure privateCode = new PrivateCodeStructure();
-                    privateCode.setValue((String) generalSignEquipment.get(PRIVATE_CODE));
-                    skilt.setPrivateCode(privateCode);
-                    if (generalSignEquipment.get(CONTENT) != null) {
-                        skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
-                    }
+                    skilt.setPrivateCode(getPrivateCodeStructure((Map) generalSignEquipment.get(PRIVATE_CODE)));
+                    skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
                     skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
                     equipments.getInstalledEquipment().add(skilt);
                 }

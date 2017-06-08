@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,27 @@ public class StopPlaceSplitterTest {
         List<StopPlace> actual = stopPlaceSplitter.split(Arrays.asList(stopPlace));
 
         assertThat(actual).hasSize(2);
+    }
+
+    @Test
+    public void keepStopType() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        Quay quay = new Quay();
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 30)));
+
+        Quay quay2 = new Quay();
+        quay2.setCentroid(geometryFactory.createPoint(new Coordinate(6, 31)));
+
+
+        stopPlace.getQuays().add(quay);
+        stopPlace.getQuays().add(quay2);
+
+        List<StopPlace> actual = stopPlaceSplitter.split(Arrays.asList(stopPlace));
+
+        assertThat(actual).hasSize(2);
+        assertThat(actual).extracting(StopPlace::getStopPlaceType).containsOnly(StopTypeEnumeration.ONSTREET_BUS);
     }
 
     /**
