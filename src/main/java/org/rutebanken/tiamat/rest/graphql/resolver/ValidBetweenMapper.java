@@ -23,8 +23,6 @@ public class ValidBetweenMapper {
     public ValidBetween map(Map input) {
         ValidBetween validBetween = new ValidBetween();
 
-        idResolver.extractAndSetNetexId(ID, input, validBetween);
-
         if(input.get(VALID_BETWEEN_FROM_DATE) != null) {
             validBetween.setFromDate((Instant) input.get(VALID_BETWEEN_FROM_DATE));
         }

@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
@@ -391,14 +392,24 @@ StopPlaceRegisterGraphQLSchema {
                             .name(WEIGHTING)
                             .type(interchangeWeightingEnum))
                     .field(newFieldDefinition()
+                            .name(PARENT_SITE_REF)
+                            .type(GraphQLString)
+                            .dataFetcher(env -> {
+                                SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
+                                if (parentSiteRef != null) {
+                                    return parentSiteRef.getRef();
+                                }
+                                return null;
+                            }))
+                    .field(newFieldDefinition()
                             .name(VERSION_COMMENT)
                             .type(GraphQLString))
                     .field(newFieldDefinition()
                             .name(QUAYS)
                             .type(new GraphQLList(quayObjectType)))
                     .field(newFieldDefinition()
-                            .name(VALID_BETWEENS)
-                            .type(new GraphQLList(validBetweenObjectType)))
+                            .name(VALID_BETWEEN)
+                            .type(validBetweenObjectType))
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
@@ -472,14 +483,17 @@ StopPlaceRegisterGraphQLSchema {
                         .name(WEIGHTING)
                         .type(interchangeWeightingEnum))
                 .field(newInputObjectField()
+                        .name(PARENT_SITE_REF)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
                         .name(VERSION_COMMENT)
                         .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectInputType)))
                 .field(newInputObjectField()
-                        .name(VALID_BETWEENS)
-                        .type(new GraphQLList(validBetweenInputObjectType)))
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenInputObjectType))
                 .build();
     }
 

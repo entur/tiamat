@@ -44,8 +44,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
     @Test
     public void fillGapsInStopPlaces() {
-        int explicitIdPostfix = 20000;
-        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), String.valueOf(explicitIdPostfix));
+        long explicitIdPostfix = 20000;
+        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), explicitIdPostfix);
         StopPlace explicitIdStopPlace = new StopPlace();
         explicitIdStopPlace.setNetexId(explicitId);
         explicitIdStopPlace = stopPlaceRepository.save(explicitIdStopPlace);
@@ -225,16 +225,16 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         validBetween.setFromDate(Instant.now());
         validBetween.setToDate(Instant.now().plus(70, ChronoUnit.DAYS));
         
-        stopPlace.getValidBetweens().add(validBetween);
+        stopPlace.setValidBetween(validBetween);
 
         stopPlaceRepository.save(stopPlace);
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace.getValidBetweens())
-                .isNotEmpty();
+        assertThat(actualStopPlace.getValidBetween())
+                .isNotNull();
 
-        ValidBetween actualValidBetween = actualStopPlace.getValidBetweens().get(0);
+        ValidBetween actualValidBetween = actualStopPlace.getValidBetween();
         assertThat(actualValidBetween.getFromDate()).isEqualTo(validBetween.getFromDate());
         assertThat(actualValidBetween.getToDate()).isEqualTo(validBetween.getToDate());
     }

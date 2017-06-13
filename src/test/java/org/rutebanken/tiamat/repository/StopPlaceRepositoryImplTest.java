@@ -737,7 +737,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(version);
         stopPlace.setNetexId(id);
-        stopPlace.getValidBetweens().add(new ValidBetween(startOfPeriod, endOfPeriod));
+        stopPlace.setValidBetween(new ValidBetween(startOfPeriod, endOfPeriod));
         return stopPlaceRepository.save(stopPlace);
     }
 

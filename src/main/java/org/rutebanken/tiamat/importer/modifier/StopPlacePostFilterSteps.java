@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.importer.modifier;
 
-import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
-import org.rutebanken.tiamat.importer.modifier.name.*;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;

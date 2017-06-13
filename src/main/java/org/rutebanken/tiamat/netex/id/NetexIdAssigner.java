@@ -24,17 +24,11 @@ public class NetexIdAssigner {
     public void assignNetexId(IdentifiedEntity identifiedEntity) {
 
         if(identifiedEntity.getNetexId() == null) {
-            try {
-                String netexId = netexIdProvider.getGeneratedId(identifiedEntity);
-                identifiedEntity.setNetexId(netexId);
-                logger.trace("Assigned ID {} to entity", netexId);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Error generating new ID for entity: "+identifiedEntity, e);
-            }
-
+            String netexId = netexIdProvider.getGeneratedId(identifiedEntity);
+            identifiedEntity.setNetexId(netexId);
+            logger.trace("Assigned ID {} to entity", netexId);
         } else {
             logger.trace("Incoming object claims explicit netex ID {}.", identifiedEntity.getNetexId());
-
             netexIdProvider.claimId(identifiedEntity);
         }
     }

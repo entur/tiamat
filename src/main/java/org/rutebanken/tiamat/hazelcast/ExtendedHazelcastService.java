@@ -9,12 +9,15 @@ import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.rutebanken.tiamat.netex.id.GeneratedIdState.LAST_IDS_FOR_ENTITY;
-
+@Service
 public class ExtendedHazelcastService extends HazelCastService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtendedHazelcastService.class);
@@ -36,7 +39,7 @@ public class ExtendedHazelcastService extends HazelCastService {
      */
     private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 2;
 
-    public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
+    public ExtendedHazelcastService(@Autowired KubernetesService kubernetesService, @Value("hazelcast.management.url:")  String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
     }
 

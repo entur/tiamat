@@ -234,8 +234,8 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
         assertThat(firstVersion).isNotNull();
         assertThat(secondVersion).isNotNull();
-        assertThat(firstVersion.getValidBetweens().get(0).getToDate()).isLessThan(Instant.now());
-        assertThat(secondVersion.getValidBetweens().get(0).getToDate()).isNull();
+        assertThat(firstVersion.getValidBetween().getToDate()).isLessThan(Instant.now());
+        assertThat(secondVersion.getValidBetween().getToDate()).isNull();
         assertThat(firstVersion.getQuays()).hasSize(3);
         assertThat(secondVersion.getQuays()).hasSize(2);
 

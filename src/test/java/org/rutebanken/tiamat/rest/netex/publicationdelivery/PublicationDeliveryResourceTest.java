@@ -1,16 +1,29 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import com.google.common.collect.Sets;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.PrivateCodeStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopTypeEnumeration;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.rutebanken.netex.model.TopographicPlaceRefStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +138,47 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
         publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+    }
+
+    @Test
+    public void ignoreStopPlaceTypes() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:321")
+                .withVersion("3")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.ignoreStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.BUS_STATION);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response, false);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void allowOnlyStopPlaceTypes() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:3231")
+                .withVersion("2")
+                .withStopPlaceType(StopTypeEnumeration.METRO_STATION);
+
+        StopPlace other = new StopPlace()
+                .withId("XYZ:StopPlace:9988")
+                .withVersion("2")
+                .withStopPlaceType(StopTypeEnumeration.AIRPORT);
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.allowOnlyStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.METRO_STATION);
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace, other);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStopPlaceType().equals(StopTypeEnumeration.METRO_STATION));
     }
 
     @Test
@@ -986,6 +1040,39 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
 
 
     @Test
+    public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
+        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
+        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        StopPlace stopPlace1 = new StopPlace()
+                                       .withId("XYZ:Stopplace:1")
+                                       .withVersion("1")
+                                       .withName(new MultilingualString().withValue("New stop1"))
+                                       .withValidBetween(new ValidBetween().withFromDate(firstValidFrom).withToDate(secondValidFrom), new ValidBetween().withFromDate(secondValidFrom))
+                                       .withCentroid(new SimplePoint_VersionStructure()
+                                                             .withLocation(new LocationStructure()
+                                                                                   .withLatitude(new BigDecimal("59.914353"))
+                                                                                   .withLongitude(new BigDecimal("10.806387"))));
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<StopPlace> changedStopPlaces = extractStopPlaces(response);
+        Assert.assertEquals(1, changedStopPlaces.size());
+        StopPlace stopPlace = changedStopPlaces.get(0);
+
+        List<ValidBetween> actualValidBetween = stopPlace.getValidBetween();
+
+        assertThat(actualValidBetween)
+                .as("Stop Place should have actualValidBetween set")
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        assertThat(actualValidBetween.get(0).getFromDate()).isEqualTo(firstValidFrom);
+    }
+
+
+    @Test
     public void exportStopPlacesWithEffectiveChangedInPeriod() throws Exception {
         OffsetDateTime validFrom = OffsetDateTime.now().minusDays(3);
         StopPlace stopPlace1 = new StopPlace()
@@ -1550,6 +1637,11 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         PublicationDeliveryStructure deliveryStructure = unmarshal(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        return extractStopPlaces(deliveryStructure);
+    }
+
+    private List<StopPlace> extractStopPlaces(PublicationDeliveryStructure deliveryStructure) throws JAXBException {
+
 
         List<StopPlace> stopPlaces = new ArrayList<>();
         for (JAXBElement<? extends Common_VersionFrameStructure> frameStructureElmt : deliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame()) {
@@ -1563,7 +1655,6 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
             }
         }
         return stopPlaces;
-
     }
 
     private static final JAXBContext jaxbContext;

@@ -24,7 +24,7 @@ public class NetexIdHelper {
 
     private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
 
-    public static String getNetexId(String type, String id) {
+    public static String getNetexId(String type, long id) {
         return NSR + ":" + type + ":" + id;
     }
 
@@ -33,7 +33,7 @@ public class NetexIdHelper {
      * TODO: Move to test
      */
     public static String generateRandomizedNetexId(IdentifiedEntity identifiedEntity) {
-        return getNetexId(determineIdType(identifiedEntity), String.valueOf(new Random().nextInt()));
+        return getNetexId(determineIdType(identifiedEntity), new Random().nextInt());
     }
 
     public static boolean isNsrId(String netexId) {
