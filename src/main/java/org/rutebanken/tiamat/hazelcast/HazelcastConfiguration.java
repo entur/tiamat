@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.hazelcast;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +12,8 @@ public class HazelcastConfiguration {
      * To be able to use hazelcast instance in other parts of the application, expose it as spring bean here.
      */
     @Bean
-    public HazelcastInstance getHazelcastInstanceFromHazelcastService(@Autowired ExtendedHazelcastService extendedHazelcastService) {
-        return extendedHazelcastService.getHazelcastInstance();
+    public HazelcastInstance getHazelcastInstanceFromTiamatHazelcastCacheRegionFactory() {
+        return TiamatHazelcastCacheRegionFactory.getHazelCastInstance();
     }
 
 }
