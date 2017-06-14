@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 
 public class StopPlaceSearch {
@@ -17,17 +18,19 @@ public class StopPlaceSearch {
     private Pageable pageable;
     private boolean allVersions;
     private Long version;
+    private Instant pointInTime;
 
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, Pageable pageable, Long version) {
+                            List<String> netexIdList, boolean allVersions, Instant pointInTime, Pageable pageable, Long version) {
         this.query = query;
         this.municipalityIds = municipalityIds;
         this.countyIds = countyIds;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
+        this.pointInTime = pointInTime;
         this.pageable = pageable;
         this.version = version;
     }
@@ -116,6 +119,14 @@ public class StopPlaceSearch {
         this.allVersions = allVersions;
     }
 
+    public Instant getPointInTime() {
+        return pointInTime;
+    }
+
+    public void setPointInTime(Instant pointInTime) {
+        this.pointInTime = pointInTime;
+    }
+
     public static class Builder {
 
         private String query;
@@ -126,6 +137,7 @@ public class StopPlaceSearch {
         private boolean allVersions;
         private Pageable pageable = new PageRequest(0, 20);
         private Long version;
+        private Instant pointInTime;
 
         public Builder setQuery(String query) {
             this.query = query;
@@ -167,8 +179,13 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setPointInTime(Instant pointInTime) {
+            this.pointInTime = pointInTime;
+            return this;
+        }
+
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pageable, version);
+            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pointInTime, pageable, version);
         }
 
     }

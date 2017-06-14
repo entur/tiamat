@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
 
-import com.google.api.client.util.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -10,7 +9,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.jdbc.internal.*;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -29,6 +28,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 
@@ -49,11 +49,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private GeometryFactory geometryFactory;
 
     /**
-     * Find nearby stop places, specifying a bounding box.
+     * Find nearby stop places that are valid 'now', specifying a bounding box.
      * Optionally, a stop place ID to ignore can be defined.
      */
     @Override
     public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable) {
+        return findStopPlacesWithin(xMin, yMin, xMax, yMax, ignoreStopPlaceId, Instant.now(), pageable);
+    }
+
+    /**
+     * Find nearby stop places that are valid at the given point in time, specifying a bounding box.
+     * Optionally, a stop place ID to ignore can be defined.
+     */
+    @Override
+    public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable) {
         Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
@@ -61,11 +70,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         String queryString = "SELECT s FROM StopPlace s " +
                                      "WHERE within(s.centroid, :filter) = true " +
                                      "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
-                                     "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId)";
+                                     "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId) ";
+        if (pointInTime != null) {
+            queryString += "AND ((s.validBetween.fromDate IS NULL OR s.validBetween.fromDate <= :pointInTime) AND (s.validBetween.toDate IS NULL OR s.validBetween.toDate > :pointInTime))";
+        }
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+
+        if (pointInTime != null) {
+            query.setParameter("pointInTime", pointInTime);
+        }
+
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 
@@ -434,6 +451,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         } else if (!stopPlaceSearch.isAllVersions()) {
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
+        }
+
+        if (stopPlaceSearch.getPointInTime() != null) {
+            operators.add("and");
+            //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
+            wheres.add("((s.from_date IS NULL AND s.to_date IS NULL) OR (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))");
+            parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         }
 
         for (int i = 0; i < wheres.size(); i++) {

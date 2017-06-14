@@ -19,6 +19,8 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable);
 
+    Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable);
+
     String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
 
     String findNearbyStopPlace(Envelope envelope, String name);

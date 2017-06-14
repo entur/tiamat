@@ -321,6 +321,11 @@ StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLString)
                 .description("Searches for StopPlace by importedId.")
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(POINT_IN_TIME)
+                .type(dateScalar.getGraphQLDateScalar())
+                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, 'now' is used.")
+                .build());
         return arguments;
     }
 
@@ -352,6 +357,17 @@ StopPlaceRegisterGraphQLSchema {
                 .name(IGNORE_STOPPLACE_ID)
                 .type(GraphQLString)
                 .description("ID of StopPlace to excluded from result.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(INCLUDE_EXPIRED)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true if expired StopPlaces should be returned, default is 'false'.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(POINT_IN_TIME)
+                .type(dateScalar.getGraphQLDateScalar())
+                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, 'now' is used.")
                 .build());
         return arguments;
     }

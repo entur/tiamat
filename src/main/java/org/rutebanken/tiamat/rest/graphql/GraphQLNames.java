@@ -204,6 +204,7 @@ public class GraphQLNames {
     public static final String PAGE = "page";
     public static final String SIZE = "size";
     public static final String ALL_VERSIONS = "allVersions";
+    public static final String POINT_IN_TIME = "pointInTime";
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";
@@ -219,6 +220,7 @@ public class GraphQLNames {
     public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";
+    public static final String INCLUDE_EXPIRED = "includeExpired";
 
     public static final String NAME = "name";
     public static final String NAME_TYPE = "nameType";
