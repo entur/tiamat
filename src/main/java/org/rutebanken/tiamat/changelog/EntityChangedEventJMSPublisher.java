@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -24,11 +23,6 @@ public class EntityChangedEventJMSPublisher implements EntityChangedListener {
 
     @Value("${changelog.publish.enabled:false}")
     private boolean publish;
-
-    @Autowired
-    TransactionTemplate transactionTemplate;
-
-
 
     @Override
     public void onChange(EntityInVersionStructure entity) {
