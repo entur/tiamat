@@ -58,14 +58,6 @@ class StopPlaceFetcher implements DataFetcher {
             stopPlaceSearchBuilder.setAllVersions(allVersions);
         }
 
-        Instant pointInTime;
-        if (environment.getArgument(POINT_IN_TIME) != null) {
-            pointInTime = environment.getArgument(POINT_IN_TIME);
-        } else {
-            pointInTime = Instant.now();
-        }
-        stopPlaceSearchBuilder.setPointInTime(pointInTime);
-
         if (netexId != null && !netexId.isEmpty()) {
 
             try {
@@ -90,6 +82,16 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
+
+            Instant pointInTime;
+            if (environment.getArgument(POINT_IN_TIME) != null) {
+                pointInTime = environment.getArgument(POINT_IN_TIME);
+            } else {
+                pointInTime = Instant.now();
+            }
+
+            stopPlaceSearchBuilder.setPointInTime(pointInTime);
+
             List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
             if (stopTypes != null && !stopTypes.isEmpty()) {
                 stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
