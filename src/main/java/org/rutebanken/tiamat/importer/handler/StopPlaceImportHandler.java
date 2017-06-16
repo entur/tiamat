@@ -1,5 +1,13 @@
 package org.rutebanken.tiamat.importer.handler;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
@@ -25,11 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Component
 public class StopPlaceImportHandler {
@@ -114,7 +117,7 @@ public class StopPlaceImportHandler {
                 tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
             }
 
-            final Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
+            Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", publicationDeliveryParams.importType);
 
             if (publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
@@ -132,6 +135,12 @@ public class StopPlaceImportHandler {
                     }
                 }
             }
+            
+    		// Filter uniques by StopPlace.id#version
+            Map<String,org.rutebanken.netex.model.StopPlace> uniqueById = new HashMap<>();
+            importedOrMatchedNetexStopPlaces.stream().forEach(e -> uniqueById.put(e.getId()+"#"+e.getVersion(), e));
+            importedOrMatchedNetexStopPlaces =  uniqueById.values();
+            
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedMatchedOrUpdated);
 
             tariffZonesFromStopsExporter.resolveTariffZones(importedOrMatchedNetexStopPlaces, responseSiteframe);
