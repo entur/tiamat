@@ -2,12 +2,15 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 @MappedSuperclass
 public class EntityInVersionStructure extends EntityStructure {
 
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "fromDate", column = @Column(name = "from_date")),
+            @AttributeOverride(name = "toDate", column = @Column(name = "to_date"))
+    })
     @Embedded
     private ValidBetween validBetween;
 

@@ -240,6 +240,45 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
 
     @Test
+    public void findStopPlacesWithinIncludeExpiredVersions() throws Exception {
+
+        double xMin = 10.1;
+        double yMin = 59.1;
+
+        double xMax = 10.9;
+        double yMax = 59.9;
+
+        StopPlace expiredStopPlace = createStopPlace(59.3, 10.5);
+
+        ValidBetween expiredValidBetween = new ValidBetween(Instant.now().minusSeconds(1000), Instant.now().minusSeconds(100));
+        expiredStopPlace.setValidBetween(expiredValidBetween);
+
+        StopPlace openEndedStopPlace = createStopPlace(59.4, 10.6);
+        ValidBetween openEndedValidBetween = new ValidBetween(expiredValidBetween.getToDate());
+        openEndedStopPlace.setValidBetween(openEndedValidBetween);
+
+        expiredStopPlace = stopPlaceRepository.save(expiredStopPlace);
+        openEndedStopPlace = stopPlaceRepository.save(openEndedStopPlace);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(xMin, yMin, xMax, yMax, null, pageable);
+        assertThat(result).hasSize(1);
+        // Default behaviour should omit expired StopPlaces - i.e. only return openEndedStopPlace
+        assertThat(result.getContent().get(0).getNetexId())
+                .isEqualTo(openEndedStopPlace.getNetexId());
+
+
+        Instant pointInTime = expiredValidBetween.getFromDate().plusSeconds(1);
+        Page<StopPlace> expirySearchResult = stopPlaceRepository.findStopPlacesWithin(xMin, yMin, xMax, yMax, null, pointInTime, pageable);
+        assertThat(expirySearchResult).hasSize(1); // timestamp set to *before* openEndedStopPlace
+
+        assertThat(expirySearchResult.getContent().get(0).getNetexId())
+                .isEqualTo(expiredStopPlace.getNetexId());
+    }
+
+
+    @Test
     public void findNearbyStopPlace() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("name", ""));
@@ -725,6 +764,49 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         accumulatedStops.addAll(changedStopsP1.getContent());
         assertContainsOnlyInExactVersion(accumulatedStops, currentVersion, expiredInPeriod, newInPeriod);
 
+    }
+
+    @Test
+    public void findStopPlaceForSpecificPointInTime() throws Exception {
+        String stopPlaceName = "Nesbru";
+
+        ValidBetween expiredValidBetween = new ValidBetween(Instant.now().minusSeconds(1000), Instant.now().minusSeconds(100 ));
+        StopPlace expiredStopPlace = createStopPlaceWithMunicipality(stopPlaceName, null);
+        expiredStopPlace.setValidBetween(expiredValidBetween);
+        stopPlaceRepository.save(expiredStopPlace);
+
+        ValidBetween openendedValidBetween = new ValidBetween(Instant.now().minusSeconds(100 ));
+        StopPlace newestStopPlace = createStopPlaceWithMunicipality(stopPlaceName, null);
+        newestStopPlace.setValidBetween(openendedValidBetween);
+        stopPlaceRepository.save(newestStopPlace);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        StopPlaceSearch search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setPointInTime(Instant.now().minusSeconds(1000))
+                .setPageable(pageable).build();
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
+        assertThat(result)
+                .extracting(IdentifiedEntity::getNetexId)
+                .contains(expiredStopPlace.getNetexId())
+                .doesNotContain(newestStopPlace.getNetexId());
+
+
+        pageable = new PageRequest(0, 10);
+
+        search = new StopPlaceSearch.Builder()
+                .setQuery(stopPlaceName)
+                .setPointInTime(Instant.now())
+                .setPageable(pageable).build();
+
+        result = stopPlaceRepository.findStopPlace(search);
+        assertThat(result)
+                .extracting(IdentifiedEntity::getNetexId)
+                .contains(newestStopPlace.getNetexId())
+                .doesNotContain(expiredStopPlace.getNetexId())
+        ;
     }
 
     private void assertContainsOnlyInExactVersion(Collection<StopPlace> actual, StopPlace... expected) {

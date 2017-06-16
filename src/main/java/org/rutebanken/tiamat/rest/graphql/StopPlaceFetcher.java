@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,14 @@ class StopPlaceFetcher implements DataFetcher {
         if(allVersions != null) {
             stopPlaceSearchBuilder.setAllVersions(allVersions);
         }
+
+        Instant pointInTime;
+        if (environment.getArgument(POINT_IN_TIME) != null) {
+            pointInTime = environment.getArgument(POINT_IN_TIME);
+        } else {
+            pointInTime = Instant.now();
+        }
+        stopPlaceSearchBuilder.setPointInTime(pointInTime);
 
         if (netexId != null && !netexId.isEmpty()) {
 
@@ -128,8 +137,12 @@ class StopPlaceFetcher implements DataFetcher {
                     ignoreStopPlaceId = environment.getArgument(IGNORE_STOPPLACE_ID);
                 }
 
+                if (environment.getArgument(INCLUDE_EXPIRED)) {
+                    pointInTime = null;
+                }
+
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
-                        boundingBox.yMax, ignoreStopPlaceId, pageable);
+                        boundingBox.yMax, ignoreStopPlaceId, pointInTime, pageable);
             } else {
                     stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }

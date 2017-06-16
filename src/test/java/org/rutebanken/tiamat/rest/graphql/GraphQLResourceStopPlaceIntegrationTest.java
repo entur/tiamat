@@ -8,8 +8,10 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.HashSet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
@@ -270,6 +272,75 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
     }
+
+
+    @Test
+    public void searchForExpiredStopPlace() {
+
+        String name = "Gamleveien";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
+
+        Instant fromDate = Instant.now().minusSeconds(10000);
+        Instant toDate = Instant.now().minusSeconds(1000);
+
+        ValidBetween validBetween = new ValidBetween(fromDate, toDate);
+        stopPlace.setValidBetween(validBetween);
+        stopPlaceRepository.save(stopPlace);
+
+        //Ensure that from- and toDate is before "now"
+        assertThat(fromDate.isBefore(Instant.now()));
+        assertThat(toDate.isBefore(Instant.now()));
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (query:\\\"" + name + "\\\" pointInTime:\\\"" + stopPlace.getValidBetween().getFromDate().plusSeconds(10) + "\\\") { " +
+                "    name {value} " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        // Verify that pointInTime within validity-period returns expected StopPlace
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", Matchers.hasSize(1));
+
+
+        // Verify that pointInTime *after* validity-period returns null
+        graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (query:\\\"" + name + "\\\", pointInTime:\\\"" + stopPlace.getValidBetween().getToDate().plusSeconds(10).toString() + "\\\") { " +
+                "    name {value} " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", Matchers.hasSize(0));
+
+
+        // Verify that pointInTime *before* validity-period returns null
+        graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (query:\\\"" + name + "\\\", pointInTime:\\\"" + stopPlace.getValidBetween().getFromDate().minusSeconds(100).toString() + "\\\") { " +
+                "    name {value} " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", Matchers.hasSize(0));
+
+        // Verify that no pointInTime (i.e. now) returns null
+        graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (query:\\\"" + name + "\\\") { " +
+                "    name {value} " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", Matchers.hasSize(0));
+    }
+
 
     @Test
     public void searchForTramStopWithMunicipalityAndCounty() {
