@@ -21,24 +21,33 @@ public class EntityChangedEventJMSPublisher implements EntityChangedListener {
     @Value("${changelog.queue.name:IrkallaChangelogQueue}")
     private String queueName;
 
-    @Value("${changelog.publish.enabled:false}")
+    @Value("${changelog.publish.enabled:true}")
     private boolean publish;
 
     @Override
     public void onChange(EntityInVersionStructure entity) {
         if (publish && isLoggedEntity(entity)) {
-            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity).toString());
+            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, false).toString());
         }
     }
 
-    protected EntityChangedEvent toEntityChangedEvent(EntityInVersionStructure entity) {
+    @Override
+    public void onDelete(EntityInVersionStructure entity) {
+        if (publish && isLoggedEntity(entity)) {
+            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, true).toString());
+        }
+    }
+
+    protected EntityChangedEvent toEntityChangedEvent(EntityInVersionStructure entity, boolean deleted) {
         EntityChangedEvent event = new EntityChangedEvent();
         event.msgId = UUID.randomUUID().toString();
         event.entityType = getEntityType(entity);
         event.entityId = entity.getNetexId();
         event.entityVersion = (entity).getVersion();
 
-        if (entity.getVersion() == 1) {
+        if (deleted) {
+            event.crudAction = EntityChangedEvent.CrudAction.DELETE;
+        } else if (entity.getVersion() == 1) {
             event.crudAction = EntityChangedEvent.CrudAction.CREATE;
         } else if (isDeactivated(entity)) {
             event.crudAction = EntityChangedEvent.CrudAction.REMOVE;
@@ -48,6 +57,7 @@ public class EntityChangedEventJMSPublisher implements EntityChangedListener {
 
         return event;
     }
+
 
     private boolean isDeactivated(EntityInVersionStructure entity) {
         if (entity.getValidBetween() == null) {

@@ -3,9 +3,13 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
+import org.rutebanken.tiamat.changelog.EntityChangedEvent;
+import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -16,6 +20,14 @@ import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+
+    @Autowired
+    private EntityChangedJMSListener entityChangedJMSListener;
+
+    @Before
+    public void cleanReceivedJMS(){
+        entityChangedJMSListener.popEvents();
+    }
 
     @Test
     public void retrieveStopPlaceWithTwoQuays() throws Exception {
@@ -567,6 +579,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat));
+
+        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue();
     }
 
     @Test
@@ -853,6 +867,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     public void testSimpleMutationAddSecondQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1l);
         stopPlace.setName(new EmbeddableMultilingualString("Espa"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
 
@@ -926,6 +941,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
+
+        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE)).isTrue();
     }
 
 
@@ -934,6 +951,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     public void testMutationUpdateStopPlaceCreateQuayAndUpdateQuay() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1l);
         stopPlace.setName(new EmbeddableMultilingualString("Espa"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
 
@@ -1020,6 +1038,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
+
+        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE)).isTrue();
     }
 
     /**

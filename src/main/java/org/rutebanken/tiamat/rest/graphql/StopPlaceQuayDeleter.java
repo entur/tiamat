@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,10 +29,14 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private AuthorizationService authorizationService;
 
+    @Autowired
+    private EntityChangedListener entityChangedListener;
+
     protected boolean deleteStopPlace(String stopPlaceId) {
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
         stopPlaceRepository.delete(stopPlaces);
+        notifyDeleted(stopPlaces);
         return true;
     }
 
@@ -61,5 +67,12 @@ public class StopPlaceQuayDeleter {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
         return stopPlaces;
+    }
+
+    private void notifyDeleted(List<StopPlace> stopPlaces) {
+        Collections.sort(stopPlaces,
+                (o1, o2) -> Long.compare(o1.getVersion(), o2.getVersion()));
+        StopPlace newest = stopPlaces.get(stopPlaces.size() - 1);
+        entityChangedListener.onDelete(newest);
     }
 }

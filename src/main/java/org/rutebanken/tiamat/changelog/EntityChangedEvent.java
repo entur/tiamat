@@ -12,7 +12,7 @@ public class EntityChangedEvent {
 
     public enum EntityType {STOP_PLACE}
 
-    public enum CrudAction {CREATE, UPDATE, REMOVE}
+    public enum CrudAction {CREATE, UPDATE, REMOVE, DELETE}
 
     public String msgId;
 
@@ -23,7 +23,6 @@ public class EntityChangedEvent {
     public Long entityVersion;
 
     public CrudAction crudAction;
-    // valid from?
 
     public String toString() {
         try {

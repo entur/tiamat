@@ -5,4 +5,6 @@ import org.rutebanken.tiamat.model.EntityInVersionStructure;
 public interface EntityChangedListener {
 
     void onChange(EntityInVersionStructure entity);
+
+    void onDelete(EntityInVersionStructure entity);
 }

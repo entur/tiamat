@@ -17,7 +17,7 @@ public class EntityChangedEventJMSPublisherTest {
     public void createdStopPlaceIsMappedToCreatedEvent() {
         StopPlace stopPlace = stopPlace(1l, NOW, null);
 
-        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace);
+        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace, false);
         Assert.assertEquals(EntityChangedEvent.EntityType.STOP_PLACE, event.entityType);
         Assert.assertEquals(stopPlace.getNetexId(), event.entityId);
         Assert.assertEquals(EntityChangedEvent.CrudAction.CREATE, event.crudAction);
@@ -28,7 +28,7 @@ public class EntityChangedEventJMSPublisherTest {
     public void updatedStopPlaceIsMappedToUpdatedEvent() {
         StopPlace stopPlace = stopPlace(2l, NOW, null);
 
-        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace);
+        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace, false);
         Assert.assertEquals(EntityChangedEvent.EntityType.STOP_PLACE, event.entityType);
         Assert.assertEquals(stopPlace.getNetexId(), event.entityId);
         Assert.assertEquals(EntityChangedEvent.CrudAction.UPDATE, event.crudAction);
@@ -39,11 +39,23 @@ public class EntityChangedEventJMSPublisherTest {
     public void deactivatedStopPlaceIsMappedToRemovedEvent() {
         StopPlace stopPlace = stopPlace(4l, NOW, NOW.plusMillis(2000));
 
-        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace);
+        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace, false);
         Assert.assertEquals(EntityChangedEvent.EntityType.STOP_PLACE, event.entityType);
         Assert.assertEquals(stopPlace.getNetexId(), event.entityId);
         Assert.assertEquals(EntityChangedEvent.CrudAction.REMOVE, event.crudAction);
     }
+
+
+    @Test
+    public void deletedStopPlaceIsMappedToDeleteEvent() {
+        StopPlace stopPlace = stopPlace(1l, NOW, null);
+
+        EntityChangedEvent event = jmsPublisher.toEntityChangedEvent(stopPlace, true);
+        Assert.assertEquals(EntityChangedEvent.EntityType.STOP_PLACE, event.entityType);
+        Assert.assertEquals(stopPlace.getNetexId(), event.entityId);
+        Assert.assertEquals(EntityChangedEvent.CrudAction.DELETE, event.crudAction);
+    }
+
 
     private StopPlace stopPlace(Long version, Instant validFrom, Instant validTo) {
         StopPlace stopPlace = new StopPlace();
