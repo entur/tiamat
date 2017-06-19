@@ -1,11 +1,13 @@
 package org.rutebanken.tiamat.importer.finder;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,11 +33,11 @@ public class StopPlaceFromOriginalIdFinderTest {
 
         when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId())).thenReturn(stopPlace);
         when(stopPlaceRepository
-                .findByKeyValue(anyString(), anySet()))
-                .thenAnswer(invocationOnMock -> !Collections.disjoint((Collection<?>) invocationOnMock.getArguments()[1], stopPlace.getOriginalIds()) ? stopPlace.getNetexId() : null);
+                .findByKeyValues(anyString(), anySet()))
+                .thenAnswer(invocationOnMock -> !Collections.disjoint((Collection<?>) invocationOnMock.getArguments()[1], stopPlace.getOriginalIds()) ? Sets.newHashSet(stopPlace.getNetexId()) : Sets.newHashSet());
 
-        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
-        assertThat(actual).isNotNull();
+        List<StopPlace> actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+        assertThat(actual).hasSize(1);
     }
 
     @Test
@@ -47,10 +49,10 @@ public class StopPlaceFromOriginalIdFinderTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("101L");
 
-        StopPlace actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
+        List<StopPlace> actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
 
-        verify(stopPlaceRepository, never()).findByKeyValue(anyString(), anySet());
+        verify(stopPlaceRepository, never()).findFirstByKeyValues(anyString(), anySet());
         verify(stopPlaceRepository, never()).findOne(anyLong());
-        assertThat(actual).isNull();
+        assertThat(actual).isEmpty();
     }
 }

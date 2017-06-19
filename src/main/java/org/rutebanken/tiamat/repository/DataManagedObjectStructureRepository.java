@@ -6,5 +6,5 @@ import java.util.Set;
 
 public interface DataManagedObjectStructureRepository<T extends DataManagedObjectStructure> {
 
-    String findByKeyValue(String key, Set<String> originalIds);
+    String findFirstByKeyValues(String key, Set<String> originalIds);
 }

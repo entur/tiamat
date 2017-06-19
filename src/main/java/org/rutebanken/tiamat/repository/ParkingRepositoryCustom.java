@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepository<Parking>  {
 
-    String findByKeyValue(String key, Set<String> value);
+    String findFirstByKeyValues(String key, Set<String> value);
 
     String findNearbyParking(Envelope boundingBox, String value, ParkingTypeEnumeration parkingType);
 

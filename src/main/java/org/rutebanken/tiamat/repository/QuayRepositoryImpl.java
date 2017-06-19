@@ -52,7 +52,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	}
 
 	@Override
-	public String findByKeyValue(String key, Set<String> values) {
+	public String findFirstByKeyValues(String key, Set<String> values) {
 
 		Query query = entityManager.createNativeQuery("SELECT q.netex_id " +
 				"FROM quay_key_values qkv " +

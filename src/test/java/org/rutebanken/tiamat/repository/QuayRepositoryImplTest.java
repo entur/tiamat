@@ -27,7 +27,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         quayRepository.flush();
 
-        quayRepository.findByKeyValue("test", Sets.newHashSet("value"));
+        quayRepository.findFirstByKeyValues("test", Sets.newHashSet("value"));
 
     }
 

@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -25,13 +26,13 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
  * It uses a guava cache to avoid expensive calls to the database.
  */
 @Component
-public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
+public class StopPlaceFromOriginalIdFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFromOriginalIdFinder.class);
 
     private StopPlaceRepository stopPlaceRepository;
 
-    private Cache<String, Optional<String>> keyValueCache;
+    private Cache<String, Set<String>> keyValueCache;
 
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:50000}") int maximumSize,
@@ -44,20 +45,15 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
                 .build();
     }
 
-    @Override
-    public StopPlace find(StopPlace stopPlace) {
+    public List<StopPlace> find(StopPlace stopPlace) {
 
         Set<String> originalIds = stopPlace.getOrCreateValues(ORIGINAL_ID_KEY);
 
-        if(originalIds.isEmpty()) return null;
+        if(originalIds.isEmpty()) return Lists.newArrayList();
 
-        StopPlace existingStopPlace = findByKeyValue(originalIds);
+        List<StopPlace> existingStopPlaces = findByKeyValue(originalIds);
 
-        if (existingStopPlace != null) {
-            logger.debug("Found stop place {} from original ID", existingStopPlace.getNetexId());
-            return existingStopPlace;
-        }
-        return null;
+        return existingStopPlaces;
     }
 
     public void update(StopPlace stopPlace) {
@@ -66,7 +62,7 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
             return;
         }
         for(String originalId : stopPlace.getOrCreateValues(ORIGINAL_ID_KEY)) {
-            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getNetexId()));
+//            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getNetexId()));
         }
     }
 
@@ -113,29 +109,51 @@ public class StopPlaceFromOriginalIdFinder implements StopPlaceFinder {
         return ":" + postfix;
     }
 
-    private StopPlace findByKeyValue(Set<String> originalIds) {
+    private List<StopPlace> findByKeyValue(Set<String> originalIds) {
 
         Set<String> zeroPaddedOrUnchangedOriginalIds = originalIds.stream()
                 .flatMap(this::zeroStrippedPostfixAndUnchanged)
                 .collect(Collectors.toSet());
-
-        for(String zeroPaddedOrUnchangedOriginalId : zeroPaddedOrUnchangedOriginalIds) {
-            String cacheKey = keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId);
-            Optional<String> matchingStopPlaceNetexId = keyValueCache.getIfPresent(cacheKey);
-            if(matchingStopPlaceNetexId != null && matchingStopPlaceNetexId.isPresent()) {
-                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId.get());
-                return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId.get());
-            }
-        }
+//
+//                .map(zeroPaddedOrUnchangedOriginalId -> keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId))
+//                .map(cacheKey -> keyValueCache.getIfPresent(cacheKey))
+//                .map(cacheResult -> {
+//                    if(cacheResult == null) {
+//
+//                    }
+//                })
+//                .filter(Objects::nonNull)
+//                .filter(set -> !set.isEmpty())
+//
+//                .collect(Collectors.toSet());
+//
+//
+//
+//        for (String zeroPaddedOrUnchangedOriginalId : zeroPaddedOrUnchangedOriginalIds) {
+//            String cacheKey = keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId);
+//            Set<String> matchingStopPlaceNetexIds = keyValueCache.getIfPresent(cacheKey);
+//            if (matchingStopPlaceNetexIds != null) {
+//                if (!matchingStopPlaceNetexIds.isEmpty()) {
+//                    List<StopPlace> stopPlaces = matchingStopPlaceNetexIds.stream()
+//                            .peek(matchingStopPlaceNetexId -> logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId))
+//                            .map(matchingStopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId))
+//                            .collect(Collectors.toList());
+//
+//                    if(!stopPlaces.isEmpty()) {
+//                        return stopPlaces;
+//                    }
+//                }
+//            }
+//        }
 
         logger.debug("Looking for stop places from original IDs: {}", zeroPaddedOrUnchangedOriginalIds);
 
         // No cache match
-        String stopPlaceNetexId = stopPlaceRepository.findByKeyValue(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalIds);
-        if(stopPlaceNetexId != null) {
-            return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
-        }
-        return null;
+        Set<String> stopPlaceNetexIds = stopPlaceRepository.findByKeyValues(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalIds);
+        return stopPlaceNetexIds
+                .stream()
+                .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
+                .collect(Collectors.toList());
     }
 
     private String keyValKey(String key, String value) {

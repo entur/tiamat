@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -33,6 +34,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Repository
@@ -155,6 +157,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
+    private Set<String> getSetResult(Query query) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> results = query.getResultList();
+            if (results.isEmpty()) {
+                return Sets.newHashSet();
+            } else {
+                return results.stream().collect(toSet());
+            }
+        } catch (NoResultException noResultException) {
+            return Sets.newHashSet();
+        }
+    }
+
     @Override
     public List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
@@ -174,15 +190,25 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
+    @Override
+    public String findFirstByKeyValues(String key, Set<String> values) {
+        Set<String> matches = findByKeyValues(key, values);
+        if(matches.isEmpty()) {
+            return null;
+        }
+        return matches.iterator().next();
+
+    }
+
     /**
-     * Find stop place's netex ID by key value
+     * Find stop place netex IDs by key value
      *
-     * @param key    key in key values for stop
+     * @param key key in key values for stop
      * @param values list of values to check for
-     * @return stop place's netex ID
+     * @return set of stop place's netex IDs
      */
     @Override
-    public String findByKeyValue(String key, Set<String> values) {
+    public Set<String> findByKeyValues(String key, Set<String> values) {
 
         StringBuilder sqlQuery = new StringBuilder("SELECT s.netex_id " +
                                                            "FROM stop_place s " +
@@ -216,7 +242,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         parameters.forEach(parameter -> query.setParameter(parameter, iterator.next()));
         query.setParameter("key", key);
 
-        return getOneOrNull(query);
+        return getSetResult(query);
     }
 
     public List<String> searchByKeyValue(String key, String value) {

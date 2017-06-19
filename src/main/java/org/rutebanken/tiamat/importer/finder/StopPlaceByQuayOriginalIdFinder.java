@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Component
@@ -28,7 +29,7 @@ public class StopPlaceByQuayOriginalIdFinder {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
-    public Set<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
+    public List<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
             return incomingStopPlace.getQuays().stream()
                     .flatMap(quay -> quay.getOriginalIds().stream())
@@ -40,9 +41,9 @@ public class StopPlaceByQuayOriginalIdFinder {
                     .peek(stopPlaceNetexId -> logger.debug("Found stop place {}", stopPlaceNetexId))
                     .map(stopPlaceRepository::findFirstByNetexIdOrderByVersionDesc)
                     .filter(stopPlace -> stopPlace != null)
-                    .collect(toSet());
+                    .collect(toList());
         }
-        return new HashSet<>();
+        return new ArrayList<>();
     }
 
     private String extractNumericValueIfPossible(String quayOriginalId) {

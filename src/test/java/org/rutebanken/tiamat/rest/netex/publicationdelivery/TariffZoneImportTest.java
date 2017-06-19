@@ -158,7 +158,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void publicationDeliveryWithTariffZoneAndStopPlaceMergeZonesImportTypeIdMatch() throws Exception {
+    public void mergeTariffZonesForStopPlace() throws Exception {
 
 
         SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
@@ -203,6 +203,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         StopPlace stopPlace2 = new StopPlace()
                 .withId("NTR:StopPlace:322")
                 .withVersion("2")
+                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withTariffZones(new TariffZoneRefs_RelStructure()
                         .withTariffZoneRef(new TariffZoneRef()
                                 .withVersion(tariffZone2.getVersion())

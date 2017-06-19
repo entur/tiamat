@@ -40,7 +40,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 
 	@Override
-	public String findByKeyValue(String key, Set<String> originalIds) {
+	public String findFirstByKeyValues(String key, Set<String> originalIds) {
 		throw new NotImplementedException("findByKeyvalue not implemented for topographic place");
 	}
 

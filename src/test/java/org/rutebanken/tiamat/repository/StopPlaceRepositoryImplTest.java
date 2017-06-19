@@ -52,7 +52,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(stopPlace);
 
-        String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        String netexId = stopPlaceRepository.findFirstByKeyValues("key", Sets.newHashSet("value"));
         StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
         Assertions.assertThat(actual).isNotNull();
         Assertions.assertThat(actual.getKeyValues()).containsKey("key");
@@ -72,7 +72,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
 
-        String netexId = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        String netexId = stopPlaceRepository.findFirstByKeyValues("key", Sets.newHashSet("value"));
         assertThat(netexId).isEqualTo(stopPlace.getNetexId());
         StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
         Assertions.assertThat(actual).isNotNull();
@@ -88,7 +88,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         firstStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(firstStopPlace);
 
-        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("anotherValue"));
+        String id = stopPlaceRepository.findFirstByKeyValues("key", Sets.newHashSet("anotherValue"));
         assertThat(id).isNull();
     }
 
@@ -102,7 +102,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         matchingStopPlace.getKeyValues().put("key", new Value("value"));
         stopPlaceRepository.save(matchingStopPlace);
 
-        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("value"));
+        String id = stopPlaceRepository.findFirstByKeyValues("key", Sets.newHashSet("value"));
 
         assertThat(id).isEqualTo(matchingStopPlace.getNetexId());
 
@@ -118,7 +118,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceWithSomeValues.getKeyValues().put("key", new Value("One value", "Second value", "Third value"));
         stopPlaceRepository.save(stopPlaceWithSomeValues);
 
-        String id = stopPlaceRepository.findByKeyValue("key", Sets.newHashSet("Third value"));
+        String id = stopPlaceRepository.findFirstByKeyValues("key", Sets.newHashSet("Third value"));
 
         assertThat(id).isEqualTo(stopPlaceWithSomeValues.getNetexId());
 

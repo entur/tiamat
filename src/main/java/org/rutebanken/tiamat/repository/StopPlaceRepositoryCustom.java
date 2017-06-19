@@ -27,7 +27,9 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration);
 
-    String findByKeyValue(String key, Set<String> value);
+    String findFirstByKeyValues(String key, Set<String> value);
+
+    Set<String> findByKeyValues(String key, Set<String> values);
 
     List<String> searchByKeyValue(String key, String value);
     

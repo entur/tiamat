@@ -37,7 +37,7 @@ public class StopPlaceIdMatcher {
 
         tiamatStops.forEach(incomingStopPlace -> {
 
-                    Set<StopPlace> existingStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
+                    List<StopPlace> existingStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
 
                     if(existingStopPlaces.isEmpty()){
                         logger.warn("Cannot find stop place from IDs: {}. StopPlace toString: {}.",

@@ -45,7 +45,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
      * @return stop place's netex ID
      */
     @Override
-    public String findByKeyValue(String key, Set<String> values) {
+    public String findFirstByKeyValues(String key, Set<String> values) {
 
         Query query = entityManager.createNativeQuery("SELECT p.netex_id " +
                                                         "FROM parking p " +

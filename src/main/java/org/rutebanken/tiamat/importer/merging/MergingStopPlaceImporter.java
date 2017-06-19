@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -176,15 +177,23 @@ public class MergingStopPlaceImporter {
     }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
-        final StopPlace existingStopPlace = stopPlaceFromOriginalIdFinder.find(newStopPlace);
-        if (existingStopPlace != null) {
+        final List<StopPlace> existingStopPlaces = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+        if (existingStopPlaces != null && !existingStopPlaces.isEmpty()) {
 
-            if(zoneDistanceChecker.exceedsLimit(newStopPlace, existingStopPlace)) {
-                logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}",
-                        ZoneDistanceChecker.DEFAULT_MAX_DISTANCE,
-                        newStopPlace, existingStopPlace);
-            } else {
-                return existingStopPlace;
+            Optional<StopPlace> nearbyExistingStopPlace = existingStopPlaces.stream()
+                    .filter(existingStopPlace -> {
+                        if (zoneDistanceChecker.exceedsLimit(newStopPlace, existingStopPlace)) {
+                            logger.warn("Found stop place, but the distance between incoming and found stop place is too far in meters: {}. Incoming: {}. Found: {}",
+                                    ZoneDistanceChecker.DEFAULT_MAX_DISTANCE,
+                                    newStopPlace, existingStopPlace);
+                            return false;
+                        }
+                        return true;
+                    })
+                    .findAny();
+
+            if(nearbyExistingStopPlace.isPresent()) {
+                return nearbyExistingStopPlace.get();
             }
         }
 

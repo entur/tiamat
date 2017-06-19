@@ -8,17 +8,12 @@ import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class StopPlaceMatchingTest extends TiamatIntegrationTest {
@@ -56,6 +51,131 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
         assertThat(result).hasSize(1);
         publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
+    }
+
+    /**
+     * Incoming stop matches two stops with different modality. Choose the right one based on modality.
+     *
+     * https://rutebanken.atlassian.net/browse/NRP-1718
+     *
+     */
+    @Test
+    public void matchMultipleStopsAndDifferentStopPlaceType() throws Exception {
+
+        StopPlace railstationStopPlace = new StopPlace()
+                .withId("NTR:StopPlace:222")
+                .withStopPlaceType(StopTypeEnumeration.RAIL_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Vennesla"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(railstationStopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+
+
+        StopPlace stopPlaceToBeMatched = new StopPlace()
+                .withId("NTR:StopPlace:222")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Vennesla"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))));
+
+
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+
+
+        PublicationDeliveryStructure publicationDelivery3 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
+        publicationDeliveryParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery3, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
+        assertThat(result.get(0).getStopPlaceType()).isEqualTo(stopPlaceToBeMatched.getStopPlaceType());
+    }
+
+    /**
+     * Incoming stop matches two stops.
+     * Incoming stop has two quays, where each quay matches in separate stop place.
+     * Both stop places should be returned.
+     *
+     * https://rutebanken.atlassian.net/browse/NRP-1718
+     */
+    @Test
+    public void matchMultipleStopsBasedOnQuayOriginalId() throws Exception {
+
+        StopPlace firstStopPlace = new StopPlace()
+                .withId("NTR:StopPlace:10")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Vennesla"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                            .withId("NTR:Quay:11")
+                            .withVersion("1")));
+
+        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
+        publicationDeliveryParams.importType = ImportType.INITIAL;
+        PublicationDeliveryStructure initialPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(firstStopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initialPublicationDelivery, publicationDeliveryParams);
+
+        StopPlace secondStopPlace = new StopPlace()
+                .withId("NTR:StopPlace:10")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Vennesla"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("NTR:Quay:12")
+                                .withVersion("1")));
+
+        PublicationDeliveryStructure secondInitialPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(secondStopPlace);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondInitialPublicationDelivery, publicationDeliveryParams);
+
+        StopPlace incomingStopPlace = new StopPlace()
+                .withId("NTR:StopPlace:10")
+                .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("Vennesla"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("10"))
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("NTR:Quay:12")
+                                .withVersion("1"))
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("NTR:Quay:11")
+                                .withVersion("1")));
+
+        publicationDeliveryParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure matchingPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(incomingStopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(matchingPublicationDelivery, publicationDeliveryParams);
+
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).as("two stop places matches one incoming stop place with two quays").hasSize(2);
+
     }
 
     /**

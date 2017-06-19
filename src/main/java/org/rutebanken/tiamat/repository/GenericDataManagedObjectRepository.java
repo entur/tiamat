@@ -37,7 +37,7 @@ public class GenericDataManagedObjectRepository {
 
     public String findByKeyValue(String key, Set<String> values, Class<? extends DataManagedObjectStructure> clazz) {
         DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) repositories.getRepositoryFor(clazz);
-        String netexId = repository.findByKeyValue(key, values);
+        String netexId = repository.findFirstByKeyValues(key, values);
         if (netexId != null) {
             return netexId;
         }
