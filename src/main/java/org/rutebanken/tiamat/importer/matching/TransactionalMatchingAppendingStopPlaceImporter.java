@@ -67,6 +67,7 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
 
 
         List<org.rutebanken.tiamat.model.StopPlace> foundStopPlaces = stopPlaceByIdFinder.findStopPlace(incomingStopPlace);
+        final int foundStopPlacesCount = foundStopPlaces.size();
 
         if(!foundStopPlaces.isEmpty()) {
 
@@ -83,6 +84,11 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
                         return true;
                     })
                     .filter(foundStopPlace -> {
+
+                        if(foundStopPlacesCount == 1) {
+                            logger.info("There are only one found stop places. Filtering in stop place regardless of type {}", foundStopPlace);
+                            return true;
+                        }
 
                         if(incomingStopPlace.getStopPlaceType() == null) {
                             logger.info("Incoming stop place type is null. Filter in. {}", incomingStopPlace);
