@@ -70,7 +70,7 @@ public class ParkingFromOriginalIdFinder implements ParkingFinder {
             String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
             Optional<String> matchingParkingNetexId = keyValueCache.getIfPresent(cacheKey);
             if(matchingParkingNetexId != null && matchingParkingNetexId.isPresent()) {
-                logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingParkingNetexId.get());
+                logger.debug("Cache match. Key {}, parking id: {}", cacheKey, matchingParkingNetexId.get());
                 return parkingRepository.findFirstByNetexIdOrderByVersionDesc(matchingParkingNetexId.get());
             }
         }
