@@ -89,6 +89,11 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
                             return true;
                         }
 
+                        if(incomingStopPlace.getStopPlaceType().equals(StopTypeEnumeration.OTHER)) {
+                            logger.info("Incoming stop place type is OTHER. Filter in. {}", incomingStopPlace);
+                            return true;
+                        }
+
                         if(foundStopPlace.getStopPlaceType().equals(incomingStopPlace.getStopPlaceType())
                                 || alternativeStopTypes.matchesAlternativeType(foundStopPlace.getStopPlaceType(), incomingStopPlace.getStopPlaceType())) {
                             return true;
