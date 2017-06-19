@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.rutebanken.tiamat.PeriodicCacheLogger;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
@@ -23,7 +24,7 @@ public class StopPlaceFromOriginalIdFinderTest {
     public void findShouldSearchForAllIdsInKeyVal() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger());
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("100L");
@@ -44,7 +45,7 @@ public class StopPlaceFromOriginalIdFinderTest {
     public void findShouldHandleEmptyValues() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS);
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger());
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("101L");

@@ -4,16 +4,17 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.rutebanken.tiamat.PeriodicCacheLogger;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -32,17 +33,25 @@ public class StopPlaceFromOriginalIdFinder {
 
     private StopPlaceRepository stopPlaceRepository;
 
+    /**
+     * One original ID can be used in multiple stop places
+     */
     private Cache<String, Set<String>> keyValueCache;
 
+    @Autowired
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:50000}") int maximumSize,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfter:30}") int expiresAfter,
-                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit) {
+                                         @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit,
+                                         PeriodicCacheLogger periodicCacheLogger) {
         this.stopPlaceRepository = stopPlaceRepository;
         keyValueCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
+                .recordStats()
                 .build();
+
+        periodicCacheLogger.scheduleCacheStatsLogging(keyValueCache, logger);
     }
 
     public List<StopPlace> find(StopPlace stopPlace) {
@@ -57,12 +66,25 @@ public class StopPlaceFromOriginalIdFinder {
     }
 
     public void update(StopPlace stopPlace) {
+
         if(stopPlace.getNetexId() == null) {
             logger.warn("Attempt to update cache when stop place does not have any ID! stop place: {}", stopPlace);
             return;
         }
+
         for(String originalId : stopPlace.getOrCreateValues(ORIGINAL_ID_KEY)) {
-//            keyValueCache.put(keyValKey(ORIGINAL_ID_KEY, originalId), Optional.ofNullable(stopPlace.getNetexId()));
+
+            String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
+
+            Set<String> cachedValue = keyValueCache.getIfPresent(cacheKey);
+
+            if(cachedValue != null && !cachedValue.isEmpty()) {
+                logger.debug("Found existing value cached.");
+                cachedValue.add(originalId);
+                keyValueCache.put(cacheKey, cachedValue);
+            } else {
+                keyValueCache.put(cacheKey, Sets.newHashSet(originalId));
+            }
         }
     }
 
@@ -114,37 +136,23 @@ public class StopPlaceFromOriginalIdFinder {
         Set<String> zeroPaddedOrUnchangedOriginalIds = originalIds.stream()
                 .flatMap(this::zeroStrippedPostfixAndUnchanged)
                 .collect(Collectors.toSet());
-//
-//                .map(zeroPaddedOrUnchangedOriginalId -> keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId))
-//                .map(cacheKey -> keyValueCache.getIfPresent(cacheKey))
-//                .map(cacheResult -> {
-//                    if(cacheResult == null) {
-//
-//                    }
-//                })
-//                .filter(Objects::nonNull)
-//                .filter(set -> !set.isEmpty())
-//
-//                .collect(Collectors.toSet());
-//
-//
-//
-//        for (String zeroPaddedOrUnchangedOriginalId : zeroPaddedOrUnchangedOriginalIds) {
-//            String cacheKey = keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId);
-//            Set<String> matchingStopPlaceNetexIds = keyValueCache.getIfPresent(cacheKey);
-//            if (matchingStopPlaceNetexIds != null) {
-//                if (!matchingStopPlaceNetexIds.isEmpty()) {
-//                    List<StopPlace> stopPlaces = matchingStopPlaceNetexIds.stream()
-//                            .peek(matchingStopPlaceNetexId -> logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId))
-//                            .map(matchingStopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId))
-//                            .collect(Collectors.toList());
-//
-//                    if(!stopPlaces.isEmpty()) {
-//                        return stopPlaces;
-//                    }
-//                }
-//            }
-//        }
+
+        for (String zeroPaddedOrUnchangedOriginalId : zeroPaddedOrUnchangedOriginalIds) {
+            String cacheKey = keyValKey(ORIGINAL_ID_KEY, zeroPaddedOrUnchangedOriginalId);
+            Set<String> matchingStopPlaceNetexIds = keyValueCache.getIfPresent(cacheKey);
+            if (matchingStopPlaceNetexIds != null) {
+                if (!matchingStopPlaceNetexIds.isEmpty()) {
+                    List<StopPlace> stopPlaces = matchingStopPlaceNetexIds.stream()
+                            .peek(matchingStopPlaceNetexId -> logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId))
+                            .map(matchingStopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId))
+                            .collect(Collectors.toList());
+
+                    if(!stopPlaces.isEmpty()) {
+                        return stopPlaces;
+                    }
+                }
+            }
+        }
 
         logger.debug("Looking for stop places from original IDs: {}", zeroPaddedOrUnchangedOriginalIds);
 
@@ -153,6 +161,7 @@ public class StopPlaceFromOriginalIdFinder {
         return stopPlaceNetexIds
                 .stream()
                 .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
+                .peek(this::update)
                 .collect(Collectors.toList());
     }
 

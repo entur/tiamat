@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.importer.finder;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
+import org.rutebanken.tiamat.PeriodicCacheLogger;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.importer.AlternativeStopTypes;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -23,10 +24,11 @@ public class NearbyStopPlaceFinderTest {
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     private AlternativeStopTypes alternativeTypes = new AlternativeStopTypes();
+    private PeriodicCacheLogger periodicCacheLogger = new PeriodicCacheLogger();
 
     @Test
     public void nullCentroid() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, alternativeTypes);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, periodicCacheLogger, alternativeTypes);
         StopPlace stopPlace = new StopPlace();
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
         assertThat(actual).isNull();
@@ -34,7 +36,7 @@ public class NearbyStopPlaceFinderTest {
 
     @Test
     public void nullPoint() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, alternativeTypes);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, periodicCacheLogger, alternativeTypes);
         StopPlace stopPlace = new StopPlace();
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
         assertThat(actual).isNull();
@@ -42,7 +44,7 @@ public class NearbyStopPlaceFinderTest {
 
     @Test
     public void nullType() throws Exception {
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, alternativeTypes);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(mock(StopPlaceRepository.class), 0, 0, TimeUnit.DAYS, periodicCacheLogger, alternativeTypes);
         StopPlace stopPlace = new StopPlace();
         nearbyStopPlaceFinder.update(stopPlace);
     }
@@ -51,7 +53,7 @@ public class NearbyStopPlaceFinderTest {
     public void leakingEnvelope() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, alternativeTypes);
+        NearbyStopPlaceFinder nearbyStopPlaceFinder = new NearbyStopPlaceFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, periodicCacheLogger, alternativeTypes);
 
         String stopPlaceId = "NSR:StopPlace:1";
 
