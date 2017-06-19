@@ -84,12 +84,17 @@ public class TransactionalMatchingAppendingStopPlaceImporter {
                     })
                     .filter(foundStopPlace -> {
 
+                        if(incomingStopPlace.getStopPlaceType() == null) {
+                            logger.info("Incoming stop place type is null. Filter in. {}", incomingStopPlace);
+                            return true;
+                        }
+
                         if(foundStopPlace.getStopPlaceType().equals(incomingStopPlace.getStopPlaceType())
                                 || alternativeStopTypes.matchesAlternativeType(foundStopPlace.getStopPlaceType(), incomingStopPlace.getStopPlaceType())) {
                             return true;
                         }
 
-                        logger.warn("Found match for incoming stop place {}, but the type does not match: {} != {}. Filtering it out.", foundStopPlace.getNetexId(), incomingStopPlace.getStopPlaceType(), foundStopPlace.getStopPlaceType());
+                        logger.warn("Found match for incoming stop place {}, but the type does not match: {} != {}. Filter out. Incoming stop: {}", foundStopPlace.getNetexId(), incomingStopPlace.getStopPlaceType(), foundStopPlace.getStopPlaceType(), incomingStopPlace);
 
                         return false;
                     })
