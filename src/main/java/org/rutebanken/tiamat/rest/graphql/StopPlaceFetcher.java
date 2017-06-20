@@ -59,7 +59,7 @@ class StopPlaceFetcher implements DataFetcher {
         }
 
         Instant pointInTime = null;
-        if (allVersions != null && !allVersions) {
+        if (allVersions == null || !allVersions) {
             //If requesting all versions - POINT_IN_TIME is irrelevant
             if (environment.getArgument(POINT_IN_TIME) != null) {
                 pointInTime = environment.getArgument(POINT_IN_TIME);
