@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,9 +71,9 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, StopPlaceSearch stopPlaceSearch, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
-        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(), parkingRepository.scrollParkings(), outputStream);
+        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(stopPlaceSearch), parkingRepository.scrollParkings(), outputStream);
     }
 
     public Marshaller createStopPlaceMarshaller() throws JAXBException {

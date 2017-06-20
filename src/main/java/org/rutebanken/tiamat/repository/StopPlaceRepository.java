@@ -21,7 +21,7 @@ public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityIn
     Iterator<StopPlace> scrollStopPlaces();
 
     @Override
-    Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceIds);
+    Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch);
 
 }
 

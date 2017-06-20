@@ -95,7 +95,7 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, zipOutputStream);
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceSearch, zipOutputStream);
                                         zipOutputStream.closeEntry();
                                     } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);

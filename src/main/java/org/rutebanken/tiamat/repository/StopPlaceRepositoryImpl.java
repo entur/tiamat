@@ -5,10 +5,8 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.Criteria;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
+import org.hibernate.*;
+import org.hibernate.criterion.CriteriaQuery;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
@@ -22,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,12 +42,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
-    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
+    private static final int SCROLL_FETCH_SIZE = 100;
 
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private GeometryFactory geometryFactory;
+
+    @Autowired
+    private StopPlaceQueryFromSearchBuilder stopPlaceQueryFromSearchBuilder;
 
     /**
      * Find nearby stop places that are valid 'now', specifying a bounding box.
@@ -358,168 +361,51 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     @Override
-    public Iterator<StopPlace> scrollStopPlaces() throws InterruptedException {
-        return scrollStopPlaces(null);
-    }
-
-    @Override
-    public Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException {
-
-        final int fetchSize = 100;
-
+    public Iterator<StopPlace> scrollStopPlaces() {
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
         Criteria query = session.createCriteria(StopPlace.class);
-        if (stopPlaceNetexIds != null) {
-            query.add(Restrictions.in("netexId", stopPlaceNetexIds));
-        }
 
         query.setReadOnly(true);
-        query.setFetchSize(fetchSize);
+        query.setFetchSize(SCROLL_FETCH_SIZE);
         query.setCacheable(false);
         ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 
-        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, fetchSize, session);
+        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
+
+        return stopPlaceEntityIterator;
+    }
+
+    @Override
+    public Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch) {
+
+        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(stopPlaceSearch);
+        SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
+        queryWithParams.getSecond().forEach(sqlQuery::setParameter);
+        sqlQuery.addEntity(StopPlace.class);
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setFetchSize(SCROLL_FETCH_SIZE);
+        sqlQuery.setCacheable(false);
+        ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+
+        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
 
         return stopPlaceEntityIterator;
     }
 
     @Override
     public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(stopPlaceSearch);
 
-        StringBuilder queryString = new StringBuilder("select * from stop_place s ");
+        final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), StopPlace.class);
 
-        List<String> wheres = new ArrayList<>();
-        Map<String, Object> parameters = new HashMap<>();
-        List<String> operators = new ArrayList<>();
-        List<String> orderByStatements = new ArrayList<>();
+        queryWithParams.getSecond().forEach(nativeQuery::setParameter);
+        nativeQuery.setFirstResult(stopPlaceSearch.getPageable().getOffset());
+        nativeQuery.setMaxResults(stopPlaceSearch.getPageable().getPageSize());
 
-        boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
-
-        if (hasIdFilter) {
-            wheres.add("s.netex_id in :netexIdList");
-            parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
-        } else {
-            if (stopPlaceSearch.getQuery() != null) {
-
-                parameters.put("query", stopPlaceSearch.getQuery());
-                operators.add("and");
-
-                if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
-                    String netexId = stopPlaceSearch.getQuery();
-
-                    String netexIdType = NetexIdHelper.extractIdType(netexId);
-
-                    // Detect non NSR NetexId and search in original ID
-                    if (!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
-                        parameters.put("originalIdKey", ORIGINAL_ID_KEY);
-
-                        if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where spkv.key_values_key = :originalIdKey and v.items = :query)");
-                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where qkv.key_values_key = :originalIdKey and v.items = :query)");
-                        } else {
-                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
-                        }
-                    } else {
-                        // NSR ID detected
-
-                        if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("netex_id = :query");
-                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
-                        } else {
-                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
-                        }
-                    }
-                } else {
-                    if (stopPlaceSearch.getQuery().length() <= 3) {
-                        wheres.add("lower(s.name_value) like concat(lower(:query), '%')");
-                    } else {
-                        wheres.add("lower(s.name_value) like concat('%', lower(:query), '%')");
-                    }
-
-                    orderByStatements.add("similarity(s.name_value, :query) desc");
-                }
-            }
-
-            if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
-                wheres.add("s.stop_place_type in :stopPlaceTypes");
-                parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations().stream().map(StopTypeEnumeration::toString).collect(toList()));
-                operators.add("and");
-            }
-
-            boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
-            boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
-
-            if (hasMunicipalityFilter && !hasIdFilter) {
-                String prefix;
-                if (hasCountyFilter) {
-                    operators.add("or");
-                    prefix = "(";
-                } else prefix = "";
-
-                wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
-                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
-            }
-
-            if (hasCountyFilter && !hasIdFilter) {
-                String suffix = hasMunicipalityFilter ? ")" : "";
-                wheres.add("s.topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)" + suffix);
-                parameters.put("countyId", stopPlaceSearch.getCountyIds());
-            }
-        }
-
-        if (stopPlaceSearch.getVersion() != null) {
-            operators.add("and");
-            wheres.add("s.version = :version");
-            parameters.put("version", stopPlaceSearch.getVersion());
-        } else if (!stopPlaceSearch.isAllVersions()) {
-            operators.add("and");
-            wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
-        }
-
-        if (stopPlaceSearch.getPointInTime() != null) {
-            operators.add("and");
-            //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            wheres.add("((s.from_date IS NULL AND s.to_date IS NULL) OR (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))");
-            parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
-        }
-
-        for (int i = 0; i < wheres.size(); i++) {
-            if (i > 0) {
-                queryString.append(operators.get(i - 1));
-            } else {
-                queryString.append("where");
-            }
-            queryString.append(' ').append(wheres.get(i)).append(' ');
-        }
-
-        orderByStatements.add("netex_id, version asc");
-        queryString.append(" order by");
-
-        for (int i = 0; i < orderByStatements.size(); i++) {
-            if (i > 0) {
-                queryString.append(',');
-            }
-            queryString.append(' ').append(orderByStatements.get(i)).append(' ');
-        }
-
-        final String generatedSql = basicFormatter.format(queryString.toString());
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("{}", generatedSql);
-            logger.debug("params: {}", parameters.toString());
-        }
-
-        final Query typedQuery = entityManager.createNativeQuery(generatedSql, StopPlace.class);
-
-        parameters.forEach(typedQuery::setParameter);
-
-        typedQuery.setFirstResult(stopPlaceSearch.getPageable().getOffset());
-        typedQuery.setMaxResults(stopPlaceSearch.getPageable().getPageSize());
-
-        List<StopPlace> stopPlaces = typedQuery.getResultList();
+        List<StopPlace> stopPlaces = nativeQuery.getResultList();
         return new PageImpl<>(stopPlaces, stopPlaceSearch.getPageable(), stopPlaces.size());
 
     }
