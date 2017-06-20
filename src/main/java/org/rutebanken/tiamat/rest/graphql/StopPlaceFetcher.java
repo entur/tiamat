@@ -58,13 +58,16 @@ class StopPlaceFetcher implements DataFetcher {
             stopPlaceSearchBuilder.setAllVersions(allVersions);
         }
 
-        Instant pointInTime;
-        if (environment.getArgument(POINT_IN_TIME) != null) {
-            pointInTime = environment.getArgument(POINT_IN_TIME);
-        } else {
-            pointInTime = Instant.now();
+        Instant pointInTime = null;
+        if (allVersions != null && !allVersions) {
+            //If requesting all versions - POINT_IN_TIME is irrelevant
+            if (environment.getArgument(POINT_IN_TIME) != null) {
+                pointInTime = environment.getArgument(POINT_IN_TIME);
+            } else {
+                pointInTime = Instant.now();
+            }
+            stopPlaceSearchBuilder.setPointInTime(pointInTime);
         }
-        stopPlaceSearchBuilder.setPointInTime(pointInTime);
 
         if (netexId != null && !netexId.isEmpty()) {
 

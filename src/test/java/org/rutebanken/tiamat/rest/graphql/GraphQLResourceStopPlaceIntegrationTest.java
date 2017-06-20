@@ -163,7 +163,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
     @Test
     public void searchForStopPlaceNsrIdInQuery() throws Exception {
-//        String stopPlaceName = "Jålefjellet";
         String stopPlaceName = "Jallafjellet";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
 
@@ -182,6 +181,35 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         executeGraphQL(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
+    }
+
+    @Test
+    public void lookupStopPlaceAllVersions() throws Exception {
+
+        String stopPlaceName = "TestPlace";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        StopPlace copy = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        copy = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, copy);
+
+        assertThat(stopPlace.getVersion()).isEqualTo(1);
+        assertThat(copy.getVersion()).isEqualTo(2);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.ID + ":\\\"" + stopPlace.getNetexId() + "\\\" allVersions:true)" +
+                " { " +
+                "  id " +
+                "  version " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", hasSize(2))
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[1].id", equalTo(stopPlace.getNetexId()));
     }
 
     @Test
