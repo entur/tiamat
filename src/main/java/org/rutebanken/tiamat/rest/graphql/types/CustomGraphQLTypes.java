@@ -16,6 +16,7 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
+import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
 
 public class CustomGraphQLTypes {
 
@@ -63,6 +64,16 @@ public class CustomGraphQLTypes {
         public static GraphQLEnumType genderTypeEnum = createCustomEnumType(GENDER, GenderLimitationEnumeration.class);
 
         public static GraphQLEnumType nameTypeEnum = createCustomEnumType(NAME_TYPE, NameTypeEnumeration.class);
+
+        public static GraphQLEnumType allVehiclesModesOfTransportationEnum = createCustomEnumType(TRANSPORT_MODE_TYPE, VehicleModeEnumeration.class);
+        public static GraphQLEnumType busSubmodeType = createCustomEnumType("BusSubmodeType", BusSubmodeEnumeration.class);
+        public static GraphQLEnumType tramSubmodeType = createCustomEnumType("TramSubmodeType", TramSubmodeEnumeration.class);
+        public static GraphQLEnumType railSubmodeType = createCustomEnumType("RailSubmodeType", RailSubmodeEnumeration.class);
+        public static GraphQLEnumType metroSubmodeType = createCustomEnumType("MetroSubmodeType", MetroSubmodeEnumeration.class);
+        public static GraphQLEnumType airSubmodeType = createCustomEnumType("AirSubmodeType", AirSubmodeEnumeration.class);
+        public static GraphQLEnumType waterSubmodeType = createCustomEnumType("WaterSubmodeType", WaterSubmodeEnumeration.class);
+        public static GraphQLEnumType cablewaySubmodeType = createCustomEnumType("TelecabinSubmodeType", TelecabinSubmodeEnumeration.class);
+        public static GraphQLEnumType funicularSubmodeType = createCustomEnumType("FunicularSubmodeType", FunicularSubmodeEnumeration.class);
 
         private static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -707,6 +718,20 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(PARKING_PROPERTIES)
                         .type(parkingPropertiesInputObjectType))
+                .build();
+
+        public static GraphQLObjectType transportModeSubmodeObjectType = newObject()
+                .name("TransportModes")
+                .field(newFieldDefinition()
+                        .name("transportMode")
+                        .type(GraphQLString)
+                        .dataFetcher(env -> env.getSource())
+                )
+                .field(newFieldDefinition()
+                        .name("submode")
+                        .type(new GraphQLList(GraphQLString))
+                        .dataFetcher(env -> getValidSubmodes((String) env.getSource()))
+                )
                 .build();
 
         public static GraphQLObjectType parkingObjectType = newObject()

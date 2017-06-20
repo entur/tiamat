@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
@@ -133,6 +134,8 @@ class StopPlaceUpdater implements DataFetcher {
             isUpdated = true;
         }
 
+        isUpdated = isUpdated | setTransportModeSubMode(stopPlace, input.get(TRANSPORT_MODE), input.get(SUBMODE));
+
         if (input.get(QUAYS) != null) {
             List quays = (List) input.get(QUAYS);
             for (Object quayObject : quays) {
@@ -150,6 +153,60 @@ class StopPlaceUpdater implements DataFetcher {
         }
 
         return isUpdated;
+    }
+
+    private boolean setTransportModeSubMode(StopPlace stopPlace, Object transportMode, Object submode) {
+        if (transportMode != null) {
+            stopPlace.setTransportMode((VehicleModeEnumeration) transportMode);
+
+            //Resetting all submodes
+            stopPlace.setBusSubmode(null);
+            stopPlace.setTramSubmode(null);
+            stopPlace.setRailSubmode(null);
+            stopPlace.setMetroSubmode(null);
+            stopPlace.setAirSubmode(null);
+            stopPlace.setWaterSubmode(null);
+            stopPlace.setTelecabinSubmode(null);
+            stopPlace.setFunicularSubmode(null);
+
+            if (submode != null) {
+
+                VehicleModeEnumeration stopPlaceTransportMode = stopPlace.getTransportMode();
+
+                Preconditions.checkNotNull(stopPlaceTransportMode);
+                List<String> validSubmodes = TransportModeScalar.getValidSubmodes(stopPlaceTransportMode.value());
+
+                String errorMessage = "Submode " + submode + " is invalid for TransportMode " + stopPlaceTransportMode;
+
+                if (submode instanceof BusSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((BusSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setBusSubmode((BusSubmodeEnumeration) submode);
+                } else if (submode instanceof TramSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((TramSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setTramSubmode((TramSubmodeEnumeration) submode);
+                } else if (submode instanceof RailSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((RailSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setRailSubmode((RailSubmodeEnumeration) submode);
+                } else if (submode instanceof MetroSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((MetroSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setMetroSubmode((MetroSubmodeEnumeration) submode);
+                } else if (submode instanceof AirSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((AirSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setAirSubmode((AirSubmodeEnumeration) submode);
+                } else if (submode instanceof WaterSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((WaterSubmodeEnumeration) submode).value()), errorMessage);
+                    stopPlace.setWaterSubmode((WaterSubmodeEnumeration) submode);
+                } else if (submode instanceof TelecabinSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()),errorMessage);
+                    stopPlace.setTelecabinSubmode((TelecabinSubmodeEnumeration) submode);
+                } else if (submode instanceof FunicularSubmodeEnumeration) {
+                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()),errorMessage);
+                    stopPlace.setFunicularSubmode((FunicularSubmodeEnumeration) submode);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     private boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
@@ -342,6 +399,7 @@ class StopPlaceUpdater implements DataFetcher {
                     equipments.getInstalledEquipment().add(skilt);
                 }
             }
+
 
 
             if (entity instanceof StopPlace) {

@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -81,6 +82,9 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DateScalar dateScalar;
+
+    @Autowired
+    TransportModeScalar transportModeScalar;
 
 
     @PostConstruct
@@ -171,6 +175,11 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Find parking")
                         .argument(createFindParkingArguments(allVersionsArgument))
                         .dataFetcher(parkingFetcher))
+                .field(newFieldDefinition()
+                        .name(VALID_TRANSPORT_MODES)
+                        .type(new GraphQLList(transportModeSubmodeObjectType))
+                        .description("List all valid Transportmode/Submode-combinations.")
+                        .staticValue(transportModeScalar.getTransportModes().keySet()))
                 .build();
 
 
@@ -398,6 +407,7 @@ StopPlaceRegisterGraphQLSchema {
         return newObject()
                     .name(OUTPUT_TYPE_STOPPLACE)
                     .fields(commonFieldsList)
+                    .fields(transportModeScalar.createTransportModeFieldsList())
                     .field(newFieldDefinition()
                             .name(STOP_PLACE_TYPE)
                             .type(stopPlaceTypeEnum))
@@ -489,6 +499,7 @@ StopPlaceRegisterGraphQLSchema {
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_STOPPLACE)
                 .fields(commonInputFieldsList)
+                .fields(transportModeScalar.createTransportModeInputFieldsList())
                 .field(newInputObjectField()
                         .name(STOP_PLACE_TYPE)
                         .type(stopPlaceTypeEnum))

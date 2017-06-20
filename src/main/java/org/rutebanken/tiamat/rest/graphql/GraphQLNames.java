@@ -234,7 +234,6 @@ public class GraphQLNames {
 
     public static final String TOTAL_CAPACITY = "totalCapacity";
 
-
     public static final String PARKING_TYPE = "parkingType";
     public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
     public static final String PARKING_VEHICLE_TYPE = "parkingVehicleType";
@@ -255,6 +254,12 @@ public class GraphQLNames {
     public static final String FREE_PARKING_OUT_OF_HOURS = "freeParkingOutOfHours";
     public static final String LABEL = "label";
     public static final String PARENT_SITE_REF = "parentSiteRef";
+
+    public static final String VALID_TRANSPORT_MODES = "validTransportModes";
+    public static final String TRANSPORT_MODE = "transportMode";
+    public static final String TRANSPORT_MODE_TYPE = "TransportModeType";
+    public static final String SUBMODE = "submode";
+    public static final String SUBMODE_TYPE = "SubmodeType";
 
     public static final String FIND_STOPPLACE = "stopPlace";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
