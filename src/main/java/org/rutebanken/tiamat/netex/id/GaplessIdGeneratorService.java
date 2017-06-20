@@ -298,7 +298,7 @@ public class GaplessIdGeneratorService {
                             persisted.addAndGet(claimedIds.size());
                             claimedIds.destroy();
                         } else {
-                            logger.info("No claimed IDs to insert for {}", entityTypeName);
+                            logger.debug("No claimed IDs to insert for {}", entityTypeName);
                         }
                     }, entityManager);
                 } catch (Exception e) {
