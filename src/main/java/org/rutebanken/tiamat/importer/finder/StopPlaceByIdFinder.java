@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.*;
 
 @Component
 public class StopPlaceByIdFinder {
@@ -54,7 +54,7 @@ public class StopPlaceByIdFinder {
                 .filter(set -> !set.isEmpty())
                 .flatMap(set -> set.stream())
                 .filter(Objects::nonNull)
-                .collect(toList());
+                .collect(collectingAndThen(toCollection(() -> new TreeSet<>(comparing(org.rutebanken.tiamat.model.StopPlace::getNetexId))), ArrayList::new));
     }
 
     public List<StopPlace> findByQuayNetexId(StopPlace incomingStopPlace, boolean hasQuays) {
