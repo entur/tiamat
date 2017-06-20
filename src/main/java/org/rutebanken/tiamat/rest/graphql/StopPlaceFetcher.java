@@ -53,20 +53,17 @@ class StopPlaceFetcher implements DataFetcher {
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
         Integer version = (Integer) environment.getArgument(VERSION);
 
+
         Boolean allVersions = environment.getArgument(ALL_VERSIONS);
         if(allVersions != null) {
             stopPlaceSearchBuilder.setAllVersions(allVersions);
         }
 
-        Instant pointInTime = null;
-        if (allVersions == null || !allVersions) {
-            //If requesting all versions - POINT_IN_TIME is irrelevant
-            if (environment.getArgument(POINT_IN_TIME) != null) {
-                pointInTime = environment.getArgument(POINT_IN_TIME);
-            } else {
-                pointInTime = Instant.now();
-            }
-            stopPlaceSearchBuilder.setPointInTime(pointInTime);
+        Instant pointInTime ;
+        if (environment.getArgument(POINT_IN_TIME) != null) {
+            pointInTime = environment.getArgument(POINT_IN_TIME);
+        } else {
+            pointInTime = Instant.now();
         }
 
         if (netexId != null && !netexId.isEmpty()) {
@@ -93,6 +90,12 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }
         } else {
+
+            if (allVersions == null || !allVersions) {
+                //If requesting all versions - POINT_IN_TIME is irrelevant
+                stopPlaceSearchBuilder.setPointInTime(pointInTime);
+            }
+
             List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
             if (stopTypes != null && !stopTypes.isEmpty()) {
                 stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
