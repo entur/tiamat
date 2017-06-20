@@ -130,11 +130,10 @@ public class PublicationDeliveryExporter {
     }
 
     public void exportTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
-        logger.info("Adding tariffZone");
-
         List<TariffZone> tariffZones = tariffZoneRepository.findAll();
         if (!tariffZones.isEmpty()) {
             siteFrame.setTariffZones(new TariffZonesInFrame_RelStructure(tariffZones));
+            logger.info("Added {} tariffZones", tariffZones.size());
         } else {
             logger.info("No tariff zones found");
         }
