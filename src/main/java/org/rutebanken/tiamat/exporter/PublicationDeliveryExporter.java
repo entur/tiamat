@@ -65,16 +65,17 @@ public class PublicationDeliveryExporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure exportSiteFrame(SiteFrame siteFrame) {
-        logger.info("Returning publication delivery");
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
 
+
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
 
+        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
 
