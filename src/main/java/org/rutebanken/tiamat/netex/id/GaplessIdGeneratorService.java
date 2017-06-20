@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
+import com.hazelcast.core.ISet;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,7 +85,7 @@ public class GaplessIdGeneratorService {
         lock.lock();
         try {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
-            List<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
+            ISet<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
             if (claimedId > 0) {
                 if (availableIds.remove(claimedId)) {
@@ -118,7 +117,7 @@ public class GaplessIdGeneratorService {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         executeInTransaction(() -> {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
-            IList<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
+            ISet<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
 
             if (!claimedIds.isEmpty()) {
                 // Ignore duplicates because claimed ids could already have been inserted as available IDs previously
@@ -213,10 +212,12 @@ public class GaplessIdGeneratorService {
         entityManager.flush();
     }
 
-    private void insertIdsIgnoreDuplicates(String tableName, List<Long> list, EntityManager entityManager) {
+    private void insertIdsIgnoreDuplicates(String tableName, Set<Long> list, EntityManager entityManager) {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
         }
+
+        Iterator<Long> iterator = list.iterator();
 
         StringBuilder insertUsedIdsSql = new StringBuilder("insert into id_generator(table_name, id_value) ")
                 .append("select id1.table_name, id1.id_value ")
@@ -225,15 +226,15 @@ public class GaplessIdGeneratorService {
                 .append(tableName)
                 .append("' as varchar) ")
                 .append("as table_name, ")
-                .append(list.get(0)) // First value
+                .append(iterator.next()) // First value
                 .append(" as id_value ");
 
-        for (int i = 1; i < list.size(); i++) {
+        while(iterator.hasNext()) {
             insertUsedIdsSql.append("union all ")
                     .append("select '")
                     .append(tableName)
                     .append("',")
-                    .append(list.get(i))
+                    .append(iterator.next())
                     .append(" ");
         }
 
@@ -291,7 +292,7 @@ public class GaplessIdGeneratorService {
                 try {
                     EntityManager entityManager = entityManagerFactory.createEntityManager();
                     executeInTransaction(() -> {
-                        IList<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
+                        ISet<Long> claimedIds = generatedIdState.getClaimedIdListForEntity(entityTypeName);
                         if(!claimedIds.isEmpty()) {
                             logger.info("About to write {} claimed IDs to db for {}", claimedIds.size(), entityTypeName);
                             insertIdsIgnoreDuplicates(entityTypeName, claimedIds, entityManager);

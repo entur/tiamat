@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.netex.id;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ISet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,7 @@ public class GeneratedIdState implements Serializable{
         return lastIdMap.get(entityTypeName);
     }
 
-    public IList<Long> getClaimedIdListForEntity(String entityTypeName) {
-        return hazelcastInstance.getList(CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityTypeName);
+    public ISet<Long> getClaimedIdListForEntity(String entityTypeName) {
+        return hazelcastInstance.getSet(CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityTypeName);
     }
 }
