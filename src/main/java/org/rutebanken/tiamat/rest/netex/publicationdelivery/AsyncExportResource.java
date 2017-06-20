@@ -81,7 +81,7 @@ public class AsyncExportResource {
 
     @GET
     @Path("async")
-    public Response asyncStopPlaceSearch(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
+    public Response asyncExport(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
         StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
         ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
         return Response.ok(exportJob).build();
