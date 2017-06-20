@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
+import org.rutebanken.tiamat.dtoassembling.dto.ExportParamsDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
@@ -146,7 +147,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         Mockito.when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(JerseyUriBuilder.fromPath("http://test"));
         ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(null, null, 0, 1);
 
-        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, false, uriInfoMock);
+        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, new ExportParamsDto(), uriInfoMock);
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
         Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.get(0).getName().getValue());
@@ -162,7 +163,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         UriInfo uriInfoMock = Mockito.mock(UriInfo.class);
         ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(historicTime, historicTime, 0, 1);
 
-        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, false, uriInfoMock);
+        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, new ExportParamsDto(), uriInfoMock);
         Assert.assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value());
     }
 

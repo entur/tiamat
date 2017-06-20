@@ -4,6 +4,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
+import org.rutebanken.tiamat.dtoassembling.dto.ExportParamsDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
@@ -62,13 +63,13 @@ public class ExportResource {
     @Produces(MediaType.APPLICATION_XML)
     @Path("changed")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
-                                                                 @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces,
+                                                                 @BeanParam ExportParamsDto exportParamsDto,
                                                                  @Context UriInfo uriInfo)
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, includeTopographicPlaces);
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParamsDto.includeTopographicPlaces);
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();
@@ -77,7 +78,7 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), includeTopographicPlaces, uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParamsDto.includeTopographicPlaces, uriInfo), "next");
         }
 
         return rsp.build();
