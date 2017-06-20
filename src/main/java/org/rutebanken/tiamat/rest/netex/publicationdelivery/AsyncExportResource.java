@@ -21,17 +21,17 @@ import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.AS
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
-public class AsyncExportPublicationDeliveryResource {
+public class AsyncExportResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncExportPublicationDeliveryResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncExportResource.class);
 
     private final StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     private final AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
     @Autowired
-    public AsyncExportPublicationDeliveryResource(StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
-                                                  AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
+    public AsyncExportResource(StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
+                               AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
 
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
