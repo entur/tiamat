@@ -18,14 +18,11 @@ import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStruc
 import org.rutebanken.netex.model.TopographicPlaceRefStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
@@ -51,7 +48,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -999,7 +995,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream);
 
         assertThat(response.getStatus()).isEqualTo(200);
     }
@@ -1154,7 +1150,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
@@ -1278,7 +1274,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
@@ -1374,7 +1370,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
@@ -1583,7 +1579,7 @@ public class PublicationDeliveryResourceTest extends TiamatIntegrationTest {
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();

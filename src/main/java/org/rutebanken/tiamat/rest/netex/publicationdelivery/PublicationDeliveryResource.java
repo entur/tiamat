@@ -17,7 +17,6 @@ import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -71,14 +70,14 @@ public class PublicationDeliveryResource {
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
     }
 
-    public Response receivePublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
-        return receivePublicationDelivery(inputStream, null);
+    public Response importPublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
+        return importPublicationDelivery(inputStream, null);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response receivePublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
+    public Response importPublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
@@ -97,13 +96,13 @@ public class PublicationDeliveryResource {
 
     @GET
     @Path(ASYNC_JOB_URL)
-    public Collection<ExportJob> getJobs() {
+    public Collection<ExportJob> getAsyncExportJobs() {
         return asyncPublicationDeliveryExporter.getJobs();
     }
 
     @GET
     @Path(ASYNC_JOB_URL + "/{id}")
-    public Response getJob(@PathParam(value = "id") long exportJobId) {
+    public Response getAsyncExportJob(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
@@ -117,7 +116,7 @@ public class PublicationDeliveryResource {
 
     @GET
     @Path(ASYNC_JOB_URL + "/{id}/content")
-    public Response getJobContents(@PathParam(value = "id") long exportJobId) {
+    public Response getAsyncExportJobContents(@PathParam(value = "id") long exportJobId) {
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 

@@ -180,7 +180,7 @@ public class PublicationDeliveryTestHelper {
 
         InputStream stream = new ByteArrayInputStream(publicationDeliveryXml.getBytes(StandardCharsets.UTF_8));
 
-        Response response = publicationDeliveryResource.receivePublicationDelivery(stream, publicationDeliveryParams);
+        Response response = publicationDeliveryResource.importPublicationDelivery(stream, publicationDeliveryParams);
 
         assertThat(response.getStatus()).isEqualTo(200);
 
@@ -213,7 +213,7 @@ public class PublicationDeliveryTestHelper {
         marshaller.marshal(jaxPublicationDelivery, outputStream);
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-        return publicationDeliveryResource.receivePublicationDelivery(inputStream, publicationDeliveryParams);
+        return publicationDeliveryResource.importPublicationDelivery(inputStream, publicationDeliveryParams);
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {
