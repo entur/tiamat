@@ -1017,7 +1017,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
-        List<StopPlace> changedStopPlaces = extractStopPlaces(response);
+        List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
         StopPlace stopPlace = changedStopPlaces.get(0);
 
@@ -1499,21 +1499,5 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
-    }
-
-
-    private List<StopPlace> extractStopPlaces(PublicationDeliveryStructure deliveryStructure) throws JAXBException {
-        List<StopPlace> stopPlaces = new ArrayList<>();
-        for (JAXBElement<? extends Common_VersionFrameStructure> frameStructureElmt : deliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame()) {
-            Common_VersionFrameStructure frameStructure = frameStructureElmt.getValue();
-            if (frameStructure instanceof Site_VersionFrameStructure) {
-                Site_VersionFrameStructure siteFrame = (Site_VersionFrameStructure) frameStructure;
-
-                if (siteFrame.getStopPlaces() != null) {
-                    stopPlaces.addAll(siteFrame.getStopPlaces().getStopPlace());
-                }
-            }
-        }
-        return stopPlaces;
     }
 }
