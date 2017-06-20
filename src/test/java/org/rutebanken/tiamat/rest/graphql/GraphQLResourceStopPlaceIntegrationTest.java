@@ -694,7 +694,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
 
     @Test
-    public void testSimpleMutationUpdateKayValuesStopPlace() throws Exception {
+    public void testSimpleMutationUpdateKeyValuesStopPlace() throws Exception {
 
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlace.setShortName(new EmbeddableMultilingualString("E"));
@@ -725,6 +725,58 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("id", equalTo(stopPlace.getNetexId()))
                     .body("keyValues[0].key", equalTo("jbvId"))
                     .body("keyValues[0].values[0]", equalTo("1234"));
+    }
+
+
+    @Test
+    public void testSimpleMutationUpdateTransportModeStopPlace() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Bussen");
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.LOCAL_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String newTransportMode = VehicleModeEnumeration.TRAM.value();
+        String newSubmode = TramSubmodeEnumeration.LOCAL_TRAM.value();
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "          transportMode: " + newTransportMode +
+                "          submode: " + newSubmode +
+                "       }) { " +
+                "  id " +
+                "  transportMode" +
+                "  submode " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("transportMode", equalTo(newTransportMode))
+                .body("submode", equalTo(newSubmode));
+    }
+
+    @Test
+    public void testGetValidTransportModes() throws Exception {
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  validTransportModes {" +
+                "    transportMode" +
+                "    submode" +
+                "  }" +
+                "} " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.validTransportModes", notNullValue())
+                .body("data.validTransportModes[0].transportMode", notNullValue())
+                .body("data.validTransportModes[0].submode", notNullValue());
     }
 
 

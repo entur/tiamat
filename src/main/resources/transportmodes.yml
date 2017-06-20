@@ -1,0 +1,39 @@
+bus:
+  - airportLinkBus
+  - expressBus
+  - localBus
+  - nightBus
+  - railReplacementBus
+  - regionalBus
+  - schoolBus
+  - shuttleBus
+  - sightseeingBus
+tram:
+  - localTram
+rail:
+  - internationalRail
+  - interregionalRail
+  - local
+  - longDistance
+  - nightRail
+  - regionalRail
+  - touristRailway
+metro:
+  - metro
+air:
+  - domesticFlight
+  - helicopterService
+  - internationalFlight
+water:
+  - highSpeedPassengerService
+  - highSpeedVehicleService
+  - internationalCarFerry
+  - internationalPassengerFerry
+  - localCarFerry
+  - localPassengerFerry
+  - nationalCarFerry
+  - sightseeingService
+cableway:
+  - telecabin
+funicular:
+  - funicular
