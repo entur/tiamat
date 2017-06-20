@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -13,10 +14,11 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  * Configure a chained transaction manager for best effort multi resource transactions (db + jms).
- *
+ * <p>
  * Db transactions will be commited first.
  */
 @Configuration
+@ConditionalOnProperty(name = "changelog.publish.enabled", havingValue = "true", matchIfMissing = true)
 public class ChainedTransactionConfiguration {
 
     @Bean
