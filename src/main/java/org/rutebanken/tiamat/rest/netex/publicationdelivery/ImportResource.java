@@ -16,6 +16,9 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Import publication deliveries
+ */
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")

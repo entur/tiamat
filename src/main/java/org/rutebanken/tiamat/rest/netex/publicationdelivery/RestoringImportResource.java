@@ -46,6 +46,9 @@ import java.util.function.Consumer;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
+/**
+ * Restore tiamat from earlier export
+ */
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")

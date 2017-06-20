@@ -18,6 +18,9 @@ import java.util.Collection;
 
 import static org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter.ASYNC_JOB_URL;
 
+/**
+ * Export publication delivery data to google cloud storage. Some parts like stops and parking asynchronously
+ */
 @Component
 @Produces("application/xml")
 @Path("/publication_delivery")
