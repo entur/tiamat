@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.netex.publicationdelivery;
+package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.StopPlace;

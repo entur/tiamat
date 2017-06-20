@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.netex.publicationdelivery;
+package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import com.google.common.base.MoreObjects;
 import org.rutebanken.netex.model.*;

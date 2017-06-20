@@ -1,7 +1,5 @@
-package org.rutebanken.tiamat.rest.netex.publicationdelivery;
+package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
-import com.google.common.base.MoreObjects;
-import org.rutebanken.netex.model.NavigationPath;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TopographicPlace;
@@ -20,16 +18,9 @@ import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.io.ByteStreams.toByteArray;
 import static javax.xml.bind.JAXBContext.newInstance;

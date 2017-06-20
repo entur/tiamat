@@ -1,18 +1,18 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.EntityQueueProcessor;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.PublicationDeliveryPartialUnmarshaller;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.UnmarshalResult;
 import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_PARKING;
-import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
 public class PublicationDeliveryPartialUnmarshallerTest {
 

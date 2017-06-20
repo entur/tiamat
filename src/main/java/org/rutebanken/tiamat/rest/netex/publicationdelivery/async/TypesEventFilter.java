@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.netex.publicationdelivery;
+package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

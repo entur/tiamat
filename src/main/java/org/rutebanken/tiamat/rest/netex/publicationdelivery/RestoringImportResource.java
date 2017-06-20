@@ -12,6 +12,9 @@ import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.EntityQueueProcessor;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.PublicationDeliveryPartialUnmarshaller;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.UnmarshalResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_PARKING;
-import static org.rutebanken.tiamat.rest.netex.publicationdelivery.RunnableUnmarshaller.POISON_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
 @Component
 @Produces("application/xml")
