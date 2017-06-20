@@ -46,12 +46,8 @@ public class PublicationDeliveryTestHelper {
         }
     }
 
-    public static JAXBContext getJaxbContext() {
-        return jaxbContext;
-    }
-
     @Autowired
-    private PublicationDeliveryResource publicationDeliveryResource;
+    private ImportResource importResource;
 
     public PublicationDeliveryStructure createPublicationDeliveryTopographicPlace(TopographicPlace... topographicPlace) {
         SiteFrame siteFrame = siteFrame();
@@ -102,6 +98,10 @@ public class PublicationDeliveryTestHelper {
                 .filter(value -> value.equals(expectedId))
                 .collect(Collectors.toList());
         assertThat(list).as("Matching original ID "+expectedId).hasSize(1);
+    }
+
+    public List<StopPlace> extractStopPlaces(Response response) throws IOException, JAXBException {
+        return extractStopPlaces(fromResponse(response));
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -180,7 +180,7 @@ public class PublicationDeliveryTestHelper {
 
         InputStream stream = new ByteArrayInputStream(publicationDeliveryXml.getBytes(StandardCharsets.UTF_8));
 
-        Response response = publicationDeliveryResource.importPublicationDelivery(stream, publicationDeliveryParams);
+        Response response = importResource.importPublicationDelivery(stream, publicationDeliveryParams);
 
         assertThat(response.getStatus()).isEqualTo(200);
 
@@ -213,7 +213,7 @@ public class PublicationDeliveryTestHelper {
         marshaller.marshal(jaxPublicationDelivery, outputStream);
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-        return publicationDeliveryResource.importPublicationDelivery(inputStream, publicationDeliveryParams);
+        return importResource.importPublicationDelivery(inputStream, publicationDeliveryParams);
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {
