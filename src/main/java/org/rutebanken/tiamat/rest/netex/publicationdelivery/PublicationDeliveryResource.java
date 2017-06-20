@@ -45,8 +45,6 @@ public class PublicationDeliveryResource {
 
     private final PublicationDeliveryExporter publicationDeliveryExporter;
 
-    private final AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
-
     private final PublicationDeliveryImporter publicationDeliveryImporter;
 
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
@@ -57,7 +55,6 @@ public class PublicationDeliveryResource {
                                               PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                               StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
                                               PublicationDeliveryExporter publicationDeliveryExporter,
-                                              AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter,
                                               PublicationDeliveryImporter publicationDeliveryImporter,
                                               ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
@@ -65,7 +62,6 @@ public class PublicationDeliveryResource {
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
-        this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
     }
@@ -92,53 +88,6 @@ public class PublicationDeliveryResource {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
         }
-    }
-
-    @GET
-    @Path(ASYNC_JOB_URL)
-    public Collection<ExportJob> getAsyncExportJobs() {
-        return asyncPublicationDeliveryExporter.getJobs();
-    }
-
-    @GET
-    @Path(ASYNC_JOB_URL + "/{id}")
-    public Response getAsyncExportJob(@PathParam(value = "id") long exportJobId) {
-
-        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
-
-        if (exportJob == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        logger.info("Returning job {}", exportJob);
-        return Response.ok(exportJob).build();
-    }
-
-    @GET
-    @Path(ASYNC_JOB_URL + "/{id}/content")
-    public Response getAsyncExportJobContents(@PathParam(value = "id") long exportJobId) {
-
-        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
-
-        if (exportJob == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        logger.info("Returning result of job {}", exportJob);
-        if (!exportJob.getStatus().equals(JobStatus.FINISHED)) {
-            return Response.accepted("Job status is not FINISHED for job: " + exportJob).build();
-        }
-
-        InputStream inputStream = asyncPublicationDeliveryExporter.getJobFileContent(exportJob);
-        return Response.ok(inputStream).build();
-    }
-
-    @GET
-    @Path("async")
-    public Response asyncStopPlaceSearch(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
-        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
-        return Response.ok(exportJob).build();
     }
 
     @GET
