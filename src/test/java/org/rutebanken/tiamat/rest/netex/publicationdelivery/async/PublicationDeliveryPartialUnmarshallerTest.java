@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.netex.publicationdelivery;
+package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.EntityQueueProcessor;
