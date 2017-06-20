@@ -7,6 +7,8 @@ import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.RestoringImportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
 import org.rutebanken.tiamat.rest.topographic_place.StopPlaceTopographicRefUpdaterResource;
@@ -24,9 +26,10 @@ public class JerseyConfig extends ResourceConfig {
         register(DtoQuayResource.class);
         register(ImportResource.class);
         register(RestoringImportResource.class);
+        register(AsyncExportResource.class);
+        register(ExportResource.class);
         register(GraphQLResource.class);
         register(StopPlaceTopographicRefUpdaterResource.class);
-
         register(GeneralExceptionMapper.class);
     }
 }
