@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.importers;
+package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;
