@@ -1,29 +1,56 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 import java.time.Instant;
 import java.util.List;
 
 public class StopPlaceSearch {
 
+    /**
+     * zero-based page index
+     */
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+
+    @DefaultValue(value = "0") @QueryParam(value = "page")
+    private int page;
+
+    @DefaultValue(value = "20") @QueryParam(value = "size")
+    private int size;
+
+    @QueryParam(value = "q")
     private String query;
+
+    @QueryParam(value = "municipalityReference")
     private List<String> municipalityIds;
+
+    @QueryParam(value = "countyReference")
     private List<String> countyIds;
+
+    @QueryParam(value = "stopPlaceType")
     private List<StopTypeEnumeration> stopTypeEnumerations;
+
+    @QueryParam(value = "idList")
     private List<String> netexIdList;
-    private Pageable pageable;
+
+    @QueryParam(value = "allVersions")
     private boolean allVersions;
+
+    @QueryParam(value = "version")
     private Long version;
+
     private Instant pointInTime;
 
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, Instant pointInTime, Pageable pageable, Long version) {
+                            List<String> netexIdList, boolean allVersions, Instant pointInTime, Long version, int page, int size) {
         this.query = query;
         this.municipalityIds = municipalityIds;
         this.countyIds = countyIds;
@@ -31,67 +58,48 @@ public class StopPlaceSearch {
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
         this.pointInTime = pointInTime;
-        this.pageable = pageable;
         this.version = version;
+        this.page = page;
+        this.size = size;
     }
 
     public String getQuery() {
         return query;
     }
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
     public List<String> getMunicipalityIds() {
         return municipalityIds;
-    }
-
-    public void setMunicipalityIds(List<String> municipalityIds) {
-        this.municipalityIds = municipalityIds;
     }
 
     public List<String> getCountyIds() {
         return countyIds;
     }
 
-    public void setCountyIds(List<String> countyIds) {
-        this.countyIds = countyIds;
-    }
-
     public List<StopTypeEnumeration> getStopTypeEnumerations() {
         return stopTypeEnumerations;
     }
 
-    public void setStopTypeEnumerations(List<StopTypeEnumeration> stopTypeEnumerations) {
-        this.stopTypeEnumerations = stopTypeEnumerations;
-    }
-
     public Pageable getPageable() {
-        return pageable;
+        return new PageRequest(page, size);
     }
-
-    public void setPageable(Pageable pageable) {
-        this.pageable = pageable;
-    }
-
 
     public List<String> getNetexIdList() {
         return netexIdList;
-    }
-
-    public void setNetexIdList(List<String> netexIdList) {
-        this.netexIdList = netexIdList;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
+    public boolean isAllVersions() {
+        return allVersions;
     }
 
+    public Instant getPointInTime() {
+        return pointInTime;
+    }
+
+    // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
                 || countyIds != null || municipalityIds != null
@@ -106,25 +114,9 @@ public class StopPlaceSearch {
                 .add("countyReference", getCountyIds())
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("netexIdList", getNetexIdList())
-                .add("page", getPageable().getPageNumber())
-                .add("size", getPageable().getPageSize())
+                .add("page", page)
+                .add("size", size)
                 .toString();
-    }
-
-    public boolean isAllVersions() {
-        return allVersions;
-    }
-
-    public void setAllVersions(boolean allVersions) {
-        this.allVersions = allVersions;
-    }
-
-    public Instant getPointInTime() {
-        return pointInTime;
-    }
-
-    public void setPointInTime(Instant pointInTime) {
-        this.pointInTime = pointInTime;
     }
 
     public static class Builder {
@@ -135,9 +127,10 @@ public class StopPlaceSearch {
         private List<StopTypeEnumeration> stopTypeEnumerations;
         private List<String> idList;
         private boolean allVersions;
-        private Pageable pageable = new PageRequest(0, 20);
         private Long version;
         private Instant pointInTime;
+        private int page = DEFAULT_PAGE;
+        private int size = DEFAULT_PAGE_SIZE;
 
         public Builder setQuery(String query) {
             this.query = query;
@@ -164,8 +157,13 @@ public class StopPlaceSearch {
             return this;
         }
 
-        public Builder setPageable(Pageable pageable) {
-            this.pageable = pageable;
+        public Builder setPage(int page) {
+            this.page = page;
+            return this;
+        }
+
+        public Builder setSize(int size) {
+            this.size = size;
             return this;
         }
 
@@ -185,7 +183,7 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pointInTime, pageable, version);
+            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pointInTime, version, page, size);
         }
 
     }

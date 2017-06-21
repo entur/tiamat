@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;

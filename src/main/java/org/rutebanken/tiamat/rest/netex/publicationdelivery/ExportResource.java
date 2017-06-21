@@ -2,14 +2,12 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
-import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.dtoassembling.dto.ExportParamsDto;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,29 +29,24 @@ public class ExportResource {
 
     private final PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
-    private final StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
-
     private final PublicationDeliveryExporter publicationDeliveryExporter;
 
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
 
     @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
                           PublicationDeliveryExporter publicationDeliveryExporter,
                           ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
-        this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportStopPlaces(@BeanParam StopPlaceSearchDto stopPlaceSearchDto,
+    public Response exportStopPlaces(@BeanParam StopPlaceSearch stopPlaceSearch,
                                      @QueryParam(value = "includeTopographicPlaces") boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch, includeTopographicPlaces);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
@@ -63,13 +56,13 @@ public class ExportResource {
     @Produces(MediaType.APPLICATION_XML)
     @Path("changed")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
-                                                                 @BeanParam ExportParamsDto exportParamsDto,
+                                                                 @BeanParam ExportParams exportParams,
                                                                  @Context UriInfo uriInfo)
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParamsDto.includeTopographicPlaces);
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.includeTopographicPlaces);
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();
@@ -78,7 +71,7 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParamsDto.includeTopographicPlaces, uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.includeTopographicPlaces, uriInfo), "next");
         }
 
         return rsp.build();

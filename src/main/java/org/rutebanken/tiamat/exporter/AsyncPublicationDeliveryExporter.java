@@ -2,10 +2,10 @@ package org.rutebanken.tiamat.exporter;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
@@ -60,10 +60,10 @@ public class AsyncPublicationDeliveryExporter {
 
     /**
      * Start export job with upload to google cloud storage
-     * @param stopPlaceSearch search params for stops
+     * @param exportParams search params for stops
      * @return export job with information about the started process
      */
-    public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
+    public ExportJob startExportJob(ExportParams exportParams) {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
@@ -95,7 +95,7 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceSearch, zipOutputStream);
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, exportParams, zipOutputStream);
                                         zipOutputStream.closeEntry();
                                     } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);

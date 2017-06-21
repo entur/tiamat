@@ -2,12 +2,13 @@ package org.rutebanken.tiamat.exporter;
 
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,9 +72,9 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, StopPlaceSearch stopPlaceSearch, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
-        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(stopPlaceSearch), parkingRepository.scrollParkings(), outputStream);
+        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(exportParams.stopPlaceSearch), parkingRepository.scrollParkings(), outputStream);
     }
 
     public Marshaller createStopPlaceMarshaller() throws JAXBException {

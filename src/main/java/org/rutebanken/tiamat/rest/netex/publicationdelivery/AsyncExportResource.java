@@ -1,11 +1,10 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +27,11 @@ public class AsyncExportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncExportResource.class);
 
-    private final StopPlaceSearchDisassembler stopPlaceSearchDisassembler;
 
     private final AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
     @Autowired
-    public AsyncExportResource(StopPlaceSearchDisassembler stopPlaceSearchDisassembler,
-                               AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
-
-        this.stopPlaceSearchDisassembler = stopPlaceSearchDisassembler;
+    public AsyncExportResource(AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter) {
         this.asyncPublicationDeliveryExporter = asyncPublicationDeliveryExporter;
     }
 
@@ -81,9 +76,8 @@ public class AsyncExportResource {
 
     @GET
     @Path("async")
-    public Response asyncExport(@BeanParam StopPlaceSearchDto stopPlaceSearchDto) {
-        StopPlaceSearch stopPlaceSearch = stopPlaceSearchDisassembler.disassemble(stopPlaceSearchDto);
-        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(stopPlaceSearch);
+    public Response asyncExport(@BeanParam ExportParams exportParams) {
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
         return Response.ok(exportJob).build();
     }
 }

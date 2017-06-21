@@ -7,7 +7,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.StopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +46,7 @@ class StopPlaceFetcher implements DataFetcher {
 
         Page<StopPlace> stopPlaces = new PageImpl<>(new ArrayList<>());
 
-        PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
-        stopPlaceSearchBuilder.setPageable(pageable);
+        stopPlaceSearchBuilder.setPage(environment.getArgument(PAGE)).setSize(environment.getArgument(SIZE));
 
         String netexId = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
@@ -72,7 +71,7 @@ class StopPlaceFetcher implements DataFetcher {
                 List<StopPlace> stopPlace;
                 if(version != null && version > 0) {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
-                    stopPlaces = new PageImpl<>(stopPlace, pageable, 1L);
+                    stopPlaces = new PageImpl<>(stopPlace, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), 1L);
                 } else {
                     stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
                     stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
@@ -148,7 +147,7 @@ class StopPlaceFetcher implements DataFetcher {
                 }
 
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
-                        boundingBox.yMax, ignoreStopPlaceId, pointInTime, pageable);
+                        boundingBox.yMax, ignoreStopPlaceId, pointInTime, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)));
             } else {
                     stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
             }

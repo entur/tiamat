@@ -19,7 +19,6 @@ import org.rutebanken.netex.model.TopographicPlaceRefStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;

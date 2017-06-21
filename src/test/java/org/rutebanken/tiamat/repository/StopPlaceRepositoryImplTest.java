@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.H2Functions;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.data.domain.Page;
@@ -371,7 +372,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace stopPlace = createStopPlaceWithMunicipality(stopPlaceName, municipality);
         stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
         stopPlaceRepository.save(stopPlace);
-        Pageable pageable = new PageRequest(0, 10);
 
         List<StopTypeEnumeration> stopTypeEnumerations = Arrays.asList(StopTypeEnumeration.BUS_STATION);
 
@@ -379,7 +379,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                                                            .setQuery(stopPlaceName)
                                                                            .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
                                                                            .setStopTypeEnumerations(stopTypeEnumerations)
-                                                                           .setPageable(pageable)
                                                                            .build());
         assertThat(result).isEmpty();
     }
@@ -391,12 +390,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         TopographicPlace municipality = createMunicipality(municipalityName, null);
         StopPlace stopPlace = createStopPlaceWithMunicipality(stopPlaceName, municipality);
         stopPlaceRepository.save(stopPlace);
-        Pageable pageable = new PageRequest(0, 10);
 
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                                          .setQuery(stopPlaceName)
                                          .setMunicipalityIds(Arrays.asList(stopPlace.getTopographicPlace().getNetexId().toString()))
-                                         .setPageable(pageable).build();
+                                        .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -447,13 +445,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         TopographicPlace municipality = createMunicipality(municipalityName, county);
         createStopPlaceWithMunicipality(stopPlaceName, municipality);
 
-        Pageable pageable = new PageRequest(0, 10);
-
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                                          .setQuery(stopPlaceName)
                                          .setMunicipalityIds(Arrays.asList(municipality.getNetexId().toString()))
                                          .setCountyIds(Arrays.asList(county.getNetexId().toString()))
-                                         .setPageable(pageable)
                                          .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result).isNotEmpty();
@@ -785,7 +780,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlaceSearch search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
                 .setPointInTime(Instant.now().minusSeconds(1000))
-                .setPageable(pageable).build();
+                .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(search);
         assertThat(result)
@@ -799,7 +794,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         search = new StopPlaceSearch.Builder()
                 .setQuery(stopPlaceName)
                 .setPointInTime(Instant.now())
-                .setPageable(pageable).build();
+                .build();
 
         result = stopPlaceRepository.findStopPlace(search);
         assertThat(result)
