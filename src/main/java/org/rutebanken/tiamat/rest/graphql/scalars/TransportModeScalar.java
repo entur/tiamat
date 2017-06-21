@@ -120,23 +120,25 @@ public class TransportModeScalar {
         if (o instanceof StopPlace) {
             StopPlace stopPlace = (StopPlace) o;
             VehicleModeEnumeration mode = stopPlace.getTransportMode();
-            switch (mode) {
-                case BUS:
-                    return stopPlace.getBusSubmode();
-                case TRAM:
-                    return stopPlace.getTramSubmode();
-                case RAIL:
-                    return stopPlace.getRailSubmode();
-                case METRO:
-                    return stopPlace.getMetroSubmode();
-                case AIR:
-                    return stopPlace.getAirSubmode();
-                case WATER:
-                    return stopPlace.getWaterSubmode();
-                case CABLEWAY:
-                    return stopPlace.getTelecabinSubmode();
-                case FUNICULAR:
-                    return stopPlace.getFunicularSubmode();
+            if (mode != null) {
+                switch (mode) {
+                    case BUS:
+                        return stopPlace.getBusSubmode();
+                    case TRAM:
+                        return stopPlace.getTramSubmode();
+                    case RAIL:
+                        return stopPlace.getRailSubmode();
+                    case METRO:
+                        return stopPlace.getMetroSubmode();
+                    case AIR:
+                        return stopPlace.getAirSubmode();
+                    case WATER:
+                        return stopPlace.getWaterSubmode();
+                    case CABLEWAY:
+                        return stopPlace.getTelecabinSubmode();
+                    case FUNICULAR:
+                        return stopPlace.getFunicularSubmode();
+                }
             }
         }
         return null;
