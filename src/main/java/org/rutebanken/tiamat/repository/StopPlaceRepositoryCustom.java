@@ -39,9 +39,9 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId);
 
-    Iterator<StopPlace> scrollStopPlaces() throws InterruptedException;
+    Iterator<StopPlace> scrollStopPlaces();
 
-    Iterator<StopPlace> scrollStopPlaces(List<String> stopPlaceNetexIds) throws InterruptedException;
+    Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch);
 
     Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
 

@@ -60,8 +60,8 @@ public class AsyncPublicationDeliveryExporter {
 
     /**
      * Start export job with upload to google cloud storage
-     * @param stopPlaceSearch NOTE: Not currently used.
-     * @return
+     * @param stopPlaceSearch search params for stops
+     * @return export job with information about the started process
      */
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
 
@@ -95,7 +95,7 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, zipOutputStream);
+                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, stopPlaceSearch, zipOutputStream);
                                         zipOutputStream.closeEntry();
                                     } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);
