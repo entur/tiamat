@@ -60,8 +60,8 @@ public class AsyncPublicationDeliveryExporter {
 
     /**
      * Start export job with upload to google cloud storage
-     * @param stopPlaceSearch NOTE: Not currently used.
-     * @return
+     * @param stopPlaceSearch search params for stops
+     * @return export job with information about the started process
      */
     public ExportJob startExportJob(StopPlaceSearch stopPlaceSearch) {
 
