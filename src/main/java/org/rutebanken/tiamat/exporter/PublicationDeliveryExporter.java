@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
@@ -45,12 +46,12 @@ public class PublicationDeliveryExporter {
         this.netexMapper = netexMapper;
     }
 
-    public PublicationDeliveryStructure exportStopPlaces(StopPlaceSearch stopPlaceSearch, boolean includeTopographicPlaces) {
-        ExportMode topographicPlaceExportMode = includeTopographicPlaces ? RELEVANT : NONE;
-        if (stopPlaceSearch.isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(stopPlaceSearch.getPageable()), topographicPlaceExportMode);
+    public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
+        ExportMode topographicPlaceExportMode = exportParams.includeTopographicPlaces ? RELEVANT : NONE;
+        if (exportParams.stopPlaceSearch.isEmpty()) {
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.stopPlaceSearch.getPageable()), topographicPlaceExportMode);
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(stopPlaceSearch), topographicPlaceExportMode);
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams.stopPlaceSearch), topographicPlaceExportMode);
         }
     }
 

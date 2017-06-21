@@ -73,7 +73,11 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
                 .setQuery("Østre gravlund")
                 .build();
-        Response response = exportResource.exportStopPlaces(stopPlaceSearch,includeTopographicPlaces);
+        ExportParams exportParams = new ExportParams();
+        exportParams.stopPlaceSearch = stopPlaceSearch;
+        exportParams.includeTopographicPlaces = includeTopographicPlaces;
+
+        Response response = exportResource.exportStopPlaces(exportParams);
         assertThat(response.getStatus()).isEqualTo(200);
         // TODO Response is empty. Inserted stop place is somehow not found
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();

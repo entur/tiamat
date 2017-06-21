@@ -45,9 +45,8 @@ public class ExportResource {
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Response exportStopPlaces(@BeanParam StopPlaceSearch stopPlaceSearch,
-                                     @BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(stopPlaceSearch, exportParams.includeTopographicPlaces);
+    public Response exportStopPlaces(@BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(exportParams);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
 
