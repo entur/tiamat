@@ -383,7 +383,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(stopPlaceSearch);
         SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
-        queryWithParams.getSecond().forEach(sqlQuery::setParameter);
+        queryWithParams.getSecond().forEach((parameter, value) -> {
+                    if (value instanceof Collection) {
+                        sqlQuery.setParameterList(parameter, (Collection) value);
+                    } else {
+                        sqlQuery.setParameter(parameter, value);
+                    }
+                });
+
         sqlQuery.addEntity(StopPlace.class);
         sqlQuery.setReadOnly(true);
         sqlQuery.setFetchSize(SCROLL_FETCH_SIZE);

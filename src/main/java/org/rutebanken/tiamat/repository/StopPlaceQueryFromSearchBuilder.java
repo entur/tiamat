@@ -31,7 +31,7 @@ public class StopPlaceQueryFromSearchBuilder {
 
     public Pair<String, Map<String, Object>> buildQueryString(StopPlaceSearch stopPlaceSearch) {
 
-        StringBuilder queryString = new StringBuilder("select * from stop_place s ");
+        StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
