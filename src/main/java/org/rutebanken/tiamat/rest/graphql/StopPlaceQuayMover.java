@@ -36,7 +36,7 @@ public class StopPlaceQuayMover {
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
-    public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId, String versionComment) {
+    public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId, String fromVersionComment, String toVersionComment) {
 
         Set<StopPlace> sourceStopPlaces = resolveSourceStopPlaces(resolveQuays(quayIds));
 
@@ -50,6 +50,8 @@ public class StopPlaceQuayMover {
 
         Set<Quay> quaysToMove = stopPlaceToRemoveQuaysFrom.getQuays().stream().filter(quay -> quayIds.contains(quay.getNetexId())).collect(toSet());
         stopPlaceToRemoveQuaysFrom.getQuays().removeIf(quay -> quaysToMove.contains(quay));
+        stopPlaceToRemoveQuaysFrom.setVersionComment(fromVersionComment);
+
         stopPlaceToRemoveQuaysFrom = stopPlaceVersionedSaverService.saveNewVersion(sourceStopPlace, stopPlaceToRemoveQuaysFrom);
         logger.debug("Saved stop place without quays {} {}", quayIds, stopPlaceToRemoveQuaysFrom);
 
@@ -57,7 +59,7 @@ public class StopPlaceQuayMover {
         Pair<StopPlace, StopPlace> pair = resolve(destinationStopPlaceId);
         centroidComputer.computeCentroidForStopPlace(pair.getRight());
         pair.getRight().getQuays().addAll(quaysToMove);
-        pair.getRight().setVersionComment(versionComment);
+        pair.getRight().setVersionComment(toVersionComment);
 
         StopPlace savedDestinationStopPlace = stopPlaceVersionedSaverService.saveNewVersion(pair.getLeft(), pair.getRight());
 
@@ -70,11 +72,11 @@ public class StopPlaceQuayMover {
      * @param destinationStopPlaceId netex nsr id of stop place
      * @return Returns new stop place if destinationStopPlaceId is null. If destinationStopPlaceId is set, returns a copy of existing stop place.
      */
-    private Pair<StopPlace, StopPlace> resolve(String destionationStopPlaceId) {
-        if (destionationStopPlaceId == null) {
+    private Pair<StopPlace, StopPlace> resolve(String destinationStopPlaceId) {
+        if (destinationStopPlaceId == null) {
             return Pair.of(null, new StopPlace());
         }
-        StopPlace existingDestinationStopPlace = resolveExistingStopPlace(destionationStopPlaceId);
+        StopPlace existingDestinationStopPlace = resolveExistingStopPlace(destinationStopPlaceId);
         return Pair.of(existingDestinationStopPlace, stopPlaceVersionedSaverService.createCopy(existingDestinationStopPlace, StopPlace.class));
     }
 

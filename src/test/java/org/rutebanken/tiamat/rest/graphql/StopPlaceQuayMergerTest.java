@@ -55,7 +55,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null);
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null);
 
         assertThat(mergedStopPlace).isNotNull();
 

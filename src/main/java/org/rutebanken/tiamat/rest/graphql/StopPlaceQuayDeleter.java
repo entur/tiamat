@@ -40,7 +40,7 @@ public class StopPlaceQuayDeleter {
         return true;
     }
 
-    public StopPlace deleteQuay(String stopPlaceId, String quayId) {
+    public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
         Preconditions.checkArgument(stopPlace != null, "Attempting to delete StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
@@ -53,6 +53,8 @@ public class StopPlaceQuayDeleter {
         StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
         nextVersionStopPlace.getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
+
+        nextVersionStopPlace.setVersionComment(versionComment);
 
         return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
     }

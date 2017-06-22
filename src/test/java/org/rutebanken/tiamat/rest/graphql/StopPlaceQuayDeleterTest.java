@@ -95,11 +95,13 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         Quay fetchedQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayNetexId);
         assertThat(fetchedQuay).isNotNull();
 
-        StopPlace updated = stopPlaceQuayDeleter.deleteQuay(stopPlaceNetexId, quayNetexId);
+        String versionComment = "Deleting quay";
+        StopPlace updated = stopPlaceQuayDeleter.deleteQuay(stopPlaceNetexId, quayNetexId, versionComment);
 
         assertThat(updated).isNotNull();
         assertThat(updated.getQuays()).isNotNull();
         assertThat(updated.getQuays()).hasSize(1);
+        assertThat(updated.getVersionComment()).isEqualTo(versionComment);
 
     }
 }

@@ -926,7 +926,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
-                "  stopPlace: " + MOVE_QUAYS_TO_STOP + " ("+QUAY_IDS+": \\\""+quay.getNetexId()+"\\\" " + VERSION_COMMENT + ":\\\"" + versionComment + "\\\") { " +
+                "  stopPlace: " + MOVE_QUAYS_TO_STOP + " ("+QUAY_IDS+": \\\""+quay.getNetexId()+"\\\" " + TO_VERSION_COMMENT + ":\\\"" + versionComment + "\\\") { " +
                 "  id " +
                 "    quays {" +
                 "      id " +
