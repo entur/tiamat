@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 @Service
-public class GenericDataManagedObjectRepository {
+public class GenericEntityInVersionRepository {
 
     private Repositories repositories = null;
 
     @Autowired
-    public GenericDataManagedObjectRepository(ApplicationContext appContext) {
+    public GenericEntityInVersionRepository(ApplicationContext appContext) {
         repositories = new Repositories(appContext);
     }
 

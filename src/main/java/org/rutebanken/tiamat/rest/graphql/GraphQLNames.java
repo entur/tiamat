@@ -120,6 +120,10 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARKING_AREA = "ParkingArea";
     public static final String INPUT_TYPE_PARKING_AREA = OUTPUT_TYPE_PARKING_AREA + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_AUTHORIZATION_CHECK = "AuthorizationCheck";
+    public static final String AUTHORIZATION_CHECK_DESCRIPTION = "Check if authorized for entity with role";
+    public static final String AUTHORIZATION_CHECK_ROLE = "role";
+
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
@@ -262,6 +266,9 @@ public class GraphQLNames {
     public static final String SUBMODE_TYPE = "SubmodeType";
 
     public static final String FIND_STOPPLACE = "stopPlace";
+
+    /** Check if authorized to edit entity */
+    public static final String CHECK_AUTHORIZED = "checkAuthorized";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";

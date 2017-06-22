@@ -3,9 +3,9 @@ package org.rutebanken.tiamat.repository;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
@@ -28,10 +28,13 @@ public class ReferenceResolver {
     private static final Logger logger = LoggerFactory.getLogger(ReferenceResolver.class);
 
     @Autowired
-    private GenericDataManagedObjectRepository genericDataManagedObjectRepository;
+    private GenericEntityInVersionRepository genericEntityInVersionRepository;
 
     @Autowired
     private ValidPrefixList validPrefixList;
+
+    @Autowired
+    private TypeFromIdResolver typeFromIdResolver;
 
     public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
@@ -40,38 +43,32 @@ public class ReferenceResolver {
         assertNotNull(versionOfObjectRefStructure, "ref", versionOfObjectRefStructure.getRef());
 
         String ref = versionOfObjectRefStructure.getRef();
-        if(StringUtils.countMatches(ref, ":") != 2) {
+        if (StringUtils.countMatches(ref, ":") != 2) {
             throw new IllegalArgumentException("Expected two number of colons in ref. Got: '" + ref + "'");
 
         }
         String memberClass = NetexIdHelper.extractIdType(ref);
 
-        String canonicalName = EntityInVersionStructure.class.getPackage().getName() + "." + memberClass;
-        try {
-            @SuppressWarnings("unchecked")
-            Class<T> clazz = (Class<T>) Class.forName(canonicalName);
+        Class<T> clazz = typeFromIdResolver.resolveClassFromId(ref);
 
-            String prefix = NetexIdHelper.extractIdPrefix(ref);
+        String prefix = NetexIdHelper.extractIdPrefix(ref);
 
-            final String netexId;
-            if(!validPrefixList.isValidPrefixForType(prefix, memberClass)) {
-                logger.debug("Detected ID without valid prefix: {} and type {}. Will try to find it from original ID: {}.", prefix, memberClass, ref);
-                Set<String> valuesArgument = Sets.newHashSet(ref);
-                netexId = genericDataManagedObjectRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
-            } else {
-                netexId = ref;
-            }
-
-            if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
-                return genericDataManagedObjectRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
-            } else {
-                long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
-                return genericDataManagedObjectRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
-            }
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Type " + canonicalName + " cannot be found", e);
+        final String netexId;
+        if (!validPrefixList.isValidPrefixForType(prefix, memberClass)) {
+            logger.debug("Detected ID without valid prefix: {} and type {}. Will try to find it from original ID: {}.", prefix, memberClass, ref);
+            Set<String> valuesArgument = Sets.newHashSet(ref);
+            netexId = genericEntityInVersionRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
+        } else {
+            netexId = ref;
         }
+
+        if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
+            return genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
+        } else {
+            long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
+            return genericEntityInVersionRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
+        }
+
     }
 
     private void assertNotNull(VersionOfObjectRefStructure versionOfObjectRefStructure, String name, String fieldValue) {

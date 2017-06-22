@@ -4,7 +4,7 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.rest.graphql.fetcher.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
@@ -21,6 +21,8 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
+import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
@@ -57,7 +59,7 @@ StopPlaceRegisterGraphQLSchema {
     private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
     @Autowired
-    private ReferenceResolver referenceResolver;
+    private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -180,6 +182,12 @@ StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(transportModeSubmodeObjectType))
                         .description("List all valid Transportmode/Submode-combinations.")
                         .staticValue(transportModeScalar.getTransportModes().keySet()))
+                .field(newFieldDefinition()
+                        .name(CHECK_AUTHORIZED)
+                        .type(createAuthorizationCheckOutputType())
+                        .description(AUTHORIZATION_CHECK_DESCRIPTION)
+                        .argument(createAuthorizationCheckArguments())
+                        .dataFetcher(authorizationCheckDataFetcher))
                 .build();
 
 

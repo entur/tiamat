@@ -1,11 +1,9 @@
 package org.rutebanken.tiamat.importer.restore;
 
 
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.EntityInVersionRepository;
-import org.rutebanken.tiamat.repository.GenericDataManagedObjectRepository;
+import org.rutebanken.tiamat.repository.GenericEntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +21,7 @@ public class GenericRestoringImporter {
     private NetexMapper netexMapper;
 
     @Autowired
-    private GenericDataManagedObjectRepository genericDataManagedObjectRepository;
-
+    private GenericEntityInVersionRepository genericEntityInVersionRepository;
 
 
     public <T extends EntityInVersionStructure> void importObjects(AtomicInteger objectsImported, List<? extends org.rutebanken.netex.model.DataManagedObjectStructure> dataManagedObjects, Class<T> tiamatType) {
@@ -40,7 +37,7 @@ public class GenericRestoringImporter {
                 .map(dataManagedObject -> netexMapper.getFacade().map(dataManagedObject, tiamatType))
                 .forEach(mappedObject -> {
                     logger.debug("Saving version {}, netex ID: {} - {}", mappedObject.getVersion(), mappedObject.getNetexId(), mappedObject);
-                    genericDataManagedObjectRepository.save(mappedObject, tiamatType);
+                    genericEntityInVersionRepository.save(mappedObject, tiamatType);
                     objectsImported.incrementAndGet();
                 });
         logger.info("Imported {} {}", objectsImported.get(), tiamatType.getSimpleName());

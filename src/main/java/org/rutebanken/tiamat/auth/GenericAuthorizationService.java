@@ -40,24 +40,37 @@ public class GenericAuthorizationService implements AuthorizationService {
 
 	@Override
 	public void assertAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
-		if (!authorizationEnabled) {
-			return;
-		}
 
-		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(Collectors.toList());
-		boolean allowed = true;
-		for (EntityStructure entity : entities) {
-			allowed &= entity == null ||
-					           relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
-			if (!allowed) {
-				throw new AccessDeniedException("Insufficient privileges for operation");
-			}
+		final boolean allowed = isAuthorized(requiredRole, entities);
+		if (!allowed) {
+			throw new AccessDeniedException("Insufficient privileges for operation");
 		}
 	}
 
 	@Override
 	public void assertAuthorized(String requiredRole, EntityStructure... entities) {
 		assertAuthorized(requiredRole, Arrays.asList(entities));
+	}
+
+	@Override
+	public boolean isAuthorized(String requiredRole, EntityStructure... entities) {
+		return isAuthorized(requiredRole, Arrays.asList(entities));
+	}
+
+	@Override
+	public boolean isAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
+		if (!authorizationEnabled) {
+			return true;
+		}
+
+		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(Collectors.toList());
+		boolean allowed = true;
+		for (EntityStructure entity : entities) {
+			allowed &= entity == null ||
+					relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
+
+		}
+		return allowed;
 	}
 
 	protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment) {
