@@ -126,6 +126,8 @@ public class GraphQLNames {
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
+    public static final String POLYGON = "polygon";
+
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
