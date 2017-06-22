@@ -38,11 +38,12 @@ public class StopPlaceOperationsBuilder {
                 .description("Merges two StopPlaces by terminating 'from'-StopPlace, and copying quays/values into 'to'-StopPlace")
                 .argument(newArgument().name(FROM_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(TO_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
-                .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
+                .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
+                .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT)))
                 .build());
 
-        //Move Quay from one StopPlace to another
+        //Merge two quays on a StopPlace
         operations.add(newFieldDefinition()
                 .type(stopPlaceObjectType)
                 .name(MERGE_QUAYS)
@@ -66,8 +67,9 @@ public class StopPlaceOperationsBuilder {
                         .name(TO_STOP_PLACE_ID)
                         .description("The target stop place ID to move quays to. If not specified, a new stop place will be created.")
                         .type(GraphQLString))
-                .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayMover.moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
+                .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
+                .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayMover.moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT)))
                 .build());
 
         //Delete StopPlace
@@ -86,7 +88,8 @@ public class StopPlaceOperationsBuilder {
                 .description("Removes quay from StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
-                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID)))
+                .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID), environment.getArgument(VERSION_COMMENT)))
                 .build());
 
         return operations;

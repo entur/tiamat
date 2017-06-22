@@ -33,7 +33,7 @@ public class StopPlaceQuayMerger {
 
 
 
-    protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String versionComment) {
+    protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment) {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
         StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
 
@@ -56,12 +56,13 @@ public class StopPlaceQuayMerger {
 
         //Remove quays from from-StopPlace
         fromStopPlaceToTerminate.getQuays().clear();
+        fromStopPlaceToTerminate.setVersionComment(fromVersionComment);
 
         //Terminate validity of from-StopPlace
         terminateEntity(fromStopPlaceToTerminate);
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
 
-        mergedStopPlace.setVersionComment(versionComment);
+        mergedStopPlace.setVersionComment(toVersionComment);
 
         return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
     }
