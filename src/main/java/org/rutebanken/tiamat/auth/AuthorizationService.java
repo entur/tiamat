@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.auth;
 
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.EntityStructure;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface AuthorizationService {
 	/**
@@ -34,4 +36,11 @@ public interface AuthorizationService {
 	 * @return whether the current user is authorized with the given role for the list of entities
 	 */
 	boolean isAuthorized(String requiredRole, Collection<? extends EntityStructure> entities);
+
+	/**
+	 * Get relevant roles for entity
+	 * @param entityStructure to get relevant roles for
+	 * @return list of roles relevant for this entity
+	 */
+	Set<String> getRelevantRolesForEntity(EntityStructure entityStructure);
 }

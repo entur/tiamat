@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 
 import java.util.ArrayList;
@@ -16,6 +17,16 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class AuthorizationCheckCreator {
 
+    public static List<GraphQLArgument> createAuthorizationCheckArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .description("The entity ID to check authorization for. For instance stop place ID")
+                .build());
+        return arguments;
+    }
+
     public static GraphQLObjectType createAuthorizationCheckOutputType() {
         return newObject()
                 .name(OUTPUT_TYPE_AUTHORIZATION_CHECK)
@@ -25,28 +36,9 @@ public class AuthorizationCheckCreator {
                         .type(GraphQLString)
                         .description("The identificatior for entity"))
                 .field(newFieldDefinition()
-                        .name("authorized")
-                        .type(GraphQLBoolean)
-                        .description("Whether the authenticated used is authorized with the given role"))
-                .field(newFieldDefinition()
-                        .name(AUTHORIZATION_CHECK_ROLE)
-                        .type(GraphQLString)
-                        .description("The requested role"))
+                        .name(AUTHORIZATION_CHECK_ROLES)
+                        .type(new GraphQLList(GraphQLString))
+                        .description("The relevant roles for the given ID"))
                 .build();
-    }
-
-    public static List<GraphQLArgument> createAuthorizationCheckArguments() {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .description("The entity ID to check authorization for. For instance stop place ID")
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(AUTHORIZATION_CHECK_ROLE)
-                .type(GraphQLString)
-                .description("The requested role to check for authorization for. For instance: '" + ROLE_EDIT_STOPS + "' or '" + ENTITY_CLASSIFIER_ALL_TYPES + "' (default)")
-                .build());
-        return arguments;
     }
 }

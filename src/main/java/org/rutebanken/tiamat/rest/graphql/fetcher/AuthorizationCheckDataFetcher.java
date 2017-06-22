@@ -12,8 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUTHORIZATION_CHECK_ROLE;
 
 @Component
 public class AuthorizationCheckDataFetcher implements DataFetcher {
@@ -40,16 +41,10 @@ public class AuthorizationCheckDataFetcher implements DataFetcher {
             throw new IllegalArgumentException("Cannot find entity with ID: " + id);
         }
 
-        String role = dataFetchingEnvironment.getArgument(AUTHORIZATION_CHECK_ROLE);
+        Set<String> roles = authorizationService.getRelevantRolesForEntity(entityInVersionStructure);
 
-        if(role == null) {
-            throw new IllegalArgumentException("Argument " + AUTHORIZATION_CHECK_ROLE + " cannot be null");
-        }
+        logger.debug("User is authorized with roles {} for entity {}", roles, id);
 
-        boolean authorized = authorizationService.isAuthorized(role, entityInVersionStructure);
-
-        logger.debug("Checking if user is authorized with role {} for entity {}: {}", role, id, authorized);
-
-        return new AuthorizationResponse(role, authorized, role);
+        return new AuthorizationResponse(id, roles);
     }
 }

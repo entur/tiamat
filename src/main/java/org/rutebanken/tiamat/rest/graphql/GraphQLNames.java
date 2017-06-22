@@ -122,7 +122,7 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_AUTHORIZATION_CHECK = "AuthorizationCheck";
     public static final String AUTHORIZATION_CHECK_DESCRIPTION = "Check if authorized for entity with role";
-    public static final String AUTHORIZATION_CHECK_ROLE = "role";
+    public static final String AUTHORIZATION_CHECK_ROLES = "roles";
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 

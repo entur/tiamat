@@ -1,28 +1,24 @@
 package org.rutebanken.tiamat.model.authorization;
 
+import java.util.Set;
+
 public class AuthorizationResponse {
 
     private String id;
 
-    private boolean authorized;
-    private final String role;
+    private final Set<String> roles;
 
-    public AuthorizationResponse(String id, boolean authorized, String role) {
+    public AuthorizationResponse(String id, Set<String> roles) {
         this.id = id;
-        this.authorized = authorized;
-        this.role = role;
+        this.roles = roles;
     }
 
     public String getId() {
         return id;
     }
 
-    public boolean isAuthorized() {
-        return authorized;
-    }
 
-    public String getRole() {
-        return role;
+    public Set<String> getRoles() {
+        return roles;
     }
-
 }

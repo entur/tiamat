@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class GenericAuthorizationService implements AuthorizationService {
@@ -58,12 +61,20 @@ public class GenericAuthorizationService implements AuthorizationService {
 	}
 
 	@Override
+	public Set<String> getRelevantRolesForEntity(EntityStructure entityStructure) {
+		return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+				.filter(roleAssignment -> isAuthorizationForEntity(entityStructure, roleAssignment))
+				.map(roleAssignment -> roleAssignment.getRole())
+				.collect(Collectors.toSet());
+	}
+
+	@Override
 	public boolean isAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
 		if (!authorizationEnabled) {
 			return true;
 		}
 
-		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(Collectors.toList());
+		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(toList());
 		boolean allowed = true;
 		for (EntityStructure entity : entities) {
 			allowed &= entity == null ||
