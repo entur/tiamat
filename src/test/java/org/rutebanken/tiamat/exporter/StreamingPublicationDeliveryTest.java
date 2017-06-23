@@ -24,13 +24,16 @@ import java.util.List;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 
 public class StreamingPublicationDeliveryTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private ParkingRepository parkingRepository = mock(ParkingRepository.class);
+    public PublicationDeliveryExporter publicationDeliveryExporter = mock(PublicationDeliveryExporter.class);
+    public TiamatSiteFrameExporter tiamatSiteFrameExporter= mock(TiamatSiteFrameExporter.class);
 
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, new NetexMapper());
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, new NetexMapper());
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {

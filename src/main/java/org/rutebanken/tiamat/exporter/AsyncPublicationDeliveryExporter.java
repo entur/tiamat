@@ -37,8 +37,6 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
 
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
-
     private final ExportJobRepository exportJobRepository;
 
     private final BlobStoreService blobStoreService;
@@ -48,10 +46,9 @@ public class AsyncPublicationDeliveryExporter {
     private final ExportTimeZone exportTimeZone;
 
     @Autowired
-    public AsyncPublicationDeliveryExporter(PublicationDeliveryExporter publicationDeliveryExporter, ExportJobRepository exportJobRepository,
+    public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
                                                        BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery,
                                                        ExportTimeZone exportTimeZone) {
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
@@ -76,10 +73,6 @@ public class AsyncPublicationDeliveryExporter {
         exportService.submit(() -> {
                 try {
                     logger.info("Started export job {}", exportJob);
-                    PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
-                    logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
-
-                    logger.info("About to add stop places?");
 
                     final PipedInputStream in = new PipedInputStream();
                     final PipedOutputStream out = new PipedOutputStream(in);
@@ -90,7 +83,7 @@ public class AsyncPublicationDeliveryExporter {
                         try {
                             logger.info("Streaming output thread running");
                             zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                            streamingPublicationDelivery.stream(publicationDeliveryStructure, exportParams, zipOutputStream);
+                            streamingPublicationDelivery.stream(exportParams, zipOutputStream);
                             zipOutputStream.closeEntry();
                         } catch (Exception e) {
                             exportJob.setStatus(JobStatus.FAILED);

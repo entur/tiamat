@@ -8,7 +8,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +40,17 @@ public class StreamingPublicationDelivery {
 
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
+    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
 
     private final NetexMapper netexMapper;
 
     @Autowired
-    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
+        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.netexMapper = netexMapper;
     }
 
@@ -72,7 +75,8 @@ public class StreamingPublicationDelivery {
         return byteArrayOutputStream.toString();
     }
 
-    public void stream(PublicationDeliveryStructure publicationDeliveryStructure, ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
         stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(exportParams), parkingRepository.scrollParkings(), outputStream);
     }
@@ -152,18 +156,18 @@ public class StreamingPublicationDelivery {
         while (iterableStopPlaces.hasNext()) {
             StopPlace stopPlace = iterableStopPlaces.next();
 
-            if(count == 0) {
+            if (count == 0) {
                 bufferedWriter.write("<stopPlaces>");
                 bufferedWriter.write(lineSeparator);
             }
 
             ++count;
 
-            if(count % 1000 == 0 && logger.isInfoEnabled()) {
+            if (count % 1000 == 0 && logger.isInfoEnabled()) {
                 String stopPlacesPerSecond = "NA";
 
                 long duration = System.currentTimeMillis() - startTime;
-                if(duration >= 1000) {
+                if (duration >= 1000) {
                     stopPlacesPerSecond = String.valueOf(count / (duration / 1000f));
                 }
                 logger.info("Stop places marshalled: {}. Stop places per second: {}", count, stopPlacesPerSecond);
@@ -176,16 +180,16 @@ public class StreamingPublicationDelivery {
             stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
             bufferedWriter.write(lineSeparator);
         }
-        if(count > 0) {
+        if (count > 0) {
             bufferedWriter.write("</stopPlaces>");
             bufferedWriter.write(lineSeparator);
         }
     }
 
     public void marshalParkings(Iterator<Parking> iterableParkings,
-                             BufferedWriter bufferedWriter,
-                             Marshaller marshaller,
-                             String lineSeparator) throws InterruptedException, JAXBException, IOException {
+                                BufferedWriter bufferedWriter,
+                                Marshaller marshaller,
+                                String lineSeparator) throws InterruptedException, JAXBException, IOException {
         logger.info("Marshalling parkings");
 
         int count = 0;
@@ -193,20 +197,20 @@ public class StreamingPublicationDelivery {
         long startTime = System.currentTimeMillis();
 
         while (iterableParkings.hasNext()) {
-            Parking parking  = iterableParkings.next();
+            Parking parking = iterableParkings.next();
 
-            if(count == 0) {
+            if (count == 0) {
                 bufferedWriter.write("<parkings>");
                 bufferedWriter.write(lineSeparator);
             }
 
             ++count;
 
-            if(count % 1000 == 0 && logger.isInfoEnabled()) {
+            if (count % 1000 == 0 && logger.isInfoEnabled()) {
                 String parkingsPerSecond = "NA";
 
                 long duration = System.currentTimeMillis() - startTime;
-                if(duration >= 1000) {
+                if (duration >= 1000) {
                     parkingsPerSecond = String.valueOf(count / (duration / 1000f));
                 }
                 logger.info("Parkings marshalled: {}. Parkings per second: {}", count, parkingsPerSecond);
@@ -219,7 +223,7 @@ public class StreamingPublicationDelivery {
             marshaller.marshal(jaxBParking, bufferedWriter);
             bufferedWriter.write(lineSeparator);
         }
-        if(count > 0) {
+        if (count > 0) {
             bufferedWriter.write("</parkings>");
             bufferedWriter.write(lineSeparator);
         }
