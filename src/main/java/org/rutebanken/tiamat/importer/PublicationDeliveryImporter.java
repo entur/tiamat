@@ -58,17 +58,17 @@ public class PublicationDeliveryImporter {
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, PublicationDeliveryParams publicationDeliveryParams) {
+    public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
             logger.warn(responseMessage);
             throw new RuntimeException(responseMessage);
         }
 
-        if (publicationDeliveryParams == null) {
-            publicationDeliveryParams = new PublicationDeliveryParams();
+        if (importParams == null) {
+            importParams = new ImportParams();
         } else {
-            validate(publicationDeliveryParams);
+            validate(importParams);
         }
 
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
@@ -103,7 +103,7 @@ public class PublicationDeliveryImporter {
                 logger.info("Finished importing topographic places");
             }
 
-            if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryParams.importType != ImportType.ID_MATCH) {
+            if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
                 List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
                 logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
                 List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
@@ -113,8 +113,8 @@ public class PublicationDeliveryImporter {
                 }
             }
 
-            stopPlaceImportHandler.handleStops(netexSiteFrame, publicationDeliveryParams, stopPlacesCreatedOrUpdated, responseSiteframe);
-            parkingsImportHandler.handleParkings(netexSiteFrame, publicationDeliveryParams, parkingsCreatedOrUpdated, responseSiteframe);
+            stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlacesCreatedOrUpdated, responseSiteframe);
+            parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingsCreatedOrUpdated, responseSiteframe);
 
             if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
                 List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
@@ -131,9 +131,9 @@ public class PublicationDeliveryImporter {
         }
     }
 
-    private void validate(PublicationDeliveryParams publicationDeliveryParams) {
-        if (publicationDeliveryParams.targetTopographicPlaces != null && publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null) {
-            if (!publicationDeliveryParams.targetTopographicPlaces.isEmpty() && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+    private void validate(ImportParams importParams) {
+        if (importParams.targetTopographicPlaces != null && importParams.onlyMatchOutsideTopographicPlaces != null) {
+            if (!importParams.targetTopographicPlaces.isEmpty() && !importParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
                 throw new IllegalArgumentException("targetTopographicPlaces and targetTopographicPlaces cannot be specified at the same time!");
             }
         }

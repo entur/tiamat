@@ -1,40 +1,26 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.collect.Sets;
-import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
-import org.rutebanken.netex.model.TopographicPlaceRefStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.importer.ImportType;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -144,10 +130,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION);
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.ignoreStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.BUS_STATION);
+        ImportParams importParams = new ImportParams();
+        importParams.ignoreStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.BUS_STATION);
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response, false);
 
         assertThat(result).isEmpty();
@@ -166,10 +152,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withVersion("2")
                 .withStopPlaceType(StopTypeEnumeration.AIRPORT);
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.allowOnlyStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.METRO_STATION);
+        ImportParams importParams = new ImportParams();
+        importParams.allowOnlyStopTypes = Sets.newHashSet(org.rutebanken.tiamat.model.StopTypeEnumeration.METRO_STATION);
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace, other);
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
@@ -204,9 +190,9 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(incomingStopPlace);
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
@@ -420,12 +406,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
-        publicationDeliveryParams.importType = ImportType.MERGE;
-        PublicationDeliveryStructure mergeResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        importParams.importType = ImportType.MERGE;
+        PublicationDeliveryStructure mergeResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(mergeResponse);
 

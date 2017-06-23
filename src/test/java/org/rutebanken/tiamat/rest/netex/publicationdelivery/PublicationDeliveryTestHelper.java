@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,8 +163,8 @@ public class PublicationDeliveryTestHelper {
         return postAndReturnPublicationDelivery(publicationDeliveryStructure, null);
     }
 
-    public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
-        Response response = postPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {
+        Response response = postPublicationDelivery(publicationDeliveryStructure, importParams);
 
         if(! (response.getEntity() instanceof StreamingOutput)) {
             throw new RuntimeException("Response is not instance of streaming output: "+response);
@@ -176,11 +176,11 @@ public class PublicationDeliveryTestHelper {
         return postAndReturnPublicationDelivery(publicationDeliveryXml, null);
     }
 
-    public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
+    public PublicationDeliveryStructure postAndReturnPublicationDelivery(String publicationDeliveryXml, ImportParams importParams) throws JAXBException, IOException, SAXException {
 
         InputStream stream = new ByteArrayInputStream(publicationDeliveryXml.getBytes(StandardCharsets.UTF_8));
 
-        Response response = importResource.importPublicationDelivery(stream, publicationDeliveryParams);
+        Response response = importResource.importPublicationDelivery(stream, importParams);
 
         assertThat(response.getStatus()).isEqualTo(200);
 
@@ -203,7 +203,7 @@ public class PublicationDeliveryTestHelper {
         return (PublicationDeliveryStructure) element.getValue();
     }
 
-    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, PublicationDeliveryParams publicationDeliveryParams) throws JAXBException, IOException, SAXException {
+    public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = new ObjectFactory().createPublicationDelivery(publicationDeliveryStructure);
@@ -213,7 +213,7 @@ public class PublicationDeliveryTestHelper {
         marshaller.marshal(jaxPublicationDelivery, outputStream);
         InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-        return importResource.importPublicationDelivery(inputStream, publicationDeliveryParams);
+        return importResource.importPublicationDelivery(inputStream, importParams);
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure publicationDelivery) {
