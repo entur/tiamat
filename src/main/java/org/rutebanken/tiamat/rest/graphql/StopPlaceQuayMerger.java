@@ -56,12 +56,6 @@ public class StopPlaceQuayMerger {
         fromStopPlaceToTerminate.getQuays().clear();
         fromStopPlaceToTerminate.setVersionComment(fromVersionComment);
 
-        //Terminate validity of from-StopPlace
-        terminateEntity(fromStopPlaceToTerminate);
-        if (!isDryRun) {
-            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
-        }
-
         ObjectMerger.copyPropertiesNotNull(fromStopPlaceToTerminate, mergedStopPlace, ignoreFields);
 
         mergedStopPlace.setVersionComment(toVersionComment);
@@ -85,11 +79,16 @@ public class StopPlaceQuayMerger {
             });
         }
 
-
         if (fromStopPlaceToTerminate.getAlternativeNames() != null) {
             mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
         }
 
+
+        //Terminate validity of from-StopPlace
+        terminateEntity(fromStopPlaceToTerminate);
+        if (!isDryRun) {
+            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
+        }
         if (!isDryRun) {
             return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
         }
