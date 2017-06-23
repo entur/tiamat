@@ -241,4 +241,11 @@ public class PublicationDeliveryTestHelper {
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
                 .findAny().get();
     }
+
+    public StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {
+        return extractStopPlaces(publicationDeliveryStructure).stream()
+                .filter(stopPlace -> stopPlace.getId().equals(stopPlaceId))
+                .findFirst().get();
+    }
+
 }

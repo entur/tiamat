@@ -1,11 +1,12 @@
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.*;
@@ -17,9 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.*;
 
 import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.*;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
@@ -29,21 +28,17 @@ import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSIO
 public class PublicationDeliveryExporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
     private StopPlaceRepository stopPlaceRepository;
-    private TopographicPlaceRepository topographicPlaceRepository;
-    private TariffZoneRepository tariffZoneRepository;
     private NetexMapper netexMapper;
+    private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       TopographicPlaceRepository topographicPlaceRepository,
-                                       TariffZoneRepository tariffZoneRepository,
-                                       NetexMapper netexMapper) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter) {
         this.stopPlaceRepository = stopPlaceRepository;
-        this.topographicPlaceRepository = topographicPlaceRepository;
-        this.tariffZoneRepository = tariffZoneRepository;
         this.netexMapper = netexMapper;
+        this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
@@ -65,14 +60,17 @@ public class PublicationDeliveryExporter {
         return exportPublicationDeliveryWithStops(stopPlaceRepository.findAll(), ALL);
     }
 
-    @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure exportSiteFrame(SiteFrame siteFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
+        return publicationDeliveryStructure;
+    }
 
-
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
@@ -87,39 +85,10 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportMode topographicPlaceExportMode) {
         logger.info("Preparing publication delivery export");
-        org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
-        siteFrame.setCreated(Instant.now());
-        siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
-
-        StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
-
-        if (iterableStopPlaces != null) {
-            iterableStopPlaces.forEach(stopPlace -> stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace));
-            logger.info("Adding {} stop places", stopPlacesInFrame_relStructure.getStopPlace().size());
-            siteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
-            if (siteFrame.getStopPlaces().getStopPlace().isEmpty()) {
-                siteFrame.setStopPlaces(null);
-            }
-        }
-
-        Collection<TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, stopPlacesInFrame_relStructure);
-
-        if (!topographicPlacesForExport.isEmpty()) {
-            Iterator<TopographicPlace> topographicPlaceIterable = topographicPlacesForExport.iterator();
-
-
-            TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
-            topographicPlaceIterable
-                    .forEachRemaining(topographicPlace -> topographicPlaces.getTopographicPlace().add(topographicPlace));
-
-            logger.info("Adding {} topographic places", topographicPlaces.getTopographicPlace().size());
-            siteFrame.setTopographicPlaces(topographicPlaces);
-        } else {
-            siteFrame.setTopographicPlaces(null);
-        }
-
-        exportTariffZones(siteFrame);
+        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
+        tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
+        tiamatSiteFrameExporter.addTopographicPlacesToTiamatSiteFrame(topographicPlaceExportMode, siteFrame);
+        tiamatSiteFrameExporter.addTariffZones(siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
@@ -128,54 +97,15 @@ public class PublicationDeliveryExporter {
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 
-
-        return exportSiteFrame(convertedSiteFrame);
+        return createPublicationDelivery(convertedSiteFrame);
     }
 
-    public void exportTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
-        List<TariffZone> tariffZones = tariffZoneRepository.findAll();
-        if (!tariffZones.isEmpty()) {
-            siteFrame.setTariffZones(new TariffZonesInFrame_RelStructure(tariffZones));
-            logger.info("Added {} tariffZones", tariffZones.size());
-        } else {
-            logger.info("No tariff zones found");
-        }
-    }
-
-    private void removeVersionFromTopographicPlaceReferences(SiteFrame convertedSiteFrame) {
+    private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {
         if (convertedSiteFrame.getStopPlaces() != null) {
-            convertedSiteFrame.getStopPlaces().getStopPlace().stream().filter(sp -> sp.getTopographicPlaceRef() != null).forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
-        }
-    }
-
-    private Collection<TopographicPlace> getTopographicPlacesForExport(ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
-        Collection<TopographicPlace> topographicPlacesForExport;
-        if (ALL.equals(topographicPlaceExportMode)) {
-            topographicPlacesForExport = topographicPlaceRepository.findAll();
-            if (topographicPlacesForExport.isEmpty()) {
-                logger.warn("No topographic places found to export");
-            }
-        } else if (RELEVANT.equals(topographicPlaceExportMode)) {
-            Set<TopographicPlace> uniqueTopographicPlaces = new HashSet<>();
-            for (StopPlace stopPlace : stopPlacesInFrame_relStructure.getStopPlace()) {
-                gatherTopographicPlaceTree(stopPlace.getTopographicPlace(), uniqueTopographicPlaces);
-            }
-
-            topographicPlacesForExport = new HashSet<>(uniqueTopographicPlaces);
-        } else {
-            topographicPlacesForExport = new ArrayList<>();
-        }
-        return topographicPlacesForExport;
-    }
-
-    private void gatherTopographicPlaceTree(TopographicPlace topographicPlace, Set<TopographicPlace> target) {
-        if (topographicPlace != null && target.add(topographicPlace)) {
-            TopographicPlaceRefStructure parentRef = topographicPlace.getParentTopographicPlaceRef();
-            if (parentRef != null) {
-                TopographicPlace parent = topographicPlaceRepository.findFirstByNetexIdAndVersion(parentRef.getRef(), Long.valueOf(parentRef.getVersion()));
-                gatherTopographicPlaceTree(parent, target);
-            }
-
+            convertedSiteFrame.getStopPlaces().getStopPlace()
+                    .stream()
+                    .filter(sp -> sp.getTopographicPlaceRef() != null)
+                    .forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
         }
     }
 

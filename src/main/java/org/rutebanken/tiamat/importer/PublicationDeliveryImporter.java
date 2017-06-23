@@ -2,10 +2,8 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
-import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
-import org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -16,8 +14,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -128,8 +124,7 @@ public class PublicationDeliveryImporter {
                 responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
             }
 
-
-            return publicationDeliveryExporter.exportSiteFrame(responseSiteframe);
+            return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();
