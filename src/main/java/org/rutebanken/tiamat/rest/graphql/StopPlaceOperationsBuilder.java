@@ -40,7 +40,8 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(TO_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT)))
+                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
+                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)))
                 .build());
 
         //Merge two quays on a StopPlace
@@ -52,7 +53,8 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(FROM_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(TO_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayMerger.mergeQuays(environment.getArgument(STOP_PLACE_ID), environment.getArgument(FROM_QUAY_ID), environment.getArgument(TO_QUAY_ID), environment.getArgument(VERSION_COMMENT)))
+                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
+                .dataFetcher(environment -> stopPlaceQuayMerger.mergeQuays(environment.getArgument(STOP_PLACE_ID), environment.getArgument(FROM_QUAY_ID), environment.getArgument(TO_QUAY_ID), environment.getArgument(VERSION_COMMENT), environment.getArgument(DRY_RUN)))
                 .build());
 
         operations.add(newFieldDefinition()

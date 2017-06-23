@@ -202,6 +202,7 @@ public class GraphQLNames {
     public static final String VERSION_COMMENT = "versionComment";
     public static final String FROM_VERSION_COMMENT = "fromVersionComment";
     public static final String TO_VERSION_COMMENT = "toVersionComment";
+    public static final String DRY_RUN = "dryRun";
     public static final String PUBLIC_CODE = "publicCode";
     public static final String WEIGHTING = "weighting";
 

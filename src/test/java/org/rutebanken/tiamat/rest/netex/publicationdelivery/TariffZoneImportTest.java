@@ -1,22 +1,14 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
-import net.opengis.gml._3.DirectPositionListType;
-import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.importer.ImportType;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,14 +61,14 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
 
         // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
         // Second causes tariffzone to be in second version. Then the version reference from stop place must be updated, or else the validation fails
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
         List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
                 .getTariffZones().getTariffZone();
@@ -118,11 +110,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
 
         // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
         TariffZone tariffZone2 = new TariffZone()
                 .withName(new MultilingualString().withValue("X09"))
@@ -146,8 +138,8 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
 
         // Second import should match and merge tariffzones
-        publicationDeliveryParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
+        importParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
         List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
                 .getTariffZones().getTariffZone();
@@ -189,11 +181,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
 
         // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
         TariffZone tariffZone2 = new TariffZone()
                 .withName(new MultilingualString().withValue("X08"))
@@ -219,8 +211,8 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
 
         // Second import should match and merge tariffzones
-        publicationDeliveryParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
+        importParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
         List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
                 .getTariffZones().getTariffZone();
@@ -232,9 +224,9 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
         assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
+        importParams.importType = ImportType.ID_MATCH;
 
-        PublicationDeliveryStructure idMatchResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, publicationDeliveryParams);
+        PublicationDeliveryStructure idMatchResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
         actualZones = publicationDeliveryTestHelper.findSiteFrame(idMatchResponse)
                 .getTariffZones().getTariffZone();

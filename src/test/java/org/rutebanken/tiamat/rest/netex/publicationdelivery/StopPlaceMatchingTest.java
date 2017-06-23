@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportType;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -35,15 +35,15 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("74"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         System.out.println("Got response: \n" + response);
 
@@ -72,10 +72,10 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("10"))
                                 .withLongitude(new BigDecimal("74"))));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(railstationStopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
 
         StopPlace stopPlaceToBeMatched = new StopPlace()
@@ -89,14 +89,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("74"))));
 
 
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
 
         PublicationDeliveryStructure publicationDelivery3 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery3, publicationDeliveryParams);
+        importParams.importType = ImportType.MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery3, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -129,10 +129,10 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                             .withId("NTR:Quay:11")
                             .withVersion("1")));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure initialPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(firstStopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initialPublicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initialPublicationDelivery, importParams);
 
         StopPlace secondStopPlace = new StopPlace()
                 .withId("NTR:StopPlace:10")
@@ -149,7 +149,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withVersion("1")));
 
         PublicationDeliveryStructure secondInitialPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(secondStopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondInitialPublicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondInitialPublicationDelivery, importParams);
 
         StopPlace incomingStopPlace = new StopPlace()
                 .withId("NTR:StopPlace:10")
@@ -168,9 +168,9 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withId("NTR:Quay:11")
                                 .withVersion("1")));
 
-        publicationDeliveryParams.importType = ImportType.MATCH;
+        importParams.importType = ImportType.MATCH;
         PublicationDeliveryStructure matchingPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(incomingStopPlace);
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(matchingPublicationDelivery, publicationDeliveryParams);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(matchingPublicationDelivery, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -209,10 +209,10 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("74.2"))
                                 .withLongitude(new BigDecimal("10.2"))));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(tooFarAwayStopPlace, nearbyStopPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         StopPlace stopPlaceToBeMerged = new StopPlace()
                 .withId("RUT:StopPlace:187187666") // Same as the ID of the stop place which is too far away
@@ -225,8 +225,8 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("10.20001"))));
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMerged);
-        publicationDeliveryParams.importType = ImportType.MERGE;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.MERGE;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -253,15 +253,15 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("75"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         System.out.println("Got response: \n" + response);
 
@@ -285,17 +285,17 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("76"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         // ID is similar, but does not start with 2
         stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         System.out.println("Got response: \n" + response);
 
@@ -316,17 +316,17 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("77"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         // match even without leading zero and different prefix
         stopPlaceToBeMatched.setId("AKT:StopPlace:111111111");
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         System.out.println("Got response: \n" + response);
 
@@ -348,17 +348,17 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("77"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         // match when stop place does not have leading zero, but the incoming has.
         stopPlaceToBeMatched.setId("AKT:StopPlace:0111111111");
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         System.out.println("Got response: \n" + response);
 
@@ -412,15 +412,15 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("71"))));
 
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         // Import the same matching stop twice to verify no duplicates
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1, stopPlace2);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -447,14 +447,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withId("RUT:Quay:0136068001")
                                 .withVersion("1")));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -481,14 +481,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withId("RUT:Quay:zzzz")
                                 .withVersion("1")));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -515,14 +515,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withId("RUT:Quay:08888888")
                                 .withVersion("1")));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -549,14 +549,14 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withId("NSR:Quay:0136068001")
                                 .withVersion("1")));
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, publicationDeliveryParams);
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace2);
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery2, importParams);
 
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
@@ -753,12 +753,12 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 "  </dataObjects>\n" +
                 "</PublicationDelivery>\n";
 
-        PublicationDeliveryParams publicationDeliveryParams = new PublicationDeliveryParams();
-        publicationDeliveryParams.importType = ImportType.INITIAL;
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initiallyImportedStops, publicationDeliveryParams);
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(initiallyImportedStops, importParams);
 
-        publicationDeliveryParams.importType = ImportType.ID_MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(idMatch, publicationDeliveryParams);
+        importParams.importType = ImportType.ID_MATCH;
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(idMatch, importParams);
 
         List<StopPlace> stops = publicationDeliveryTestHelper.extractStopPlaces(response);
 

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.ImportType;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.filter.StopPlaceTypeFilter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
@@ -84,31 +83,31 @@ public class StopPlaceImportHandler {
     private TopographicPlacesExporter topographicPlacesExporter;
 
 
-    public void handleStops(SiteFrame netexSiteFrame, PublicationDeliveryParams publicationDeliveryParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
+    public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
             List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
 
-            tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, publicationDeliveryParams.allowOnlyStopTypes);
+            tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, importParams.allowOnlyStopTypes);
 
-            if (publicationDeliveryParams.ignoreStopTypes != null && !publicationDeliveryParams.ignoreStopTypes.isEmpty()) {
-                tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, publicationDeliveryParams.ignoreStopTypes, true);
+            if (importParams.ignoreStopTypes != null && !importParams.ignoreStopTypes.isEmpty()) {
+                tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, importParams.ignoreStopTypes, true);
             }
 
-            boolean isImportTypeIdMatch = publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH);
+            boolean isImportTypeIdMatch = importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH);
             if (!isImportTypeIdMatch) {
                 logger.info("Running stop place pre steps");
                 tiamatStops = stopPlacePreSteps.run(tiamatStops);
             }
 
             int numberOfStopBeforeFiltering = tiamatStops.size();
-            logger.info("About to filter {} stops based on topographic references: {}", tiamatStops.size(), publicationDeliveryParams.targetTopographicPlaces);
-            tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.targetTopographicPlaces, tiamatStops);
-            logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, publicationDeliveryParams.targetTopographicPlaces);
+            logger.info("About to filter {} stops based on topographic references: {}", tiamatStops.size(), importParams.targetTopographicPlaces);
+            tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(importParams.targetTopographicPlaces, tiamatStops);
+            logger.info("Got {} stops (was {}) after filtering by: {}", tiamatStops.size(), numberOfStopBeforeFiltering, importParams.targetTopographicPlaces);
 
-            if (publicationDeliveryParams.onlyMatchOutsideTopographicPlaces != null && !publicationDeliveryParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
+            if (importParams.onlyMatchOutsideTopographicPlaces != null && !importParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
                 numberOfStopBeforeFiltering = tiamatStops.size();
-                logger.info("Filtering stops outside given list of topographic places: {}", publicationDeliveryParams.onlyMatchOutsideTopographicPlaces);
-                tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(publicationDeliveryParams.onlyMatchOutsideTopographicPlaces, tiamatStops, true);
+                logger.info("Filtering stops outside given list of topographic places: {}", importParams.onlyMatchOutsideTopographicPlaces);
+                tiamatStops = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(importParams.onlyMatchOutsideTopographicPlaces, tiamatStops, true);
                 logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
             }
 
@@ -118,20 +117,20 @@ public class StopPlaceImportHandler {
             }
 
             Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
-            logger.info("The import type is: {}", publicationDeliveryParams.importType);
+            logger.info("The import type is: {}", importParams.importType);
 
-            if (publicationDeliveryParams.importType != null && publicationDeliveryParams.importType.equals(ImportType.ID_MATCH)) {
+            if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
                 synchronized (STOP_PLACE_IMPORT_LOCK) {
-                    if (publicationDeliveryParams.importType == null || publicationDeliveryParams.importType.equals(ImportType.MERGE)) {
+                    if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
                         importedOrMatchedNetexStopPlaces = transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                    } else if (publicationDeliveryParams.importType.equals(ImportType.INITIAL)) {
+                    } else if (importParams.importType.equals(ImportType.INITIAL)) {
                         importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                    } else if (publicationDeliveryParams.importType.equals(ImportType.MATCH)) {
+                    } else if (importParams.importType.equals(ImportType.MATCH)) {
                         importedOrMatchedNetexStopPlaces = matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                     } else {
-                        throw new NotImplementedException("Import type " + publicationDeliveryParams.importType + " not implemented ");
+                        throw new NotImplementedException("Import type " + importParams.importType + " not implemented ");
                     }
                 }
             }

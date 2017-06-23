@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class PublicationDeliveryParams {
+public class ImportParams {
 
     /**
      * Only import stops that matches the list of counties.

@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
+import org.rutebanken.tiamat.importer.ImportParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +49,13 @@ public class ImportResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response importPublicationDelivery(InputStream inputStream, @BeanParam PublicationDeliveryParams publicationDeliveryParams) throws IOException, JAXBException, SAXException {
+    public Response importPublicationDelivery(InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
-            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, publicationDeliveryParams);
-            if (publicationDeliveryParams != null && publicationDeliveryParams.skipOutput) {
+            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, importParams);
+            if (importParams != null && importParams.skipOutput) {
                 return Response.ok().build();
             } else {
                 return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();

@@ -56,10 +56,6 @@ public class PublicationDeliveryExporter {
         return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, topographicPlaceExportMode), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
     }
 
-    public PublicationDeliveryStructure exportAllStopPlaces() throws JAXBException {
-        return exportPublicationDeliveryWithStops(stopPlaceRepository.findAll(), ALL);
-    }
-
     public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)

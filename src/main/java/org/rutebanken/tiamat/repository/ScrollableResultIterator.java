@@ -43,7 +43,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
 
         if (currentItem.isPresent()) {
             if (++counter % fetchSize == 0) {
-                logger.debug("Scrolling stop places. Counter is currently at {}", counter);
+                logger.debug("Scrolling {}s. Counter is currently at {}", currentItem.getClass().getSimpleName(), counter);
             }
             return currentItem.get();
         }

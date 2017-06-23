@@ -2,17 +2,18 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -31,9 +32,9 @@ public class StopPlaceQuayMerger {
     @Autowired
     private AuthorizationService authorizationService;
 
+    private static final String[] ignoreFields = { "keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
 
-
-    protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment) {
+    protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
         StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
 
@@ -51,23 +52,50 @@ public class StopPlaceQuayMerger {
         fromStopPlaceToTerminate.getQuays().stream()
                 .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
 
-        // Keep importedId
-        mergedStopPlace.getOriginalIds().addAll(fromStopPlaceToTerminate.getOriginalIds());
-
         //Remove quays from from-StopPlace
         fromStopPlaceToTerminate.getQuays().clear();
         fromStopPlaceToTerminate.setVersionComment(fromVersionComment);
 
-        //Terminate validity of from-StopPlace
-        terminateEntity(fromStopPlaceToTerminate);
-        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
+        ObjectMerger.copyPropertiesNotNull(fromStopPlaceToTerminate, mergedStopPlace, ignoreFields);
 
         mergedStopPlace.setVersionComment(toVersionComment);
 
-        return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
+        if (fromStopPlaceToTerminate.getKeyValues() != null) {
+            mergeKeyValues(fromStopPlaceToTerminate.getKeyValues(), mergedStopPlace.getKeyValues());
+        }
+
+        if (fromStopPlaceToTerminate.getPlaceEquipments() != null) {
+            mergedStopPlace.setPlaceEquipments(
+                    mergePlaceEquipments(fromStopPlaceToTerminate.getPlaceEquipments(), mergedStopPlace.getPlaceEquipments())
+            );
+        }
+
+
+        if (fromStopPlaceToTerminate.getTariffZones() != null) {
+            fromStopPlaceToTerminate.getTariffZones().forEach( tz -> {
+                TariffZoneRef tariffZoneRef = new TariffZoneRef();
+                ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
+                mergedStopPlace.getTariffZones().add(tariffZoneRef);
+            });
+        }
+
+        if (fromStopPlaceToTerminate.getAlternativeNames() != null) {
+            mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
+        }
+
+
+        //Terminate validity of from-StopPlace
+        terminateEntity(fromStopPlaceToTerminate);
+        if (!isDryRun) {
+            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
+        }
+        if (!isDryRun) {
+            return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
+        }
+        return mergedStopPlace;
     }
 
-    protected StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment) {
+    protected StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
         Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
@@ -84,18 +112,76 @@ public class StopPlaceQuayMerger {
         Quay fromQuay = fromQuayOpt.get();
         Quay toQuay = toQuayOpt.get();
 
+        ObjectMerger.copyPropertiesNotNull(fromQuay, toQuay, ignoreFields);
         //Copy attributes to to-quay
-        toQuay.getOriginalIds().addAll(fromQuay.getOriginalIds());
+
+        if (fromQuay.getKeyValues() != null) {
+            mergeKeyValues(fromQuay.getKeyValues(), toQuay.getKeyValues());
+        }
+
+        if (fromQuay.getPlaceEquipments() != null) {
+            toQuay.setPlaceEquipments(mergePlaceEquipments(fromQuay.getPlaceEquipments(), toQuay.getPlaceEquipments()));
+        }
+
+        if (fromQuay.getAlternativeNames() != null) {
+            mergeAlternativeNames(fromQuay.getAlternativeNames(), toQuay.getAlternativeNames());
+        }
 
         updatedStopPlace.getQuays()
                 .removeIf(quay -> quay.getNetexId().equals(fromQuayId));
 
         updatedStopPlace.setVersionComment(versionComment);
 
-        //Save updated StopPlace
-        updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, updatedStopPlace);
+        if (!isDryRun) {
+            //Save updated StopPlace
+            updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, updatedStopPlace);
+        }
 
         return updatedStopPlace;
+    }
+
+    void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
+        fromKeyValues.keySet()
+            .forEach(key -> {
+                if (toKeyValues.containsKey(key)) {
+                    toKeyValues.get(key).getItems().addAll(fromKeyValues.get(key).getItems());
+                } else {
+                    Value value = fromKeyValues.get(key);
+
+                    List<String> valueItems = new ArrayList<>();
+                    valueItems.addAll(value.getItems());
+
+                    toKeyValues.put(key, new Value(valueItems));
+                }
+            });
+    }
+
+    PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
+        if (fromPlaceEquipments != null) {
+            if (toPlaceEquipments == null) {
+                toPlaceEquipments = new PlaceEquipment();
+            }
+            List<InstalledEquipment_VersionStructure> fromInstalledEquipment = fromPlaceEquipments.getInstalledEquipment();
+            List<InstalledEquipment_VersionStructure> toInstalledEquipment = toPlaceEquipments.getInstalledEquipment();
+            if (fromInstalledEquipment != null) {
+                fromInstalledEquipment.forEach(eq -> {
+                    toInstalledEquipment.add(
+                            stopPlaceVersionedSaverService.createCopy(eq, InstalledEquipment_VersionStructure.class)
+                    );
+                });
+            }
+        }
+        return toPlaceEquipments;
+    }
+
+    void mergeAlternativeNames(List<AlternativeName> fromAlternativeNames, List<AlternativeName> toAlternativeNames) {
+        if (fromAlternativeNames != null) {
+            fromAlternativeNames.forEach( altName -> {
+                AlternativeName mergedAltName = new AlternativeName();
+                ObjectMerger.copyPropertiesNotNull(altName, mergedAltName);
+                toAlternativeNames.add(mergedAltName);
+            });
+        }
     }
 
     private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
