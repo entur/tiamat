@@ -90,11 +90,12 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
         assertThat(mergedStopPlace.getName().getValue()).matches(toStopPlace.getName().getValue());
 
-        assertThat(mergedStopPlace.getPlaceEquipments()).isNotNull();
         assertThat(mergedStopPlace.getVersionComment()).isNull();
         assertThat(mergedStopPlace.getTransportMode()).isEqualTo(VehicleModeEnumeration.BUS);
 
+        // Equipment
         PlaceEquipment placeEquipment = mergedStopPlace.getPlaceEquipments();
+        assertThat(placeEquipment).isNotNull();
         List<InstalledEquipment_VersionStructure> equipment = placeEquipment.getInstalledEquipment();
         assertThat(equipment).hasSize(1);
         assertThat(equipment).doesNotContain(generalSign); // Result from merge does not contain same object
@@ -119,6 +120,82 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
                 fail("Unknown Quay has been added");
             }
         });
+    }
+
+    @Test
+    @Transactional
+    public void testMergeStopPlacesWithTariffZones() {
+
+        StopPlace fromStopPlace = new StopPlace();
+        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
+        
+        Set<TariffZoneRef> fromTzSet = new HashSet<>();
+        TariffZoneRef fromTz = new TariffZoneRef();
+        fromTz.setRef("NSR:TZ:1");
+        fromTz.setVersion("1");
+        fromTzSet.add(fromTz);
+        fromStopPlace.setTariffZones(fromTzSet);
+
+
+        StopPlace toStopPlace = new StopPlace();
+        toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
+
+        Set<TariffZoneRef> toTzSet = new HashSet<>();
+        TariffZoneRef toTz = new TariffZoneRef();
+        toTz.setRef("NSR:TZ:2");
+        toTz.setVersion("2");
+        toTzSet.add(toTz);
+        toStopPlace.setTariffZones(toTzSet);
+
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
+
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+
+        assertThat(mergedStopPlace.getTariffZones()).hasSize(2);
+
+    }
+
+    @Test
+    @Transactional
+    public void testMergeStopPlacesWithAlternativeNames() {
+
+        StopPlace fromStopPlace = new StopPlace();
+        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
+
+        Set<TariffZoneRef> fromTzSet = new HashSet<>();
+        TariffZoneRef fromTz = new TariffZoneRef();
+        fromTz.setRef("NSR:TZ:1");
+        fromTz.setVersion("1");
+        fromTzSet.add(fromTz);
+        fromStopPlace.setTariffZones(fromTzSet);
+
+        AlternativeName fromAlternativeName = new AlternativeName();
+        fromAlternativeName.setName(new EmbeddableMultilingualString("FROM-alternative"));
+        fromStopPlace.getAlternativeNames().add(fromAlternativeName);
+
+        StopPlace toStopPlace = new StopPlace();
+        toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
+
+        Set<TariffZoneRef> toTzSet = new HashSet<>();
+        TariffZoneRef toTz = new TariffZoneRef();
+        toTz.setRef("NSR:TZ:2");
+        toTz.setVersion("2");
+        toTzSet.add(toTz);
+        toStopPlace.setTariffZones(toTzSet);
+
+        AlternativeName toAlternativeName = new AlternativeName();
+        toAlternativeName.setName(new EmbeddableMultilingualString("TO-alternative"));
+        toStopPlace.getAlternativeNames().add(toAlternativeName);
+
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
+
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+
+        //AlternativeName
+        assertThat(mergedStopPlace.getAlternativeNames()).isNotNull();
+        assertThat(mergedStopPlace.getAlternativeNames()).hasSize(2);
     }
 
     @Test

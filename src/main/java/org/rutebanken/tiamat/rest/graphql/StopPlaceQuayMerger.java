@@ -32,7 +32,7 @@ public class StopPlaceQuayMerger {
     @Autowired
     private AuthorizationService authorizationService;
 
-    private static final String[] ignoreFields = { "keyValues", "placeEquipments", "accessibilityAssessment"};
+    private static final String[] ignoreFields = { "keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
 
     protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
@@ -76,6 +76,20 @@ public class StopPlaceQuayMerger {
             );
         }
 
+
+        if (fromStopPlaceToTerminate.getTariffZones() != null) {
+            fromStopPlaceToTerminate.getTariffZones().forEach( tz -> {
+                TariffZoneRef tariffZoneRef = new TariffZoneRef();
+                ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
+                mergedStopPlace.getTariffZones().add(tariffZoneRef);
+            });
+        }
+
+
+        if (fromStopPlaceToTerminate.getAlternativeNames() != null) {
+            mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
+        }
+
         if (!isDryRun) {
             return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
         }
@@ -108,6 +122,10 @@ public class StopPlaceQuayMerger {
 
         if (fromQuay.getPlaceEquipments() != null) {
             toQuay.setPlaceEquipments(mergePlaceEquipments(fromQuay.getPlaceEquipments(), toQuay.getPlaceEquipments()));
+        }
+
+        if (fromQuay.getAlternativeNames() != null) {
+            mergeAlternativeNames(fromQuay.getAlternativeNames(), toQuay.getAlternativeNames());
         }
 
         updatedStopPlace.getQuays()
@@ -155,6 +173,16 @@ public class StopPlaceQuayMerger {
             }
         }
         return toPlaceEquipments;
+    }
+
+    void mergeAlternativeNames(List<AlternativeName> fromAlternativeNames, List<AlternativeName> toAlternativeNames) {
+        if (fromAlternativeNames != null) {
+            fromAlternativeNames.forEach( altName -> {
+                AlternativeName mergedAltName = new AlternativeName();
+                ObjectMerger.copyPropertiesNotNull(altName, mergedAltName);
+                toAlternativeNames.add(mergedAltName);
+            });
+        }
     }
 
     private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
