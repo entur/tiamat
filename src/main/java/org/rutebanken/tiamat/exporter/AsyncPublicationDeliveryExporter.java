@@ -88,30 +88,30 @@ public class AsyncPublicationDeliveryExporter {
                     final PipedOutputStream out = new PipedOutputStream(in);
 
                     Thread outputStreamThread = new Thread(() -> {
-                                final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+                        final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
 
-                                try {
-                                    logger.info("Streaming output thread running");
-                                    zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                    streamingPublicationDelivery.stream(publicationDeliveryStructure, exportParams, zipOutputStream);
-                                    zipOutputStream.closeEntry();
-                                } catch (Exception e) {
-                                    exportJob.setStatus(JobStatus.FAILED);
-                                    String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
-                                    logger.error(message + " " + exportJob, e);
-                                    exportJob.setMessage(message);
-                                    if (e instanceof InterruptedException) {
-                                        Thread.currentThread().interrupt();
-                                    }
-                                } finally {
-
-                                    try {
-                                        zipOutputStream.close();
-                                    } catch (IOException e) {
-                                        logger.warn("Could not close stream", e);
-                                    }
-                                }
+                        try {
+                            logger.info("Streaming output thread running");
+                            zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
+                            streamingPublicationDelivery.stream(publicationDeliveryStructure, exportParams, zipOutputStream);
+                            zipOutputStream.closeEntry();
+                        } catch (Exception e) {
+                            exportJob.setStatus(JobStatus.FAILED);
+                            String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
+                            logger.error(message + " " + exportJob, e);
+                            exportJob.setMessage(message);
+                            if (e instanceof InterruptedException) {
+                                Thread.currentThread().interrupt();
                             }
+                        } finally {
+
+                            try {
+                                zipOutputStream.close();
+                            } catch (IOException e) {
+                                logger.warn("Could not close stream", e);
+                            }
+                        }
+                    }
                     );
 
                     outputStreamThread.setName("outstream-" + exportJob.getId());
