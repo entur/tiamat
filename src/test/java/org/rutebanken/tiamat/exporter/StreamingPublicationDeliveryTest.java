@@ -32,9 +32,9 @@ public class StreamingPublicationDeliveryTest {
     private ParkingRepository parkingRepository = mock(ParkingRepository.class);
     private PublicationDeliveryExporter publicationDeliveryExporter = mock(PublicationDeliveryExporter.class);
     private TiamatSiteFrameExporter tiamatSiteFrameExporter= mock(TiamatSiteFrameExporter.class);
-    private IterableMarshaller iterableMarshaller = mock(IterableMarshaller.class);
-
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, iterableMarshaller, new NetexMapper());
+    private NetexMapper netexMapper = new NetexMapper();
+    private IterableMarshaller iterableMarshaller = new IterableMarshaller(netexMapper);
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, iterableMarshaller, netexMapper);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {

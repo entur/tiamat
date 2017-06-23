@@ -24,9 +24,12 @@ public class IterableMarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(IterableMarshaller.class);
 
+    private final NetexMapper netexMapper;
 
     @Autowired
-    private NetexMapper netexMapper;
+    public IterableMarshaller(NetexMapper netexMapper) {
+        this.netexMapper = netexMapper;
+    }
 
     public <TIAMAT extends IdentifiedEntity, NETEX extends EntityStructure> void marshal(Iterator<TIAMAT> iterator,
                                                                                          BufferedWriter bufferedWriter,
