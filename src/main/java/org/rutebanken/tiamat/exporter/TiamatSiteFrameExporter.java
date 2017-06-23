@@ -35,7 +35,7 @@ public class TiamatSiteFrameExporter {
     public org.rutebanken.tiamat.model.SiteFrame createTiamatSiteFrame(String description) {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setDescription(new MultilingualStringEntity(description));
-//        siteFrame.setCreated(Instant.now());
+        // siteFrame.setCreated(Instant.now()); // Disabled because of OffsetDateTimeInstantConverter issues during test
         siteFrame.setVersion(1L);
         siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
         return siteFrame;
