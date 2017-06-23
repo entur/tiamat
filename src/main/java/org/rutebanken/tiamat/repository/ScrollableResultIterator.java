@@ -31,7 +31,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
             return true;
         }
 
-        close(currentItem.get().getClass().getSimpleName());
+        close();
         return false;
     }
 
@@ -48,7 +48,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
             return currentItem.get();
         }
 
-        close(currentItem.get().getClass().getSimpleName());
+        close();
         throw new NoSuchElementException();
     }
 
@@ -68,8 +68,8 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
         }
     }
 
-    private void close(String simpleName) {
-        logger.info("Closing result set for {}. Counter ended at {}", simpleName, counter);
+    private void close() {
+        logger.info("Closing result set. Counter ended at {}", counter);
         scrollableResults.close();
     }
 }
