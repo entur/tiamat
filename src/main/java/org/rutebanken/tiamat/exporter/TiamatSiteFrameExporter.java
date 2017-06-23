@@ -20,17 +20,22 @@ public class TiamatSiteFrameExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(TariffZonesFromStopsExporter.class);
 
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+
+    private final TopographicPlaceRepository topographicPlaceRepository;
+
+    private final TariffZoneRepository tariffZoneRepository;
 
     @Autowired
-    private TariffZoneRepository tariffZoneRepository;
+    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository) {
+        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.tariffZoneRepository = tariffZoneRepository;
+    }
 
 
     public org.rutebanken.tiamat.model.SiteFrame createTiamatSiteFrame(String description) {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
         siteFrame.setDescription(new MultilingualStringEntity(description));
-        siteFrame.setCreated(Instant.now());
+//        siteFrame.setCreated(Instant.now());
         siteFrame.setVersion(1L);
         siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
         return siteFrame;

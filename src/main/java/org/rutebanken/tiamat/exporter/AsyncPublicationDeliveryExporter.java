@@ -79,10 +79,6 @@ public class AsyncPublicationDeliveryExporter {
 
                 try {
                     logger.info("Started export job {}", exportJob);
-                    PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
-                    logger.info("Got publication delivery from exporter: {}", publicationDeliveryStructure);
-
-                    logger.info("About to add stop places?");
 
                     final PipedInputStream in = new PipedInputStream();
                     final PipedOutputStream out = new PipedOutputStream(in);
@@ -95,7 +91,7 @@ public class AsyncPublicationDeliveryExporter {
                                     try {
                                         logger.info("Streaming output thread running");
                                         zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                                        streamingPublicationDelivery.stream(publicationDeliveryStructure, exportParams, zipOutputStream);
+                                        streamingPublicationDelivery.stream(exportParams, zipOutputStream);
                                         zipOutputStream.closeEntry();
                                     } catch (Exception e) {
                                         exportJob.setStatus(JobStatus.FAILED);

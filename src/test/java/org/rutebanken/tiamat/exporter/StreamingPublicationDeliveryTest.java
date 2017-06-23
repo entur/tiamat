@@ -8,8 +8,11 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -29,22 +32,14 @@ public class StreamingPublicationDeliveryTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private ParkingRepository parkingRepository = mock(ParkingRepository.class);
-
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, new NetexMapper());
+    private TiamatSiteFrameExporter tiamatSiteFrameExporter= new TiamatSiteFrameExporter(mock(TopographicPlaceRepository.class), mock(TariffZoneRepository.class));
+    private NetexMapper netexMapper = new NetexMapper();
+    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter);
+    private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
-
-        String publicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
-                "    <PublicationTimestamp>2017-01-06T13:09:42.338+01:00</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NSR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame created=\"2017-01-06T13:09:42.272+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
-                "        </SiteFrame>\n" +
-                "   </dataObjects>\n" +
-                "</PublicationDelivery>\n";
-
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -54,7 +49,7 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(stopPlaces.iterator(), new ArrayList<Parking>().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -66,17 +61,6 @@ public class StreamingPublicationDeliveryTest {
     @Test
     public void streamParkingIntoPublicationDelivery() throws Exception {
 
-        String publicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
-                "    <PublicationTimestamp>2017-01-06T13:09:42.338+01:00</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NSR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame created=\"2017-01-06T13:09:42.272+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
-                "        </SiteFrame>\n" +
-                "   </dataObjects>\n" +
-                "</PublicationDelivery>\n";
-
-
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         Parking parking = new Parking();
@@ -85,7 +69,7 @@ public class StreamingPublicationDeliveryTest {
         List<Parking> parkings = new ArrayList<>(2);
         parkings.add(parking);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, new ArrayList().iterator(), parkings.iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(new ArrayList<StopPlace>().iterator(), parkings.iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -98,25 +82,6 @@ public class StreamingPublicationDeliveryTest {
     @Test
     public void streamStopPlaceIntoPublicationDeliveryWithTopographicPlace() throws Exception {
 
-        String publicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
-                "    <PublicationTimestamp>2017-01-06T13:09:42.338+01:00</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NSR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame created=\"2017-01-06T13:09:42.272+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
-                "           <topographicPlaces>\n" +
-                "               <TopographicPlace modification=\"new\" version=\"any\" id=\"NSR:TopographicPlace:3\">\n" +
-                "                    <Name lang=\"no\">Akershus</Name>\n" +
-                "                    <Descriptor>\n" +
-                "                        <Name>Akershus</Name>\n" +
-                "                    </Descriptor>\n" +
-                "                    <TopographicPlaceType>county</TopographicPlaceType>\n" +
-                "                    <CountryRef ref=\"no\"/>\n" +
-                "                </TopographicPlace>\n" +
-                "           </topographicPlaces>\n" +
-                "        </SiteFrame>\n" +
-                "   </dataObjects>\n" +
-                "</PublicationDelivery>\n";
 
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -127,7 +92,7 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(stopPlaces.iterator(), new ArrayList<Parking>().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
@@ -142,27 +107,6 @@ public class StreamingPublicationDeliveryTest {
     @Test
     public void streamStopPlaceAndValidateResult() throws Exception {
 
-        String publicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
-                "    <PublicationTimestamp>2017-01-06T13:09:42.338+01:00</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NSR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame created=\"2017-01-06T13:09:42.272+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
-                "           <topographicPlaces>\n" +
-                "               <TopographicPlace modification=\"new\" version=\"any\" id=\"NSR:TopographicPlace:3\">\n" +
-                "                    <Name lang=\"no\">Akershus</Name>\n" +
-                "                    <Descriptor>\n" +
-                "                        <Name>Akershus</Name>\n" +
-                "                    </Descriptor>\n" +
-                "                    <TopographicPlaceType>county</TopographicPlaceType>\n" +
-                "                    <CountryRef ref=\"no\"/>\n" +
-                "                </TopographicPlace>\n" +
-                "           </topographicPlaces>\n" +
-                "        </SiteFrame>\n" +
-                "   </dataObjects>\n" +
-                "</PublicationDelivery>\n";
-
-
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
@@ -172,7 +116,7 @@ public class StreamingPublicationDeliveryTest {
         List<StopPlace> stopPlaces = new ArrayList<>(1);
         stopPlaces.add(stopPlace);
 
-        streamingPublicationDelivery.stream(publicationDeliveryXml, stopPlaces.iterator(), new ArrayList().iterator(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(stopPlaces.iterator(), new ArrayList<Parking>().iterator(), byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
         System.out.println(xml);
