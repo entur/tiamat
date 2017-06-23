@@ -156,6 +156,34 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
     }
 
+
+    @Test
+    @Transactional
+    public void testMergeStopPlacesShouldIgnoreValidBetween() {
+
+        StopPlace fromStopPlace = new StopPlace();
+        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
+        ValidBetween fromValidBetween = new ValidBetween(Instant.now().minusSeconds(3600));
+        fromStopPlace.setValidBetween(fromValidBetween);
+
+        StopPlace toStopPlace = new StopPlace();
+        toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
+
+        ValidBetween toValidBetween = new ValidBetween(Instant.now().minusSeconds(1800));
+        toStopPlace.setValidBetween(toValidBetween);
+
+
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
+
+        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+
+        assertThat(mergedStopPlace.getValidBetween()).isNotNull();
+        assertThat(mergedStopPlace.getValidBetween().getFromDate()).isNotNull();
+        assertThat(mergedStopPlace.getValidBetween().getToDate()).isNull();
+
+    }
+
     @Test
     @Transactional
     public void testMergeStopPlacesWithAlternativeNames() {
