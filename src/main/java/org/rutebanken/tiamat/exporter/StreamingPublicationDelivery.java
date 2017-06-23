@@ -35,7 +35,7 @@ public class StreamingPublicationDelivery {
     private static final Logger logger = LoggerFactory.getLogger(StreamingPublicationDelivery.class);
 
     private static final JAXBContext publicationDeliveryContext = createContext(PublicationDeliveryStructure.class);
-    private static final JAXBContext stopPlaceContext = createContext(org.rutebanken.netex.model.StopPlace.class);
+    private static final JAXBContext jaxbContext = createContext(org.rutebanken.netex.model.StopPlace.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
 
     private final StopPlaceRepository stopPlaceRepository;
@@ -60,15 +60,6 @@ public class StreamingPublicationDelivery {
 
     }
 
-    public static JAXBContext createContext(Class clazz) {
-        try {
-            return newInstance(clazz);
-        } catch (JAXBException e) {
-            logger.warn("Could not create instance of jaxb context for class " + clazz, e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public String writePublicationDeliverySkeletonToString(PublicationDeliveryStructure publicationDeliveryStructure) throws JAXBException {
         JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure);
 
@@ -87,14 +78,6 @@ public class StreamingPublicationDelivery {
         stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(exportParams), parkingRepository.scrollParkings(), outputStream);
     }
 
-    public Marshaller createStopPlaceMarshaller() throws JAXBException {
-        Marshaller stopPlaceMarshaller = stopPlaceContext.createMarshaller();
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
-        return stopPlaceMarshaller;
-    }
-
 
     /**
      * In order to not hold all stop places in memory at once, we need to marshal stop places and parkings from queues.
@@ -107,8 +90,7 @@ public class StreamingPublicationDelivery {
         BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
 
         try {
-            Marshaller stopPlaceMarshaller = createStopPlaceMarshaller();
-
+            Marshaller marshaller = createMarshaller();
 
             String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(LINE_SEPARATOR);
 
@@ -125,7 +107,7 @@ public class StreamingPublicationDelivery {
                         bufferedWriter.write(modifiedLine);
                         bufferedWriter.write(LINE_SEPARATOR);
 
-                        marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, stopPlaceMarshaller);
+                        marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, marshaller);
 
                         bufferedWriter.write("</SiteFrame>");
                         bufferedWriter.write(LINE_SEPARATOR);
@@ -138,7 +120,7 @@ public class StreamingPublicationDelivery {
                 }
                 if (publicationDeliveryLine.contains("</SiteFrame>")) {
                     // Marshal stops after other nodes, such as topographic places
-                    marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, stopPlaceMarshaller);
+                    marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, marshaller);
                 }
                 bufferedWriter.write(publicationDeliveryLine);
                 bufferedWriter.write(LINE_SEPARATOR);
@@ -148,8 +130,25 @@ public class StreamingPublicationDelivery {
         }
     }
 
+    private static JAXBContext createContext(Class clazz) {
+        try {
+            return newInstance(clazz);
+        } catch (JAXBException e) {
+            logger.warn("Could not create instance of jaxb context for class " + clazz, e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private void marshalIterableTypes(Iterator<StopPlace> stopPlaceIterator, Iterator<Parking> parkingIterator, BufferedWriter bufferedWriter, Marshaller marshaller) throws IOException, JAXBException {
         iterableMarshaller.marshal(stopPlaceIterator, bufferedWriter, marshaller, org.rutebanken.netex.model.StopPlace.class, "stopPlaces", netexObjectFactory::createStopPlace);
         iterableMarshaller.marshal(parkingIterator, bufferedWriter, marshaller, org.rutebanken.netex.model.Parking.class, "parkings", netexObjectFactory::createParking);
+    }
+
+    private Marshaller createMarshaller() throws JAXBException {
+        Marshaller stopPlaceMarshaller = jaxbContext.createMarshaller();
+        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        stopPlaceMarshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
+        return stopPlaceMarshaller;
     }
 }
