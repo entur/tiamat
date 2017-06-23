@@ -3,12 +3,12 @@ package org.rutebanken.tiamat.rest.coordinates;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
+import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.*;
-import java.io.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
+import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 
 @Transactional
 @Component
@@ -67,8 +76,11 @@ public class CoordinatesFixerResource {
 
             logger.info("Parsed prefix: {}, name: {}, coordinates: {}", prefix, name, coordinates);
 
-            StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder().setQuery(name).build();
-            Page<StopPlace> stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearch);
+            ExportParams exportParams = newExportParamsBuilder()
+                    .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                            .setQuery(name).build())
+                    .build();
+            Page<StopPlace> stopPlaces = stopPlaceRepository.findStopPlace(exportParams);
 
             logger.info("Found {} stop places from name {}", stopPlaces.getTotalElements(), name);
 

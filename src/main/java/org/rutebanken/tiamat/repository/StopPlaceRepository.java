@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Point;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityIn
     Iterator<StopPlace> scrollStopPlaces();
 
     @Override
-    Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch);
+    Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams);
 
 }
 

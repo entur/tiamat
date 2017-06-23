@@ -27,12 +27,6 @@ public class StopPlaceSearch {
     @QueryParam(value = "q")
     private String query;
 
-    @QueryParam(value = "municipalityReference")
-    private List<String> municipalityIds;
-
-    @QueryParam(value = "countyReference")
-    private List<String> countyIds;
-
     @QueryParam(value = "stopPlaceType")
     private List<StopTypeEnumeration> stopTypeEnumerations;
 
@@ -49,11 +43,9 @@ public class StopPlaceSearch {
 
     public StopPlaceSearch() {}
 
-    private StopPlaceSearch(String query, List<String> municipalityIds, List<String> countyIds, List<StopTypeEnumeration> stopTypeEnumerations,
+    private StopPlaceSearch(String query, List<StopTypeEnumeration> stopTypeEnumerations,
                             List<String> netexIdList, boolean allVersions, Instant pointInTime, Long version, int page, int size) {
         this.query = query;
-        this.municipalityIds = municipalityIds;
-        this.countyIds = countyIds;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
@@ -65,14 +57,6 @@ public class StopPlaceSearch {
 
     public String getQuery() {
         return query;
-    }
-
-    public List<String> getMunicipalityIds() {
-        return municipalityIds;
-    }
-
-    public List<String> getCountyIds() {
-        return countyIds;
     }
 
     public List<StopTypeEnumeration> getStopTypeEnumerations() {
@@ -102,7 +86,6 @@ public class StopPlaceSearch {
     // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
-                || countyIds != null || municipalityIds != null
                 || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty()));
     }
 
@@ -110,8 +93,6 @@ public class StopPlaceSearch {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("q", getQuery())
-                .add("municipalityReferences", getMunicipalityIds())
-                .add("countyReference", getCountyIds())
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("netexIdList", getNetexIdList())
                 .add("page", page)
@@ -119,11 +100,13 @@ public class StopPlaceSearch {
                 .toString();
     }
 
+    public static Builder newStopPlaceSearchBuilder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
         private String query;
-        private List<String> municipalityIds;
-        private List<String> countyIds;
         private List<StopTypeEnumeration> stopTypeEnumerations;
         private List<String> idList;
         private boolean allVersions;
@@ -132,18 +115,11 @@ public class StopPlaceSearch {
         private int page = DEFAULT_PAGE;
         private int size = DEFAULT_PAGE_SIZE;
 
+        private Builder() {
+        }
+
         public Builder setQuery(String query) {
             this.query = query;
-            return this;
-        }
-
-        public Builder setMunicipalityIds(List<String> municipalityIds) {
-            this.municipalityIds = municipalityIds;
-            return this;
-        }
-
-        public Builder setCountyIds(List<String> countyIds) {
-            this.countyIds = countyIds;
             return this;
         }
 
@@ -183,7 +159,7 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, municipalityIds, countyIds, stopTypeEnumerations, idList, allVersions, pointInTime, version, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, pointInTime, version, page, size);
         }
 
     }

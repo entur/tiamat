@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -25,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
+import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceFetcher")
@@ -40,7 +43,8 @@ class StopPlaceFetcher implements DataFetcher {
     @Override
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
-        StopPlaceSearch.Builder stopPlaceSearchBuilder = new StopPlaceSearch.Builder();
+        ExportParams.Builder exportParamsBuilder = newExportParamsBuilder();
+        StopPlaceSearch.Builder stopPlaceSearchBuilder = newStopPlaceSearchBuilder();
 
         logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
 
@@ -74,7 +78,7 @@ class StopPlaceFetcher implements DataFetcher {
                     stopPlaces = new PageImpl<>(stopPlace, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), 1L);
                 } else {
                     stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
-                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                    stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
                 }
 
             } catch (NumberFormatException nfe) {
@@ -86,7 +90,7 @@ class StopPlaceFetcher implements DataFetcher {
 
             if (stopPlaceNetexId != null && !stopPlaceNetexId.isEmpty()) {
                 stopPlaceSearchBuilder.setNetexIdList(stopPlaceNetexId);
-                stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
             }
         } else {
 
@@ -105,7 +109,7 @@ class StopPlaceFetcher implements DataFetcher {
 
             List<String> countyRef = environment.getArgument(COUNTY_REF);
             if (countyRef != null && !countyRef.isEmpty()) {
-                stopPlaceSearchBuilder.setCountyIds(
+                exportParamsBuilder.setCountyReferences(
                         countyRef.stream()
                             .filter(countyRefValue -> countyRefValue != null && !countyRefValue.isEmpty())
                             .collect(Collectors.toList())
@@ -114,7 +118,7 @@ class StopPlaceFetcher implements DataFetcher {
 
             List<String> municipalityRef = environment.getArgument(MUNICIPALITY_REF);
             if (municipalityRef != null && !municipalityRef.isEmpty()) {
-                stopPlaceSearchBuilder.setMunicipalityIds(
+                exportParamsBuilder.setMunicipalityReferences(
                         municipalityRef.stream()
                                 .filter(municipalityRefValue -> municipalityRefValue != null && !municipalityRefValue.isEmpty())
                                 .collect(Collectors.toList())
@@ -149,7 +153,7 @@ class StopPlaceFetcher implements DataFetcher {
                 stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
                         boundingBox.yMax, ignoreStopPlaceId, pointInTime, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)));
             } else {
-                    stopPlaces = stopPlaceRepository.findStopPlace(stopPlaceSearchBuilder.build());
+                stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
             }
         }
         return stopPlaces;

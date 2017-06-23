@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -30,7 +31,9 @@ public class StopPlaceQueryFromSearchBuilder {
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
-    public Pair<String, Map<String, Object>> buildQueryString(StopPlaceSearch stopPlaceSearch) {
+    public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
+
+        StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
 
@@ -94,8 +97,8 @@ public class StopPlaceQueryFromSearchBuilder {
                 operators.add("and");
             }
 
-            boolean hasMunicipalityFilter = stopPlaceSearch.getMunicipalityIds() != null && !stopPlaceSearch.getMunicipalityIds().isEmpty();
-            boolean hasCountyFilter = stopPlaceSearch.getCountyIds() != null && !stopPlaceSearch.getCountyIds().isEmpty();
+            boolean hasMunicipalityFilter = exportParams.getMunicipalityReferences() != null && !exportParams.getMunicipalityReferences().isEmpty();
+            boolean hasCountyFilter = exportParams.getCountyReferences() != null && !exportParams.getCountyReferences().isEmpty();
 
             if (hasMunicipalityFilter && !hasIdFilter) {
                 String prefix;
@@ -105,13 +108,13 @@ public class StopPlaceQueryFromSearchBuilder {
                 } else prefix = "";
 
                 wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
-                parameters.put("municipalityId", stopPlaceSearch.getMunicipalityIds());
+                parameters.put("municipalityId", exportParams.getMunicipalityReferences());
             }
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
                 wheres.add("s.topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)" + suffix);
-                parameters.put("countyId", stopPlaceSearch.getCountyIds());
+                parameters.put("countyId", exportParams.getCountyReferences());
             }
         }
 

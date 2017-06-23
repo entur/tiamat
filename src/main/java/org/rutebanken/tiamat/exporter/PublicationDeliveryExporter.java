@@ -47,11 +47,11 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
-        ExportMode topographicPlaceExportMode = exportParams.includeTopographicPlaces ? RELEVANT : NONE;
-        if (exportParams.stopPlaceSearch.isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.stopPlaceSearch.getPageable()), topographicPlaceExportMode);
+        ExportMode topographicPlaceExportMode = exportParams.isIncludeTopographicPlaces() ? RELEVANT : NONE;
+        if (exportParams.getStopPlaceSearch().isEmpty()) {
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), topographicPlaceExportMode);
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams.stopPlaceSearch), topographicPlaceExportMode);
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), topographicPlaceExportMode);
         }
     }
 

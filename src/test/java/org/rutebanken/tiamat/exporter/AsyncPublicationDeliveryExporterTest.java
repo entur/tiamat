@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 
 public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
@@ -39,8 +40,7 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
-        ExportParams exportParams = new ExportParams();
-        exportParams.stopPlaceSearch = new StopPlaceSearch();
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(new StopPlaceSearch()).build();
 
         ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
 

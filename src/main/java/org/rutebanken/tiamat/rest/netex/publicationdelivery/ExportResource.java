@@ -61,7 +61,7 @@ public class ExportResource {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.includeTopographicPlaces);
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.isIncludeTopographicPlaces());
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();
@@ -70,7 +70,7 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.includeTopographicPlaces, uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.isIncludeTopographicPlaces(), uriInfo), "next");
         }
 
         return rsp.build();

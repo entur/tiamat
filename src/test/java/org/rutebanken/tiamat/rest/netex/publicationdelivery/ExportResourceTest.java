@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.google.common.collect.Sets;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,9 +9,6 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
-import org.rutebanken.tiamat.importer.ImportType;
-import org.rutebanken.tiamat.importer.PublicationDeliveryParams;
-import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
@@ -21,25 +17,17 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
+import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 
 public class ExportResourceTest extends TiamatIntegrationTest {
 
@@ -70,12 +58,13 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
         insertTestStopWithTopographicPlace();
 
-        StopPlaceSearch stopPlaceSearch = new StopPlaceSearch.Builder()
+        StopPlaceSearch stopPlaceSearch = newStopPlaceSearchBuilder()
                 .setQuery("Østre gravlund")
                 .build();
-        ExportParams exportParams = new ExportParams();
-        exportParams.stopPlaceSearch = stopPlaceSearch;
-        exportParams.includeTopographicPlaces = includeTopographicPlaces;
+        ExportParams exportParams = newExportParamsBuilder()
+                .setStopPlaceSearch(stopPlaceSearch)
+                .setIncludeTopographicPlaces(includeTopographicPlaces)
+                .build();
 
         Response response = exportResource.exportStopPlaces(exportParams);
         assertThat(response.getStatus()).isEqualTo(200);
@@ -151,7 +140,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         Mockito.when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(JerseyUriBuilder.fromPath("http://test"));
         ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(null, null, 0, 1);
 
-        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, new ExportParams(), uriInfoMock);
+        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, newExportParamsBuilder().build(), uriInfoMock);
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
         Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.get(0).getName().getValue());
@@ -167,7 +156,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         UriInfo uriInfoMock = Mockito.mock(UriInfo.class);
         ChangedStopPlaceSearchDto search = new ChangedStopPlaceSearchDto(historicTime, historicTime, 0, 1);
 
-        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, new ExportParams(), uriInfoMock);
+        Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, newExportParamsBuilder().build(), uriInfoMock);
         Assert.assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value());
     }
 

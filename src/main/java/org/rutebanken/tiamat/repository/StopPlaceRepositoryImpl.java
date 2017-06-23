@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -372,11 +373,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch) {
+    public Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams) {
 
         Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
 
-        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(stopPlaceSearch);
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
         queryWithParams.getSecond().forEach((parameter, value) -> {
                     if (value instanceof Collection) {
@@ -398,17 +399,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch) {
-        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(stopPlaceSearch);
+    public Page<StopPlace> findStopPlace(ExportParams exportParams) {
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
 
         final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), StopPlace.class);
 
         queryWithParams.getSecond().forEach(nativeQuery::setParameter);
-        nativeQuery.setFirstResult(stopPlaceSearch.getPageable().getOffset());
-        nativeQuery.setMaxResults(stopPlaceSearch.getPageable().getPageSize());
+        nativeQuery.setFirstResult(exportParams.getStopPlaceSearch().getPageable().getOffset());
+        nativeQuery.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
 
         List<StopPlace> stopPlaces = nativeQuery.getResultList();
-        return new PageImpl<>(stopPlaces, stopPlaceSearch.getPageable(), stopPlaces.size());
+        return new PageImpl<>(stopPlaces, exportParams.getStopPlaceSearch().getPageable(), stopPlaces.size());
 
     }
 

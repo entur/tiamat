@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -42,9 +43,9 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Iterator<StopPlace> scrollStopPlaces();
 
-    Iterator<StopPlace> scrollStopPlaces(StopPlaceSearch stopPlaceSearch);
+    Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams);
 
-    Page<StopPlace> findStopPlace(StopPlaceSearch stopPlaceSearch);
+    Page<StopPlace> findStopPlace(ExportParams exportParams);
 
     Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search);
 

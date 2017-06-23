@@ -74,7 +74,7 @@ public class StreamingPublicationDelivery {
 
     public void stream(PublicationDeliveryStructure publicationDeliveryStructure, ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
         String publicationDeliveryStructureXml = writePublicationDeliverySkeletonToString(publicationDeliveryStructure);
-        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(exportParams.stopPlaceSearch), parkingRepository.scrollParkings(), outputStream);
+        stream(publicationDeliveryStructureXml, stopPlaceRepository.scrollStopPlaces(exportParams), parkingRepository.scrollParkings(), outputStream);
     }
 
     public Marshaller createStopPlaceMarshaller() throws JAXBException {
