@@ -19,10 +19,10 @@ public class StopPlaceSearch {
     public static final int DEFAULT_PAGE_SIZE = 20;
 
     @DefaultValue(value = "0") @QueryParam(value = "page")
-    private int page;
+    private int page = DEFAULT_PAGE;
 
     @DefaultValue(value = "20") @QueryParam(value = "size")
-    private int size;
+    private int size = DEFAULT_PAGE_SIZE;
 
     @QueryParam(value = "q")
     private String query;
