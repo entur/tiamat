@@ -43,15 +43,21 @@ public class StreamingPublicationDelivery {
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
 
+    private final IterableMarshaller iterableMarshaller;
+
     private final NetexMapper netexMapper;
 
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     @Autowired
-    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, IterableMarshaller iterableMarshaller, NetexMapper netexMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
+        this.iterableMarshaller = iterableMarshaller;
         this.netexMapper = netexMapper;
+
     }
 
     public static JAXBContext createContext(Class clazz) {
@@ -91,8 +97,9 @@ public class StreamingPublicationDelivery {
 
 
     /**
-     * In order to not hold all stop places in memory at once, we need to marshal stop places from a queue.
+     * In order to not hold all stop places in memory at once, we need to marshal stop places and parkings from queues.
      * Requires a publication delivery xml that contains newlines.
+     * Should be possible to stream without re-reading
      */
     public void stream(String publicationDeliveryStructureXml, Iterator<StopPlace> stopPlaceIterator, Iterator<Parking> parkingIterator, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
@@ -102,8 +109,8 @@ public class StreamingPublicationDelivery {
         try {
             Marshaller stopPlaceMarshaller = createStopPlaceMarshaller();
 
-            String lineSeparator = System.getProperty("line.separator");
-            String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(lineSeparator);
+
+            String[] publicationDeliveryLines = publicationDeliveryStructureXml.split(LINE_SEPARATOR);
 
             for (int index = 0; index < publicationDeliveryLines.length; index++) {
                 String publicationDeliveryLine = publicationDeliveryLines[index];
@@ -116,116 +123,33 @@ public class StreamingPublicationDelivery {
                         String modifiedLine = publicationDeliveryLine.replace("/>", ">");
 
                         bufferedWriter.write(modifiedLine);
-                        bufferedWriter.write(lineSeparator);
+                        bufferedWriter.write(LINE_SEPARATOR);
 
-                        marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
-                        marshalParkings(parkingIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                        marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, stopPlaceMarshaller);
 
                         bufferedWriter.write("</SiteFrame>");
-                        bufferedWriter.write(lineSeparator);
+                        bufferedWriter.write(LINE_SEPARATOR);
 
                     } else {
                         bufferedWriter.write(publicationDeliveryLine);
-                        bufferedWriter.write(lineSeparator);
+                        bufferedWriter.write(LINE_SEPARATOR);
                     }
                     continue;
                 }
                 if (publicationDeliveryLine.contains("</SiteFrame>")) {
                     // Marshal stops after other nodes, such as topographic places
-                    marshalStops(stopPlaceIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
-                    marshalParkings(parkingIterator, bufferedWriter, stopPlaceMarshaller, lineSeparator);
+                    marshalIterableTypes(stopPlaceIterator, parkingIterator, bufferedWriter, stopPlaceMarshaller);
                 }
                 bufferedWriter.write(publicationDeliveryLine);
-                bufferedWriter.write(lineSeparator);
+                bufferedWriter.write(LINE_SEPARATOR);
             }
         } finally {
             bufferedWriter.flush();
         }
     }
 
-    public void marshalStops(Iterator<StopPlace> iterableStopPlaces,
-                             BufferedWriter bufferedWriter,
-                             Marshaller stopPlaceMarshaller,
-                             String lineSeparator) throws InterruptedException, JAXBException, IOException {
-        logger.info("Marshalling stops");
-
-        int count = 0;
-
-        long startTime = System.currentTimeMillis();
-
-        while (iterableStopPlaces.hasNext()) {
-            StopPlace stopPlace = iterableStopPlaces.next();
-
-            if (count == 0) {
-                bufferedWriter.write("<stopPlaces>");
-                bufferedWriter.write(lineSeparator);
-            }
-
-            ++count;
-
-            if (count % 1000 == 0 && logger.isInfoEnabled()) {
-                String stopPlacesPerSecond = "NA";
-
-                long duration = System.currentTimeMillis() - startTime;
-                if (duration >= 1000) {
-                    stopPlacesPerSecond = String.valueOf(count / (duration / 1000f));
-                }
-                logger.info("Stop places marshalled: {}. Stop places per second: {}", count, stopPlacesPerSecond);
-            } else {
-                logger.debug("Marshalling stop place {}: {}", count, stopPlace);
-            }
-
-            org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
-            JAXBElement<org.rutebanken.netex.model.StopPlace> jaxBStopPlace = netexObjectFactory.createStopPlace(netexStopPlace);
-            stopPlaceMarshaller.marshal(jaxBStopPlace, bufferedWriter);
-            bufferedWriter.write(lineSeparator);
-        }
-        if (count > 0) {
-            bufferedWriter.write("</stopPlaces>");
-            bufferedWriter.write(lineSeparator);
-        }
-    }
-
-    public void marshalParkings(Iterator<Parking> iterableParkings,
-                                BufferedWriter bufferedWriter,
-                                Marshaller marshaller,
-                                String lineSeparator) throws InterruptedException, JAXBException, IOException {
-        logger.info("Marshalling parkings");
-
-        int count = 0;
-
-        long startTime = System.currentTimeMillis();
-
-        while (iterableParkings.hasNext()) {
-            Parking parking = iterableParkings.next();
-
-            if (count == 0) {
-                bufferedWriter.write("<parkings>");
-                bufferedWriter.write(lineSeparator);
-            }
-
-            ++count;
-
-            if (count % 1000 == 0 && logger.isInfoEnabled()) {
-                String parkingsPerSecond = "NA";
-
-                long duration = System.currentTimeMillis() - startTime;
-                if (duration >= 1000) {
-                    parkingsPerSecond = String.valueOf(count / (duration / 1000f));
-                }
-                logger.info("Parkings marshalled: {}. Parkings per second: {}", count, parkingsPerSecond);
-            } else {
-                logger.debug("Marshalling parking {}: {}", count, parking);
-            }
-
-            org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(parking);
-            JAXBElement<org.rutebanken.netex.model.Parking> jaxBParking = netexObjectFactory.createParking(netexParking);
-            marshaller.marshal(jaxBParking, bufferedWriter);
-            bufferedWriter.write(lineSeparator);
-        }
-        if (count > 0) {
-            bufferedWriter.write("</parkings>");
-            bufferedWriter.write(lineSeparator);
-        }
+    private void marshalIterableTypes(Iterator<StopPlace> stopPlaceIterator, Iterator<Parking> parkingIterator, BufferedWriter bufferedWriter, Marshaller marshaller) throws IOException, JAXBException {
+        iterableMarshaller.marshal(stopPlaceIterator, bufferedWriter, marshaller, org.rutebanken.netex.model.StopPlace.class, "stopPlaces", netexObjectFactory::createStopPlace);
+        iterableMarshaller.marshal(parkingIterator, bufferedWriter, marshaller, org.rutebanken.netex.model.Parking.class, "parkings", netexObjectFactory::createParking);
     }
 }
