@@ -80,23 +80,28 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant now = Instant.now();
+        Instant validFrom;
+        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getFromDate() != null) {
+            validFrom = newVersion.getValidBetween().getFromDate();
+        } else {
+            validFrom = Instant.now();
+        }
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            newVersion.setCreated(now);
+            newVersion.setCreated(Instant.now());
         } else {
-            newVersion.setChanged(now);
+            newVersion.setChanged(Instant.now());
             // TODO: Add support for "valid from/to" being explicitly set
 
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            versionCreator.terminateVersion(existingStopPlace, now);
+            versionCreator.terminateVersion(existingStopPlace, validFrom);
         }
 
         // Save latest version
-        newVersion = initiateOrIncrementVersions(newVersion, now);
+        newVersion = initiateOrIncrementVersions(newVersion, validFrom);
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);

@@ -763,7 +763,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
      * @throws Exception
      */
     @Test
-    public void testNewVersionCompareValidFrom() throws Exception {
+    public void testNewVersionVerifyValidFrom() throws Exception {
 
         StopPlace stopPlace = createStopPlace("Espa");
 
