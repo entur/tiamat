@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 
@@ -16,7 +17,7 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
 
     Iterator<Parking> scrollParkings();
 
-    Iterator<Parking> scrollParkings(List<String> parkingNetexIds);
+    Iterator<Parking> scrollParkings(ParkingSearch parkingSearch);
 
     /**
      * Find parkings that belong to StopPlace

@@ -25,11 +25,10 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
  * Builds query from stop place search params
  */
 @Component
-public class StopPlaceQueryFromSearchBuilder {
+public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceQueryFromSearchBuilder.class);
 
-    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
@@ -134,14 +133,7 @@ public class StopPlaceQueryFromSearchBuilder {
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         }
 
-        for (int i = 0; i < wheres.size(); i++) {
-            if (i > 0) {
-                queryString.append(operators.get(i - 1));
-            } else {
-                queryString.append("where");
-            }
-            queryString.append(' ').append(wheres.get(i)).append(' ');
-        }
+        addWheres(queryString, wheres, operators);
 
         orderByStatements.add("netex_id, version asc");
         queryString.append(" order by");
@@ -159,7 +151,6 @@ public class StopPlaceQueryFromSearchBuilder {
             logger.debug("{}", generatedSql);
             logger.debug("params: {}", parameters.toString());
         }
-
         return Pair.of(generatedSql, parameters);
     }
 }

@@ -3,14 +3,15 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.Criteria;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
+import org.hibernate.*;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -18,10 +19,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 @Transactional
@@ -35,7 +33,8 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     @Autowired
     private GeometryFactory geometryFactory;
 
-
+    @Autowired
+    private ParkingQueryFromSearchBuilder parkingQueryFromSearchBuilder;
 
     /**
      * Find stop place's netex ID by key value
@@ -79,17 +78,17 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     @Override
-    public Iterator<Parking> scrollParkings(List<String> parkingNetexIds) {
+    public Iterator<Parking> scrollParkings(ParkingSearch parkingSearch) {
 
         final int fetchSize = 100;
 
-        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+        Session session = entityManager.unwrap(Session.class);
 
-        Criteria query = session.createCriteria(Parking.class);
-        if (parkingNetexIds != null) {
-            query.add(Restrictions.in("netexId", parkingNetexIds));
-        }
+        Pair<String, Map<String, Object>> pair = parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch);
+        SQLQuery query = session.createSQLQuery(pair.getFirst());
+        parkingQueryFromSearchBuilder.addParams(query, pair.getSecond());
 
+        query.addEntity(Parking.class);
         query.setReadOnly(true);
         query.setFetchSize(fetchSize);
         query.setCacheable(false);

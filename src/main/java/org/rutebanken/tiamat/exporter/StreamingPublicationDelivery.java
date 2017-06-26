@@ -8,6 +8,7 @@ import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.async.ListeningNetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -84,8 +85,9 @@ public class StreamingPublicationDelivery {
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         }
 
+        ParkingSearch parkingSearch = ParkingSearch.newParkingSearchBuilder().setAllVersions(true).setParentSiteRefs(stopPlaceIds).build();
 
-        Iterator<org.rutebanken.tiamat.model.Parking> parkingIterator = parkingRepository.scrollParkings(); // Todo filter on stop places
+        Iterator<org.rutebanken.tiamat.model.Parking> parkingIterator = parkingRepository.scrollParkings(parkingSearch);
         if(parkingIterator.hasNext()) {
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(netexMapper, parkingIterator, Parking.class);
