@@ -14,9 +14,9 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
 
     String findNearbyParking(Envelope boundingBox, String value, ParkingTypeEnumeration parkingType);
 
-    Iterator<Parking> scrollParkings() throws InterruptedException;
+    Iterator<Parking> scrollParkings();
 
-    Iterator<Parking> scrollParkings(List<String> parkingNetexIds) throws InterruptedException;
+    Iterator<Parking> scrollParkings(List<String> parkingNetexIds);
 
     /**
      * Find parkings that belong to StopPlace

@@ -74,12 +74,12 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     @Override
-    public Iterator<Parking> scrollParkings() throws InterruptedException {
+    public Iterator<Parking> scrollParkings() {
         return scrollParkings(null);
     }
 
     @Override
-    public Iterator<Parking> scrollParkings(List<String> parkingNetexIds) throws InterruptedException {
+    public Iterator<Parking> scrollParkings(List<String> parkingNetexIds) {
 
         final int fetchSize = 100;
 
