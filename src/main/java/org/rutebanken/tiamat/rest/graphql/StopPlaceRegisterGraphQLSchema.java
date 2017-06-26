@@ -260,7 +260,7 @@ StopPlaceRegisterGraphQLSchema {
     }
 
     private List<GraphQLArgument> createFindParkingArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = new ArrayList<>();
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
@@ -273,7 +273,6 @@ StopPlaceRegisterGraphQLSchema {
                 .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
                 .build());
-        arguments.addAll(createPageAndSizeArguments());
         arguments.add(allVersionsArgument);
         return arguments;
     }
@@ -299,8 +298,7 @@ StopPlaceRegisterGraphQLSchema {
     }
 
     private List<GraphQLArgument> createFindStopPlaceArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.addAll(createPageAndSizeArguments());
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
         arguments.add(allVersionsArgument);
                 //Search
         arguments.add(GraphQLArgument.newArgument()
@@ -343,12 +341,21 @@ StopPlaceRegisterGraphQLSchema {
                 .type(dateScalar.getGraphQLDateScalar())
                 .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, 'now' is used.")
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(KEY)
+                .type(GraphQLString)
+                .description("Must be used together with parameter 'values', other search-parameters are ignored. Defines key to search for.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VALUES)
+                .type(new GraphQLList(GraphQLString))
+                .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")
+                .build());
         return arguments;
     }
 
     private List<GraphQLArgument> createBboxArguments() {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.addAll(createPageAndSizeArguments());
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
                 //BoundingBox
         arguments.add(GraphQLArgument.newArgument()
                 .name(LONGITUDE_MIN)

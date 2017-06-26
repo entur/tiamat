@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -32,6 +31,8 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     String findFirstByKeyValues(String key, Set<String> value);
 
     Set<String> findByKeyValues(String key, Set<String> values);
+
+    Set<String> findByKeyValues(String key, Set<String> values, boolean exactMatch);
 
     List<String> searchByKeyValue(String key, String value);
     

@@ -8,7 +8,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -208,6 +207,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      */
     @Override
     public Set<String> findByKeyValues(String key, Set<String> values) {
+        return findByKeyValues(key, values, false);
+    }
+
+    /**
+     * Find stop place netex IDs by key value
+     *
+     * @param key key in key values for stop
+     * @param values list of values to check for
+     * @param exactMatch set to <code>true</code> to perform lookup instead of search
+     * @return set of stop place's netex IDs
+     */
+    @Override
+    public Set<String> findByKeyValues(String key, Set<String> values, boolean exactMatch) {
 
         StringBuilder sqlQuery = new StringBuilder("SELECT s.netex_id " +
                                                            "FROM stop_place s " +
@@ -227,7 +239,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         for (int parameterCounter = 0; parameterCounter < values.size(); parameterCounter++) {
             sqlQuery.append(" v.items LIKE :value").append(parameterCounter);
             parameters.add(parameterPrefix + parameterCounter);
-            parametervalues.add("%" + valuesIterator.next());
+            parametervalues.add((exactMatch ? "":"%") + valuesIterator.next());
             if (parameterCounter + 1 < values.size()) {
                 sqlQuery.append(" OR ");
             }

@@ -4,11 +4,11 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
@@ -54,8 +52,10 @@ class StopPlaceFetcher implements DataFetcher {
 
         String netexId = environment.getArgument(ID);
         String importedId = environment.getArgument(IMPORTED_ID_QUERY);
-        Integer version = (Integer) environment.getArgument(VERSION);
+        Integer version = environment.getArgument(VERSION);
 
+        String key = environment.getArgument(KEY);
+        List<String> values = environment.getArgument(VALUES);
 
         Boolean allVersions = environment.getArgument(ALL_VERSIONS);
         if(allVersions != null) {
@@ -94,38 +94,54 @@ class StopPlaceFetcher implements DataFetcher {
             }
         } else {
 
-            if (allVersions == null || !allVersions) {
-                //If requesting all versions - POINT_IN_TIME is irrelevant
-                stopPlaceSearchBuilder.setPointInTime(pointInTime);
-            }
+            if (key != null && values != null) {
+                Set<String> valueSet = new HashSet<>();
+                valueSet.addAll(values);
 
-            List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
-            if (stopTypes != null && !stopTypes.isEmpty()) {
-                stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
-                                .filter(type -> type != null)
-                                .collect(Collectors.toList())
-                );
-            }
+                Set<String> stopPlaceNetexId = stopPlaceRepository.findByKeyValues(key, valueSet, true);
+                if (stopPlaceNetexId != null && !stopPlaceNetexId.isEmpty()) {
+                    List<String> idList = new ArrayList<>();
+                    idList.addAll(stopPlaceNetexId);
+                    stopPlaceSearchBuilder.setNetexIdList(idList);
+                } else {
+                    //Search for key/values returned no results
+                    return stopPlaces;
+                }
+            } else {
 
-            List<String> countyRef = environment.getArgument(COUNTY_REF);
-            if (countyRef != null && !countyRef.isEmpty()) {
-                exportParamsBuilder.setCountyReferences(
-                        countyRef.stream()
-                            .filter(countyRefValue -> countyRefValue != null && !countyRefValue.isEmpty())
+                if (allVersions == null || !allVersions) {
+                    //If requesting all versions - POINT_IN_TIME is irrelevant
+                    stopPlaceSearchBuilder.setPointInTime(pointInTime);
+                }
+
+                List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
+                if (stopTypes != null && !stopTypes.isEmpty()) {
+                    stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
+                            .filter(type -> type != null)
                             .collect(Collectors.toList())
-                );
-            }
+                    );
+                }
 
-            List<String> municipalityRef = environment.getArgument(MUNICIPALITY_REF);
-            if (municipalityRef != null && !municipalityRef.isEmpty()) {
-                exportParamsBuilder.setMunicipalityReferences(
-                        municipalityRef.stream()
-                                .filter(municipalityRefValue -> municipalityRefValue != null && !municipalityRefValue.isEmpty())
-                                .collect(Collectors.toList())
-                );
-            }
+                List<String> countyRef = environment.getArgument(COUNTY_REF);
+                if (countyRef != null && !countyRef.isEmpty()) {
+                    exportParamsBuilder.setCountyReferences(
+                            countyRef.stream()
+                                    .filter(countyRefValue -> countyRefValue != null && !countyRefValue.isEmpty())
+                                    .collect(Collectors.toList())
+                    );
+                }
 
-            stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
+                List<String> municipalityRef = environment.getArgument(MUNICIPALITY_REF);
+                if (municipalityRef != null && !municipalityRef.isEmpty()) {
+                    exportParamsBuilder.setMunicipalityReferences(
+                            municipalityRef.stream()
+                                    .filter(municipalityRefValue -> municipalityRefValue != null && !municipalityRefValue.isEmpty())
+                                    .collect(Collectors.toList())
+                    );
+                }
+
+                stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
+            }
 
             if (environment.getArgument(LONGITUDE_MIN) != null) {
                 BoundingBoxDto boundingBox = new BoundingBoxDto();
