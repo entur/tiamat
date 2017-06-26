@@ -15,7 +15,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     private final int fetchSize;
     private final Session session;
     private int counter;
-    private Optional<T> currentItem = Optional.empty();
+    private Optional<T> next = Optional.empty();
 
     public ScrollableResultIterator(ScrollableResults scrollableResults, int fetchSize, Session session) {
         this.scrollableResults = scrollableResults;
@@ -26,26 +26,34 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        currentItem = getNext();
-        if (currentItem.isPresent()) {
+        if(next.isPresent()) {
+            // Next value was already fetched
+            return true;
+        }
+        next = getNext();
+        if (next.isPresent()) {
+            // Next value is now fetched. It is present.
             return true;
         }
 
+        next = Optional.empty();
         close();
         return false;
     }
 
     @Override
     public T next() {
-        if(!currentItem.isPresent()) {
-            currentItem = getNext();
+        if(!next.isPresent()) {
+            next = getNext();
         }
 
-        if (currentItem.isPresent()) {
+        if (next.isPresent()) {
             if (++counter % fetchSize == 0) {
-                logger.debug("Scrolling {}s. Counter is currently at {}", currentItem.getClass().getSimpleName(), counter);
+                logger.debug("Scrolling {}s. Counter is currently at {}", next.getClass().getSimpleName(), counter);
             }
-            return currentItem.get();
+            T returnValue =  next.get();
+            next = Optional.empty();
+            return returnValue;
         }
 
         close();
@@ -63,8 +71,8 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     }
 
     private void evictBeforeNext() {
-        if(currentItem.isPresent()) {
-            session.evict(currentItem.get());
+        if(next.isPresent()) {
+            session.evict(next.get());
         }
     }
 
