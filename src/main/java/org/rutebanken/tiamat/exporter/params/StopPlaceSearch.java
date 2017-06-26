@@ -86,7 +86,8 @@ public class StopPlaceSearch {
     // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
-                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty()));
+                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty())
+                || (netexIdList != null && !netexIdList.isEmpty()));
     }
 
     @Override
