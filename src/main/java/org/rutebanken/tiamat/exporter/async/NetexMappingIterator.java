@@ -4,39 +4,36 @@ import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.events.Event;
 
 import java.util.Iterator;
-import java.util.function.Consumer;
 
 public class NetexMappingIterator<T extends EntityStructure, N extends org.rutebanken.netex.model.EntityStructure> implements Iterator<N> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexMappingIterator.class);
 
-    private final Iterator scrollableResultIterator;
+    private final Iterator<T> iterator;
     private final NetexMapper netexMapper;
     private final Class<N> netexClass;
     private final long startTime = System.currentTimeMillis();
     private int count;
 
-    public NetexMappingIterator(Iterator<T> iterator, NetexMapper netexMapper, Class<N> netexClass) {
-        this.scrollableResultIterator = iterator;
+    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass) {
+        this.iterator = iterator;
         this.netexMapper = netexMapper;
         this.netexClass = netexClass;
     }
 
     @Override
     public boolean hasNext() {
-        return scrollableResultIterator.hasNext();
+        return iterator.hasNext();
     }
 
     @Override
     public N next() {
         ++count;
         logStatus();
-        return netexMapper.getFacade().map(scrollableResultIterator.next(), netexClass);
+        return netexMapper.getFacade().map(iterator.next(), netexClass);
     }
-
 
     private void logStatus() {
         if (count % 1000 == 0 && logger.isInfoEnabled()) {

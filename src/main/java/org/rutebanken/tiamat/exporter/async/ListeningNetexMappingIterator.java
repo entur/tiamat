@@ -14,7 +14,7 @@ public class ListeningNetexMappingIterator<T extends EntityStructure, N extends 
     private final Consumer<N> listener;
 
     public ListeningNetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, Consumer<N> listener) {
-        super(iterator, netexMapper, netexClass);
+        super(netexMapper, iterator, netexClass);
         this.listener = listener;
     }
 
