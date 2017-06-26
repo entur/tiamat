@@ -5,6 +5,7 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.exporter.async.ListeningNetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -23,8 +24,11 @@ import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 
@@ -69,10 +73,13 @@ public class StreamingPublicationDelivery {
         // Todo: use export params to generate a more descriptive name
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
+        Set<String> stopPlaceIds = new HashSet<>();
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if(stopPlaceIterator.hasNext()) {
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
-            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(netexMapper, stopPlaceIterator, StopPlace.class);
+
+            Consumer<StopPlace> listener = (stopPlace) -> stopPlaceIds.add(stopPlace.getId());
+            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(netexMapper, stopPlaceIterator, StopPlace.class, listener);
             setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         }

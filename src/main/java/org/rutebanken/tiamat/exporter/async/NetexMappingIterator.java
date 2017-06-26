@@ -7,16 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.events.Event;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 public class NetexMappingIterator<T extends EntityStructure, N extends org.rutebanken.netex.model.EntityStructure> implements Iterator<N> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexMappingIterator.class);
 
-    private Iterator scrollableResultIterator;
-    private NetexMapper netexMapper;
+    private final Iterator scrollableResultIterator;
+    private final NetexMapper netexMapper;
     private final Class<N> netexClass;
+    private final long startTime = System.currentTimeMillis();
     private int count;
-    private long startTime = System.currentTimeMillis();
 
     public NetexMappingIterator(Iterator<T> iterator, NetexMapper netexMapper, Class<N> netexClass) {
         this.scrollableResultIterator = iterator;
