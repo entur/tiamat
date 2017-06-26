@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -276,7 +277,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
+        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion, Instant.now());
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }

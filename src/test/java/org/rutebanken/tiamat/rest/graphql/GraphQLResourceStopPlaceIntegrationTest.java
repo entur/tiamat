@@ -757,6 +757,37 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("keyValues[0].values[0]", equalTo("1234"));
     }
 
+    /**
+     * NRP-1632
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testNewVersionCompareValidFrom() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Espa");
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String newName = "EspaBoller";
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        newVersion.setName(new EmbeddableMultilingualString(newName));
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
+
+        assertThat(newVersion.getVersion()).isGreaterThan(stopPlace.getVersion());
+        assertThat(newVersion.getValidBetween()).isNotNull();
+        assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
+        assertThat(newVersion.getValidBetween().getToDate()).isNull();
+
+
+        stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), stopPlace.getVersion());
+        assertThat(stopPlace.getValidBetween().getFromDate()).isNotNull();
+        assertThat(stopPlace.getValidBetween().getToDate()).isNotNull();
+
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualByComparingTo(stopPlace.getValidBetween().getToDate());
+    }
 
     @Test
     public void testSimpleMutationUpdateTransportModeStopPlace() throws Exception {
