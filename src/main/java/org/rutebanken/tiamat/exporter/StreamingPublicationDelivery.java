@@ -65,14 +65,14 @@ public class StreamingPublicationDelivery {
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.netexMapper = netexMapper;
     }
-
-    public void stream(Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator, Iterator<org.rutebanken.tiamat.model.Parking> parkingIterator, OutputStream outputStream) throws JAXBException {
+    public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
 
         // Todo: use export params to generate a more descriptive name
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
+        Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
         Set<String> stopPlaceIds = new HashSet<>();
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if(stopPlaceIterator.hasNext()) {
@@ -84,6 +84,8 @@ public class StreamingPublicationDelivery {
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         }
 
+
+        Iterator<org.rutebanken.tiamat.model.Parking> parkingIterator = parkingRepository.scrollParkings(); // Todo filter on stop places
         if(parkingIterator.hasNext()) {
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(netexMapper, parkingIterator, Parking.class);
@@ -94,12 +96,6 @@ public class StreamingPublicationDelivery {
         Marshaller marshaller = createMarshaller();
 
         marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-    }
-
-    public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
-        Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
-        Iterator<org.rutebanken.tiamat.model.Parking> parkingIterator = parkingRepository.scrollParkings();
-        stream(stopPlaceIterator, parkingIterator, outputStream);
     }
 
     /**
