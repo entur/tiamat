@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.exporter;
 
-import com.sun.xml.xsom.impl.scd.Iterators;
-import org.apache.commons.collections.iterators.ArrayListIterator;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
@@ -47,7 +45,7 @@ public class StreamingPublicationDeliveryTest {
     private NetexMapper netexMapper = new NetexMapper();
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper);
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {

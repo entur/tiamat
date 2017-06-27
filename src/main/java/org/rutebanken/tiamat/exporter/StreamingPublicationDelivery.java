@@ -1,25 +1,21 @@
 package org.rutebanken.tiamat.exporter;
 
-import com.google.common.collect.Iterators;
-import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.ContainmentAggregationStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.exporter.async.ListeningNetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 
@@ -67,30 +55,41 @@ public class StreamingPublicationDelivery {
     private final ParkingRepository parkingRepository;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-
+    private final TopographicPlacesExporter topographicPlacesExporter;
     private final NetexMapper netexMapper;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
 
     @Autowired
-    public StreamingPublicationDelivery(PublicationDeliveryHelper publicationDeliveryHelper, StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(PublicationDeliveryHelper publicationDeliveryHelper, StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, NetexMapper netexMapper) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
+        this.topographicPlacesExporter = topographicPlacesExporter;
         this.netexMapper = netexMapper;
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
 
-        // Todo: use export params to generate a more descriptive name
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
+        tiamatSiteFrameExporter.addTariffZones(siteFrame);
+
+        logger.info("Mapping site frame to netex model");
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element.
         final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
-
         logger.info("Got {} stop place IDs from stop place search", stopPlaceIds.size());
+
+//        List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = stopPlaceIds.stream()
+//                .map(stopPlaceIds -> )
+        // TODO export topographic places that are relevant for stop places
+
 
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if(!stopPlaceIds.isEmpty()) {
