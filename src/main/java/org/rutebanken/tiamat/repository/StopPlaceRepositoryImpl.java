@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -28,6 +29,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -390,6 +392,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
 
         return stopPlaceEntityIterator;
+    }
+
+    @Override
+    public Set<String> getNetexIds(ExportParams exportParams) {
+        Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
+
+        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+
+        @SuppressWarnings("unchecked")
+        Set<String> result =  new HashSet<>(query.list());
+        return result;
     }
 
     @Override

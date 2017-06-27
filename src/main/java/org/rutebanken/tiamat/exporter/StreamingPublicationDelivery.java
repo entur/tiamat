@@ -13,7 +13,9 @@ import org.rutebanken.tiamat.exporter.async.ListeningNetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -34,6 +36,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -84,45 +87,42 @@ public class StreamingPublicationDelivery {
         // Todo: use export params to generate a more descriptive name
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
-        final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
-        final Set<String> stopPlaceIds = new HashSet<>();
+        // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element.
+        final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
+
+        logger.info("Got {} stop place IDs from stop place search", stopPlaceIds.size());
+
         // Override lists with custom iterator to be able to scroll database results on the fly.
-        if(stopPlaceIterator.hasNext()) {
+        if(!stopPlaceIds.isEmpty()) {
+            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
+            logger.info("There are stop places to export");
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
-            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new ListeningNetexMappingIterator<>(netexMapper, stopPlaceIterator, StopPlace.class, (stopPlace) -> stopPlaceIds.add(stopPlace.getId())));
+            // Use Listening iterator to collect stop place IDs.
+            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, stopPlaceIterator, StopPlace.class));
             setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
+        } else {
+            logger.info("No stop places to export");
         }
 
-        ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
+        ParkingSearch parkingSearch = ParkingSearch.newParkingSearchBuilder().setParentSiteRefs(stopPlaceIds).build();
+        int parkingsCount = parkingRepository.countResult(parkingSearch);
+        if(parkingsCount > 0) {
+            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
+            // Only set parkings if they will exist during marshalling.
+            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
+            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(parkingSearch), Parking.class));
 
-        final AtomicInteger filteredIn = new AtomicInteger();
-        final AtomicInteger filteredOut = new AtomicInteger();
-
-        Iterator<org.rutebanken.tiamat.model.Parking> filteredParkingIterator = Iterators.filter(parkingRepository.scrollParkings(), (parking) -> {
-            if (parking != null && parking.getParentSiteRef() != null) {
-                boolean contains = stopPlaceIds.contains(parking.getParentSiteRef().getRef());
-                if (contains) {
-                    filteredIn.incrementAndGet();
-                } else {
-                    filteredOut.incrementAndGet();
-                }
-                return contains;
-            }
-            filteredOut.incrementAndGet();
-            return false;
-        });
-
-        // Filter parking based on matches to parent site ref. Cannot use repository query because of too many parameters
-        List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, filteredParkingIterator, Parking.class));
-
-        setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
-        netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+        } else {
+            logger.info("No parkings to export based on stop places");
+        }
 
         Marshaller marshaller = createMarshaller();
+
         marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-        logger.info("Filtered in {} parkings, {} out based on site references to stop places", filteredIn.get(), filteredOut.get());
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,23 @@ public class ParkingQueryFromSearchBuilder extends SearchBuilder {
         if(parkingSearch != null) {
 
             if (parkingSearch.getParentSiteRefs() != null && !parkingSearch.getParentSiteRefs().isEmpty()) {
-                wheres.add("p.parent_site_ref in :parentSiteRefs");
-                parameters.put("parentSiteRefs", parkingSearch.getParentSiteRefs());
+                StringBuilder stringBuilder = new StringBuilder("(");
+                int counter = 0;
+                for(String parentSiteRef : parkingSearch.getParentSiteRefs()) {
+                    stringBuilder.append("'")
+                            .append(StringEscapeUtils.escapeSql(parentSiteRef))
+                            .append("'");
+                    if(++counter < parkingSearch.getParentSiteRefs().size()) {
+                        stringBuilder.append(",");
+                    }
+                }
+                stringBuilder.append(")");
+
+                wheres.add("p.parent_site_ref in " + stringBuilder.toString());
             }
 
             if (!parkingSearch.isAllVersions()) {
-                wheres.add("p.version = (select max(v.version) from parking pv where pv.netex_id = p.netex_id)");
+                wheres.add("p.version = (select max(pv.version) from parking pv where pv.netex_id = p.netex_id)");
                 operators.add("and");
             }
         }

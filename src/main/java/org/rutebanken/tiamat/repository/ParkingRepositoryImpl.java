@@ -3,10 +3,10 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.*;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.SQLQuery;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
@@ -19,6 +19,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.*;
 
 @Repository
@@ -97,6 +98,16 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         ScrollableResultIterator<Parking> parkingEntityIterator = new ScrollableResultIterator<>(results, fetchSize, session);
 
         return parkingEntityIterator;
+    }
+
+    @Override
+    public int countResult(ParkingSearch parkingSearch) {
+        Pair<String, Map<String, Object>> pair = parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch);
+        Session session = entityManager.unwrap(Session.class);
+
+        SQLQuery query = session.createSQLQuery("SELECT COUNT(*) from (" + pair.getFirst() + ") as numberOfParkings");
+        parkingQueryFromSearchBuilder.addParams(query, pair.getSecond());
+        return ((BigInteger) query.uniqueResult()).intValue();
     }
 
     @Override
