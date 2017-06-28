@@ -18,7 +18,7 @@ import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportM
 @Service
 public class TiamatSiteFrameExporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TariffZonesFromStopsExporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TiamatSiteFrameExporter.class);
 
 
     private final TopographicPlaceRepository topographicPlaceRepository;
