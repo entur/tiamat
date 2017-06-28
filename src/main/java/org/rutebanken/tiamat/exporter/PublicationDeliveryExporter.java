@@ -75,10 +75,6 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
-        return exportPublicationDeliveryWithStops(null, ALL);
-    }
-
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportMode topographicPlaceExportMode) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");

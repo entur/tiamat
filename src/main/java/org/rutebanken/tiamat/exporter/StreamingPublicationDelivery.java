@@ -74,13 +74,16 @@ public class StreamingPublicationDelivery {
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportPublicationDeliveryWithoutStops();
+
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
         tiamatSiteFrameExporter.addTariffZones(siteFrame);
+        tiamatSiteFrameExporter.addTopographicPlacesToTiamatSiteFrame(PublicationDeliveryExporter.ExportMode.ALL, siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
         // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element.
         final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
