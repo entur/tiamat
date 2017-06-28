@@ -43,16 +43,16 @@ public class ExportResourceTest extends TiamatIntegrationTest {
      */
     @Test
     public void exportStopPlacesWithRelevantTopographicPlaces() throws JAXBException, IOException, SAXException {
-        exportStopPlacesAndVerify(true);
+        exportStopPlacesAndVerify(ExportParams.ExportMode.RELEVANT);
     }
 
     @Test
     public void exportStopPlacesWithoutTopographicPlaces() throws JAXBException, IOException, SAXException {
-        exportStopPlacesAndVerify(false);
+        exportStopPlacesAndVerify(ExportParams.ExportMode.NONE);
     }
 
 
-    private void exportStopPlacesAndVerify(boolean includeTopographicPlaces) throws JAXBException, IOException, SAXException {
+    private void exportStopPlacesAndVerify(ExportParams.ExportMode includeTopographicPlaces) throws JAXBException, IOException, SAXException {
         // Import stop to make sure we have something to export, although other tests might have populated the test database.
         // Make ids and search string unique
 

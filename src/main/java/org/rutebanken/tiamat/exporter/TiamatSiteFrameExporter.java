@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.exporter;
 
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -12,8 +13,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
 
-import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.ALL;
-import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.RELEVANT;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.ALL;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.RELEVANT;
 
 @Service
 public class TiamatSiteFrameExporter {
@@ -54,7 +55,7 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    public void addTopographicPlacesToTiamatSiteFrame(PublicationDeliveryExporter.ExportMode topographicPlaceExportMode, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+    public void addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode topographicPlaceExportMode, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
         Collection<TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, siteFrame.getStopPlaces());
 
         if (!topographicPlacesForExport.isEmpty()) {
@@ -81,7 +82,7 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    private Collection<TopographicPlace> getTopographicPlacesForExport(PublicationDeliveryExporter.ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
+    private Collection<TopographicPlace> getTopographicPlacesForExport(ExportParams.ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
         Collection<TopographicPlace> topographicPlacesForExport;
         if (ALL.equals(topographicPlaceExportMode)) {
             topographicPlacesForExport = topographicPlaceRepository.findAll();

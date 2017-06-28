@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.exporter.params;
 
+import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.QueryParam;
 import java.util.Arrays;
@@ -11,8 +13,10 @@ import java.util.List;
  */
 public class ExportParams {
 
+    public enum ExportMode {NONE, RELEVANT, ALL}
+
     @QueryParam(value = "includeTopographicPlaces")
-    private boolean includeTopographicPlaces = false;
+    private ExportMode includeTopographicPlaces;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -23,7 +27,7 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(boolean includeTopographicPlaces, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+    private ExportParams(ExportMode includeTopographicPlaces, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
         this.includeTopographicPlaces = includeTopographicPlaces;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
@@ -36,7 +40,7 @@ public class ExportParams {
 
     public ExportParams() {}
 
-    public boolean isIncludeTopographicPlaces() {
+    public ExportMode getIncludeTopographicPlaces() {
         return includeTopographicPlaces;
     }
 
@@ -58,14 +62,14 @@ public class ExportParams {
 
     public static class Builder {
 
-        private boolean includeTopographicPlaces;
+        private ExportMode includeTopographicPlaces = ExportMode.ALL;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;
 
         private Builder() { }
 
-        public Builder setIncludeTopographicPlaces(boolean includeTopographicPlaces) {
+        public Builder setIncludeTopographicPlaces(ExportMode includeTopographicPlaces) {
             this.includeTopographicPlaces = includeTopographicPlaces;
             return this;
         }
