@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.exporter.params;
 
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import com.google.common.base.MoreObjects;
 
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.QueryParam;
@@ -15,8 +15,8 @@ public class ExportParams {
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
-    @QueryParam(value = "includeTopographicPlaces")
-    private ExportMode includeTopographicPlaces;
+    @QueryParam(value = "topopgraphicPlaceExportMode")
+    private ExportMode topopgraphicPlaceExportMode;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -27,8 +27,8 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode includeTopographicPlaces, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
-        this.includeTopographicPlaces = includeTopographicPlaces;
+    private ExportParams(ExportMode topopgraphicPlaceExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+        this.topopgraphicPlaceExportMode = topopgraphicPlaceExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
@@ -40,8 +40,8 @@ public class ExportParams {
 
     public ExportParams() {}
 
-    public ExportMode getIncludeTopographicPlaces() {
-        return includeTopographicPlaces;
+    public ExportMode getTopopgraphicPlaceExportMode() {
+        return topopgraphicPlaceExportMode;
     }
 
     public List<String> getMunicipalityReferences() {
@@ -58,6 +58,16 @@ public class ExportParams {
 
     public static ExportParams.Builder newExportParamsBuilder() {
        return new Builder();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("topopgraphicPlaceExportMode", topopgraphicPlaceExportMode)
+                .add("municipalityReferences", municipalityReferences)
+                .add("countyReferences", countyReferences)
+                .add("stopPlaceSearch", stopPlaceSearch)
+                .toString();
     }
 
     public static class Builder {

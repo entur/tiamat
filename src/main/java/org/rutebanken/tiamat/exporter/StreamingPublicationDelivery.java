@@ -74,8 +74,6 @@ public class StreamingPublicationDelivery {
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
-
-
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
         tiamatSiteFrameExporter.addTariffZones(siteFrame);
         tiamatSiteFrameExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);

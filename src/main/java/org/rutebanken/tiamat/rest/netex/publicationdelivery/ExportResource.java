@@ -7,7 +7,6 @@ import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,7 @@ public class ExportResource {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.getIncludeTopographicPlaces());
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.getTopopgraphicPlaceExportMode());
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();
@@ -70,7 +69,7 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getIncludeTopographicPlaces(), uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopopgraphicPlaceExportMode(), uriInfo), "next");
         }
 
         return rsp.build();

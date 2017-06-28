@@ -1,12 +1,8 @@
 package org.rutebanken.tiamat.exporter;
 
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.*;
@@ -17,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBException;
 import java.time.OffsetDateTime;
 
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
@@ -40,9 +35,9 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
         if (exportParams.getStopPlaceSearch().isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams.getIncludeTopographicPlaces());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams.getTopopgraphicPlaceExportMode());
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams.getIncludeTopographicPlaces());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams.getTopopgraphicPlaceExportMode());
         }
     }
 
