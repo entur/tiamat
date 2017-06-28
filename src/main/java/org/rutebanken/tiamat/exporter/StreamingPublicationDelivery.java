@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -19,6 +20,7 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +31,11 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 
@@ -78,11 +82,18 @@ public class StreamingPublicationDelivery {
         tiamatSiteFrameExporter.addTariffZones(siteFrame);
 
         // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element and to be able to gather relevant topographic places
-        final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
-        logger.info("Got {} stop place IDs from stop place search", stopPlaceIds.size());
+        final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
+        logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
         if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
             topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
+        } else if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+            List<TopographicPlace> relevantTopographicPlaces = topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(stopPlacePrimaryIds);
+            Set<TopographicPlace> target = new HashSet<>();
+            for(TopographicPlace topographicPlace : relevantTopographicPlaces) {
+                topographicPlacesExporter.gatherTopographicPlaceTree(topographicPlace, target);
+            }
+            topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(target, siteFrame);
         }
 
         logger.info("Mapping site frame to netex model");
@@ -90,15 +101,13 @@ public class StreamingPublicationDelivery {
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
-
-
 //        List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = stopPlaceIds.stream()
 //                .map(stopPlaceIds -> )
         // TODO export topographic places that are relevant for stop places
 
 
         // Override lists with custom iterator to be able to scroll database results on the fly.
-        if(!stopPlaceIds.isEmpty()) {
+        if(!stopPlacePrimaryIds.isEmpty()) {
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
             logger.info("There are stop places to export");
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
@@ -111,19 +120,19 @@ public class StreamingPublicationDelivery {
             logger.info("No stop places to export");
         }
 
-        ParkingSearch parkingSearch = ParkingSearch.newParkingSearchBuilder().setParentSiteRefs(stopPlaceIds).build();
-        int parkingsCount = parkingRepository.countResult(parkingSearch);
-        if(parkingsCount > 0) {
-            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
-            // Only set parkings if they will exist during marshalling.
-            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
-            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(parkingSearch), Parking.class));
-
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
-            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
-        } else {
-            logger.info("No parkings to export based on stop places");
-        }
+//        ParkingSearch parkingSearch = ParkingSearch.newParkingSearchBuilder().setParentSiteRefs().collect(Collectors.toSet()).build();
+//        int parkingsCount = parkingRepository.countResult(parkingSearch);
+//        if(parkingsCount > 0) {
+//            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
+//            // Only set parkings if they will exist during marshalling.
+//            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
+//            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(parkingSearch), Parking.class));
+//
+//            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+//            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+//        } else {
+//            logger.info("No parkings to export based on stop places");
+//        }
 
         Marshaller marshaller = createMarshaller();
 

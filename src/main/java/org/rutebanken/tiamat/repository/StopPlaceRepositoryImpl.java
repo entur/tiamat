@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
@@ -406,6 +407,26 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Set<String> result =  new HashSet<>(query.list());
         return result;
     }
+
+    @Override
+    public Set<Long> getDatabaseIds(ExportParams exportParams) {
+        Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
+
+        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+
+        Set<Long> result = new HashSet<>();
+        for(Object object : query.list()) {
+            BigInteger bigInteger = (BigInteger) object;
+            result.add(bigInteger.longValue());
+
+        }
+
+        return result;
+    }
+
+
 
     @Override
     public Page<StopPlace> findStopPlace(ExportParams exportParams) {

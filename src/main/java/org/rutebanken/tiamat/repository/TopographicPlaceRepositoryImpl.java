@@ -6,10 +6,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.commons.lang.NotImplementedException;
-import org.hibernate.Criteria;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
+import org.hibernate.*;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.StringType;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
@@ -28,6 +25,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -66,5 +64,31 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		parameters.forEach(query::setParameter);
 
 		return query.getResultList();
+	}
+
+
+	@Override
+	public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+
+		StringBuilder sql = new StringBuilder("select tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
+
+		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
+		sql.append(String.join(",", stopPlaceStringDbIds));
+		sql.append(")");
+
+
+		Query query = entityManager.createNativeQuery(sql.toString(), TopographicPlace.class);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<TopographicPlace> results = query.getResultList();
+			if (results.isEmpty()) {
+				return null;
+			} else {
+				return results;
+			}
+		} catch (NoResultException noResultException) {
+			return null;
+		}
 	}
 }

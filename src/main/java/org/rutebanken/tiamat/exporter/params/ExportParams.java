@@ -16,7 +16,7 @@ public class ExportParams {
     public enum ExportMode {NONE, RELEVANT, ALL}
 
     @QueryParam(value = "topopgraphicPlaceExportMode")
-    private ExportMode topopgraphicPlaceExportMode;
+    private ExportMode topopgraphicPlaceExportMode = ExportMode.ALL;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -38,7 +38,7 @@ public class ExportParams {
         this.stopPlaceSearch = stopPlaceSearch;
     }
 
-    private ExportParams() {}
+    public ExportParams() {}
 
     public ExportMode getTopopgraphicPlaceExportMode() {
         return topopgraphicPlaceExportMode;

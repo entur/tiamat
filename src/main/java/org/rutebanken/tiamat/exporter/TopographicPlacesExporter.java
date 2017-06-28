@@ -67,10 +67,13 @@ public class TopographicPlacesExporter {
         return null;
     }
 
-
     public void addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode topographicPlaceExportMode, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
         Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, siteFrame.getStopPlaces());
+        addTopographicPlacesToTiamatSiteFrame(topographicPlacesForExport, siteFrame);
+    }
 
+    // TODO: Handle allVersions attribute
+    public void addTopographicPlacesToTiamatSiteFrame(Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
         if (!topographicPlacesForExport.isEmpty()) {
             Iterator<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaceIterable = topographicPlacesForExport.iterator();
 
@@ -105,7 +108,7 @@ public class TopographicPlacesExporter {
         return topographicPlacesForExport;
     }
 
-    private void gatherTopographicPlaceTree(org.rutebanken.tiamat.model.TopographicPlace topographicPlace, Set<org.rutebanken.tiamat.model.TopographicPlace> target) {
+    public void gatherTopographicPlaceTree(org.rutebanken.tiamat.model.TopographicPlace topographicPlace, Set<org.rutebanken.tiamat.model.TopographicPlace> target) {
         if (topographicPlace != null && target.add(topographicPlace)) {
             TopographicPlaceRefStructure parentRef = topographicPlace.getParentTopographicPlaceRef();
             if (parentRef != null) {
