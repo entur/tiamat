@@ -76,16 +76,21 @@ public class StreamingPublicationDelivery {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
         tiamatSiteFrameExporter.addTariffZones(siteFrame);
-        tiamatSiteFrameExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
+
+        // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element and to be able to gather relevant topographic places
+        final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
+        logger.info("Got {} stop place IDs from stop place search", stopPlaceIds.size());
+
+        if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
+            topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
+        }
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
-        // We need to know these IDs before marshalling begins. To avoid marshalling empty parking element.
-        final Set<String> stopPlaceIds = stopPlaceRepository.getNetexIds(exportParams);
-        logger.info("Got {} stop place IDs from stop place search", stopPlaceIds.size());
+
 
 //        List<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaces = stopPlaceIds.stream()
 //                .map(stopPlaceIds -> )

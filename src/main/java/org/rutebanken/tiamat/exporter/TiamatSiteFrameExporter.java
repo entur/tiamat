@@ -55,23 +55,6 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    public void addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode topographicPlaceExportMode, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
-        Collection<TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, siteFrame.getStopPlaces());
-
-        if (!topographicPlacesForExport.isEmpty()) {
-            Iterator<TopographicPlace> topographicPlaceIterable = topographicPlacesForExport.iterator();
-
-            TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
-            topographicPlaceIterable
-                    .forEachRemaining(topographicPlace -> topographicPlaces.getTopographicPlace().add(topographicPlace));
-
-            logger.info("Adding {} topographic places", topographicPlaces.getTopographicPlace().size());
-            siteFrame.setTopographicPlaces(topographicPlaces);
-        } else {
-            siteFrame.setTopographicPlaces(null);
-        }
-    }
-
     public void addTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
         List<TariffZone> tariffZones = tariffZoneRepository.findAll();
         if (!tariffZones.isEmpty()) {
@@ -82,34 +65,4 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    private Collection<TopographicPlace> getTopographicPlacesForExport(ExportParams.ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
-        Collection<TopographicPlace> topographicPlacesForExport;
-        if (ALL.equals(topographicPlaceExportMode)) {
-            topographicPlacesForExport = topographicPlaceRepository.findAll();
-            if (topographicPlacesForExport.isEmpty()) {
-                logger.warn("No topographic places found to export");
-            }
-        } else if (RELEVANT.equals(topographicPlaceExportMode) && stopPlacesInFrame_relStructure != null) {
-            Set<TopographicPlace> uniqueTopographicPlaces = new HashSet<>();
-            for (StopPlace stopPlace : stopPlacesInFrame_relStructure.getStopPlace()) {
-                gatherTopographicPlaceTree(stopPlace.getTopographicPlace(), uniqueTopographicPlaces);
-            }
-
-            topographicPlacesForExport = new HashSet<>(uniqueTopographicPlaces);
-        } else {
-            topographicPlacesForExport = new ArrayList<>();
-        }
-        return topographicPlacesForExport;
-    }
-
-    private void gatherTopographicPlaceTree(TopographicPlace topographicPlace, Set<TopographicPlace> target) {
-        if (topographicPlace != null && target.add(topographicPlace)) {
-            TopographicPlaceRefStructure parentRef = topographicPlace.getParentTopographicPlaceRef();
-            if (parentRef != null) {
-                TopographicPlace parent = topographicPlaceRepository.findFirstByNetexIdAndVersion(parentRef.getRef(), Long.valueOf(parentRef.getVersion()));
-                gatherTopographicPlaceTree(parent, target);
-            }
-
-        }
-    }
 }
