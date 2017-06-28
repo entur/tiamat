@@ -82,6 +82,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     protected String getUserNameForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null ? authentication.getName():null;
+        if (authentication != null) {
+            return (String)authentication.getPrincipal();
+        }
+        return null;
     }
 }
