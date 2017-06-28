@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.keycloak.KeycloakPrincipal;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
@@ -83,7 +84,10 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     protected String getUserNameForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            return (String)authentication.getPrincipal();
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof KeycloakPrincipal) {
+                return ((KeycloakPrincipal) principal).getName();
+            }
         }
         return null;
     }
