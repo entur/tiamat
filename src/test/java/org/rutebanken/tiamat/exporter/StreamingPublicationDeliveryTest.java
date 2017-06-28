@@ -44,9 +44,10 @@ public class StreamingPublicationDeliveryTest {
     private TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
     private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class));
     private NetexMapper netexMapper = new NetexMapper();
-    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter);
+
+    private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
+    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
-    private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter();
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,
             parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper);
 
@@ -155,7 +156,7 @@ public class StreamingPublicationDeliveryTest {
         when(parkingRepository.countResult(any())).thenReturn(parkings.size());
         when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
         when(stopPlaceRepository.getNetexIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> stopPlace.getNetexId()).collect(Collectors.toSet()));
-        streamingPublicationDelivery.stream(new ExportParams(), byteArrayOutputStream);
+        streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
 
 }

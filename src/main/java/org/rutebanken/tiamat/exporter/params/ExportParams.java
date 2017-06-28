@@ -38,7 +38,7 @@ public class ExportParams {
         this.stopPlaceSearch = stopPlaceSearch;
     }
 
-    public ExportParams() {}
+    private ExportParams() {}
 
     public ExportMode getTopopgraphicPlaceExportMode() {
         return topopgraphicPlaceExportMode;
@@ -72,15 +72,15 @@ public class ExportParams {
 
     public static class Builder {
 
-        private ExportMode includeTopographicPlaces = ExportMode.ALL;
+        private ExportMode topographicPlaceExportMode = ExportMode.ALL;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;
 
         private Builder() { }
 
-        public Builder setIncludeTopographicPlaces(ExportMode includeTopographicPlaces) {
-            this.includeTopographicPlaces = includeTopographicPlaces;
+        public Builder setTopographicPlaceExportMode(ExportMode topographicPlaceExportMode) {
+            this.topographicPlaceExportMode = topographicPlaceExportMode;
             return this;
         }
 
@@ -110,7 +110,7 @@ public class ExportParams {
         }
 
         public ExportParams build() {
-            return new ExportParams(includeTopographicPlaces, municipalityReferences, countyReferences, stopPlaceSearch);
+            return new ExportParams(topographicPlaceExportMode, municipalityReferences, countyReferences, stopPlaceSearch);
         }
     }
 }

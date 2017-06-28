@@ -4,7 +4,6 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +25,14 @@ public class TopographicPlacesExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(TopographicPlacesExporter.class);
 
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+    private final TopographicPlaceRepository topographicPlaceRepository;
+    private final NetexMapper netexMapper;
 
     @Autowired
-    private NetexMapper netexMapper;
+    public TopographicPlacesExporter(TopographicPlaceRepository topographicPlaceRepository, NetexMapper netexMapper) {
+        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.netexMapper = netexMapper;
+    }
 
     /**
      * Finds topographic places and parent topographic places from NetexId and version.

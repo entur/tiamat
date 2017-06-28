@@ -63,7 +63,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
                 .build();
         ExportParams exportParams = newExportParamsBuilder()
                 .setStopPlaceSearch(stopPlaceSearch)
-                .setIncludeTopographicPlaces(includeTopographicPlaces)
+                .setTopographicPlaceExportMode(includeTopographicPlaces)
                 .build();
 
         Response response = exportResource.exportStopPlaces(exportParams);
