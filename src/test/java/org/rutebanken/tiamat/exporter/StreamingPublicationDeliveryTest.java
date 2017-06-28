@@ -27,6 +27,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
@@ -45,7 +46,9 @@ public class StreamingPublicationDeliveryTest {
     private NetexMapper netexMapper = new NetexMapper();
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
-    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository, parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper);
+    private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter();
+    private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
@@ -148,7 +151,10 @@ public class StreamingPublicationDeliveryTest {
 
     private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
+        when(parkingRepository.scrollParkings(any())).thenReturn(parkings.iterator());
+        when(parkingRepository.countResult(any())).thenReturn(parkings.size());
         when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
+        when(stopPlaceRepository.getNetexIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> stopPlace.getNetexId()).collect(Collectors.toSet()));
         streamingPublicationDelivery.stream(new ExportParams(), byteArrayOutputStream);
     }
 
