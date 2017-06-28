@@ -86,7 +86,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof KeycloakPrincipal) {
-                return ((KeycloakPrincipal) principal).getName();
+                return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getIdToken().getPreferredUsername();
             }
         }
         return null;
