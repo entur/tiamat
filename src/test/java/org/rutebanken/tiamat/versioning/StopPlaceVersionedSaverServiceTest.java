@@ -4,9 +4,13 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -234,6 +238,31 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
         assertThat(stopPlace3.getTopographicPlace()).isNotNull();
+    }
+
+
+    @Test
+    public void newVersionOfStopPlaceGetsChangedBySet() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlaceRepository.save(topographicPlace);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTopographicPlace(topographicPlace);
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
+
+        final String mockUser = "mockUser";
+
+        Authentication auth = new TestingAuthenticationToken((Principal) () -> mockUser, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
+
+        assertThat(stopPlace2.getChangedBy()).isNullOrEmpty();
+        assertThat(stopPlace3.getChangedBy()).isEqualTo(mockUser);
     }
 
 

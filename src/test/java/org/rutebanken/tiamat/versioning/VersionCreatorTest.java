@@ -32,6 +32,18 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(newVersion.getVersionComment()).isNull();
     }
 
+
+    @Test
+    public void changedByShouldNotBeCopied() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setChangedBy("testuser");
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
+        assertThat(newVersion.getChangedBy()).isNull();
+    }
+
     @Test
     public void createCopyOfStopWithGeometry() {
         StopPlace stopPlace = new StopPlace();

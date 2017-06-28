@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +28,7 @@ public class VersionCreator {
     private static final String ID_FIELD = "id";
 
     private static final String VERSION_COMMENT_FIELD = "versionComment";
+    private static final String CHANGED_BY_FIELD = "changedBy";
 
     private final VersionIncrementor versionIncrementor;
 
@@ -67,6 +67,7 @@ public class VersionCreator {
                 .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
                 .exclude(ID_FIELD)
                 .exclude(VERSION_COMMENT_FIELD)
+                .exclude(CHANGED_BY_FIELD)
                 .byDefault()
                 .register();
 
@@ -81,6 +82,7 @@ public class VersionCreator {
 
         commonClassesToConfigure.forEach(clazz -> mapperFactory.classMap(clazz, clazz)
                 .exclude(VERSION_COMMENT_FIELD)
+                .exclude(CHANGED_BY_FIELD)
                 .exclude(ID_FIELD)
                 .byDefault()
                 .register());
