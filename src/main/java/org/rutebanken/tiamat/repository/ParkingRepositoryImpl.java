@@ -3,14 +3,18 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.Criteria;
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -18,10 +22,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 @Repository
 @Transactional
@@ -35,7 +37,8 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     @Autowired
     private GeometryFactory geometryFactory;
 
-
+    @Autowired
+    private ParkingQueryFromSearchBuilder parkingQueryFromSearchBuilder;
 
     /**
      * Find stop place's netex ID by key value
@@ -74,22 +77,46 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     @Override
-    public Iterator<Parking> scrollParkings() throws InterruptedException {
-        return scrollParkings(null);
+    public Iterator<Parking> scrollParkings() {
+
+        return scrollParkings();
     }
 
     @Override
-    public Iterator<Parking> scrollParkings(List<String> parkingNetexIds) throws InterruptedException {
+    public Iterator<Parking> scrollParkings(ParkingSearch parkingSearch) {
+        return scrollParkings(parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch));
+    }
 
+    @Override
+    public Iterator<Parking> scrollParkings(Set<Long> stopPlaceIds) {
+        return scrollParkings(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
+    }
+
+    @Override
+    public int countResult(ParkingSearch parkingSearch) {
+        return countResult(parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch));
+    }
+
+    @Override
+    public int countResult(Set<Long> stopPlaceIds) {
+        return countResult(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
+    }
+
+    private int countResult(Pair<String, Map<String, Object>> sqlWithParams) {
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
+        parkingQueryFromSearchBuilder.addParams(query, sqlWithParams.getSecond());
+        return ((BigInteger) query.uniqueResult()).intValue();
+    }
+
+    private Iterator<Parking> scrollParkings(Pair<String, Map<String, Object>> sqlWithParams) {
         final int fetchSize = 100;
 
-        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery(sqlWithParams.getFirst());
+        parkingQueryFromSearchBuilder.addParams(query, sqlWithParams.getSecond());
 
-        Criteria query = session.createCriteria(Parking.class);
-        if (parkingNetexIds != null) {
-            query.add(Restrictions.in("netexId", parkingNetexIds));
-        }
-
+        query.addEntity(Parking.class);
         query.setReadOnly(true);
         query.setFetchSize(fetchSize);
         query.setCacheable(false);
@@ -98,6 +125,17 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         ScrollableResultIterator<Parking> parkingEntityIterator = new ScrollableResultIterator<>(results, fetchSize, session);
 
         return parkingEntityIterator;
+    }
+
+    private Pair<String, Map<String, Object>> getParkingsByStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
+        StringBuilder sql = new StringBuilder("select p.* from parking p " +
+                "inner join stop_place sp on sp.netex_id = p.parent_site_ref " +
+                "   and (cast(sp.version as text) = p.parent_site_ref_version OR p.parent_site_ref_version is null) " +
+                " where sp.id in (");
+
+        sql.append(StringUtils.join(stopPlaceIds, ','));
+        sql.append(')');
+        return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }
 
     @Override
