@@ -96,6 +96,7 @@ public class StopPlaceSearch {
                 .add("q", getQuery())
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("netexIdList", getNetexIdList())
+                .add("allVersions", isAllVersions())
                 .add("page", page)
                 .add("size", size)
                 .toString();

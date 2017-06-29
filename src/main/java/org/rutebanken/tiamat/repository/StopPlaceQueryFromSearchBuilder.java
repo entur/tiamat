@@ -148,8 +148,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         final String generatedSql = basicFormatter.format(queryString.toString());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("{}", generatedSql);
-            logger.debug("params: {}", parameters.toString());
+            logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
         }
         return Pair.of(generatedSql, parameters);
     }
