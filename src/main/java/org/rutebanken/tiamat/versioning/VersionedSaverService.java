@@ -81,16 +81,18 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         }
     }
 
+    /*
+     * Gets username from Spring Security
+     *
+     * Expects property keycloak.principal-attribute=preferred_username
+     *
+     */
     protected String getUserNameForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            if (authentication.getPrincipal() instanceof KeycloakPrincipal) {
-                KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) authentication.getPrincipal();
-                if (keycloakPrincipal != null &&
-                        keycloakPrincipal.getKeycloakSecurityContext() != null &&
-                        keycloakPrincipal.getKeycloakSecurityContext().getToken() != null) {
-                    return keycloakPrincipal.getKeycloakSecurityContext().getToken().getPreferredUsername();
-                }
+            if (authentication.getPrincipal() != null &&
+                    authentication.getPrincipal() instanceof KeycloakPrincipal) {
+                return ((KeycloakPrincipal)authentication.getPrincipal()).getName();
             }
         }
         return null;
