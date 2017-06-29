@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 
 /**
  * Stream data objects inside already serialized publication delivery.
@@ -88,7 +89,7 @@ public class StreamingPublicationDelivery {
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
-        if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
+        if(exportParams.getTopopgraphicPlaceExportMode() == null || exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
             topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
         } else if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
             List<TopographicPlace> relevantTopographicPlaces = topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(stopPlacePrimaryIds);
@@ -117,11 +118,11 @@ public class StreamingPublicationDelivery {
         } else {
             logger.info("No stop places to export");
         }
-        
+
         int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
         if(parkingsCount > 0) {
-            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
             // Only set parkings if they will exist during marshalling.
+            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds), Parking.class));
 
