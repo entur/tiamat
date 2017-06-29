@@ -25,10 +25,11 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
  * Builds query from stop place search params
  */
 @Component
-public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
+public class StopPlaceQueryFromSearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceQueryFromSearchBuilder.class);
 
+    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
@@ -133,7 +134,14 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         }
 
-        addWheres(queryString, wheres, operators);
+        for (int i = 0; i < wheres.size(); i++) {
+            if (i > 0) {
+                queryString.append(operators.get(i - 1));
+            } else {
+                queryString.append("where");
+            }
+            queryString.append(' ').append(wheres.get(i)).append(' ');
+        }
 
         orderByStatements.add("netex_id, version asc");
         queryString.append(" order by");
@@ -148,8 +156,10 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         final String generatedSql = basicFormatter.format(queryString.toString());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+            logger.debug("{}", generatedSql);
+            logger.debug("params: {}", parameters.toString());
         }
+
         return Pair.of(generatedSql, parameters);
     }
 }

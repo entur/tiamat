@@ -1,7 +1,5 @@
 package org.rutebanken.tiamat.exporter.params;
 
-import com.google.common.base.MoreObjects;
-
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.QueryParam;
 import java.util.Arrays;
@@ -13,10 +11,8 @@ import java.util.List;
  */
 public class ExportParams {
 
-    public enum ExportMode {NONE, RELEVANT, ALL}
-
-    @QueryParam(value = "topopgraphicPlaceExportMode")
-    private ExportMode topopgraphicPlaceExportMode = ExportMode.ALL;
+    @QueryParam(value = "includeTopographicPlaces")
+    private boolean includeTopographicPlaces = false;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -27,8 +23,8 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topopgraphicPlaceExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
-        this.topopgraphicPlaceExportMode = topopgraphicPlaceExportMode;
+    private ExportParams(boolean includeTopographicPlaces, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+        this.includeTopographicPlaces = includeTopographicPlaces;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
@@ -40,8 +36,8 @@ public class ExportParams {
 
     public ExportParams() {}
 
-    public ExportMode getTopopgraphicPlaceExportMode() {
-        return topopgraphicPlaceExportMode;
+    public boolean isIncludeTopographicPlaces() {
+        return includeTopographicPlaces;
     }
 
     public List<String> getMunicipalityReferences() {
@@ -60,27 +56,17 @@ public class ExportParams {
        return new Builder();
     }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("topopgraphicPlaceExportMode", topopgraphicPlaceExportMode)
-                .add("municipalityReferences", municipalityReferences)
-                .add("countyReferences", countyReferences)
-                .add("stopPlaceSearch", stopPlaceSearch)
-                .toString();
-    }
-
     public static class Builder {
 
-        private ExportMode topographicPlaceExportMode = ExportMode.ALL;
+        private boolean includeTopographicPlaces;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;
 
         private Builder() { }
 
-        public Builder setTopographicPlaceExportMode(ExportMode topographicPlaceExportMode) {
-            this.topographicPlaceExportMode = topographicPlaceExportMode;
+        public Builder setIncludeTopographicPlaces(boolean includeTopographicPlaces) {
+            this.includeTopographicPlaces = includeTopographicPlaces;
             return this;
         }
 
@@ -110,7 +96,7 @@ public class ExportParams {
         }
 
         public ExportParams build() {
-            return new ExportParams(topographicPlaceExportMode, municipalityReferences, countyReferences, stopPlaceSearch);
+            return new ExportParams(includeTopographicPlaces, municipalityReferences, countyReferences, stopPlaceSearch);
         }
     }
 }

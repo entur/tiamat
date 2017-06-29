@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class ExportResource {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.getTopopgraphicPlaceExportMode());
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.isIncludeTopographicPlaces());
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();
@@ -69,13 +70,13 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopopgraphicPlaceExportMode(), uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.isIncludeTopographicPlaces(), uriInfo), "next");
         }
 
         return rsp.build();
     }
 
-    private URI createLinkToNextPage(String from, String to, int page, int perPage, ExportParams.ExportMode includeTopographicPlaces, UriInfo uriInfo) {
+    private URI createLinkToNextPage(String from, String to, int page, int perPage, boolean includeTopographicPlaces, UriInfo uriInfo) {
         UriBuilder linkBuilder = uriInfo.getAbsolutePathBuilder()
                 .queryParam("page", page)
                 .queryParam("per_page", perPage)

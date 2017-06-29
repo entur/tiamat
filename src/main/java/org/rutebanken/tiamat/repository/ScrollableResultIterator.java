@@ -15,7 +15,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     private final int fetchSize;
     private final Session session;
     private int counter;
-    private Optional<T> next = Optional.empty();
+    private Optional<T> currentItem = Optional.empty();
 
     public ScrollableResultIterator(ScrollableResults scrollableResults, int fetchSize, Session session) {
         this.scrollableResults = scrollableResults;
@@ -26,34 +26,26 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        if(next.isPresent()) {
-            // Next value was already fetched
-            return true;
-        }
-        next = getNext();
-        if (next.isPresent()) {
-            // Next value is now fetched. It is present.
+        currentItem = getNext();
+        if (currentItem.isPresent()) {
             return true;
         }
 
-        next = Optional.empty();
         close();
         return false;
     }
 
     @Override
     public T next() {
-        if(!next.isPresent()) {
-            next = getNext();
+        if(!currentItem.isPresent()) {
+            currentItem = getNext();
         }
 
-        if (next.isPresent()) {
+        if (currentItem.isPresent()) {
             if (++counter % fetchSize == 0) {
-                logger.debug("Scrolling {}s. Counter is currently at {}", next.getClass().getSimpleName(), counter);
+                logger.debug("Scrolling {}s. Counter is currently at {}", currentItem.getClass().getSimpleName(), counter);
             }
-            T returnValue =  next.get();
-            next = Optional.empty();
-            return returnValue;
+            return currentItem.get();
         }
 
         close();
@@ -71,8 +63,8 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     }
 
     private void evictBeforeNext() {
-        if(next.isPresent()) {
-            session.evict(next.get());
+        if(currentItem.isPresent()) {
+            session.evict(currentItem.get());
         }
     }
 

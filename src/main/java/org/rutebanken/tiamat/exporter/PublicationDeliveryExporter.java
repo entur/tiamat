@@ -1,8 +1,12 @@
 package org.rutebanken.tiamat.exporter;
 
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.*;
@@ -13,8 +17,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.bind.JAXBException;
 import java.time.OffsetDateTime;
 
+import static org.rutebanken.tiamat.exporter.PublicationDeliveryExporter.ExportMode.*;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
@@ -24,28 +30,30 @@ public class PublicationDeliveryExporter {
     private StopPlaceRepository stopPlaceRepository;
     private NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-    private TopographicPlacesExporter topographicPlacesExporter;
+
+    public enum ExportMode {NONE, RELEVANT, ALL}
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
-        this.topographicPlacesExporter = topographicPlacesExporter;
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
+        ExportMode topographicPlaceExportMode = exportParams.isIncludeTopographicPlaces() ? RELEVANT : NONE;
         if (exportParams.getStopPlaceSearch().isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams.getTopopgraphicPlaceExportMode());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), topographicPlaceExportMode);
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams.getTopopgraphicPlaceExportMode());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), topographicPlaceExportMode);
         }
     }
 
-    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams.ExportMode includeTopographicPlaces) {
+    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, boolean includeTopographicPlaces) {
+        ExportMode topographicPlaceExportMode = includeTopographicPlaces ? RELEVANT : NONE;
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, includeTopographicPlaces), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, topographicPlaceExportMode), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
@@ -67,17 +75,21 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportParams.ExportMode topographicPlaceExportMode) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithoutStops() {
+        return exportPublicationDeliveryWithStops(null, ALL);
+    }
+
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportMode topographicPlaceExportMode) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
-        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(topographicPlaceExportMode, siteFrame);
-        tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
+        tiamatSiteFrameExporter.addTopographicPlacesToTiamatSiteFrame(topographicPlaceExportMode, siteFrame);
+        tiamatSiteFrameExporter.addTariffZones(siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if (ExportParams.ExportMode.NONE.equals(topographicPlaceExportMode)){
+        if (NONE.equals(topographicPlaceExportMode)){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 

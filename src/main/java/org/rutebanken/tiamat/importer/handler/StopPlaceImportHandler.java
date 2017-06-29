@@ -82,7 +82,7 @@ public class StopPlaceImportHandler {
     @Autowired
     private TopographicPlacesExporter topographicPlacesExporter;
 
-    // TODO: Use ExportParams to control what is returned?
+
     public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
             List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());

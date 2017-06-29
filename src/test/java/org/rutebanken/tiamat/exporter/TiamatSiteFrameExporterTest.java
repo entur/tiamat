@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.TariffZone;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 public class TiamatSiteFrameExporterTest extends TiamatIntegrationTest {
 
@@ -22,7 +23,7 @@ public class TiamatSiteFrameExporterTest extends TiamatIntegrationTest {
 
         tariffZoneRepository.save(tariffZone);
 
-        publicationDeliveryExporter.addAllTariffZones(siteFrame);
+        publicationDeliveryExporter.addTariffZones(siteFrame);
 
         assertThat(siteFrame.getTariffZones()).isNotNull();
         assertThat(siteFrame.getTariffZones().getTariffZone()).hasSize(1);

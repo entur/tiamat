@@ -15,6 +15,4 @@ import java.util.Set;
 public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStructureRepository<TopographicPlace> {
 
     List<TopographicPlace> findByNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType);
-
-    List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds);
 }
