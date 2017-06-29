@@ -84,9 +84,13 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     protected String getUserNameForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof KeycloakPrincipal) {
-//                return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+            if (authentication.getPrincipal() instanceof KeycloakPrincipal) {
+                KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) authentication.getPrincipal();
+                if (keycloakPrincipal != null &&
+                        keycloakPrincipal.getKeycloakSecurityContext() != null &&
+                        keycloakPrincipal.getKeycloakSecurityContext().getToken() != null) {
+                    return keycloakPrincipal.getKeycloakSecurityContext().getToken().getPreferredUsername();
+                }
             }
         }
         return null;
