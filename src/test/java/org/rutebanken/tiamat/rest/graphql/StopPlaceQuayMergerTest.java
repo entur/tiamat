@@ -366,6 +366,48 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
     }
 
+
+    /**
+     * Test added to reproduce/verify NRP-1791
+     */
+    @Test
+    @Transactional
+    public void testMergeQuaysWithEmptyNonNullValuesInTarget() {
+
+        StopPlace fromStopPlace = new StopPlace();
+        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
+
+        Quay fromQuay = new Quay();
+        fromQuay.setPublicCode("A");
+        fromQuay.setPrivateCode(new PrivateCodeStructure("", "test"));
+
+        Quay toQuay = new Quay();
+        toQuay.setPublicCode("");
+        toQuay.setPrivateCode(new PrivateCodeStructure("B", ""));
+
+        fromStopPlace.getQuays().add(fromQuay);
+        fromStopPlace.getQuays().add(toQuay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
+
+        StopPlace stopPlaceWithMergedQuays = stopPlaceQuayMerger.mergeQuays(fromStopPlace.getNetexId(), fromQuay.getNetexId(), toQuay.getNetexId(), null, false);
+
+        assertThat(stopPlaceWithMergedQuays).isNotNull();
+
+        // assertQuays
+        assertThat(stopPlaceWithMergedQuays.getQuays()).hasSize(1);
+        Quay quay = stopPlaceWithMergedQuays.getQuays().iterator().next();
+
+        if (quay.getNetexId().equals(toQuay.getNetexId())) {
+
+            assertThat(quay.getVersion()).isEqualTo(1 + toQuay.getVersion());
+
+            assertThat(quay.getPublicCode()).isEqualTo(fromQuay.getPublicCode());
+            assertThat(quay.getPrivateCode().getType()).isEqualTo(fromQuay.getPrivateCode().getType());
+            assertThat(quay.getPrivateCode().getValue()).isEqualTo(toQuay.getPrivateCode().getValue());
+        }
+    }
+
     @Test
     @Transactional
     public void testMergeQuays() {
@@ -381,6 +423,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:123401");
         fromQuay.getOriginalIds().add("TEST:Quay:567801");
+        fromQuay.setPublicCode("A");
 
         String testKey = "testKey";
         String testValue = "testValue";
@@ -397,6 +440,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
         toQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.21, 60.21)));
         toQuay.getOriginalIds().add("TEST:Quay:432101");
         toQuay.getOriginalIds().add("TEST:Quay:876501");
+        toQuay.setPublicCode("");
 
         Quay quayToKeepUnaltered = new Quay();
         quayToKeepUnaltered.setCompassBearing(new Float(180));

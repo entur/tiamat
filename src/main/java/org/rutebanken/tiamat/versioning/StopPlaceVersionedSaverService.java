@@ -1,10 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
-import com.google.common.collect.Sets;
-import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
-import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -20,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.time.Instant;
 import java.util.stream.Collectors;
-
 
 
 @Transactional
@@ -86,6 +80,13 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
+        Instant validFrom;
+        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getFromDate() != null) {
+            validFrom = newVersion.getValidBetween().getFromDate();
+        } else {
+            validFrom = Instant.now();
+        }
+
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             newVersion.setCreated(Instant.now());
@@ -96,11 +97,15 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            versionCreator.terminateVersion(existingStopPlace, Instant.now());
+            versionCreator.terminateVersion(existingStopPlace, validFrom);
         }
 
         // Save latest version
-        newVersion = initiateOrIncrementVersions(newVersion);
+        newVersion = initiateOrIncrementVersions(newVersion, validFrom);
+
+        newVersion.setChangedBy(getUserNameForAuthenticatedUser());
+        logger.info("StopPlace [{}], version {} changed by user [{}].", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
+
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);
@@ -124,12 +129,12 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
      * Increment versions for stop place with children.
      * The object must have their netexId set, or else they will get an initial version
      * @param stopPlace with quays and accessibility assessment
+     * @param validFrom
      * @return modified StopPlace
      */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
+    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace, Instant validFrom) {
         versionCreator.initiateOrIncrement(stopPlace);
         initiateOrIncrementVersionsForChildren(stopPlace);
-        Instant now = Instant.now();
 
         ValidBetween validBetween;
         if (stopPlace.getValidBetween() != null) {
@@ -139,10 +144,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             stopPlace.setValidBetween(validBetween);
         }
 
-        if (validBetween.getFromDate() == null) {
-            validBetween.setFromDate(now);
-            validBetween.setToDate(null);
-        }
+        // new validFrom is set
+        validBetween.setFromDate(validFrom);
+        validBetween.setToDate(null);
 
         return stopPlace;
     }

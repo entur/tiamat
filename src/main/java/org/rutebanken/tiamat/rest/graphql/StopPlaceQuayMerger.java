@@ -84,12 +84,10 @@ public class StopPlaceQuayMerger {
         }
 
 
-        //Terminate validity of from-StopPlace
-        terminateEntity(fromStopPlaceToTerminate);
         if (!isDryRun) {
+            //Terminate validity of from-StopPlace
+            terminateEntity(fromStopPlaceToTerminate);
             stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
-        }
-        if (!isDryRun) {
             return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
         }
         return mergedStopPlace;

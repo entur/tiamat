@@ -5,6 +5,7 @@ import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.AuthorizationCheckFactory;
 import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,73 +25,78 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class GenericAuthorizationService implements AuthorizationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(GenericAuthorizationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenericAuthorizationService.class);
 
-	@Value("${authorization.enabled:true}")
-	protected boolean authorizationEnabled;
+    @Value("${authorization.enabled:true}")
+    protected boolean authorizationEnabled;
 
-	@Value("${administrative.zone.id.prefix:KVE:TopographicPlace}")
-	protected String administrativeZoneIdPrefix;
+    @Value("${administrative.zone.id.prefix:KVE:TopographicPlace:}")
+    protected String administrativeZoneIdPrefix;
 
-	@Autowired
-	protected TopographicPlaceRepository topographicPlaceRepository;
+    @Autowired
+    protected TopographicPlaceRepository topographicPlaceRepository;
 
-	@Autowired
-	private AuthorizationCheckFactory authorizationCheckFactory;
+    @Autowired
+    private AuthorizationCheckFactory authorizationCheckFactory;
 
-	@Autowired
-	private RoleAssignmentExtractor roleAssignmentExtractor;
+    @Autowired
+    private RoleAssignmentExtractor roleAssignmentExtractor;
 
-	@Override
-	public void assertAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
+    @Override
+    public void assertAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
 
-		final boolean allowed = isAuthorized(requiredRole, entities);
-		if (!allowed) {
-			throw new AccessDeniedException("Insufficient privileges for operation");
-		}
-	}
+        final boolean allowed = isAuthorized(requiredRole, entities);
+        if (!allowed) {
+            throw new AccessDeniedException("Insufficient privileges for operation");
+        }
+    }
 
-	@Override
-	public void assertAuthorized(String requiredRole, EntityStructure... entities) {
-		assertAuthorized(requiredRole, Arrays.asList(entities));
-	}
+    @Override
+    public void assertAuthorized(String requiredRole, EntityStructure... entities) {
+        assertAuthorized(requiredRole, Arrays.asList(entities));
+    }
 
-	@Override
-	public boolean isAuthorized(String requiredRole, EntityStructure... entities) {
-		return isAuthorized(requiredRole, Arrays.asList(entities));
-	}
+    @Override
+    public boolean isAuthorized(String requiredRole, EntityStructure... entities) {
+        return isAuthorized(requiredRole, Arrays.asList(entities));
+    }
 
-	@Override
-	public Set<String> getRelevantRolesForEntity(EntityStructure entityStructure) {
-		return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
-				.filter(roleAssignment -> isAuthorizationForEntity(entityStructure, roleAssignment))
-				.map(roleAssignment -> roleAssignment.getRole())
-				.collect(Collectors.toSet());
-	}
+    @Override
+    public Set<String> getRelevantRolesForEntity(EntityStructure entityStructure) {
+        return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+                       .filter(roleAssignment -> isAuthorizationForEntity(entityStructure, roleAssignment))
+                       .map(roleAssignment -> roleAssignment.getRole())
+                       .collect(Collectors.toSet());
+    }
 
-	@Override
-	public boolean isAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
-		if (!authorizationEnabled) {
-			return true;
-		}
+    @Override
+    public boolean isAuthorized(String requiredRole, Collection<? extends EntityStructure> entities) {
+        if (!authorizationEnabled) {
+            return true;
+        }
 
-		List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(toList());
-		boolean allowed = true;
-		for (EntityStructure entity : entities) {
-			allowed &= entity == null ||
-					relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
+        List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(toList());
+        boolean allowed = true;
+        for (EntityStructure entity : entities) {
+            allowed &= entity == null ||
+                               relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
 
-		}
-		return allowed;
-	}
+        }
+        return allowed;
+    }
 
-	protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment) {
-		Polygon administrativeZone = null;
-		if (roleAssignment.z != null) {
-			topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.z);
-		}
-		return authorizationCheckFactory.buildCheck(entity, roleAssignment, administrativeZone).isAllowed();
-	}
+    protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment) {
+        Polygon administrativeZone = null;
+        if (roleAssignment.z != null) {
+            TopographicPlace tp = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.z);
+            if (tp == null) {
+                logger.warn("RoleAssignment contains unknown adminZone reference:" + roleAssignment.z + " . Will not allow authorization");
+                return false;
+            }
+            administrativeZone = tp.getPolygon();
+        }
+        return authorizationCheckFactory.buildCheck(entity, roleAssignment, administrativeZone).isAllowed();
+    }
 
 
 }

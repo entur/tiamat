@@ -1,12 +1,18 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.security.Principal;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +243,32 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
 
     @Test
+    @Ignore
+    public void newVersionOfStopPlaceGetsChangedBySet() {
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlaceRepository.save(topographicPlace);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTopographicPlace(topographicPlace);
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace2, StopPlace.class);
+
+        final String mockUser = "mockUser";
+
+        Authentication auth = new TestingAuthenticationToken((Principal) () -> mockUser, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
+
+        assertThat(stopPlace2.getChangedBy()).isNullOrEmpty();
+        assertThat(stopPlace3.getChangedBy()).isEqualTo(mockUser);
+    }
+
+
+    @Test
     public void createNewVersionOfStopWithPlaceEquipment() {
 
 
@@ -276,7 +308,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
+        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion, Instant.now());
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }

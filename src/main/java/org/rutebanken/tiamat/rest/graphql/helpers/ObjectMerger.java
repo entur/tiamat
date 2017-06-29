@@ -29,9 +29,9 @@ public class ObjectMerger extends BeanUtils {
 
     /**
      * Copy the not null property values of the given source bean into the given target bean.
-     * <p>Note: The source and target classes do not have to match or even be derived
-     * from each other, as long as the properties match. Any bean properties that the
-     * source bean exposes but the target bean does not will silently be ignored.
+     *
+     * Values are copied if target-property is null or empty
+     *
      * @param source the source bean
      * @param target the target bean
      * @param ignoreProperties array of property names to ignore
@@ -68,7 +68,9 @@ public class ObjectMerger extends BeanUtils {
                             if (sourceValue != null && targetReadMethod != null) {
                                 setAccessible(targetReadMethod);
                                 Object targetValue = targetReadMethod.invoke(target);
-                                if (targetValue == null | (targetValue instanceof Enum)) {
+                                if (targetValue == null |
+                                        (targetValue instanceof Enum) |
+                                        ("").equals(targetValue)) {
                                     targetWriteMethod.invoke(target, sourceValue);
                                 } else if(targetValue instanceof Collection<?>) {
                                     ((Collection) targetValue).addAll((Collection) sourceValue);

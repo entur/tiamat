@@ -294,6 +294,36 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
     }
 
+
+    @Test
+    public void searchForStopPlaceByKeyValue() throws Exception {
+        String stopPlaceName = "KeyValueStop";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
+        String key = "testKey";
+        String value = "testValue";
+        stopPlace.getKeyValues().put(key, new Value(value));
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{" +
+                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE + " (key:\\\"" + key + "\\\", values:\\\"" + value + "\\\") { " +
+                "    name {value} " +
+                "    keyValues {key values} " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", hasSize(1))
+                .root("data.stopPlace[0]")
+                    .body("name.value", equalTo(stopPlaceName))
+                    .body("keyValues[0].key", equalTo(key))
+                    .body("keyValues[0].values",  hasSize(1))
+                    .body("keyValues[0].values[0]", equalTo(value));
+    }
+
     @Test
     public void searchForStopsWithDifferentStopPlaceTypeShouldHaveNoResult() {
 
@@ -727,6 +757,37 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("keyValues[0].values[0]", equalTo("1234"));
     }
 
+    /**
+     * NRP-1632
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testNewVersionVerifyValidFrom() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Espa");
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String newName = "EspaBoller";
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        newVersion.setName(new EmbeddableMultilingualString(newName));
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
+
+        assertThat(newVersion.getVersion()).isGreaterThan(stopPlace.getVersion());
+        assertThat(newVersion.getValidBetween()).isNotNull();
+        assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
+        assertThat(newVersion.getValidBetween().getToDate()).isNull();
+
+
+        stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), stopPlace.getVersion());
+        assertThat(stopPlace.getValidBetween().getFromDate()).isNotNull();
+        assertThat(stopPlace.getValidBetween().getToDate()).isNotNull();
+
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualByComparingTo(stopPlace.getValidBetween().getToDate());
+    }
 
     @Test
     public void testSimpleMutationUpdateTransportModeStopPlace() throws Exception {

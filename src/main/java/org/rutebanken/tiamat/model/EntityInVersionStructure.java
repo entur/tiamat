@@ -16,6 +16,8 @@ public class EntityInVersionStructure extends EntityStructure {
 
     private String versionComment;
 
+    private String changedBy;
+
     @Transient
     protected String dataSourceRef;
 
@@ -150,5 +152,13 @@ public class EntityInVersionStructure extends EntityStructure {
 
     public void setVersionComment(String versionComment) {
         this.versionComment = versionComment;
+    }
+
+    public String getChangedBy() {
+        return changedBy;
+    }
+
+    public void setChangedBy(String changedBy) {
+        this.changedBy = changedBy;
     }
 }

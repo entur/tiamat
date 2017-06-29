@@ -1,10 +1,13 @@
 package org.rutebanken.tiamat.versioning;
 
+import org.keycloak.KeycloakPrincipal;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Instant;
 
@@ -50,6 +53,10 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         }
 
         versionCreator.initiateOrIncrement(newVersion);
+
+        newVersion.setChangedBy(getUserNameForAuthenticatedUser());
+        logger.info("Object {}, version {} changed by user {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
+
         return getRepository().save(newVersion);
     }
 
@@ -72,5 +79,22 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
                 throw new IllegalArgumentException("Existing and new entity do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
             }
         }
+    }
+
+    /*
+     * Gets username from Spring Security
+     *
+     * Expects property keycloak.principal-attribute=preferred_username
+     *
+     */
+    protected String getUserNameForAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            if (authentication.getPrincipal() != null &&
+                    authentication.getPrincipal() instanceof KeycloakPrincipal) {
+                return ((KeycloakPrincipal)authentication.getPrincipal()).getName();
+            }
+        }
+        return null;
     }
 }
