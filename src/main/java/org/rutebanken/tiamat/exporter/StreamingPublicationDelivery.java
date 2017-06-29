@@ -9,18 +9,17 @@ import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +34,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 
 /**
  * Stream data objects inside already serialized publication delivery.
@@ -62,13 +59,21 @@ public class StreamingPublicationDelivery {
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final NetexMapper netexMapper;
+    private final TariffZoneRepository tariffZoneRepository;
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
 
     @Autowired
-    public StreamingPublicationDelivery(PublicationDeliveryHelper publicationDeliveryHelper, StopPlaceRepository stopPlaceRepository, ParkingRepository parkingRepository, PublicationDeliveryExporter publicationDeliveryExporter, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, NetexMapper netexMapper) {
+    public StreamingPublicationDelivery(PublicationDeliveryHelper publicationDeliveryHelper,
+                                        StopPlaceRepository stopPlaceRepository,
+                                        ParkingRepository parkingRepository,
+                                        PublicationDeliveryExporter publicationDeliveryExporter,
+                                        TiamatSiteFrameExporter tiamatSiteFrameExporter,
+                                        TopographicPlacesExporter topographicPlacesExporter,
+                                        NetexMapper netexMapper,
+                                        TariffZoneRepository tariffZoneRepository) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -76,11 +81,11 @@ public class StreamingPublicationDelivery {
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.netexMapper = netexMapper;
+        this.tariffZoneRepository = tariffZoneRepository;
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
-        tiamatSiteFrameExporter.addTariffZones(siteFrame);
 
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
@@ -98,6 +103,12 @@ public class StreamingPublicationDelivery {
                 topographicPlacesExporter.gatherTopographicPlaceTree(topographicPlace, target);
             }
             topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(target, siteFrame);
+        }
+
+        List<org.rutebanken.tiamat.model.TariffZone> tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(stopPlacePrimaryIds);
+        if(tariffZones != null) {
+            logger.info("Got {} tariff zones from {} stop place ids", tariffZones.size(), stopPlacePrimaryIds.size());
+            tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
         }
 
         logger.info("Mapping site frame to netex model");

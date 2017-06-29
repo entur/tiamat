@@ -55,8 +55,11 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    public void addTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
-        List<TariffZone> tariffZones = tariffZoneRepository.findAll();
+    public void addAllTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+        addTariffZones(siteFrame, tariffZoneRepository.findAll());
+    }
+
+    public void addTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame, List<TariffZone> tariffZones) {
         if (!tariffZones.isEmpty()) {
             siteFrame.setTariffZones(new TariffZonesInFrame_RelStructure(tariffZones));
             logger.info("Added {} tariffZones", tariffZones.size());

@@ -72,7 +72,7 @@ public class PublicationDeliveryExporter {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(topographicPlaceExportMode, siteFrame);
-        tiamatSiteFrameExporter.addTariffZones(siteFrame);
+        tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);

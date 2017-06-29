@@ -27,14 +27,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,8 +49,9 @@ public class StreamingPublicationDeliveryTest {
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
+    private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,
-            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper);
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper, tariffZoneRepository);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
