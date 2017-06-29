@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -24,11 +25,13 @@ import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,6 +63,7 @@ public class StreamingPublicationDeliveryTest {
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
+        setField(IdentifiedEntity.class, "id", stopPlace, 1L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -101,7 +105,7 @@ public class StreamingPublicationDeliveryTest {
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
-
+        setField(IdentifiedEntity.class, "id", stopPlace, 2L);
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
 
@@ -131,6 +135,7 @@ public class StreamingPublicationDeliveryTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
         stopPlace.setVersion(2L);
+        setField(IdentifiedEntity.class, "id", stopPlace, 3L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(1);
         stopPlaces.add(stopPlace);
@@ -157,8 +162,27 @@ public class StreamingPublicationDeliveryTest {
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
         when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
-        when(stopPlaceRepository.getNetexIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> stopPlace.getNetexId()).collect(Collectors.toSet()));
+        when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
 
+    private void setField(Class clazz, String fieldName, Object instance, Object fieldValue) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(instance, fieldValue);
+        } catch (IllegalAccessException|NoSuchFieldException e) {
+            throw new RuntimeException("Cannot set field "+fieldName +" of "+instance, e);
+        }
+    }
+
+    private <T> T getField(Class entityClass, String fieldName, Object instance, Class<T> clazz) {
+        try {
+            Field field = entityClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return clazz.cast(field.get(instance));
+        } catch (IllegalAccessException|NoSuchFieldException e) {
+            throw new RuntimeException("Cannot get field "+fieldName +" of "+instance, e);
+        }
+    }
 }
