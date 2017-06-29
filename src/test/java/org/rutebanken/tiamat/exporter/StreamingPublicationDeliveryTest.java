@@ -27,12 +27,15 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -152,8 +155,8 @@ public class StreamingPublicationDeliveryTest {
 
     private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
-        when(parkingRepository.scrollParkings(any())).thenReturn(parkings.iterator());
-        when(parkingRepository.countResult(any())).thenReturn(parkings.size());
+        when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
+        when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
         when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
         when(stopPlaceRepository.getNetexIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> stopPlace.getNetexId()).collect(Collectors.toSet()));
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);

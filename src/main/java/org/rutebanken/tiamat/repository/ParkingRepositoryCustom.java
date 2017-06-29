@@ -13,7 +13,11 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
 
     String findFirstByKeyValues(String key, Set<String> value);
 
+    Iterator<Parking> scrollParkings(Set<Long> stopPlaceIds);
+
     int countResult(ParkingSearch parkingSearch);
+
+    int countResult(Set<Long> stopPlaceIds);
 
     String findNearbyParking(Envelope boundingBox, String value, ParkingTypeEnumeration parkingType);
 

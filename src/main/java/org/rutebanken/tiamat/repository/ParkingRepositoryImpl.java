@@ -3,6 +3,9 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -75,19 +78,43 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
     @Override
     public Iterator<Parking> scrollParkings() {
-        return scrollParkings(null);
+
+        return scrollParkings();
     }
 
     @Override
     public Iterator<Parking> scrollParkings(ParkingSearch parkingSearch) {
+        return scrollParkings(parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch));
+    }
 
+    @Override
+    public Iterator<Parking> scrollParkings(Set<Long> stopPlaceIds) {
+        return scrollParkings(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
+    }
+
+    @Override
+    public int countResult(ParkingSearch parkingSearch) {
+        return countResult(parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch));
+    }
+
+    @Override
+    public int countResult(Set<Long> stopPlaceIds) {
+        return countResult(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
+    }
+
+    private int countResult(Pair<String, Map<String, Object>> sqlWithParams) {
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
+        parkingQueryFromSearchBuilder.addParams(query, sqlWithParams.getSecond());
+        return ((BigInteger) query.uniqueResult()).intValue();
+    }
+
+    private Iterator<Parking> scrollParkings(Pair<String, Map<String, Object>> sqlWithParams) {
         final int fetchSize = 100;
 
         Session session = entityManager.unwrap(Session.class);
-
-        Pair<String, Map<String, Object>> pair = parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch);
-        SQLQuery query = session.createSQLQuery(pair.getFirst());
-        parkingQueryFromSearchBuilder.addParams(query, pair.getSecond());
+        SQLQuery query = session.createSQLQuery(sqlWithParams.getFirst());
+        parkingQueryFromSearchBuilder.addParams(query, sqlWithParams.getSecond());
 
         query.addEntity(Parking.class);
         query.setReadOnly(true);
@@ -100,14 +127,15 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         return parkingEntityIterator;
     }
 
-    @Override
-    public int countResult(ParkingSearch parkingSearch) {
-        Pair<String, Map<String, Object>> pair = parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch);
-        Session session = entityManager.unwrap(Session.class);
+    private Pair<String, Map<String, Object>> getParkingsByStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
+        StringBuilder sql = new StringBuilder("select p.* from parking p " +
+                "inner join stop_place sp on sp.netex_id = p.parent_site_ref " +
+                "   and (cast(sp.version as text) = p.parent_site_ref_version OR p.parent_site_ref_version is null) " +
+                " where sp.id in (");
 
-        SQLQuery query = session.createSQLQuery("SELECT COUNT(*) from (" + pair.getFirst() + ") as numberOfParkings");
-        parkingQueryFromSearchBuilder.addParams(query, pair.getSecond());
-        return ((BigInteger) query.uniqueResult()).intValue();
+        sql.append(StringUtils.join(stopPlaceIds, ','));
+        sql.append(')');
+        return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }
 
     @Override
