@@ -134,6 +134,11 @@ public class StopPlaceQueryFromSearchBuilder {
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         }
 
+        if (stopPlaceSearch.isWithoutLocationOnly()) {
+            operators.add("and");
+            wheres.add("s.centroid IS NULL");
+        }
+
         for (int i = 0; i < wheres.size(); i++) {
             if (i > 0) {
                 queryString.append(operators.get(i - 1));

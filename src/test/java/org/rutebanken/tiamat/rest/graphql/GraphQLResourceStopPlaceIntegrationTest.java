@@ -128,6 +128,63 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
     }
 
+
+    /**
+     * Use query parameter for original ID search
+     */
+    @Test
+    public void searchForStopPlaceWithoutCoordinates() throws Exception {
+        String basename = "koordinaten";
+        String nameWithLocation = basename + " nr 1";
+        StopPlace stopPlaceWithCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithLocation));
+        stopPlaceWithCoordinates.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
+
+        String nameWithoutLocation = basename + " nr 2";
+        StopPlace stopPlaceWithoutCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithoutLocation));
+        stopPlaceWithoutCoordinates.setCentroid(null);
+
+        stopPlaceRepository.save(stopPlaceWithCoordinates);
+        stopPlaceRepository.save(stopPlaceWithoutCoordinates);
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + basename + "\\\")" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                "  geometry {coordinates } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+        // Search for stopPlace should return both StopPlaces above
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace.find { it.id == '" + stopPlaceWithCoordinates.getNetexId() + "'}")
+                    .body("name.value", equalTo(nameWithLocation))
+                    .body("geometry", notNullValue())
+                    .body("geometry.coordinates", hasSize(1))
+                .root("data.stopPlace.find { it.id == '" + stopPlaceWithoutCoordinates.getNetexId() + "'}")
+                    .body("name.value", equalTo(nameWithoutLocation))
+                    .body("geometry", nullValue())
+        ;
+
+        graphQlJsonQuery = "{" +
+                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
+                " (" + GraphQLNames.QUERY + ":\\\"" + basename + "\\\" withoutLocationOnly:true)" +
+                " { " +
+                "  id " +
+                "  name { value } " +
+                "  geometry {coordinates } " +
+                " }" +
+                "}\",\"variables\":\"\"}";
+
+        // Filtering on withoutLocationsOnly stopPlace should only return one
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace", hasSize(1))
+                .body("data.stopPlace[0].name.value", equalTo(nameWithoutLocation))
+                .body("data.stopPlace[0].geometry", nullValue())
+                ;
+    }
+
     /**
      * Search for stop place by quay original ID
      */

@@ -36,6 +36,9 @@ public class StopPlaceSearch {
     @QueryParam(value = "allVersions")
     private boolean allVersions;
 
+    @QueryParam(value = "withoutLocationOnly")
+    private boolean withoutLocationOnly;
+
     @QueryParam(value = "version")
     private Long version;
 
@@ -44,11 +47,12 @@ public class StopPlaceSearch {
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, Instant pointInTime, Long version, int page, int size) {
+                            List<String> netexIdList, boolean allVersions, boolean withoutLocationOnly, Instant pointInTime, Long version, int page, int size) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
+        this.withoutLocationOnly = withoutLocationOnly;
         this.pointInTime = pointInTime;
         this.version = version;
         this.page = page;
@@ -77,6 +81,10 @@ public class StopPlaceSearch {
 
     public boolean isAllVersions() {
         return allVersions;
+    }
+
+    public boolean isWithoutLocationOnly() {
+        return withoutLocationOnly;
     }
 
     public Instant getPointInTime() {
@@ -110,6 +118,7 @@ public class StopPlaceSearch {
         private List<StopTypeEnumeration> stopTypeEnumerations;
         private List<String> idList;
         private boolean allVersions;
+        private boolean withoutLocationOnly;
         private Long version;
         private Instant pointInTime;
         private int page = DEFAULT_PAGE;
@@ -148,6 +157,11 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setWithoutLocationOnly(boolean withoutLocationOnly) {
+            this.withoutLocationOnly = withoutLocationOnly;
+            return this;
+        }
+
         public Builder setVersion(Long version) {
             this.version = version;
             return this;
@@ -159,7 +173,7 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, pointInTime, version, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, page, size);
         }
 
     }

@@ -347,6 +347,12 @@ StopPlaceRegisterGraphQLSchema {
                 .description("Must be used together with parameter 'values', other search-parameters are ignored. Defines key to search for.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(WITHOUT_LOCATION_ONLY)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return objects that do not have coordinates.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
                 .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")
