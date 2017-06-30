@@ -63,7 +63,9 @@ class StopPlaceFetcher implements DataFetcher {
         }
 
         Boolean withoutLocationOnly = environment.getArgument(WITHOUT_LOCATION_ONLY);
-        stopPlaceSearchBuilder.setWithoutLocationOnly(withoutLocationOnly);
+        if (withoutLocationOnly != null) {
+            stopPlaceSearchBuilder.setWithoutLocationOnly(withoutLocationOnly);
+        }
 
         Instant pointInTime ;
         if (environment.getArgument(POINT_IN_TIME) != null) {
