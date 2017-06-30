@@ -2,15 +2,15 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import com.google.common.base.Strings;
 import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static org.rutebanken.tiamat.netex.id.NetexIdHelper.stripLeadingZeros;
 
 /**
  * Note: Implemented because of an issue with using
@@ -23,6 +23,7 @@ public class NetexIdMapper {
     private static final Logger logger = LoggerFactory.getLogger(NetexIdMapper.class);
 
     public static final String ORIGINAL_ID_KEY = "imported-id";
+    public static final String MERGED_ID_KEY = "merged-id";
 
     @Autowired
     private ValidPrefixList validPrefixList;
@@ -68,19 +69,18 @@ public class NetexIdMapper {
             if(netexEntity.getKeyList().getKeyValue() != null) {
 
                 for(KeyValueStructure keyValueStructure : netexEntity.getKeyList().getKeyValue()) {
-                    if(keyValueStructure.getKey().equals(ORIGINAL_ID_KEY)) {
+                    String value = keyValueStructure.getValue();
+                    String key = keyValueStructure.getKey();
 
-                        if(keyValueStructure.getValue().contains(",")) {
-                            String[] originalIds = keyValueStructure.getValue().split(",");
-                            for(String originalId : originalIds) {
-                                addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, originalId, true);
-                            }
-                        } else {
-                            addKeyValueAvoidEmpty(tiamatEntity, ORIGINAL_ID_KEY, keyValueStructure.getValue(), true);
+                    boolean ignoreEmptyPostfix = (key.equals(ORIGINAL_ID_KEY) | key.equals(MERGED_ID_KEY));
+
+                    if (value.contains(",")) {
+                        String[] originalIds = value.split(",");
+                        for (String originalId : originalIds) {
+                            addKeyValueAvoidEmpty(tiamatEntity, key, originalId, ignoreEmptyPostfix);
                         }
-
                     } else {
-                        addKeyValueAvoidEmpty(tiamatEntity, keyValueStructure.getKey(), keyValueStructure.getValue(), false);
+                        addKeyValueAvoidEmpty(tiamatEntity, key, value, ignoreEmptyPostfix);
                     }
                 }
             }

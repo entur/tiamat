@@ -14,6 +14,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.*;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 
 public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest  {
 
@@ -398,14 +399,13 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
         assertThat(stopPlaceWithMergedQuays.getQuays()).hasSize(1);
         Quay quay = stopPlaceWithMergedQuays.getQuays().iterator().next();
 
-        if (quay.getNetexId().equals(toQuay.getNetexId())) {
+        assertThat(quay.getNetexId()).isEqualTo(toQuay.getNetexId());
 
-            assertThat(quay.getVersion()).isEqualTo(1 + toQuay.getVersion());
-
-            assertThat(quay.getPublicCode()).isEqualTo(fromQuay.getPublicCode());
-            assertThat(quay.getPrivateCode().getType()).isEqualTo(fromQuay.getPrivateCode().getType());
-            assertThat(quay.getPrivateCode().getValue()).isEqualTo(toQuay.getPrivateCode().getValue());
-        }
+        assertThat(quay.getVersion()).isEqualTo(1 + toQuay.getVersion());
+        assertThat(quay.getPublicCode()).isEqualTo(fromQuay.getPublicCode());
+        assertThat(quay.getPrivateCode().getType()).isEqualTo(fromQuay.getPrivateCode().getType());
+        assertThat(quay.getPrivateCode().getValue()).isEqualTo(toQuay.getPrivateCode().getValue());
+        assertThat(quay.getOrCreateValues(MERGED_ID_KEY)).contains(fromQuay.getNetexId());
     }
 
     @Test

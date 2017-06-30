@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 
 @Transactional
 @Component
@@ -63,6 +64,8 @@ public class StopPlaceQuayMerger {
         if (fromStopPlaceToTerminate.getKeyValues() != null) {
             mergeKeyValues(fromStopPlaceToTerminate.getKeyValues(), mergedStopPlace.getKeyValues());
         }
+
+        mergedStopPlace.getOrCreateValues(MERGED_ID_KEY).add(fromStopPlaceToTerminate.getNetexId());
 
         if (fromStopPlaceToTerminate.getPlaceEquipments() != null) {
             mergedStopPlace.setPlaceEquipments(
@@ -116,6 +119,8 @@ public class StopPlaceQuayMerger {
         if (fromQuay.getKeyValues() != null) {
             mergeKeyValues(fromQuay.getKeyValues(), toQuay.getKeyValues());
         }
+
+        toQuay.getOrCreateValues(MERGED_ID_KEY).add(fromQuay.getNetexId());
 
         if (fromQuay.getPlaceEquipments() != null) {
             toQuay.setPlaceEquipments(mergePlaceEquipments(fromQuay.getPlaceEquipments(), toQuay.getPlaceEquipments()));
