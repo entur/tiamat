@@ -3,13 +3,11 @@ package org.rutebanken.tiamat.auth.check;
 import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.EntityStructure;
-
 import java.util.List;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 
 public class AuthorizationCheck<T extends EntityStructure> {
-
 
 	protected T entity;
 	protected RoleAssignment roleAssignment;

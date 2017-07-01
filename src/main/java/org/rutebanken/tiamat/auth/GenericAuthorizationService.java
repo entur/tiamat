@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.auth;
 
 import com.vividsolutions.jts.geom.Polygon;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.AuthorizationCheckFactory;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 
 @Service
 public class GenericAuthorizationService implements AuthorizationService {
@@ -64,7 +66,8 @@ public class GenericAuthorizationService implements AuthorizationService {
     @Override
     public Set<String> getRelevantRolesForEntity(EntityStructure entityStructure) {
         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
-                       .filter(roleAssignment -> isAuthorizationForEntity(entityStructure, roleAssignment))
+                       .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(ENTITY_TYPE).stream()
+                            .anyMatch(entityTypeString -> entityTypeString.toLowerCase().equals(entityStructure.getClass().getSimpleName().toLowerCase())))
                        .map(roleAssignment -> roleAssignment.getRole())
                        .collect(Collectors.toSet());
     }
@@ -76,26 +79,36 @@ public class GenericAuthorizationService implements AuthorizationService {
         }
 
         List<RoleAssignment> relevantRoles = roleAssignmentExtractor.getRoleAssignmentsForUser().stream().filter(ra -> requiredRole.equals(ra.r)).collect(toList());
+
         boolean allowed = true;
         for (EntityStructure entity : entities) {
             allowed &= entity == null ||
-                               relevantRoles.stream().anyMatch(ra -> isAuthorizationForEntity(entity, ra));
+                               relevantRoles.stream()
+                                       .anyMatch(roleAssignment -> isAuthorizationForEntity(entity, roleAssignment, requiredRole));
 
         }
         return allowed;
     }
 
-    protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment) {
-        Polygon administrativeZone = null;
-        if (roleAssignment.z != null) {
-            TopographicPlace tp = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.z);
-            if (tp == null) {
-                logger.warn("RoleAssignment contains unknown adminZone reference:" + roleAssignment.z + " . Will not allow authorization");
-                return false;
+    protected boolean isAuthorizationForEntity(EntityStructure entity, RoleAssignment roleAssignment, String requiredRole) {
+
+        ReflectionAuthorizationService reflectionAuthorizationService = new ReflectionAuthorizationService() {
+            @Override
+            public boolean entityAllowedInAdministrativeZone(RoleAssignment roleAssignment, Object entity) {
+                Polygon administrativeZone = null;
+                if (roleAssignment.z != null) {
+                    TopographicPlace tp = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.z);
+                    if (tp == null) {
+                        logger.warn("RoleAssignment contains unknown adminZone reference:" + roleAssignment.z + " . Will not allow authorization");
+                        return false;
+                    }
+                    administrativeZone = tp.getPolygon();
+                }
+                // TODO check polygon
+            return true;
             }
-            administrativeZone = tp.getPolygon();
-        }
-        return authorizationCheckFactory.buildCheck(entity, roleAssignment, administrativeZone).isAllowed();
+        };
+        return reflectionAuthorizationService.authorized(roleAssignment, entity, requiredRole);
     }
 
 
