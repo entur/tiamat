@@ -337,7 +337,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId) {
+    public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId, Instant pointInTime) {
         String sql = "SELECT DISTINCT s.netex_id " +
                              "FROM stop_place s " +
                              "  INNER JOIN stop_place_quays spq " +
@@ -347,12 +347,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN quay_key_values qkv " +
                              "    ON q.id = qkv.quay_id AND qkv.key_values_key = :originalIdKey " +
                              "  INNER JOIN value_items vi " +
-                             "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value ";
+                             "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value" +
+                             " where s.from_date <= :pointInTime and (s.to_date is null or s.to_date > :pointInTime)";
 
         Query query = entityManager.createNativeQuery(sql);
 
         query.setParameter("value", "%:" + quayOriginalId);
         query.setParameter("originalIdKey", ORIGINAL_ID_KEY);
+        query.setParameter("pointInTime",  Date.from(pointInTime));
 
         try {
             @SuppressWarnings("unchecked")

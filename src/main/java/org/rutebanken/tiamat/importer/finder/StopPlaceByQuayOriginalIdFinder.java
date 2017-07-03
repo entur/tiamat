@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -65,7 +66,7 @@ public class StopPlaceByQuayOriginalIdFinder {
         try {
             return originalQuayIdCache.get(quayOriginalId, () -> {
                 logger.debug("Cache miss. Fetching stop place repository to find stop place from {}", quayOriginalId);
-                List<String> stopPlaceNetexIds = stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId);
+                List<String> stopPlaceNetexIds = stopPlaceRepository.findStopPlaceFromQuayOriginalId(quayOriginalId, Instant.now());
                 if(stopPlaceNetexIds == null || stopPlaceNetexIds.isEmpty()) {
                     return Optional.empty();
                 }

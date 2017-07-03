@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -24,6 +25,7 @@ import java.util.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Transactional
 public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
@@ -838,6 +840,41 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .contains(newestStopPlace.getNetexId())
                 .doesNotContain(expiredStopPlace.getNetexId())
         ;
+    }
+
+    public void findStopPlaceFromQuayOriginalIdReturnsOnlyStopsValidAtPointInTime() {
+        String importedIdSuffix = "2";
+        String importedId="XXX:Quay:"+importedIdSuffix;
+        Instant now = Instant.now();
+
+        StopPlace historicMatchingStopV1 = saveStop("NSR:StopPlace:1", 1l, now.minusSeconds(200), now.minusSeconds(10));
+        saveQuay(historicMatchingStopV1, "NSR:Quay:1", 1l, importedId);
+        StopPlace historicMatchingStopV2 = saveStop(historicMatchingStopV1.getNetexId(), 2l, now.minusSeconds(10), null);
+        saveQuay(historicMatchingStopV2, "NSR:Quay:1", 2l, null);
+
+        StopPlace currentMatchingStop = saveStop("NSR:StopPlace:2", 1l, now.minusSeconds(10), null);
+        saveQuay(currentMatchingStop, "NSR:Quay:2", 1l, importedId);
+
+        List<String> currentMatchingStopPlaceIds = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdSuffix, now);
+        Assert.assertEquals(Arrays.asList(currentMatchingStop.getNetexId()), currentMatchingStopPlaceIds);
+
+        List<String> historicMatchingStopPlaceIds = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdSuffix, now.minusSeconds(100));
+        Assert.assertEquals(Arrays.asList(historicMatchingStopV1.getNetexId()), historicMatchingStopPlaceIds);
+
+        // No imported-ids are valid for point in time 300 seconds ago
+        Assert.assertTrue(CollectionUtils.isEmpty(stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdSuffix, now.minusSeconds(300))));
+    }
+
+    private Quay saveQuay(StopPlace stopPlace, String id, Long version, String importedId) {
+        Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
+        stopPlace.getQuays().add(quay);
+
+
+        quay.setNetexId(id);
+        quay.setVersion(version);
+        quay.getKeyValues().put(ORIGINAL_ID_KEY, new Value(importedId));
+        stopPlaceRepository.save(stopPlace);
+        return quay;
     }
 
     private void assertContainsOnlyInExactVersion(Collection<StopPlace> actual, StopPlace... expected) {
