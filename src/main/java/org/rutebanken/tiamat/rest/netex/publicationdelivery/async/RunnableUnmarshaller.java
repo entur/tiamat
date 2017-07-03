@@ -58,7 +58,7 @@ public class RunnableUnmarshaller implements Runnable {
                         stops.incrementAndGet();
                         unmarshalResult.getStopPlaceQueue().put(stopPlace);
 
-                        if (stops.get() % 20 == 0) {
+                        if (stops.get() % 200 == 0) {
                             logger.info("Unmarshalled stop number {}", stops.get());
                         }
                         continue;
