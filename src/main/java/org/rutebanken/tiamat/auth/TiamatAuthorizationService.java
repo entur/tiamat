@@ -4,18 +4,14 @@ import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
-import org.rutebanken.tiamat.model.Site_VersionStructure;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class TiamatAuthorizationService extends ReflectionAuthorizationService {
@@ -23,16 +19,18 @@ public class TiamatAuthorizationService extends ReflectionAuthorizationService {
     private static final Logger logger = LoggerFactory.getLogger(TiamatAuthorizationService.class);
     private final String administrativeZoneIdPrefix;
     private final TopographicPlaceRepository topographicPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
 
     @Autowired
     public TiamatAuthorizationService(RoleAssignmentExtractor roleAssignmentExtractor,
                                       @Value("${authorization.enabled:true}") boolean authorizationEnabled,
                                       @Value("${administrative.zone.id.prefix:KVE:TopographicPlace:}") String administrativeZoneIdPrefix,
-                                      TopographicPlaceRepository topographicPlaceRepository) {
+                                      TopographicPlaceRepository topographicPlaceRepository, StopPlaceRepository stopPlaceRepository) {
         super(roleAssignmentExtractor, authorizationEnabled);
 
         this.administrativeZoneIdPrefix = administrativeZoneIdPrefix;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.stopPlaceRepository = stopPlaceRepository;
     }
 
 
@@ -92,5 +90,25 @@ public class TiamatAuthorizationService extends ReflectionAuthorizationService {
             logger.warn("Cannot check for organisation for entity {}", entity);
             return true;
         }
+    }
+
+    @Override
+    public Object resolveCorrectEntity(Object entity) {
+
+        if(entity == null) {
+            return null;
+        }
+
+        if(entity instanceof Quay) {
+            StopPlace stopPlace = stopPlaceRepository.findByQuay((Quay) entity);
+            if(stopPlace == null) {
+                throw new IllegalArgumentException("Cannot resolve stop place from quay: " + entity);
+            }
+            return stopPlace;
+        }
+
+
+        return entity;
+
     }
 }

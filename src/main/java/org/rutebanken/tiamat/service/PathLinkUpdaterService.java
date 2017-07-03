@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 @Transactional
 @Service
@@ -37,7 +34,7 @@ public class PathLinkUpdaterService {
     private TiamatAuthorizationService authorizationService;
 
     public PathLink createOrUpdatePathLink(PathLink incomingPathLink) {
-        Set<EntityInVersionStructure> entitiesRequiringAuthorization=new HashSet<>();
+        Set<Object> entitiesRequiringAuthorization=new HashSet<>();
         PathLink resultPathLink;
 
         boolean updatedExisting;
@@ -118,7 +115,7 @@ public class PathLinkUpdaterService {
 		    entitiesRequiringAuthorization.add(to);
 	    }
 
-        authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(entitiesRequiringAuthorization));
+        authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, entitiesRequiringAuthorization);
         pathLinkRepository.save(resultPathLink);
 
         logger.info("{} {}", updatedExisting ? "Updated" : "Created", resultPathLink);

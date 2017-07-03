@@ -3,9 +3,11 @@ package org.rutebanken.tiamat.auth;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,9 +21,11 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     private TiamatAuthorizationService tiamatAuthorizationService;
 
 
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
     @Test
     public void authorizedForStopPlaceTypeWhenOthersBlacklisted() {
-
 
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole("editStops")
@@ -40,9 +44,30 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void authorizedByQuay() {
+
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole("editStops")
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "onstreetBus")
+                .build();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        Quay quay = new Quay();
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, quay, roleAssignment.r);
+        assertThat(authorized, is(true));
+    }
+
+    @Test
     public void notAuthorizedForBlacklistedStopPlaceTypes() {
 
-    
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole("editStops")
                 .withOrganisation("OST")
