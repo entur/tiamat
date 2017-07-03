@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.service;
 
 import graphql.GraphQLException;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
-import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
@@ -33,7 +33,7 @@ public class PathLinkUpdaterService {
     private ReferenceResolver referenceResolver;
 
     @Autowired
-    private AuthorizationService authorizationService;
+    private TiamatAuthorizationService authorizationService;
 
     public PathLink createOrUpdatePathLink(PathLink incomingPathLink) {
         Set<EntityInVersionStructure> entitiesRequiringAuthorization=new HashSet<>();

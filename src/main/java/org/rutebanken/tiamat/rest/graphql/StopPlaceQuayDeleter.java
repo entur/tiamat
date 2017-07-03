@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -27,7 +27,7 @@ public class StopPlaceQuayDeleter {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private AuthorizationService authorizationService;
+    private TiamatAuthorizationService authorizationService;
 
     @Autowired
     private EntityChangedListener entityChangedListener;

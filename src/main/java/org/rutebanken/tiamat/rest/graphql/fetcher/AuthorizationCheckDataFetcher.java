@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.rest.graphql.fetcher;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.authorization.AuthorizationResponse;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
@@ -28,7 +28,7 @@ public class AuthorizationCheckDataFetcher implements DataFetcher {
     private TypeFromIdResolver typeFromIdResolver;
 
     @Autowired
-    private AuthorizationService authorizationService;
+    private TiamatAuthorizationService authorizationService;
 
     @Override
     public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
@@ -37,7 +37,7 @@ public class AuthorizationCheckDataFetcher implements DataFetcher {
         Class clazz = typeFromIdResolver.resolveClassFromId(id);
         EntityInVersionStructure entityInVersionStructure = genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(id, clazz);
 
-        if(entityInVersionStructure == null) {
+        if (entityInVersionStructure == null) {
             throw new IllegalArgumentException("Cannot find entity with ID: " + id);
         }
 

@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
@@ -31,7 +31,7 @@ public class StopPlaceQuayMerger {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private AuthorizationService authorizationService;
+    private TiamatAuthorizationService authorizationService;
 
     private static final String[] ignoreFields = { "keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
 

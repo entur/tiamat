@@ -4,7 +4,7 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
@@ -51,7 +51,7 @@ class StopPlaceUpdater implements DataFetcher {
     private TopographicPlaceLookupService topographicPlaceLookupService;
 
     @Autowired
-    private AuthorizationService authorizationService;
+    private TiamatAuthorizationService authorizationService;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
@@ -197,10 +197,10 @@ class StopPlaceUpdater implements DataFetcher {
                     Preconditions.checkArgument(validSubmodes.contains(((WaterSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setWaterSubmode((WaterSubmodeEnumeration) submode);
                 } else if (submode instanceof TelecabinSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()),errorMessage);
+                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setTelecabinSubmode((TelecabinSubmodeEnumeration) submode);
                 } else if (submode instanceof FunicularSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()),errorMessage);
+                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setFunicularSubmode((FunicularSubmodeEnumeration) submode);
                 }
             }
@@ -238,9 +238,9 @@ class StopPlaceUpdater implements DataFetcher {
             isQuayUpdated = true;
         }
 
-        if(quayInputMap.get(PRIVATE_CODE) != null) {
+        if (quayInputMap.get(PRIVATE_CODE) != null) {
             Map privateCodeInputMap = (Map) quayInputMap.get(PRIVATE_CODE);
-            if(quay.getPrivateCode() == null) {
+            if (quay.getPrivateCode() == null) {
                 quay.setPrivateCode(new PrivateCodeStructure());
             }
             quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
@@ -280,9 +280,9 @@ class StopPlaceUpdater implements DataFetcher {
 
             entity.getKeyValues().clear();
 
-            keyValues.forEach(inputMap-> {
-                String key = (String)inputMap.get(KEY);
-                List<String> values = (List<String>)inputMap.get(VALUES);
+            keyValues.forEach(inputMap -> {
+                String key = (String) inputMap.get(KEY);
+                List<String> values = (List<String>) inputMap.get(VALUES);
                 Value value = new Value(values);
                 entity.getKeyValues().put(key, value);
             });
@@ -312,7 +312,7 @@ class StopPlaceUpdater implements DataFetcher {
                 }
             }
 
-            
+
             isUpdated = true;
         }
 
@@ -401,11 +401,10 @@ class StopPlaceUpdater implements DataFetcher {
             }
 
 
-
             if (entity instanceof StopPlace) {
-                ((StopPlace)entity).setPlaceEquipments(equipments);
+                ((StopPlace) entity).setPlaceEquipments(equipments);
             } else if (entity instanceof Quay) {
-                ((Quay)entity).setPlaceEquipments(equipments);
+                ((Quay) entity).setPlaceEquipments(equipments);
             }
             isUpdated = true;
         }
@@ -478,9 +477,9 @@ class StopPlaceUpdater implements DataFetcher {
                     .filter(alternativeName -> alternativeName != null)
                     .filter(alternativeName -> alternativeName.getName() != null)
                     .filter(alternativeName -> {
-                            return (alternativeName.getName().getLang() != null &&
-                                    alternativeName.getName().getLang().equals(name.getLang()) &&
-                                    alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
+                        return (alternativeName.getName().getLang() != null &&
+                                alternativeName.getName().getLang().equals(name.getLang()) &&
+                                alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
                     })
                     .findFirst();
             if (existing.isPresent()) {
