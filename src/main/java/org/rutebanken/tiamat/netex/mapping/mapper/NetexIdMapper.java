@@ -45,7 +45,7 @@ public class NetexIdMapper {
             logger.debug("Detected ID with valid prefix: {}. ", netexEntity.getId());
             tiamatEntity.setNetexId(netexEntity.getId().trim());
         } else {
-            logger.debug("Received ID {}. Will save it as key value ", netexEntity.getId());
+            logger.debug("Received ID {}. Will map it as key value ", netexEntity.getId());
             if(tiamatEntity instanceof  DataManagedObjectStructure) {
                 moveOriginalIdToKeyValueList((DataManagedObjectStructure) tiamatEntity, netexEntity.getId());
                 tiamatEntity.setNetexId(null);
