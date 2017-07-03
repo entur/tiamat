@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 
 @Service
@@ -67,7 +68,8 @@ public class GenericAuthorizationService implements AuthorizationService {
     public Set<String> getRelevantRolesForEntity(EntityStructure entityStructure) {
         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
                        .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(ENTITY_TYPE).stream()
-                            .anyMatch(entityTypeString -> entityTypeString.toLowerCase().equals(entityStructure.getClass().getSimpleName().toLowerCase())))
+                            .anyMatch(entityTypeString -> entityTypeString.toLowerCase().equals(entityStructure.getClass().getSimpleName().toLowerCase())
+                                    || entityTypeString.contains(ENTITY_CLASSIFIER_ALL_TYPES)))
                        .map(roleAssignment -> roleAssignment.getRole())
                        .collect(Collectors.toSet());
     }
