@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -75,7 +72,7 @@ class ParkingUpdater implements DataFetcher {
         boolean isUpdated = populateParking(input, updatedParking);
 
         if (isUpdated) {
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingVersion, updatedParking);
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedParking));
 
             updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
 

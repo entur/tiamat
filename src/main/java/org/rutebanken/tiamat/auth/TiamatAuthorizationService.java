@@ -75,7 +75,7 @@ public class TiamatAuthorizationService extends ReflectionAuthorizationService {
     @Override
     public boolean entityMatchesOrganisationRef(RoleAssignment roleAssignment, Object entity) {
 
-        if(entity instanceof Site_VersionStructure) {
+        if (entity instanceof Site_VersionStructure) {
 
             Site_VersionStructure site = (Site_VersionStructure) entity;
 
@@ -90,8 +90,7 @@ public class TiamatAuthorizationService extends ReflectionAuthorizationService {
             return true;
         } else {
             logger.warn("Cannot check for organisation for entity {}", entity);
+            return true;
         }
-        logger.debug("Entity not instance of version structure: {}", entity);
-        return true;
     }
 }

@@ -10,10 +10,7 @@ import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
@@ -48,7 +45,7 @@ public class StopPlaceQuayDeleter {
         Optional<Quay> optionalQuay = stopPlace.getQuays().stream().filter(quay -> quay.getNetexId().equals(quayId)).findFirst();
         Preconditions.checkArgument(optionalQuay.isPresent(), "Attempting to delete Quay [id = %s], but Quay does not exist on StopPlace [id = %s].", quayId, stopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlace);
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
         StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
@@ -67,7 +64,7 @@ public class StopPlaceQuayDeleter {
 
         Preconditions.checkArgument((stopPlaces != null && !stopPlaces.isEmpty()), "Attempting to fetch StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlaces));
         return stopPlaces;
     }
 
