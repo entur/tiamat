@@ -64,7 +64,7 @@ public class StopPlaceQuayDeleter {
 
         Preconditions.checkArgument((stopPlaces != null && !stopPlaces.isEmpty()), "Attempting to fetch StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlaces));
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
         return stopPlaces;
     }
 

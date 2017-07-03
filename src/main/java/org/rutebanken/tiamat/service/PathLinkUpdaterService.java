@@ -3,10 +3,7 @@ package org.rutebanken.tiamat.service;
 import graphql.GraphQLException;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.TransferDuration;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.ReferenceResolver;
 import org.slf4j.Logger;
@@ -16,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Transactional
 @Service
@@ -34,7 +33,7 @@ public class PathLinkUpdaterService {
     private TiamatAuthorizationService authorizationService;
 
     public PathLink createOrUpdatePathLink(PathLink incomingPathLink) {
-        Set<Object> entitiesRequiringAuthorization=new HashSet<>();
+        Set<EntityStructure> entitiesRequiringAuthorization = new HashSet<>();
         PathLink resultPathLink;
 
         boolean updatedExisting;
