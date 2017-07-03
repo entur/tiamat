@@ -20,7 +20,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
 
     @Test
-    public void authorizedForLegalStopPlaceTypesWhenOthersBlacklisted() {
+    public void authorizedForStopPlaceTypeWhenOthersBlacklisted() {
 
 
         RoleAssignment roleAssignment = RoleAssignment.builder()
@@ -37,6 +37,24 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
         assertThat(authorized, is(true));
+    }
+
+    @Test
+    public void notAuthorizedForBlacklistedStopPlaceTypes() {
+
+    
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole("editStops")
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "!airport")
+                .withEntityClassification("StopPlaceType", "!railStation")
+                .build();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
+        assertThat(authorized, is(false));
     }
 
 }
