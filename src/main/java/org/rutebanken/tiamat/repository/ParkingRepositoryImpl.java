@@ -83,7 +83,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
         final int fetchSize = 100;
 
-        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+        Session session = entityManager.unwrap(Session.class);
 
         Criteria query = session.createCriteria(Parking.class);
         if (parkingNetexIds != null) {

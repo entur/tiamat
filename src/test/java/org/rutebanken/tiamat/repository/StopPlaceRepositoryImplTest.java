@@ -29,8 +29,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 @Transactional
 public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
-
-    @Transactional(propagation = Propagation.NEVER)
+    
     @Test
     public void scrollableResult() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));

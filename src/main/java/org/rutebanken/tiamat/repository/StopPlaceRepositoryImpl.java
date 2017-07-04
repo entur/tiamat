@@ -372,7 +372,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces() {
-        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+        Session session = entityManager.unwrap(Session.class);
 
         Criteria query = session.createCriteria(StopPlace.class);
 
@@ -389,7 +389,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams) {
 
-        Session session = entityManager.getEntityManagerFactory().createEntityManager().unwrap(Session.class);
+        Session session = entityManager.unwrap(Session.class);
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
