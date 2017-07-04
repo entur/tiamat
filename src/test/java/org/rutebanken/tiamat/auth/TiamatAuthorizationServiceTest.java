@@ -4,13 +4,13 @@ import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -22,6 +22,8 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     @Autowired
     private ReflectionAuthorizationService reflectionAuthorizationService;
 
+    @Autowired
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -102,7 +104,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
 
         boolean authorized = reflectionAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
-        assertThat("Should not be authorized as both type and subode does not match", authorized, is(false));
+        assertThat("Should NOT be authorized as both type and submode does not match", authorized, is(false));
     }
 
     @Test
@@ -120,6 +122,76 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
 
         boolean authorized = reflectionAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
-        assertThat("Should be authorized as both type and subode does not match", authorized, is(true));
+        assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
     }
+
+    /**
+     * Test real life example from ninkasi
+     */
+    @Test
+    public void testNSBEditStopsRoleAssignmentsOnlyRail() {
+        String role = "editStops";
+        roleAssignmentsForRailAndRailReplacementMocked(role);
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        boolean authorized = reflectionAuthorizationService.isAuthorized(role, Arrays.asList(stopPlace));
+        assertThat("type rail station should be allowed", authorized, is(true));
+    }
+
+    @Test
+    public void testNSBEditStopsRoleAssignmentsOnlyRailReplacementBus() {
+        String role = "editStops";
+        roleAssignmentsForRailAndRailReplacementMocked(role);
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        boolean authorized = reflectionAuthorizationService.isAuthorized(role, Arrays.asList(stopPlace));
+        assertThat("rail replacement bus should be allowed", authorized, is(true));
+    }
+
+    @Test
+    public void testNSBEditStopsRoleAssignmentsRailAndReplacementBus() {
+        String role = "editStops";
+        roleAssignmentsForRailAndRailReplacementMocked(role);
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        boolean authorized = reflectionAuthorizationService.isAuthorized(role, Arrays.asList(stopPlace));
+        assertThat("rail replacement bus and rail station should not both be set in real life. Role assignments are OR-ed. So should give true.", authorized, is(true));
+    }
+
+    @Test
+    public void testNSBEditStopsRoleAssignmentsWaterSubmode() {
+        String role = "editStops";
+        roleAssignmentsForRailAndRailReplacementMocked(role);
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setWaterSubmode(WaterSubmodeEnumeration.AIRPORT_BOAT_LINK);
+        boolean authorized = reflectionAuthorizationService.isAuthorized(role, Arrays.asList(stopPlace));
+        assertThat("submode airport boat link not allowed", authorized, is(false));
+    }
+
+    @Test
+    public void testNSBEditStopsRoleAssignmentsBusStation() {
+        String role = "editStops";
+        roleAssignmentsForRailAndRailReplacementMocked(role);
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        boolean authorized = reflectionAuthorizationService.isAuthorized(role, Arrays.asList(stopPlace));
+        assertThat("bus station not allowed when sub mode not set", authorized, is(false));
+    }
+
+    private List<RoleAssignment> roleAssignmentsForRailAndRailReplacementMocked(String role) {
+        List<RoleAssignment> roleAssignments = Arrays.asList(RoleAssignment.builder().withRole(role)
+                        .withOrganisation("NSB")
+                        .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                        .withEntityClassification("StopPlaceType", "railStation")
+                        .build(),
+                RoleAssignment.builder().withRole(role)
+                        .withOrganisation("NSB")
+                        .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                        .withEntityClassification("Submode", "railReplacementBus")
+                        .build());
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(roleAssignments);
+        return roleAssignments;
+    }
+
 }
