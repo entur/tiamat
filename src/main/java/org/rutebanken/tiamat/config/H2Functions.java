@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigInteger;
+import java.sql.Connection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,14 +31,16 @@ public class H2Functions implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(jdbcTemplate.getDataSource().getConnection().getMetaData().getDatabaseProductName().contains("H2")) {
+
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        if(connection.getMetaData().getDatabaseProductName().contains("H2")) {
             logger.info("H2 detected. Creating alias to method similarity.");
             jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS similarity FOR \"org.rutebanken.tiamat.config.H2Functions.similarity\"");
 
             logger.info("H2. Creating alias to method generate_series");
             jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_series FOR \"org.rutebanken.tiamat.config.H2Functions.generateSeries\"");
-
         }
+        connection.close();
     }
 
     /**
