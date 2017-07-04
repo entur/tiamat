@@ -62,7 +62,7 @@ public class IterableMarshaller {
                 if (duration >= 1000) {
                     entityPerSecond = String.valueOf(count / (duration / 1000f));
                 }
-                logger.info("{} marshalled: {}. {} per second: {}", nodeName, nodeName, count, entityPerSecond);
+                logger.info("{} marshalled: {}: {}. per second: {}", nodeName, nodeName, count, entityPerSecond);
             } else {
                 logger.debug("Marshalling {} {}: {}", nodeName,  count, tiamatEntity);
             }
