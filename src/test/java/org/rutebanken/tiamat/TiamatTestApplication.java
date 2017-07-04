@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat;
 
 
-import org.rutebanken.tiamat.auth.RoleAssignmentExtractorConfig;
+import org.rutebanken.tiamat.config.RoleAssignmentExtractorConfig;
 import org.rutebanken.tiamat.auth.TiamatSecurityConfig;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.boot.SpringApplication;

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.vividsolutions.jts.geom.Point;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
@@ -40,7 +40,7 @@ class ParkingUpdater implements DataFetcher {
     GeometryResolver geometryResolver;
 
     @Autowired
-    private TiamatAuthorizationService authorizationService;
+    private ReflectionAuthorizationService authorizationService;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {

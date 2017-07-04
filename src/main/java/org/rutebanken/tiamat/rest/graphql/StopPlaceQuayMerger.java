@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
@@ -28,9 +28,9 @@ public class StopPlaceQuayMerger {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private TiamatAuthorizationService authorizationService;
+    private ReflectionAuthorizationService authorizationService;
 
-    private static final String[] ignoreFields = { "keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
+    private static final String[] ignoreFields = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
 
     protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
@@ -72,7 +72,7 @@ public class StopPlaceQuayMerger {
 
 
         if (fromStopPlaceToTerminate.getTariffZones() != null) {
-            fromStopPlaceToTerminate.getTariffZones().forEach( tz -> {
+            fromStopPlaceToTerminate.getTariffZones().forEach(tz -> {
                 TariffZoneRef tariffZoneRef = new TariffZoneRef();
                 ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
                 mergedStopPlace.getTariffZones().add(tariffZoneRef);
@@ -142,18 +142,18 @@ public class StopPlaceQuayMerger {
 
     void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
         fromKeyValues.keySet()
-            .forEach(key -> {
-                if (toKeyValues.containsKey(key)) {
-                    toKeyValues.get(key).getItems().addAll(fromKeyValues.get(key).getItems());
-                } else {
-                    Value value = fromKeyValues.get(key);
+                .forEach(key -> {
+                    if (toKeyValues.containsKey(key)) {
+                        toKeyValues.get(key).getItems().addAll(fromKeyValues.get(key).getItems());
+                    } else {
+                        Value value = fromKeyValues.get(key);
 
-                    List<String> valueItems = new ArrayList<>();
-                    valueItems.addAll(value.getItems());
+                        List<String> valueItems = new ArrayList<>();
+                        valueItems.addAll(value.getItems());
 
-                    toKeyValues.put(key, new Value(valueItems));
-                }
-            });
+                        toKeyValues.put(key, new Value(valueItems));
+                    }
+                });
     }
 
     PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
@@ -176,7 +176,7 @@ public class StopPlaceQuayMerger {
 
     void mergeAlternativeNames(List<AlternativeName> fromAlternativeNames, List<AlternativeName> toAlternativeNames) {
         if (fromAlternativeNames != null) {
-            fromAlternativeNames.forEach( altName -> {
+            fromAlternativeNames.forEach(altName -> {
                 AlternativeName mergedAltName = new AlternativeName();
                 ObjectMerger.copyPropertiesNotNull(altName, mergedAltName);
                 toAlternativeNames.add(mergedAltName);
@@ -186,7 +186,7 @@ public class StopPlaceQuayMerger {
 
     private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
         // Terminate validity for "from"-stopPlace
-        if (entity.getValidBetween()!=null) {
+        if (entity.getValidBetween() != null) {
             entity.getValidBetween().setToDate(Instant.now());
         } else {
             entity.setValidBetween(new ValidBetween(null, Instant.now()));

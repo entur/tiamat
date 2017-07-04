@@ -1,24 +1,23 @@
 package org.rutebanken.tiamat.auth;
 
 import org.junit.Test;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 
 public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Autowired
-    private TiamatAuthorizationService tiamatAuthorizationService;
+    private ReflectionAuthorizationService reflectionAuthorizationService;
 
 
     @Autowired
@@ -39,7 +38,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
-        boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
+        boolean authorized = reflectionAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
         assertThat(authorized, is(true));
     }
 
@@ -61,7 +60,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, quay, roleAssignment.r);
+        boolean authorized = reflectionAuthorizationService.authorized(roleAssignment, quay, roleAssignment.r);
         assertThat(authorized, is(true));
     }
 
@@ -78,7 +77,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        boolean authorized = tiamatAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
+        boolean authorized = reflectionAuthorizationService.authorized(roleAssignment, stopPlace, roleAssignment.r);
         assertThat(authorized, is(false));
     }
 

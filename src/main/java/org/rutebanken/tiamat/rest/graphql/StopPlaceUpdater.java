@@ -4,7 +4,7 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.auth.TiamatAuthorizationService;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
@@ -51,7 +51,7 @@ class StopPlaceUpdater implements DataFetcher {
     private TopographicPlaceLookupService topographicPlaceLookupService;
 
     @Autowired
-    private TiamatAuthorizationService authorizationService;
+    private ReflectionAuthorizationService authorizationService;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;

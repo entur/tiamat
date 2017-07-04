@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.auth;
+package org.rutebanken.tiamat.config;
 
 import org.rutebanken.helper.organisation.KeycloakRoleAssignmentExtractor;
 import org.springframework.context.annotation.Bean;
