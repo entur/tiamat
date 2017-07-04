@@ -32,7 +32,7 @@ public class AuthorizationServiceConfig {
 
         // Should be made configurable
         Map<String, List<String>> fieldMappings = new HashMap<>();
-        fieldMappings.put(SUBMODE, Arrays.asList("airSubmode", "busSubmode", "coachSubmode", "funicularSubmode", "metroSubmode", "tramSubmode", "telecabinSubmode", "railSubmode", "waterSubmode"));
+        fieldMappings.put(SUBMODE.toLowerCase(), Arrays.asList("airSubmode", "busSubmode", "coachSubmode", "funicularSubmode", "metroSubmode", "tramSubmode", "telecabinSubmode", "railSubmode", "waterSubmode"));
 
 
         return new ReflectionAuthorizationService(roleAssignmentExtractor, authorizationEnabled, tiamatOriganisationChecker, topographicPlaceChecker, tiamatEntityResolver, fieldMappings);
