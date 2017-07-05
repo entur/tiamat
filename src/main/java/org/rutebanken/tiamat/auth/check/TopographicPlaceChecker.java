@@ -18,19 +18,17 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
     private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceChecker.class);
 
     private final TopographicPlaceRepository topographicPlaceRepository;
-    private final String administrativeZoneIdPrefix;
 
     @Autowired
-    public TopographicPlaceChecker(TopographicPlaceRepository topographicPlaceRepository, @Value("${administrative.zone.id.prefix:KVE:TopographicPlace:}") String administrativeZoneIdPrefix) {
+    public TopographicPlaceChecker(TopographicPlaceRepository topographicPlaceRepository) {
         this.topographicPlaceRepository = topographicPlaceRepository;
-        this.administrativeZoneIdPrefix = administrativeZoneIdPrefix;
     }
 
     @Override
     public boolean entityMatchesAdministrativeZone(RoleAssignment roleAssignment, Object entity) {
 
         if (roleAssignment.getAdministrativeZone() != null) {
-            TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(administrativeZoneIdPrefix + roleAssignment.getAdministrativeZone());
+            TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(roleAssignment.getAdministrativeZone());
             if (topographicPlace == null) {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
