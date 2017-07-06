@@ -1,11 +1,13 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -15,6 +17,9 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Import publication deliveries
@@ -32,14 +37,18 @@ public class ImportResource {
 
     private final PublicationDeliveryImporter publicationDeliveryImporter;
 
+    private final Set<ImportType> enabledImportTypes;
+
     @Autowired
     public ImportResource(PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
-                          PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          PublicationDeliveryImporter publicationDeliveryImporter) {
+                                 PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
+                                 PublicationDeliveryImporter publicationDeliveryImporter,
+                                 @Value("#{'${netex.import.enabled.types:ID_MATCH}'.split(',')}") Set<ImportType> enabledImportTypes) {
 
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
+        this.enabledImportTypes = enabledImportTypes;
     }
 
     public Response importPublicationDelivery(InputStream inputStream) throws IOException, JAXBException, SAXException {
@@ -51,6 +60,11 @@ public class ImportResource {
     @Produces(MediaType.APPLICATION_XML)
     public Response importPublicationDelivery(InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
+
+        ImportType effectiveImportType = safeGetImportType(importParams);
+        if (!enabledImportTypes.contains(effectiveImportType)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("ImportType: " + effectiveImportType + " not enabled!").build();
+        }
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
@@ -64,6 +78,16 @@ public class ImportResource {
             logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
         }
+    }
+
+    /**
+     * Return specified ImportType or default value if not set.
+     */
+    private ImportType safeGetImportType(ImportParams importParams) {
+        if (importParams == null || importParams.importType == null) {
+            return new ImportParams().importType;
+        }
+        return importParams.importType;
     }
 
 }
