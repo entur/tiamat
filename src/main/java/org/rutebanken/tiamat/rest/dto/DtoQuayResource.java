@@ -13,6 +13,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -43,7 +44,7 @@ public class DtoQuayResource {
 
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                 while (!lastEmpty) {
-                    List<IdMappingDto> quayMappings = stopPlaceRepository.findKeyValueMappingsForQuay(recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> quayMappings = stopPlaceRepository.findKeyValueMappingsForQuay(Instant.now(), recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : quayMappings) {
                         writer.println(mapping.toCsvString());
                         recordPosition++;

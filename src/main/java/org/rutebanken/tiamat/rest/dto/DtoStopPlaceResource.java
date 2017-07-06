@@ -14,6 +14,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -46,7 +47,7 @@ public class DtoStopPlaceResource {
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                 while (!lastEmpty) {
 
-                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(Instant.now(), recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : stopPlaceMappings) {
                         writer.println(mapping.toCsvString());
                         recordPosition++;

@@ -286,26 +286,27 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     // Does not belong here. Move it to QuayRepository.
     @Override
-    public List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip) {
+    public List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
         String sql = "SELECT vi.items, q.netex_id " +
                              "FROM quay_key_values qkv " +
                              "INNER JOIN stop_place_quays spq " +
                              "ON spq.quays_id = qkv.quay_id " +
                              "INNER JOIN quay q " +
-                             "ON (spq.quays_id = q.id " +
-                             "AND q.version = (SELECT MAX(qv.version) FROM quay qv WHERE qv.netex_id = q.netex_id)) " +
+                             "ON spq.quays_id = q.id " +
+                             "INNER JOIN stop_place s " +
+                             "ON s.id= spq.stop_place_id and (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime) " +
                              "INNER JOIN value_items vi " +
-                             "ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :originalIdKey";
+                             "ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :originalIdKey ";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
         nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
-
+        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
         @SuppressWarnings("unchecked")
         List<Object[]> result = nativeQuery.getResultList();
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto((String) row[0].toString(), (String) row[1].toString()));
+            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString()));
         }
 
         return mappingResult;
@@ -313,18 +314,18 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip) {
+    public List<IdMappingDto> findKeyValueMappingsForStop(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
         String sql = "SELECT v.items, s.netex_id " +
                              "FROM stop_place_key_values spkv " +
                              "INNER JOIN value_items v " +
                              "ON spkv.key_values_key = :originalIdKey AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
                              "INNER JOIN stop_place s " +
-                             "ON s.id = spkv.stop_place_id " +
-                             "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)";
+                             "ON s.id = spkv.stop_place_id AND (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime)";
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
         nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
+        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
 
         List<Object[]> result = nativeQuery.getResultList();
 
@@ -348,7 +349,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "    ON q.id = qkv.quay_id AND qkv.key_values_key = :originalIdKey " +
                              "  INNER JOIN value_items vi " +
                              "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value" +
-                             " where s.from_date <= :pointInTime and (s.to_date is null or s.to_date > :pointInTime)";
+                             " where (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime)";
 
         Query query = entityManager.createNativeQuery(sql);
 

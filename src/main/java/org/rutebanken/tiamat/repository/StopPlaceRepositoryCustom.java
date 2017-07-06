@@ -36,9 +36,9 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     List<String> searchByKeyValue(String key, String value);
     
-    List<IdMappingDto> findKeyValueMappingsForQuay(int recordPosition, int recordsPerRoundTrip);
+    List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip);
 
-    List<IdMappingDto> findKeyValueMappingsForStop(int recordPosition, int recordsPerRoundTrip);
+    List<IdMappingDto> findKeyValueMappingsForStop(Instant pointInTime, int recordPosition, int recordsPerRoundTrip);
 
     List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId, Instant pointInTime);
 

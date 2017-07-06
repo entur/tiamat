@@ -10,6 +10,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -32,7 +33,7 @@ public class DtoQuayResourceTest {
         int keyValueMappingCount = 3;
         int size = 1;
 
-        when(stopPlaceRepository.findKeyValueMappingsForQuay(anyInt(), anyInt()))
+        when(stopPlaceRepository.findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt()))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString())))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString())))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
@@ -43,7 +44,7 @@ public class DtoQuayResourceTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
         // plus one for the last empty call.
-        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(anyInt(), anyInt());
+        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt());
     }
 
 }

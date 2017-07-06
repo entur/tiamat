@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.H2Functions;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
@@ -29,7 +30,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 @Transactional
 public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
-    
+
     @Test
     public void scrollableResult() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));
@@ -380,12 +381,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         List<StopTypeEnumeration> stopTypeEnumerations = Arrays.asList(StopTypeEnumeration.BUS_STATION);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery(stopPlaceName)
-                        .setStopTypeEnumerations(stopTypeEnumerations)
-                        .build())
-                .setMunicipalityReference(stopPlace.getTopographicPlace().getNetexId())
-                .build());
+                                                                           .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                                                       .setQuery(stopPlaceName)
+                                                                                                       .setStopTypeEnumerations(stopTypeEnumerations)
+                                                                                                       .build())
+                                                                           .setMunicipalityReference(stopPlace.getTopographicPlace().getNetexId())
+                                                                           .build());
 
         assertThat(result).isEmpty();
     }
@@ -399,11 +400,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery(stopPlaceName)
-                        .build())
-                .setMunicipalityReference(stopPlace.getTopographicPlace().getNetexId())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setQuery(stopPlaceName)
+                                                                        .build())
+                                            .setMunicipalityReference(stopPlace.getTopographicPlace().getNetexId())
+                                            .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -419,9 +420,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery("bru").build())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setQuery("bru").build())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
@@ -440,8 +441,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(brunesset);
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
-                .setQuery("nesset").build())
-                .build();
+                                                                                        .setQuery("nesset").build())
+                                            .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
         assertThat(result.getContent()).extracting(stop -> stop.getName().getValue())
@@ -460,12 +461,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality(stopPlaceName, municipality);
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setMunicipalityReference(municipality.getNetexId())
-                .setCountyReference(county.getNetexId())
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery(stopPlaceName)
-                        .build())
-                .build();
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .setCountyReference(county.getNetexId())
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setQuery(stopPlaceName)
+                                                                        .build())
+                                            .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -482,11 +483,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality(stopPlaceName, municipality);
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setCountyReference(county.getNetexId())
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery(stopPlaceName)
-                        .build())
-                .build();
+                                            .setCountyReference(county.getNetexId())
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setQuery(stopPlaceName)
+                                                                        .build())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
 
@@ -509,12 +510,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         TopographicPlace buskerud = createCounty("Buskerud");
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
-                .setQuery(stopPlaceName)
-                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
-                .build())
-                .setMunicipalityReference(municipality.getNetexId())
-                .setCountyReference(buskerud.getNetexId())
-                .build();
+                                                                                        .setQuery(stopPlaceName)
+                                                                                        .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
+                                                                                        .build())
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .setCountyReference(buskerud.getNetexId())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
@@ -531,7 +532,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 newStopPlaceSearchBuilder()
                         .setQuery("lEpEnden")
                         .build())
-                .build();
+                                            .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
@@ -551,12 +552,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("Does not matter", municipality);
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
-                        .build())
-                .setMunicipalityReference(municipality.getNetexId())
-                .setCountyReference(county.getNetexId())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.COACH_STATION))
+                                                                        .build())
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .setCountyReference(county.getNetexId())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
 
@@ -578,12 +579,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setQuery("Name")
-                        .build())
-                .setMunicipalityReference(municipality.getNetexId())
-                .setCountyReference(county.getNetexId())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setQuery("Name")
+                                                                        .build())
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .setCountyReference(county.getNetexId())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
 
@@ -601,10 +602,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
-                                         .setQuery("Somewhere else")
-                                         .build())
-                .setCountyReference(county.getNetexId())
-                .build();
+                                                                                        .setQuery("Somewhere else")
+                                                                                        .build())
+                                            .setCountyReference(county.getNetexId())
+                                            .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isEmpty();
     }
@@ -615,10 +616,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         createStopPlaceWithMunicipality("No matching stop name", municipality);
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
-                .setQuery("Somewhere else")
-                .build())
-                .setMunicipalityReference(municipality.getNetexId())
-                .build();
+                                                                                        .setQuery("Somewhere else")
+                                                                                        .build())
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isEmpty();
@@ -639,10 +640,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         List<String> stopPlaceIds = Arrays.asList(stopPlace1.getNetexId(), stopPlace2.getNetexId());
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setNetexIdList(stopPlaceIds)
-                        .build())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setNetexIdList(stopPlaceIds)
+                                                                        .build())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).hasSize(2);
@@ -664,10 +665,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         List<String> stopPlaceIds = new ArrayList<>();
 
         ExportParams exportParams = newExportParamsBuilder()
-                .setStopPlaceSearch(newStopPlaceSearchBuilder()
-                        .setNetexIdList(stopPlaceIds)
-                        .build())
-                .build();
+                                            .setStopPlaceSearch(newStopPlaceSearchBuilder()
+                                                                        .setNetexIdList(stopPlaceIds)
+                                                                        .build())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
@@ -694,9 +695,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                                   .build();
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch)
-                .setMunicipalityReference(municipality.getNetexId())
-                .setCountyReference(county.getNetexId())
-                .build();
+                                            .setMunicipalityReference(municipality.getNetexId())
+                                            .setCountyReference(county.getNetexId())
+                                            .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).extracting(StopPlace::getName).extracting(EmbeddableMultilingualString::getValue)
@@ -792,7 +793,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Page<StopPlace> changedStopsP1 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(1, 2)));
         Assert.assertFalse(changedStopsP1.hasNext());
 
-        List<StopPlace> accumulatedStops=new ArrayList<>(changedStopsP0.getContent());
+        List<StopPlace> accumulatedStops = new ArrayList<>(changedStopsP0.getContent());
         accumulatedStops.addAll(changedStopsP1.getContent());
         assertContainsOnlyInExactVersion(accumulatedStops, currentVersion, expiredInPeriod, newInPeriod);
 
@@ -802,12 +803,12 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     public void findStopPlaceForSpecificPointInTime() throws Exception {
         String stopPlaceName = "Nesbru";
 
-        ValidBetween expiredValidBetween = new ValidBetween(Instant.now().minusSeconds(1000), Instant.now().minusSeconds(100 ));
+        ValidBetween expiredValidBetween = new ValidBetween(Instant.now().minusSeconds(1000), Instant.now().minusSeconds(100));
         StopPlace expiredStopPlace = createStopPlaceWithMunicipality(stopPlaceName, null);
         expiredStopPlace.setValidBetween(expiredValidBetween);
         stopPlaceRepository.save(expiredStopPlace);
 
-        ValidBetween openendedValidBetween = new ValidBetween(Instant.now().minusSeconds(100 ));
+        ValidBetween openendedValidBetween = new ValidBetween(Instant.now().minusSeconds(100));
         StopPlace newestStopPlace = createStopPlaceWithMunicipality(stopPlaceName, null);
         newestStopPlace.setValidBetween(openendedValidBetween);
         stopPlaceRepository.save(newestStopPlace);
@@ -815,9 +816,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Pageable pageable = new PageRequest(0, 10);
 
         StopPlaceSearch search = newStopPlaceSearchBuilder()
-                .setQuery(stopPlaceName)
-                .setPointInTime(Instant.now().minusSeconds(1000))
-                .build();
+                                         .setQuery(stopPlaceName)
+                                         .setPointInTime(Instant.now().minusSeconds(1000))
+                                         .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(newExportParamsBuilder().setStopPlaceSearch(search).build());
         assertThat(result)
@@ -829,9 +830,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         pageable = new PageRequest(0, 10);
 
         search = newStopPlaceSearchBuilder()
-                .setQuery(stopPlaceName)
-                .setPointInTime(Instant.now())
-                .build();
+                         .setQuery(stopPlaceName)
+                         .setPointInTime(Instant.now())
+                         .build();
 
         result = stopPlaceRepository.findStopPlace(newExportParamsBuilder().setStopPlaceSearch(search).build());
         assertThat(result)
@@ -841,9 +842,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         ;
     }
 
+    @Test
     public void findStopPlaceFromQuayOriginalIdReturnsOnlyStopsValidAtPointInTime() {
         String importedIdSuffix = "2";
-        String importedId="XXX:Quay:"+importedIdSuffix;
+        String importedId = "XXX:Quay:" + importedIdSuffix;
         Instant now = Instant.now();
 
         StopPlace historicMatchingStopV1 = saveStop("NSR:StopPlace:1", 1l, now.minusSeconds(200), now.minusSeconds(10));
@@ -863,6 +865,61 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         // No imported-ids are valid for point in time 300 seconds ago
         Assert.assertTrue(CollectionUtils.isEmpty(stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdSuffix, now.minusSeconds(300))));
     }
+
+    @Test
+    public void findKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTime() {
+        String importedIdSuffix = "2";
+        String importedId = "XXX:Quay:" + importedIdSuffix;
+        Instant now = Instant.now();
+
+        StopPlace historicMatchingStopV1 = saveStop("NSR:StopPlace:1", 1l, now.minusSeconds(200), now.minusSeconds(10));
+        Quay historicMatchingQuay = saveQuay(historicMatchingStopV1, "NSR:Quay:1", 1l, importedId);
+
+        StopPlace currentMatchingStop = saveStop("NSR:StopPlace:2", 1l, now.minusSeconds(10), null);
+        Quay currentMatchingQuay = saveQuay(currentMatchingStop, "NSR:Quay:2", 1l, importedId);
+
+        List<IdMappingDto> currentMapping = stopPlaceRepository.findKeyValueMappingsForQuay(now, 0, 2000);
+        Assert.assertEquals(1, currentMapping.size());
+        Assert.assertEquals(importedId, currentMapping.get(0).originalId);
+        Assert.assertEquals(currentMatchingQuay.getNetexId(), currentMapping.get(0).netexId);
+
+        List<IdMappingDto> historicMapping = stopPlaceRepository.findKeyValueMappingsForQuay(now.minusSeconds(100), 0, 2000);
+        Assert.assertEquals(1, historicMapping.size());
+        Assert.assertEquals(importedId, historicMapping.get(0).originalId);
+        Assert.assertEquals(historicMatchingQuay.getNetexId(), historicMapping.get(0).netexId);
+
+        // No imported-ids are valid for point in time 300 seconds ago
+        Assert.assertTrue(stopPlaceRepository.findKeyValueMappingsForQuay(now.minusSeconds(300), 0, 2000).isEmpty());
+    }
+
+    @Test
+    public void findKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime() {
+        String importedIdSuffix = "2";
+        String importedId = "XXX:StopPlace:" + importedIdSuffix;
+        Instant now = Instant.now();
+
+        StopPlace historicMatchingStopV1 = saveStop("NSR:StopPlace:1", 1l, now.minusSeconds(200), now.minusSeconds(10));
+        historicMatchingStopV1.getKeyValues().put(ORIGINAL_ID_KEY, new Value(importedId));
+        stopPlaceRepository.save(historicMatchingStopV1);
+
+        StopPlace currentMatchingStop = saveStop("NSR:StopPlace:2", 1l, now.minusSeconds(10), null);
+        currentMatchingStop.getKeyValues().put(ORIGINAL_ID_KEY, new Value(importedId));
+        stopPlaceRepository.save(currentMatchingStop);
+
+        List<IdMappingDto> currentMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, 0, 2000);
+        Assert.assertEquals(1, currentMapping.size());
+        Assert.assertEquals(importedId, currentMapping.get(0).originalId);
+        Assert.assertEquals(currentMatchingStop.getNetexId(), currentMapping.get(0).netexId);
+
+        List<IdMappingDto> historicMapping = stopPlaceRepository.findKeyValueMappingsForStop(now.minusSeconds(100), 0, 2000);
+        Assert.assertEquals(1, historicMapping.size());
+        Assert.assertEquals(importedId, historicMapping.get(0).originalId);
+        Assert.assertEquals(historicMatchingStopV1.getNetexId(), historicMapping.get(0).netexId);
+
+        // No imported-ids are valid for point in time 300 seconds ago
+        Assert.assertTrue(stopPlaceRepository.findKeyValueMappingsForStop(now.minusSeconds(300), 0, 2000).isEmpty());
+    }
+
 
     private Quay saveQuay(StopPlace stopPlace, String id, Long version, String importedId) {
         Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
