@@ -287,7 +287,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     // Does not belong here. Move it to QuayRepository.
     @Override
     public List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.netex_id " +
+        String sql = "SELECT vi.items, q.netex_id, s.stop_place_type " +
                              "FROM quay_key_values qkv " +
                              "INNER JOIN stop_place_quays spq " +
                              "ON spq.quays_id = qkv.quay_id " +
@@ -306,16 +306,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString()));
+            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), parseStopType(row[2])));
         }
 
         return mappingResult;
     }
 
+    private StopTypeEnumeration parseStopType(Object o) {
+        if (o != null) {
+            return StopTypeEnumeration.valueOf(o.toString());
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT v.items, s.netex_id " +
+        String sql = "SELECT v.items, s.netex_id, s.stop_place_type " +
                              "FROM stop_place_key_values spkv " +
                              "INNER JOIN value_items v " +
                              "ON spkv.key_values_key = :originalIdKey AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
@@ -331,7 +338,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto((String) row[0], (String) row[1]));
+            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), parseStopType(row[2])));
         }
 
         return mappingResult;

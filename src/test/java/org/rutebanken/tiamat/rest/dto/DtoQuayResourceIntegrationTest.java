@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,12 +30,12 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
 
     @Test
     public void testQuayIdMapping() {
-        String url =  "/jersey/quay/id_mapping";
 
         StopPlace stopPlace = new StopPlace();
 
         String spOrigId = "TST:555";
         stopPlace.getOriginalIds().add(spOrigId);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
 
         Set<Quay> quays = new HashSet<>();
         Quay q1 = new Quay();
@@ -53,12 +54,16 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
 
         saverService.saveNewVersion(stopPlace, newVersion);
 
-        String response = getIdMapping(url);
+        String url =  "/jersey/quay/id_mapping";
+        String responseWithoutStopPlaceType = getIdMapping(url);
 
-        assertThat(response).contains(originalId + "," + q1.getNetexId() + "\n");
-        assertThat(response).contains(originalId2 + "," + q1.getNetexId() + "\n");
-        assertThat(response).contains(originalId3 + "," + q1.getNetexId() + "\n");
-        assertThat(response).doesNotContain(spOrigId);
+        assertThat(responseWithoutStopPlaceType).contains(originalId + "," + q1.getNetexId() + "\n");
+        assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + q1.getNetexId() + "\n");
+        assertThat(responseWithoutStopPlaceType).contains(originalId3 + "," + q1.getNetexId() + "\n");
+        assertThat(responseWithoutStopPlaceType).doesNotContain(spOrigId);
+
+        String responseWithStopPlaceType = getIdMapping(url + "?includeStopType=true");
+        assertThat(responseWithStopPlaceType).contains(originalId + "," + StopTypeEnumeration.AIRPORT.value() + "," + q1.getNetexId() + "\n");
     }
 
     @Test
@@ -86,12 +91,17 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        String response = getIdMapping(url);
+        String responseWithoutStopPlaceType = getIdMapping(url);
 
-        assertThat(response).contains(originalId + "," + stopPlace.getNetexId() + "\n");
-        assertThat(response).contains(originalId2 + "," + stopPlace.getNetexId() + "\n");
-        assertThat(response).doesNotContain(quayOrigId);
-        assertThat(response).doesNotContain(quayOrigId2);
+        assertThat(responseWithoutStopPlaceType).contains(originalId + "," + stopPlace.getNetexId() + "\n");
+        assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + stopPlace.getNetexId() + "\n");
+        assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId);
+        assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId2);
+
+        String responseWithStopPlaceType = getIdMapping(url+"?includeStopType=true");
+
+        assertThat(responseWithStopPlaceType).contains(originalId + ",," + stopPlace.getNetexId() + "\n");
+        assertThat(responseWithStopPlaceType).contains(originalId2 + ",," + stopPlace.getNetexId() + "\n");
     }
 
     private String getIdMapping(String url) {

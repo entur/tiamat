@@ -39,7 +39,7 @@ public class DtoQuayResourceTest {
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
                 .thenReturn(new ArrayList<>());
 
-        Response response = dtoQuayResource.getIdMapping(size);
+        Response response = dtoQuayResource.getIdMapping(size, false);
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);

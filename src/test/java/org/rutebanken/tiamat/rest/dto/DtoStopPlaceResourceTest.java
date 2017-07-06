@@ -29,7 +29,7 @@ public class DtoStopPlaceResourceTest {
     }
 
     @Test
-    public void keyValueStopPlaceMappingWithWithSize() throws IOException {
+    public void ikeyValueStopPlaceMappingWithWithSize() throws IOException {
         int keyValueMappingCount = 3;
         int size = 1;
 
@@ -39,7 +39,7 @@ public class DtoStopPlaceResourceTest {
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
                 .thenReturn(new ArrayList<>());
 
-        Response response = dtoStopPlaceResource.getIdMapping(size);
+        Response response = dtoStopPlaceResource.getIdMapping(size, false);
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
