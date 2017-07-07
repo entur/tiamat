@@ -94,7 +94,8 @@ public class StopPlaceSearch {
     // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
-                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty()));
+                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty())
+                || (netexIdList != null && !netexIdList.isEmpty()));
     }
 
     @Override
@@ -103,6 +104,7 @@ public class StopPlaceSearch {
                 .add("q", getQuery())
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("netexIdList", getNetexIdList())
+                .add("allVersions", isAllVersions())
                 .add("page", page)
                 .add("size", size)
                 .toString();

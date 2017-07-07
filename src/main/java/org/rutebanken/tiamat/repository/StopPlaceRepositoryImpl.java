@@ -12,6 +12,8 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.ParkingSearch;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -29,6 +31,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +41,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
@@ -413,13 +418,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
-        queryWithParams.getSecond().forEach((parameter, value) -> {
-                    if (value instanceof Collection) {
-                        sqlQuery.setParameterList(parameter, (Collection) value);
-                    } else {
-                        sqlQuery.setParameter(parameter, value);
-                    }
-                });
+        stopPlaceQueryFromSearchBuilder.addParams(sqlQuery, queryWithParams.getSecond());;
 
         sqlQuery.addEntity(StopPlace.class);
         sqlQuery.setReadOnly(true);
@@ -431,6 +430,39 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         return stopPlaceEntityIterator;
     }
+
+    @Override
+    public Set<String> getNetexIds(ExportParams exportParams) {
+        Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
+
+        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+
+        @SuppressWarnings("unchecked")
+        Set<String> result =  new HashSet<>(query.list());
+        return result;
+    }
+
+    @Override
+    public Set<Long> getDatabaseIds(ExportParams exportParams) {
+        Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery query = session.createSQLQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
+
+        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+
+        Set<Long> result = new HashSet<>();
+        for(Object object : query.list()) {
+            BigInteger bigInteger = (BigInteger) object;
+            result.add(bigInteger.longValue());
+
+        }
+
+        return result;
+    }
+
+
 
     @Override
     public Page<StopPlace> findStopPlace(ExportParams exportParams) {
