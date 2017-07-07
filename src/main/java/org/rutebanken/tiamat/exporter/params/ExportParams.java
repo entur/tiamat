@@ -18,6 +18,10 @@ public class ExportParams {
     @QueryParam(value = "topopgraphicPlaceExportMode")
     private ExportMode topopgraphicPlaceExportMode = ExportMode.ALL;
 
+    @QueryParam(value = "tariffZoneExportMode")
+    private ExportMode tariffZoneExportMode = ExportMode.ALL;
+
+
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
 
@@ -27,8 +31,9 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topopgraphicPlaceExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+    private ExportParams(ExportMode topopgraphicPlaceExportMode, ExportMode tariffZoneExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
         this.topopgraphicPlaceExportMode = topopgraphicPlaceExportMode;
+        this.tariffZoneExportMode = tariffZoneExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
@@ -42,6 +47,10 @@ public class ExportParams {
 
     public ExportMode getTopopgraphicPlaceExportMode() {
         return topopgraphicPlaceExportMode;
+    }
+
+    public ExportMode getTariffZoneExportMode() {
+        return tariffZoneExportMode;
     }
 
     public List<String> getMunicipalityReferences() {
@@ -67,11 +76,12 @@ public class ExportParams {
                 .add("municipalityReferences", municipalityReferences)
                 .add("countyReferences", countyReferences)
                 .add("stopPlaceSearch", stopPlaceSearch)
+                .add("tariffZoneExportMode", tariffZoneExportMode)
                 .toString();
     }
 
     public static class Builder {
-
+        private ExportMode tariffZoneExportMode = ExportMode.ALL;
         private ExportMode topographicPlaceExportMode = ExportMode.ALL;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
@@ -109,8 +119,13 @@ public class ExportParams {
             return this;
         }
 
+        public Builder setTariffZoneExportMode(ExportMode tariffZoneExportMode) {
+            this.tariffZoneExportMode = tariffZoneExportMode;
+            return  this;
+        }
+
         public ExportParams build() {
-            return new ExportParams(topographicPlaceExportMode, municipalityReferences, countyReferences, stopPlaceSearch);
+            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, municipalityReferences, countyReferences, stopPlaceSearch);
         }
     }
 }

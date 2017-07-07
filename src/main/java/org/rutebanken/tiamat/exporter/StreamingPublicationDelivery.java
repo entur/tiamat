@@ -90,7 +90,6 @@ public class StreamingPublicationDelivery {
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
-        // Todo: If all objects in all versions is going to be exported, avoid queries?
 
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
@@ -106,10 +105,17 @@ public class StreamingPublicationDelivery {
             topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(target, siteFrame);
         }
 
-        List<org.rutebanken.tiamat.model.TariffZone> tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(stopPlacePrimaryIds);
-        if(tariffZones != null) {
-            logger.info("Got {} tariff zones from {} stop place ids", tariffZones.size(), stopPlacePrimaryIds.size());
-            tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
+        List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
+        if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
+            tariffZones = tariffZoneRepository.findAll();
+            logger.info("Added all tariff zones, regardless of version: {}", tariffZones.size());
+
+        } else {
+            tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(stopPlacePrimaryIds);
+            if (tariffZones != null) {
+                logger.info("Got {} tariff zones from {} stop place ids", tariffZones.size(), stopPlacePrimaryIds.size());
+                tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
+            }
         }
 
         logger.info("Mapping site frame to netex model");
