@@ -90,6 +90,7 @@ public class StreamingPublicationDelivery {
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
+        // Todo: If all objects in all versions is going to be exported, avoid queries?
 
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
