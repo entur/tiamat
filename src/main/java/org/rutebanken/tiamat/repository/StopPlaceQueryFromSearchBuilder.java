@@ -122,7 +122,7 @@ public class StopPlaceQueryFromSearchBuilder {
             operators.add("and");
             wheres.add("s.version = :version");
             parameters.put("version", stopPlaceSearch.getVersion());
-        } else if (!stopPlaceSearch.isAllVersions()) {
+        } else if (!stopPlaceSearch.isAllVersions() && stopPlaceSearch.getPointInTime() == null) {
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }
