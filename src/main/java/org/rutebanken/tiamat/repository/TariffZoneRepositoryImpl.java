@@ -43,14 +43,22 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
 	@Override
 	public List<TariffZone> getTariffZonesFromStopPlaceIds(Set<Long> stopPlaceIds) {
-
-		StringBuilder sql = new StringBuilder("select tz.* from stop_place_tariff_zones sptz " +
-				"inner join tariff_zone tz on sptz.tariff_zones_id = tz.id " +
-				"inner join stop_place s on s.id = sptz.stop_place_id " +
-				"where s.id in(");
-
+		StringBuilder sql = new StringBuilder("SELECT tz.* " +
+				"FROM (SELECT tz2.id " +
+				"      FROM stop_place_tariff_zones sptz " +
+				"            	inner join tariff_zone_ref tzr " +
+				"               	ON sptz.tariff_zones_id = tzr.id " +
+				"	                AND sptz.stop_place_id IN(");
+		
 		sql.append(StringUtils.join(stopPlaceIds, ','));
 		sql.append(')');
+
+		sql.append("            inner join tariff_zone tz2 " +
+				"                   ON tz2.netex_id = tzr.ref " +
+				"                   AND ( tz2.version IS NULL " +
+				"                   	OR Cast(tz2.version AS TEXT) = tzr.version ) " +
+				"        GROUP BY tz2.id) tz2 " +
+				"		 JOIN tariff_zone tz ON tz2.id = tz.id");
 
 		Query query = entityManager.createNativeQuery(sql.toString(), TariffZone.class);
 
