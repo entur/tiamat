@@ -3,8 +3,6 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
@@ -128,13 +126,27 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     private Pair<String, Map<String, Object>> getParkingsByStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
-        StringBuilder sql = new StringBuilder("select p.* from parking p " +
-                "inner join stop_place sp on sp.netex_id = p.parent_site_ref " +
-                "   and (cast(sp.version as text) = p.parent_site_ref_version OR p.parent_site_ref_version is null) " +
-                " where sp.id in (");
+
+        StringBuilder sql = new StringBuilder("SELECT p.* " +
+                "FROM (SELECT p2.id, " +
+                "           p2.netex_id, " +
+                "           p2.version " +
+                "      FROM parking p2 " +
+                "      INNER JOIN stop_place sp " +
+                "           ON sp.netex_id = p2.parent_site_ref " +
+                "           AND ( Cast(sp.version AS TEXT) = " +
+                "                   p2.parent_site_ref_version " +
+                "                 OR p2.parent_site_ref_version IS NULL ) " +
+                "           WHERE sp.id in (");
 
         sql.append(StringUtils.join(stopPlaceIds, ','));
         sql.append(')');
+
+        sql.append("   GROUP  BY p2.id) p2 " +
+                "JOIN parking p " +
+                "      ON p2.id = p.id " +
+                "ORDER BY p.netex_id, p.version");
+
         return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }
 
