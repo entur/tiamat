@@ -8,6 +8,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
+import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
+
+    @Autowired
+    private ValidBetweenMapper validBetweenMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -89,6 +93,11 @@ class ParkingUpdater implements DataFetcher {
             EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
             isUpdated = isUpdated || (!name.equals(updatedParking.getName()));
             updatedParking.setName(name);
+        }
+
+        if (input.get(VALID_BETWEEN) != null) {
+            updatedParking.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
+            isUpdated = true;
         }
 
         if (input.get(GEOMETRY) != null) {
