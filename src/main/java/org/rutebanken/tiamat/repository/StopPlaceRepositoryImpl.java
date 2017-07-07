@@ -5,7 +5,11 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.hibernate.*;
+import org.hibernate.Criteria;
+import org.hibernate.SQLQuery;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
@@ -26,9 +30,17 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Repository
@@ -296,10 +308,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "INNER JOIN stop_place s " +
                              "ON s.id= spq.stop_place_id and (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime) " +
                              "INNER JOIN value_items vi " +
-                             "ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :originalIdKey ";
+                             "ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) ";
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
-        nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
+        nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
         nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
         @SuppressWarnings("unchecked")
         List<Object[]> result = nativeQuery.getResultList();
@@ -325,13 +337,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         String sql = "SELECT v.items, s.netex_id, s.stop_place_type " +
                              "FROM stop_place_key_values spkv " +
                              "INNER JOIN value_items v " +
-                             "ON spkv.key_values_key = :originalIdKey AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
+                             "ON spkv.key_values_key in (:mappingIdKeys) AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
                              "INNER JOIN stop_place s " +
                              "ON s.id = spkv.stop_place_id AND (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime)";
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
-        nativeQuery.setParameter("originalIdKey", ORIGINAL_ID_KEY);
+        nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
         nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
 
         List<Object[]> result = nativeQuery.getResultList();
@@ -353,7 +365,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN quay q " +
                              "    ON spq.quays_id = q.id " +
                              "  INNER JOIN quay_key_values qkv " +
-                             "    ON q.id = qkv.quay_id AND qkv.key_values_key = :originalIdKey " +
+                             "    ON q.id = qkv.quay_id AND qkv.key_values_key in (:originalIdKey) " +
                              "  INNER JOIN value_items vi " +
                              "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value" +
                              " where (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime)";
