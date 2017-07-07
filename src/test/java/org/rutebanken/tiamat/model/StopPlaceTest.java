@@ -4,12 +4,17 @@ import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -450,5 +455,39 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems()).hasSize(1);
+    }
+
+    @Test
+    public void searchForStopWithFutureVersion() {
+        StopPlace currentVersion = new StopPlace();
+
+        Instant from = Instant.from(LocalDate.now().minusDays(1L).atStartOfDay(ZoneOffset.systemDefault()).toInstant());
+        Instant to = Instant.from(LocalDate.now().plusDays(1L).atStartOfDay(ZoneOffset.systemDefault()).toInstant());
+
+        currentVersion.setValidBetween(new ValidBetween(from, to));
+        currentVersion.setVersion(1);
+        stopPlaceRepository.save(currentVersion);
+
+        StopPlace futureVersion = stopPlaceVersionedSaverService.createCopy(currentVersion, StopPlace.class);
+
+        futureVersion.setValidBetween(new ValidBetween(to));
+        futureVersion.setVersion(2);
+        stopPlaceRepository.save(futureVersion);
+
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder()
+                        .setPointInTime(Instant.now())
+                        .build())
+                .build());
+
+
+        assertThat(actual).isNotNull();
+        assertThat(actual.getTotalElements()).isEqualTo(1);
+
+
+        StopPlace actualStopPlace = actual.getContent().get(0);
+        assertThat(actualStopPlace.getVersion()).isEqualTo(currentVersion.getVersion());
+
     }
 }
