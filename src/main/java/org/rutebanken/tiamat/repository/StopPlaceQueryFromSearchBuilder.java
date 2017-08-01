@@ -138,6 +138,17 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             wheres.add("s.centroid IS NULL");
         }
 
+        if(stopPlaceSearch.getVersionValidity() != null) {
+            operators.add("and");
+
+            if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+                wheres.add("s.from_date <= now() AND (s.to_date >= now() OR s.to_date IS NULL)");
+            } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
+                wheres.add("s.to_date >= now() OR s.to_date IS NULL");
+            }
+
+        }
+
         addWheres(queryString, wheres, operators);
 
         orderByStatements.add("netex_id, version asc");

@@ -4,15 +4,20 @@ import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.time.temporal.TemporalUnit;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
@@ -69,5 +74,93 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 
 		StopPlace foundStop = stopPlaceRepository.findByQuay(quay);
 		Assert.assertEquals(savedStop, foundStop);
+	}
+
+	@Test
+	public void findCurrentlyValidStopPlace() {
+		StopPlace currentlyValid = new StopPlace();
+		currentlyValid.setVersion(1L);
+		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS), Instant.now().plus(1, DAYS)));
+		stopPlaceRepository.save(currentlyValid);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).hasSize(1);
+		assertThat(results).contains(currentlyValid);
+	}
+
+	@Test
+	public void findCurrentlyValidStopPlaceWithoutEndDate() {
+		StopPlace currentlyValid = new StopPlace();
+		currentlyValid.setVersion(1L);
+		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS)));
+		stopPlaceRepository.save(currentlyValid);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).hasSize(1);
+		assertThat(results).contains(currentlyValid);
+	}
+
+
+	@Test
+	public void doNotFindExpiredStopPlaceVersion() {
+		StopPlace expiredVersion = new StopPlace();
+		expiredVersion.setVersion(1L);
+		expiredVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, DAYS), Instant.now().minus(1, DAYS)));
+		stopPlaceRepository.save(expiredVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	public void doNotFindFutureStopPlaceVersion() {
+		StopPlace futureVersion = new StopPlace();
+		futureVersion.setVersion(1L);
+		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
+		stopPlaceRepository.save(futureVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	public void findFutureStopPlaceVersion() {
+		StopPlace futureVersion = new StopPlace();
+		futureVersion.setVersion(1L);
+		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
+		stopPlaceRepository.save(futureVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results)
+				.hasSize(1)
+				.contains(futureVersion);
+
+	}
+
+
+	@Test
+	public void findFutureStopPlaceVersionWithoutEndDate() {
+		StopPlace futureVersion = new StopPlace();
+		futureVersion.setVersion(1L);
+		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS)));
+		stopPlaceRepository.save(futureVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results)
+				.hasSize(1)
+				.contains(futureVersion);
+
 	}
 }
