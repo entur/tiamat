@@ -37,15 +37,15 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
         if (exportParams.getStopPlaceSearch().isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams.getTopopgraphicPlaceExportMode());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams);
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams.getTopopgraphicPlaceExportMode());
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams);
         }
     }
 
-    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams.ExportMode includeTopographicPlaces) {
+    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, includeTopographicPlaces), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
@@ -67,17 +67,17 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportParams.ExportMode topographicPlaceExportMode) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportParams exportParams) {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
-        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(topographicPlaceExportMode, siteFrame);
+        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopopgraphicPlaceExportMode(), siteFrame);
         tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if (ExportParams.ExportMode.NONE.equals(topographicPlaceExportMode)){
+        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopopgraphicPlaceExportMode())){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 

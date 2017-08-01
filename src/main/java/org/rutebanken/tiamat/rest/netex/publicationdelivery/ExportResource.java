@@ -62,7 +62,7 @@ public class ExportResource {
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         logger.info("Exporting stop places. Search: {}, export mode: {}", search, exportParams.getTopopgraphicPlaceExportMode());
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.getTopopgraphicPlaceExportMode());
+                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
 
         if (resultPage.totalElements == 0) {
             return Response.noContent().build();

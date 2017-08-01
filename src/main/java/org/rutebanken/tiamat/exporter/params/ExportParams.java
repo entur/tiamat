@@ -25,8 +25,9 @@ public class ExportParams {
     @QueryParam(value = "topopgraphicPlaceExportMode")
     private ExportMode topopgraphicPlaceExportMode = ExportMode.RELEVANT;
 
+    @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
-    private ExportMode tariffZoneExportMode = ExportMode.ALL;
+    private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
 
 
     @QueryParam(value = "municipalityReference")
@@ -88,7 +89,7 @@ public class ExportParams {
     }
 
     public static class Builder {
-        private ExportMode tariffZoneExportMode = ExportMode.ALL;
+        private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
         private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
