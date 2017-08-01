@@ -21,18 +21,20 @@ import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSIO
 @Transactional
 public class PublicationDeliveryExporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
-    private StopPlaceRepository stopPlaceRepository;
-    private NetexMapper netexMapper;
+    private final StopPlaceRepository stopPlaceRepository;
+    private final NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-    private TopographicPlacesExporter topographicPlacesExporter;
+    private final TopographicPlacesExporter topographicPlacesExporter;
+    private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
+        this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
@@ -72,10 +74,19 @@ public class PublicationDeliveryExporter {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopopgraphicPlaceExportMode(), siteFrame);
-        tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
+
+        boolean relevantTariffZones = exportParams.getTariffZoneExportMode() == null || ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
+
+        if(!relevantTariffZones) {
+            tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
+        }
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        if(relevantTariffZones) {
+            tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+        }
 
         if (ExportParams.ExportMode.NONE.equals(exportParams.getTopopgraphicPlaceExportMode())){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);

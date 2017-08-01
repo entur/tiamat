@@ -62,6 +62,7 @@ public class TariffZonesFromStopsExporter {
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
                 .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
 
+        logger.info("Adding {} tariff zones", tariffZoneMap.values().size());
         responseSiteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneMap.values()));
     }
 
