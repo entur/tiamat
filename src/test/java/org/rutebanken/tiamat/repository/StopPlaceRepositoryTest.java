@@ -70,33 +70,4 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		StopPlace foundStop = stopPlaceRepository.findByQuay(quay);
 		Assert.assertEquals(savedStop, foundStop);
 	}
-
-    /*
-    @Test
-    public void reproduceConcurrencyIssue() throws InterruptedException, ExecutionException {
-
-
-        ExecutorService service = Executors.newFixedThreadPool(200);
-        List<Future<String>> futures = new ArrayList<>();
-
-        for(int i = 0; i < 1000; i++) {
-            Future<String> future = service.submit(() -> {
-                StopPlace stopPlace = new StopPlace();
-                stopPlaceRepository.save(stopPlace);
-                //System.out.println("Saved: " + stopPlace.getNetexId());
-                return stopPlace.getNetexId();
-            });
-            futures.add(future);
-        }
-
-        for(Future<String> future : futures) {
-
-            String id = future.get();
-            //System.out.println("Got id "+id);
-            assertThat(id).isNotEmpty();
-        }
-
-
-    }
-    */
 }
