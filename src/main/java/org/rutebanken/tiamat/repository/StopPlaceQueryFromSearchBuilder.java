@@ -121,7 +121,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             operators.add("and");
             wheres.add("s.version = :version");
             parameters.put("version", stopPlaceSearch.getVersion());
-        } else if (!stopPlaceSearch.isAllVersions() && stopPlaceSearch.getPointInTime() == null) {
+        } else if (!stopPlaceSearch.isAllVersions()
+                && stopPlaceSearch.getPointInTime() == null &&
+                (stopPlaceSearch.getVersionValidity() == null || ExportParams.VersionValidity.ALL.equals(stopPlaceSearch.getVersionValidity()))) {
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }
@@ -131,14 +133,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
             wheres.add("((s.from_date IS NULL AND s.to_date IS NULL) OR (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
-        }
-
-        if (stopPlaceSearch.isWithoutLocationOnly()) {
-            operators.add("and");
-            wheres.add("s.centroid IS NULL");
-        }
-
-        if(stopPlaceSearch.getVersionValidity() != null) {
+        } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
             if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
@@ -146,7 +141,11 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
                 wheres.add("s.to_date >= now() OR s.to_date IS NULL");
             }
+        }
 
+        if (stopPlaceSearch.isWithoutLocationOnly()) {
+            operators.add("and");
+            wheres.add("s.centroid IS NULL");
         }
 
         addWheres(queryString, wheres, operators);
