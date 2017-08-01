@@ -36,6 +36,10 @@ public class StopPlaceSearch {
     @QueryParam(value = "allVersions")
     private boolean allVersions;
 
+    @DefaultValue(value = "ALL")
+    @QueryParam(value = "versionValidity")
+    private ExportParams.VersionValidity versionValidity;
+
     @QueryParam(value = "withoutLocationOnly")
     private boolean withoutLocationOnly;
 
@@ -47,7 +51,7 @@ public class StopPlaceSearch {
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, boolean withoutLocationOnly, Instant pointInTime, Long version, int page, int size) {
+                            List<String> netexIdList, boolean allVersions, boolean withoutLocationOnly, Instant pointInTime, Long version, ExportParams.VersionValidity versionValidity, int page, int size) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
@@ -55,6 +59,7 @@ public class StopPlaceSearch {
         this.withoutLocationOnly = withoutLocationOnly;
         this.pointInTime = pointInTime;
         this.version = version;
+        this.versionValidity = versionValidity;
         this.page = page;
         this.size = size;
     }
@@ -91,6 +96,10 @@ public class StopPlaceSearch {
         return pointInTime;
     }
 
+    public ExportParams.VersionValidity getVersionValidity() {
+        return versionValidity;
+    }
+
     // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
@@ -105,6 +114,7 @@ public class StopPlaceSearch {
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
+                .add("versionValidity", getVersionValidity())
                 .add("page", page)
                 .add("size", size)
                 .toString();
@@ -123,6 +133,7 @@ public class StopPlaceSearch {
         private boolean withoutLocationOnly;
         private Long version;
         private Instant pointInTime;
+        private ExportParams.VersionValidity versionValidity;
         private int page = DEFAULT_PAGE;
         private int size = DEFAULT_PAGE_SIZE;
 
@@ -174,8 +185,13 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setVersionValidity(ExportParams.VersionValidity versionValidity) {
+            this.versionValidity = versionValidity;
+            return this;
+        }
+
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, versionValidity, page, size);
         }
 
     }
