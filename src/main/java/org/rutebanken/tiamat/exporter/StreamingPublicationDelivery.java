@@ -84,6 +84,8 @@ public class StreamingPublicationDelivery {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
 
+        logger.info("Async export initiated. Export params: {}", exportParams);
+
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
