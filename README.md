@@ -175,7 +175,7 @@ The parameter ```tariffZoneExportMode``` can be set to *RELEVANT* or *ALL*
 Relevant tariff zones with be found from the exported list of stop places. Because stop places can have a list of tariff zone refs.
 
 ### Version validity
-This parameter controls what stop places to return.
+The ```versionValidity``` parameter controls what stop places to return.
 * ALL: returns all stops in any version (See allVersions attribute), regardless of version validity
 * CURRENT: returns only stop place versions valid at the current time
 * FUTURE_CURRENT: returns only stop place versions valid at the current time, as well as versions valid in the future.
