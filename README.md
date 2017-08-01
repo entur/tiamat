@@ -111,72 +111,92 @@ publicationDeliveryStreamingOutput.validateAgainstSchema=false
 publicationDeliveryUnmarshaller.validateAgainstSchema=true
 ```
 
-## NeTEx export with query params
+## Synchronous NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery
+https://api-test.entur.org/tiamat/1.0/publication_delivery
 
 ### Query by name example:
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?q=Arne%20Garborgs%20vei
+https://api-test.entur.org/tiamat/1.0/publication_delivery?q=Arne%20Garborgs%20vei
 ```
 
 ### Query by ids that contains the number 3115
  ```
- https://www-test.entur.org/admin/nsr/jersey/publication_delivery?q=3115
+ https://api-test.entur.org/tiamat/1.0/publication_delivery?q=3115
  ```
 
 ### Query by stop place type
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?stopPlaceType=onstreetBus
+https://api-test.entur.org/tiamat/1.0/publication_delivery?stopPlaceType=RAIL_STATION
 ```
 It is also possible with multiple types.
 
-### Query by topographic place ref
-
-#### First, get references from this endpoint:
+### Query by municipality ID
 ```
-https://www-test.entur.org/admin/nsr/jersey/topographic_place
+https://api-test.entur.org/tiamat/1.0/publication_delivery?municipalityReference=KVE:TopographicPlace:1003
 ```
 
-#### Then you can set *countyReference* or *municipalityReference*
+### Query by county ID 
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?municipalityReference=2
+https://api-test.entur.org/tiamat/1.0/publication_delivery?countyReference=KVE:TopographicPlace:11
 ```
 
-### Size of results
+### Limit size of results
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?size=1000
+https://api-test.entur.org/tiamat/1.0/publication_delivery?size=1000
 ```
 
 ### Page
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?page=1
+https://api-test.entur.org/tiamat/1.0/publication_delivery?page=1
 ```
 
 ### ID list
 You can specify a list of NSR stop place IDs to return
 ```
-https://www-test.entur.org/admin/nsr/jersey/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+https://api-test.entur.org/tiamat/1.0/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
-See the possible params
-https://github.com/rutebanken/tiamat/blob/master/src/main/java/org/rutebanken/tiamat/rest/dto/DtoStopPlaceSearch.java
+### Topographic export mode
+The parameter ```topopgraphicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
+Relevant topographic places will be found from the exported list of stop places.
 
-## Async NeTEx export *ALL* data from Tiamat
-At the time of writing, you need to export everything with async export.
+### Tariff Zone export mode
+The parameter ```tariffZoneExportMode``` can be set to *RELEVANT* or *ALL*
+Relevant tariff zones with be found from the exported list of stop places. Because stop places can have a list of tariff zone refs.
+
+### Version validity
+This parameter controls what stop places to return.
+* ALL: returns all stops in any version (See allVersions attribute), regardless of version validity
+* CURRENT: returns only stop place versions valid at the current time
+* FUTURE_CURRENT: returns only stop place versions valid at the current time, as well as versions valid in the future.
+
+### Example
+```
+https://api-test.entur.org/tiamat/1.0/publication_delivery?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
+```
+
+Returns stop places with current version validity now, matching the query 'Nesbru' and exists in municipality 0220. Fetches relevant tariff zones and topographic places.
+
+## Async NeTEx export from Tiamat
+Asynchronous export uploads exported data to google cloud storage. When initiated, you will get a job ID back.
+When the job is finished, you can download the exported data.
+
+*Most of the parameters from synchronous export works with asynchronous export as well!*
+
 ### Start async export:
 ```
-curl https://www-test.entur.org/admin/nsr/jersey/publication_delivery/async | xmllint --format -
+curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async | xmllint --format -
 ```
 
 ### Check job status:
 ```
-curl https://www-test.entur.org/admin/nsr/jersey/publication_delivery/async/job | xmllint --format -
+curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async/job | xmllint --format -
 ```
 
 ### When job is done. Download it:
 ```
-curl https://www-test.entur.org/admin/nsr/jersey/publication_delivery/async/job/130116/content | zcat | xmllint --format - > export.xml
+curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async/job/130116/content | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
@@ -232,7 +252,7 @@ https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
 # GraphQL
 GraphQL endpoint is available on
 ```
-https://www-test.entur.org/admin/nsr/jersey/graphql
+https://api-test.entur.org/tiamat/1.0/graphql
 ```
 
 Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/
