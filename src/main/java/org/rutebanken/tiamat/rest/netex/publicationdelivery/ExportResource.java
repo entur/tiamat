@@ -45,6 +45,7 @@ public class ExportResource {
     @GET
     @Produces(MediaType.APPLICATION_XML)
     public Response exportStopPlaces(@BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
+        logger.info("Exporting publication delivery. {}", exportParams);
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(exportParams);
         return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
     }
