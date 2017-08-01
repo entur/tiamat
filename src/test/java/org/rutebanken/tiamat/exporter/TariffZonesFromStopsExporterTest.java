@@ -58,7 +58,7 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
         SiteFrame siteFrame = new SiteFrame();
         tariffZonesFromStopsExporter.resolveTariffZones(Arrays.asList(netexStopPlace), siteFrame);
 
-        assertThat(siteFrame.getTariffZones().getTariffZone()).as("Number of tariffzones returned").hasSize(0);
+        assertThat(siteFrame.getTariffZones()).as("Number of tariffzones returned").isNull();
 
     }
 

@@ -84,7 +84,7 @@ public class PublicationDeliveryExporter {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if(relevantTariffZones) {
+        if(relevantTariffZones && convertedSiteFrame.getStopPlaces() != null) {
             tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
         }
 
