@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.base.MoreObjects;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
@@ -28,5 +29,14 @@ public class ChangedStopPlaceSearch {
 
     public Pageable getPageable() {
         return pageable;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("from", from)
+                .add("to", to)
+                .add("pageable", pageable)
+                .toString();
     }
 }

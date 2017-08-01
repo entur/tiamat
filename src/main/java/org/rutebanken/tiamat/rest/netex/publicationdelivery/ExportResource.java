@@ -59,6 +59,7 @@ public class ExportResource {
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
+        logger.info("Exporting stop places. Search: {}, export mode: {}", search, exportParams.getTopopgraphicPlaceExportMode());
         PublicationDeliveryStructurePage resultPage =
                 publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams.getTopopgraphicPlaceExportMode());
 
