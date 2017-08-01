@@ -157,6 +157,10 @@ You can specify a list of NSR stop place IDs to return
 https://api-test.entur.org/tiamat/1.0/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
+### All Versions
+``allVersions```. Acceptable values are true or false. If set to true, all versions of matching stop places will be returned.
+If set to false, the highest version by number will be returned for matching stop places. This parameter is not enabled when using the version valitity parmaeter.
+
 ### Topographic export mode
 The parameter ```topopgraphicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
 Relevant topographic places will be found from the exported list of stop places.
