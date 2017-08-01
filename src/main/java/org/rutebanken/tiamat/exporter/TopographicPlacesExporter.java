@@ -90,7 +90,7 @@ public class TopographicPlacesExporter {
 
     private Collection<org.rutebanken.tiamat.model.TopographicPlace> getTopographicPlacesForExport(ExportParams.ExportMode topographicPlaceExportMode, StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure) {
         Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport;
-        if (ALL.equals(topographicPlaceExportMode)) {
+        if (ALL.equals(topographicPlaceExportMode) || topographicPlaceExportMode == null) {
             topographicPlacesForExport = topographicPlaceRepository.findAll();
             if (topographicPlacesForExport.isEmpty()) {
                 logger.warn("No topographic places found to export");
