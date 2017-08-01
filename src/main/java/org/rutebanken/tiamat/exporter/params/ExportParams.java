@@ -19,6 +19,8 @@ public class ExportParams {
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
+    public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE}
+
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topopgraphicPlaceExportMode")
     private ExportMode topopgraphicPlaceExportMode = ExportMode.RELEVANT;
