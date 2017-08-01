@@ -3,13 +3,11 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
-import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -60,9 +58,7 @@ public class StreamingPublicationDelivery {
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
-
-    @Autowired
-    private TopographicPlaceRepository topographicPlaceRepository;
+    private final TopographicPlaceRepository topographicPlaceRepository;
 
 
     @Autowired
@@ -73,7 +69,7 @@ public class StreamingPublicationDelivery {
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TopographicPlacesExporter topographicPlacesExporter,
                                         NetexMapper netexMapper,
-                                        TariffZoneRepository tariffZoneRepository) {
+                                        TariffZoneRepository tariffZoneRepository, TopographicPlaceRepository topographicPlaceRepository) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -82,6 +78,7 @@ public class StreamingPublicationDelivery {
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
+        this.topographicPlaceRepository = topographicPlaceRepository;
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 

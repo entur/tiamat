@@ -3,9 +3,13 @@ package org.rutebanken.tiamat.exporter.params;
 import com.google.common.base.MoreObjects;
 
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.String.valueOf;
+import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.RELEVANT;
 
 /**
  * Export parameters.
@@ -15,8 +19,9 @@ public class ExportParams {
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
+    @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topopgraphicPlaceExportMode")
-    private ExportMode topopgraphicPlaceExportMode = ExportMode.ALL;
+    private ExportMode topopgraphicPlaceExportMode = ExportMode.RELEVANT;
 
     @QueryParam(value = "tariffZoneExportMode")
     private ExportMode tariffZoneExportMode = ExportMode.ALL;
@@ -82,7 +87,7 @@ public class ExportParams {
 
     public static class Builder {
         private ExportMode tariffZoneExportMode = ExportMode.ALL;
-        private ExportMode topographicPlaceExportMode = ExportMode.ALL;
+        private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;

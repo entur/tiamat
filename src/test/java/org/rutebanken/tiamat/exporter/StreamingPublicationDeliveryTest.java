@@ -29,7 +29,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -54,7 +53,7 @@ public class StreamingPublicationDeliveryTest {
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,
-            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper, tariffZoneRepository);
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
@@ -114,6 +113,7 @@ public class StreamingPublicationDeliveryTest {
         topographicPlace.setVersion(1);
         topographicPlace.setNetexId("NSR:TopographicPlace:2");
         when(topographicPlaceRepository.findAll()).thenReturn(Arrays.asList(topographicPlace));
+        when(topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(anySetOf(Long.class))).thenReturn(Arrays.asList(topographicPlace));
 
         stream(stopPlaces, new ArrayList<>(), byteArrayOutputStream);
 
