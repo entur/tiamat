@@ -158,7 +158,7 @@ https://api-test.entur.org/tiamat/1.0/publication_delivery?idList=NSR:StopPlace:
 ```
 
 ### All Versions
-``allVersions```. Acceptable values are true or false. If set to true, all versions of matching stop places will be returned.
+```allVersions```. Acceptable values are true or false. If set to true, all versions of matching stop places will be returned.
 If set to false, the highest version by number will be returned for matching stop places. This parameter is not enabled when using the version valitity parmaeter.
 
 ### Stop places without location
