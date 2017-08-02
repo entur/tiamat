@@ -89,6 +89,9 @@ public class PublicationDeliveryExporter {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
         }
 
+        Set<Long> stopPlaceIds = StreamSupport.stream(iterableStopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
+        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
+
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
@@ -99,9 +102,6 @@ public class PublicationDeliveryExporter {
         if (ExportParams.ExportMode.NONE.equals(exportParams.getTopopgraphicPlaceExportMode())){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
-
-        Set<Long> stopPlaceIds = StreamSupport.stream(iterableStopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
-        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
 
         return createPublicationDelivery(convertedSiteFrame);
     }
