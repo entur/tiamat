@@ -4,18 +4,12 @@ import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Parking;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -48,13 +42,15 @@ public class StreamingPublicationDeliveryTest {
     private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class));
     private NetexMapper netexMapper = new NetexMapper();
 
+    private PathLinkRepository pathLinkRepository = mock(PathLinkRepository.class);
+
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private TariffZonesFromStopsExporter tariffZonesFromStopsExporter = mock(TariffZonesFromStopsExporter.class);
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter, tariffZonesFromStopsExporter);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,
-            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository);
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, topographicPlacesExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository, pathLinkRepository);
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {
@@ -77,6 +73,7 @@ public class StreamingPublicationDeliveryTest {
                 .contains("</PublicationDelivery")
                 .contains("</dataObjects>");
     }
+
     @Test
     public void streamParkingIntoPublicationDelivery() throws Exception {
 
@@ -129,6 +126,37 @@ public class StreamingPublicationDeliveryTest {
     }
 
     @Test
+    public void streamPathLinksIntoPublicationDelivery() throws Exception {
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
+        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
+        setField(IdentifiedEntity.class, "id", stopPlace, 1L);
+
+        StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("stop place 2 in publication delivery"));
+        stopPlace2.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace2));
+        setField(IdentifiedEntity.class, "id", stopPlace, 2L);
+
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace)), new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace2)));
+        setField(IdentifiedEntity.class, "id", pathLink, 1L);
+
+        List<StopPlace> stopPlaces = new ArrayList<>(2);
+        stopPlaces.add(stopPlace);
+        stopPlaces.add(stopPlace2);
+
+        stream(stopPlaces, new ArrayList<>(), Arrays.asList(pathLink),byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        assertThat(xml)
+                .contains("<StopPlace")
+                .contains("<PathLink")
+                .contains("</PublicationDelivery")
+                .contains("</dataObjects>");
+    }
+
+    @Test
     public void streamStopPlaceAndValidateResult() throws Exception {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -159,11 +187,18 @@ public class StreamingPublicationDeliveryTest {
     }
 
     private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
+        stream(stopPlaces, parkings, new ArrayList<>(), byteArrayOutputStream);
+    }
+
+    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
         when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
         when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
+        when(pathLinkRepository.findAll()).thenReturn(pathLinks);
+        when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
+
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
 

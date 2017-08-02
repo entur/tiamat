@@ -3,18 +3,18 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
+import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +59,7 @@ public class StreamingPublicationDelivery {
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
+    private final PathLinkRepository pathLinkRepository;
 
 
     @Autowired
@@ -69,7 +70,7 @@ public class StreamingPublicationDelivery {
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TopographicPlacesExporter topographicPlacesExporter,
                                         NetexMapper netexMapper,
-                                        TariffZoneRepository tariffZoneRepository, TopographicPlaceRepository topographicPlaceRepository) {
+                                        TariffZoneRepository tariffZoneRepository, TopographicPlaceRepository topographicPlaceRepository, PathLinkRepository pathLinkRepository) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -79,6 +80,7 @@ public class StreamingPublicationDelivery {
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.pathLinkRepository = pathLinkRepository;
     }
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
@@ -116,6 +118,16 @@ public class StreamingPublicationDelivery {
                 tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
             }
         }
+
+        List<org.rutebanken.tiamat.model.PathLink> pathLinks = pathLinkRepository.findByStopPlaceIds(stopPlacePrimaryIds);
+        if(!pathLinks.isEmpty()) {
+            logger.info("Adding {} path links", pathLinks);
+            siteFrame.setPathLinks(new PathLinksInFrame_RelStructure());
+            siteFrame.getPathLinks().getPathLink().addAll(pathLinks);
+        } else {
+            logger.info("There are no path links to export with the current filter");
+        }
+
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
