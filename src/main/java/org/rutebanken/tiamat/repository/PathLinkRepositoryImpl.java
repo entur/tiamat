@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.repository;
 
 
+import org.apache.commons.lang.StringUtils;
+import org.rutebanken.tiamat.model.PathLink;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
@@ -70,5 +72,47 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
         } catch (NoResultException noResultException) {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<PathLink> findByStopPlaceIds(Set<Long> stopPlaceIds) {
+
+        String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
+
+        System.out.println(sql);
+        Query query = entityManager.createNativeQuery(sql, PathLink.class);
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<PathLink> results = query.getResultList();
+            return results;
+
+        } catch (NoResultException noResultException) {
+            return new ArrayList<>();
+        }
+    }
+
+    public String createFindPathLinkFromStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
+        return new StringBuilder(
+                "SELECT pl.* " +
+                        "FROM (" +
+                        "   SELECT pl2.id" +
+                        "   FROM stop_place s" +
+                        "       LEFT OUTER JOIN stop_place_quays spq ON spq.stop_place_id = s.id" +
+                        "       LEFT OUTER JOIN quay q ON spq.quays_id = q.id" +
+                        "       INNER JOIN path_link_end ple" +
+                        "           ON (ple.place_ref = s.netex_id" +
+                        "               AND (ple.place_version = cast(s.version AS TEXT) OR ple.place_version = 'any'))" +
+                        "           OR (ple.place_ref = q.netex_id" +
+                        "               AND (ple.place_version = cast(q.version AS TEXT) OR ple.place_version = 'any'))" +
+                        "       INNER JOIN path_link pl2 ON ple.id = pl2.from_id" +
+                        "           OR ple.id = pl2.to_id" +
+                        "   WHERE s.id IN(")
+                .append(StringUtils.join(stopPlaceIds, ','))
+                .append(") ")
+                .append("GROUP BY pl2.id) pl2 ")
+                .append("JOIN path_link pl ON pl.id = pl2.id ")
+                .append("ORDER by pl.netex_id, pl.version")
+                .toString();
     }
 }
