@@ -7,10 +7,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
-import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +41,9 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private ParkingRepository parkingRepository;
+
+    @Autowired
+    private PathLinkRepository pathLinkRepository;
 
     @Autowired
     private ReferenceResolver referenceResolver;
@@ -86,6 +86,8 @@ public class RestoringImportResourceTest extends TiamatIntegrationTest {
         assertThat(parkingRepository.findAll()).as("imported parkings in repository").isNotEmpty();
 
         assertThat(tariffZoneRepository.findAll()).as("tariff zones in repository").isNotEmpty();
+
+        assertThat(pathLinkRepository.findAll()).as("path links in repository)").isNotEmpty();
     }
 
 }

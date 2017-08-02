@@ -518,6 +518,25 @@
           <Name>V02</Name>
         </TariffZone>
       </tariffZones>
+      <pathLinks modificationSet="all">
+        <PathLink modification="new" version="0" id="NSR:PathLink:1">
+          <ns2:LineString ns2:id="LineString">
+            <ns2:posList count="8" srsDimension="4326">
+              10.489593744277956 59.866274572704434 10.489497184753418 59.8661506924231 10.489518642425539 59.86584368278061 10.488853454589846 59.865946019643
+            </ns2:posList>
+          </ns2:LineString>
+          <From>
+            <PlaceRef ref="NSR:Quay:8007"/>
+          </From>
+          <To>
+            <PlaceRef ref="NSR:Quay:8008"/>
+          </To>
+          <AccessModes/>
+          <TransferDuration>
+            <DefaultDuration>PT2M22S</DefaultDuration>
+          </TransferDuration>
+        </PathLink>
+      </pathLinks>
     </SiteFrame>
   </dataObjects>
 </PublicationDelivery>
