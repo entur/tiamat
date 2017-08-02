@@ -149,7 +149,8 @@ public class RestoringImportResource {
 
                 return Response.ok("Imported " + stopPlacesImported.get() + " stop places, "
                         + parkingsImported.get() + " parkings, "
-                        + topographicPlacesCounter.get() + " topographic places."
+                        + topographicPlacesCounter.get() + " topographic places,"
+                        + pathLinksCounter.get() + " path links,"
                         + tariffZonesCounter + " tariff zones")
                         .build();
 
