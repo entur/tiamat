@@ -35,6 +35,10 @@ public class PublicationDeliveryHelper {
         return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
     }
 
+    public boolean hasPathLinks(SiteFrame netexSiteFrame) {
+        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null;
+    }
+
     public boolean hasParkings(SiteFrame siteFrame) {
         return siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null;
     }

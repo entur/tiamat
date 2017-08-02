@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.importer.restore.GenericRestoringImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringParkingImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringStopPlaceImporter;
 import org.rutebanken.tiamat.importer.restore.RestoringTopographicPlaceImporter;
+import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -65,7 +66,7 @@ public class RestoringImportResource {
     private final RestoringStopPlaceImporter restoringStopPlaceImporter;
     private final HazelcastInstance hazelcastInstance;
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final GenericRestoringImporter tariffZoneGenericRestoringImporter;
+    private final GenericRestoringImporter genericRestoringImporter;
 
     @Autowired
     public RestoringImportResource(PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller,
@@ -82,7 +83,7 @@ public class RestoringImportResource {
         this.restoringParkingImporter = restoringParkingImporter;
         this.hazelcastInstance = hazelcastInstance;
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.tariffZoneGenericRestoringImporter = genericRestoringImporter;
+        this.genericRestoringImporter = genericRestoringImporter;
     }
 
     /**
@@ -117,9 +118,17 @@ public class RestoringImportResource {
 
                 AtomicInteger tariffZonesCounter = new AtomicInteger();
                 if(publicationDeliveryHelper.hasTariffZones(netexSiteFrame)) {
-                    tariffZoneGenericRestoringImporter.importObjects(tariffZonesCounter, netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
+                    genericRestoringImporter.importObjects(tariffZonesCounter, netexSiteFrame.getTariffZones().getTariffZone(), TariffZone.class);
                 } else {
                     logger.info("No tariff zones detected");
+                }
+
+                AtomicInteger pathLinksCounter = new AtomicInteger();
+                if(publicationDeliveryHelper.hasPathLinks(netexSiteFrame)) {
+                    genericRestoringImporter.importObjects(pathLinksCounter, netexSiteFrame.getPathLinks().getPathLink(), PathLink.class);
+                    logger.info("Imported {} path links", pathLinksCounter);
+                } else {
+                    logger.info("No path links to import");
                 }
 
                 logger.info("Importing stops");
