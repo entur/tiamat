@@ -7,10 +7,12 @@ import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
@@ -442,5 +444,26 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
         assertThat(netexAccessibilityAssesment.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssesment:123124");
+    }
+
+    @Test
+    public void pathLinkToNetex() throws Exception {
+        PathLink pathLink = new PathLink(
+                new PathLinkEnd(new AddressablePlaceRefStructure("NSR:StopPlace:1", "1")),
+                new PathLinkEnd(new AddressablePlaceRefStructure("NSR:StopPlace:2", "1")));
+        pathLink.setNetexId("NSR:PathLink:1");
+        pathLink.setVersion(2L);
+
+        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+        assertThat(netexPathLink.getId()).isEqualTo(pathLink.getNetexId());
+        assertThat(netexPathLink.getVersion()).as("version").isEqualTo(String.valueOf(pathLink.getVersion()));
+        assertThat(netexPathLink.getTo()).isNotNull();
+        assertThat(netexPathLink.getFrom()).isNotNull();
+
+        assertThat(netexPathLink.getFrom().getPlaceRef().getRef()).isEqualTo(pathLink.getFrom().getPlaceRef().getRef());
+        assertThat(netexPathLink.getFrom().getPlaceRef().getVersion()).isEqualTo(pathLink.getFrom().getPlaceRef().getVersion());
+
+        assertThat(netexPathLink.getTo().getPlaceRef().getRef()).isEqualTo(pathLink.getTo().getPlaceRef().getRef());
+        assertThat(netexPathLink.getTo().getPlaceRef().getVersion()).isEqualTo(pathLink.getTo().getPlaceRef().getVersion());
     }
 }
