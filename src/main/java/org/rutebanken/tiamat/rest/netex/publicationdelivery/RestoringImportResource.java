@@ -126,7 +126,6 @@ public class RestoringImportResource {
                 AtomicInteger pathLinksCounter = new AtomicInteger();
                 if(publicationDeliveryHelper.hasPathLinks(netexSiteFrame)) {
                     genericRestoringImporter.importObjects(pathLinksCounter, netexSiteFrame.getPathLinks().getPathLink(), PathLink.class);
-                    logger.info("Imported {} path links", pathLinksCounter);
                 } else {
                     logger.info("No path links to import");
                 }
