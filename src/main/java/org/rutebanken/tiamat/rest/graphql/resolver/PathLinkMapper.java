@@ -93,9 +93,6 @@ public class PathLinkMapper {
             Map<String, String> placeRefInput = (Map<String, String>) input.get(PATH_LINK_END_PLACE_REF);
             String reference = placeRefInput.get(ENTITY_REF_REF);
             String version = placeRefInput.get(ENTITY_REF_VERSION);
-            if(version == null) {
-                version = ANY_VERSION;
-            }
 
             AddressablePlaceRefStructure addressablePlaceRef = new AddressablePlaceRefStructure(reference, version);
             pathLinkEnd.setPlaceRef(addressablePlaceRef);
