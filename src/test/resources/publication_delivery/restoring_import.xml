@@ -526,10 +526,10 @@
             </ns2:posList>
           </ns2:LineString>
           <From>
-            <PlaceRef ref="NSR:Quay:8007"/>
+            <PlaceRef ref="NSR:StopPlace:784"/>
           </From>
           <To>
-            <PlaceRef ref="NSR:Quay:8008"/>
+            <PlaceRef ref="NSR:Quay:1148"/>
           </To>
           <AccessModes/>
           <TransferDuration>
