@@ -57,8 +57,8 @@ public class StopPlaceQuayMover {
 
         // Old and new version of destination
         Pair<StopPlace, StopPlace> pair = resolve(destinationStopPlaceId);
-        centroidComputer.computeCentroidForStopPlace(pair.getRight());
         pair.getRight().getQuays().addAll(quaysToMove);
+        centroidComputer.computeCentroidForStopPlace(pair.getRight());
         pair.getRight().setVersionComment(toVersionComment);
 
         StopPlace savedDestinationStopPlace = stopPlaceVersionedSaverService.saveNewVersion(pair.getLeft(), pair.getRight());
