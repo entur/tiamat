@@ -102,9 +102,9 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
                         "       LEFT OUTER JOIN quay q ON spq.quays_id = q.id" +
                         "       INNER JOIN path_link_end ple" +
                         "           ON (ple.place_ref = s.netex_id" +
-                        "               AND (ple.place_version = cast(s.version AS TEXT) OR ple.place_version = 'any'))" +
+                        "               AND (ple.place_version = cast(s.version AS TEXT) OR ple.place_version is NULL))" +
                         "           OR (ple.place_ref = q.netex_id" +
-                        "               AND (ple.place_version = cast(q.version AS TEXT) OR ple.place_version = 'any'))" +
+                        "               AND (ple.place_version = cast(q.version AS TEXT) OR ple.place_version is NULL))" +
                         "       INNER JOIN path_link pl2 ON ple.id = pl2.from_id" +
                         "           OR ple.id = pl2.to_id" +
                         "   WHERE s.id IN(")
