@@ -18,8 +18,11 @@ public abstract class IdentifiedEntity {
 
     protected String netexId;
 
-
-    private Long getId() {
+    /**
+     * This is the primary identificator. Usually, you should relate to ${getNetexId}
+     * @return the primary long value of this identitifed entity.
+     */
+    public Long getId() {
         return id;
     }
 
