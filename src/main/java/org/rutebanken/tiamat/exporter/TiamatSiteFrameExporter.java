@@ -1,8 +1,8 @@
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
@@ -10,11 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
-
-import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.ALL;
-import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.RELEVANT;
 
 @Service
 public class TiamatSiteFrameExporter {
@@ -26,10 +22,13 @@ public class TiamatSiteFrameExporter {
 
     private final TariffZoneRepository tariffZoneRepository;
 
+    private final PathLinkRepository pathLinkRepository;
+
     @Autowired
-    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository) {
+    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository) {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
+        this.pathLinkRepository = pathLinkRepository;
     }
 
 
@@ -68,4 +67,14 @@ public class TiamatSiteFrameExporter {
         }
     }
 
+    public void addRelevantPathLinks(Set<Long> stopPlaceIds, SiteFrame siteFrame) {
+        List<org.rutebanken.tiamat.model.PathLink> pathLinks = pathLinkRepository.findByStopPlaceIds(stopPlaceIds);
+        if (!pathLinks.isEmpty()) {
+            logger.info("Adding {} path links", pathLinks);
+            siteFrame.setPathLinks(new org.rutebanken.tiamat.model.PathLinksInFrame_RelStructure());
+            siteFrame.getPathLinks().getPathLink().addAll(pathLinks);
+        } else {
+            logger.info("There are no path links to export with the current filter");
+        }
+    }
 }

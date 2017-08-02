@@ -38,15 +38,15 @@ public class StreamingPublicationDeliveryTest {
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private ParkingRepository parkingRepository = mock(ParkingRepository.class);
 
-    private TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
-    private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class));
-    private NetexMapper netexMapper = new NetexMapper();
-
     private PathLinkRepository pathLinkRepository = mock(PathLinkRepository.class);
+    private TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
+    private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class), pathLinkRepository);
+
+    private NetexMapper netexMapper = new NetexMapper();
 
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private TariffZonesFromStopsExporter tariffZonesFromStopsExporter = mock(TariffZonesFromStopsExporter.class);
-    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter, tariffZonesFromStopsExporter);
+    private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository, netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter, tariffZonesFromStopsExporter, pathLinkRepository);
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(publicationDeliveryHelper, stopPlaceRepository,

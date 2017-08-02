@@ -14,7 +14,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
@@ -26,15 +32,17 @@ public class PublicationDeliveryExporter {
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
+    private final PathLinkRepository pathLinkRepository;
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, PathLinkRepository pathLinkRepository) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
+        this.pathLinkRepository = pathLinkRepository;
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
@@ -91,6 +99,9 @@ public class PublicationDeliveryExporter {
         if (ExportParams.ExportMode.NONE.equals(exportParams.getTopopgraphicPlaceExportMode())){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
+
+        Set<Long> stopPlaceIds = StreamSupport.stream(iterableStopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
+        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
 
         return createPublicationDelivery(convertedSiteFrame);
     }

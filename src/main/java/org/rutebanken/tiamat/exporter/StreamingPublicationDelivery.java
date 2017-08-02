@@ -119,15 +119,7 @@ public class StreamingPublicationDelivery {
             }
         }
 
-        List<org.rutebanken.tiamat.model.PathLink> pathLinks = pathLinkRepository.findByStopPlaceIds(stopPlacePrimaryIds);
-        if(!pathLinks.isEmpty()) {
-            logger.info("Adding {} path links", pathLinks);
-            siteFrame.setPathLinks(new PathLinksInFrame_RelStructure());
-            siteFrame.getPathLinks().getPathLink().addAll(pathLinks);
-        } else {
-            logger.info("There are no path links to export with the current filter");
-        }
-
+        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
