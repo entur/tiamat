@@ -106,6 +106,7 @@ public class StreamingPublicationDelivery {
         List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
         if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
             tariffZones = tariffZoneRepository.findAll();
+            tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
             logger.info("Added all tariff zones, regardless of version: {}", tariffZones.size());
 
         } else {
