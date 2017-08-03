@@ -71,8 +71,8 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
             logger.debug("Converting coordinates {}", lineString.getCoordinates());
             List<Double> positions = directPositionListType.getValue();
             for(Coordinate coordinate : lineString.getCoordinates()) {
-                positions.add(coordinate.x);
                 positions.add(coordinate.y);
+                positions.add(coordinate.x);
             }
             directPositionListType.setCount(BigInteger.valueOf(positions.size()));
             directPositionListType.setSrsDimension(BigInteger.valueOf(lineString.getSRID()));
