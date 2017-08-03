@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IList;
 import com.hazelcast.core.ISet;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.slf4j.Logger;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -90,21 +88,25 @@ public class GaplessIdGeneratorService {
             if (claimedId > 0) {
                 if (availableIds.remove(claimedId)) {
                     logger.trace("Removed claimed ID {} from list of available IDs for entity {}: {}", claimedId, entityTypeName, availableIds.stream().collect(toList()));
-                } else {
-                    claimedIds.add(claimedId);
                 }
+                // Add it to make it persisted later
+                claimedIds.add(claimedId);
             }
 
             boolean timeToGenerateAvailableIds = availableIds.size() < LOW_LEVEL_AVAILABLE_IDS;
 
             if (timeToGenerateAvailableIds || claimedIds.size() > INSERT_CLAIMED_ID_THRESHOLD) {
-                generateInTransaction(entityTypeName, timeToGenerateAvailableIds);
+                writeClaimedIdsAndGenerateNew(entityTypeName, timeToGenerateAvailableIds);
             }
 
             if (claimedId > 0) {
+                logger.trace("Returning claimed ID {}", claimedId);
                 return claimedId;
             } else {
-                return availableIds.remove();
+                Long remove = availableIds.remove();
+                claimedIds.add(remove);
+                logger.trace("Returning available ID for {}: {}", entityTypeName, remove);
+                return remove;
             }
         } catch (Exception e) {
             throw new IdGeneratorException("Caught exception when generating IDs for entity " + entityTypeName, e);
@@ -113,7 +115,7 @@ public class GaplessIdGeneratorService {
         }
     }
 
-    private void generateInTransaction(String entityTypeName, boolean timeToGenerateAvailableIds) {
+    private void writeClaimedIdsAndGenerateNew(String entityTypeName, boolean timeToGenerateAvailableIds) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         executeInTransaction(() -> {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
@@ -139,7 +141,7 @@ public class GaplessIdGeneratorService {
     /**
      * Generate new IDs for entity.
      *
-     * @param entityTypeName table to generateInTransaction IDs for
+     * @param entityTypeName table to writeClaimedIdsAndGenerateNew IDs for
      * @param availableIds   The (empty) queue of available IDs to fill
      * @param claimedId
      */
@@ -149,9 +151,6 @@ public class GaplessIdGeneratorService {
         while (retrievedIds.isEmpty()) {
             retrievedIds.addAll(retrieveIds(entityTypeName, entityManager));
         }
-
-        logger.trace("Inserting retrieved IDs for {}: {}", entityTypeName, retrievedIds);
-        insertIds(entityTypeName, retrievedIds, entityManager);
 
         for (long retrievedId : retrievedIds) {
             availableIds.put(retrievedId);
@@ -179,37 +178,6 @@ public class GaplessIdGeneratorService {
             generatedIdState.setLastIdForEntity(entityTypeName, Collections.max(retrievedIds));
         }
         return retrievedIds;
-    }
-
-    /**
-     * Insert used IDs into the helper table.
-     *
-     * @param tableName     the entity name. Typically class.getSimpleName value
-     * @param list          list of long values to reserve
-     * @param entityManager for the current transaction
-     */
-    private void insertIds(String tableName, List<Long> list, EntityManager entityManager) {
-        if (list.isEmpty()) {
-            throw new IllegalArgumentException("No IDs to insert");
-        }
-
-        StringBuilder insertUsedIdsSql = new StringBuilder("INSERT INTO id_generator(table_name, id_value) VALUES");
-
-        for (int i = 0; i < list.size(); i++) {
-            insertUsedIdsSql.append("('").append(tableName).append("',").append(list.get(i)).append(")");
-            if (i < list.size() - 1) {
-                insertUsedIdsSql.append(',');
-            }
-        }
-
-        // Format the sql for logging
-        String sql = insertUsedIdsSql.toString();
-
-        Query query = entityManager.createNativeQuery(sql);
-        logger.trace(sql);
-        int result = query.executeUpdate();
-        logger.trace("Inserted {}", result);
-        entityManager.flush();
     }
 
     private void insertIdsIgnoreDuplicates(String tableName, Set<Long> list, EntityManager entityManager) {
