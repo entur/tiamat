@@ -75,7 +75,7 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
                 positions.add(coordinate.x);
             }
             directPositionListType.setCount(BigInteger.valueOf(positions.size()));
-            directPositionListType.setSrsDimension(BigInteger.valueOf(lineString.getSRID()));
+            directPositionListType.setSrsDimension(BigInteger.valueOf(2L));
         }
         lineStringType.setPosList(directPositionListType);
         lineStringType.setId(LineString.class.getSimpleName());
