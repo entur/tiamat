@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
@@ -93,6 +94,9 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
                     authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
 
+                    if(updatedStopPlace.getName() == null && Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
+                        throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
+                    }
                     updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
 
                     return updatedStopPlace;
