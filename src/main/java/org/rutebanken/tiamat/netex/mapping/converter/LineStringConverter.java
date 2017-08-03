@@ -37,8 +37,6 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
     public LineString convertTo(LineStringType lineStringType, Type<LineString> type) {
 
         if(lineStringType.getPosList() != null) {
-            checkSrsDimension(lineStringType);
-
             List<Double> values = lineStringType.getPosList().getValue();
 
             CoordinateSequence coordinateSequence = doubleValuesToCoordinateSequence.convert(values);
@@ -48,16 +46,6 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
         }
 
         return null;
-    }
-
-    private void checkSrsDimension(LineStringType lineStringType) {
-        boolean lineStringContains = lineStringType.getSrsDimension() != null && lineStringType.getSrsDimension().intValue() == geometryFactory.getSRID();
-        boolean posListContains = lineStringType.getPosList() != null && lineStringType.getPosList().getSrsDimension().intValue() == geometryFactory.getSRID();
-
-        if (!lineStringContains && !posListContains) {
-            throw new NetexMappingException("SRS ID is not provided or has the wrong value for LineStringType or PosList: "
-                    + " Expected " + geometryFactory.getSRID());
-        }
     }
 
     @Override
@@ -79,6 +67,7 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
         }
         lineStringType.setPosList(directPositionListType);
         lineStringType.setId(LineString.class.getSimpleName());
+        lineStringType.setSrsDimension(BigInteger.valueOf(2L));
 
         return lineStringType;
     }

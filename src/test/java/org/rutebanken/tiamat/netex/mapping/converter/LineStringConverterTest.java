@@ -36,7 +36,6 @@ public class LineStringConverterTest {
         LineStringType gisLineString = lineStringConverter.convertFrom(lineString, new TypeBuilder<LineStringType>() {}.build());
         assertThat(gisLineString).isNotNull();
         assertThat(gisLineString.getPosList().getCount().intValue()).isEqualTo(4);
-        assertThat(gisLineString.getPosList().getSrsDimension().intValue()).isEqualTo(geometryFactory.getSRID());
         assertThat(gisLineString.getId()).isNotEmpty();
         // Check that the format is Y,X
         assertThat(gisLineString.getPosList().getValue().get(0)).isEqualTo(coordinates[0].y);
