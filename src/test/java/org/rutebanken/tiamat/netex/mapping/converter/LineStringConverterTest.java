@@ -44,8 +44,7 @@ public class LineStringConverterTest {
         assertThat(gisLineString.getPosList().getValue().get(2)).isEqualTo(coordinates[1].y);
         assertThat(gisLineString.getPosList().getValue().get(3)).isEqualTo(coordinates[1].x);
 
-
-//         assertThat(gisLineString.getPosList().getSrsName()).isEqualTo("WGS84");
+        assertThat(gisLineString.getSrsDimension().intValue()).isEqualTo(2);
     }
 
     @Test
