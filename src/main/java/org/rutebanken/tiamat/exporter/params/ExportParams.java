@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.valueOf;
-import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.RELEVANT;
 
 /**
  * Export parameters.
@@ -22,8 +21,8 @@ public class ExportParams {
     public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE}
 
     @DefaultValue(value = "RELEVANT")
-    @QueryParam(value = "topopgraphicPlaceExportMode")
-    private ExportMode topopgraphicPlaceExportMode = ExportMode.RELEVANT;
+    @QueryParam(value = "topographicPlaceExportMode")
+    private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
 
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
@@ -39,8 +38,8 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topopgraphicPlaceExportMode, ExportMode tariffZoneExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
-        this.topopgraphicPlaceExportMode = topopgraphicPlaceExportMode;
+    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+        this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
@@ -53,8 +52,8 @@ public class ExportParams {
 
     public ExportParams() {}
 
-    public ExportMode getTopopgraphicPlaceExportMode() {
-        return topopgraphicPlaceExportMode;
+    public ExportMode getTopographicPlaceExportMode() {
+        return topographicPlaceExportMode;
     }
 
     public ExportMode getTariffZoneExportMode() {
@@ -80,7 +79,7 @@ public class ExportParams {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("topopgraphicPlaceExportMode", topopgraphicPlaceExportMode)
+                .add("topographicPlaceExportMode", topographicPlaceExportMode)
                 .add("municipalityReferences", municipalityReferences)
                 .add("countyReferences", countyReferences)
                 .add("stopPlaceSearch", stopPlaceSearch)

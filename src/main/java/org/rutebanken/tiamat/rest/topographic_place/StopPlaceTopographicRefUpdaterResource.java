@@ -20,7 +20,7 @@ import java.util.Set;
  * Look up topographic place references for already persisted stops.
  */
 @Component
-@Path("/topopgraphic_place_updater")
+@Path("/topographic_place_updater")
 public class StopPlaceTopographicRefUpdaterResource {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceTopographicRefUpdaterResource.class);

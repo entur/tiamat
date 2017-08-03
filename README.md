@@ -167,7 +167,7 @@ Use the paramter: ```withoutLocationOnly=true```
 
 
 ### Topographic export mode
-The parameter ```topopgraphicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
+The parameter ```topographicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
 Relevant topographic places will be found from the exported list of stop places.
 
 ### Tariff Zone export mode

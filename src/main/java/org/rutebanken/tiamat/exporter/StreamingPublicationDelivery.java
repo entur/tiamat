@@ -3,14 +3,11 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
-import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -95,9 +92,9 @@ public class StreamingPublicationDelivery {
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
-        if(exportParams.getTopopgraphicPlaceExportMode() == null || exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
+        if(exportParams.getTopographicPlaceExportMode() == null || exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
             topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
-        } else if(exportParams.getTopopgraphicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+        } else if(exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
             List<TopographicPlace> relevantTopographicPlaces = topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(stopPlacePrimaryIds);
             Set<TopographicPlace> target = new HashSet<>();
             for(TopographicPlace topographicPlace : relevantTopographicPlaces) {

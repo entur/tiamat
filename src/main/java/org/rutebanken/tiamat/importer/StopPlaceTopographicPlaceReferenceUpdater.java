@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * The netex mapper should not map topographic place references to topographic places.
  * Because it should not know about repositories.
- * Thats why only the stop place's topopgraphic place id and version is populated.
+ * Thats why only the stop place's topographic place id and version is populated.
  * Update the reference with a proper topographic reference fetched from the repository,
  */
 @Component

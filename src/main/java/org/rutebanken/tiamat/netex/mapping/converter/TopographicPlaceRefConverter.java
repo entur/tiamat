@@ -43,7 +43,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
 
         Long version = Longs.tryParse(topographicPlaceRefStructure.getVersion());
         if(version != null) {
-            logger.debug("Looking for topopgraphic place with ID {} and version {}", topographicPlaceRefStructure.getRef(), version);
+            logger.debug("Looking for topographic place with ID {} and version {}", topographicPlaceRefStructure.getRef(), version);
             TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdAndVersion(topographicPlaceRefStructure.getRef(), version);
             if(topographicPlace != null) {
                 return topographicPlace;

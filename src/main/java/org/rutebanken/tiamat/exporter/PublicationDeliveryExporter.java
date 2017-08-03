@@ -14,12 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
@@ -81,7 +78,7 @@ public class PublicationDeliveryExporter {
         logger.info("Preparing publication delivery export");
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
-        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopopgraphicPlaceExportMode(), siteFrame);
+        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 
         boolean relevantTariffZones = exportParams.getTariffZoneExportMode() == null || ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
 
@@ -99,7 +96,7 @@ public class PublicationDeliveryExporter {
             tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
         }
 
-        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopopgraphicPlaceExportMode())){
+        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())){
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 

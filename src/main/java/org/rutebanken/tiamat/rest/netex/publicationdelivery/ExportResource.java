@@ -60,7 +60,7 @@ public class ExportResource {
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
-        logger.info("Exporting stop places. Search: {}, export mode: {}", search, exportParams.getTopopgraphicPlaceExportMode());
+        logger.info("Exporting stop places. Search: {}, export mode: {}", search, exportParams.getTopographicPlaceExportMode());
         PublicationDeliveryStructurePage resultPage =
                 publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
 
@@ -71,7 +71,7 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopopgraphicPlaceExportMode(), uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopographicPlaceExportMode(), uriInfo), "next");
         }
 
         return rsp.build();
