@@ -52,7 +52,7 @@ public class LineStringConverterTest {
         LineStringType lineStringType = new LineStringType()
                 .withId("LineString")
                 .withPosList(new DirectPositionListType()
-                        .withSrsDimension(BigInteger.valueOf(geometryFactory.getSRID()))
+                        .withSrsDimension(BigInteger.valueOf(2L))
                         .withValue(71.1, 9.1, 4.1, 9.5));
 
         LineString lineString = lineStringConverter.convertTo(lineStringType, new TypeBuilder<LineString>(){}.build());
