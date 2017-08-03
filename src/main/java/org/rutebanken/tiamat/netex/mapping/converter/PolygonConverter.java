@@ -5,6 +5,8 @@ import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import net.opengis.gml._3.*;
 import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonType> {
+
+    private static final Logger logger = LoggerFactory.getLogger(PolygonConverter.class);
 
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
 
@@ -66,6 +70,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
             return new Polygon(exteriorLinearRing, interiorHoles, geometryFactory);
         }
 
+        logger.warn("Cannot convert polygon from PolygonType. Cannot find exterior values: {}", polygonType);
 
         return null;
     }
