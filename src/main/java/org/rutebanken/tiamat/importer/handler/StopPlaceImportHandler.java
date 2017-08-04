@@ -41,9 +41,9 @@ public class StopPlaceImportHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceImportHandler.class);
 
     /**
-     * Hazelcast lock key for merging stop place import.
+     * Hazelcast lock key for stop place import.
      */
-    private static final String STOP_PLACE_MERGING_IMPORT_LOCK_KEY = "STOP_PLACE_MERGING_IMPORT_LOCK_KEY";
+    private static final String STOP_PLACE_IMPORT_LOCK_KEY = "STOP_PLACE_IMPORT_LOCK_KEY";
 
     /**
      * Make this configurable. Export topographic places in response.
@@ -129,7 +129,7 @@ public class StopPlaceImportHandler {
             if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
-                final Lock lock = hazelcastInstance.getLock(STOP_PLACE_MERGING_IMPORT_LOCK_KEY);
+                final Lock lock = hazelcastInstance.getLock(STOP_PLACE_IMPORT_LOCK_KEY);
                 lock.lock();
                 try {
                     if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
