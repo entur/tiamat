@@ -55,6 +55,9 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
         if(required && value == null) {
             throw new RuntimeException("Property " + key + " cannot be null");
         }
+        if(value == null) {
+            return null;
+        }
         return String.valueOf(value);
     }
 
