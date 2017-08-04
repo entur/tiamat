@@ -30,8 +30,10 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
 
             logger.info("Creating kubernetes service");
             KubernetesService kubernetesService = new KubernetesService(kubernetesUrl, namespace, kuberentesEnabled);
-            logger.info("Initiating kubernetes service");
-            kubernetesService.init();
+            if(kuberentesEnabled) {
+                logger.info("Initiating kubernetes service");
+                kubernetesService.init();
+            }
 
             logger.info("Creating extended hazelcast service");
             ExtendedHazelcastService extendedHazelcastService = new ExtendedHazelcastService(kubernetesService, hazelcastManagementUrl);
@@ -63,8 +65,10 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
 
     private static boolean getBooleanProperty(String key, boolean required) {
         String value = getProperty(key, required);
-        boolean booleanValue = value.equalsIgnoreCase("true");
-        return booleanValue;
+        if(value == null) {
+            return false;
+        }
+        return value.equalsIgnoreCase("true");
     }
 
     /**
