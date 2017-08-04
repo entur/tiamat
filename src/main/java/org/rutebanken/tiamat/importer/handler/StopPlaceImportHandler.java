@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
@@ -38,8 +40,10 @@ public class StopPlaceImportHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceImportHandler.class);
 
-    private static final Object STOP_PLACE_IMPORT_LOCK = new Object();
-
+    /**
+     * Hazelcast lock key for merging stop place import.
+     */
+    private static final String STOP_PLACE_MERGING_IMPORT_LOCK_KEY = "STOP_PLACE_MERGING_IMPORT_LOCK_KEY";
 
     /**
      * Make this configurable. Export topographic places in response.
@@ -82,6 +86,9 @@ public class StopPlaceImportHandler {
     @Autowired
     private TopographicPlacesExporter topographicPlacesExporter;
 
+    @Autowired
+    private HazelcastInstance hazelcastInstance;
+
     // TODO: Use ExportParams to control what is returned?
     public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
@@ -122,7 +129,9 @@ public class StopPlaceImportHandler {
             if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
-                synchronized (STOP_PLACE_IMPORT_LOCK) {
+                final Lock lock = hazelcastInstance.getLock(STOP_PLACE_MERGING_IMPORT_LOCK_KEY);
+                lock.lock();
+                try {
                     if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
                         importedOrMatchedNetexStopPlaces = transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
                     } else if (importParams.importType.equals(ImportType.INITIAL)) {
@@ -132,6 +141,8 @@ public class StopPlaceImportHandler {
                     } else {
                         throw new NotImplementedException("Import type " + importParams.importType + " not implemented ");
                     }
+                } finally {
+                    lock.unlock();
                 }
             }
             
