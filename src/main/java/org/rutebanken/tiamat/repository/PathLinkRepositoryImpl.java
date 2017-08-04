@@ -77,6 +77,10 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
     @Override
     public List<PathLink> findByStopPlaceIds(Set<Long> stopPlaceIds) {
 
+        if(stopPlaceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
 
         System.out.println(sql);
