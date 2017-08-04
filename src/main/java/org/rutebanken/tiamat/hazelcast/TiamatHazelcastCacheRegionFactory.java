@@ -28,10 +28,14 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
             String namespace = getProperty("rutebanken.kubernetes.namespace", false);
             String hazelcastManagementUrl = getProperty("rutebanken.hazelcast.management.url", false);
 
+            logger.info("Creating kubernetes service");
             KubernetesService kubernetesService = new KubernetesService(kubernetesUrl, namespace, kuberentesEnabled);
-            logger.info("Created kubernetes service");
+            logger.info("Initiating kubernetes service");
+            kubernetesService.init();
+
+            logger.info("Creating extended hazelcast service");
             ExtendedHazelcastService extendedHazelcastService = new ExtendedHazelcastService(kubernetesService, hazelcastManagementUrl);
-            logger.info("Init ExtendedHazelcastService");
+            logger.info("Initiating extended hazelcast service");
             extendedHazelcastService.init();
             logger.info(extendedHazelcastService.information());
             return extendedHazelcastService;
