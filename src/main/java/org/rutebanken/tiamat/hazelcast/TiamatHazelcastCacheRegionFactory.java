@@ -26,6 +26,10 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
 
             boolean kuberentesEnabled = getBooleanProperty("rutebanken.kubernetes.enabled", false);
             String namespace = getProperty("rutebanken.kubernetes.namespace", false);
+            if(namespace == null) {
+                namespace = "default";
+            }
+
             String hazelcastManagementUrl = getProperty("rutebanken.hazelcast.management.url", false);
 
             logger.info("Creating kubernetes service");
