@@ -8,9 +8,6 @@ import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +15,6 @@ import java.util.UUID;
 
 import static org.rutebanken.tiamat.netex.id.GeneratedIdState.LAST_IDS_FOR_ENTITY;
 
-@Service
 public class ExtendedHazelcastService extends HazelCastService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtendedHazelcastService.class);
@@ -34,13 +30,13 @@ public class ExtendedHazelcastService extends HazelCastService {
      * JVM is configured to have 1000 MB and this value is 10, then the map entries will be evicted when used heap size exceeds 100 MB.
      *
      * We have about 22 maps for the second level cache and max heap 5 GB, at the time of writing.
-     * With this value set to 2, this means that each map will have their map entries evicted when the used heap size (of the map itself) exeeds 100MB.
+     * With this value set to 2, this means that each map will have their map entries evicted when the used heap size (of the map itselv) exeeds 100MB.
      * 100 MB per map is 2.2GB used heap in total.
      *
      */
     private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 2;
 
-    public ExtendedHazelcastService(@Autowired KubernetesService kubernetesService, @Value("${hazelcast.management.url:}") String hazelcastManagementUrl) {
+    public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
     }
 
