@@ -698,6 +698,43 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue();
     }
 
+
+    /**
+     * Test added for NRP-1851
+     * @throws Exception
+     */
+    @Test
+    public void testSimpleMutationCreateStopPlaceImportedIdWithNewLine() throws Exception {
+
+        String name = "Testing name";
+        String encNewLine = "\\\\n";
+        String originalId = "TEST:1234    ";
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          name: { value:\\\"" + name + "\\\" } " +
+                "          keyValues:{ key:\\\"" + GraphQLNames.IMPORTED_ID +"\\\" values:\\\"" + originalId + encNewLine + "\\\" }" +
+                "       }) { " +
+                "  id " +
+                "  name { value } " +
+                "  keyValues { key values } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .root("data.stopPlace[0]")
+                .body("id", notNullValue())
+                .body("name.value", equalTo(name))
+                .body("keyValues[0].key", equalTo(GraphQLNames.IMPORTED_ID))
+                .body("keyValues[0].values[0]", not(equalTo(originalId)))
+                .body("keyValues[0].values[0]", equalTo(originalId.trim()))
+                ;
+
+        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue();
+    }
+
+
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
         TopographicPlace parentTopographicPlace = new TopographicPlace(new EmbeddableMultilingualString("countyforinstance"));
