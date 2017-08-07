@@ -24,7 +24,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -288,11 +287,6 @@ class StopPlaceUpdater implements DataFetcher {
             keyValues.forEach(inputMap-> {
                 String key = (String)inputMap.get(KEY);
                 List<String> values = (List<String>)inputMap.get(VALUES);
-
-                values = values.stream()
-                        .map(s -> s.trim())
-                        .filter(s -> !s.isEmpty())
-                        .collect(Collectors.toList());
 
                 Value value = new Value(values);
                 entity.getKeyValues().put(key, value);

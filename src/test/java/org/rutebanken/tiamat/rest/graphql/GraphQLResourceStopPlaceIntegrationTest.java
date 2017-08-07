@@ -707,17 +707,20 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     public void testSimpleMutationCreateStopPlaceImportedIdWithNewLine() throws Exception {
 
         String name = "Testing name";
-        String encNewLine = "\\\\n";
-        String originalId = "TEST:1234    ";
+        String jsonFriendlyNewLineStr = "\\\\n";
+        String shortName = "          ";
+        String originalId = "   TEST:1234    ";
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
                 "          name: { value:\\\"" + name + "\\\" } " +
-                "          keyValues:{ key:\\\"" + GraphQLNames.IMPORTED_ID +"\\\" values:\\\"" + originalId + encNewLine + "\\\" }" +
+                "          shortName: { value:\\\"" + shortName + jsonFriendlyNewLineStr + "\\\" } " +
+                "          keyValues:{ key:\\\"" + GraphQLNames.IMPORTED_ID +"\\\" values:\\\"" + originalId + jsonFriendlyNewLineStr + "\\\" }" +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
+                "  shortName { value } " +
                 "  keyValues { key values } " +
                 "  } " +
                 "}\",\"variables\":\"\"}";
@@ -726,8 +729,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .root("data.stopPlace[0]")
                 .body("id", notNullValue())
                 .body("name.value", equalTo(name))
+                .body("shortName.value", equalTo(""))
                 .body("keyValues[0].key", equalTo(GraphQLNames.IMPORTED_ID))
-                .body("keyValues[0].values[0]", not(equalTo(originalId)))
                 .body("keyValues[0].values[0]", equalTo(originalId.trim()))
                 ;
 
@@ -754,9 +757,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        String updatedName = "Testing name ";
-        String updatedShortName = "Testing shortname ";
-        String updatedDescription = "Testing description ";
+        String updatedName = "Testing name";
+        String updatedShortName = "Testing shortname";
+        String updatedDescription = "Testing description";
 //        String fromDate = "2012-04-23T18:25:43.511+0200";
 //        String toDate = "2018-04-23T18:25:43.511+0200";
 
@@ -942,9 +945,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name ";
-        String shortName = "Testing shortname ";
-        String description = "Testing description ";
+        String name = "Testing name";
+        String shortName = "Testing shortname";
+        String description = "Testing description";
         String publicCode = "publicCode 2";
 
         String privateCodeValue = "PB03";
@@ -1014,9 +1017,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name ";
-        String shortName = "Testing shortname ";
-        String description = "Testing description ";
+        String name = "Testing name";
+        String shortName = "Testing shortname";
+        String description = "Testing description";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -1114,9 +1117,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String name = "Testing name ";
-        String shortName = "Testing shortname ";
-        String description = "Testing description ";
+        String name = "Testing name";
+        String shortName = "Testing shortname";
+        String description = "Testing description";
 
         Float lon = new Float(10.11111);
         Float lat = new Float(59.11111);
@@ -1298,7 +1301,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        String name = "Testing name ";
+        String name = "Testing name";
         String netexId = stopPlace.getNetexId();
 
         //Verify that placeEquipments have been set
@@ -1431,7 +1434,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        String name = "Testing name ";
+        String name = "Testing name";
         String netexId = stopPlace.getNetexId();
 
         //Verify that placeEquipments have been set
