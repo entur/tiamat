@@ -69,7 +69,9 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	@Override
 	public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-
+		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+			return new ArrayList<>();
+		}
 		StringBuilder sql = new StringBuilder("select tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
 
 		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());

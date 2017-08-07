@@ -21,6 +21,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,9 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
 	@Override
 	public List<TariffZone> getTariffZonesFromStopPlaceIds(Set<Long> stopPlaceIds) {
+		if(stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+			return new ArrayList<>();
+		}
 		StringBuilder sql = new StringBuilder("SELECT tz.* " +
 				"FROM (SELECT tz2.id " +
 				"      FROM stop_place_tariff_zones sptz " +
