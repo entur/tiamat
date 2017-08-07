@@ -28,15 +28,6 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     @Autowired
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
 
-    @Autowired
-    private GeneratedIdState generatedIdState;
-
-    @Autowired
-    private HazelcastInstance hazelcastInstance;
-
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-
     @Test
     public void verifyNetexIdAssignedToStop() {
         StopPlace stopPlace = new StopPlace();

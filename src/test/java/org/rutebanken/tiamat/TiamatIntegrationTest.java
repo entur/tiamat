@@ -69,7 +69,8 @@ public abstract class TiamatIntegrationTest {
     protected GeneratedIdState generatedIdState;
 
     @Autowired
-    private EntityManagerFactory entityManagerFactory;
+    protected EntityManagerFactory entityManagerFactory;
+
     @Value("${local.server.port}")
     protected int port;
 
