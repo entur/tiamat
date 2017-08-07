@@ -298,6 +298,8 @@ public class GraphQLNames {
     public static final String MERGE_QUAYS = "mergeQuays";
     public static final String MOVE_QUAYS_TO_STOP = "moveQuaysToStop";
     public static final String QUAY_IDS = "quayIds";
+    public static final String TERMINATE_STOP_PLACE = "terminateStopPlace";
+    public static final String REOPEN_STOP_PLACE = "reopenStopPlace";
     public static final String DELETE_STOP_PLACE = "deleteStopPlace";
     public static final String DELETE_QUAY_FROM_STOP_PLACE = "deleteQuay";
 }

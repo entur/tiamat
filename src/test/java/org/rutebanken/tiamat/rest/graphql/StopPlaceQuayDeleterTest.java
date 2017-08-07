@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,6 +62,49 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         Quay deletedQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayNetexId);
         // Verify that associated quay is also deleted
         assertThat(deletedQuay).isNull();
+    }
+
+    @Transactional
+    @Test
+    public void testTerminateAndReopenStopPlace() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+
+        //Saving two versions to verify that both are deleted
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String stopPlaceNetexId = savedStopPlace.getNetexId();
+
+        StopPlace fetchedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
+
+        assertThat(fetchedStopPlace).isNotNull();
+        assertThat(fetchedStopPlace.getValidBetween().getToDate()).isNull();
+
+        long latestVersion = fetchedStopPlace.getVersion();
+
+        Instant timeOfTermination = fetchedStopPlace.getValidBetween().getFromDate().plusMillis(1);
+
+        String terminatedVersionComment = "Terminating Stop";
+        StopPlace terminatedStopPlace = stopPlaceQuayDeleter.terminateStopPlace(stopPlaceNetexId, timeOfTermination, terminatedVersionComment);
+
+        assertThat(terminatedStopPlace).isNotNull();
+
+        terminatedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
+        assertThat(terminatedStopPlace).isNotNull();
+        assertThat(terminatedStopPlace.getVersion()).isGreaterThan(latestVersion);
+        assertThat(terminatedStopPlace.getVersionComment()).isEqualTo(terminatedVersionComment);
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isEqualByComparingTo(timeOfTermination);
+
+
+        String reopenedVersionComment = "Reopened StopPlace";
+        StopPlace reopenedStopPlace = stopPlaceQuayDeleter.reopenStopPlace(stopPlaceNetexId, reopenedVersionComment);
+        assertThat(reopenedStopPlace).isNotNull();
+        assertThat(reopenedStopPlace.getVersion()).isGreaterThan(terminatedStopPlace.getVersion());
+        assertThat(reopenedStopPlace.getVersionComment()).isEqualTo(reopenedVersionComment);
+        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isGreaterThanOrEqualTo(timeOfTermination);
+        assertThat(reopenedStopPlace.getValidBetween().getToDate()).isNull();
     }
 
     @Transactional

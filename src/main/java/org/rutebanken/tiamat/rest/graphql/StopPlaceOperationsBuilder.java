@@ -4,6 +4,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,9 @@ public class StopPlaceOperationsBuilder {
 
     @Autowired
     private StopPlaceQuayDeleter stopPlaceQuayDeleter;
+
+    @Autowired
+    DateScalar dateScalar;
 
     public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -81,6 +85,28 @@ public class StopPlaceOperationsBuilder {
                 .description("!!! Deletes all versions of StopPlace from database - use with caution !!!")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .dataFetcher(environment -> stopPlaceQuayDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
+                .build());
+
+        //Terminate StopPlace
+        operations.add(newFieldDefinition()
+                .type(stopPlaceObjectType)
+                .name(TERMINATE_STOP_PLACE)
+                .description("StopPlace will no longer be active after the given date.")
+                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
+                .argument(newArgument().name(VALID_BETWEEN_TO_DATE).type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar())))
+                .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayDeleter.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT)))
+                .build());
+
+
+        //Reopen StopPlace
+        operations.add(newFieldDefinition()
+                .type(stopPlaceObjectType)
+                .name(REOPEN_STOP_PLACE)
+                .description("StopPlace will no longer be active after the given date.")
+                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
+                .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
+                .dataFetcher(environment -> stopPlaceQuayDeleter.reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
                 .build());
 
         //Delete Quay from StopPlace

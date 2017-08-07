@@ -7,9 +7,11 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -24,6 +26,9 @@ public class StopPlaceQuayDeleter {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
+    private VersionCreator versionCreator;
+
+    @Autowired
     private ReflectionAuthorizationService authorizationService;
 
     @Autowired
@@ -35,6 +40,39 @@ public class StopPlaceQuayDeleter {
         stopPlaceRepository.delete(stopPlaces);
         notifyDeleted(stopPlaces);
         return true;
+    }
+
+    protected StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
+        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+
+        if (stopPlace != null) {
+            StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+            stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+
+            nextVersionStopPlace.setVersionComment(versionComment);
+
+            versionCreator.terminateVersion(nextVersionStopPlace, timeOfTermination);
+
+            return nextVersionStopPlace;
+        }
+        return stopPlace;
+    }
+
+    protected StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
+        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+
+        if (stopPlace != null) {
+
+            StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+            nextVersionStopPlace.getValidBetween().setToDate(null);
+
+            nextVersionStopPlace.setVersionComment(versionComment);
+
+            stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+
+            return nextVersionStopPlace;
+        }
+        return stopPlace;
     }
 
     public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
