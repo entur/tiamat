@@ -97,6 +97,9 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
     @Override
     public int countResult(Set<Long> stopPlaceIds) {
+        if(stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return 0;
+        }
         return countResult(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
     }
 
