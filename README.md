@@ -266,3 +266,28 @@ https://api-test.entur.org/tiamat/1.0/graphql
 
 Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/
 (Use e.g. `Modify Headers` for Chrome to add bearer-token for mutations)
+
+
+# Flyway
+To create the database for tiamat, download and use the flyway command line tool:
+https://flywaydb.org/documentation/commandline/
+
+Execute the migration. Point to the migration files in tiamat.
+
+```
+./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations migrate
+```
+
+## Example
+```
+./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/home/cristoffer/rutebanken/tiamat/src/main/resources/db/migrations migrate
+Flyway 4.2.0 by Boxfuse
+
+Database password: 
+Database: jdbc:postgresql://localhost:5433/tiamat (PostgreSQL 9.6)
+Successfully validated 1 migration (execution time 00:00.016s)
+Creating Metadata table: "public"."schema_version"
+Current version of schema "public": << Empty Schema >>
+Migrating schema "public" to version 1 - Base version
+Successfully applied 1 migration to schema "public" (execution time 00:04.220s).
+```
