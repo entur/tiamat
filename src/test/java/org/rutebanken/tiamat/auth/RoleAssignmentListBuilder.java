@@ -2,8 +2,6 @@ package org.rutebanken.tiamat.auth;
 
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.RoleAssignment;
-import org.rutebanken.tiamat.model.Parking;
-import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
@@ -23,8 +21,7 @@ public class RoleAssignmentListBuilder {
     }
 
     public RoleAssignmentListBuilder withAccessAllAreas() {
-        return withStopPlaceOfType(AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES)
-                .withParkingOfType(AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
+        return withRole(AuthorizationConstants.ROLE_EDIT_STOPS, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
     }
 
 
@@ -34,27 +31,22 @@ public class RoleAssignmentListBuilder {
 
     public RoleAssignmentListBuilder withStopPlaceOfType(String type) {
         RoleAssignment allStopPlaceAccess = RoleAssignment.builder().withRole(AuthorizationConstants.ROLE_EDIT_STOPS)
-                .withOrganisation("NOT_YET_CHECKED")
-                .withEntityClassification(AuthorizationConstants.ENTITY_TYPE, StopPlace.class.getSimpleName())
-                .withEntityClassification("StopPlaceType", type)
-                .build();
+                                                    .withOrganisation("NOT_YET_CHECKED")
+                                                    .withEntityClassification(AuthorizationConstants.ENTITY_TYPE, StopPlace.class.getSimpleName())
+                                                    .withEntityClassification("StopPlaceType", type)
+                                                    .build();
 
         roleAssignments.add(allStopPlaceAccess);
         return this;
     }
 
-    public RoleAssignmentListBuilder withParkingOfType(ParkingTypeEnumeration type) {
-        return withParkingOfType(type.value());
-    }
+    private RoleAssignmentListBuilder withRole(String roleName, String entityType) {
+        RoleAssignment roleAssignment = RoleAssignment.builder().withRole(roleName)
+                                                .withOrganisation("NOT_YET_CHECKED")
+                                                .withEntityClassification(AuthorizationConstants.ENTITY_TYPE, entityType)
+                                                .build();
 
-    public RoleAssignmentListBuilder withParkingOfType(String type) {
-        RoleAssignment allParkings = RoleAssignment.builder().withRole(AuthorizationConstants.ROLE_EDIT_STOPS)
-                .withOrganisation("NOT_YET_CHECKED")
-                .withEntityClassification(AuthorizationConstants.ENTITY_TYPE, Parking.class.getSimpleName())
-                .withEntityClassification("parkingType", type)
-                .build();
-
-        roleAssignments.add(allParkings);
+        roleAssignments.add(roleAssignment);
         return this;
     }
 

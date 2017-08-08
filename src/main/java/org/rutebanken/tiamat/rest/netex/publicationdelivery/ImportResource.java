@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
@@ -63,7 +64,9 @@ public class ImportResource {
 
         ImportType effectiveImportType = safeGetImportType(importParams);
         if (!enabledImportTypes.contains(effectiveImportType)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("ImportType: " + effectiveImportType + " not enabled!").build();
+            String error = "ImportType: " + effectiveImportType + " not enabled!";
+            logger.warn(error);
+            return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
@@ -74,9 +77,14 @@ public class ImportResource {
             } else {
                 return Response.ok(publicationDeliveryStreamingOutput.stream(responsePublicationDelivery)).build();
             }
-        } catch (Exception e) {
-            logger.error("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Caught exception while import publication delivery: " + e.getMessage()).build();
+
+
+        } catch (NotAuthenticatedException | NotAuthorizedException e) {
+            logger.debug("Access denied for publication delivery: " + e.getMessage(), e);
+            throw e;
+        } catch (RuntimeException e) {
+            logger.warn("Caught exception while importing publication delivery: " + incomingPublicationDelivery, e);
+            throw e;
         }
     }
 

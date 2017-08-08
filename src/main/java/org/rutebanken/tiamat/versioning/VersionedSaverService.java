@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.keycloak.KeycloakPrincipal;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
@@ -10,6 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Instant;
+import java.util.Arrays;
+
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 public abstract class VersionedSaverService<T extends EntityInVersionStructure> {
 
@@ -17,6 +21,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     @Autowired
     private VersionCreator versionCreator;
+
+    @Autowired
+    private ReflectionAuthorizationService authorizationService;
 
     public abstract EntityInVersionRepository<T> getRepository();
 
@@ -41,6 +48,8 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
             }
         }
 
+        authorizeNewVersion(existingVersion, newVersion);
+
         if(existingVersion == null) {
             newVersion.setCreated(Instant.now());
             // If the new incoming version has the version attribute set, reset it.
@@ -58,6 +67,10 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         logger.info("Object {}, version {} changed by user {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
 
         return getRepository().save(newVersion);
+    }
+
+    protected void authorizeNewVersion(T existingVersion, T newVersion) {
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, newVersion));
     }
 
     protected void validate(T existingVersion, T newVersion) {
