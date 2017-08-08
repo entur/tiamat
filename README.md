@@ -272,15 +272,16 @@ Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/
 To create the database for tiamat, download and use the flyway command line tool:
 https://flywaydb.org/documentation/commandline/
 
+## Migration
 Execute the migration. Point to the migration files in tiamat.
 
 ```
 ./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations migrate
 ```
 
-## Example
+### Example migration
 ```
-./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/home/cristoffer/rutebanken/tiamat/src/main/resources/db/migrations migrate
+./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations migrate
 Flyway 4.2.0 by Boxfuse
 
 Database password: 
@@ -291,3 +292,17 @@ Current version of schema "public": << Empty Schema >>
 Migrating schema "public" to version 1 - Base version
 Successfully applied 1 migration to schema "public" (execution time 00:04.220s).
 ```
+
+
+## Baseline existing database
+To baseline an existing database that does not contain the table `schema_version`.
+The schema of this database must be exactly equivalent to the first migration file. (If not, you might be better off by starting from scratch and using the restoring_import to repopulate the new database.)
+
+```
+./flyway -url=jdbc:postgresql://localhost:6432/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations baseline
+```
+
+
+## Schema changes
+Create new file according to the flyway documentation in resources/db/migrations
+Commit the migration togheter with code changes that requires this schema change.
