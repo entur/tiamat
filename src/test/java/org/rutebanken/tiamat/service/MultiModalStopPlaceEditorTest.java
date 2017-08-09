@@ -4,11 +4,17 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,6 +90,18 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         StopPlace acutalSecondStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondStopPlace.getNetexId());
         assertThat(acutalSecondStopPlace.getVersion()).as("Second stop place version should have version 2 after joining parent stop place").isEqualTo(2L);
     }
+
+    @Test(expected = Exception.class)
+    public void testNotAllowsChildStopWithFutureVersion() {
+
+        StopPlace child = createStopPlace("child candidate");
+        child.setValidBetween(new ValidBetween(Instant.now().plus(10, ChronoUnit.DAYS)));
+        child = stopPlaceRepository.save(child);
+
+        String parentStopPlaceName = "Super StopPlace";
+        multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+    }
+
 
     private void assertThatChildsReferencesParent(List<String> childIds, StopPlace parent) {
         childIds.forEach(id -> {
