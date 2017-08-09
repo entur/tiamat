@@ -119,7 +119,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 
 	@Override
 	public List<JbvCodeMappingDto> findJbvCodeMappingsForQuay() {
-		String sql ="SELECT vi.items, q.public_code, q.netex_id " +
+		String sql ="SELECT DISTINCT vi.items, q.public_code, q.netex_id " +
 				"FROM stop_place_key_values qkv " +
 				"INNER JOIN stop_place_quays spq " +
 				"ON spq.stop_place_id = qkv.stop_place_id " +
