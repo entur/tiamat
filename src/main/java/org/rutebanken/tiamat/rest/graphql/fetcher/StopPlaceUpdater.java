@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.fetcher;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Preconditions;
