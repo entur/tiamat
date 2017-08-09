@@ -74,15 +74,15 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         StopPlace superDuperStopPlace = multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString(parentStopPlaceName));
 
         assertThatChildsReferencesParent(childIds, superDuperStopPlace);
-        
-        StopPlace acutalFirstStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(firstStopPlace.getNetexId(), firstStopPlace.getVersion());
-        assertThat(acutalFirstStopPlace.getVersion()).isEqualTo(1L);
 
-        StopPlace acutalFirstStopPlaceVersion2 = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstStopPlace.getNetexId());
-        assertThat(acutalFirstStopPlaceVersion2.getVersion()).isEqualTo(3L);
+        StopPlace acutalFirstStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(firstStopPlace.getNetexId(), firstStopPlace.getVersion());
+        assertThat(acutalFirstStopPlace).as("First version of first stop place should not have it's version changed").isNotNull();
+
+        StopPlace acutalNewVersionOfFirstStopPlaceVersion2 = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(firstStopPlace.getNetexId());
+        assertThat(acutalNewVersionOfFirstStopPlaceVersion2.getVersion()).as("Previous version 2 of stop place should now be version 3").isEqualTo(3L);
 
         StopPlace acutalSecondStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(secondStopPlace.getNetexId());
-        assertThat(acutalSecondStopPlace.getVersion()).isEqualTo(2L);
+        assertThat(acutalSecondStopPlace.getVersion()).as("Second stop place version should have version 2 after joining parent stop place").isEqualTo(2L);
     }
 
     private void assertThatChildsReferencesParent(List<String> childIds, StopPlace parent) {
