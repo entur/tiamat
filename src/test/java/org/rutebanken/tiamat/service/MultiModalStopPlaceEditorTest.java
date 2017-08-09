@@ -52,7 +52,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
 
     @Test
-    public void testCreateMultiModalParentStopPlaceFromOneVersionedChild() {
+    public void testCreateMultiModalParentStopPlaceFromVersionedChild() {
 
         StopPlace firstStopPlace = createStopPlace("first");
         firstStopPlace.setVersion(1L);
@@ -65,7 +65,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         firstStopPlaceVersion2 = stopPlaceRepository.save(firstStopPlaceVersion2);
 
         StopPlace secondStopPlace = createStopPlace("second");
-        firstStopPlace.setVersion(1L);
+        secondStopPlace.setVersion(1L);
         secondStopPlace = stopPlaceRepository.save(secondStopPlace);
 
         List<String> childIds = Stream.of(firstStopPlaceVersion2, secondStopPlace).map(sp -> sp.getNetexId()).collect(Collectors.toList());

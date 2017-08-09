@@ -6,12 +6,15 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
@@ -19,6 +22,7 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 @Component
 public class MultiModalStopPlaceEditor {
 
+    private static final Logger logger = LoggerFactory.getLogger(MultiModalStopPlaceEditor.class);
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -31,27 +35,33 @@ public class MultiModalStopPlaceEditor {
 
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
-        List<StopPlace> stopPlaces = stopPlaceRepository.findAll(childStopPlaceIds);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
+        // Fetch max versions of future child stop places
+        List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(Collectors.toList());
 
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
+
+        logger.info("Saving first version of parent stop place {}", name);
         StopPlace parentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(name));
 
-        // TODO: Do not change all child versions
-        // Terminate last version of stop place
-        // Version ref must be decided. Should it point to a certain version?
-        // What happens if you have a new version of the parent stop place?: Then the child stop place should be bumped as well
-        stopPlaces.forEach(stopPlace -> {
+        // Terminate last version of stop place. Create new version with parent site ref
+
+        futureChildStopPlaces.forEach(existingVersion -> {
+
+            logger.info("Adding child stop place {} to parent stop place {}", existingVersion, parentStopPlace);
+            StopPlace stopPlaceCopy = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
             SiteRefStructure siteRefStructure = new SiteRefStructure();
             siteRefStructure.setRef(parentStopPlace.getNetexId());
             siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
-            stopPlace.setParentSiteRef(siteRefStructure);
+            stopPlaceCopy.setParentSiteRef(siteRefStructure);
+            stopPlaceVersionedSaverService.saveNewVersion(existingVersion, stopPlaceCopy);
+
         });
         return parentStopPlace;
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
-
+        // What happens if you have a new version of the parent stop place?: Then the child stop place should be bumped as well
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
 
