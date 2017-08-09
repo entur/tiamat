@@ -35,13 +35,16 @@ public class MultiModalStopPlaceEditor {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
 
-        StopPlace parentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace());
+        StopPlace parentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(name));
 
-        parentStopPlace.setName(name);
-
+        // TODO: Do not change all child versions
+        // Terminate last version of stop place
+        // Version ref must be decided. Should it point to a certain version?
+        // What happens if you have a new version of the parent stop place?: Then the child stop place should be bumped as well
         stopPlaces.forEach(stopPlace -> {
             SiteRefStructure siteRefStructure = new SiteRefStructure();
             siteRefStructure.setRef(parentStopPlace.getNetexId());
+            siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
             stopPlace.setParentSiteRef(siteRefStructure);
         });
         return parentStopPlace;
