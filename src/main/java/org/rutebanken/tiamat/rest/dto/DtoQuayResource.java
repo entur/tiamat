@@ -1,7 +1,8 @@
 package org.rutebanken.tiamat.rest.dto;
 
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,11 @@ public class DtoQuayResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DtoQuayResource.class);
 
-    private final StopPlaceRepository stopPlaceRepository;
+    private final QuayRepository quayRepository;
 
     @Autowired
-    public DtoQuayResource(StopPlaceRepository stopPlaceRepository) {
-        this.stopPlaceRepository = stopPlaceRepository;
+    public DtoQuayResource(QuayRepository quayRepository) {
+        this.quayRepository = quayRepository;
     }
 
     @GET
@@ -45,7 +46,7 @@ public class DtoQuayResource {
 
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                 while (!lastEmpty) {
-                    List<IdMappingDto> quayMappings = stopPlaceRepository.findKeyValueMappingsForQuay(Instant.now(), recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(Instant.now(), recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : quayMappings) {
                         writer.println(mapping.toCsvString(includeStopType));
                         recordPosition++;
@@ -53,6 +54,30 @@ public class DtoQuayResource {
                     writer.flush();
                     if (quayMappings.isEmpty()) lastEmpty = true;
                 }
+                writer.close();
+            } catch (Exception e) {
+                logger.warn("Catched exception when streaming id map for quay: {}", e.getMessage(), e);
+                throw e;
+            }
+        }).build();
+    }
+
+
+    @GET
+    @Produces("text/plain")
+    @Path("/jbv_code_mapping")
+    public Response getJbvCodeMapping() {
+
+        logger.info("Fetching Quay mapping table for all StopPlaces containg keyValue jbvCode...");
+
+        return Response.ok().entity((StreamingOutput) output -> {
+
+            try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
+                    List<JbvCodeMappingDto> quayMappings = quayRepository.findJbvCodeMappingsForQuay();
+                    for (JbvCodeMappingDto mapping : quayMappings) {
+                        writer.println(mapping.toCsvString());
+                    }
+                    writer.flush();
                 writer.close();
             } catch (Exception e) {
                 logger.warn("Catched exception when streaming id map for quay: {}", e.getMessage(), e);

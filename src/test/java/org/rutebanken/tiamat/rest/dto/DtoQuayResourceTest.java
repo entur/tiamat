@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.rest.dto;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.QuayRepository;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -20,12 +20,12 @@ import static org.mockito.Mockito.*;
 
 public class DtoQuayResourceTest {
 
-    private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
+    private QuayRepository quayRepository = mock(QuayRepository.class);
     private DtoQuayResource dtoQuayResource;
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource(stopPlaceRepository);
+        dtoQuayResource = new DtoQuayResource(quayRepository);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class DtoQuayResourceTest {
         int keyValueMappingCount = 3;
         int size = 1;
 
-        when(stopPlaceRepository.findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt()))
+        when(quayRepository.findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt()))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString())))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString())))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
@@ -44,7 +44,7 @@ public class DtoQuayResourceTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
         // plus one for the last empty call.
-        verify(stopPlaceRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt());
+        verify(quayRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt());
     }
 
 }
