@@ -302,4 +302,8 @@ public class GraphQLNames {
     public static final String REOPEN_STOP_PLACE = "reopenStopPlace";
     public static final String DELETE_STOP_PLACE = "deleteStopPlace";
     public static final String DELETE_QUAY_FROM_STOP_PLACE = "deleteQuay";
+
+    public static final String CREATE_MULTIMODAL_STOPPLACE = "createMultiModalStopPlace";
+    public static final String ADD_TO_MULTIMODAL_STOPPLACE = "addToModalStopPlace";
+    public static final String REMOVE_FROM_MULTIMODAL_STOPPLACE = "removeFromModalStopPlace";
 }
