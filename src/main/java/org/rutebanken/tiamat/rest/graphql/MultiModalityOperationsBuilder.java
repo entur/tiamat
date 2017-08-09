@@ -24,7 +24,7 @@ public class MultiModalityOperationsBuilder {
     private MultiModalStopPlaceEditor parentStopPlaceCreator;
 
     @Autowired
-    DateScalar dateScalar;
+    private DateScalar dateScalar;
 
     public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();

@@ -62,6 +62,9 @@ StopPlaceRegisterGraphQLSchema {
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
+    private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
+
+    @Autowired
     DataFetcher stopPlaceFetcher;
 
     @Autowired
@@ -234,6 +237,7 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
+                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(stopPlaceObjectType))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
