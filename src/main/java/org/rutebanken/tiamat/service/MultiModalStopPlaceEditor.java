@@ -62,7 +62,9 @@ public class MultiModalStopPlaceEditor {
             SiteRefStructure siteRefStructure = new SiteRefStructure();
             siteRefStructure.setRef(parentStopPlace.getNetexId());
             siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
+
             stopPlaceCopy.setParentSiteRef(siteRefStructure);
+            stopPlaceCopy.setName(null);
             stopPlaceVersionedSaverService.saveNewVersion(existingVersion, stopPlaceCopy);
 
         });

@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +51,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(result.getValidBetween()).isNotNull();
         assertThat(result.getNetexId()).isNotNull();
 
-        assertThatChildsReferencesParent(childIds, result);
+        assertThatChildsReferencesParentAndHasNoName(childIds, result);
     }
 
 
@@ -79,7 +77,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         String parentStopPlaceName = "Super duper StopPlace";
         StopPlace superDuperStopPlace = multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString(parentStopPlaceName));
 
-        assertThatChildsReferencesParent(childIds, superDuperStopPlace);
+        assertThatChildsReferencesParentAndHasNoName(childIds, superDuperStopPlace);
 
         StopPlace acutalFirstStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(firstStopPlace.getNetexId(), firstStopPlace.getVersion());
         assertThat(acutalFirstStopPlace).as("First version of first stop place should not have it's version changed").isNotNull();
@@ -103,12 +101,13 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     }
 
 
-    private void assertThatChildsReferencesParent(List<String> childIds, StopPlace parent) {
+    private void assertThatChildsReferencesParentAndHasNoName(List<String> childIds, StopPlace parent) {
         childIds.forEach(id -> {
             StopPlace child = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id);
             assertThat(child.getParentSiteRef()).as("child stop " + id + " must have parent site ref").isNotNull();
             assertThat(child.getParentSiteRef().getRef()).as("child stop " + id + " must have parent site ref matching matching parent's netex id").isEqualTo(parent.getNetexId());
             assertThat(child.getParentSiteRef().getVersion()).as("child stop " + id + " must have parent site ref version").isEqualTo(String.valueOf(parent.getVersion()));
+            assertThat(child.getName()).as("Child should not have name set").isNull();
         });
     }
 
