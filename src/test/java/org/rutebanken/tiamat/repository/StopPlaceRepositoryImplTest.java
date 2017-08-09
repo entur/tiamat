@@ -13,6 +13,8 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.service.MultiModalStopPlaceEditor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,9 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 @Transactional
 public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
+
+    @Autowired
+    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
     @Test
     public void scrollableResult() throws InterruptedException {
@@ -744,6 +749,42 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .describedAs("Expecting only one stop place in return. Because only the highest version should be returned.")
                 .hasSize(1);
 
+    }
+
+    @Test
+    public void findParentStopPlaceByName() {
+
+        StopPlace child = new StopPlace();
+        child.setVersion(1L);
+        child = stopPlaceRepository.save(child);
+
+        String parentStopPlaceName = "new parent stop place";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder().setQuery(parentStopPlaceName).build()).build());
+        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(parent.getNetexId());
+    }
+
+    @Test
+    public void findParentStopPlaceByNameAndType() {
+
+        StopPlace child = new StopPlace();
+        child.setVersion(1L);
+        child.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        child = stopPlaceRepository.save(child);
+
+        String parentStopPlaceName = "new parent stop place. child is bus";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(
+                ExportParams.newExportParamsBuilder().setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setQuery(parentStopPlaceName)
+                                .setStopTypeEnumerations(Arrays.asList(child.getStopPlaceType()))
+                                .build())
+                        .build());
+        assertThat(actual.getTotalElements()).isEqualTo(1L);
+        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(parent.getNetexId());
     }
 
     @Test

@@ -36,6 +36,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
+        queryString.append("left join stop_place p on s.parent_site_ref = p.netex_id and s.parent_site_ref_version = cast(p.version as text) ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
@@ -74,7 +75,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         // NSR ID detected
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("netex_id = :query");
+                            wheres.add("s.netex_id = :query");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
                         } else {
@@ -82,12 +83,17 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         }
                     }
                 } else {
+
+                    final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
+                    final String containsLowerMatchQuerySql =  "concat('%', lower(:query), '%') ";
+                    final String orNameMatchInParentStopSql = "or lower(p.name_value) like ";
                     if (stopPlaceSearch.getQuery().length() <= 3) {
-                        wheres.add("lower(s.name_value) like concat(lower(:query), '%')");
+                        wheres.add("(lower(s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
                     } else {
-                        wheres.add("lower(s.name_value) like concat('%', lower(:query), '%')");
+                        wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
                     }
 
+                    orderByStatements.add("similarity(p.name_value, :query) desc");
                     orderByStatements.add("similarity(s.name_value, :query) desc");
                 }
             }
@@ -152,7 +158,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         addWheres(queryString, wheres, operators);
 
-        orderByStatements.add("netex_id, version asc");
+        orderByStatements.add("s.netex_id, s.version asc");
         queryString.append(" order by");
 
         for (int i = 0; i < orderByStatements.size(); i++) {
