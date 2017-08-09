@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -140,7 +140,7 @@ public class StopPlaceQuayMerger {
         return updatedStopPlace;
     }
 
-    void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
+    public void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
         fromKeyValues.keySet()
                 .forEach(key -> {
                     if (toKeyValues.containsKey(key)) {
@@ -156,7 +156,7 @@ public class StopPlaceQuayMerger {
                 });
     }
 
-    PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
+    public PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
         if (fromPlaceEquipments != null) {
             if (toPlaceEquipments == null) {
                 toPlaceEquipments = new PlaceEquipment();

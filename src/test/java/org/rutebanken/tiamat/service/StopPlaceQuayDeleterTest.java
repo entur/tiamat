@@ -1,10 +1,12 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.rest.graphql.AbstractGraphQLResourceIntegrationTest;
+import org.rutebanken.tiamat.service.StopPlaceQuayDeleter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
@@ -12,7 +14,7 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegrationTest  {
+public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegrationTest {
 
 
     @Autowired

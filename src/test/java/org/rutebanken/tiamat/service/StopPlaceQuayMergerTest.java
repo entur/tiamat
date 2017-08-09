@@ -1,9 +1,11 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.rest.graphql.AbstractGraphQLResourceIntegrationTest;
+import org.rutebanken.tiamat.service.StopPlaceQuayMerger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
@@ -16,7 +18,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 
-public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest  {
+public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     StopPlaceQuayMerger stopPlaceQuayMerger;
