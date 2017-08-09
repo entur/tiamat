@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolver;
+package org.rutebanken.tiamat.rest.graphql.resolvers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;

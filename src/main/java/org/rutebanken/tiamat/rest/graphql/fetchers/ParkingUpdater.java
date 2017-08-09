@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.fetcher;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import com.google.common.base.Preconditions;
 import com.vividsolutions.jts.geom.Point;
@@ -7,8 +7,8 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
-import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.rest.graphql.resolvers.GeometryResolver;
+import org.rutebanken.tiamat.rest.graphql.resolvers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getEmbeddableString;
 
 @Service("parkingUpdater")
 @Transactional(propagation = Propagation.REQUIRES_NEW)

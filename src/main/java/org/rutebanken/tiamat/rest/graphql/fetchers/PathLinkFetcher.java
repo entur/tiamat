@@ -1,16 +1,13 @@
-package org.rutebanken.tiamat.rest.graphql.fetcher;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
-import com.google.common.primitives.Booleans;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.rest.graphql.resolver.IdResolver;
+import org.rutebanken.tiamat.rest.graphql.resolvers.IdResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;

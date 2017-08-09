@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.fetcher;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Preconditions;
@@ -9,8 +9,8 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
-import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
-import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
+import org.rutebanken.tiamat.rest.graphql.resolvers.GeometryResolver;
+import org.rutebanken.tiamat.rest.graphql.resolvers.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
@@ -28,8 +28,8 @@ import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.resolver.ObjectResolver.getPrivateCodeStructure;
+import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getPrivateCodeStructure;
 
 @Service("stopPlaceUpdater")
 @Transactional

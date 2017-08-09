@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.operation;
+package org.rutebanken.tiamat.rest.graphql.operations;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
