@@ -2,6 +2,9 @@ package org.rutebanken.tiamat.rest.graphql.helpers;
 
 import java.util.*;
 
+/**
+ * Trimming whitespace on all input-fields of type GraphQLString
+ */
 public class CleanupHelper {
 
     public static void trimValues(Map<String, Object> arguments) {
