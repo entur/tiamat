@@ -16,7 +16,6 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
-import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLTrimmedString;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
 
 public class CustomGraphQLTypes {
@@ -156,10 +155,10 @@ public class CustomGraphQLTypes {
                 .name(INPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
                 .field(newInputObjectField()
                         .name(VALUE)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(LANG)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .build();
 
     public static GraphQLObjectType keyValuesObjectType = newObject()
@@ -177,15 +176,15 @@ public class CustomGraphQLTypes {
             .name(INPUT_TYPE_KEY_VALUES)
             .field(newInputObjectField()
                     .name(KEY)
-                    .type(GraphQLTrimmedString))
+                    .type(GraphQLString))
             .field(newInputObjectField()
                     .name(VALUES)
-                    .type(new GraphQLList(GraphQLTrimmedString)))
+                    .type(new GraphQLList(GraphQLString)))
             .build();
 
     public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
                 .name(ID)
-                .type(GraphQLTrimmedString)
+                .type(GraphQLString)
                 .dataFetcher(env -> {
                         if (env.getSource() instanceof IdentifiedEntity) {
                                 return ((IdentifiedEntity) env.getSource()).getNetexId();
@@ -281,10 +280,10 @@ public class CustomGraphQLTypes {
             .name(OUTPUT_TYPE_PRIVATE_CODE)
             .field(newFieldDefinition()
                     .name(TYPE)
-                    .type(GraphQLTrimmedString))
+                    .type(GraphQLString))
             .field(newFieldDefinition()
                     .name(VALUE)
-                    .type(GraphQLTrimmedString))
+                    .type(GraphQLString))
             .build();
 
     public static GraphQLFieldDefinition privateCodeFieldDefinition = newFieldDefinition()
@@ -297,10 +296,10 @@ public class CustomGraphQLTypes {
                 .name(INPUT_TYPE_PRIVATE_CODE)
                 .field(newInputObjectField()
                         .name(TYPE)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(VALUE)
-                        .type(new GraphQLNonNull(GraphQLTrimmedString)))
+                        .type(new GraphQLNonNull(GraphQLString)))
                 .build();
 
     public static GraphQLObjectType generalSignEquipmentType = newObject()
@@ -606,11 +605,11 @@ public class CustomGraphQLTypes {
             .description(ENTITY_REF_DESCRIPTION)
             .field(newInputObjectField()
                     .name(ENTITY_REF_REF)
-                    .type(GraphQLTrimmedString)
+                    .type(GraphQLString)
                     .description(ENTITY_REF_REF_DESCRIPTION))
             .field(newInputObjectField()
                     .name(ENTITY_REF_VERSION)
-                    .type(GraphQLTrimmedString)
+                    .type(GraphQLString)
                     .description(ENTITY_REF_VERSION_DESCRIPTION))
             .build();
 
@@ -816,7 +815,7 @@ public class CustomGraphQLTypes {
                         .type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField()
                         .name(PARENT_SITE_REF)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(TOTAL_CAPACITY)
                         .type(GraphQLBigInteger))
@@ -849,7 +848,7 @@ public class CustomGraphQLTypes {
                         .type(parkingReservationEnum))
                 .field(newInputObjectField()
                         .name(BOOKING_URL)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(FREE_PARKING_OUT_OF_HOURS)
                         .type(GraphQLBoolean))

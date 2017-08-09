@@ -21,7 +21,6 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLTrimmedString;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
@@ -540,10 +539,10 @@ StopPlaceRegisterGraphQLSchema {
                         .type(interchangeWeightingEnum))
                 .field(newInputObjectField()
                         .name(PARENT_SITE_REF)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(VERSION_COMMENT)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectInputType)))
@@ -556,7 +555,7 @@ StopPlaceRegisterGraphQLSchema {
     private List<GraphQLInputObjectField> createCommonInputFieldList(GraphQLInputObjectType embeddableMultiLingualStringInputObjectType) {
 
         List<GraphQLInputObjectField> commonInputFieldsList = new ArrayList<>();
-        commonInputFieldsList.add(newInputObjectField().name(ID).type(GraphQLTrimmedString).description("Ignore when creating new").build());
+        commonInputFieldsList.add(newInputObjectField().name(ID).type(GraphQLString).description("Ignore when creating new").build());
         commonInputFieldsList.add(newInputObjectField().name(NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
@@ -585,7 +584,7 @@ StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLBigDecimal))
                 .field(newInputObjectField()
                         .name(PUBLIC_CODE)
-                        .type(GraphQLTrimmedString))
+                        .type(GraphQLString))
                 .field(newInputObjectField()
                     .name(PRIVATE_CODE)
                     .type(privateCodeInputType))

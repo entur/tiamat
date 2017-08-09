@@ -8,6 +8,7 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.resolver.GeometryResolver;
 import org.rutebanken.tiamat.rest.graphql.resolver.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
@@ -60,6 +61,7 @@ class StopPlaceUpdater implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
         List<Field> fields = environment.getFields();
+        CleanupHelper.trimValues(environment.getArguments());
         StopPlace stopPlace = null;
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_STOPPLACE)) {
@@ -68,6 +70,7 @@ class StopPlaceUpdater implements DataFetcher {
         }
         return Arrays.asList(stopPlace);
     }
+
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
         StopPlace updatedStopPlace;
