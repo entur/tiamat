@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.fetcher;
 
 import com.google.common.primitives.Booleans;
 import graphql.schema.DataFetcher;
