@@ -38,7 +38,7 @@ class ParkingUpdater implements DataFetcher {
     private ParkingVersionedSaverService parkingVersionedSaverService;
 
     @Autowired
-    GeometryResolver geometryResolver;
+    private GeometryResolver geometryResolver;
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
