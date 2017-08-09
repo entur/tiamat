@@ -6,6 +6,8 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetcher.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
+import org.rutebanken.tiamat.rest.graphql.operation.MultiModalityOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operation.StopPlaceOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;

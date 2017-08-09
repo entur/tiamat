@@ -30,7 +30,7 @@ public class MultiModalStopPlaceEditor {
     private ReflectionAuthorizationService authorizationService;
 
 
-    protected StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
+    public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
         List<StopPlace> stopPlaces = stopPlaceRepository.findAll(childStopPlaceIds);
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
@@ -47,7 +47,7 @@ public class MultiModalStopPlaceEditor {
         return parentStopPlace;
     }
 
-    protected StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
+    public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
@@ -64,7 +64,7 @@ public class MultiModalStopPlaceEditor {
         return parentStopPlace;
     }
 
-    protected StopPlace removeFromMultiModalStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
+    public StopPlace removeFromMultiModalStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
