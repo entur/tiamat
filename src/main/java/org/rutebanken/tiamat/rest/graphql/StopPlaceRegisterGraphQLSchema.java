@@ -17,10 +17,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
+import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
@@ -132,7 +135,67 @@ StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommondFieldList);
 
-        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(commonFieldsList, quayObjectType, validBetweenObjectType, topographicPlaceObjectType, tariffZoneObjectType);
+        MutableStopPlaceTypeResolver stopPlaceTypeResolver = new MutableStopPlaceTypeResolver();
+
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(VERSION_COMMENT)
+                .type(GraphQLString)
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(CHANGED_BY)
+                .type(GraphQLString).build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(TOPOGRAPHIC_PLACE)
+                .type(topographicPlaceObjectType).build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(VALID_BETWEEN)
+                .type(validBetweenObjectType).build());
+
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(ALTERNATIVE_NAMES)
+                .type(new GraphQLList(alternativeNameObjectType))
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(TARIFF_ZONES)
+                .type(new GraphQLList(tariffZoneObjectType))
+                .dataFetcher(stopPlaceTariffZoneFetcher)
+                .build());
+
+        GraphQLInterfaceType stopPlaceInterface = stopPlaceInterface = newInterface()
+                .name(OUTPUT_TYPE_STOPPLACE+"Interface")
+                .fields(commonFieldsList)
+                .fields(stopPlaceInterfaceFields)
+                .typeResolver(stopPlaceTypeResolver)
+                .build();
+
+
+
+        GraphQLObjectType stopPlaceObjectType = createStopPlaceObjectType(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
+
+        GraphQLObjectType parentStopPlaceObjectType = newObject()
+                .name("ParentStopPlace")
+                .withInterface(stopPlaceInterface)
+                .fields(stopPlaceInterfaceFields)
+                .fields(commonFieldsList)
+                .field(newFieldDefinition()
+                                .name("children")
+                                .type(stopPlaceObjectType)
+                        .dataFetcher(stopPlaceFetcher))
+                .build();
+
+        stopPlaceTypeResolver.setFunction(object -> {
+            if(object instanceof StopPlace) {
+                StopPlace stopPlace = (StopPlace) object;
+                if(stopPlace.getParentSiteRef() != null) {
+                    return stopPlaceObjectType;
+                } else {
+                    return parentStopPlaceObjectType;
+                }
+            }
+            return null;
+        });
+
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -154,7 +217,7 @@ StopPlaceRegisterGraphQLSchema {
                 .name("StopPlaceRegister")
                 .description("Query and search for data")
                 .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceObjectType))
+                        .type(new GraphQLList(stopPlaceInterface))
                         .name(FIND_STOPPLACE)
                         .description("Search for StopPlaces")
                         .argument(createFindStopPlaceArguments(allVersionsArgument))
@@ -430,54 +493,33 @@ StopPlaceRegisterGraphQLSchema {
     }
 
 
-    private GraphQLObjectType createStopPlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList,
-                                                        GraphQLObjectType quayObjectType,
-                                                        GraphQLObjectType validBetweenObjectType,
-                                                        GraphQLObjectType topographicPlaceObjectType,
-                                                        GraphQLObjectType tariffZoneObjectType) {
+    private GraphQLObjectType createStopPlaceObjectType(GraphQLInterfaceType stopPlaceInterface, List<GraphQLFieldDefinition> stopPlaceInterfaceFields, List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
         return newObject()
-                    .name(OUTPUT_TYPE_STOPPLACE)
-                    .fields(commonFieldsList)
-                    .fields(transportModeScalar.createTransportModeFieldsList())
-                    .field(newFieldDefinition()
-                            .name(STOP_PLACE_TYPE)
-                            .type(stopPlaceTypeEnum))
-                    .field(newFieldDefinition()
-                            .name(TOPOGRAPHIC_PLACE)
-                            .type(topographicPlaceObjectType))
-                    .field(newFieldDefinition()
-                            .name(WEIGHTING)
-                            .type(interchangeWeightingEnum))
-                    .field(newFieldDefinition()
-                            .name(PARENT_SITE_REF)
-                            .type(GraphQLString)
-                            .dataFetcher(env -> {
-                                SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
-                                if (parentSiteRef != null) {
-                                    return parentSiteRef.getRef();
-                                }
-                                return null;
-                            }))
-                    .field(newFieldDefinition()
-                            .name(VERSION_COMMENT)
-                            .type(GraphQLString))
-                    .field(newFieldDefinition()
-                            .name(CHANGED_BY)
-                            .type(GraphQLString))
-                    .field(newFieldDefinition()
-                            .name(QUAYS)
-                            .type(new GraphQLList(quayObjectType)))
-                    .field(newFieldDefinition()
-                            .name(VALID_BETWEEN)
-                            .type(validBetweenObjectType))
-                    .field(newFieldDefinition()
-                            .name(ALTERNATIVE_NAMES)
-                            .type(new GraphQLList(alternativeNameObjectType)))
-                    .field(newFieldDefinition()
-                            .name(TARIFF_ZONES)
-                            .type(new GraphQLList(tariffZoneObjectType))
-                            .dataFetcher(stopPlaceTariffZoneFetcher))
-                    .build();
+                .name(OUTPUT_TYPE_STOPPLACE)
+                .withInterface(stopPlaceInterface)
+                .fields(stopPlaceInterfaceFields)
+                .fields(commonFieldsList)
+                .fields(transportModeScalar.createTransportModeFieldsList())
+                .field(newFieldDefinition()
+                        .name(STOP_PLACE_TYPE)
+                        .type(stopPlaceTypeEnum))
+                .field(newFieldDefinition()
+                        .name(WEIGHTING)
+                        .type(interchangeWeightingEnum))
+                .field(newFieldDefinition()
+                        .name(PARENT_SITE_REF)
+                        .type(GraphQLString)
+                        .dataFetcher(env -> {
+                            SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
+                            if (parentSiteRef != null) {
+                                return parentSiteRef.getRef();
+                            }
+                            return null;
+                        }))
+                .field(newFieldDefinition()
+                        .name(QUAYS)
+                        .type(new GraphQLList(quayObjectType)))
+                .build();
     }
 
     private GraphQLObjectType createQuayObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
@@ -595,6 +637,20 @@ StopPlaceRegisterGraphQLSchema {
                     .name(PRIVATE_CODE)
                     .type(privateCodeInputType))
                 .build();
+    }
+
+    private static class MutableStopPlaceTypeResolver implements TypeResolver {
+
+        private Function<Object, GraphQLObjectType> function;
+
+        public void setFunction(Function<Object, GraphQLObjectType> function) {
+            this.function = function;
+        }
+
+        @Override
+        public GraphQLObjectType getType(Object object) {
+            return function.apply(object);
+        }
     }
 }
 
