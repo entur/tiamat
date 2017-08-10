@@ -35,7 +35,7 @@ public class ParentStopPlacesFetcherTest {
         StopPlace child2 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
         addParentRef(child2, parent);
 
-        List<StopPlace> result = parentStopPlacesFetcher.resolveParents(Arrays.asList(parent, parentSecondVersion, child1, child2));
+        List<StopPlace> result = parentStopPlacesFetcher.resolveAndReplaceWithParents(Arrays.asList(parent, parentSecondVersion, child1, child2));
 
         assertThat(result).extracting(this::concatenateNetexIdVersion)
                 .as("parent first version should be kept")

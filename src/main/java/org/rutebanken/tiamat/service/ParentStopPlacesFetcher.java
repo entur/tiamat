@@ -30,7 +30,7 @@ public class ParentStopPlacesFetcher {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
-    public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList) {
+    public List<StopPlace> resolveAndReplaceWithParents(List<StopPlace> stopPlaceList) {
 
 
         if (stopPlaceList == null) {
