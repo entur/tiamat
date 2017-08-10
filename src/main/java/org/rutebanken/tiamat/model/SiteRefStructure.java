@@ -6,4 +6,10 @@ import javax.persistence.Embeddable;
 public class SiteRefStructure
         extends SiteElementRefStructure {
 
+    public SiteRefStructure() { super();}
+
+    public SiteRefStructure(String ref, String version) {
+        super(ref, version);
+    }
+
 }
