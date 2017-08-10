@@ -25,7 +25,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.3.3</fabric8.version>
-        <docker.maven.plugin.version>0.13.9</docker.maven.plugin.version>
+        <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
         <spring-boot-plugin.version>1.5.3.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
@@ -496,7 +496,7 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jolokia</groupId>
+                <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker.maven.plugin.version}</version>
                 <configuration>
@@ -505,6 +505,7 @@
                             <name>${docker.image}</name>
                             <build>
                                 <from>${docker.from}</from>
+                                <cleanup>${docker.cleanup}</cleanup>
                                 <assembly>
                                     <basedir>/deployments</basedir>
                                     <descriptorRef>artifact</descriptorRef>
