@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolver;
+package org.rutebanken.tiamat.rest.graphql.resolvers;
 
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component

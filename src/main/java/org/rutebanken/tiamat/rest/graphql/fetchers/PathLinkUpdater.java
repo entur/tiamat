@@ -1,11 +1,11 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.rest.graphql.resolver.PathLinkMapper;
+import org.rutebanken.tiamat.rest.graphql.resolvers.PathLinkMapper;
 import org.rutebanken.tiamat.service.PathLinkUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

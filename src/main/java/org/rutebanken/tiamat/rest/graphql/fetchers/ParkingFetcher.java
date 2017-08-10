@@ -1,9 +1,10 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

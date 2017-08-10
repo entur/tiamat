@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolver;
+package org.rutebanken.tiamat.rest.graphql.resolvers;
 
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;

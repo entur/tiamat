@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.geo.CentroidComputer;

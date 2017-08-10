@@ -2,8 +2,8 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
-import org.rutebanken.tiamat.rest.graphql.fetcher.KeyValuesDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetcher.OriginalIdsDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.OriginalIdsDataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

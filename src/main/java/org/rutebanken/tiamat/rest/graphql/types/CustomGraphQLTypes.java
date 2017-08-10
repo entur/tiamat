@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.rest.graphql.PrivateCodeFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

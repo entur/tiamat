@@ -1,9 +1,12 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.operations;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.tiamat.service.StopPlaceQuayDeleter;
+import org.rutebanken.tiamat.service.StopPlaceQuayMerger;
+import org.rutebanken.tiamat.service.StopPlaceQuayMover;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

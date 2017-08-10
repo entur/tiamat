@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -34,6 +34,8 @@ class StopPlaceFetcher implements DataFetcher {
 
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFetcher.class);
+
+    private static final Page<StopPlace> EMPTY_STOPS_RESULT = new PageImpl<>(new ArrayList<>());;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -110,7 +112,7 @@ class StopPlaceFetcher implements DataFetcher {
                     stopPlaceSearchBuilder.setNetexIdList(idList);
                 } else {
                     //Search for key/values returned no results
-                    return stopPlaces;
+                    return EMPTY_STOPS_RESULT;
                 }
             } else {
 

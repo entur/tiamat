@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -34,7 +34,7 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private EntityChangedListener entityChangedListener;
 
-    protected boolean deleteStopPlace(String stopPlaceId) {
+    public boolean deleteStopPlace(String stopPlaceId) {
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
         stopPlaceRepository.delete(stopPlaces);
@@ -42,7 +42,7 @@ public class StopPlaceQuayDeleter {
         return true;
     }
 
-    protected StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
+    public StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
         if (stopPlace != null) {
@@ -58,7 +58,7 @@ public class StopPlaceQuayDeleter {
         return stopPlace;
     }
 
-    protected StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
+    public StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
         if (stopPlace != null) {

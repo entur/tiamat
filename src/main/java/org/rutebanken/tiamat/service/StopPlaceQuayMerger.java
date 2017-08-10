@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.service;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -32,7 +32,7 @@ public class StopPlaceQuayMerger {
 
     private static final String[] ignoreFields = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
 
-    protected StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
+    public StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
         StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
 
@@ -93,7 +93,7 @@ public class StopPlaceQuayMerger {
         return mergedStopPlace;
     }
 
-    protected StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
+    public StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
         Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
@@ -140,7 +140,7 @@ public class StopPlaceQuayMerger {
         return updatedStopPlace;
     }
 
-    void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
+    public void mergeKeyValues(Map<String, Value> fromKeyValues, Map<String, Value> toKeyValues) {
         fromKeyValues.keySet()
                 .forEach(key -> {
                     if (toKeyValues.containsKey(key)) {
@@ -156,7 +156,7 @@ public class StopPlaceQuayMerger {
                 });
     }
 
-    PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
+    public PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
         if (fromPlaceEquipments != null) {
             if (toPlaceEquipments == null) {
                 toPlaceEquipments = new PlaceEquipment();

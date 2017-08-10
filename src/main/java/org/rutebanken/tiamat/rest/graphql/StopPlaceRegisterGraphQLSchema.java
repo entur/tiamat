@@ -4,8 +4,10 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.rest.graphql.fetcher.AuthorizationCheckDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetcher.StopPlaceTariffZoneFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
+import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
@@ -60,6 +62,9 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
+
+    @Autowired
+    private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -234,6 +239,7 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
+                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(stopPlaceObjectType))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()

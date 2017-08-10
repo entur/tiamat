@@ -1,22 +1,17 @@
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.fetcher.PolygonFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.ZonedDateTime;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component

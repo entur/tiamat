@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.fetcher;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 
 import graphql.schema.DataFetcher;
