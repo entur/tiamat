@@ -752,7 +752,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void findParentStopPlaceByName() {
+    public void findStopPlaceByParentName() {
 
         StopPlace child = new StopPlace();
         child.setVersion(1L);
@@ -762,7 +762,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
 
         Page<StopPlace> actual = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder().setQuery(parentStopPlaceName).build()).build());
-        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(parent.getNetexId());
+        assertThat(actual.getContent().get(0).getNetexId()).as("The child is expected to be returned").isEqualTo(child.getNetexId());
     }
 
     @Test
