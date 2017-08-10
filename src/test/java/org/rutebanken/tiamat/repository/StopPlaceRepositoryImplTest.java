@@ -766,7 +766,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void findParentStopPlaceByNameAndType() {
+    public void findStopPlaceByNameAndParentType() {
 
         StopPlace child = new StopPlace();
         child.setVersion(1L);
@@ -784,7 +784,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                 .build())
                         .build());
         assertThat(actual.getTotalElements()).isEqualTo(1L);
-        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(parent.getNetexId());
+        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(child.getNetexId());
     }
 
     @Test
