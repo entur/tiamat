@@ -104,6 +104,8 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_STOPPLACE_INTERFACE = OUTPUT_TYPE_STOPPLACE + "Interface";
 
+    public static final String OUTPUT_TYPE_PARENT_STOPPLACE = "Parent" + OUTPUT_TYPE_STOPPLACE;
+
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
@@ -150,6 +152,8 @@ public class GraphQLNames {
     public static final String ACCESSIBILITY_ASSESSMENT = "accessibilityAssessment";
     public static final String LIMITATIONS = "limitations";
     public static final String MOBILITY_IMPAIRED_ACCESS = "mobilityImpairedAccess";
+
+    public static final String CHILDREN = "children";
 
     public static final String WHEELCHAIR_ACCESS = "wheelchairAccess";
     public static final String STEP_FREE_ACCESS = "stepFreeAccess";
@@ -286,6 +290,7 @@ public class GraphQLNames {
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
+    public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
 
