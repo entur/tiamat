@@ -22,6 +22,8 @@ import java.util.*;
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
+    private boolean parentStopPlace;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
 
@@ -259,6 +261,14 @@ public class StopPlace
         this.tariffZones = tariffZones;
     }
 
+    public boolean isParentStopPlace() {
+        return parentStopPlace;
+    }
+
+    public void setParentStopPlace(boolean parentStopPlace) {
+        this.parentStopPlace = parentStopPlace;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -290,6 +300,7 @@ public class StopPlace
                 .add("centroid", centroid)
                 .add("keyValues", getKeyValues())
                 .add("quays", quays)
+                .add("isParentStopPlace", isParentStopPlace())
                 .toString();
     }
 }

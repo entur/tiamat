@@ -1,0 +1,1 @@
+alter table stop_place add column parent_stop_place boolean not null default 'false';
