@@ -1316,17 +1316,19 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "        shelterEquipment { id }" +
                 "        generalSign { id }" +
                 "      }" +
-                "    quays {" +
-                "      id" +
-                "      placeEquipments {" +
-                "        waitingRoomEquipment { id }" +
-                "        sanitaryEquipment { id }" +
-                "        ticketingEquipment { id }" +
-                "        cycleStorageEquipment { id }" +
-                "        shelterEquipment { id }" +
-                "        generalSign { id }" +
-                "      }" +
-                "    }" +
+                "    ... on StopPlace {" +
+                "       quays {" +
+                "       id" +
+                "        placeEquipments {" +
+                "         waitingRoomEquipment { id }" +
+                "         sanitaryEquipment { id }" +
+                "         ticketingEquipment { id }" +
+                "         cycleStorageEquipment { id }" +
+                "         shelterEquipment { id }" +
+                "         generalSign { id }" +
+                "        }" +
+                "       }" +
+                "   }" +
                 "  }" +
                 "}}\",\"variables\":\"\"}";
 
