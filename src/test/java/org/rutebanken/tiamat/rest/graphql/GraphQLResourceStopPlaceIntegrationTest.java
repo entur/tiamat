@@ -55,10 +55,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + stopPlace.getNetexId() + "\\\") {" +
                 "   id " +
                 "   name { value } " +
+                "  ... on StopPlace {" +
                 "   quays { " +
                 "      id " +
                 "      name  { value } " +
                 "     }" +
+                "  }" +
                 "}" +
                 "}\",\"variables\":\"\"}";
 
@@ -551,11 +553,13 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 " (municipalityReference:[\\\""+baerum.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
                 "id " +
                 "name { value } " +
+                "  ... on StopPlace {" +
                 "quays " +
                 "  { " +
                 "   id " +
                 "   name  { value } " +
                 "  }  " +
+                "}" +
                 "}" +
                 "}\",\"variables\":\"\"}";
 
@@ -1450,6 +1454,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "          lang" +
                 "        }" +
                 "      }" +
+                "  ... on StopPlace {" +
                 "    quays {" +
                 "      id" +
                 "      alternativeNames {" +
@@ -1460,6 +1465,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "        }" +
                 "      }" +
                 "    }" +
+                "   }" +
                 "  }" +
                 "}}\",\"variables\":\"\"}";
 
