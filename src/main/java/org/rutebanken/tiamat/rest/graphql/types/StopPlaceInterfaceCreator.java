@@ -53,7 +53,9 @@ public class StopPlaceInterfaceCreator {
     }
 
 
-    public GraphQLInterfaceType createInterface(List<GraphQLFieldDefinition> stopPlaceInterfaceFields, List<GraphQLFieldDefinition> commonFieldsList, TypeResolver stopPlaceTypeResolver) {
+    public GraphQLInterfaceType createInterface(List<GraphQLFieldDefinition> stopPlaceInterfaceFields,
+                                                List<GraphQLFieldDefinition> commonFieldsList,
+                                                TypeResolver stopPlaceTypeResolver) {
         return newInterface()
                 .name(OUTPUT_TYPE_STOPPLACE_INTERFACE)
                 .fields(commonFieldsList)
