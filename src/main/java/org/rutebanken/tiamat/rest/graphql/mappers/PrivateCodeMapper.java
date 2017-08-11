@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolvers;
+package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -8,13 +8,6 @@ import java.util.Map;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class ObjectResolver {
-
-    public static EmbeddableMultilingualString getEmbeddableString(Map map) {
-        if (map != null) {
-            return new EmbeddableMultilingualString((String) map.get(VALUE), (String) map.get(LANG));
-        }
-        return null;
-    }
 
 
     public static PrivateCodeStructure getPrivateCodeStructure(Map<String, String> pCode) {
