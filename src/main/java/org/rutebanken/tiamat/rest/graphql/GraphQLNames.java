@@ -102,6 +102,8 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_STOPPLACE = "StopPlace";
     public static final String INPUT_TYPE_STOPPLACE = OUTPUT_TYPE_STOPPLACE + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_STOPPLACE_INTERFACE = OUTPUT_TYPE_STOPPLACE + "Interface";
+
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
