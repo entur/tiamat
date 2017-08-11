@@ -7,9 +7,7 @@ import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
-public class ObjectResolver {
-
-
+public class PrivateCodeMapper {
     public static PrivateCodeStructure getPrivateCodeStructure(Map<String, String> pCode) {
         if (pCode == null) {
             return null;

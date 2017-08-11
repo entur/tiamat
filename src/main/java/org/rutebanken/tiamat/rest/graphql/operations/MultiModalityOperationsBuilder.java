@@ -5,7 +5,6 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.service.MultiModalStopPlaceEditor;
-import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
 
 @Component

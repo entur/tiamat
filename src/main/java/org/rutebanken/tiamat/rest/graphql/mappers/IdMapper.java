@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class IdResolver {
+public class IdMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(IdResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(IdMapper.class);
 
     public Optional<String> extractIdIfPresent(String field, Map input) {
         if(input.get(field) != null) {
