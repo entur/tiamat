@@ -186,10 +186,10 @@ StopPlaceRegisterGraphQLSchema {
         stopPlaceTypeResolver.setResolveFunction(object -> {
             if(object instanceof StopPlace) {
                 StopPlace stopPlace = (StopPlace) object;
-                if(stopPlace.getParentSiteRef() != null) {
-                    return stopPlaceObjectType;
-                } else {
+                if(stopPlace.isParentStopPlace()) {
                     return parentStopPlaceObjectType;
+                } else {
+                    return stopPlaceObjectType;
                 }
             }
             return null;
