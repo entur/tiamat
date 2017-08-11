@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
@@ -17,8 +18,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
 
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -135,7 +134,7 @@ StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommondFieldList);
 
-        MutableStopPlaceTypeResolver stopPlaceTypeResolver = new MutableStopPlaceTypeResolver();
+        MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
         stopPlaceInterfaceFields.add(newFieldDefinition()
@@ -184,7 +183,7 @@ StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(stopPlaceFetcher))
                 .build();
 
-        stopPlaceTypeResolver.setFunction(object -> {
+        stopPlaceTypeResolver.setResolveFunction(object -> {
             if(object instanceof StopPlace) {
                 StopPlace stopPlace = (StopPlace) object;
                 if(stopPlace.getParentSiteRef() != null) {
@@ -639,18 +638,5 @@ StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private static class MutableStopPlaceTypeResolver implements TypeResolver {
-
-        private Function<Object, GraphQLObjectType> function;
-
-        public void setFunction(Function<Object, GraphQLObjectType> function) {
-            this.function = function;
-        }
-
-        @Override
-        public GraphQLObjectType getType(Object object) {
-            return function.apply(object);
-        }
-    }
 }
 
