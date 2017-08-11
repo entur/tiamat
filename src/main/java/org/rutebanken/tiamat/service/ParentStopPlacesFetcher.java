@@ -44,11 +44,11 @@ public class ParentStopPlacesFetcher {
                         StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(),
                                 Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
                         if(parent != null) {
-                            logger.info("Resolved parent: {}", parent);
+                            logger.info("Resolved parent: {} from child {}", parent.getNetexId(), stopPlace.getNetexId());
                             return parent;
                         }
                     }
-                    logger.info("Could not resolve parent. returning child: {}", stopPlace);
+                    logger.debug("No parent. returning child: {}", stopPlace.getNetexId());
                     return stopPlace;
                 })
                 .collect(
