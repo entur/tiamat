@@ -42,10 +42,8 @@ public class MultiModalStopPlaceEditor {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
-        logger.info("Saving first version of parent stop place {}", name);
-        StopPlace parentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(name));
-
-        // Terminate last version of stop place. Create new version with parent site ref
+        logger.info("Creating first version of parent stop place {}", name);
+        final StopPlace parentStopPlace = createAndSaveParentStopPlace(name);
 
         futureChildStopPlaces.forEach(existingVersion -> {
 
@@ -104,5 +102,12 @@ public class MultiModalStopPlaceEditor {
         });
 
         return parentStopPlace;
+    }
+
+    private StopPlace createAndSaveParentStopPlace(EmbeddableMultilingualString name) {
+        StopPlace stopPlace = new StopPlace(name);
+        stopPlace.setParentStopPlace(true);
+        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
     }
 }
