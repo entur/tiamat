@@ -12,6 +12,7 @@ import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -64,6 +65,9 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private StopPlaceInterfaceCreator stopPlaceInterfaceCreator;
+
+    @Autowired
+    private StopPlaceInputObjectTypeCreator stopPlaceInputObjectTypeCreator;
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
@@ -237,17 +241,7 @@ StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
 
-        GraphQLInputObjectType parentStopPlaceInputObjectType = newInputObject()
-                .name(INPUT_TYPE_PARENT_STOPPLACE)
-                .fields(commonInputFieldList)
-                .fields(transportModeScalar.createTransportModeInputFieldsList())
-                .field(newInputObjectField()
-                        .name(VERSION_COMMENT)
-                        .type(GraphQLString))
-                .field(newInputObjectField()
-                        .name(VALID_BETWEEN)
-                        .type(validBetweenInputObjectType))
-                .build();
+        GraphQLInputObjectType parentStopPlaceInputObjectType = stopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType);
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
