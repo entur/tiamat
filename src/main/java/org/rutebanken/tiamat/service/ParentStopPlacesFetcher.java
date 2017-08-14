@@ -6,15 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 /**
  * Resolve and fetch parent stop places from a list of stops
@@ -30,30 +27,40 @@ public class ParentStopPlacesFetcher {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
-    public List<StopPlace> resolveAndReplaceWithParents(List<StopPlace> stopPlaceList) {
+    public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds) {
 
 
         if (stopPlaceList == null) {
             return stopPlaceList;
         }
 
-        return stopPlaceList.stream()
-                .map(stopPlace -> {
-                    if(stopPlace.getParentSiteRef() != null) {
-                        // Parent stop place refs should have version. If not, let it fail.
-                        StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(),
-                                Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
-                        if(parent != null) {
-                            logger.info("Resolved parent: {} from child {}", parent.getNetexId(), stopPlace.getNetexId());
-                            return parent;
-                        }
+        List<StopPlace> result = stopPlaceList.stream().filter(StopPlace::isParentStopPlace).collect(toList());
+
+        List<StopPlace> nonParentStops = stopPlaceList.stream().filter(stopPlace -> !stopPlace.isParentStopPlace()).collect(toList());
+
+        nonParentStops.forEach(nonParentStop -> {
+            if (nonParentStop.getParentSiteRef() != null) {
+                // Parent stop place refs should have version. If not, let it fail.
+                StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(nonParentStop.getParentSiteRef().getRef(),
+                        Long.parseLong(nonParentStop.getParentSiteRef().getVersion()));
+                if (parent != null) {
+                    logger.info("Resolved parent: {} from child {}", parent.getNetexId(), nonParentStop.getNetexId());
+                    result.add(parent);
+                    if(keepChilds) {
+                        result.add(nonParentStop);
                     }
-                    logger.debug("No parent. Returning ordinary stop place: {}", stopPlace.getNetexId());
-                    return stopPlace;
-                })
+                } else {
+                    logger.warn("Could not resolve parent from {}", nonParentStop.getParentSiteRef());
+                }
+            } else {
+                result.add(nonParentStop);
+            }
+        });
+
+        return result.stream()
                 .collect(
                         collectingAndThen(
-                                toCollection(() -> new TreeSet<>(comparing(stopPlace -> stopPlace.getNetexId()+"-"+stopPlace.getVersion()))),
+                                toCollection(() -> new TreeSet<>(comparing(stopPlace -> stopPlace.getNetexId() + "-" + stopPlace.getVersion()))),
                                 ArrayList::new)
                 );
     }

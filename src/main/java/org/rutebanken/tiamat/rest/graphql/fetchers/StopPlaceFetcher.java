@@ -38,6 +38,11 @@ class StopPlaceFetcher implements DataFetcher {
 
     private static final Page<StopPlace> EMPTY_STOPS_RESULT = new PageImpl<>(new ArrayList<>());;
 
+    /**
+     * Wether to keep childs when resolving parent stop places. False, because with graphql it's possible to fetch children from parent.
+     */
+    private static final boolean KEEP_CHILDS = false;
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
@@ -185,7 +190,7 @@ class StopPlaceFetcher implements DataFetcher {
         }
 
 
-        List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveAndReplaceWithParents(stopPlacesPage.getContent());
+        List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlacesPage.getContent(), KEEP_CHILDS);
         return new PageImpl<>(parentsResolved, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), parentsResolved.size());
     }
 }

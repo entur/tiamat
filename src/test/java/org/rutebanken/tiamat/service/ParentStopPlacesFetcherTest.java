@@ -26,16 +26,20 @@ public class ParentStopPlacesFetcherTest {
 
         int counter = 0;
         StopPlace parent = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        parent.setParentStopPlace(true);
         StopPlace parentSecondVersion = new StopPlace();
+        parentSecondVersion.setParentStopPlace(true);
         parentSecondVersion.setNetexId(parent.getNetexId());
         parentSecondVersion.setVersion(2L);
 
         StopPlace child1 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        child1.setParentStopPlace(false);
         addParentRef(child1, parent);
         StopPlace child2 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        child2.setParentStopPlace(false);
         addParentRef(child2, parent);
 
-        List<StopPlace> result = parentStopPlacesFetcher.resolveAndReplaceWithParents(Arrays.asList(parent, parentSecondVersion, child1, child2));
+        List<StopPlace> result = parentStopPlacesFetcher.resolveParents(Arrays.asList(parent, parentSecondVersion, child1, child2), false);
 
         assertThat(result).extracting(this::concatenateNetexIdVersion)
                 .as("parent first version should be kept")
@@ -47,11 +51,41 @@ public class ParentStopPlacesFetcherTest {
         assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).doesNotContain(child2.getNetexId());
     }
 
+    @Test
+    public void resolveParentsKeepChilds() throws Exception {
+
+        int counter = 10;
+        StopPlace parent = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        parent.setParentStopPlace(true);
+
+        StopPlace parentSecondVersion = new StopPlace();
+        parentSecondVersion.setParentStopPlace(true);
+        parentSecondVersion.setNetexId(parent.getNetexId());
+        parentSecondVersion.setVersion(2L);
+
+        StopPlace child1 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        child1.setParentStopPlace(false);
+        addParentRef(child1, parent);
+
+        StopPlace child2 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        child2.setParentStopPlace(false);
+        addParentRef(child2, parent);
+
+        List<StopPlace> result = parentStopPlacesFetcher.resolveParents(Arrays.asList(parent, parentSecondVersion, child1, child2), true);
+
+        assertThat(result).extracting(this::concatenateNetexIdVersion)
+                .as("parent first version should be kept")
+                .contains(concatenateNetexIdVersion(parent));
+        assertThat(result).extracting(this::concatenateNetexIdVersion)
+                .as("parent second version should be kept")
+                .contains(concatenateNetexIdVersion(parentSecondVersion));
+        assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child1.getNetexId());
+        assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child2.getNetexId());
+    }
+
     private void addParentRef(StopPlace child, StopPlace parent) {
         child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
     }
-
-    private Comparator<StopPlace> comparator = comparing(stopPlace -> stopPlace.getVersion()+stopPlace.getNetexId());
 
     private String concatenateNetexIdVersion(EntityInVersionStructure entity) {
         return entity.getVersion()+entity.getNetexId();
