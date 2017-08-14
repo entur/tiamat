@@ -21,6 +21,7 @@ import java.util.List;
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
+import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
@@ -236,6 +237,18 @@ StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
 
+        GraphQLInputObjectType parentStopPlaceInputObjectType = newInputObject()
+                .name(INPUT_TYPE_PARENT_STOPPLACE)
+                .fields(commonInputFieldList)
+                .fields(transportModeScalar.createTransportModeInputFieldsList())
+                .field(newInputObjectField()
+                        .name(VERSION_COMMENT)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenInputObjectType))
+                .build();
+
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
@@ -249,6 +262,16 @@ StopPlaceRegisterGraphQLSchema {
                                 .name(OUTPUT_TYPE_STOPPLACE)
                                 .type(stopPlaceInputObjectType))
                         .dataFetcher(stopPlaceUpdater))
+                .field(newFieldDefinition()
+                        .type(new GraphQLList(parentStopPlaceObjectType))
+                        .name(MUTATE_PARENT_STOPPLACE)
+                        .description("Update existing Parent StopPlace")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_PARENT_STOPPLACE)
+                                .type(parentStopPlaceInputObjectType))
+                        .dataFetcher(dataFetchingEnvironment -> {
+                            return dataFetchingEnvironment.getSource();
+                        }))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name(MUTATE_PATH_LINK)
@@ -490,7 +513,7 @@ StopPlaceRegisterGraphQLSchema {
     }
 
     private GraphQLInputObjectType createValidBetweenInputObjectType() {
-        return GraphQLInputObjectType.newInputObject()
+        return newInputObject()
                 .name(INPUT_TYPE_VALID_BETWEEN)
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN_FROM_DATE)
@@ -508,7 +531,7 @@ StopPlaceRegisterGraphQLSchema {
                                                                   GraphQLInputObjectType topographicPlaceInputObjectType,
                                                                   GraphQLInputObjectType quayObjectInputType,
                                                                   GraphQLInputObjectType validBetweenInputObjectType) {
-        return GraphQLInputObjectType.newInputObject()
+        return newInputObject()
                 .name(INPUT_TYPE_STOPPLACE)
                 .fields(commonInputFieldsList)
                 .fields(transportModeScalar.createTransportModeInputFieldsList())
@@ -560,7 +583,7 @@ StopPlaceRegisterGraphQLSchema {
 
 
     private GraphQLInputObjectType createQuayInputObjectType(List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList) {
-        return GraphQLInputObjectType.newInputObject()
+        return newInputObject()
                 .name(INPUT_TYPE_QUAY)
                 .fields(graphQLCommonInputObjectFieldsList)
                 .field(newInputObjectField()
