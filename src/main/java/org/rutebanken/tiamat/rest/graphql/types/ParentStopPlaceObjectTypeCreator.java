@@ -35,7 +35,7 @@ public class ParentStopPlaceObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(CHILDREN)
                         .type(stopPlaceObjectType)
-                        .dataFetcher(stopPlaceChildFetcher::get))
+                        .dataFetcher(stopPlaceChildFetcher))
                 .build();
     }
 }
