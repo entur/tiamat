@@ -18,7 +18,7 @@ public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityIn
 
     StopPlace findByNameValueAndCentroid(String name, Point geometryPoint);
 
-    @Query(value = "select s from stop_place s where s.parent_site_ref = #{#ref} and s.parent_site_ref_version = #{#version}", nativeQuery = true)
+    @Query(value = "select s.* from stop_place s where s.parent_site_ref = :#{#ref} and s.parent_site_ref_version = :#{#version}", nativeQuery = true)
     List<StopPlace> findByParentRef(@Param("ref") String ref, @Param("version") String version);
 
     Page<StopPlace> findByNameValueContainingIgnoreCaseOrderByChangedDesc(String name, Pageable pageable);
