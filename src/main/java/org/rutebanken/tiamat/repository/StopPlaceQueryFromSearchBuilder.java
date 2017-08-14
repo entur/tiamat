@@ -46,7 +46,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
         if (hasIdFilter) {
-            wheres.add("s.netex_id in :netexIdList");
+            wheres.add("(s.netex_id in :netexIdList OR p.netex_id in :netexIdList)");
             parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
