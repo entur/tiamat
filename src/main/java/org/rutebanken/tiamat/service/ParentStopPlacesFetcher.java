@@ -48,7 +48,7 @@ public class ParentStopPlacesFetcher {
                             return parent;
                         }
                     }
-                    logger.debug("No parent. returning child: {}", stopPlace.getNetexId());
+                    logger.debug("No parent. Returning ordinary stop place: {}", stopPlace.getNetexId());
                     return stopPlace;
                 })
                 .collect(
