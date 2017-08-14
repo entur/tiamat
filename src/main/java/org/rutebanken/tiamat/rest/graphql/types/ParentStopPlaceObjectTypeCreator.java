@@ -34,7 +34,7 @@ public class ParentStopPlaceObjectTypeCreator {
                 .fields(commonFieldsList)
                 .field(newFieldDefinition()
                         .name(CHILDREN)
-                        .type(stopPlaceObjectType)
+                        .type(new GraphQLList(stopPlaceObjectType))
                         .dataFetcher(stopPlaceChildFetcher))
                 .build();
     }
