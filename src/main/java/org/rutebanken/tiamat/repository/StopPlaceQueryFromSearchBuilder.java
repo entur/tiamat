@@ -156,6 +156,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             wheres.add("s.centroid IS NULL");
         }
 
+        operators.add("and");
+        wheres.add("s.parent_stop_place = false");
+
         addWheres(queryString, wheres, operators);
 
         orderByStatements.add("s.netex_id, s.version asc");
