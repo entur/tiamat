@@ -59,13 +59,18 @@ public class MultiModalStopPlaceEditor {
                             throw new RuntimeException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is not currently valid: to date = " + existingVersion.getValidBetween().getToDate());
                         }
                     }
+
+                    if(existingVersion.isParentStopPlace()) {
+                        throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is already a parent stop place");
+                    }
+
+                    if(existingVersion.getParentSiteRef().getRef() != null) {
+                        throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " does already have parent site ref");
+                    }
+
                     logger.info("Adding child stop place {} to new parent stop place {}", existingVersion, parentStopPlace);
                     // Create copy to get rid of database primary keys, preparing it to be versioned under parent stop place.
                     StopPlace stopPlaceCopy = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-                    stopPlaceCopy.setName(null);
-                    stopPlaceCopy.setValidBetween(null);
-                    stopPlaceCopy.setTopographicPlace(null);
-                    stopPlaceCopy.setTariffZones(null);
                     return stopPlaceCopy;
                 })
                 .collect(toSet());
