@@ -98,7 +98,7 @@ class StopPlaceUpdater implements DataFetcher {
                 updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
             } else {
-                Preconditions.checkArgument(!existingVersion.isParentStopPlace(),
+                Preconditions.checkArgument(!mutateParent,
                         "Cannot create new parent stop place. Use mutation %s", CREATE_MULTIMODAL_STOPPLACE);
 
                 logger.info("Creating new StopPlace");
