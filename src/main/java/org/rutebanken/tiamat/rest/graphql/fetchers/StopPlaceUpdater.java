@@ -62,25 +62,39 @@ class StopPlaceUpdater implements DataFetcher {
         StopPlace stopPlace = null;
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_STOPPLACE)) {
-                stopPlace = createOrUpdateStopPlace(environment);
+                stopPlace = createOrUpdateStopPlace(environment, false);
+            } else if(field.getName().equals(MUTATE_PARENT_STOPPLACE)) {
+                stopPlace = createOrUpdateStopPlace(environment, true);
             }
         }
         return Arrays.asList(stopPlace);
     }
 
 
-    private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment) {
+    private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment, boolean mutateParent) {
         StopPlace updatedStopPlace;
         StopPlace existingVersion = null;
 
-        if (environment.getArgument(OUTPUT_TYPE_STOPPLACE) != null) {
-            Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
+        Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
+        if(input == null) {
+            input = environment.getArgument(OUTPUT_TYPE_PARENT_STOPPLACE);
+        }
+
+        if (input != null) {
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("Updating StopPlace {}", netexId);
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+                if(mutateParent) {
+                    Preconditions.checkArgument(existingVersion.isParentStopPlace(),
+                            "Attempting to update StopPlace as parent [id = %s], but StopPlace is not a parent", netexId);
+                } else {
+                    Preconditions.checkArgument(!existingVersion.isParentStopPlace(),
+                            "Attempting to update parent StopPlace [id = %s] with incorrect mutation. Use %s", netexId, MUTATE_PARENT_STOPPLACE);
+                }
+
                 updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
             } else {

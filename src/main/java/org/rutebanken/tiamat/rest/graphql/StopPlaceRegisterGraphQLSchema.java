@@ -263,9 +263,7 @@ StopPlaceRegisterGraphQLSchema {
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARENT_STOPPLACE)
                                 .type(parentStopPlaceInputObjectType))
-                        .dataFetcher(dataFetchingEnvironment -> {
-                            return dataFetchingEnvironment.getSource();
-                        }))
+                        .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name(MUTATE_PATH_LINK)
