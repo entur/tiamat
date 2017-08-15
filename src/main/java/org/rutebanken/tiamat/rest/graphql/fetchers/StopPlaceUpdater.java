@@ -84,7 +84,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
-                logger.info("Updating StopPlace {}", netexId);
+                logger.info("About to update StopPlace {}", netexId);
                 existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                 Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
                 if(mutateParent) {
@@ -138,6 +138,7 @@ class StopPlaceUpdater implements DataFetcher {
 
         if (input.get(VERSION_COMMENT) != null) {
             stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
+            isUpdated = true;
         }
 
         if (input.get(VALID_BETWEEN) != null) {
