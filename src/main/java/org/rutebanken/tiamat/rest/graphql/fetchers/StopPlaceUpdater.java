@@ -44,9 +44,6 @@ class StopPlaceUpdater implements DataFetcher {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private EntityManager em;
-
-    @Autowired
     private GeometryMapper geometryMapper;
 
     @Autowired
