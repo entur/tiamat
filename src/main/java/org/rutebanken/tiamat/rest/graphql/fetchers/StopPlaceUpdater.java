@@ -152,9 +152,6 @@ class StopPlaceUpdater implements DataFetcher {
                 }
             }
         }
-        if (isUpdated) {
-            stopPlace.setChanged(Instant.now());
-        }
 
         return isUpdated;
     }
