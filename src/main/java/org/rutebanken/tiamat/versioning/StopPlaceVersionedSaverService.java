@@ -20,7 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 @Transactional
@@ -111,7 +112,12 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         clearUnwantedChildFields(newVersion);
+
+        if(newVersion.getChildren() != null) {
+            stopPlaceRepository.save(newVersion.getChildren());
+        }
         newVersion = stopPlaceRepository.save(newVersion);
+        logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(ch -> ch.getId()).collect(toList()));
 
         updateParentSiteRefsForChilds(newVersion);
 
@@ -160,7 +166,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                     stopPlace.getQuays()
                             .stream()
                             .flatMap(q -> q.getOriginalIds().stream())
-                            .collect(Collectors.toList()));
+                            .collect(toList()));
         }
         if(stopPlace.isParentStopPlace()) {
             if(stopPlace.getChildren() != null) {
@@ -203,6 +209,10 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         }
     }
 
+    /**
+     * Needs to be done after parent stop place has been assigned an ID
+     * @param parentStopPlace saved parent stop place
+     */
     private void updateParentSiteRefsForChilds(StopPlace parentStopPlace) {
         long count = 0;
         if(parentStopPlace.getChildren() != null) {
