@@ -35,6 +35,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
+        StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
+        queryString.append("left join stop_place p on s.parent_site_ref = p.netex_id and s.parent_site_ref_version = cast(p.version as text) ");
+
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
@@ -42,24 +45,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
-
-        StringBuilder queryString = new StringBuilder();
-
-        queryString.append("with u as ( ")
-                .append("select p.* from stop_place p ")
-                .append("where p.parent_stop_place = true ");
-
-        if(stopPlaceSearch.getQuery() != null) {
-            queryString.append("and lower(p.name_value) like concat(lower(:query), '%') ");
-        }
-
-        queryString.append("union ")
-                .append("select s.* from stop_place s ")
-                .append("left join stop_place p on s.parent_site_ref = p.netex_id ")
-                .append("and s.parent_site_ref_version = cast(p.version as text) ");
-
         if (hasIdFilter) {
-            wheres.add("(s.netex_id in :netexIdList OR p.netex_id in :netexIdList) ");
+            wheres.add("(s.netex_id in :netexIdList OR p.netex_id in :netexIdList)");
             parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
@@ -106,7 +93,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
                     }
 
-                    orderByStatements.add("similarity(u.name_value, :query) desc");
+                    orderByStatements.add("similarity(p.name_value, :query) desc");
+                    orderByStatements.add("similarity(s.name_value, :query) desc");
                 }
             }
 
@@ -173,10 +161,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         addWheres(queryString, wheres, operators);
 
-        queryString.append(")")
-                .append("select u.* from u");
-
-        orderByStatements.add("u.netex_id, u.version asc");
+        orderByStatements.add("s.netex_id, s.version asc");
         queryString.append(" order by");
 
         for (int i = 0; i < orderByStatements.size(); i++) {
