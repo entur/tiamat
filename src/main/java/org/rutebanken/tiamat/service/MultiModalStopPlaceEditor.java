@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -64,7 +63,7 @@ public class MultiModalStopPlaceEditor {
                         throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is already a parent stop place");
                     }
 
-                    if(existingVersion.getParentSiteRef().getRef() != null) {
+                    if(existingVersion.getParentSiteRef() != null && existingVersion.getParentSiteRef().getRef() != null) {
                         throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " does already have parent site ref");
                     }
 
@@ -75,7 +74,7 @@ public class MultiModalStopPlaceEditor {
                 })
                 .collect(toSet());
 
-        parentStopPlace.setChildren(childCopies);
+        parentStopPlace.getChildren().addAll(childCopies);
         return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace);
     }
 
