@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceChildFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,9 +19,6 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPl
 @Component
 public class ParentStopPlaceObjectTypeCreator {
 
-    @Autowired
-    private StopPlaceChildFetcher stopPlaceChildFetcher;
-
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface,
                                     List<GraphQLFieldDefinition> stopPlaceInterfaceFields,
                                     List<GraphQLFieldDefinition> commonFieldsList,
@@ -34,8 +30,7 @@ public class ParentStopPlaceObjectTypeCreator {
                 .fields(commonFieldsList)
                 .field(newFieldDefinition()
                         .name(CHILDREN)
-                        .type(new GraphQLList(stopPlaceObjectType))
-                        .dataFetcher(stopPlaceChildFetcher))
+                        .type(new GraphQLList(stopPlaceObjectType)))
                 .build();
     }
 }
