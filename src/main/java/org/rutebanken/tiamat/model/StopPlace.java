@@ -86,6 +86,9 @@ public class StopPlace
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<StopPlace> children = new HashSet<>();
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TariffZoneRef> tariffZones = new HashSet<>();
 
@@ -253,6 +256,14 @@ public class StopPlace
         this.quays = quays;
     }
 
+    public Set<StopPlace> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<StopPlace> children) {
+        this.children = children;
+    }
+
     public Set<TariffZoneRef> getTariffZones() {
         return tariffZones;
     }
@@ -280,12 +291,14 @@ public class StopPlace
         StopPlace other = (StopPlace) object;
 
         return Objects.equals(this.name, other.name)
-                && Objects.equals(this.centroid, other.centroid);
+                && Objects.equals(this.centroid, other.centroid)
+                && Objects.equals(this.stopPlaceType, other.stopPlaceType)
+                && Objects.equals(this.parentStopPlace, other.parentStopPlace);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, centroid);
+        return Objects.hash(name, centroid, stopPlaceType, parentStopPlace);
     }
 
     @Override
@@ -301,6 +314,7 @@ public class StopPlace
                 .add("keyValues", getKeyValues())
                 .add("quays", quays)
                 .add("isParentStopPlace", isParentStopPlace())
+                .add("children", children == null ? 0 : children.size())
                 .toString();
     }
 }
