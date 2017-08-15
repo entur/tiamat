@@ -110,9 +110,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
-        newVersion = stopPlaceRepository.save( newVersion);
-
         clearUnwantedChildFields(newVersion);
+        newVersion = stopPlaceRepository.save(newVersion);
+
         updateParentSiteRefsForChilds(newVersion);
 
         if(existingVersion != null) {
@@ -122,7 +122,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         updateQuaysCache(newVersion);
 
         nearbyStopPlaceFinder.update(newVersion);
+        newVersion.getChildren().forEach(nearbyStopPlaceFinder::update);
         entityChangedListener.onChange(newVersion);
+        newVersion.getChildren().forEach(entityChangedListener::onChange);
         return newVersion;
     }
 
@@ -168,6 +170,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
+        if(stopPlaceToSave.getChildren() == null) return;
         stopPlaceToSave.getChildren().forEach(child -> {
             child.setName(null);
             child.setValidBetween(null);
