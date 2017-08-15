@@ -12,7 +12,6 @@ import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +22,6 @@ import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
-import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
@@ -67,7 +65,7 @@ StopPlaceRegisterGraphQLSchema {
     private StopPlaceInterfaceCreator stopPlaceInterfaceCreator;
 
     @Autowired
-    private StopPlaceInputObjectTypeCreator stopPlaceInputObjectTypeCreator;
+    private ParentStopPlaceInputObjectTypeCreator parentStopPlaceInputObjectTypeCreator;
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
@@ -241,7 +239,7 @@ StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
 
-        GraphQLInputObjectType parentStopPlaceInputObjectType = stopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType);
+        GraphQLInputObjectType parentStopPlaceInputObjectType = parentStopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
