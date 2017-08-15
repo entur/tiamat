@@ -26,6 +26,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
@@ -85,8 +87,9 @@ class StopPlaceUpdater implements DataFetcher {
             String netexId = (String) input.get(ID);
             if (netexId != null) {
                 logger.info("About to update StopPlace {}", netexId);
-                existingVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-                Preconditions.checkArgument(existingVersion != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+
+                existingVersion = findAndVerify(netexId);
+
                 if(mutateParent) {
                     Preconditions.checkArgument(existingVersion.isParentStopPlace(),
                             "Attempting to update StopPlace as parent [id = %s], but StopPlace is not a parent", netexId);
@@ -111,9 +114,12 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
                     authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
 
+                    handleChildStops(input, updatedStopPlace);
+
                     if(updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
                     }
+
                     updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
 
                     return updatedStopPlace;
@@ -121,6 +127,54 @@ class StopPlaceUpdater implements DataFetcher {
             }
         }
         return existingVersion;
+    }
+
+    private void handleChildStops(Map input, StopPlace updatedParentStopPlace) {
+        if(input.get(CHILDREN) != null) {
+            List childObjects = (List) input.get(CHILDREN);
+            logger.info("Incoming child stop objects: {}", childObjects);
+
+            List<StopPlace> populatedChilds =  new ArrayList<>();
+
+            for(Object childStopObject : childObjects) {
+                Map childStopMap = (Map) childStopObject;
+                String childNetexId = (String) childStopMap.get(ID);
+
+                StopPlace existingChildStopPlace = findAndVerify(childNetexId);
+
+
+                verifyCorrectParentSet(existingChildStopPlace, updatedParentStopPlace);
+
+                StopPlace child = new StopPlace();
+                populateStopPlaceFromInput((Map) childStopMap, child);
+
+                populatedChilds.add(child);
+            }
+
+
+            logger.info("Populated child stops: {}", populatedChilds);
+        }
+    }
+
+    private StopPlace findAndVerify(String netexId) {
+        StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+        Preconditions.checkArgument(existingStopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+        return existingStopPlace;
+    }
+
+    private void verifyCorrectParentSet(StopPlace existingChildStop, StopPlace existingParentStop) {
+        Preconditions.checkArgument(existingChildStop.getParentSiteRef() != null,
+                "Attempting to update StopPlace child [id = %s], but it does not belong to any parent.", existingChildStop.getNetexId());
+
+        Preconditions.checkArgument(existingChildStop.getParentSiteRef().getRef().equals(existingParentStop.getNetexId()),
+                "Attempting to update StopPlace child [id = %s], but it does not belong to parent %s.", existingChildStop.getNetexId(), existingParentStop.getNetexId());
+
+        Preconditions.checkArgument(existingChildStop.getParentSiteRef().getVersion().equals(String.valueOf(existingParentStop.getVersion())),
+                "Attempting to update StopPlace child [id = %s], but it does not refer to parent %s in correct version: %s.",
+                    existingChildStop.getNetexId(),
+                    existingParentStop.getNetexId(),
+                    existingParentStop.getVersion());
+
     }
 
     /**
