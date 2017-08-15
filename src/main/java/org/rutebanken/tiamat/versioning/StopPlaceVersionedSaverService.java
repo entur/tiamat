@@ -4,6 +4,8 @@ import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
+import org.rutebanken.tiamat.model.SiteElement;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
@@ -109,6 +111,10 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
         newVersion = stopPlaceRepository.save( newVersion);
+
+        clearUnwantedChildFields(newVersion);
+        updateParentSiteRefsForChilds(newVersion);
+
         if(existingVersion != null) {
            tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
@@ -151,6 +157,15 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         return stopPlace;
     }
 
+    private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
+        stopPlaceToSave.getChildren().forEach(child -> {
+            child.setName(null);
+            child.setValidBetween(null);
+            child.setTopographicPlace(null);
+            child.setTariffZones(null);
+        });
+    }
+
     private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
 
         versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
@@ -162,12 +177,40 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if (stopPlaceToSave.getQuays() != null) {
             logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
             stopPlaceToSave.getQuays().forEach(quay -> {
-                versionCreator.initiateOrIncrement(quay);
-                versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(quay);
-                if (quay.getAlternativeNames() != null) {
-                    versionCreator.initiateOrIncrementAlternativeNamesVersion(quay.getAlternativeNames());
-                }
+                initiateOrIncrementSiteElementVersion(quay);
             });
+        }
+
+        if(stopPlaceToSave.getChildren() != null) {
+            logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlaceToSave.getChildren().size(), stopPlaceToSave.getNetexId());
+            stopPlaceToSave.getChildren().forEach(child -> {
+                initiateOrIncrementSiteElementVersion(child);
+                initiateOrIncrementVersionsForChildren(child);
+            });
+        }
+    }
+
+    private void updateParentSiteRefsForChilds(StopPlace parentStopPlace) {
+        long count = 0;
+        if(parentStopPlace.getChildren() != null) {
+            count = parentStopPlace.getChildren().stream()
+                .map(child -> {
+                    SiteRefStructure siteRefStructure = new SiteRefStructure();
+                    siteRefStructure.setRef(parentStopPlace.getNetexId());
+                    siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
+                    child.setParentSiteRef(siteRefStructure);
+                    return child;
+
+            }).count();
+        }
+        logger.info("Updated {} childs with parent site refs", count);
+    }
+
+    private void initiateOrIncrementSiteElementVersion(SiteElement siteElement) {
+        versionCreator.initiateOrIncrement(siteElement);
+        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(siteElement);
+        if (siteElement.getAlternativeNames() != null) {
+            versionCreator.initiateOrIncrementAlternativeNamesVersion(siteElement.getAlternativeNames());
         }
     }
 }
