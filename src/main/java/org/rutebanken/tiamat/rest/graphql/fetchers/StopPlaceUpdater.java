@@ -20,14 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
-import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toList;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
@@ -114,7 +111,9 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
                     authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
 
-                    handleChildStops(input, updatedStopPlace);
+                    if(updatedStopPlace.isParentStopPlace()) {
+                        handleChildStops(input, updatedStopPlace);
+                    }
 
                     if(updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
@@ -139,6 +138,10 @@ class StopPlaceUpdater implements DataFetcher {
             for(Object childStopObject : childObjects) {
                 Map childStopMap = (Map) childStopObject;
                 String childNetexId = (String) childStopMap.get(ID);
+
+                if(updatedParentStopPlace.getChildren().stream().noneMatch(child -> child.getNetexId().equals(childNetexId))) {
+                    throw new RuntimeException("Parent " + updatedParentStopPlace.getNetexId() + " does not already contain this child " + childNetexId + ". Cannot continue.");
+                }
 
                 StopPlace existingChildStopPlace = findAndVerify(childNetexId);
 
