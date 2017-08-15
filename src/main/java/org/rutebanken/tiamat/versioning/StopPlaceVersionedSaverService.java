@@ -119,13 +119,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
            tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
 
-        if(newVersion.getQuays() != null) {
-            stopPlaceByQuayOriginalIdFinder.updateCache(newVersion.getNetexId(),
-                    newVersion.getQuays()
-                            .stream()
-                            .flatMap(q -> q.getOriginalIds().stream())
-                            .collect(Collectors.toList()));
-        }
+        updateQuaysCache(newVersion);
+
         nearbyStopPlaceFinder.update(newVersion);
         entityChangedListener.onChange(newVersion);
         return newVersion;
@@ -155,6 +150,21 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         validBetween.setToDate(null);
 
         return stopPlace;
+    }
+
+    private void updateQuaysCache(StopPlace stopPlace) {
+        if(stopPlace.getQuays() != null) {
+            stopPlaceByQuayOriginalIdFinder.updateCache(stopPlace.getNetexId(),
+                    stopPlace.getQuays()
+                            .stream()
+                            .flatMap(q -> q.getOriginalIds().stream())
+                            .collect(Collectors.toList()));
+        }
+        if(stopPlace.isParentStopPlace()) {
+            if(stopPlace.getChildren() != null) {
+                stopPlace.getChildren().forEach(this::updateQuaysCache);
+            }
+        }
     }
 
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
