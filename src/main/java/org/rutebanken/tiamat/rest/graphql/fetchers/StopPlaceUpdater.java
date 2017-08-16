@@ -6,12 +6,10 @@ import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
-import org.rutebanken.tiamat.rest.graphql.mappers.*;
-import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
+import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
 
 @Service("stopPlaceUpdater")
 @Transactional
@@ -46,7 +42,7 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private StopPlaceMapper stopPlaceMapper;
-    
+
     @Override
     public Object get(DataFetchingEnvironment environment) {
         List<Field> fields = environment.getFields();
@@ -55,7 +51,7 @@ class StopPlaceUpdater implements DataFetcher {
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_STOPPLACE)) {
                 stopPlace = createOrUpdateStopPlace(environment, false);
-            } else if(field.getName().equals(MUTATE_PARENT_STOPPLACE)) {
+            } else if (field.getName().equals(MUTATE_PARENT_STOPPLACE)) {
                 stopPlace = createOrUpdateStopPlace(environment, true);
             }
         }
@@ -68,7 +64,7 @@ class StopPlaceUpdater implements DataFetcher {
         StopPlace existingVersion = null;
 
         Map input = environment.getArgument(OUTPUT_TYPE_STOPPLACE);
-        if(input == null) {
+        if (input == null) {
             input = environment.getArgument(OUTPUT_TYPE_PARENT_STOPPLACE);
         }
 
@@ -80,7 +76,7 @@ class StopPlaceUpdater implements DataFetcher {
 
                 existingVersion = findAndVerify(netexId);
 
-                if(mutateParent) {
+                if (mutateParent) {
                     Preconditions.checkArgument(existingVersion.isParentStopPlace(),
                             "Attempting to update StopPlace as parent [id = %s], but StopPlace is not a parent", netexId);
                 } else {
@@ -104,11 +100,11 @@ class StopPlaceUpdater implements DataFetcher {
                 if (hasValuesChanged) {
                     authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
 
-                    if(updatedStopPlace.isParentStopPlace()) {
+                    if (updatedStopPlace.isParentStopPlace()) {
                         handleChildStops(input, updatedStopPlace);
                     }
 
-                    if(updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
+                    if (updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
                     }
 
@@ -122,39 +118,48 @@ class StopPlaceUpdater implements DataFetcher {
     }
 
     private void handleChildStops(Map input, StopPlace updatedParentStopPlace) {
-        if(input.get(CHILDREN) != null) {
+        if (input.get(CHILDREN) != null) {
             List childObjects = (List) input.get(CHILDREN);
             logger.info("Incoming child stop objects: {}", childObjects);
 
-            List<StopPlace> populatedChilds =  new ArrayList<>();
+            List<StopPlace> populatedChilds = new ArrayList<>();
 
-            for(Object childStopObject : childObjects) {
+            for (Object childStopObject : childObjects) {
                 Map childStopMap = (Map) childStopObject;
                 String childNetexId = (String) childStopMap.get(ID);
 
-                if(updatedParentStopPlace.getChildren().stream().noneMatch(child -> child.getNetexId().equals(childNetexId))) {
+                if (updatedParentStopPlace.getChildren().stream().noneMatch(child -> child.getNetexId().equals(childNetexId))) {
                     throw new RuntimeException("Parent " + updatedParentStopPlace.getNetexId() + " does not already contain this child " + childNetexId + ". Cannot continue.");
                 }
 
-                StopPlace existingChildStopPlace = findAndVerify(childNetexId);
+                logger.info("Finding existing child stop place from parent: {}", updatedParentStopPlace.getNetexId());
+                StopPlace existingChildStopPlace = updatedParentStopPlace.getChildren().stream().filter(c -> c.getNetexId().equals(childNetexId)).findFirst().orElse(null);
+                verifyStopPlaceNotNull(existingChildStopPlace, childNetexId);
 
+                // Next line is not strictly required. As the child will alway belong to the parent.
                 verifyCorrectParentSet(existingChildStopPlace, updatedParentStopPlace);
 
-                StopPlace child = new StopPlace();
-                stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, child);
+                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
 
-                populatedChilds.add(child);
+                logger.info("Populating changes for child stop {} (parent: {}=", childNetexId, updatedParentStopPlace.getNetexId());
+                stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);
+
+                // Verify after changes applied as well
+                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
             }
 
-
-            logger.info("Populated child stops: {}", populatedChilds);
+            logger.info("Applied changes for {} child stops", populatedChilds.size());
         }
     }
 
     private StopPlace findAndVerify(String netexId) {
         StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-        Preconditions.checkArgument(existingStopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+        verifyStopPlaceNotNull(existingStopPlace, netexId);
         return existingStopPlace;
+    }
+
+    private void verifyStopPlaceNotNull(StopPlace existingStopPlace, String netexId) {
+        Preconditions.checkArgument(existingStopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
     }
 
     private void verifyCorrectParentSet(StopPlace existingChildStop, StopPlace existingParentStop) {
@@ -166,15 +171,9 @@ class StopPlaceUpdater implements DataFetcher {
 
         Preconditions.checkArgument(existingChildStop.getParentSiteRef().getVersion().equals(String.valueOf(existingParentStop.getVersion())),
                 "Attempting to update StopPlace child [id = %s], but it does not refer to parent %s in correct version: %s.",
-                    existingChildStop.getNetexId(),
-                    existingParentStop.getNetexId(),
-                    existingParentStop.getVersion());
+                existingChildStop.getNetexId(),
+                existingParentStop.getNetexId(),
+                existingParentStop.getVersion());
 
     }
-
-
-
-
-
-
 }
