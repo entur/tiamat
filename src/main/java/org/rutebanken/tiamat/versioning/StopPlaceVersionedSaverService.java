@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -115,6 +116,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         if(newVersion.getChildren() != null) {
             stopPlaceRepository.save(newVersion.getChildren());
+            if(logger.isDebugEnabled()) {
+                logger.debug("Saved children: {}", newVersion.getChildren().stream()
+                        .map(sp -> "{id:" + sp.getId() + " netexId:" + sp.getNetexId() + " version:" + sp.getVersion() + "}")
+                        .collect(Collectors.toList()));
+            }
         }
         newVersion = stopPlaceRepository.save(newVersion);
         logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(ch -> ch.getId()).collect(toList()));
