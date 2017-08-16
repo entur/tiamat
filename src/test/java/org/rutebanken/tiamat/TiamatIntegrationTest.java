@@ -78,6 +78,8 @@ public abstract class TiamatIntegrationTest {
     @After
     public void clearRepositories() {
 
+        logger.info("Clearing repositories");
+
         pathLinkRepository.deleteAll();
         pathLinkRepository.flush();
 
