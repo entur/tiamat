@@ -97,12 +97,12 @@ class StopPlaceUpdater implements DataFetcher {
             if (updatedStopPlace != null) {
                 boolean hasValuesChanged = stopPlaceMapper.populateStopPlaceFromInput(input, updatedStopPlace);
 
+                if (updatedStopPlace.isParentStopPlace()) {
+                    hasValuesChanged |= handleChildStops(input, updatedStopPlace);
+                }
+
                 if (hasValuesChanged) {
                     authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
-
-                    if (updatedStopPlace.isParentStopPlace()) {
-                        handleChildStops(input, updatedStopPlace);
-                    }
 
                     if (updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
@@ -117,12 +117,13 @@ class StopPlaceUpdater implements DataFetcher {
         return existingVersion;
     }
 
-    private void handleChildStops(Map input, StopPlace updatedParentStopPlace) {
+    private boolean handleChildStops(Map input, StopPlace updatedParentStopPlace) {
+        boolean updated = false;
+
+        int updatedCount = 0;
         if (input.get(CHILDREN) != null) {
             List childObjects = (List) input.get(CHILDREN);
             logger.info("Incoming child stop objects: {}", childObjects);
-
-            List<StopPlace> populatedChilds = new ArrayList<>();
 
             for (Object childStopObject : childObjects) {
                 Map childStopMap = (Map) childStopObject;
@@ -141,15 +142,16 @@ class StopPlaceUpdater implements DataFetcher {
 
                 authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
 
-                logger.info("Populating changes for child stop {} (parent: {}=", childNetexId, updatedParentStopPlace.getNetexId());
-                stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);
-
+                logger.info("Populating changes for child stop {} (parent: {})", childNetexId, updatedParentStopPlace.getNetexId());
+                updated |= stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);
+                updatedCount++;
                 // Verify after changes applied as well
                 authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
             }
 
-            logger.info("Applied changes for {} child stops", populatedChilds.size());
+            logger.info("Applied changes for {} child stops. Parent stop contains {} child stops", updatedCount, updatedParentStopPlace.getChildren().size());
         }
+        return updated;
     }
 
     private StopPlace findAndVerify(String netexId) {
