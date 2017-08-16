@@ -25,11 +25,11 @@ public class MultiModalityOperationsBuilder {
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceCreator;
 
-    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType stopPlaceObjectType) {
+    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType parentStopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(CREATE_MULTIMODAL_STOPPLACE)
                 .description("Creates a new multimodal parent StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
@@ -38,7 +38,7 @@ public class MultiModalityOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(ADD_TO_MULTIMODAL_STOPPLACE)
                 .description("Adds a StopPlace to an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
@@ -47,7 +47,7 @@ public class MultiModalityOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(REMOVE_FROM_MULTIMODAL_STOPPLACE)
                 .description("Removes a StopPlace from an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
