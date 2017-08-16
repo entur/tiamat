@@ -9,6 +9,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
+import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.SiteElementAlternativeNameMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
@@ -57,6 +58,9 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private SiteElementAlternativeNameMapper siteElementAlternativeNameMapper;
+
+    @Autowired
+    private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -506,7 +510,7 @@ class StopPlaceUpdater implements DataFetcher {
                 limitation = limitations.get(0);
             }
 
-            AccessibilityLimitation limitationFromInput = createAccessibilityLimitationFromInput((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
+            AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
 
             //Only flag as updated if limitations are updated
             if (limitationFromInput.getWheelchairAccess() != limitation.getWheelchairAccess() |
@@ -534,13 +538,5 @@ class StopPlaceUpdater implements DataFetcher {
         return isUpdated;
     }
 
-    private AccessibilityLimitation createAccessibilityLimitationFromInput(Map<String, LimitationStatusEnumeration> limitationsInput) {
-        AccessibilityLimitation limitation = new AccessibilityLimitation();
-        limitation.setWheelchairAccess(limitationsInput.get(WHEELCHAIR_ACCESS));
-        limitation.setAudibleSignalsAvailable(limitationsInput.get(AUDIBLE_SIGNALS_AVAILABLE));
-        limitation.setStepFreeAccess(limitationsInput.get(STEP_FREE_ACCESS));
-        limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
-        limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
-        return limitation;
-    }
+
 }
