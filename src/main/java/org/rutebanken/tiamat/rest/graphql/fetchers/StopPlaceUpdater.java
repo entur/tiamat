@@ -50,6 +50,9 @@ class StopPlaceUpdater implements DataFetcher {
     @Autowired
     private SiteElementMapper siteElementMapper;
 
+    @Autowired
+    private QuayMapper quayMapper;
+
     @Override
     public Object get(DataFetchingEnvironment environment) {
         List<Field> fields = environment.getFields();
@@ -215,7 +218,7 @@ class StopPlaceUpdater implements DataFetcher {
             for (Object quayObject : quays) {
 
                 Map quayInputMap = (Map) quayObject;
-                if (populateQuayFromInput(stopPlace, quayInputMap)) {
+                if (quayMapper.populateQuayFromInput(stopPlace, quayInputMap)) {
                     isUpdated = true;
                 } else {
                     logger.info("Quay not changed");
@@ -280,54 +283,7 @@ class StopPlaceUpdater implements DataFetcher {
         return false;
     }
 
-    private boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
-        Quay quay;
-        if (quayInputMap.get(ID) != null) {
-            Optional<Quay> existingQuay = stopPlace.getQuays().stream()
-                    .filter(q -> q.getNetexId() != null)
-                    .filter(q -> q.getNetexId().equals(quayInputMap.get(ID))).findFirst();
 
-            Preconditions.checkArgument(existingQuay.isPresent(),
-                    "Attempting to update Quay [id = %s] on StopPlace [id = %s] , but Quay does not exist on StopPlace",
-                    quayInputMap.get(ID),
-                    stopPlace.getNetexId());
-
-            quay = existingQuay.get();
-            logger.info("Updating Quay {} for StopPlace {}", quay.getNetexId(), stopPlace.getNetexId());
-        } else {
-            quay = new Quay();
-            logger.info("Creating new Quay");
-        }
-        boolean isQuayUpdated = siteElementMapper.populate(quayInputMap, quay);
-
-        if (quayInputMap.get(COMPASS_BEARING) != null) {
-            quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());
-            isQuayUpdated = true;
-        }
-        if (quayInputMap.get(PUBLIC_CODE) != null) {
-            quay.setPublicCode((String) quayInputMap.get(PUBLIC_CODE));
-            isQuayUpdated = true;
-        }
-
-        if(quayInputMap.get(PRIVATE_CODE) != null) {
-            Map privateCodeInputMap = (Map) quayInputMap.get(PRIVATE_CODE);
-            if(quay.getPrivateCode() == null) {
-                quay.setPrivateCode(new PrivateCodeStructure());
-            }
-            quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
-            quay.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
-            isQuayUpdated = true;
-        }
-
-        if (isQuayUpdated) {
-            quay.setChanged(Instant.now());
-
-            if (quay.getNetexId() == null) {
-                stopPlace.getQuays().add(quay);
-            }
-        }
-        return isQuayUpdated;
-    }
 
 
 
