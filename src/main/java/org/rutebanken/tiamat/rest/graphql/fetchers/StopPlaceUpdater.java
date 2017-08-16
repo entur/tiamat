@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.SiteElementAlternativeNameMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
@@ -53,6 +54,9 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
+
+    @Autowired
+    private SiteElementAlternativeNameMapper siteElementAlternativeNameMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -144,7 +148,6 @@ class StopPlaceUpdater implements DataFetcher {
                 }
 
                 StopPlace existingChildStopPlace = findAndVerify(childNetexId);
-
 
                 verifyCorrectParentSet(existingChildStopPlace, updatedParentStopPlace);
 
@@ -371,7 +374,7 @@ class StopPlaceUpdater implements DataFetcher {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
             for (Object alternativeNameObject : alternativeNames) {
                 Map alternativeNameInputMap = (Map) alternativeNameObject;
-                if (populateAlternativeNameFromInput(entity, alternativeNameInputMap)) {
+                if (siteElementAlternativeNameMapper.populateAlternativeNameFromInput(entity, alternativeNameInputMap)) {
                     isUpdated = true;
                 } else {
                     logger.info("AlternativeName not changed");
@@ -539,45 +542,5 @@ class StopPlaceUpdater implements DataFetcher {
         limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
         limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
         return limitation;
-    }
-
-    private boolean populateAlternativeNameFromInput(SiteElement entity, Map entry) {
-        boolean isUpdated = false;
-        AlternativeName altName;
-
-        NameTypeEnumeration nameType = (NameTypeEnumeration) entry.getOrDefault(NAME_TYPE, NameTypeEnumeration.OTHER);
-        EmbeddableMultilingualString name = getEmbeddableString((Map) entry.get(NAME));
-
-        if (name != null) {
-
-            Optional<AlternativeName> existing = entity.getAlternativeNames()
-                    .stream()
-                    .filter(alternativeName -> alternativeName != null)
-                    .filter(alternativeName -> alternativeName.getName() != null)
-                    .filter(alternativeName -> {
-                            return (alternativeName.getName().getLang() != null &&
-                                    alternativeName.getName().getLang().equals(name.getLang()) &&
-                                    alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
-                    })
-                    .findFirst();
-            if (existing.isPresent()) {
-                altName = existing.get();
-            } else {
-                altName = new AlternativeName();
-            }
-            if (name.getValue() != null) {
-                altName.setName(name);
-                altName.setNameType(nameType);
-                isUpdated = true;
-            }
-
-            if (altName.getName() == null || altName.getName().getValue() == null || altName.getName().getValue().isEmpty()) {
-                entity.getAlternativeNames().remove(altName);
-            } else if (isUpdated && altName.getNetexId() == null) {
-                entity.getAlternativeNames().add(altName);
-            }
-        }
-
-        return isUpdated;
     }
 }
