@@ -291,14 +291,20 @@ public class StopPlace
         StopPlace other = (StopPlace) object;
 
         return Objects.equals(this.name, other.name)
+                && Objects.equals(this.version, other.version)
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.stopPlaceType, other.stopPlaceType)
-                && Objects.equals(this.parentStopPlace, other.parentStopPlace);
+                && Objects.equals(this.parentStopPlace, other.parentStopPlace
+                && Objects.equals(this.accessSpaces, other.accessSpaces)
+                && Objects.equals(this.created, other.created)
+                && Objects.equals(this.quays, other.quays)
+        );
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, centroid, stopPlaceType, parentStopPlace);
+        return Objects.hash(name, version, centroid, stopPlaceType, parentStopPlace, accessSpaces, created, quays);
     }
 
     @Override
