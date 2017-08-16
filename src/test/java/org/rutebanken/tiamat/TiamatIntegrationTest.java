@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.*;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
@@ -79,11 +80,19 @@ public abstract class TiamatIntegrationTest {
     public void clearRepositories() {
 
         logger.info("Clearing repositories");
+        stopPlaceRepository.flush();
 
         pathLinkRepository.deleteAll();
         pathLinkRepository.flush();
 
+        stopPlaceRepository.findAll().stream()
+                .filter(StopPlace::isParentStopPlace)
+                .forEach(sp -> {
+                    stopPlaceRepository.delete(sp);
+                });
+        stopPlaceRepository.flush();
         stopPlaceRepository.deleteAll();
+
         stopPlaceRepository.flush();
 
         quayRepository.deleteAll();
