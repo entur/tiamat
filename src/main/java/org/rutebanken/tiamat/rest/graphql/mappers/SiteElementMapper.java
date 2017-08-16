@@ -78,16 +78,6 @@ public class SiteElementMapper {
         }
         if (input.get(GEOMETRY) != null) {
             entity.setCentroid(geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY)));
-
-            if (entity instanceof StopPlace) {
-                try {
-                    topographicPlaceLookupService.populateTopographicPlaceRelation((StopPlace) entity);
-                } catch (Exception e) {
-                    logger.warn("Setting TopographicPlace on StopPlace failed", e);
-                }
-            }
-
-
             isUpdated = true;
         }
 
