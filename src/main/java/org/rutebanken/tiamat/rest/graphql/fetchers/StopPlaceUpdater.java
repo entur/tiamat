@@ -82,6 +82,9 @@ class StopPlaceUpdater implements DataFetcher {
                 } else {
                     Preconditions.checkArgument(!existingVersion.isParentStopPlace(),
                             "Attempting to update parent StopPlace [id = %s] with incorrect mutation. Use %s", netexId, MUTATE_PARENT_STOPPLACE);
+
+                    Preconditions.checkArgument(existingVersion.getParentSiteRef() == null,
+                            "Attempting to update stop place which has parent [id = %s]. Edit the parent instead. (Parent %s)", netexId, existingVersion.getParentSiteRef());
                 }
 
                 updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
