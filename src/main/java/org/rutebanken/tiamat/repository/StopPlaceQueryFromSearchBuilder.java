@@ -64,7 +64,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         parameters.put("mergedIdKey", MERGED_ID_KEY);
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)");
+                            String keyValuesQuery = "id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)";
+                            wheres.add("(s."+keyValuesQuery +" OR p."+keyValuesQuery+")");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where (qkv.key_values_key = :originalIdKey OR qkv.key_values_key = :mergedIdKey) and v.items = :query)");
                         } else {
@@ -74,7 +75,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         // NSR ID detected
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.netex_id = :query");
+                            wheres.add("s.netex_id = :query or p.netex_id = :query");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
                         } else {
