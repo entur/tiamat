@@ -140,21 +140,27 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            wheres.add("((s.from_date IS NULL AND s.to_date IS NULL) OR (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))");
+            String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
+
+            wheres.add("(" + formatRepeatedValue(pointInTimeQuery, "s", 5)+ " and " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ ")");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
             if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
-                wheres.add("s.from_date <= now() AND (s.to_date >= now() OR s.to_date IS NULL)");
+
+                String currentQuery = "(%s.from_date <= now() AND (%s.to_date >= now() or %s.to_date IS NULL))";
+                wheres.add("("+ formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
             } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
-                wheres.add("s.to_date >= now() OR s.to_date IS NULL");
+                String futureQuery = "s.to_date >= now() OR s.to_date IS NULL";
+                String parentFutureQuery = "p.to_date >= now() OR p.to_date IS NULL";
+                wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
             }
         }
 
         if (stopPlaceSearch.isWithoutLocationOnly()) {
             operators.add("and");
-            wheres.add("s.centroid IS NULL");
+            wheres.add("(s.centroid IS NULL or (p.id IS NOT NULL AND p.centroid IS NULL))");
         }
 
         operators.add("and");
@@ -178,5 +184,13 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
         }
         return Pair.of(generatedSql, parameters);
+    }
+
+    private String formatRepeatedValue(String format, String value, int repeated) {
+        Object[] args = new Object[repeated];
+        for(int i = 0; i < repeated; i++) {
+            args[i] = value;
+        }
+        return String.format(format, args);
     }
 }
