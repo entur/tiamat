@@ -113,7 +113,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     prefix = "(";
                 } else prefix = "";
 
-                wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
+                String municipalityQuery = "topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)";
+                wheres.add(prefix + "(s."+municipalityQuery + " OR p."+municipalityQuery +")");
                 parameters.put("municipalityId", exportParams.getMunicipalityReferences());
             }
 
