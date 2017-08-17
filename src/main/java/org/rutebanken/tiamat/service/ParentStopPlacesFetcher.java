@@ -46,7 +46,8 @@ public class ParentStopPlacesFetcher {
                 if (parent != null) {
                     logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
 
-                    if(result.stream().noneMatch(stopPlace -> stopPlace.getId().equals(parent.getId()))) {
+                    if(result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
+                            && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
                         result.add(parent);
                     }
                     if(keepChilds) {
