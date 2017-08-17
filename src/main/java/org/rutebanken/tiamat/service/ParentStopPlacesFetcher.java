@@ -44,8 +44,11 @@ public class ParentStopPlacesFetcher {
                 StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(nonParentStop.getParentSiteRef().getRef(),
                         Long.parseLong(nonParentStop.getParentSiteRef().getVersion()));
                 if (parent != null) {
-                    logger.info("Resolved parent: {} from child {}", parent.getNetexId(), nonParentStop.getNetexId());
-                    result.add(parent);
+                    logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
+
+                    if(result.stream().noneMatch(stopPlace -> stopPlace.getId().equals(parent.getId()))) {
+                        result.add(parent);
+                    }
                     if(keepChilds) {
                         result.add(nonParentStop);
                     }
@@ -57,12 +60,7 @@ public class ParentStopPlacesFetcher {
             }
         });
 
-        return result.stream()
-                .collect(
-                        collectingAndThen(
-                                toCollection(() -> new TreeSet<>(comparing(stopPlace -> stopPlace.getNetexId() + "-" + stopPlace.getVersion()))),
-                                ArrayList::new)
-                );
+        return result;
     }
 
 }

@@ -93,8 +93,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
                     }
 
-                    orderByStatements.add("similarity(p.name_value, :query) desc");
-                    orderByStatements.add("similarity(s.name_value, :query) desc");
+                    orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
                 }
             }
 
