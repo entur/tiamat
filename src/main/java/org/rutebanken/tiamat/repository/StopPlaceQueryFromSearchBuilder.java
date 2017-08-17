@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.repository;
 
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
@@ -114,13 +113,14 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 } else prefix = "";
 
                 String municipalityQuery = "topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)";
-                wheres.add(prefix + "(s."+municipalityQuery + " OR p."+municipalityQuery +")");
+                wheres.add(prefix + "(s." + municipalityQuery + " or p." + municipalityQuery + ")");
                 parameters.put("municipalityId", exportParams.getMunicipalityReferences());
             }
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
-                wheres.add("s.topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)" + suffix);
+                String countyQuery = "topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)";
+                wheres.add("(s." + countyQuery + " or " + "p." + countyQuery + ")" + suffix);
                 parameters.put("countyId", exportParams.getCountyReferences());
             }
         }
