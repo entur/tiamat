@@ -5,7 +5,6 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.service.MultiModalStopPlaceEditor;
-import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
 
 @Component
@@ -26,11 +25,11 @@ public class MultiModalityOperationsBuilder {
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceCreator;
 
-    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType stopPlaceObjectType) {
+    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType parentStopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(CREATE_MULTIMODAL_STOPPLACE)
                 .description("Creates a new multimodal parent StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
@@ -39,7 +38,7 @@ public class MultiModalityOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(ADD_TO_MULTIMODAL_STOPPLACE)
                 .description("Adds a StopPlace to an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
@@ -48,7 +47,7 @@ public class MultiModalityOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(REMOVE_FROM_MULTIMODAL_STOPPLACE)
                 .description("Removes a StopPlace from an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))

@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolvers;
+package org.rutebanken.tiamat.rest.graphql.mappers;
 
 
 import org.rutebanken.tiamat.model.ValidBetween;
@@ -13,11 +13,11 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 @Component
 public class ValidBetweenMapper {
 
-    private final IdResolver idResolver;
+    private final IdMapper idMapper;
 
     @Autowired
-    public ValidBetweenMapper(IdResolver idResolver) {
-        this.idResolver = idResolver;
+    public ValidBetweenMapper(IdMapper idMapper) {
+        this.idMapper = idMapper;
     }
 
     public ValidBetween map(Map input) {

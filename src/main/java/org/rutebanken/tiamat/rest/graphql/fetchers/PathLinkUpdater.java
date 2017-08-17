@@ -5,7 +5,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.rest.graphql.resolvers.PathLinkMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.PathLinkMapper;
 import org.rutebanken.tiamat.service.PathLinkUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

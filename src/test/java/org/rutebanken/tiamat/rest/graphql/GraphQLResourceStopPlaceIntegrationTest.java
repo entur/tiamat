@@ -55,10 +55,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + stopPlace.getNetexId() + "\\\") {" +
                 "   id " +
                 "   name { value } " +
+                "  ... on StopPlace {" +
                 "   quays { " +
                 "      id " +
                 "      name  { value } " +
                 "     }" +
+                "  }" +
                 "}" +
                 "}\",\"variables\":\"\"}";
 
@@ -551,11 +553,13 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 " (municipalityReference:[\\\""+baerum.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
                 "id " +
                 "name { value } " +
+                "  ... on StopPlace {" +
                 "quays " +
                 "  { " +
                 "   id " +
                 "   name  { value } " +
                 "  }  " +
+                "}" +
                 "}" +
                 "}\",\"variables\":\"\"}";
 
@@ -737,6 +741,49 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue();
     }
 
+
+    @Test
+    public void testCreateMultimodalStop() throws Exception {
+
+        StopPlace bus = new StopPlace();
+        bus.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        bus.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(bus);
+
+        StopPlace tram = new StopPlace();
+        tram.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        tram.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(tram);
+
+        String parentStopPlaceName = "Super stop place name";
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                " stopPlace: " + GraphQLNames.CREATE_MULTIMODAL_STOPPLACE + " (" +
+                "          stopPlaceId:[\\\"" + bus.getNetexId() + "\\\",\\\"" + tram.getNetexId() + "\\\"]" +
+                "          name: { value:\\\"" + parentStopPlaceName + "\\\" } " +
+                "       ) { " +
+                "  id " +
+                "  name { value } " +
+                "  children {" +
+                "   id name { value } stopPlaceType version " +
+                "  } " +
+                "  validBetween { fromDate toDate } " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+        
+        executeGraphQL(graphQlJsonQuery)
+            .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
+            .body("data.stopPlace.stopPlaceType", nullValue())
+            .root("data.stopPlace.children.find { it.id == '" + tram.getNetexId() + "'}")
+                .body("version", equalTo(String.valueOf(tram.getVersion()+1)))
+                .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                .body("name", nullValue())
+            .root("data.stopPlace.children.find { it.id == '" + bus.getNetexId() + "'}")
+                .body("name", nullValue())
+                .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
+                .body("version", equalTo(String.valueOf(bus.getVersion()+1)));
+}
 
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
@@ -1316,17 +1363,19 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "        shelterEquipment { id }" +
                 "        generalSign { id }" +
                 "      }" +
-                "    quays {" +
-                "      id" +
-                "      placeEquipments {" +
-                "        waitingRoomEquipment { id }" +
-                "        sanitaryEquipment { id }" +
-                "        ticketingEquipment { id }" +
-                "        cycleStorageEquipment { id }" +
-                "        shelterEquipment { id }" +
-                "        generalSign { id }" +
-                "      }" +
-                "    }" +
+                "    ... on StopPlace {" +
+                "       quays {" +
+                "       id" +
+                "        placeEquipments {" +
+                "         waitingRoomEquipment { id }" +
+                "         sanitaryEquipment { id }" +
+                "         ticketingEquipment { id }" +
+                "         cycleStorageEquipment { id }" +
+                "         shelterEquipment { id }" +
+                "         generalSign { id }" +
+                "        }" +
+                "       }" +
+                "   }" +
                 "  }" +
                 "}}\",\"variables\":\"\"}";
 
@@ -1448,6 +1497,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "          lang" +
                 "        }" +
                 "      }" +
+                "  ... on StopPlace {" +
                 "    quays {" +
                 "      id" +
                 "      alternativeNames {" +
@@ -1458,6 +1508,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "        }" +
                 "      }" +
                 "    }" +
+                "   }" +
                 "  }" +
                 "}}\",\"variables\":\"\"}";
 
