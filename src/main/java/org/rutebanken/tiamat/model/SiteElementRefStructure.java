@@ -6,11 +6,4 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class SiteElementRefStructure extends AddressablePlaceRefStructure {
 
-    public SiteElementRefStructure() { super();}
-
-    public SiteElementRefStructure(String ref, String version) {
-        super(ref, version);
-    }
-
-
 }

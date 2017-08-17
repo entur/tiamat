@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.repository;
 
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
@@ -45,7 +46,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
         if (hasIdFilter) {
-            wheres.add("(s.netex_id in :netexIdList OR p.netex_id in :netexIdList)");
+            wheres.add("s.netex_id in :netexIdList");
             parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
@@ -64,8 +65,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         parameters.put("mergedIdKey", MERGED_ID_KEY);
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            String keyValuesQuery = "id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)";
-                            wheres.add("(s."+keyValuesQuery +" OR p."+keyValuesQuery+")");
+                            wheres.add("s.id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where (qkv.key_values_key = :originalIdKey OR qkv.key_values_key = :mergedIdKey) and v.items = :query)");
                         } else {
@@ -75,7 +75,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         // NSR ID detected
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("(s.netex_id = :query or p.netex_id = :query)");
+                            wheres.add("s.netex_id = :query");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
                         } else {
@@ -93,7 +93,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
                     }
 
-                    orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
+                    orderByStatements.add("similarity(p.name_value, :query) desc");
+                    orderByStatements.add("similarity(s.name_value, :query) desc");
                 }
             }
 
@@ -113,15 +114,13 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     prefix = "(";
                 } else prefix = "";
 
-                String municipalityQuery = "topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)";
-                wheres.add(prefix + "(s." + municipalityQuery + " or p." + municipalityQuery + ")");
+                wheres.add(prefix + "s.topographic_place_id in (select tp.id from topographic_place tp where tp.netex_id in :municipalityId)");
                 parameters.put("municipalityId", exportParams.getMunicipalityReferences());
             }
 
             if (hasCountyFilter && !hasIdFilter) {
                 String suffix = hasMunicipalityFilter ? ")" : "";
-                String countyQuery = "topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)";
-                wheres.add("(s." + countyQuery + " or " + "p." + countyQuery + ")" + suffix);
+                wheres.add("s.topographic_place_id in (select tp.id from topographic_place tp where tp.parent_ref in :countyId)" + suffix);
                 parameters.put("countyId", exportParams.getCountyReferences());
             }
         }
@@ -140,31 +139,22 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
-
-            wheres.add("(" + formatRepeatedValue(pointInTimeQuery, "s", 5)+ " or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
+            wheres.add("((s.from_date IS NULL AND s.to_date IS NULL) OR (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
             if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
-
-                String currentQuery = "(%s.from_date <= now() AND (%s.to_date >= now() or %s.to_date IS NULL))";
-                wheres.add("("+ formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
+                wheres.add("s.from_date <= now() AND (s.to_date >= now() OR s.to_date IS NULL)");
             } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
-                String futureQuery = "s.to_date >= now() OR s.to_date IS NULL";
-                String parentFutureQuery = "p.to_date >= now() OR p.to_date IS NULL";
-                wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
+                wheres.add("s.to_date >= now() OR s.to_date IS NULL");
             }
         }
 
         if (stopPlaceSearch.isWithoutLocationOnly()) {
             operators.add("and");
-            wheres.add("(s.centroid IS NULL or (p.id IS NOT NULL AND p.centroid IS NULL))");
+            wheres.add("s.centroid IS NULL");
         }
-
-        operators.add("and");
-        wheres.add("s.parent_stop_place = false");
 
         addWheres(queryString, wheres, operators);
 
@@ -184,13 +174,5 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
         }
         return Pair.of(generatedSql, parameters);
-    }
-
-    private String formatRepeatedValue(String format, String value, int repeated) {
-        Object[] args = new Object[repeated];
-        for(int i = 0; i < repeated; i++) {
-            args[i] = value;
-        }
-        return String.format(format, args);
     }
 }

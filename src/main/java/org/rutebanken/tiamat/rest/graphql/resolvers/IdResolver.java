@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.mappers;
+package org.rutebanken.tiamat.rest.graphql.resolvers;
 
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class IdMapper {
+public class IdResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(IdMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(IdResolver.class);
 
     public Optional<String> extractIdIfPresent(String field, Map input) {
         if(input.get(field) != null) {

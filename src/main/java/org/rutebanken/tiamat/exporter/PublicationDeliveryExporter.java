@@ -6,7 +6,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.*;
-import org.rutebanken.tiamat.service.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
@@ -32,31 +30,29 @@ public class PublicationDeliveryExporter {
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final PathLinkRepository pathLinkRepository;
-    private final ParentStopPlacesFetcher parentStopPlacesFetcher;
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, PathLinkRepository pathLinkRepository, ParentStopPlacesFetcher parentStopPlacesFetcher) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, PathLinkRepository pathLinkRepository) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.pathLinkRepository = pathLinkRepository;
-        this.parentStopPlacesFetcher = parentStopPlacesFetcher;
     }
 
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
         if (exportParams.getStopPlaceSearch().isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()).getContent(), exportParams);
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()), exportParams);
         } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams).getContent(), exportParams);
+            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams), exportParams);
         }
     }
 
     public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage, exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
@@ -78,13 +74,10 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams) {
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(Iterable<StopPlace> iterableStopPlaces, ExportParams exportParams) {
         logger.info("Preparing publication delivery export");
-
-        stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
-
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
-        tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
+        tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, iterableStopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 
         boolean relevantTariffZones = exportParams.getTariffZoneExportMode() == null || ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
@@ -93,7 +86,7 @@ public class PublicationDeliveryExporter {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
         }
 
-        Set<Long> stopPlaceIds = StreamSupport.stream(stopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
+        Set<Long> stopPlaceIds = StreamSupport.stream(iterableStopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
 
         logger.info("Mapping site frame to netex model");

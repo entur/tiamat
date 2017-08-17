@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class NetexMappingIterator<T extends EntityStructure, N extends org.rutebanken.netex.model.EntityStructure> implements Iterator<N> {
 
@@ -16,13 +15,12 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final NetexMapper netexMapper;
     private final Class<N> netexClass;
     private final long startTime = System.currentTimeMillis();
-    private final AtomicInteger mappedCount;
+    private int count;
 
-    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
+    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass) {
         this.iterator = iterator;
         this.netexMapper = netexMapper;
         this.netexClass = netexClass;
-        this.mappedCount = mappedCount;
     }
 
     @Override
@@ -32,15 +30,14 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
 
     @Override
     public N next() {
-        mappedCount.incrementAndGet();
+        ++count;
         logStatus();
         return netexMapper.getFacade().map(iterator.next(), netexClass);
     }
 
     private void logStatus() {
-        if (mappedCount.get() % 1000 == 0 && logger.isInfoEnabled()) {
+        if (count % 1000 == 0 && logger.isInfoEnabled()) {
             String entityPerSecond = "NA";
-            int count = mappedCount.get();
 
             long duration = System.currentTimeMillis() - startTime;
             if (duration >= 1000) {

@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.mappers;
+package org.rutebanken.tiamat.rest.graphql.resolvers;
 
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
@@ -17,19 +17,19 @@ public class PathLinkMapper {
     private static final Logger logger = LoggerFactory.getLogger(PathLinkMapper.class);
 
 
-    private final GeometryMapper geometryMapper;
-    private final IdMapper idMapper;
+    private final GeometryResolver geometryResolver;
+    private final IdResolver idResolver;
 
     @Autowired
-    public PathLinkMapper(GeometryMapper geometryMapper, IdMapper idMapper) {
-        this.geometryMapper = geometryMapper;
-        this.idMapper = idMapper;
+    public PathLinkMapper(GeometryResolver geometryResolver, IdResolver idResolver) {
+        this.geometryResolver = geometryResolver;
+        this.idResolver = idResolver;
     }
 
     public PathLink map(Map input) {
 
         PathLink pathLink = new PathLink();
-        idMapper.extractAndSetNetexId(ID, input, pathLink);
+        idResolver.extractAndSetNetexId(ID, input, pathLink);
 
         if(input.get(VERSION) != null) {
             pathLink.setVersion((Long) input.get(VERSION));
@@ -44,7 +44,7 @@ public class PathLinkMapper {
         }
 
         if(input.get(GEOMETRY) != null) {
-            pathLink.setLineString(geometryMapper.createGeoJsonLineString((Map) input.get(GEOMETRY)));
+            pathLink.setLineString(geometryResolver.createGeoJsonLineString((Map) input.get(GEOMETRY)));
         }
 
         if(input.get(TRANSFER_DURATION) != null) {
@@ -83,7 +83,7 @@ public class PathLinkMapper {
 
     private PathLinkEnd mapToPathLinkEnd(Map input) {
         PathLinkEnd pathLinkEnd = new PathLinkEnd();
-        idMapper.extractAndSetNetexId(ID, input, pathLinkEnd);
+        idResolver.extractAndSetNetexId(ID, input, pathLinkEnd);
 
         if(input.get(PATH_LINK_END_PLACE_REF) != null) {
 
