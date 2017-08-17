@@ -75,7 +75,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         // NSR ID detected
 
                         if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.netex_id = :query or p.netex_id = :query");
+                            wheres.add("(s.netex_id = :query or p.netex_id = :query)");
                         } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                             wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
                         } else {
@@ -142,7 +142,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
             String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
 
-            wheres.add("(" + formatRepeatedValue(pointInTimeQuery, "s", 5)+ " and " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ ")");
+            wheres.add("(" + formatRepeatedValue(pointInTimeQuery, "s", 5)+ " or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
