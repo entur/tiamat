@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.graphql.resolvers;
+package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class GeometryResolver {
+public class GeometryMapper {
 
     @Autowired
     private GeometryFactory geometryFactory;

@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,16 @@ class StopPlaceFetcher implements DataFetcher {
 
     private static final Page<StopPlace> EMPTY_STOPS_RESULT = new PageImpl<>(new ArrayList<>());;
 
+    /**
+     * Wether to keep childs when resolving parent stop places. False, because with graphql it's possible to fetch children from parent.
+     */
+    private static final boolean KEEP_CHILDS = false;
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private ParentStopPlacesFetcher parentStopPlacesFetcher;
 
     @Override
     @Transactional
@@ -48,7 +57,7 @@ class StopPlaceFetcher implements DataFetcher {
 
         logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
 
-        Page<StopPlace> stopPlaces = new PageImpl<>(new ArrayList<>());
+        Page<StopPlace> stopPlacesPage = new PageImpl<>(new ArrayList<>());
 
         stopPlaceSearchBuilder.setPage(environment.getArgument(PAGE)).setSize(environment.getArgument(SIZE));
 
@@ -82,10 +91,10 @@ class StopPlaceFetcher implements DataFetcher {
                 List<StopPlace> stopPlace;
                 if(version != null && version > 0) {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
-                    stopPlaces = new PageImpl<>(stopPlace, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), 1L);
+                    stopPlacesPage = new PageImpl<>(stopPlace, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), 1L);
                 } else {
                     stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
-                    stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
+                    stopPlacesPage = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
                 }
 
             } catch (NumberFormatException nfe) {
@@ -97,7 +106,7 @@ class StopPlaceFetcher implements DataFetcher {
 
             if (stopPlaceNetexId != null && !stopPlaceNetexId.isEmpty()) {
                 stopPlaceSearchBuilder.setNetexIdList(stopPlaceNetexId);
-                stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
+                stopPlacesPage = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
             }
         } else {
 
@@ -173,12 +182,15 @@ class StopPlaceFetcher implements DataFetcher {
                     pointInTime = null;
                 }
 
-                stopPlaces = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
+                stopPlacesPage = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
                         boundingBox.yMax, ignoreStopPlaceId, pointInTime, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)));
             } else {
-                stopPlaces = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
+                stopPlacesPage = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
             }
         }
-        return stopPlaces;
+
+
+        List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlacesPage.getContent(), KEEP_CHILDS);
+        return new PageImpl<>(parentsResolved, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), parentsResolved.size());
     }
 }

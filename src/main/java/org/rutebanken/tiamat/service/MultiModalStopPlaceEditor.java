@@ -15,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Transactional
@@ -38,37 +40,42 @@ public class MultiModalStopPlaceEditor {
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
 
         // Fetch max versions of future child stop places
-        List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(Collectors.toList());
+        List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
-        logger.info("Saving first version of parent stop place {}", name);
-        StopPlace parentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(name));
+        logger.info("Creating first version of parent stop place {}", name);
+        final StopPlace parentStopPlace = new StopPlace(name);
+        parentStopPlace.setParentStopPlace(true);
 
-        // Terminate last version of stop place. Create new version with parent site ref
+        Set<StopPlace> childCopies = futureChildStopPlaces.stream()
+                .map(existingVersion -> {
+                    if (existingVersion.getValidBetween() != null) {
+                        if (existingVersion.getValidBetween().getFromDate() != null && existingVersion.getValidBetween().getFromDate().isAfter(Instant.now())) {
+                            throw new RuntimeException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is not currently valid: from date = " + existingVersion.getValidBetween().getFromDate());
+                        }
+                        if (existingVersion.getValidBetween().getToDate() != null && existingVersion.getValidBetween().getToDate().isBefore(Instant.now())) {
+                            throw new RuntimeException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is not currently valid: to date = " + existingVersion.getValidBetween().getToDate());
+                        }
+                    }
 
-        futureChildStopPlaces.forEach(existingVersion -> {
+                    if(existingVersion.isParentStopPlace()) {
+                        throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is already a parent stop place");
+                    }
 
-            if(existingVersion.getValidBetween() != null) {
-                if(existingVersion.getValidBetween().getFromDate() != null && existingVersion.getValidBetween().getFromDate().isAfter(Instant.now())) {
-                    throw new RuntimeException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is not currently valid: from date = " + existingVersion.getValidBetween().getFromDate());
-                }
-                if(existingVersion.getValidBetween().getToDate() != null && existingVersion.getValidBetween().getToDate().isBefore(Instant.now())) {
-                    throw new RuntimeException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " is not currently valid: to date = " + existingVersion.getValidBetween().getToDate());
-                }
-            }
-            logger.info("Adding child stop place {} to parent stop place {}", existingVersion, parentStopPlace);
-            StopPlace stopPlaceCopy = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-            SiteRefStructure siteRefStructure = new SiteRefStructure();
-            siteRefStructure.setRef(parentStopPlace.getNetexId());
-            siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
+                    if(existingVersion.getParentSiteRef() != null && existingVersion.getParentSiteRef().getRef() != null) {
+                        throw new IllegalArgumentException("The stop place " + existingVersion.getNetexId() + " version " + existingVersion.getVersion() + " does already have parent site ref");
+                    }
 
-            stopPlaceCopy.setParentSiteRef(siteRefStructure);
-            stopPlaceCopy.setName(null);
-            stopPlaceVersionedSaverService.saveNewVersion(existingVersion, stopPlaceCopy);
+                    logger.info("Adding child stop place {} to new parent stop place {}", existingVersion, parentStopPlace);
+                    // Create copy to get rid of database primary keys, preparing it to be versioned under parent stop place.
+                    StopPlace stopPlaceCopy = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+                    return stopPlaceCopy;
+                })
+                .collect(toSet());
 
-        });
-        return parentStopPlace;
+        parentStopPlace.getChildren().addAll(childCopies);
+        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace);
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
@@ -105,4 +112,5 @@ public class MultiModalStopPlaceEditor {
 
         return parentStopPlace;
     }
+
 }

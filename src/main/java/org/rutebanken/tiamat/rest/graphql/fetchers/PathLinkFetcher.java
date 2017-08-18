@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
-import org.rutebanken.tiamat.rest.graphql.resolvers.IdResolver;
+import org.rutebanken.tiamat.rest.graphql.mappers.IdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +24,12 @@ class PathLinkFetcher implements DataFetcher {
     private PathLinkRepository pathLinkRepository;
 
     @Autowired
-    private IdResolver idResolver;
+    private IdMapper idMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
-        Optional<String> pathLinkNetexId = idResolver.extractIdIfPresent(ID, environment.getArguments());
+        Optional<String> pathLinkNetexId = idMapper.extractIdIfPresent(ID, environment.getArguments());
 
         boolean allVersions = environment.getArgument(ALL_VERSIONS) != null ? environment.getArgument(ALL_VERSIONS) : false;
 
@@ -40,7 +40,7 @@ class PathLinkFetcher implements DataFetcher {
             return Arrays.asList(pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkNetexId.get()));
         }
 
-        Optional<String> stopPlaceNetexId = idResolver.extractIdIfPresent(FIND_BY_STOP_PLACE_ID, environment.getArguments());
+        Optional<String> stopPlaceNetexId = idMapper.extractIdIfPresent(FIND_BY_STOP_PLACE_ID, environment.getArguments());
         if (stopPlaceNetexId.isPresent()) {
             // Find pathlinks referencing to stops. Or path links referencing to quays that belong to stop.
 

@@ -7,8 +7,8 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.rest.graphql.resolvers.GeometryResolver;
-import org.rutebanken.tiamat.rest.graphql.resolvers.ValidBetweenMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.resolvers.ObjectResolver.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 
 @Service("parkingUpdater")
 @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -38,7 +38,7 @@ class ParkingUpdater implements DataFetcher {
     private ParkingVersionedSaverService parkingVersionedSaverService;
 
     @Autowired
-    private GeometryResolver geometryResolver;
+    private GeometryMapper geometryMapper;
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
@@ -101,7 +101,7 @@ class ParkingUpdater implements DataFetcher {
         }
 
         if (input.get(GEOMETRY) != null) {
-            Point geoJsonPoint = geometryResolver.createGeoJsonPoint((Map) input.get(GEOMETRY));
+            Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY));
             isUpdated = isUpdated || (!geoJsonPoint.equals(updatedParking.getCentroid()));
             updatedParking.setCentroid(geoJsonPoint);
         }

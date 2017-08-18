@@ -744,7 +744,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
 
-        assertThat(result)
+        assertThat(result.getContent())
                 .describedAs("Expecting only one stop place in return. Because only the highest version should be returned.")
                 .hasSize(1);
 
@@ -758,14 +758,62 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         child = stopPlaceRepository.save(child);
 
         String parentStopPlaceName = "new parent stop place";
-        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+        multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
 
         Page<StopPlace> actual = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder().setQuery(parentStopPlaceName).build()).build());
         assertThat(actual.getContent().get(0).getNetexId()).as("The child is expected to be returned").isEqualTo(child.getNetexId());
     }
 
     @Test
-    public void findStopPlaceByNameAndParentType() {
+    public void findParentStopPlaceById() {
+
+        StopPlace child = new StopPlace();
+        child.setVersion(1L);
+        child = stopPlaceRepository.save(child);
+
+        String parentStopPlaceName = "new parent stop place";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(
+                ExportParams.newExportParamsBuilder()
+                        .setStopPlaceSearch(
+                                StopPlaceSearch.newStopPlaceSearchBuilder()
+                                        .setNetexIdList(Arrays.asList(parent.getNetexId()))
+                                        .build())
+                        .build());
+        assertThat(actual.getContent().get(0).getNetexId()).as("The child is expected to be returned when searching for netex_id").isEqualTo(child.getNetexId());
+    }
+
+    @Test
+    public void findParentStopByKeyValues() {
+
+        StopPlace child = new StopPlace();
+        child.setVersion(1L);
+        child = stopPlaceRepository.save(child);
+
+        String parentStopPlaceName = "new parent stop place";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+
+        String mergedIdValue = "KOL:StopPlace:1";
+        parent.getKeyValues().put(MERGED_ID_KEY, new Value(mergedIdValue));
+
+        stopPlaceRepository.save(parent);
+
+        Page<StopPlace> actual = stopPlaceRepository.findStopPlace(
+                ExportParams.newExportParamsBuilder()
+                        .setStopPlaceSearch(
+                                StopPlaceSearch.newStopPlaceSearchBuilder()
+                                        .setQuery(mergedIdValue)
+                                        .build())
+                        .build());
+        assertThat(actual.getContent()).isNotEmpty();
+        assertThat(actual.getContent().get(0).getNetexId())
+                .as("The child is expected to be returned when searching for parent " + MERGED_ID_KEY)
+                .isEqualTo(child.getNetexId());
+    }
+
+    @Test
+    public void findStopPlaceByParentNameAndChildType() {
 
         StopPlace child = new StopPlace();
         child.setVersion(1L);
