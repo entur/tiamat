@@ -89,6 +89,28 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(acutalSecondStopPlace.getVersion()).as("Second stop place version should have version 2 after joining parent stop place").isEqualTo(2L);
     }
 
+    @Test
+    public void testAddToMultiModalParentStopPlace() {
+
+        StopPlace existingChild = createStopPlace("existingChild");
+        existingChild.setVersion(1L);
+        existingChild = stopPlaceRepository.save(existingChild);
+
+        String parentStopPlaceName = "Super duper StopPlace";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(existingChild.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+
+        StopPlace newChild = createStopPlace("new child");
+        newChild.setVersion(1L);
+        newChild = stopPlaceRepository.save(newChild);
+
+        parent = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(newChild.getNetexId()));
+
+        assertThat(parent.getChildren()).hasSize(2);
+        assertThat(parent.getChildren()).extracting(StopPlace::getNetexId).contains(existingChild.getNetexId()).contains(newChild.getNetexId());
+
+
+    }
+
     @Test(expected = Exception.class)
     public void testNotAllowsChildStopWithFutureVersion() {
 
