@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.Spliterator;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -39,6 +40,8 @@ public class MultiModalStopPlaceEditor {
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
 
+        logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
+
         // Fetch max versions of future child stop places
         List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
 
@@ -55,6 +58,8 @@ public class MultiModalStopPlaceEditor {
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
+        logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
+
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
 
@@ -81,21 +86,31 @@ public class MultiModalStopPlaceEditor {
     }
 
     public StopPlace removeFromMultiModalStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
+        logger.info("Remove childs: {} from parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
 
-        List<StopPlace> stopPlaces = stopPlaceRepository.findAll(childStopPlaceIds);
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
+        if(parentStopPlace.getChildren().stream().noneMatch(stopPlace -> childStopPlaceIds.contains(stopPlace.getNetexId()))) {
+            throw new IllegalArgumentException("The specified list of IDs does not match the list of parent stop place's children" + parentStopPlaceId + ". Incoming child IDs: " + childStopPlaceIds);
+        }
 
-        stopPlaces.forEach(stopPlace -> {
-            SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
-            if (parentSiteRef != null && parentSiteRef.getRef().equals(parentStopPlaceId)) {
-                stopPlace.setParentSiteRef(null);
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, parentStopPlace.getChildren());
+
+        StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+
+        parentStopPlaceCopy.getChildren().forEach(stopToRemove -> {
+            if(childStopPlaceIds.contains(stopToRemove.getNetexId())) {
+                logger.info("Removing child stop place {} from parent stop place {}", stopToRemove.getNetexId(), parentStopPlace.getNetexId());
+                StopPlace stopToRemoveCopy = stopPlaceVersionedSaverService.createCopy(stopToRemove, StopPlace.class);
+                stopToRemoveCopy.setParentSiteRef(null);
+                stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy);
             }
         });
 
-        return parentStopPlace;
+        parentStopPlaceCopy.getChildren().removeIf(childStopPlace -> childStopPlaceIds.contains(childStopPlace.getNetexId()));
+
+        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy);
     }
 
     private void validate(StopPlace potentialNewChild) {

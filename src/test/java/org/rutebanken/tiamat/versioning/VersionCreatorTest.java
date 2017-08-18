@@ -171,4 +171,32 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
     }
 
+    @Test
+    public void createCopyOfStopPlaceWithChildren() {
+        StopPlace parent = new StopPlace();
+        parent.setVersion(1L);
+        parent.setParentStopPlace(true);
+        stopPlaceRepository.save(parent);
+
+        StopPlace child1 = new StopPlace();
+        child1.setCreated(Instant.now());
+        child1.setVersion(1L);
+        child1.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        stopPlaceRepository.save(child1);
+
+        StopPlace child2 = new StopPlace();
+        child2.setVersion(1L);
+        child2.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        stopPlaceRepository.save(child2);
+
+        parent.getChildren().add(child1);
+        parent.getChildren().add(child2);
+
+        stopPlaceRepository.save(parent);
+
+        StopPlace parentCopy = versionCreator.createCopy(parent, StopPlace.class);
+        assertThat(parentCopy.getChildren()).hasSize(2);
+
+    }
+
 }

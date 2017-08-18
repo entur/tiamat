@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -106,9 +107,34 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         parent = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(newChild.getNetexId()));
 
         assertThat(parent.getChildren()).hasSize(2);
-        assertThat(parent.getChildren()).extracting(StopPlace::getNetexId).contains(existingChild.getNetexId()).contains(newChild.getNetexId());
+        assertThat(parent.getChildren()).extracting(StopPlace::getNetexId)
+                .contains(existingChild.getNetexId())
+                .contains(newChild.getNetexId());
+    }
 
+    @Test
+    public void testRemovingStopPlaceFromMultiModalParentStopPlace() {
 
+        StopPlace childToKeep = createStopPlace("existingChild");
+        childToKeep.setVersion(1L);
+        childToKeep.setCreated(Instant.now().minus(1, ChronoUnit.DAYS));
+        childToKeep = stopPlaceRepository.save(childToKeep);
+
+        StopPlace childToRemove = createStopPlace("existingChild 2");
+        childToRemove.setVersion(1L);
+        childToRemove.setCreated(Instant.now());
+        childToRemove = stopPlaceRepository.save(childToRemove);
+
+        String parentStopPlaceName = "Parent StopPlace about to lose a child";
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(childToKeep.getNetexId(), childToRemove.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
+        stopPlaceRepository.flush();
+
+        parent = multiModalStopPlaceEditor.removeFromMultiModalStopPlace(parent.getNetexId(), Arrays.asList(childToRemove.getNetexId()));
+
+        assertThat(parent.getChildren()).hasSize(1);
+        assertThat(parent.getChildren()).extracting(StopPlace::getNetexId)
+                .doesNotContain(childToRemove.getNetexId())
+                .contains(childToKeep.getNetexId());
     }
 
     @Test(expected = Exception.class)
