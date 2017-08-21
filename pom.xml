@@ -43,7 +43,7 @@
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>16.1</geotools.version>
-
+        <com.vividsolutions.version>1.13</com.vividsolutions.version>
 
 
         <fabric8.service.name>springboot-webmvc</fabric8.service.name>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
-            <version>1.13</version>
+            <version>${com.vividsolutions.version}</version>
         </dependency>
 
         <dependency>
