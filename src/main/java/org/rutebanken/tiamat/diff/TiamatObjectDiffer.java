@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.rutebanken.tiamat.diff.generic.Difference;
 import org.rutebanken.tiamat.diff.generic.GenericDiffConfig;
 import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
@@ -44,8 +45,8 @@ public class TiamatObjectDiffer {
             List<Difference> differences = genericObjectDiffer.compareObjects(oldObject, newObject, genericDiffConfig);
             String diffString = genericObjectDiffer.diffListToString(differences);
             String changedByLogString = "";
-            if (newObject instanceof EntityInVersionStructure) {
-                changedByLogString = " - changes made by '" + ((EntityInVersionStructure) newObject).getChangedBy() + "'";
+            if (newObject instanceof DataManagedObjectStructure) {
+                changedByLogString = " - changes made by '" + ((DataManagedObjectStructure) newObject).getChangedBy() + "'";
             }
             logger.info("Difference from previous version of {}{}: {}", oldObject.getNetexId(), changedByLogString, diffString);
         } catch (Exception e) {

@@ -14,10 +14,6 @@ public class EntityInVersionStructure extends EntityStructure {
     @Embedded
     private ValidBetween validBetween;
 
-    private String versionComment;
-
-    private String changedBy;
-
     @Transient
     protected String dataSourceRef;
 
@@ -146,19 +142,4 @@ public class EntityInVersionStructure extends EntityStructure {
         this.derivedFromObjectRef = value;
     }
 
-    public String getVersionComment() {
-        return versionComment;
-    }
-
-    public void setVersionComment(String versionComment) {
-        this.versionComment = versionComment;
-    }
-
-    public String getChangedBy() {
-        return changedBy;
-    }
-
-    public void setChangedBy(String changedBy) {
-        this.changedBy = changedBy;
-    }
 }

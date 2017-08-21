@@ -30,6 +30,10 @@ public abstract class DataManagedObjectStructure
     @Transient
     protected String responsibilitySetRef;
 
+    private String versionComment;
+
+    private String changedBy;
+
     public ExtensionsStructure getExtensions() {
         return extensions;
     }
@@ -68,5 +72,21 @@ public abstract class DataManagedObjectStructure
 
     public Set<String> getOriginalIds() {
         return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
+    }
+
+    public String getVersionComment() {
+        return versionComment;
+    }
+
+    public void setVersionComment(String versionComment) {
+        this.versionComment = versionComment;
+    }
+
+    public String getChangedBy() {
+        return changedBy;
+    }
+
+    public void setChangedBy(String changedBy) {
+        this.changedBy = changedBy;
     }
 }

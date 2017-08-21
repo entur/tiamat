@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.versioning;
 
 import org.keycloak.KeycloakPrincipal;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
@@ -63,8 +64,12 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
         versionCreator.initiateOrIncrement(newVersion);
 
-        newVersion.setChangedBy(getUserNameForAuthenticatedUser());
-        logger.info("Object {}, version {} changed by user {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
+        String usernameForAuthenticatedUser = getUserNameForAuthenticatedUser();
+        if(newVersion instanceof DataManagedObjectStructure) {
+            ((DataManagedObjectStructure) newVersion).setChangedBy(usernameForAuthenticatedUser);
+        }
+
+        logger.info("Object {}, version {} changed by user {}", newVersion.getNetexId(), newVersion.getVersion(), usernameForAuthenticatedUser);
 
         return getRepository().save(newVersion);
     }
