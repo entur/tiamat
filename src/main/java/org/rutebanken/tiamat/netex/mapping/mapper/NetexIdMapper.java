@@ -12,6 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.CHANGED_BY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.VERSION_COMMENT;
+import static org.rutebanken.tiamat.netex.mapping.mapper.StopPlaceMapper.IS_PARENT_STOP_PLACE;
+
 /**
  * Note: Implemented because of an issue with using
  * CustomMapper<EntityStructure, org.rutebanken.tiamat.model.EntityStructure>
@@ -24,6 +31,8 @@ public class NetexIdMapper {
 
     public static final String ORIGINAL_ID_KEY = "imported-id";
     public static final String MERGED_ID_KEY = "merged-id";
+
+    private static final List<String> IGNORE_KEYS = Arrays.asList(CHANGED_BY, VERSION_COMMENT, IS_PARENT_STOP_PLACE);
 
     @Autowired
     private ValidPrefixList validPrefixList;
@@ -71,6 +80,11 @@ public class NetexIdMapper {
                 for(KeyValueStructure keyValueStructure : netexEntity.getKeyList().getKeyValue()) {
                     String value = keyValueStructure.getValue();
                     String key = keyValueStructure.getKey();
+
+                    if(IGNORE_KEYS.contains(key)) {
+                        // Mapped elsewhere
+                        continue;
+                    }
 
                     boolean ignoreEmptyPostfix = (key.equals(ORIGINAL_ID_KEY) | key.equals(MERGED_ID_KEY));
 
