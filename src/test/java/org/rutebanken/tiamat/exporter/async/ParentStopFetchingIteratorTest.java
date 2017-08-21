@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.exporter.async;
 
 import org.junit.Test;
-import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;

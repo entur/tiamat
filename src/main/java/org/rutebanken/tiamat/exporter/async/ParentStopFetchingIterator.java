@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.exporter.async;
 
-import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;

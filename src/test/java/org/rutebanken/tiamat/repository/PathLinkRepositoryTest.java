@@ -1,8 +1,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.junit.Test;
-import org.mockito.internal.util.collections.Sets;
-import org.onebusaway.gtfs.model.Stop;
+import org.mockito.internal.util.collections.Sets;;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 
