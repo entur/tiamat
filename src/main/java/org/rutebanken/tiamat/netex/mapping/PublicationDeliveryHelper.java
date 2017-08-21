@@ -84,4 +84,16 @@ public class PublicationDeliveryHelper {
                 .flatMap(values -> Stream.of(values))
                 .collect(toSet());
     }
+
+    public String getValueByKey(DataManagedObjectStructure dataManagedObject, String key) {
+
+        return Stream.of(dataManagedObject)
+                .filter(Objects::nonNull)
+                .map(object -> object.getKeyList())
+                .flatMap(keyList -> keyList.getKeyValue().stream())
+                .filter(keyValueStructure -> keyValueStructure.getKey().equals(key))
+                .map(keyValue -> keyValue.getValue())
+                .flatMap(values -> Stream.of(values))
+                .findFirst().orElse(null);
+    }
 }
