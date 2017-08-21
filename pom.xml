@@ -70,7 +70,7 @@
         <hikariCP.version>2.6.3</hikariCP.version>
         <commons.lang3.version>3.6</commons.lang3.version>
         <orika-core.version>1.5.1</orika-core.version>
-        <guava.version>19.0</guava.version>
+        <guava.version>23.0</guava.version>
 
         <hazelcast-hibernate5.version>1.2.2</hazelcast-hibernate5.version>
         <hibernate.version>5.0.12.Final</hibernate.version>
