@@ -23,6 +23,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+
+        <!-- Docker & Fabric8 Configs -->
+        <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
+        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
+        <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
+        <docker.cleanup>none</docker.cleanup>
+
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.3.4</fabric8.version>
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
@@ -30,16 +40,11 @@
         <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
         <spring.security.version>4.2.3.RELEASE</spring.security.version>
         <keycloak.version>3.1.0.Final</keycloak.version>
-        <hibernate-spatial.version>5.1.3.Final</hibernate-spatial.version>
         <postgresql.version>9.4.1207</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>16.1</geotools.version>
 
-        <!-- Docker & Fabric8 Configs -->
-        <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
-        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
-        <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
-        <docker.cleanup>none</docker.cleanup>
+
 
         <fabric8.service.name>springboot-webmvc</fabric8.service.name>
         <fabric8.service.port>80</fabric8.service.port>
@@ -51,9 +56,6 @@
         <fabric8.label.group>rutebanken</fabric8.label.group>
         <fabric8.iconRef>spring-boot</fabric8.iconRef>
 
-        <java.version>1.8</java.version>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <docker.port.container.jolokia>8778</docker.port.container.jolokia>
 
@@ -70,9 +72,11 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <orika-core.version>1.4.6</orika-core.version>
         <guava.version>19.0</guava.version>
-        <hazelcast-hibernate5.version>1.2.1</hazelcast-hibernate5.version>
-        <!-- Hibernate version deliberatly kept back as hazelcast cache does not support newer version-->
-        <hibernate.version>5.0.11.Final</hibernate.version>
+
+        <hazelcast-hibernate5.version>1.2.2</hazelcast-hibernate5.version>
+        <hibernate.version>5.0.12.Final</hibernate.version>
+        <hibernate-spatial.version>5.0.12.Final</hibernate-spatial.version>
+
         <jaxb-version>2.2.11</jaxb-version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
@@ -162,6 +166,10 @@
 
         <dependency>
             <groupId>com.hazelcast</groupId>
+            <!-- use hazelcast-hibernate52 when spring boot data >= 2.*.* and hibernate >= 5.2.*
+                https://github.com/spring-projects/spring-boot/commit/d50878bac18bf7aa9eb426589a1f6519b342d731
+                https://github.com/hazelcast/hazelcast-hibernate5
+            -->
             <artifactId>hazelcast-hibernate5</artifactId>
             <version>${hazelcast-hibernate5.version}</version>
         </dependency>
