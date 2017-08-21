@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.DirectPositionType;
@@ -13,6 +14,7 @@ import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +27,7 @@ public class SimplePointVersionStructureConverterTest {
     private final Type<Point> pointType = new TypeBuilder<Point>() {}.build();
     private final Type<SimplePoint_VersionStructure> simplePointVersionStructureType = new TypeBuilder<SimplePoint_VersionStructure>() {}.build();
 
+    private final MappingContext mappingContext = new MappingContext(new HashMap<>());
 
     @Test
     public void convertNetexPositionToPoint() {
@@ -34,7 +37,7 @@ public class SimplePointVersionStructureConverterTest {
                 .withLocation(new LocationStructure()
                         .withLongitude(BigDecimal.valueOf(longitude))
                         .withLatitude(BigDecimal.valueOf(latitude)));
-        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
         assertThat(point).isNotNull();
         assertThat(point.getX()).isEqualTo(longitude);
         assertThat(point.getY()).isEqualTo(latitude);
@@ -45,7 +48,7 @@ public class SimplePointVersionStructureConverterTest {
         double longitude = 10.01;
         double latitude = 20.24;
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        SimplePoint_VersionStructure simplePointVersionStructure = simplePointVersionStructureConverter.convertTo(point, simplePointVersionStructureType);
+        SimplePoint_VersionStructure simplePointVersionStructure = simplePointVersionStructureConverter.convertTo(point, simplePointVersionStructureType, mappingContext);
         assertThat(simplePointVersionStructure).isNotNull();
         assertThat(simplePointVersionStructure.getLocation().getLatitude().doubleValue()).isEqualTo(latitude);
         assertThat(simplePointVersionStructure.getLocation().getLongitude().doubleValue()).isEqualTo(longitude);
@@ -58,7 +61,7 @@ public class SimplePointVersionStructureConverterTest {
         double latitude = 20.123123123123;
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
-        SimplePoint_VersionStructure simplePointversionStructure =  simplePointVersionStructureConverter.convertTo(point, simplePointVersionStructureType);
+        SimplePoint_VersionStructure simplePointversionStructure =  simplePointVersionStructureConverter.convertTo(point, simplePointVersionStructureType, mappingContext);
 
         assertThat(simplePointversionStructure.getLocation().getLongitude().doubleValue()).isEqualTo(10.123457);
         assertThat(simplePointversionStructure.getLocation().getLatitude().doubleValue()).isEqualTo(20.123123);
@@ -72,7 +75,7 @@ public class SimplePointVersionStructureConverterTest {
                 .withLocation(new LocationStructure()
                         .withLongitude(BigDecimal.valueOf(longitude))
                         .withLatitude(BigDecimal.valueOf(latitude)));
-        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
 
         assertThat(point.getX()).isEqualTo(10.123457);
         assertThat(point.getY()).isEqualTo(20.123123);
@@ -81,27 +84,27 @@ public class SimplePointVersionStructureConverterTest {
     @Test
     public void nullCheckLocation() {
         SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure();
-        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
     }
 
     @Test
     public void nullCheckSimplePoint() {
         SimplePoint_VersionStructure simplePointversionStructure = null;
-        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
     }
 
     @Test
     public void nullCheckLatitude() {
         SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
                 .withLocation(new LocationStructure().withLongitude(BigDecimal.valueOf(10.00)));
-        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
     }
 
     @Test
     public void nullCheckLongitude() {
         SimplePoint_VersionStructure simplePointversionStructure = new SimplePoint_VersionStructure()
                 .withLocation(new LocationStructure().withLatitude(BigDecimal.valueOf(10.00)));
-        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
     }
 
     @Test
@@ -115,7 +118,7 @@ public class SimplePointVersionStructureConverterTest {
                                                 .withValue(6583758.0, 514477.0)
                                                 .withSrsName("EPSG:32632")));
 
-        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
         assertNotNull(point);
 
         assertThat(point.getX()).isCloseTo(9.25, Percentage.withPercentage(2));
@@ -133,7 +136,7 @@ public class SimplePointVersionStructureConverterTest {
                                 .withLongitude(BigDecimal.valueOf(514477.0))
                                 .withSrsName("EPSG:32632"));
 
-        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType);
+        Point point = simplePointVersionStructureConverter.convertFrom(simplePointversionStructure, pointType, mappingContext);
         assertNotNull(point);
 
         assertThat(point.getX()).isCloseTo(9.25, Percentage.withPercentage(2));

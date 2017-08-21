@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.*;
 import org.junit.Test;
@@ -10,6 +11,7 @@ import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +47,7 @@ public class PolygonConverterTest {
                         .withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
 
         Polygon polygon = polygonConverter.convertFrom(polygonType, new TypeBuilder<Polygon>() {
-        }.build());
+        }.build(), new MappingContext(new HashMap<>()));
 
         assertThat(polygon).isExactlyInstanceOf(Polygon.class).isNotNull();
         assertThat(polygon.getExteriorRing().getCoordinates()).hasSize(values.size() / 2);
@@ -76,7 +78,7 @@ public class PolygonConverterTest {
                 .withInterior(new AbstractRingPropertyType().withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
 
         Polygon polygon = polygonConverter.convertFrom(polygonType, new TypeBuilder<Polygon>() {
-        }.build());
+        }.build(), new MappingContext(new HashMap<>()));
 
         assertThat(polygon).isNotNull();
         assertThat(polygon.getExteriorRing().getCoordinates()).hasSize(values.size() / 2);
@@ -98,7 +100,7 @@ public class PolygonConverterTest {
         Polygon polygon = new Polygon(linearRing, null, geometryFactory);
 
         PolygonType actual = polygonConverter.convertTo(polygon, new TypeBuilder<PolygonType>() {
-        }.build());
+        }.build(), new MappingContext(new HashMap<>()));
         assertThat(actual).isNotNull();
         assertThat(actual.getId()).isNotEmpty();
 
@@ -130,7 +132,7 @@ public class PolygonConverterTest {
         Polygon polygon = new Polygon(linearRing, holes, geometryFactory);
 
         PolygonType actual = polygonConverter.convertTo(polygon, new TypeBuilder<PolygonType>() {
-        }.build());
+        }.build(), new MappingContext(new HashMap<>()));
         assertThat(actual).isNotNull();
 
         List<Double> actualDoublevalues = polygonConverter.extractValues(actual.getExterior());

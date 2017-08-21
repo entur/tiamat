@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.ValidBetween;
@@ -22,7 +23,7 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
     private ExportTimeZone exportTimeZone;
 
     @Override
-    public org.rutebanken.tiamat.model.ValidBetween convertTo(List<ValidBetween> validBetweens, Type<org.rutebanken.tiamat.model.ValidBetween> type) {
+    public org.rutebanken.tiamat.model.ValidBetween convertTo(List<ValidBetween> validBetweens, Type<org.rutebanken.tiamat.model.ValidBetween> type, MappingContext mappingContext) {
         if (validBetweens == null || validBetweens.isEmpty()) {
             return null;
         } else {
@@ -46,7 +47,7 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
     }
 
     @Override
-    public List<ValidBetween> convertFrom(org.rutebanken.tiamat.model.ValidBetween validBetween, Type<List<ValidBetween>> type) {
+    public List<ValidBetween> convertFrom(org.rutebanken.tiamat.model.ValidBetween validBetween, Type<List<ValidBetween>> type, MappingContext mappingContext) {
         org.rutebanken.netex.model.ValidBetween netexValidBetween = new org.rutebanken.netex.model.ValidBetween();
 
         if (validBetween.getFromDate() != null) {

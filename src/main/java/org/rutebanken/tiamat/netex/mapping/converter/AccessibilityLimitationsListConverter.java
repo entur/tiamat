@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
@@ -13,7 +14,9 @@ import java.util.List;
 public class AccessibilityLimitationsListConverter extends BidirectionalConverter<List<AccessibilityLimitation>, org.rutebanken.netex.model.AccessibilityLimitations_RelStructure> {
 
     @Override
-    public AccessibilityLimitations_RelStructure convertTo(List<AccessibilityLimitation> accessibilityLimitations, Type<AccessibilityLimitations_RelStructure> type) {
+    public AccessibilityLimitations_RelStructure convertTo(List<AccessibilityLimitation> accessibilityLimitations,
+                                                           Type<AccessibilityLimitations_RelStructure> type,
+                                                           MappingContext mappingContext) {
         if(accessibilityLimitations == null || accessibilityLimitations.isEmpty()) {
             return null;
         }
@@ -29,7 +32,9 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
     }
 
     @Override
-    public List<AccessibilityLimitation> convertFrom(AccessibilityLimitations_RelStructure accessibilityLimitations_relStructure, Type<List<AccessibilityLimitation>> type) {
+    public List<AccessibilityLimitation> convertFrom(AccessibilityLimitations_RelStructure accessibilityLimitations_relStructure,
+                                                     Type<List<AccessibilityLimitation>> type,
+                                                     MappingContext mappingContext) {
         List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
 
         if(accessibilityLimitations_relStructure.getAccessibilityLimitation() != null) {

@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.google.common.primitives.Longs;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.TopographicPlaceRefStructure;
@@ -30,7 +31,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
     }
 
     @Override
-    public TopographicPlace convertTo(TopographicPlaceRefStructure topographicPlaceRefStructure, Type<TopographicPlace> type) {
+    public TopographicPlace convertTo(TopographicPlaceRefStructure topographicPlaceRefStructure, Type<TopographicPlace> type, MappingContext mappingContext) {
 
         if(ANY_VERSION.equals(topographicPlaceRefStructure.getVersion())) {
             logger.debug("Version is any for topographic place ref. Finding newest version. ref: {}", topographicPlaceRefStructure);
@@ -54,7 +55,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
     }
 
     @Override
-    public TopographicPlaceRefStructure convertFrom(TopographicPlace topographicPlace, Type<TopographicPlaceRefStructure> type) {
+    public TopographicPlaceRefStructure convertFrom(TopographicPlace topographicPlace, Type<TopographicPlaceRefStructure> type, MappingContext mappingContext) {
         TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure()
                 .withCreated(OffsetDateTime.now())
                 .withRef(topographicPlace.getNetexId())

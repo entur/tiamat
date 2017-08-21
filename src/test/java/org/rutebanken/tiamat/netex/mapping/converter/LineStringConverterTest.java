@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
@@ -13,6 +14,7 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -21,6 +23,8 @@ public class LineStringConverterTest {
     private static GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     private LineStringConverter lineStringConverter = new LineStringConverter(geometryFactory, new DoubleValuesToCoordinateSequence());
+
+    private MappingContext mappingContext = new MappingContext(new HashMap<>());
 
     @Test
     public void convertFromLineStringToNetexGmlLineStringType() throws Exception {
@@ -33,7 +37,7 @@ public class LineStringConverterTest {
 
         LineString lineString = new LineString(points, geometryFactory);
 
-        LineStringType gisLineString = lineStringConverter.convertFrom(lineString, new TypeBuilder<LineStringType>() {}.build());
+        LineStringType gisLineString = lineStringConverter.convertFrom(lineString, new TypeBuilder<LineStringType>() {}.build(), mappingContext);
         assertThat(gisLineString).isNotNull();
         assertThat(gisLineString.getPosList().getCount().intValue()).isEqualTo(4);
         assertThat(gisLineString.getId()).isNotEmpty();
@@ -55,7 +59,7 @@ public class LineStringConverterTest {
                         .withSrsDimension(BigInteger.valueOf(2L))
                         .withValue(71.1, 9.1, 4.1, 9.5));
 
-        LineString lineString = lineStringConverter.convertTo(lineStringType, new TypeBuilder<LineString>(){}.build());
+        LineString lineString = lineStringConverter.convertTo(lineStringType, new TypeBuilder<LineString>(){}.build(), mappingContext);
         assertThat(lineString).isNotNull();
         assertThat(lineString.getCoordinates()).hasSize(2);
         assertThat(lineString.getCoordinates()[0].x).isEqualTo(lineStringType.getPosList().getValue().get(1));

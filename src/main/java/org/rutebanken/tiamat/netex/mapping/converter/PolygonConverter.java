@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import com.vividsolutions.jts.geom.*;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import net.opengis.gml._3.*;
@@ -38,7 +39,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
     }
 
     @Override
-    public Polygon convertFrom(PolygonType polygonType, Type<Polygon> type) {
+    public Polygon convertFrom(PolygonType polygonType, Type<Polygon> type, MappingContext mappingContext) {
 
         Optional<List<Double>> optionalExteriorValues = Optional.ofNullable(polygonType)
                 .map(PolygonType::getExterior)
@@ -86,7 +87,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
     }
 
     @Override
-    public PolygonType convertTo(Polygon polygon, Type<PolygonType> type) {
+    public PolygonType convertTo(Polygon polygon, Type<PolygonType> type, MappingContext mappingContext) {
 
         Optional<Coordinate[]> optionalCoordinates = Optional.ofNullable(polygon)
                 .map(Polygon::getExteriorRing)

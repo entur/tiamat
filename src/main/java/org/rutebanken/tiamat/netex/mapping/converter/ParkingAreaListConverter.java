@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
@@ -17,7 +18,7 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
     private static final Logger logger = LoggerFactory.getLogger(ParkingAreaListConverter.class);
 
     @Override
-    public ParkingAreas_RelStructure convertTo(List<ParkingArea> parkingAreas, Type<ParkingAreas_RelStructure> destinationType) {
+    public ParkingAreas_RelStructure convertTo(List<ParkingArea> parkingAreas, Type<ParkingAreas_RelStructure> destinationType, MappingContext mappingContext) {
         if(parkingAreas == null || parkingAreas.isEmpty()) {
             return null;
         }
@@ -35,7 +36,7 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
     }
 
     @Override
-    public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreas_relStructure, Type<List<ParkingArea>> destinationType) {
+    public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreas_relStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
         logger.debug("Mapping {} quays to internal model", parkingAreas_relStructure != null ? parkingAreas_relStructure.getParkingAreaRefOrParkingArea().size() : 0);
         List<ParkingArea> parkingAreas = new ArrayList<>();
         if(parkingAreas_relStructure.getParkingAreaRefOrParkingArea() != null) {

@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.Quays_RelStructure;
@@ -17,7 +18,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
     private static final Logger logger = LoggerFactory.getLogger(QuayListConverter.class);
 
     @Override
-    public Quays_RelStructure convertTo(Set<Quay> quays, Type<Quays_RelStructure> type) {
+    public Quays_RelStructure convertTo(Set<Quay> quays, Type<Quays_RelStructure> type, MappingContext mappingContext) {
         if(quays == null || quays.isEmpty()) {
             return null;
         }
@@ -34,7 +35,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
     }
 
     @Override
-    public Set<Quay> convertFrom(Quays_RelStructure quays_relStructure, Type<Set<Quay>> type) {
+    public Set<Quay> convertFrom(Quays_RelStructure quays_relStructure, Type<Set<Quay>> type, MappingContext mappingContext) {
         logger.debug("Mapping {} quays to internal model", quays_relStructure != null ? quays_relStructure.getQuayRefOrQuay().size() : 0);
         Set<Quay> quays = new HashSet<>();
         if(quays_relStructure.getQuayRefOrQuay() != null) {

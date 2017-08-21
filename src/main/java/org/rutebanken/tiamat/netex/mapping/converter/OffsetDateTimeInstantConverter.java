@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.tiamat.time.ExportTimeZone;
@@ -17,12 +18,12 @@ public class OffsetDateTimeInstantConverter extends BidirectionalConverter<Offse
     private ExportTimeZone exportTimeZone;
 
     @Override
-    public Instant convertTo(OffsetDateTime offsetDateTime, Type<Instant> type) {
+    public Instant convertTo(OffsetDateTime offsetDateTime, Type<Instant> type, MappingContext mappingContext) {
         return Instant.from(offsetDateTime);
     }
 
     @Override
-    public OffsetDateTime convertFrom(Instant instant, Type<OffsetDateTime> type) {
+    public OffsetDateTime convertFrom(Instant instant, Type<OffsetDateTime> type, MappingContext mappingContext) {
         return instant.atZone(exportTimeZone.getDefaultTimeZone()).toOffsetDateTime();
     }
 }

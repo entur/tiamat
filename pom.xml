@@ -66,10 +66,10 @@
         <assertj-core.version>3.8.0</assertj-core.version>
         <rest-assured.version>3.0.3</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
-        <com.h2database.version>1.4.193</com.h2database.version>
+        <com.h2database.version>1.4.196</com.h2database.version>
         <hikariCP.version>2.6.3</hikariCP.version>
-        <commons.lang3.version>3.4</commons.lang3.version>
-        <orika-core.version>1.4.6</orika-core.version>
+        <commons.lang3.version>3.6</commons.lang3.version>
+        <orika-core.version>1.5.1</orika-core.version>
         <guava.version>19.0</guava.version>
 
         <hazelcast-hibernate5.version>1.2.2</hazelcast-hibernate5.version>

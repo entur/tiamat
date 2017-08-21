@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import org.junit.Test;
@@ -17,13 +18,15 @@ public class KeyValuesToKeyListConverterTest {
 
     private KeyValuesToKeyListConverter keyValuesToKeyListConverter = new KeyValuesToKeyListConverter();
 
+    private MappingContext mappingContext = new MappingContext(new HashMap<>());
+
     @Test
     public void convertFrom() throws Exception {
 
         Map<String, Value> keyValues = new HashMap<>();
         keyValues.put("key", new Value("value"));
 
-        KeyListStructure keyValueStructure = keyValuesToKeyListConverter.convert(keyValues, keyListStructureType);
+        KeyListStructure keyValueStructure = keyValuesToKeyListConverter.convert(keyValues, keyListStructureType, mappingContext);
         assertThat(keyValueStructure.getKeyValue())
                 .isNotEmpty()
                 .extracting(KeyValueStructure::getKey).contains("key");
@@ -39,7 +42,7 @@ public class KeyValuesToKeyListConverterTest {
     public void convertFromEmptyExpectsNull() throws Exception {
         Map<String, Value> keyValues = new HashMap<>();
 
-        KeyListStructure keyValueStructure = keyValuesToKeyListConverter.convert(keyValues, keyListStructureType);
+        KeyListStructure keyValueStructure = keyValuesToKeyListConverter.convert(keyValues, keyListStructureType, mappingContext);
         assertThat(keyValueStructure).isNull();
     }
 

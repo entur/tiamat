@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.Levels_RelStructure;
@@ -15,7 +16,7 @@ public class LevelsConverter extends BidirectionalConverter<List<Level>, Levels_
     private static final Logger logger = LoggerFactory.getLogger(LevelsConverter.class);
 
     @Override
-    public Levels_RelStructure convertTo(List<Level> levels, Type<Levels_RelStructure> type) {
+    public Levels_RelStructure convertTo(List<Level> levels, Type<Levels_RelStructure> type, MappingContext mappingContext) {
         if(levels == null || levels.isEmpty()) {
             return null;
         }
@@ -34,7 +35,7 @@ public class LevelsConverter extends BidirectionalConverter<List<Level>, Levels_
     }
 
     @Override
-    public List<Level> convertFrom(Levels_RelStructure levels_relStructure, Type<List<Level>> type) {
+    public List<Level> convertFrom(Levels_RelStructure levels_relStructure, Type<List<Level>> type, MappingContext mappingContext) {
         return null;
     }
 }

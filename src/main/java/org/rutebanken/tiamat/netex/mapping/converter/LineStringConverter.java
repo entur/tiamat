@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import net.opengis.gml._3.DirectPositionListType;
@@ -34,7 +35,7 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
     }
 
     @Override
-    public LineString convertTo(LineStringType lineStringType, Type<LineString> type) {
+    public LineString convertTo(LineStringType lineStringType, Type<LineString> type, MappingContext mappingContext) {
 
         if(lineStringType.getPosList() != null) {
             List<Double> values = lineStringType.getPosList().getValue();
@@ -49,7 +50,7 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
     }
 
     @Override
-    public LineStringType convertFrom(LineString lineString, Type<LineStringType> type) {
+    public LineStringType convertFrom(LineString lineString, Type<LineStringType> typ, MappingContext mappingContext) {
 
         LineStringType lineStringType = new LineStringType();
 

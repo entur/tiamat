@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
@@ -18,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 @Component
 public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZoneRef>, TariffZoneRefs_RelStructure> {
     @Override
-    public TariffZoneRefs_RelStructure convertTo(Set<TariffZoneRef> tariffZones, Type<TariffZoneRefs_RelStructure> type) {
+    public TariffZoneRefs_RelStructure convertTo(Set<TariffZoneRef> tariffZones, Type<TariffZoneRefs_RelStructure> type, MappingContext mappingContext) {
 
         if(tariffZones == null || tariffZones.isEmpty()) {
             return null;
@@ -31,7 +32,7 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
     }
 
     @Override
-    public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type) {
+    public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type, MappingContext mappingContext) {
         if(tariffZoneRefs_relStructure == null
                 || tariffZoneRefs_relStructure.getTariffZoneRef() == null
                 || tariffZoneRefs_relStructure.getTariffZoneRef().isEmpty()) {

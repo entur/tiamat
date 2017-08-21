@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Point;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.Type;
@@ -52,7 +53,7 @@ public class VersionCreator {
         mapperFactory.getConverterFactory()
                 .registerConverter(new CustomConverter<Instant, Instant>() {
                     @Override
-                    public Instant convert(Instant instant, Type<? extends Instant> type) {
+                    public Instant convert(Instant instant, Type<? extends Instant> type, MappingContext mappingContext) {
                         return Instant.from(instant);
                     }
                 });

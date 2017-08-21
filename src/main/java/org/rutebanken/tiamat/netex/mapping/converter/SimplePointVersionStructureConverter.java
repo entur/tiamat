@@ -4,6 +4,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.geotools.geometry.jts.JTS;
@@ -53,7 +54,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
 
 
     @Override
-    public SimplePoint_VersionStructure convertTo(Point point, Type<SimplePoint_VersionStructure> type) {
+    public SimplePoint_VersionStructure convertTo(Point point, Type<SimplePoint_VersionStructure> type, MappingContext mappingContext) {
         if(point == null) {
             return null;
         }
@@ -68,7 +69,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
     }
 
     @Override
-    public Point convertFrom(SimplePoint_VersionStructure simplePoint, Type<Point> type) {
+    public Point convertFrom(SimplePoint_VersionStructure simplePoint, Type<Point> type, MappingContext mappingContext) {
 
         if(simplePoint != null
                 && simplePoint.getLocation() != null) {
