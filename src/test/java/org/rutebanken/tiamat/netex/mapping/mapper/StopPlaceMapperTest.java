@@ -53,4 +53,35 @@ public class StopPlaceMapperTest {
         assertThat(stopPlace.isParentStopPlace()).isTrue();
     }
 
+    @Test
+    public void falseIfFalseFromKeyValue() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+
+        netexStopPlace.setKeyList(
+                new KeyListStructure()
+                        .withKeyValue(new KeyValueStructure()
+                                .withKey(IS_PARENT_STOP_PLACE)
+                                .withValue(String.valueOf(false))));
+
+
+        stopPlaceMapper.mapAtoB(netexStopPlace, stopPlace, new MappingContext(new HashMap<>()));
+
+        assertThat(stopPlace.isParentStopPlace()).isFalse();
+    }
+
+    @Test
+    public void falseIfNotSet() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+
+        stopPlaceMapper.mapAtoB(netexStopPlace, stopPlace, new MappingContext(new HashMap<>()));
+
+        assertThat(stopPlace.isParentStopPlace()).isFalse();
+    }
+
 }
