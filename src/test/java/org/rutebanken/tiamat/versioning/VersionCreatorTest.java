@@ -162,11 +162,11 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
                 .isNotNull();
 
         System.out.println(oldVersion.getValidBetween().getToDate());
-        assertThat(oldVersion.getValidBetween().getToDate()).isGreaterThanOrEqualTo(beforeCreated);
+        assertThat(oldVersion.getValidBetween().getToDate()).isAfterOrEqualTo(beforeCreated);
 
 
         ValidBetween validBetween = newVersion.getValidBetween();
-        assertThat(validBetween.getFromDate()).isGreaterThanOrEqualTo(beforeCreated);
+        assertThat(validBetween.getFromDate()).isAfterOrEqualTo(beforeCreated);
         assertThat(validBetween.getToDate()).isNull();
 
     }

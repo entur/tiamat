@@ -97,7 +97,7 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         assertThat(terminatedStopPlace.getVersion()).isGreaterThan(latestVersion);
         assertThat(terminatedStopPlace.getVersionComment()).isEqualTo(terminatedVersionComment);
         assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
-        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isEqualByComparingTo(timeOfTermination);
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isAfterOrEqualTo(timeOfTermination);
 
 
         String reopenedVersionComment = "Reopened StopPlace";
@@ -105,7 +105,7 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         assertThat(reopenedStopPlace).isNotNull();
         assertThat(reopenedStopPlace.getVersion()).isGreaterThan(terminatedStopPlace.getVersion());
         assertThat(reopenedStopPlace.getVersionComment()).isEqualTo(reopenedVersionComment);
-        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isGreaterThanOrEqualTo(timeOfTermination);
+        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isAfterOrEqualTo(timeOfTermination);
         assertThat(reopenedStopPlace.getValidBetween().getToDate()).isNull();
     }
 

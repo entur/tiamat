@@ -930,7 +930,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(stopPlace.getValidBetween().getFromDate()).isNotNull();
         assertThat(stopPlace.getValidBetween().getToDate()).isNotNull();
 
-        assertThat(newVersion.getValidBetween().getFromDate()).isEqualByComparingTo(stopPlace.getValidBetween().getToDate());
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(stopPlace.getValidBetween().getToDate());
     }
 
     @Test
