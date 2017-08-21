@@ -90,6 +90,7 @@ public class PublicationDeliveryHelper {
         return Stream.of(dataManagedObject)
                 .filter(Objects::nonNull)
                 .map(object -> object.getKeyList())
+                .filter(Objects::nonNull)
                 .flatMap(keyList -> keyList.getKeyValue().stream())
                 .filter(keyValueStructure -> keyValueStructure.getKey().equals(key))
                 .map(keyValue -> keyValue.getValue())

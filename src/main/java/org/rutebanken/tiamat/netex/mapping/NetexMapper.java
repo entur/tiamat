@@ -6,7 +6,6 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.model.AccessibilityAssessment;
 import org.rutebanken.netex.model.CycleStorageEquipment;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.EntityInVersionStructure;
 import org.rutebanken.netex.model.GeneralSign;
 import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.netex.model.Parking;
@@ -21,7 +20,6 @@ import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
@@ -40,7 +38,8 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
-                       NetexIdMapper netexIdMapper) {
+                       NetexIdMapper netexIdMapper,
+                       PublicationDeliveryHelper publicationDeliveryHelper) {
 
         logger.info("Setting up netexMapper with DI");
 
@@ -74,7 +73,7 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
-                .customize(new StopPlaceMapper())
+                .customize(new StopPlaceMapper(publicationDeliveryHelper))
                 .byDefault()
                 .register();
 
@@ -181,7 +180,8 @@ public class NetexMapper {
         this(getDefaultConverters(),
                 new KeyListToKeyValuesMapMapper(),
                 new DataManagedObjectStructureMapper(new NetexIdMapper()),
-                new NetexIdMapper());
+                new NetexIdMapper(),
+                new PublicationDeliveryHelper());
         logger.info("Setting up netexMapper without DI");
     }
 

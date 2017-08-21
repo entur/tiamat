@@ -2,14 +2,23 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.AlternativeName;
-import org.rutebanken.netex.model.AlternativeNames_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiamat.model.StopPlace> {
+
+    public static final String IS_PARENT_STOP_PLACE = "IS_PARENT_STOP_PLACE";
+
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
+
+    @Autowired
+    public StopPlaceMapper(PublicationDeliveryHelper publicationDeliveryHelper) {
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
+    }
 
     @Override
     public void mapAtoB(StopPlace stopPlace, org.rutebanken.tiamat.model.StopPlace stopPlace2, MappingContext context) {
@@ -43,6 +52,14 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
                 stopPlace2.getAlternativeNames().addAll(alternativeNames);
             }
         }
+
+        String isParentStopPlaceStringValue = publicationDeliveryHelper.getValueByKey(stopPlace, IS_PARENT_STOP_PLACE);
+        if(isParentStopPlaceStringValue != null) {
+            if(isParentStopPlaceStringValue.equalsIgnoreCase("true")) {
+                stopPlace2.setParentStopPlace(true);
+            }
+        }
+
     }
 
     @Override
@@ -81,5 +98,13 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
         } else {
             stopPlace2.setAlternativeNames(null);
         }
+
+        if(stopPlace2.getKeyList() == null) {
+            stopPlace2.withKeyList(new KeyListStructure());
+        }
+        stopPlace2.getKeyList()
+                .withKeyValue(new KeyValueStructure()
+                        .withKey(IS_PARENT_STOP_PLACE)
+                        .withValue(String.valueOf(stopPlace.isParentStopPlace())));
     }
 }
