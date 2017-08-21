@@ -13,9 +13,9 @@ public class PrivateCodeFetcher implements DataFetcher {
     private static final Logger logger = LoggerFactory.getLogger(PrivateCodeFetcher.class);
 
     @Override
-    public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
+    public PrivateCodeStructure get(DataFetchingEnvironment dataFetchingEnvironment) {
 
-        logger.trace("Fetching private code from source {}", dataFetchingEnvironment.getSource());
+        logger.trace("Fetching private code from source {}", (Object) dataFetchingEnvironment.getSource());
 
         PrivateCodeStructure privateCode = null;
         if(dataFetchingEnvironment.getSource() instanceof GeneralSign) {
