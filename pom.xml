@@ -29,9 +29,11 @@
 
         <!-- Docker & Fabric8 Configs -->
         <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
-        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
         <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
         <docker.cleanup>none</docker.cleanup>
+        <docker.port.container.jolokia>8778</docker.port.container.jolokia>
+
+        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
         <fabric8.service.name>springboot-webmvc</fabric8.service.name>
         <fabric8.service.port>80</fabric8.service.port>
         <fabric8.service.containerPort>8080</fabric8.service.containerPort>
@@ -54,9 +56,8 @@
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
-        
-        <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
-        <docker.port.container.jolokia>8778</docker.port.container.jolokia>
+
+        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
 
         <logstash-logback.version>4.11</logstash-logback.version>
         <kubernetes-client.version>2.6.1</kubernetes-client.version>
