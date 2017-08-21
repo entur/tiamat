@@ -76,6 +76,7 @@
         <hibernate.version>5.0.12.Final</hibernate.version>
         <hibernate-spatial.version>5.0.12.Final</hibernate-spatial.version>
 
+        <groovy-all.version>2.4.12</groovy-all.version>
         <jaxb-version>2.2.11</jaxb-version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
@@ -386,7 +387,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.11</version>
+            <version>${groovy-all.version}</version>
             <scope>test</scope>
         </dependency>
 
