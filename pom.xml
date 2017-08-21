@@ -56,7 +56,7 @@
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
-
+        <activemq-client.version>5.15.0</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
 
         <logstash-logback.version>4.11</logstash-logback.version>
@@ -84,6 +84,7 @@
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>0.0.9-SNAPSHOT</netex-java-model.version>
         <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
+        <rutebanken-gcp-storage.version>0.0.3-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.3-SNAPSHOT</rutebanken-organisation.version>
     </properties>
 
@@ -207,7 +208,7 @@
         <dependency>
             <groupId>org.rutebanken.helpers</groupId>
             <artifactId>gcp-storage</artifactId>
-            <version>0.0.2</version>
+            <version>${rutebanken-gcp-storage.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -455,7 +456,7 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
-            <version>5.14.4</version>
+            <version>${activemq-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
