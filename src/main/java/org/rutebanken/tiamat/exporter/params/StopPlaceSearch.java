@@ -46,12 +46,23 @@ public class StopPlaceSearch {
     @QueryParam(value = "version")
     private Long version;
 
+    @QueryParam(value = "tag")
+    private List<String> tags;
+
     private Instant pointInTime;
 
     public StopPlaceSearch() {}
 
-    private StopPlaceSearch(String query, List<StopTypeEnumeration> stopTypeEnumerations,
-                            List<String> netexIdList, boolean allVersions, boolean withoutLocationOnly, Instant pointInTime, Long version, ExportParams.VersionValidity versionValidity, int page, int size) {
+    private StopPlaceSearch(String query,
+                            List<StopTypeEnumeration> stopTypeEnumerations,
+                            List<String> netexIdList,
+                            boolean allVersions,
+                            boolean withoutLocationOnly,
+                            Instant pointInTime,
+                            Long version,
+                            ExportParams.VersionValidity versionValidity,
+                            List<String> tags,
+                            int page, int size) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
@@ -60,6 +71,7 @@ public class StopPlaceSearch {
         this.pointInTime = pointInTime;
         this.version = version;
         this.versionValidity = versionValidity;
+        this.tags = tags;
         this.page = page;
         this.size = size;
     }
@@ -100,9 +112,14 @@ public class StopPlaceSearch {
         return versionValidity;
     }
 
+    public List<String> getTags() {
+        return tags;
+    }
+
     // TODO: Remove or update
     public boolean isEmpty() {
         return !((query != null && !query.isEmpty())
+                || (tags != null && !tags.isEmpty())
                 || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty())
                 || (netexIdList != null && !netexIdList.isEmpty()));
     }
@@ -115,6 +132,7 @@ public class StopPlaceSearch {
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
+                .add("tags", tags)
                 .add("page", page)
                 .add("size", size)
                 .toString();
@@ -134,6 +152,7 @@ public class StopPlaceSearch {
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
+        private List<String> tags;
         private int page = DEFAULT_PAGE;
         private int size = DEFAULT_PAGE_SIZE;
 
@@ -190,8 +209,13 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setTags(List<String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, versionValidity, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, versionValidity, tags, page, size);
         }
 
     }

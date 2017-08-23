@@ -103,6 +103,12 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 operators.add("and");
             }
 
+            if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
+                wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name in :tags)");
+                parameters.put("tags", stopPlaceSearch.getTags());
+                operators.add("and");
+            }
+
             boolean hasMunicipalityFilter = exportParams.getMunicipalityReferences() != null && !exportParams.getMunicipalityReferences().isEmpty();
             boolean hasCountyFilter = exportParams.getCountyReferences() != null && !exportParams.getCountyReferences().isEmpty();
 
