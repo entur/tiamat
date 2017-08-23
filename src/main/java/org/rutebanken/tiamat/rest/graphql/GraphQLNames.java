@@ -110,6 +110,12 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_TAG = "Tag";
+    public static final String INPUT_TYPE_TAG = "Tag" + INPUT_TYPE_POSTFIX;
+
+    public static final String TAG = "tag";
+    public static final String TAGS = "tags";
+
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
 

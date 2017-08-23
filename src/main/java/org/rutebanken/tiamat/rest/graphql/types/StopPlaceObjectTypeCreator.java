@@ -6,6 +6,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,12 @@ public class StopPlaceObjectTypeCreator {
 
     @Autowired
     private TransportModeScalar transportModeScalar;
+
+    @Autowired
+    private TagObjectTypeCreator tagObjectTypeCreator;
+
+    @Autowired
+    private TagFetcher tagFetcher;
 
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, List<GraphQLFieldDefinition> stopPlaceInterfaceFields, List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
         return newObject()
@@ -53,6 +60,10 @@ public class StopPlaceObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))
+                .field(newFieldDefinition()
+                        .name(TAGS)
+                        .type(tagObjectTypeCreator.create())
+                        .dataFetcher(tagFetcher))
                 .build();
     }
 }

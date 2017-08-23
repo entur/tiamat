@@ -14,8 +14,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Set<Tag> findByNetexReference(String ref);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
-    Set<Tag> findByType(String type);
+    Set<Tag> findByName(String name);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
-    Set<Tag> findByTypeAndNetexReference(String type, String netexReference);
+    Set<Tag> findByNameAndNetexReference(String name, String netexReference);
 }
