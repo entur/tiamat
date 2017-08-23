@@ -3,28 +3,25 @@ package org.rutebanken.tiamat.model.tag;
 import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
-@Table(uniqueConstraints = {
-        // Only one tag per netex_reference and tag name.
-        @UniqueConstraint(name = "tag_netex_reference_type_constraint", columnNames = {"netex_reference", "name"})})
-public class Tag {
-
-    @Id
-    @GeneratedValue
-    private long id;
+@IdClass(TagPK.class)
+public class Tag implements Serializable {
 
     /**
      * Unversioned reference to netexId.
      * A tag can point to any EntityInVersionStructure
      */
+    @Id
     @Column(name = "netex_reference")
     private String idReference;
-    
-    private String createdBy;
 
+    @Id
     private String name;
+
+    private String createdBy;
 
     private Instant created;
 
@@ -115,10 +112,9 @@ public class Tag {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", id)
                 .add("idReference", idReference)
-                .add("createdBy", createdBy)
                 .add("name", name)
+                .add("createdBy", createdBy)
                 .add("created", created)
                 .add("comment", comment)
                 .add("removed", removed)
