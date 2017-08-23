@@ -31,18 +31,16 @@ public class PublicationDeliveryExporter {
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
-    private final PathLinkRepository pathLinkRepository;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, PathLinkRepository pathLinkRepository, ParentStopPlacesFetcher parentStopPlacesFetcher) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, ParentStopPlacesFetcher parentStopPlacesFetcher) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
-        this.pathLinkRepository = pathLinkRepository;
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
     }
 
