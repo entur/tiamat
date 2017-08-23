@@ -69,12 +69,6 @@ StopPlaceRegisterGraphQLSchema {
     private ParentStopPlaceInputObjectTypeCreator parentStopPlaceInputObjectTypeCreator;
 
     @Autowired
-    private TagInputObjectTypeCreator tagInputObjectTypeCreator;
-
-    @Autowired
-    private TagObjectTypeCreator tagObjectTypeCreator;
-
-    @Autowired
     private TagOperationsBuilder tagOperationsBuilder;
 
     @Autowired
