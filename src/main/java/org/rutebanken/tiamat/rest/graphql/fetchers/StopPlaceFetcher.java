@@ -156,6 +156,11 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
+                List<String> tags = environment.getArgument(TAGS);
+                if(tags != null && !tags.isEmpty()) {
+                    stopPlaceSearchBuilder.setTags(tags);
+                }
+
                 stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
             }
 

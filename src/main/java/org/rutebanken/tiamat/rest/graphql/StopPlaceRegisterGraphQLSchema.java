@@ -24,6 +24,8 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
@@ -378,6 +380,11 @@ StopPlaceRegisterGraphQLSchema {
                 .description("Only return StopPlaces located in given counties.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(TAGS)
+                .type(new GraphQLList(GraphQLString))
+                .description("Only return StopPlace reffered to by the tag names provided. Values should not start with #")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(MUNICIPALITY_REF)
                 .type(new GraphQLList(GraphQLString))
                 .description("Only return StopPlaces located in given municipalities.")
@@ -385,7 +392,7 @@ StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(QUERY)
                 .type(GraphQLString)
-                .description("Searches for StopPlace by name.")
+                .description("Searches for StopPlace by name, " + ID + ", " + ORIGINAL_ID_KEY + ", " + MERGED_ID_KEY + " or a single tag prefixed with #")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(IMPORTED_ID_QUERY)
