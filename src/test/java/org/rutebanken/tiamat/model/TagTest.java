@@ -29,12 +29,12 @@ public class TagTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace2);
 
         Tag tag = new Tag();
-        tag.setType("fix-coordinates");
+        tag.setName("fix-coordinates");
         tag.setNetexReference(stopPlace.getNetexId());
         tagRepository.save(tag);
 
         Tag tag2 = new Tag();
-        tag2.setType("something-else");
+        tag2.setName("something-else");
         tag2.setNetexReference(stopPlace.getNetexId());
         tagRepository.save(tag2);
 

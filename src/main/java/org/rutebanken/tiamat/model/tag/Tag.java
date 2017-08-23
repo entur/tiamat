@@ -1,15 +1,13 @@
 package org.rutebanken.tiamat.model.tag;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "tag_netex_reference_type_constraint", columnNames = {"netex_reference", "type"})})
+        @UniqueConstraint(name = "tag_netex_reference_type_constraint", columnNames = {"netex_reference", "name"})})
 public class Tag {
 
     @Id
@@ -25,7 +23,7 @@ public class Tag {
     
     private String createdBy;
 
-    private String type;
+    private String name;
 
     private Instant created;
 
@@ -43,12 +41,12 @@ public class Tag {
         this.createdBy = createdBy;
     }
 
-    public String getType() {
-        return type;
+    public String getName() {
+        return name;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Instant getCreated() {
@@ -92,7 +90,7 @@ public class Tag {
 
         if (netexReference != null ? !netexReference.equals(tag.netexReference) : tag.netexReference != null) return false;
         if (createdBy != null ? !createdBy.equals(tag.createdBy) : tag.createdBy != null) return false;
-        if (type != null ? !type.equals(tag.type) : tag.type != null) return false;
+        if (name != null ? !name.equals(tag.name) : tag.name != null) return false;
         if (created != null ? !created.equals(tag.created) : tag.created != null) return false;
         if (comment != null ? !comment.equals(tag.comment) : tag.comment != null) return false;
         if (removed != null ? !removed.equals(tag.removed) : tag.removed != null) return false;
@@ -105,7 +103,7 @@ public class Tag {
     public int hashCode() {
         int result = createdBy != null ? createdBy.hashCode() : 0;
         result = 31 * result + (netexReference != null ? netexReference.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (created != null ? created.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         result = 31 * result + (removed != null ? removed.hashCode() : 0);
@@ -119,7 +117,7 @@ public class Tag {
                 .add("id", id)
                 .add("netexReference", netexReference)
                 .add("createdBy", createdBy)
-                .add("type", type)
+                .add("name", name)
                 .add("created", created)
                 .add("comment", comment)
                 .add("removed", removed)
