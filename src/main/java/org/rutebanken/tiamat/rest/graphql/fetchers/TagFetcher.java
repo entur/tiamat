@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
+
 @Component
 public class TagFetcher implements DataFetcher<Set<Tag>> {
 
@@ -21,7 +23,10 @@ public class TagFetcher implements DataFetcher<Set<Tag>> {
     public Set<Tag> get(DataFetchingEnvironment dataFetchingEnvironment) {
         IdentifiedEntity source = (IdentifiedEntity) dataFetchingEnvironment.getSource();
         if (source != null) {
-            return tagRepository.findByIdReference(source.getNetexId());
+            return tagRepository.findByIdReference(source.getNetexId())
+                    .stream()
+                    .filter(tag -> tag.getRemoved() == null)
+                    .collect(toSet());
         } else {
             return Sets.newHashSet();
         }

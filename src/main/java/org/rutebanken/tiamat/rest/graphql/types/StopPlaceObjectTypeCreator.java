@@ -28,12 +28,6 @@ public class StopPlaceObjectTypeCreator {
     @Autowired
     private TransportModeScalar transportModeScalar;
 
-    @Autowired
-    private TagObjectTypeCreator tagObjectTypeCreator;
-
-    @Autowired
-    private TagFetcher tagFetcher;
-
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, List<GraphQLFieldDefinition> stopPlaceInterfaceFields, List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
         return newObject()
                 .name(OUTPUT_TYPE_STOPPLACE)
@@ -60,10 +54,6 @@ public class StopPlaceObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))
-                .field(newFieldDefinition()
-                        .name(TAGS)
-                        .type(tagObjectTypeCreator.create())
-                        .dataFetcher(tagFetcher))
                 .build();
     }
 }

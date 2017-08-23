@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.*;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,12 @@ public class StopPlaceInterfaceCreator {
 
     @Autowired
     private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
+
+    @Autowired
+    private TagObjectTypeCreator tagObjectTypeCreator;
+
+    @Autowired
+    private TagFetcher tagFetcher;
 
     public List<GraphQLFieldDefinition> createCommonInterfaceFields(GraphQLObjectType tariffZoneObjectType,
                                                               GraphQLObjectType topographicPlaceObjectType,
@@ -49,6 +56,10 @@ public class StopPlaceInterfaceCreator {
                 .type(new GraphQLList(tariffZoneObjectType))
                 .dataFetcher(stopPlaceTariffZoneFetcher)
                 .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(TAGS)
+                .type(new GraphQLList(tagObjectTypeCreator.create()))
+                .dataFetcher(tagFetcher).build());
         return stopPlaceInterfaceFields;
     }
 
