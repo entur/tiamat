@@ -114,7 +114,16 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_TAG = "Tag" + INPUT_TYPE_POSTFIX;
 
     public static final String TAG = "tag";
+    public static final String TAG_DESCRIPTION = "A tag for an entity like StopPlace";
+    public static final String TAG_ID_REFERENCE = "idReference";
+    public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1";
     public static final String TAGS = "tags";
+    public static final String TAG_COMMENT = "comment";
+    public static final String TAG_NAME = "name";
+    public static final String TAG_NAME_DESCRIPTION = "The tag name itself";
+    public static final String TAG_COMMENT_DESCRIPTION = "A comment for this tag on this entity";
+    public static final String REMOVE_TAG = "removeTag";
+    public static final String CREATE_TAG = "createTag";
 
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
@@ -300,6 +309,7 @@ public class GraphQLNames {
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
+    public static final String MUTATE_TAG = "mutateTag";
 
 
     public static final String QUAY_ID = "quayId";

@@ -7,6 +7,7 @@ import java.time.Instant;
 
 @Entity
 @Table(uniqueConstraints = {
+        // Only one tag per netex_reference and tag name.
         @UniqueConstraint(name = "tag_netex_reference_type_constraint", columnNames = {"netex_reference", "name"})})
 public class Tag {
 
@@ -15,11 +16,11 @@ public class Tag {
     private long id;
 
     /**
-     * Unversioned site ref.
-     * A tag can point to any entity with Netex ID.
+     * Unversioned reference to netexId.
+     * A tag can point to any EntityInVersionStructure
      */
     @Column(name = "netex_reference")
-    private String netexReference;
+    private String idReference;
     
     private String createdBy;
 
@@ -88,7 +89,7 @@ public class Tag {
 
         Tag tag = (Tag) o;
 
-        if (netexReference != null ? !netexReference.equals(tag.netexReference) : tag.netexReference != null) return false;
+        if (idReference != null ? !idReference.equals(tag.idReference) : tag.idReference != null) return false;
         if (createdBy != null ? !createdBy.equals(tag.createdBy) : tag.createdBy != null) return false;
         if (name != null ? !name.equals(tag.name) : tag.name != null) return false;
         if (created != null ? !created.equals(tag.created) : tag.created != null) return false;
@@ -102,7 +103,7 @@ public class Tag {
     @Override
     public int hashCode() {
         int result = createdBy != null ? createdBy.hashCode() : 0;
-        result = 31 * result + (netexReference != null ? netexReference.hashCode() : 0);
+        result = 31 * result + (idReference != null ? idReference.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (created != null ? created.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
@@ -115,7 +116,7 @@ public class Tag {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
-                .add("netexReference", netexReference)
+                .add("idReference", idReference)
                 .add("createdBy", createdBy)
                 .add("name", name)
                 .add("created", created)
@@ -125,11 +126,11 @@ public class Tag {
                 .toString();
     }
 
-    public String getNetexReference() {
-        return netexReference;
+    public String getIdReference() {
+        return idReference;
     }
 
-    public void setNetexReference(String netexReference) {
-        this.netexReference = netexReference;
+    public void setIdreference(String netexReference) {
+        this.idReference = netexReference;
     }
 }

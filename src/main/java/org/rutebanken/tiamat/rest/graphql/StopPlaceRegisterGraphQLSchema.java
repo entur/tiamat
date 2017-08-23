@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
@@ -66,6 +67,15 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private ParentStopPlaceInputObjectTypeCreator parentStopPlaceInputObjectTypeCreator;
+
+    @Autowired
+    private TagInputObjectTypeCreator tagInputObjectTypeCreator;
+
+    @Autowired
+    private TagObjectTypeCreator tagObjectTypeCreator;
+
+    @Autowired
+    private TagOperationsBuilder tagOperationsBuilder;
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
@@ -274,12 +284,12 @@ StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .type(new GraphQLList(parkingObjectType))
                         .name(MUTATE_PARKING)
-                        .description("Create new or update existing Parking")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)
                                 .type(new GraphQLList(parkingInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
+                .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType))
                 .build();

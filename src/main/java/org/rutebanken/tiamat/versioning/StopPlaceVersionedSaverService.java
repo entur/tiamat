@@ -107,7 +107,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         // Save latest version
         newVersion = initiateOrIncrementVersions(newVersion, validFrom);
 
-        newVersion.setChangedBy(getUserNameForAuthenticatedUser());
+        newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}].", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
 
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);

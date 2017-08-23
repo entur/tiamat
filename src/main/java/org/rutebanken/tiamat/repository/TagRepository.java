@@ -11,11 +11,11 @@ import java.util.Set;
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
-    Set<Tag> findByNetexReference(String ref);
+    Set<Tag> findByIdReference(String ref);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
     Set<Tag> findByName(String name);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
-    Set<Tag> findByNameAndNetexReference(String name, String netexReference);
+    Tag findByNameAndIdReference(String name, String idReference);
 }

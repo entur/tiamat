@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.versioning;
 
 import org.keycloak.KeycloakPrincipal;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
@@ -22,6 +23,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     @Autowired
     private VersionCreator versionCreator;
+
+    @Autowired
+    protected UsernameFetcher usernameFetcher;
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
@@ -64,7 +68,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
         versionCreator.initiateOrIncrement(newVersion);
 
-        String usernameForAuthenticatedUser = getUserNameForAuthenticatedUser();
+        String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
         if(newVersion instanceof DataManagedObjectStructure) {
             ((DataManagedObjectStructure) newVersion).setChangedBy(usernameForAuthenticatedUser);
         }
@@ -99,20 +103,5 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         }
     }
 
-    /*
-     * Gets username from Spring Security
-     *
-     * Expects property keycloak.principal-attribute=preferred_username
-     *
-     */
-    protected String getUserNameForAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            if (authentication.getPrincipal() != null &&
-                    authentication.getPrincipal() instanceof KeycloakPrincipal) {
-                return ((KeycloakPrincipal)authentication.getPrincipal()).getName();
-            }
-        }
-        return null;
-    }
+
 }

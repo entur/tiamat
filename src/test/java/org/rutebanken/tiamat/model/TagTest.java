@@ -30,15 +30,15 @@ public class TagTest extends TiamatIntegrationTest {
 
         Tag tag = new Tag();
         tag.setName("fix-coordinates");
-        tag.setNetexReference(stopPlace.getNetexId());
+        tag.setIdreference(stopPlace.getNetexId());
         tagRepository.save(tag);
 
         Tag tag2 = new Tag();
         tag2.setName("something-else");
-        tag2.setNetexReference(stopPlace.getNetexId());
+        tag2.setIdreference(stopPlace.getNetexId());
         tagRepository.save(tag2);
 
-        Set<Tag> actual = tagRepository.findByNetexReference(stopPlace.getNetexId());
+        Set<Tag> actual = tagRepository.findByIdReference(stopPlace.getNetexId());
 
         assertThat(actual).isNotNull();
         assertThat(actual).hasSize(2);
