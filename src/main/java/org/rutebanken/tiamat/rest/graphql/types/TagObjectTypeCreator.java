@@ -41,11 +41,11 @@ public class TagObjectTypeCreator {
                             .description(TAG_COMMENT_DESCRIPTION))
                     .field(newFieldDefinition()
                             .name("removed")
-                            .description("When this tag was removed")
+                            .description(TAG_REMOVED_DESCRIPTION)
                             .type(dateScalar.getGraphQLDateScalar()))
                     .field(newFieldDefinition()
                             .name("removedBy")
-                            .description("Removed by user")
+                            .description(TAG_REMOVED_BY_USER_DESCRIPTION)
                             .type(GraphQLString))
                     .build();
         }

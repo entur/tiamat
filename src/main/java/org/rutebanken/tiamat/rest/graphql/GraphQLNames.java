@@ -122,6 +122,9 @@ public class GraphQLNames {
     public static final String TAG_NAME = "name";
     public static final String TAG_NAME_DESCRIPTION = "The tag name itself";
     public static final String TAG_COMMENT_DESCRIPTION = "A comment for this tag on this entity";
+    public static final String TAG_REMOVED_DESCRIPTION = "When this tag was removed. If set, the tag is removed from entity it references in field '" + TAG_ID_REFERENCE + "'";
+    public static final String TAG_REMOVED_BY_USER_DESCRIPTION = "Removed by username. Only set if tag has been removed";
+
     public static final String REMOVE_TAG = "removeTag";
     public static final String CREATE_TAG = "createTag";
 
@@ -309,8 +312,6 @@ public class GraphQLNames {
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
-    public static final String MUTATE_TAG = "mutateTag";
-
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";
