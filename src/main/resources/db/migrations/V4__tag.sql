@@ -1,0 +1,1 @@
+create table tag (netex_reference varchar(255) not null, name varchar(255) not null, comment varchar(255), created timestamp, created_by varchar(255), removed timestamp, removed_by varchar(255), primary key (netex_reference, name));

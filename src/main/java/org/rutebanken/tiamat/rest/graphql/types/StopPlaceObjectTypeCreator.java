@@ -6,6 +6,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

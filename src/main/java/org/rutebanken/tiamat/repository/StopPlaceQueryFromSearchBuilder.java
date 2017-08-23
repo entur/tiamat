@@ -50,16 +50,22 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         } else {
             if (stopPlaceSearch.getQuery() != null) {
 
-                parameters.put("query", stopPlaceSearch.getQuery());
                 operators.add("and");
 
-                if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
+                if(stopPlaceSearch.getQuery().startsWith("#") && !stopPlaceSearch.getQuery().contains(" ")) {
+                    // Seems like we are searching for tags
+                    String hashRemoved = stopPlaceSearch.getQuery().substring(1);
+                    parameters.put("query", hashRemoved);
+                    wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name = :query)");
+                } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
                     String netexId = stopPlaceSearch.getQuery();
 
                     String netexIdType = NetexIdHelper.extractIdType(netexId);
+                    parameters.put("query", stopPlaceSearch.getQuery());
 
-                    // Detect non NSR NetexId and search in original ID
                     if (!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
+
+                        // Detect non NSR NetexId and search in original ID
                         parameters.put("originalIdKey", ORIGINAL_ID_KEY);
                         parameters.put("mergedIdKey", MERGED_ID_KEY);
 
@@ -83,6 +89,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                         }
                     }
                 } else {
+                    parameters.put("query", stopPlaceSearch.getQuery());
 
                     final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
                     final String containsLowerMatchQuerySql =  "concat('%', lower(:query), '%') ";
@@ -100,6 +107,12 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
                 wheres.add("s.stop_place_type in :stopPlaceTypes");
                 parameters.put("stopPlaceTypes", stopPlaceSearch.getStopTypeEnumerations().stream().map(StopTypeEnumeration::toString).collect(toList()));
+                operators.add("and");
+            }
+
+            if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
+                wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name in :tags)");
+                parameters.put("tags", stopPlaceSearch.getTags());
                 operators.add("and");
             }
 

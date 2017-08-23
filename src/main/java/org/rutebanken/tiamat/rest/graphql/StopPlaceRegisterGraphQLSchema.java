@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
@@ -23,6 +24,8 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
@@ -66,6 +69,9 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private ParentStopPlaceInputObjectTypeCreator parentStopPlaceInputObjectTypeCreator;
+
+    @Autowired
+    private TagOperationsBuilder tagOperationsBuilder;
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
@@ -274,12 +280,12 @@ StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .type(new GraphQLList(parkingObjectType))
                         .name(MUTATE_PARKING)
-                        .description("Create new or update existing Parking")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)
                                 .type(new GraphQLList(parkingInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
+                .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType))
                 .build();
@@ -374,6 +380,11 @@ StopPlaceRegisterGraphQLSchema {
                 .description("Only return StopPlaces located in given counties.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(TAGS)
+                .type(new GraphQLList(GraphQLString))
+                .description("Only return StopPlace reffered to by the tag names provided. Values should not start with #")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(MUNICIPALITY_REF)
                 .type(new GraphQLList(GraphQLString))
                 .description("Only return StopPlaces located in given municipalities.")
@@ -381,7 +392,7 @@ StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(QUERY)
                 .type(GraphQLString)
-                .description("Searches for StopPlace by name.")
+                .description("Searches for StopPlace by name, " + ID + ", " + ORIGINAL_ID_KEY + ", " + MERGED_ID_KEY + " or a single tag prefixed with #")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(IMPORTED_ID_QUERY)

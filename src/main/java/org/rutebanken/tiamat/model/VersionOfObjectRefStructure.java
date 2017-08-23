@@ -24,6 +24,10 @@ public class VersionOfObjectRefStructure implements Serializable {
         this.version = version;
     }
 
+    public VersionOfObjectRefStructure(String ref) {
+        this.ref = ref;
+    }
+
     public String getRef() {
         return ref;
     }
