@@ -124,14 +124,15 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 				"INNER JOIN stop_place_quays spq " +
 				"ON spq.stop_place_id = qkv.stop_place_id " +
 				"INNER JOIN stop_place sp " +
-				"ON sp.id = qkv.stop_place_id " +
+				"ON sp.id = qkv.stop_place_id and sp.stop_place_type = :stopPlaceType " +
 				"INNER JOIN quay q " +
-				"ON spq.quays_id = q.id  and q.public_code is not null " +
+				"ON spq.quays_id = q.id  and q.public_code NOT LIKE '' " +
 				"INNER JOIN value_items vi " +
 				"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :mappingIdKeys " +
 				"order by items, public_code ";
 		Query nativeQuery = entityManager.createNativeQuery(sql);
 
+		nativeQuery.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
 		nativeQuery.setParameter("mappingIdKeys", Arrays.asList("jbvCode"));
 		@SuppressWarnings("unchecked")
 		List<Object[]> result = nativeQuery.getResultList();
