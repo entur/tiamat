@@ -480,10 +480,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                        .setParameter("to",  Date.from(search.getTo())).getSingleResult()).intValue();
     }
 
-    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from  stop_place sp inner join " +
-                                                                                      "(select spinner.netex_id, max(spinner.from_date) as maxFromDate from stop_place spinner " +
-                                                                                      " where (spinner.from_date between  :from and :to or spinner.to_date between  :from and :to ) " +
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from stop_place sp inner join " +
+                                                                                      "(select spinner.netex_id, max(spinner.version) as maxVersion  from stop_place spinner " +
+                                                                                      "     left join stop_place p ON spinner.parent_site_ref = p.netex_id AND spinner.parent_site_ref_version = CAST(p.version as text) " +
+                                                                                      " where ((spinner.from_date between  :from and :to or spinner.to_date between  :from and :to )" +
+                                                                                        " or p.netex_id is not null and (p.from_date between  :from and :to or p.to_date between  :from and :to ))" +
                                                                                       " group by  spinner.netex_id" +
-                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxFromDate=sp.from_date";
+                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxVersion = sp.version";
 }
 
