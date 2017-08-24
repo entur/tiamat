@@ -118,9 +118,10 @@ public class GraphQLNames {
     public static final String TAG_ID_REFERENCE = "idReference";
     public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1";
     public static final String TAGS = "tags";
+    public static final String TAGS_DESCRIPTION = "Fetches already used tags by name distinctively";
     public static final String TAG_COMMENT = "comment";
     public static final String TAG_NAME = "name";
-    public static final String TAG_NAME_DESCRIPTION = "The tag name itself";
+    public static final String TAG_NAME_DESCRIPTION = "Tag name";
     public static final String TAG_COMMENT_DESCRIPTION = "A comment for this tag on this entity";
     public static final String TAG_REMOVED_DESCRIPTION = "When this tag was removed. If set, the tag is removed from entity it references in field '" + TAG_ID_REFERENCE + "'";
     public static final String TAG_REMOVED_BY_USER_DESCRIPTION = "Removed by username. Only set if tag has been removed";

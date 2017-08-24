@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.regex.Pattern;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
@@ -21,6 +22,9 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 public class TagCreator {
 
     private static final Logger logger = LoggerFactory.getLogger(TagRemover.class);
+
+    private static final String TAG_NAME_REGEX = "^[\\w\\dæøåÆØÅ]*$";
+    private static final Pattern tagPattern = Pattern.compile(TAG_NAME_REGEX, Pattern.UNICODE_CASE);
 
     @Autowired
     private TagRepository tagRepository;
@@ -35,6 +39,12 @@ public class TagCreator {
     private ReflectionAuthorizationService authorizationService;
 
     public Tag createTag(String tagName, String idReference, String comment) {
+
+        if(!tagPattern.matcher(tagName).matches()) {
+            throw new IllegalArgumentException("Tag name not valid. Should not contain spaces or special characters. Only characters and or numbers: " + TAG_NAME_REGEX);
+        }
+        tagName = tagName.toLowerCase();
+
         Tag tag = tagRepository.findByNameAndIdReference(tagName, idReference);
         boolean brandNew = false;
         if(tag == null) {

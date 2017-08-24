@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
@@ -72,6 +73,12 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private TagOperationsBuilder tagOperationsBuilder;
+
+    @Autowired
+    private TagObjectTypeCreator tagObjectTypeCreator;
+
+    @Autowired
+    private TagFetcher tagFetcher;
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
@@ -233,6 +240,16 @@ StopPlaceRegisterGraphQLSchema {
                         .description(AUTHORIZATION_CHECK_DESCRIPTION)
                         .argument(createAuthorizationCheckArguments())
                         .dataFetcher(authorizationCheckDataFetcher))
+                .field(newFieldDefinition()
+                        .name(TAGS)
+                        .type(new GraphQLList(tagObjectTypeCreator.create()))
+                        .description(TAGS_DESCRIPTION)
+                        .argument(GraphQLArgument.newArgument()
+                            .name(TAG_NAME)
+                            .description(TAG_NAME_DESCRIPTION)
+                            .type(new GraphQLNonNull(GraphQLString)))
+                        .dataFetcher(tagFetcher)
+                        .build())
                 .build();
 
 

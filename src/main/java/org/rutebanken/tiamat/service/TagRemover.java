@@ -37,6 +37,7 @@ public class TagRemover {
     private ReflectionAuthorizationService authorizationService;
 
     public Tag removeTag(String tagName, String idReference, String comment) {
+        tagName = tagName.toLowerCase();
         Tag tag = tagRepository.findByNameAndIdReference(tagName, idReference);
 
         if(tag == null) {
