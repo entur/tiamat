@@ -7,13 +7,16 @@ import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingException;
+import org.rutebanken.tiamat.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -26,6 +29,10 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
 
     public static final String CHANGED_BY = "CHANGED_BY";
     public static final String VERSION_COMMENT = "VERSION_COMMENT";
+    public static final String TAG_PREFIX = "TAG";
+
+    @Autowired
+    private TagRepository tagRepository;
 
     /**
      * Setters for internal tiamat model when mapping from netex.
@@ -55,7 +62,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
     public void mapAtoB(DataManagedObjectStructure netexEntity, org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, MappingContext context) {
         netexIdMapper.toTiamatModel(netexEntity, tiamatEntity);
 
-        if(netexEntity.getVersion() != null) {
+        if (netexEntity.getVersion() != null) {
             if (netexEntity.getVersion().equals(ANY_VERSION)) {
                 tiamatEntity.setVersion(-1L); // Need to handle this value in import.
             } else {
@@ -70,7 +77,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             }
         }
 
-        if(netexEntity.getKeyList() != null && netexEntity.getKeyList().getKeyValue() != null) {
+        if (netexEntity.getKeyList() != null && netexEntity.getKeyList().getKeyValue() != null) {
             netexEntity.getKeyList().getKeyValue().forEach(keyValueStructure -> {
                 if (tiamatEntitySetFunctions.containsKey(keyValueStructure.getKey())) {
                     tiamatEntitySetFunctions.get(keyValueStructure.getKey()).accept(keyValueStructure.getValue(), tiamatEntity);
@@ -84,21 +91,59 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
         netexIdMapper.toNetexModel(tiamatEntity, netexEntity);
         netexEntity.setVersion(String.valueOf(tiamatEntity.getVersion()));
 
+        if (netexEntity.getKeyList() == null) {
+            netexEntity.withKeyList(new KeyListStructure());
+        }
         tiamatEntityGetFunctions.forEach((property, function) -> setKey(netexEntity, property, function.apply(tiamatEntity)));
+        mapTagsToProperties(tiamatEntity, netexEntity);
+
+        if (netexEntity.getKeyList().getKeyValue() == null || netexEntity.getKeyList().getKeyValue().isEmpty()) {
+            // Do not allow empty key list
+            netexEntity.withKeyList(null);
+        }
+    }
+
+
+    private void mapTagsToProperties(org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, DataManagedObjectStructure netexEntity) {
+        Set<Tag> tags = tagRepository.findByIdReference(tiamatEntity.getNetexId());
+
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+
+        int index = 0;
+
+        for (Tag tag : tags) {
+            addTagKeysToNetexKeyValue(netexEntity, TAG_PREFIX + "-" + index, tag);
+            index++;
+        }
+        ;
+    }
+
+    public void addTagKeysToNetexKeyValue(DataManagedObjectStructure netexEntity, String prefix, Tag tag) {
+
+        setKey(netexEntity, prefix + "-idReference", tag.getIdReference());
+        setKey(netexEntity, prefix + "-name", tag.getName());
+        setKey(netexEntity, prefix + "-createdBy", tag.getCreatedBy());
+        setKey(netexEntity, prefix + "-comment", tag.getComment());
+        if (tag.getCreated() != null) {
+            setKey(netexEntity, prefix + "-created", String.valueOf(tag.getCreated().toEpochMilli()));
+        }
+        setKey(netexEntity, prefix + "-removedBy", tag.getRemovedBy());
+        if (tag.getRemoved() != null) {
+            setKey(netexEntity, prefix + "-removed", String.valueOf(tag.getRemoved().toEpochMilli()));
+        }
     }
 
     private void setKey(DataManagedObjectStructure netexEntity, String key, String value) {
-        if(value == null) return;
+        if (value == null) return;
 
-        if(netexEntity.getKeyList() == null) {
-            netexEntity.withKeyList(new KeyListStructure());
-
-        }
         netexEntity.getKeyList()
                 .withKeyValue(new KeyValueStructure()
                         .withKey(key)
                         .withValue(value));
 
     }
+
 }
 
