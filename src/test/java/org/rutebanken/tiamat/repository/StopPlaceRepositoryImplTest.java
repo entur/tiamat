@@ -889,6 +889,40 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void findStopsWithEffectiveChangesInPeriodWithParent() {
+
+        String importedIdPosix = "321";
+        String importedId = "XXX:StopPlace:" + importedIdPosix;
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.getOrCreateValues(ORIGINAL_ID_KEY).add(importedId);
+        quayRepository.save(quay);
+
+        childStop.getQuays().add(quay);
+
+        StopPlace parentStop = new StopPlace();
+        parentStop.setParentStopPlace(true);
+        parentStop.setVersion(2L);
+
+        // Valid between only set on parent
+        parentStop.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+        parentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(parentStop);
+
+        childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
+        ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(20), now.plusSeconds(20), new PageRequest(0, 10));
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch);
+        assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(childStop.getNetexId());
+    }
+
+    @Test
     public void findStopPlaceForSpecificPointInTime() throws Exception {
         String stopPlaceName = "Nesbru";
 
@@ -902,8 +936,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         newestStopPlace.setValidBetween(openendedValidBetween);
         stopPlaceRepository.save(newestStopPlace);
 
-        Pageable pageable = new PageRequest(0, 10);
-
         StopPlaceSearch search = newStopPlaceSearchBuilder()
                                          .setQuery(stopPlaceName)
                                          .setPointInTime(Instant.now().minusSeconds(1000))
@@ -914,9 +946,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .extracting(IdentifiedEntity::getNetexId)
                 .contains(expiredStopPlace.getNetexId())
                 .doesNotContain(newestStopPlace.getNetexId());
-
-
-        pageable = new PageRequest(0, 10);
 
         search = newStopPlaceSearchBuilder()
                          .setQuery(stopPlaceName)
