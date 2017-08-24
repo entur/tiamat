@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+import static org.rutebanken.tiamat.netex.mapping.mapper.TagKeyValuesMapper.TAG_PREFIX;
 
 @Component
 public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedObjectStructure, org.rutebanken.tiamat.model.DataManagedObjectStructure> {
@@ -87,12 +88,15 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             netexEntity.getKeyList().getKeyValue().forEach(keyValueStructure -> {
                 if (tiamatEntitySetFunctions.containsKey(keyValueStructure.getKey())) {
                     tiamatEntitySetFunctions.get(keyValueStructure.getKey()).accept(keyValueStructure.getValue(), tiamatEntity);
+                    tiamatEntity.getKeyValues().remove(keyValueStructure.getValue());
                 }
             });
             Set<Tag> tags = tagKeyValuesMapper.mapPropertiesToTag(netexEntity.getKeyList());
             if(!tags.isEmpty()) {
                 tagRepository.save(tags);
             }
+            tiamatEntity.getKeyValues().keySet().removeIf(key -> key.startsWith(TAG_PREFIX));
+            logger.debug("Remaining keyvals: {}", tiamatEntity.getKeyValues());
         }
     }
 

@@ -53,7 +53,7 @@ public class TagKeyValuesMapper {
         int index = 0;
 
         for (Tag tag : tags) {
-            addTagKeysToNetexKeyValue(netexEntity, TAG_PREFIX + "-" + index, tag);
+            addTagKeysToNetexKeyValue(netexEntity, TAG_PREFIX + KEY_SEPARATOR + index, tag);
             index++;
         }
     }
@@ -79,7 +79,8 @@ public class TagKeyValuesMapper {
     private void setKey(DataManagedObjectStructure netexEntity, String prefix, String name, String value) {
         if (value == null) return;
 
-        String key = prefix + "-" + name;
+        String key = prefix + KEY_SEPARATOR + name;
+        logger.debug("Adding key: {}", key);
         netexEntity.getKeyList()
                 .withKeyValue(new KeyValueStructure()
                         .withKey(key)
@@ -131,9 +132,6 @@ public class TagKeyValuesMapper {
                 }
             }
         }
-
         return Sets.newHashSet(tagsByNumber.values());
-
-
     }
 }
