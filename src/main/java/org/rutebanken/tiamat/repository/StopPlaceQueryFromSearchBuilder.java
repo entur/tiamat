@@ -155,7 +155,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
             String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
 
-            wheres.add("(" + formatRepeatedValue(pointInTimeQuery, "s", 5)+ " or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
+            wheres.add("((p.id IS NULL AND " + formatRepeatedValue(pointInTimeQuery, "s", 5)+ ") or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
