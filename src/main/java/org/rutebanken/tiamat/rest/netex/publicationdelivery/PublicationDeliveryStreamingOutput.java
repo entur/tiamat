@@ -62,7 +62,8 @@ public class PublicationDeliveryStreamingOutput {
                 logger.debug("Marshalling publication delivery to outputstream");
                 marshaller.marshal(jaxPublicationDelivery, outputStream);
             } catch (JAXBException e) {
-                throw new RuntimeException("Could not stream site frame", e);
+                logger.warn("Could not stream site frame. "+e.getMessage(), e);
+                throw new RuntimeException("Could not stream site frame" , e);
             }
         };
 
