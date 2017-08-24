@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
-@Repository
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
