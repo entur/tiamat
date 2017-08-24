@@ -89,7 +89,7 @@ public class TagKeyValuesMapper {
 
     public Set<Tag> mapPropertiesToTag(KeyListStructure keyListStructure) {
 
-        Map<String, Tag> tagsByNumber = new HashMap();
+        Map<String, Tag> tagsByNumber = new HashMap<>();
 
         // This could have been done with reflection for reusability.
 
