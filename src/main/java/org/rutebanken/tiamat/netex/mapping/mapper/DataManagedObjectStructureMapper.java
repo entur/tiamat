@@ -90,9 +90,15 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                 }
             });
             Set<Tag> tags = tagKeyValuesMapper.mapPropertiesToTag(netexEntity.getKeyList());
-            if(!tags.isEmpty()) {
-                tagRepository.save(tags);
-            }
+
+            tags.forEach(tag -> {
+                Tag existing = tagRepository.findByNameAndIdReference(tag.getName(), tag.getIdReference());
+                if(existing == null) {
+                    // Should have been done in an importer class, not in mapper.
+                    tagRepository.save(tag);
+                }
+            });
+
             tiamatEntity.getKeyValues().keySet().removeIf(key -> key.startsWith(TAG_PREFIX));
             logger.debug("Remaining keyvals: {}", tiamatEntity.getKeyValues());
         }

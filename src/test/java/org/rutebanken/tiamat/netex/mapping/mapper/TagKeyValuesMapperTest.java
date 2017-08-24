@@ -5,8 +5,6 @@ import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.importer.KeyValueListAppender;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.repository.TagRepository;
 
