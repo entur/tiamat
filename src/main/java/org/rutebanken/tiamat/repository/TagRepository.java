@@ -14,7 +14,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Set<Tag> findByIdReference(String ref);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
-    Set<Tag> findByName(String name);
+    Set<Tag> findByNameContaining(String name);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
     Tag findByNameAndIdReference(String name, String idReference);

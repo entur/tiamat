@@ -38,7 +38,7 @@ public class TagFetcher implements DataFetcher<Set<Tag>> {
         } else if (dataFetchingEnvironment.getArgument(TAG_NAME) != null) {
 
             String tagName = dataFetchingEnvironment.getArgument(TAG_NAME);
-            return tagRepository.findByName(tagName)
+            return tagRepository.findByNameContaining(tagName)
                     .stream()
                     .filter(tag -> tag.getRemoved() == null)
                     .filter(distinctByKey(Tag::getName))
