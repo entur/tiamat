@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -29,8 +30,13 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
 
     public static final String CHANGED_BY = "CHANGED_BY";
     public static final String VERSION_COMMENT = "VERSION_COMMENT";
-    public static final String TAG_PREFIX = "TAG";
 
+    @Autowired
+    private TagKeyValuesMapper tagKeyValuesMapper;
+
+    /**
+     * A mapper should ideally not communicate with databases. Compromised solution.
+     */
     @Autowired
     private TagRepository tagRepository;
 
@@ -83,6 +89,10 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                     tiamatEntitySetFunctions.get(keyValueStructure.getKey()).accept(keyValueStructure.getValue(), tiamatEntity);
                 }
             });
+            Set<Tag> tags = tagKeyValuesMapper.mapPropertiesToTag(netexEntity.getKeyList());
+            if(!tags.isEmpty()) {
+                tagRepository.save(tags);
+            }
         }
     }
 
@@ -95,43 +105,11 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             netexEntity.withKeyList(new KeyListStructure());
         }
         tiamatEntityGetFunctions.forEach((property, function) -> setKey(netexEntity, property, function.apply(tiamatEntity)));
-        mapTagsToProperties(tiamatEntity, netexEntity);
+        tagKeyValuesMapper.mapTagsToProperties(tiamatEntity.getNetexId(), netexEntity);
 
         if (netexEntity.getKeyList().getKeyValue() == null || netexEntity.getKeyList().getKeyValue().isEmpty()) {
             // Do not allow empty key list
             netexEntity.withKeyList(null);
-        }
-    }
-
-
-    private void mapTagsToProperties(org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, DataManagedObjectStructure netexEntity) {
-        Set<Tag> tags = tagRepository.findByIdReference(tiamatEntity.getNetexId());
-
-        if (tags == null || tags.isEmpty()) {
-            return;
-        }
-
-        int index = 0;
-
-        for (Tag tag : tags) {
-            addTagKeysToNetexKeyValue(netexEntity, TAG_PREFIX + "-" + index, tag);
-            index++;
-        }
-        ;
-    }
-
-    public void addTagKeysToNetexKeyValue(DataManagedObjectStructure netexEntity, String prefix, Tag tag) {
-
-        setKey(netexEntity, prefix + "-idReference", tag.getIdReference());
-        setKey(netexEntity, prefix + "-name", tag.getName());
-        setKey(netexEntity, prefix + "-createdBy", tag.getCreatedBy());
-        setKey(netexEntity, prefix + "-comment", tag.getComment());
-        if (tag.getCreated() != null) {
-            setKey(netexEntity, prefix + "-created", String.valueOf(tag.getCreated().toEpochMilli()));
-        }
-        setKey(netexEntity, prefix + "-removedBy", tag.getRemovedBy());
-        if (tag.getRemoved() != null) {
-            setKey(netexEntity, prefix + "-removed", String.valueOf(tag.getRemoved().toEpochMilli()));
         }
     }
 
@@ -142,8 +120,6 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                 .withKeyValue(new KeyValueStructure()
                         .withKey(key)
                         .withValue(value));
-
     }
-
 }
 
