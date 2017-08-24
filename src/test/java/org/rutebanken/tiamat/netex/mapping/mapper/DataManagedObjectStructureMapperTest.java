@@ -6,17 +6,22 @@ import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.rutebanken.tiamat.repository.TagRepository;
 
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.CHANGED_BY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.VERSION_COMMENT;
 
 
 public class DataManagedObjectStructureMapperTest {
 
-    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(new NetexIdMapper());
+    private TagRepository tagRepository = mock(TagRepository.class);
+    private TagKeyValuesMapper tagKeyValuesMapper = new TagKeyValuesMapper(tagRepository);
+
+    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(), tagKeyValuesMapper);
 
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
 

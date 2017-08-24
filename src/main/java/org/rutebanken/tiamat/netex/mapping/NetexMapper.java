@@ -22,6 +22,7 @@ import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
+import org.rutebanken.tiamat.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,10 +177,10 @@ public class NetexMapper {
         facade = mapperFactory.getMapperFacade();
     }
 
-    public NetexMapper() {
+    public NetexMapper(TagRepository tagRepository) {
         this(getDefaultConverters(),
                 new KeyListToKeyValuesMapMapper(),
-                new DataManagedObjectStructureMapper(new NetexIdMapper()),
+                new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(), new TagKeyValuesMapper(tagRepository)),
                 new NetexIdMapper(),
                 new PublicationDeliveryHelper());
         logger.info("Setting up netexMapper without DI");

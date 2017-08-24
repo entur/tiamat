@@ -43,7 +43,8 @@ public class StreamingPublicationDeliveryTest {
     private TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
     private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class), pathLinkRepository);
 
-    private NetexMapper netexMapper = new NetexMapper();
+    private TagRepository tagRepository = mock(TagRepository.class);
+    private NetexMapper netexMapper = new NetexMapper(tagRepository);
 
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private TariffZonesFromStopsExporter tariffZonesFromStopsExporter = mock(TariffZonesFromStopsExporter.class);

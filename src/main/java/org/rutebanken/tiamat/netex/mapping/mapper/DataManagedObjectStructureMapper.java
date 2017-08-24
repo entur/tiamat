@@ -13,7 +13,6 @@ import org.rutebanken.tiamat.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -32,14 +31,14 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
     public static final String CHANGED_BY = "CHANGED_BY";
     public static final String VERSION_COMMENT = "VERSION_COMMENT";
 
-    @Autowired
-    private TagKeyValuesMapper tagKeyValuesMapper;
+    private final NetexIdMapper netexIdMapper;
+
+    private final TagKeyValuesMapper tagKeyValuesMapper;
 
     /**
      * A mapper should ideally not communicate with databases. Compromised solution.
      */
-    @Autowired
-    private TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
     /**
      * Setters for internal tiamat model when mapping from netex.
@@ -57,12 +56,11 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             .put(VERSION_COMMENT, org.rutebanken.tiamat.model.DataManagedObjectStructure::getVersionComment)
             .build();
 
-
     @Autowired
-    private final NetexIdMapper netexIdMapper;
-
-    public DataManagedObjectStructureMapper(NetexIdMapper netexIdMapper) {
+    public DataManagedObjectStructureMapper(TagRepository tagRepository, NetexIdMapper netexIdMapper, TagKeyValuesMapper tagKeyValuesMapper) {
+        this.tagRepository = tagRepository;
         this.netexIdMapper = netexIdMapper;
+        this.tagKeyValuesMapper = tagKeyValuesMapper;
     }
 
     @Override

@@ -58,6 +58,7 @@ public class TagKeyValuesMapperTest {
                 "TAG-0-idReference");
 
         assertThat(flattened.get("TAG-0-idReference")).isEqualTo(tag.getIdReference());
+        assertThat(flattened.get("TAG-0-name")).isEqualTo(tag.getName());
     }
 
 
