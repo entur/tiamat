@@ -333,8 +333,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN value_items vi " +
                              "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value" +
                              "  LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) " +
-                             "WHERE ((s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime)) " +
-                             "  OR ( p.netex_id IS NOT NULL AND ((p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime)))";
+                             "WHERE (p.netex_id IS NOT NULL AND (p.from_date <= :pointInTime AND (p.to_date IS NULL OR p.to_date > :pointInTime)))" +
+                             "  OR (p.netex_id IS NULL AND (s.from_date <= :pointInTime AND (s.to_date IS NULL OR s.to_date > :pointInTime)))";
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -346,7 +346,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             @SuppressWarnings("unchecked")
             List<String> results = query.getResultList();
             if (results.isEmpty()) {
-                return null;
+                return new ArrayList<>();
             } else {
                 return results;
             }

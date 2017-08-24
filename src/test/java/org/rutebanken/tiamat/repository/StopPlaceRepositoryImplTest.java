@@ -1040,6 +1040,38 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(idMapping).contains(childStop.getNetexId());
     }
 
+
+    @Test
+    public void findKeyValueMappingsForStopPlaceQuayReturnsNoStopPlacesWithParentValidAtPointIntimeForImportedId() {
+
+        String importedIdPosix = "322";
+        String importedId = "XXX:StopPlace:" + importedIdPosix;
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.getOrCreateValues(ORIGINAL_ID_KEY).add(importedId);
+        quayRepository.save(quay);
+
+        childStop.getQuays().add(quay);
+
+        StopPlace parentStop = new StopPlace();
+        parentStop.setParentStopPlace(true);
+        parentStop.setVersion(2L);
+        parentStop.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+        parentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(parentStop);
+
+        childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
+        List<String> idMapping = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdPosix, now.minusSeconds(20));
+        assertThat(idMapping).doesNotContain(childStop.getNetexId());
+    }
+
     @Test
     public void findKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTimeForImportedId() {
         testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(ORIGINAL_ID_KEY);
