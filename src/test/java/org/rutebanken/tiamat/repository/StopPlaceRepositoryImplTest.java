@@ -956,7 +956,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void findKeyValueMappingsForStopPlaceReturnsStopPlacesWithParentValidAtPointIntimeForImportedId() {
+    public void findKeyValueMappingsForStopPlaceReturnsStopPlacesWithParentValidAtPointIntimeForMergedId() {
 
         String mergedId = "XXX:StopPlace:321";
         Instant now = Instant.now();
@@ -964,7 +964,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace childStop = new StopPlace();
         childStop.getKeyValues().put(MERGED_ID_KEY, new Value(mergedId));
         childStop.setVersion(1L);
-        stopPlaceRepository.save(childStop);
 
         StopPlace parentStop = new StopPlace();
         parentStop.setParentStopPlace(true);
@@ -974,8 +973,42 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         stopPlaceRepository.save(parentStop);
 
+        childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
         List<IdMappingDto> idMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, 0, 2000);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(childStop.getNetexId());
+    }
+
+    @Test
+    public void findKeyValueMappingsForStopPlaceQuayReturnsStopPlacesWithParentValidAtPointIntimeForImportedId() {
+
+        String importedIdPosix = "321";
+        String importedId = "XXX:StopPlace:" + importedIdPosix;
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.getOrCreateValues(ORIGINAL_ID_KEY).add(importedId);
+        quayRepository.save(quay);
+
+        childStop.getQuays().add(quay);
+
+        StopPlace parentStop = new StopPlace();
+        parentStop.setParentStopPlace(true);
+        parentStop.setVersion(2L);
+        parentStop.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+        parentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(parentStop);
+
+        childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
+        List<String> idMapping = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdPosix, now);
+        assertThat(idMapping).contains(childStop.getNetexId());
     }
 
     @Test
