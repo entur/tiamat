@@ -956,6 +956,29 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void findKeyValueMappingsForStopPlaceReturnsStopPlacesWithParentValidAtPointIntimeForImportedId() {
+
+        String mergedId = "XXX:StopPlace:321";
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.getKeyValues().put(MERGED_ID_KEY, new Value(mergedId));
+        childStop.setVersion(1L);
+        stopPlaceRepository.save(childStop);
+
+        StopPlace parentStop = new StopPlace();
+        parentStop.setParentStopPlace(true);
+        parentStop.setVersion(2L);
+        parentStop.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+        parentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(parentStop);
+
+        List<IdMappingDto> idMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, 0, 2000);
+        assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(childStop.getNetexId());
+    }
+
+    @Test
     public void findKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTimeForImportedId() {
         testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(ORIGINAL_ID_KEY);
     }
