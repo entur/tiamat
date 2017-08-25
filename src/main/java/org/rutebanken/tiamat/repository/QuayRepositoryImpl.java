@@ -94,7 +94,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 				"INNER JOIN stop_place s " +
 				"ON s.id= spq.stop_place_id and (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime) " +
 				"INNER JOIN value_items vi " +
-				"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) ";
+				"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) order by q.id,qkv.key_values_id  ";
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
 		nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
