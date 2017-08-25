@@ -40,6 +40,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     private static final int SCROLL_FETCH_SIZE = 100;
 
+    /**
+     * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.
+     * The parameter "pointInTime" must be set.
+     */
+    protected static final String SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME =
+            " (p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
+                    "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime)) ";
+
+    /**
+     * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
+     */
+    protected static final String SQL_LEFT_JOIN_PARENT_STOP =
+            "LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) ";
+
     @Autowired
     private EntityManager entityManager;
 
@@ -69,11 +83,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String queryString = "SELECT s FROM StopPlace s " +
+                                     SQL_LEFT_JOIN_PARENT_STOP +
                                      "WHERE within(s.centroid, :filter) = true " +
-                                     "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
                                      "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId) ";
         if (pointInTime != null) {
-            queryString += "AND ((s.validBetween.fromDate IS NULL OR s.validBetween.fromDate <= :pointInTime) AND (s.validBetween.toDate IS NULL OR s.validBetween.toDate > :pointInTime))";
+            queryString += "AND " + SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
         }
 
         final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
@@ -300,9 +314,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN value_items v " +
                              "      ON spkv.key_values_key in (:mappingIdKeys) AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
                              "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
-                             "  LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) " +
-                             "WHERE (p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
-                             "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime))";
+                             SQL_LEFT_JOIN_PARENT_STOP +
+                             "WHERE " +
+                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
@@ -320,6 +334,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
+
+
+
     @Override
     public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId, Instant pointInTime) {
         String sql = "SELECT DISTINCT s.netex_id " +
@@ -331,10 +348,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN quay_key_values qkv " +
                              "    ON q.id = qkv.quay_id AND qkv.key_values_key in (:originalIdKey) " +
                              "  INNER JOIN value_items vi " +
-                             "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value" +
-                             "  LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) " +
-                             "WHERE (p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
-                             "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime))";
+                             "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value " +
+                             SQL_LEFT_JOIN_PARENT_STOP +
+                             " WHERE " +
+                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
         Query query = entityManager.createNativeQuery(sql);
 

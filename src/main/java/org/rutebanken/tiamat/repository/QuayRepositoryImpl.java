@@ -22,6 +22,8 @@ import java.util.*;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom
@@ -31,6 +33,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 
 	@Autowired
 	private GeometryFactory geometryFactory;
+
 
 	@Override
 	public Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
@@ -87,14 +90,20 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	public List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
 		String sql = "SELECT vi.items, q.netex_id, s.stop_place_type " +
 				"FROM quay_key_values qkv " +
-				"INNER JOIN stop_place_quays spq " +
-				"ON spq.quays_id = qkv.quay_id " +
-				"INNER JOIN quay q " +
-				"ON spq.quays_id = q.id " +
-				"INNER JOIN stop_place s " +
-				"ON s.id= spq.stop_place_id and (s.from_date is null or s.from_date <= :pointInTime) and (s.to_date is null or s.to_date > :pointInTime) " +
-				"INNER JOIN value_items vi " +
-				"ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) ";
+				"	INNER JOIN stop_place_quays spq " +
+				"		ON spq.quays_id = qkv.quay_id " +
+				"	INNER JOIN quay q " +
+				"		ON spq.quays_id = q.id " +
+				"	INNER JOIN stop_place s " +
+				"		ON s.id= spq.stop_place_id " +
+				"	INNER JOIN value_items vi " +
+				"		ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) " +
+				SQL_LEFT_JOIN_PARENT_STOP +
+				"WHERE " +
+				SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+
+
+
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
 		nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
