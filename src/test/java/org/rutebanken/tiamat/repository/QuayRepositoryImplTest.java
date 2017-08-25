@@ -45,7 +45,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
     public void findKeyValueMappingsForQuayReturnsQuayWithParentValidAtPointIntimeForImportedId() {
 
         String importedIdPosix = "187";
-        String importedId = "XXX:StopPlace:" + importedIdPosix;
+        String importedId = "XXX:Quay:" + importedIdPosix;
         Instant now = Instant.now();
 
         StopPlace childStop = new StopPlace();
@@ -69,6 +69,38 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(quay.getNetexId());
+    }
+
+    @Test
+    public void findKeyValueMappingsForQuayReturnsNoQuayWithParentValidAtPointIntimeForImportedId() {
+
+        String importedIdPosix = "104";
+        String importedId = "YYY:Quay:" + importedIdPosix;
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.getOrCreateValues(ORIGINAL_ID_KEY).add(importedId);
+
+        childStop.getQuays().add(quay);
+
+        StopPlace notCurrentlyValidParentStop = new StopPlace();
+        notCurrentlyValidParentStop.setParentStopPlace(true);
+        notCurrentlyValidParentStop.setVersion(2L);
+        notCurrentlyValidParentStop.setValidBetween(new ValidBetween(now.plusSeconds(11)));
+        notCurrentlyValidParentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(notCurrentlyValidParentStop);
+
+        childStop.setParentSiteRef(new SiteRefStructure(notCurrentlyValidParentStop.getNetexId(), String.valueOf(notCurrentlyValidParentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 10);
+        assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId)
+                .as("Quay " + quay.getNetexId() + " should not be returned in mapping as it belongs to a stop place with parent stop place wich is currently not valid")
+                .doesNotContain(quay.getNetexId());
     }
 
     @Test
