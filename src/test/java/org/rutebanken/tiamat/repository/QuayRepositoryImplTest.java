@@ -8,10 +8,12 @@ import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
@@ -37,6 +39,36 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         quayRepository.findFirstByKeyValues("test", Sets.newHashSet("value"));
 
+    }
+
+    @Test
+    public void findKeyValueMappingsForQuayReturnsQuayWithParentValidAtPointIntimeForImportedId() {
+
+        String importedIdPosix = "187";
+        String importedId = "XXX:StopPlace:" + importedIdPosix;
+        Instant now = Instant.now();
+
+        StopPlace childStop = new StopPlace();
+        childStop.setVersion(1L);
+
+        Quay quay = new Quay();
+        quay.getOrCreateValues(ORIGINAL_ID_KEY).add(importedId);
+
+        childStop.getQuays().add(quay);
+
+        StopPlace parentStop = new StopPlace();
+        parentStop.setParentStopPlace(true);
+        parentStop.setVersion(2L);
+        parentStop.setValidBetween(new ValidBetween(now.minusSeconds(11)));
+        parentStop.getChildren().add(childStop);
+
+        stopPlaceRepository.save(parentStop);
+
+        childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
+        stopPlaceRepository.save(childStop);
+
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 10);
+        assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(quay.getNetexId());
     }
 
     @Test
