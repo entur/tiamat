@@ -18,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -118,14 +117,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String sql = "SELECT sub.netex_id FROM " +
-                             "(SELECT s.netex_id AS netex_id, similarity(s.name_value, :name) AS sim FROM stop_place s " +
-                             "WHERE ST_Within(s.centroid, :filter) = true " +
-                             "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id) " +
-                             "AND s.stop_place_type = :stopPlaceType) sub " +
-                             "WHERE sub.sim > 0.6 " +
-                             "ORDER BY sub.sim DESC LIMIT 1";
+                "(SELECT s.netex_id AS netex_id, similarity(s.name_value, :name) AS sim FROM stop_place s " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE ST_Within(s.centroid, :filter) = true " +
+                "AND " + SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "AND s.stop_place_type = :stopPlaceType) sub " +
+                "WHERE sub.sim > 0.6 " +
+                "ORDER BY sub.sim DESC LIMIT 1";
 
         Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("pointInTime", Date.from(Instant.now()));
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration.toString());
         query.setParameter("name", name);
