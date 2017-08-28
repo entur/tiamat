@@ -233,7 +233,7 @@ StopPlaceRegisterGraphQLSchema {
                         .name(VALID_TRANSPORT_MODES)
                         .type(new GraphQLList(transportModeSubmodeObjectType))
                         .description("List all valid Transportmode/Submode-combinations.")
-                        .staticValue(transportModeScalar.getTransportModes().keySet()))
+                        .staticValue(transportModeScalar.getConfiguredTransportModes().keySet()))
                 .field(newFieldDefinition()
                         .name(CHECK_AUTHORIZED)
                         .type(createAuthorizationCheckOutputType())
