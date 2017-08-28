@@ -19,6 +19,7 @@ import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_
 
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom {
+    public static final String JBV_CODE = "jbvCode";
     @Autowired
     private EntityManager entityManager;
 
@@ -95,23 +96,31 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
         return null;
     }
 
+    /**
+     * Return jbv code mapping for rail stations. The stop place contains jbc code mapping. The quay contains the public code.
+     * @return
+     */
     @Override
     public List<JbvCodeMappingDto> findJbvCodeMappingsForQuay() {
         String sql = "SELECT DISTINCT vi.items, q.public_code, q.netex_id " +
-                "FROM stop_place_key_values qkv " +
-                "INNER JOIN stop_place_quays spq " +
-                "ON spq.stop_place_id = qkv.stop_place_id " +
-                "INNER JOIN stop_place sp " +
-                "ON sp.id = qkv.stop_place_id and sp.stop_place_type = :stopPlaceType " +
-                "INNER JOIN quay q " +
-                "ON spq.quays_id = q.id  and q.public_code NOT LIKE '' " +
-                "INNER JOIN value_items vi " +
-                "ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key = :mappingIdKeys " +
-                "order by items, public_code ";
+                "FROM stop_place_key_values skv " +
+                "   INNER JOIN stop_place_quays spq " +
+                "       ON spq.stop_place_id = skv.stop_place_id " +
+                "   INNER JOIN stop_place s " +
+                "       ON s.id = skv.stop_place_id AND s.stop_place_type = :stopPlaceType " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "   INNER JOIN quay q " +
+                "       ON spq.quays_id = q.id  AND q.public_code NOT LIKE '' " +
+                "   INNER JOIN value_items vi " +
+                "       ON skv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND skv.key_values_key = :mappingIdKeys " +
+                "WHERE " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "ORDER BY items, public_code ";
         Query nativeQuery = entityManager.createNativeQuery(sql);
 
         nativeQuery.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
-        nativeQuery.setParameter("mappingIdKeys", Arrays.asList("jbvCode"));
+        nativeQuery.setParameter("mappingIdKeys", Arrays.asList(JBV_CODE));
+        nativeQuery.setParameter("pointInTime", Date.from(Instant.now()));
+
         @SuppressWarnings("unchecked")
         List<Object[]> result = nativeQuery.getResultList();
 

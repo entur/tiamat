@@ -17,6 +17,8 @@ import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.List;
 
+import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
+
 @Component
 @Produces("application/json")
 @Path("/quay")
@@ -68,7 +70,7 @@ public class DtoQuayResource {
     @Path("/jbv_code_mapping")
     public Response getJbvCodeMapping() {
 
-        logger.info("Fetching Quay mapping table for all StopPlaces containg keyValue jbvCode...");
+        logger.info("Fetching Quay mapping table for all Quays containg keyValue {}...", JBV_CODE);
 
         return Response.ok().entity((StreamingOutput) output -> {
 

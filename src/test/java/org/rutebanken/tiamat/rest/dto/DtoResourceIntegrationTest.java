@@ -4,19 +4,19 @@ import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 
-public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
+public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
 
     @Autowired
@@ -67,6 +67,40 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void testQuayJbvCodeMapping() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        String jbvCode1 = "123";
+        String jbvCode2 = "1234";
+
+        stopPlace.getOrCreateValues(JBV_CODE).add(jbvCode1);
+        stopPlace.getOrCreateValues(JBV_CODE).add(jbvCode2);
+
+        Quay quay = new Quay();
+        quay.setPublicCode("10-43");
+        stopPlace.getQuays().add(quay);
+
+        stopPlace = saverService.saveNewVersion(stopPlace);
+
+        StopPlace newVersion = saverService.createCopy(stopPlace, StopPlace.class);
+        String jbvCode3 = "12345";
+        newVersion.getOrCreateValues(JBV_CODE).add(jbvCode3);
+
+        saverService.saveNewVersion(stopPlace, newVersion);
+
+        String url =  "/jersey/quay/jbv_code_mapping";
+        String response = getIdMapping(url);
+
+        assertThat(response)
+                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
+                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
+                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n");
+
+    }
+
+    @Test
     public void testStopPlaceIdMapping() {
         String url =  "/jersey/stop_place/id_mapping";
 
@@ -103,6 +137,7 @@ public class DtoQuayResourceIntegrationTest extends TiamatIntegrationTest {
         assertThat(responseWithStopPlaceType).contains(originalId + ",," + stopPlace.getNetexId() + "\n");
         assertThat(responseWithStopPlaceType).contains(originalId2 + ",," + stopPlace.getNetexId() + "\n");
     }
+
 
     private String getIdMapping(String url) {
         return given()
