@@ -44,11 +44,11 @@ public class DtoStopPlaceResource {
 
             int recordPosition = 0;
             boolean lastEmpty = false;
-
+            Instant now = Instant.now();
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                 while (!lastEmpty) {
 
-                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(Instant.now(), recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(now, recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : stopPlaceMappings) {
                         writer.println(mapping.toCsvString(includeStopType));
                         recordPosition++;

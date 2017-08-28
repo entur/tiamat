@@ -43,10 +43,10 @@ public class DtoQuayResource {
 
             int recordPosition = 0;
             boolean lastEmpty = false;
-
+            Instant now = Instant.now();
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                 while (!lastEmpty) {
-                    List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(Instant.now(), recordPosition, recordsPerRoundTrip);
+                    List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(now, recordPosition, recordsPerRoundTrip);
                     for (IdMappingDto mapping : quayMappings) {
                         writer.println(mapping.toCsvString(includeStopType));
                         recordPosition++;

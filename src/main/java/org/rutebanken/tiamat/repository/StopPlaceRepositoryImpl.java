@@ -316,7 +316,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
                              SQL_LEFT_JOIN_PARENT_STOP +
                              "WHERE " +
-                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                             "ORDER BY s.id,spkv.key_values_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);

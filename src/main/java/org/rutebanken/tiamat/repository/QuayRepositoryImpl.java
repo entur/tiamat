@@ -34,7 +34,6 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 	@Autowired
 	private GeometryFactory geometryFactory;
 
-
 	@Override
 	public Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
 		Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
@@ -100,8 +99,8 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
 				"		ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) " +
 				SQL_LEFT_JOIN_PARENT_STOP +
 				"WHERE " +
-				SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
-
+				SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "ORDER BY q.id,qkv.key_values_id";
 
 
 		Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
