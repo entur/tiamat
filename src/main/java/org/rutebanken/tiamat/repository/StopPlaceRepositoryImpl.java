@@ -43,10 +43,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.
      * The parameter "pointInTime" must be set.
+     * The parent stop must be joined in as 'p' to allow checking the validity.
      */
     protected static final String SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME =
-            " (p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
-                    "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime)) ";
+            " ((p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
+                    "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime))) ";
 
     /**
      * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
@@ -82,25 +83,24 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        String queryString = "SELECT s FROM StopPlace s " +
+        String queryString = "SELECT s.* FROM stop_place s " +
                                      SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE within(s.centroid, :filter) = true " +
-                                     "AND (:ignoreStopPlaceId IS NULL OR s.netexId != :ignoreStopPlaceId) ";
+                                     "WHERE ST_within(s.centroid, :filter) = true " +
+                                        "AND (:ignoreStopPlaceId IS NULL OR s.netex_id != :ignoreStopPlaceId) ";
         if (pointInTime != null) {
             queryString += "AND " + SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
         }
 
-        final TypedQuery<StopPlace> query = entityManager.createQuery(queryString, StopPlace.class);
+        final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
         query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
 
         if (pointInTime != null) {
-            query.setParameter("pointInTime", pointInTime);
+            query.setParameter("pointInTime", Date.from(pointInTime));
         }
 
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
-
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }

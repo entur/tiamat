@@ -169,9 +169,11 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace version1 = createStopPlace(59.875679, 10.500430);
         version1.setVersion(1L);
         version1.setNetexId("NSR:StopPlace:977777");
+        version1.setValidBetween(new ValidBetween(Instant.EPOCH, Instant.now().minusMillis(1000000)));
         StopPlace version2 = createStopPlace(59.875679, 10.500430);
         version2.setVersion(2L);
         version2.setNetexId(version1.getNetexId());
+        version2.setValidBetween(new ValidBetween(Instant.now().minusMillis(1000001), Instant.now().plusMillis(1000000)));
         stopPlaceRepository.save(version1);
         stopPlaceRepository.save(version2);
 
