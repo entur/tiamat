@@ -31,31 +31,6 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom
     @Autowired
     private EntityManager entityManager;
 
-	@Autowired
-	private GeometryFactory geometryFactory;
-
-	@Override
-	public Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable) {
-		Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
-
-		Geometry geometryFilter = geometryFactory.toGeometry(envelope);
-
-		TypedQuery<Quay> query = entityManager.createQuery(
-				"SELECT s FROM Quay s " +
-					"LEFT OUTER JOIN s.centroid sp " +
-					"WHERE within(sp.location, :filter) = true" +
-						" AND s.version = (SELECT MAX(sv.version) FROM Quay sv WHERE sv.netexId = s.netexId)",
-				Quay.class);
-		query.setParameter("filter", geometryFilter);
-
-		query.setFirstResult(pageable.getOffset());
-		query.setMaxResults(pageable.getPageSize());
-
-		List<Quay> quays = query.getResultList();
-
-		return new PageImpl<>(quays, pageable, quays.size());
-	}
-
 	@Override
 	public String findFirstByKeyValues(String key, Set<String> values) {
 

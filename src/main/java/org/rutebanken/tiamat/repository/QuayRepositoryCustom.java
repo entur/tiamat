@@ -11,8 +11,6 @@ import java.util.List;
 
 public interface QuayRepositoryCustom extends DataManagedObjectStructureRepository<Quay> {
 
-    Page<Quay> findQuaysWithin(double xMin, double yMin, double xMax, double yMax, Pageable pageable);
-
     List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForQuay();
