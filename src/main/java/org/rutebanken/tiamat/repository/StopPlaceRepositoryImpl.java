@@ -44,7 +44,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      * The parameter "pointInTime" must be set.
      * The parent stop must be joined in as 'p' to allow checking the validity.
      */
-    protected static final String SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME =
+    protected static final String SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME =
             " ((p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
                     "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime))) ";
 
@@ -87,7 +87,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                      "WHERE ST_within(s.centroid, :filter) = true " +
                                         "AND (:ignoreStopPlaceId IS NULL OR s.netex_id != :ignoreStopPlaceId) ";
         if (pointInTime != null) {
-            queryString += "AND " + SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+            queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
         }
 
         final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
@@ -120,7 +120,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                 "(SELECT s.netex_id AS netex_id, similarity(s.name_value, :name) AS sim FROM stop_place s " +
                 SQL_LEFT_JOIN_PARENT_STOP +
                 "WHERE ST_Within(s.centroid, :filter) = true " +
-                "AND " + SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
                 "AND s.stop_place_type = :stopPlaceType) sub " +
                 "WHERE sub.sim > 0.6 " +
                 "ORDER BY sub.sim DESC LIMIT 1";
@@ -137,65 +137,32 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public String findNearbyStopPlace(Envelope envelope, String name) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<String> query = entityManager
-                                           .createQuery("SELECT s.netexId FROM StopPlace s " +
-                                                                "WHERE within(s.centroid, :filter) = true " +
-                                                                "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
-                                                                "AND s.name.value = :name ",
-                                                   String.class);
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id FROM stop_place s " +
+                                                           SQL_LEFT_JOIN_PARENT_STOP +
+                                                           "WHERE ST_Within(s.centroid, :filter) = true " +
+                                                           "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                                                           "AND s.name_value = :name ");
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
+        query.setParameter("pointInTime", Date.from(Instant.now()));
         return getOneOrNull(query);
     }
 
-    private <T> T getOneOrNull(TypedQuery<T> query) {
-        try {
-            List<T> resultList = query.getResultList();
-            return resultList.isEmpty() ? null : resultList.get(0);
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
 
-    private String getOneOrNull(Query query) {
-        try {
-            @SuppressWarnings("unchecked")
-            List<String> results = query.getResultList();
-            if (results.isEmpty()) {
-                return null;
-            } else {
-                return results.get(0);
-            }
-        } catch (NoResultException noResultException) {
-            return null;
-        }
-    }
-
-    private Set<String> getSetResult(Query query) {
-        try {
-            @SuppressWarnings("unchecked")
-            List<String> results = query.getResultList();
-            if (results.isEmpty()) {
-                return Sets.newHashSet();
-            } else {
-                return results.stream().collect(toSet());
-            }
-        } catch (NoResultException noResultException) {
-            return Sets.newHashSet();
-        }
-    }
 
     @Override
     public List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        TypedQuery<String> query = entityManager
-                                           .createQuery("SELECT s.netexId FROM StopPlace s " +
-                                                                "WHERE within(s.centroid, :filter) = true " +
-                                                                "AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) " +
-                                                                "AND s.stopPlaceType = :stopPlaceType", String.class);
+        Query query = entityManager.createNativeQuery("SELECT s.netex_id FROM stop_place s " +
+                                                                SQL_LEFT_JOIN_PARENT_STOP +
+                                                                "WHERE ST_within(s.centroid, :filter) = true " +
+                                                                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                                                                "AND s.stop_place_type = :stopPlaceType");
+
         query.setParameter("filter", geometryFilter);
-        query.setParameter("stopPlaceType", stopTypeEnumeration);
+        query.setParameter("stopPlaceType", stopTypeEnumeration.toString());
+        query.setParameter("pointInTime", Date.from(Instant.now()));
         try {
             List<String> resultList = query.getResultList();
             return resultList;
@@ -239,12 +206,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         StringBuilder sqlQuery = new StringBuilder("SELECT s.netex_id " +
                                                            "FROM stop_place s " +
-                                                           "INNER JOIN stop_place_key_values spkv " +
+                                                            "INNER JOIN stop_place_key_values spkv " +
                                                            "ON spkv.stop_place_id = s.id " +
                                                            "INNER JOIN value_items v " +
                                                            "ON spkv.key_values_id = v.value_id " +
+                                                           SQL_LEFT_JOIN_PARENT_STOP +
                                                            "WHERE spkv.key_values_key = :key " +
-                                                           "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id) ");
+                                                           "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
 
 
         List<String> parameters = new ArrayList<>(values.size());
@@ -268,6 +236,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Iterator<String> iterator = parametervalues.iterator();
         parameters.forEach(parameter -> query.setParameter(parameter, iterator.next()));
         query.setParameter("key", key);
+        query.setParameter("pointInTime", Date.from(Instant.now()));
+
 
         return getSetResult(query);
     }
@@ -280,12 +250,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                                               "ON spkv.key_values_id = v.value_id " +
                                                               "INNER JOIN stop_place s " +
                                                               "ON spkv.stop_place_id = s.id " +
+                                                               SQL_LEFT_JOIN_PARENT_STOP +
                                                               "WHERE  spkv.key_values_key = :key " +
                                                               "AND v.items LIKE ( :value ) " +
-                                                              "AND s.version = (SELECT MAX(sv.version) FROM stop_place sv WHERE sv.netex_id = s.netex_id)");
+                                                              "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
 
         query.setParameter("key", key);
         query.setParameter("value", "%" + value + "%");
+        query.setParameter("pointInTime", Date.from(Instant.now()));
 
         try {
             @SuppressWarnings("unchecked")
@@ -317,7 +289,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
                              SQL_LEFT_JOIN_PARENT_STOP +
                              "WHERE " +
-                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                              SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
                              "ORDER BY s.id,spkv.key_values_id";
 
 
@@ -353,7 +325,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                              "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value " +
                              SQL_LEFT_JOIN_PARENT_STOP +
                              " WHERE " +
-                             SQL_WHERE_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -442,8 +414,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return result;
     }
 
-
-
     @Override
     public Page<StopPlace> findStopPlace(ExportParams exportParams) {
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
@@ -505,5 +475,42 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                                                                         " or p.netex_id is not null and (p.from_date between  :from and :to or p.to_date between  :from and :to ))" +
                                                                                       " group by  spinner.netex_id" +
                                                                                       ") sub on sub.netex_id=sp.netex_id and sub.maxVersion = sp.version";
+
+    private <T> T getOneOrNull(TypedQuery<T> query) {
+        try {
+            List<T> resultList = query.getResultList();
+            return resultList.isEmpty() ? null : resultList.get(0);
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    private String getOneOrNull(Query query) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> results = query.getResultList();
+            if (results.isEmpty()) {
+                return null;
+            } else {
+                return results.get(0);
+            }
+        } catch (NoResultException noResultException) {
+            return null;
+        }
+    }
+
+    private Set<String> getSetResult(Query query) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> results = query.getResultList();
+            if (results.isEmpty()) {
+                return Sets.newHashSet();
+            } else {
+                return results.stream().collect(toSet());
+            }
+        } catch (NoResultException noResultException) {
+            return Sets.newHashSet();
+        }
+    }
 }
 

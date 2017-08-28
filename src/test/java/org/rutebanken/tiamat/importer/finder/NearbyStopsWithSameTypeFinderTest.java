@@ -11,10 +11,12 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.geom.Point2D;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,6 +91,7 @@ public class NearbyStopsWithSameTypeFinderTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(stopType);
         stopPlace.setCentroid(point);
+        stopPlace.setValidBetween(new ValidBetween(Instant.EPOCH));
 
         stopPlaceRepository.save(stopPlace);
         return stopPlace;
