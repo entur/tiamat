@@ -27,9 +27,6 @@ public class StopPlaceQuayDeleter {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private VersionCreator versionCreator;
-
-    @Autowired
     private ReflectionAuthorizationService authorizationService;
 
     @Autowired
