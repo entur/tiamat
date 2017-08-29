@@ -17,50 +17,42 @@ public class ValidityUpdater {
      * Updates the validity of the new version.
      * If validity or validbetween from date not set, a default value will be set.
      *
-     * @param existingVersion
-     * @param newVersion
+     * @param newVersion the version to update valid between on
+     * @param defaultFromTime
      * @return the new version's valid from date
      */
-    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant now) {
-        Instant newVersionValidFrom;
+    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
 
         if (newVersion.getValidBetween() == null) {
-            newVersionValidFrom = now;
-            logger.warn("Validity not set for new version of {}. Setting default from date: {}", newVersion.getNetexId(), newVersionValidFrom);
-            // Open to date is default.
-            newVersion.setValidBetween(new ValidBetween(newVersionValidFrom));
-        } else {
-            if (newVersion.getValidBetween().getFromDate() == null) {
-                logger.warn("From date is not set for the new version of {}. Using now: {}", newVersion.getNetexId(), now);
-                newVersionValidFrom = now;
-                newVersion.getValidBetween().setFromDate(newVersionValidFrom);
-            } else {
-                newVersionValidFrom = newVersion.getValidBetween().getFromDate();
-            }
+            logger.warn("Validity not set for new version of {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+            newVersion.setValidBetween(new ValidBetween(defaultFromTime));
+        } else if (newVersion.getValidBetween().getFromDate() == null) {
+            logger.warn("From date is not set for the new version of {}. Using default value: {}", newVersion.getNetexId(), defaultFromTime);
+            newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
-        return newVersionValidFrom;
+
+        return newVersion.getValidBetween().getFromDate();
     }
 
     /**
-     * Terminate valid between for entity.
+     * Terminate valid between for entity. Typically the old version, or when the entity should be terminated for "good".
      *
      * @param versionToTerminate the old version of entity to terminate
-     * @param newVersionValidFrom the instant when the new version should be valid from
+     * @param terminateAt the instant when this version should be terminated
      * @param <T> Versioned entity type
      * @return the updated entity
      */
-    public <T extends EntityInVersionStructure> T terminateVersion(T versionToTerminate, Instant newVersionValidFrom) {
+    public <T extends EntityInVersionStructure> void terminateVersion(T versionToTerminate, Instant terminateAt) {
         if(versionToTerminate == null) {
             throw new IllegalArgumentException("Cannot terminate version for null object");
         }
 
-        logger.debug("New version valid from {}", newVersionValidFrom);
+        logger.debug("Version {} of {} will be invalid at {}", versionToTerminate.getVersion(), versionToTerminate.getNetexId(), terminateAt);
         if (versionToTerminate.getValidBetween() != null ) {
-            versionToTerminate.getValidBetween().setToDate(newVersionValidFrom);
+            versionToTerminate.getValidBetween().setToDate(terminateAt);
         } else {
-            logger.warn("Entity {} does not have valid between from before. Setting only toDate", versionToTerminate.getNetexId());
-            versionToTerminate.setValidBetween(new ValidBetween(null, newVersionValidFrom));
+            logger.warn("Entity {} does not have valid between. Setting toDate.", versionToTerminate.getNetexId());
+            versionToTerminate.setValidBetween(new ValidBetween(null, terminateAt));
         }
-        return versionToTerminate;
     }
 }
