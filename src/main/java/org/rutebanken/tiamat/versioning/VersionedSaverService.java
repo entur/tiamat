@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.versioning;
 
-import org.keycloak.KeycloakPrincipal;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
@@ -9,8 +8,6 @@ import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -22,13 +19,16 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     private static final Logger logger = LoggerFactory.getLogger(VersionedSaverService.class);
 
     @Autowired
-    private VersionCreator versionCreator;
-
-    @Autowired
     protected UsernameFetcher usernameFetcher;
 
     @Autowired
+    protected ValidityUpdater validityUpdater;
+
+    @Autowired
     private ReflectionAuthorizationService authorizationService;
+
+    @Autowired
+    private VersionCreator versionCreator;
 
     public abstract EntityInVersionRepository<T> getRepository();
 
@@ -44,6 +44,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
         validate(existingVersion, newVersion);
 
+        Instant now = Instant.now();
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
+
         if(existingVersion == null) {
             if (newVersion.getNetexId() != null) {
                 existingVersion = getRepository().findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
@@ -56,13 +59,13 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         authorizeNewVersion(existingVersion, newVersion);
 
         if(existingVersion == null) {
-            newVersion.setCreated(Instant.now());
+            newVersion.setCreated(now);
             // If the new incoming version has the version attribute set, reset it.
             // For tiamat, this is the first time this entity with this ID is saved
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
-            existingVersion = versionCreator.terminateVersion(existingVersion, Instant.now());
+            existingVersion = validityUpdater.terminateVersion(existingVersion, newVersionValidFrom);
             getRepository().save(existingVersion);
         }
 

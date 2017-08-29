@@ -138,40 +138,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void newVersionShouldHaveValidBetween() {
-        StopPlace oldVersion = new StopPlace();
-        oldVersion.setVersion(1L);
-
-        Quay quay = new Quay();
-        quay.setVersion(1L);
-
-        oldVersion.getQuays().add(quay);
-
-        oldVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, ChronoUnit.DAYS)));
-
-        oldVersion = stopPlaceRepository.save(oldVersion);
-
-        Instant beforeCreated = Instant.now();
-        System.out.println(beforeCreated);
-
-        StopPlace newVersion = versionCreator.createCopy(oldVersion, StopPlace.class);
-
-        oldVersion = versionCreator.terminateVersion(oldVersion, Instant.now());
-
-        assertThat(newVersion.getValidBetween())
-                .isNotNull();
-
-        System.out.println(oldVersion.getValidBetween().getToDate());
-        assertThat(oldVersion.getValidBetween().getToDate()).isAfterOrEqualTo(beforeCreated);
-
-
-        ValidBetween validBetween = newVersion.getValidBetween();
-        assertThat(validBetween.getFromDate()).isAfterOrEqualTo(beforeCreated);
-        assertThat(validBetween.getToDate()).isNull();
-
-    }
-
-    @Test
     public void createCopyOfStopPlaceWithChildren() {
         StopPlace parent = new StopPlace();
         parent.setVersion(1L);

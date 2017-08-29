@@ -7,7 +7,6 @@ import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.SiteElement;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
@@ -84,31 +83,25 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant validFrom;
-        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getFromDate() != null) {
-            validFrom = newVersion.getValidBetween().getFromDate();
-        } else {
-            validFrom = Instant.now();
-        }
+        Instant now = Instant.now();
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            newVersion.setCreated(Instant.now());
+            newVersion.setCreated(now);
         } else {
-            newVersion.setChanged(Instant.now());
-            // TODO: Add support for "valid from/to" being explicitly set
-
+            newVersion.setChanged(now);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            versionCreator.terminateVersion(existingStopPlace, validFrom);
+            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom);
         }
 
         // Save latest version
-        newVersion = initiateOrIncrementVersions(newVersion, validFrom);
+        newVersion = initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
-        logger.info("StopPlace [{}], version {} changed by user [{}].", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy());
+        logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
 
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
@@ -147,22 +140,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
      * @param validFrom
      * @return modified StopPlace
      */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace, Instant validFrom) {
+    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
         versionCreator.initiateOrIncrement(stopPlace);
         initiateOrIncrementVersionsForChildren(stopPlace);
-
-        ValidBetween validBetween;
-        if (stopPlace.getValidBetween() != null) {
-            validBetween = stopPlace.getValidBetween();
-        } else {
-            validBetween = new ValidBetween();
-            stopPlace.setValidBetween(validBetween);
-        }
-
-        // new validFrom is set
-        validBetween.setFromDate(validFrom);
-        validBetween.setToDate(null);
-
         return stopPlace;
     }
 

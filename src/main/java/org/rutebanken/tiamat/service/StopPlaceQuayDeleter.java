@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.ValidityUpdater;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private EntityChangedListener entityChangedListener;
 
+    @Autowired
+    private ValidityUpdater validityUpdater;
+
     public boolean deleteStopPlace(String stopPlaceId) {
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
@@ -51,7 +55,7 @@ public class StopPlaceQuayDeleter {
 
             nextVersionStopPlace.setVersionComment(versionComment);
 
-            versionCreator.terminateVersion(nextVersionStopPlace, timeOfTermination);
+            validityUpdater.terminateVersion(nextVersionStopPlace, timeOfTermination);
 
             return nextVersionStopPlace;
         }

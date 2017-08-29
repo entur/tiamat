@@ -146,19 +146,4 @@ public class VersionCreator {
             versionIncrementor.incrementVersion(entityInVersionStructure);
         }
     }
-
-    public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, Instant newVersionValidFrom) {
-        //TODO: Need to support "valid from" set explicitly
-
-        if(entityInVersionStructure == null) {
-            throw new IllegalArgumentException("Cannot terminate version for null object");
-        }
-
-        logger.debug("New version valid from {}", newVersionValidFrom);
-        if (entityInVersionStructure.getValidBetween() != null ) {
-            ValidBetween validBetween = entityInVersionStructure.getValidBetween();
-            validBetween.setToDate(newVersionValidFrom);
-        }
-        return entityInVersionStructure;
-    }
 }

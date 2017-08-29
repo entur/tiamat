@@ -9,20 +9,26 @@ import org.rutebanken.tiamat.changelog.EntityChangedEvent;
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
 
 public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     private EntityChangedJMSListener entityChangedJMSListener;
+
+    @Autowired
+    private ExportTimeZone exportTimeZone;
 
     @Before
     public void cleanReceivedJMS(){
@@ -831,7 +837,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
                 "          }" +
                 "          weighting:" + weighting.value() +
-//                "          validBetweens: [{fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}]" +
                 "       }) { " +
                 "  id " +
                 "  name { value } " +
@@ -862,8 +867,40 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("topographicPlace.parentTopographicPlace", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.id", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()));
-//                    .body("validBetweens[0].fromDate", comparesEqualTo(fromDate))
-//                    .body("validBetweens[0].toDate", comparesEqualTo(toDate));
+    }
+
+    @Test
+    public void testTerminateStopPlaceValidity() throws Exception {
+        StopPlace stopPlace = createStopPlace("Stop place soon to be invalidated");
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        stopPlace.setValidBetween(new ValidBetween(Instant.EPOCH));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String versionComment = "Stop place not valid anymore";
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+
+        String fromDate = dateTimeFormatter.format(stopPlace.getValidBetween().getFromDate().atZone(exportTimeZone.getDefaultTimeZone()));
+        String toDate = dateTimeFormatter.format(Instant.now().atZone(exportTimeZone.getDefaultTimeZone()));
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
+                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "          versionComment: \\\""+ versionComment + "\\\"" +
+                "          validBetween: {fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}" +
+                "       }) { " +
+                "  validBetween { fromDate toDate } " +
+                "  versionComment " +
+                "  } " +
+                "}\",\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("data.stopPlace[0]", notNullValue())
+                .root("data.stopPlace[0]")
+                    .body("versionComment", equalTo(versionComment))
+                    .body("validBetween.fromDate", comparesEqualTo(fromDate))
+                    .body("validBetween.toDate", comparesEqualTo(toDate));
     }
 
 
@@ -899,38 +936,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("id", equalTo(stopPlace.getNetexId()))
                     .body("keyValues[0].key", equalTo("jbvId"))
                     .body("keyValues[0].values[0]", equalTo("1234"));
-    }
-
-    /**
-     * NRP-1632
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testNewVersionVerifyValidFrom() throws Exception {
-
-        StopPlace stopPlace = createStopPlace("Espa");
-
-        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-
-        String newName = "EspaBoller";
-
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion.setName(new EmbeddableMultilingualString(newName));
-
-        newVersion = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
-
-        assertThat(newVersion.getVersion()).isGreaterThan(stopPlace.getVersion());
-        assertThat(newVersion.getValidBetween()).isNotNull();
-        assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
-        assertThat(newVersion.getValidBetween().getToDate()).isNull();
-
-
-        stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), stopPlace.getVersion());
-        assertThat(stopPlace.getValidBetween().getFromDate()).isNotNull();
-        assertThat(stopPlace.getValidBetween().getToDate()).isNotNull();
-
-        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(stopPlace.getValidBetween().getToDate());
     }
 
     @Test

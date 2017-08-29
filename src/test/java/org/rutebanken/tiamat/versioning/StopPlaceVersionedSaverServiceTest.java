@@ -28,7 +28,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Test
-    public void testNewStopPlaceWithQuay() {
+    public void newStopPlaceWithQuayVerifyVersionSet() {
         Quay quay1 = new Quay();
         quay1.setName(new EmbeddableMultilingualString("quay1"));
 
@@ -48,8 +48,86 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         actualStopPlace.getQuays().forEach(quay -> assertThat(quay.getVersion()).isEqualTo(1));
     }
 
+    /**
+     * NRP-1632
+     *
+     * @throws Exception
+     */
     @Test
-    public void noValidbetweenOnChildObjects() {
+    public void newVersionVerifyValidFrom() throws Exception {
+
+        StopPlace oldVersion = new StopPlace(new EmbeddableMultilingualString("Espa"));
+
+        oldVersion = stopPlaceVersionedSaverService.saveNewVersion(oldVersion);
+
+        String newName = "EspaBoller";
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(oldVersion, StopPlace.class);
+        newVersion.setName(new EmbeddableMultilingualString(newName));
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(oldVersion, newVersion);
+
+        assertThat(newVersion.getVersion()).isGreaterThan(oldVersion.getVersion());
+        assertThat(newVersion.getValidBetween()).isNotNull();
+        assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
+        assertThat(newVersion.getValidBetween().getToDate()).isNull();
+
+
+        oldVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(oldVersion.getNetexId(), oldVersion.getVersion());
+        assertThat(oldVersion.getValidBetween().getFromDate()).isNotNull();
+        assertThat(oldVersion.getValidBetween().getToDate()).isNotNull();
+
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(oldVersion.getValidBetween().getToDate());
+    }
+
+    @Test
+    public void terminateStopPlaceValidityVerifyValidity() throws Exception {
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("About to get terminated"));
+        stopPlace.setVersion(1L);
+        stopPlace.setValidBetween(new ValidBetween(Instant.EPOCH));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+
+        Instant now = Instant.now();
+
+        Instant terminated = now.plusSeconds(1);
+
+        newVersion.setValidBetween(new ValidBetween(now, terminated));
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion);
+
+        assertThat(newVersion.getVersion()).isGreaterThan(stopPlace.getVersion());
+        assertThat(newVersion.getValidBetween()).isNotNull();
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(now);
+        assertThat(newVersion.getValidBetween().getToDate()).isEqualTo(terminated);
+    }
+
+    @Test
+    public void newVersionDefaultFromDateIsSet() throws Exception {
+
+        StopPlace oldVersion = new StopPlace(new EmbeddableMultilingualString("About to get a new version where default from date is set"));
+        oldVersion.setVersion(1L);
+        oldVersion.setValidBetween(new ValidBetween(Instant.EPOCH));
+        oldVersion = stopPlaceRepository.save(oldVersion);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(oldVersion, StopPlace.class);
+
+        newVersion.setValidBetween(new ValidBetween(null));
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(oldVersion, newVersion);
+
+        assertThat(newVersion.getVersion()).isGreaterThan(oldVersion.getVersion());
+        assertThat(newVersion.getValidBetween()).isNotNull();
+        assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
+
+        oldVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(oldVersion.getNetexId(), oldVersion.getVersion());
+        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(oldVersion.getValidBetween().getToDate());
+    }
+
+    @Test
+    public void newVersionNoValidbetweenOnChildObjects() {
         Quay quay = new Quay();
         StopPlace stopPlace = new StopPlace();
         stopPlace.getQuays().add(quay);
@@ -81,7 +159,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void testUpdateStopPlaceWithQuay() {
+    public void saveStopPlaceWithQuayVerifyValuesSet() {
         Quay quay1 = new Quay();
         quay1.setName(new EmbeddableMultilingualString("quay1"));
 
@@ -141,7 +219,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void testUpdateStopPlaceSameObject() {
+    public void updateStopPlaceSameObjectShouldFail() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Initial name"));
@@ -165,7 +243,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void testUpdateStopPlaceDifferentId() {
+    public void updateStopPlaceDifferentIdShouldFail() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Initial name"));
@@ -196,7 +274,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void createNewVersionFromExistingStopPlaceAndVerifyTwoPersistedCoexistingStops() {
+    public void createNewVersionFromExistingStopPlaceVerifyTwoPersistedCoexistingStops() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);
@@ -308,7 +386,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion, Instant.now());
+        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
