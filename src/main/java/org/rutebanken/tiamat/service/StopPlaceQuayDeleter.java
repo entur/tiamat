@@ -8,7 +8,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
-import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,13 +47,12 @@ public class StopPlaceQuayDeleter {
 
         if (stopPlace != null) {
             StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-            stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
 
             nextVersionStopPlace.setVersionComment(versionComment);
 
             validityUpdater.terminateVersion(nextVersionStopPlace, timeOfTermination);
 
-            return nextVersionStopPlace;
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
         }
         return stopPlace;
     }
