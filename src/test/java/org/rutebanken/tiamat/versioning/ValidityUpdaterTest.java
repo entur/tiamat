@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.Version;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -21,6 +22,18 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
 
     @Autowired
     private VersionCreator versionCreator;
+
+    @Test
+    public void terminateVersionsWithoutValidBetween() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+
+        Instant now = Instant.now();
+        stopPlace = validityUpdater.terminateVersion(stopPlace, now);
+
+        assertThat(stopPlace.getValidBetween()).isNotNull();
+        assertThat(stopPlace.getValidBetween().getToDate()).isEqualTo(now);
+    }
 
     @Test
     public void newTerminatedVersionShouldHaveValidBetween() {

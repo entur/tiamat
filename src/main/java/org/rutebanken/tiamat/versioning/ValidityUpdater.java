@@ -44,21 +44,23 @@ public class ValidityUpdater {
     /**
      * Terminate valid between for entity.
      *
-     * @param entityInVersionStructure the entity to modify
+     * @param versionToTerminate the old version of entity to terminate
      * @param newVersionValidFrom the instant when the new version should be valid from
      * @param <T> Versioned entity type
      * @return the updated entity
      */
-    public <T extends EntityInVersionStructure> T terminateVersion(T entityInVersionStructure, Instant newVersionValidFrom) {
-        if(entityInVersionStructure == null) {
+    public <T extends EntityInVersionStructure> T terminateVersion(T versionToTerminate, Instant newVersionValidFrom) {
+        if(versionToTerminate == null) {
             throw new IllegalArgumentException("Cannot terminate version for null object");
         }
 
         logger.debug("New version valid from {}", newVersionValidFrom);
-        if (entityInVersionStructure.getValidBetween() != null ) {
-            ValidBetween validBetween = entityInVersionStructure.getValidBetween();
-            validBetween.setToDate(newVersionValidFrom);
+        if (versionToTerminate.getValidBetween() != null ) {
+            versionToTerminate.getValidBetween().setToDate(newVersionValidFrom);
+        } else {
+            logger.warn("Entity {} does not have valid between from before. Setting only toDate", versionToTerminate.getNetexId());
+            versionToTerminate.setValidBetween(new ValidBetween(null, newVersionValidFrom));
         }
-        return entityInVersionStructure;
+        return versionToTerminate;
     }
 }
