@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,6 +90,8 @@ public class GenericObjectDiffer {
 
                 if (isPrimitive(oldValue)) {
                     differences.add(new Difference(childProperty, oldValue, newValue));
+                } else if(Instant.class.isAssignableFrom(field.getType())) {
+                    differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
                 } else if (genericDiffConfig.onlyDoEqualsCheck.stream().anyMatch(type -> type.isAssignableFrom(oldValue.getClass()))) {
                     if (!oldValue.equals(newValue)) {
                         differences.add(new Difference(childProperty, oldValue, newValue));
