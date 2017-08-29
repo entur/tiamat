@@ -32,7 +32,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     protected VersionCreator versionCreator;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    protected ReflectionAuthorizationService authorizationService;
 
     public abstract EntityInVersionRepository<T> getRepository();
 

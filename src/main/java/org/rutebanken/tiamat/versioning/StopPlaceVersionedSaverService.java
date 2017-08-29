@@ -19,9 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 
 @Transactional
@@ -61,6 +63,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         super.validate(existingVersion, newVersion);
 
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
+
+
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
@@ -74,6 +79,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             newVersion.setChanged(now);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
             logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom);
         }
