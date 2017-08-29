@@ -354,7 +354,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
                 "    compassBearing " +
                 "  } " +
                 " } " +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
 
         Set<String> originalIds = new HashSet<>();
@@ -553,7 +553,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
                 "    importedId " +
                 "  } " +
                 " } " +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
 
         Set<String> originalIds = new HashSet<>();

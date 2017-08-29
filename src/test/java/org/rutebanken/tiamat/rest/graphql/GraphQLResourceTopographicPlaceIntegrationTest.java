@@ -35,7 +35,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                     "    topographicPlaceType" +
                     "    __typename" +
                     "  }" +
-                    "}" +
                     "}\",\"variables\":\"\"}";
 
         System.out.println(query);
@@ -68,7 +67,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 "    topographicPlaceType" +
                 "    __typename" +
                 "  }" +
-                "}" +
                 "}\",\"variables\":\"\"}";
 
         System.out.println(query);
@@ -99,7 +97,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 "    topographicPlaceType" +
                 "    __typename" +
                 "  }" +
-                "}" +
                 "}\",\"variables\":\"\"}";
 
         System.out.println(query);
@@ -130,7 +127,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 "    topographicPlaceType" +
                 "    __typename" +
                 "  }" +
-                "}" +
                 "}\",\"variables\":\"\"}";
 
         System.out.println(query);
@@ -156,7 +152,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 "    topographicPlaceType" +
                 "    __typename" +
                 "  }" +
-                "}" +
                 "}\",\"variables\":\"\"}";
 
         System.out.println(query);
@@ -186,7 +181,6 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
                 "    topographicPlaceType" +
                 "    __typename" +
                 "  }" +
-                "}" +
                 "}\",\"variables\":\"\"}";
 
         System.out.println(query);

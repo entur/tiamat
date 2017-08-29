@@ -975,7 +975,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "    transportMode" +
                 "    submode" +
                 "  }" +
-                "} " +
                 "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
@@ -1199,7 +1198,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "    compassBearing " +
                 "  } " +
                 "  } " +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
         String manuallyAddedQuayId = quay.getNetexId();
 
@@ -1294,7 +1293,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "    compassBearing " +
                 "  } " +
                 "  } " +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
         String manuallyAddedQuayId = quay.getNetexId();
 
@@ -1377,7 +1376,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "       }" +
                 "   }" +
                 "  }" +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlStopPlaceQuery)
                 .root("data.stopPlace[0]")
@@ -1429,7 +1428,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "      }" +
                 "    }" +
                 "  }" +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
@@ -1510,7 +1509,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 "    }" +
                 "   }" +
                 "  }" +
-                "}}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}";
 
         executeGraphQL(graphQlStopPlaceQuery)
                 .root("data.stopPlace[0]")
