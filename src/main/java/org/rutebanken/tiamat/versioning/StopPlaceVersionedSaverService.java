@@ -30,45 +30,26 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
 
-    private final StopPlaceRepository stopPlaceRepository;
-
-    private final VersionCreator versionCreator;
-
-    private final AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
-
-    private final TopographicPlaceLookupService countyAndMunicipalityLookupService;
-
-    private final TariffZonesLookupService tariffZonesLookupService;
-
-    private final StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder;
-
-    private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
-
-    private final EntityChangedListener entityChangedListener;
-
-    private final TiamatObjectDiffer tiamatObjectDiffer;
-
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    public StopPlaceVersionedSaverService(StopPlaceRepository stopPlaceRepository,
-                                          VersionCreator versionCreator,
-                                          AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer,
-                                          TopographicPlaceLookupService countyAndMunicipalityLookupService,
-                                          TariffZonesLookupService tariffZonesLookupService,
-                                          StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder,
-                                          NearbyStopPlaceFinder nearbyStopPlaceFinder,
-                                          EntityChangedListener entityChangedListener,
-                                          TiamatObjectDiffer tiamatObjectDiffer) {
-        this.stopPlaceRepository = stopPlaceRepository;
-        this.versionCreator = versionCreator;
-        this.accessibilityAssessmentOptimizer = accessibilityAssessmentOptimizer;
-        this.countyAndMunicipalityLookupService = countyAndMunicipalityLookupService;
-        this.tariffZonesLookupService = tariffZonesLookupService;
-        this.stopPlaceByQuayOriginalIdFinder = stopPlaceByQuayOriginalIdFinder;
-        this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
-        this.entityChangedListener = entityChangedListener;
-        this.tiamatObjectDiffer = tiamatObjectDiffer;
-    }
+    private AccessibilityAssessmentOptimizer accessibilityAssessmentOptimizer;
+
+    @Autowired
+    private TopographicPlaceLookupService countyAndMunicipalityLookupService;
+
+    @Autowired
+    private TariffZonesLookupService tariffZonesLookupService;
+
+    @Autowired
+    private StopPlaceByQuayOriginalIdFinder stopPlaceByQuayOriginalIdFinder;
+
+    @Autowired
+    private NearbyStopPlaceFinder nearbyStopPlaceFinder;
+
+    @Autowired
+    private EntityChangedListener entityChangedListener;
 
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {

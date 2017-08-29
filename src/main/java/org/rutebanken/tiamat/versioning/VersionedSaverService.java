@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
@@ -25,10 +26,13 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     protected ValidityUpdater validityUpdater;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    protected TiamatObjectDiffer tiamatObjectDiffer;
 
     @Autowired
-    private VersionCreator versionCreator;
+    protected VersionCreator versionCreator;
+
+    @Autowired
+    private ReflectionAuthorizationService authorizationService;
 
     public abstract EntityInVersionRepository<T> getRepository();
 
@@ -78,7 +82,11 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
         logger.info("Object {}, version {} changed by user {}", newVersion.getNetexId(), newVersion.getVersion(), usernameForAuthenticatedUser);
 
-        return getRepository().save(newVersion);
+        newVersion = getRepository().save(newVersion);
+        if(existingVersion != null) {
+            tiamatObjectDiffer.logDifference(existingVersion, newVersion);
+        }
+        return newVersion;
     }
 
     protected void authorizeNewVersion(T existingVersion, T newVersion) {
