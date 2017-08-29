@@ -34,6 +34,7 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private ValidityUpdater validityUpdater;
 
+    // TODO: Not related to deleting quays.
     public boolean deleteStopPlace(String stopPlaceId) {
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
@@ -42,6 +43,7 @@ public class StopPlaceQuayDeleter {
         return true;
     }
 
+    // TODO: Not related to deleting quays.
     public StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
@@ -57,6 +59,7 @@ public class StopPlaceQuayDeleter {
         return stopPlace;
     }
 
+    // TODO: Not related to deleting quays.
     public StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
@@ -93,6 +96,7 @@ public class StopPlaceQuayDeleter {
         return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
     }
 
+    // TODO: Not related to deleting quays.
     private List<StopPlace> getAllVersionsOfStopPlace(String stopPlaceId) {
         List<String> idList = new ArrayList<>();
         idList.add(stopPlaceId);
