@@ -93,8 +93,7 @@ public class VersionCreator {
 
     /**
      * Create next version of entity (copy), before changes are made.
-     * Does not increment version. Will be done when saving.
-     * Clears valid betweens
+     * Does not increment version or valid between:  Will be done by saver service
      *
      * @param entityInVersionStructure
      * @param type extends {@link EntityInVersionStructure}
@@ -103,12 +102,8 @@ public class VersionCreator {
     public <T extends EntityInVersionStructure> T createCopy(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
-        Instant newVersionValidFrom = Instant.now();
-
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
-
-        copy.setValidBetween(new ValidBetween(newVersionValidFrom));
 
         return type.cast(copy);
     }
