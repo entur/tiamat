@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.importer.modifier;
 
 import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

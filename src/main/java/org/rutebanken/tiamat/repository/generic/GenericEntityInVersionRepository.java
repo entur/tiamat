@@ -1,7 +1,9 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.generic;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.repository.DataManagedObjectStructureRepository;
+import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.support.Repositories;

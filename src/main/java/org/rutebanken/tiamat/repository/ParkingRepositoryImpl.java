@@ -11,6 +11,8 @@ import org.hibernate.Session;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
+import org.rutebanken.tiamat.repository.search.ParkingQueryFromSearchBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;

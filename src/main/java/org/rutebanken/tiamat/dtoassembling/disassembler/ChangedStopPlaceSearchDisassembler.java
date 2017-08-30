@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.dtoassembling.disassembler;
 
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;

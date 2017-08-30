@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.search;
 
 import com.google.common.base.MoreObjects;
 import org.springframework.data.domain.Pageable;

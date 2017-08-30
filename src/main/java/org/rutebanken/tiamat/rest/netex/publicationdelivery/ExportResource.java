@@ -6,7 +6,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

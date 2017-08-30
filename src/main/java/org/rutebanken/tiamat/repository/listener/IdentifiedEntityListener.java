@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.listener;
 
 import org.rutebanken.tiamat.config.ApplicationContextProvider;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;

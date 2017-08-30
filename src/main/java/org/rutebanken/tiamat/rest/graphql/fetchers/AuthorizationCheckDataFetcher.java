@@ -6,7 +6,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.authorization.AuthorizationResponse;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
-import org.rutebanken.tiamat.repository.GenericEntityInVersionRepository;
+import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

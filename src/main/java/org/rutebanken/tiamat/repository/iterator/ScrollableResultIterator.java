@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.iterator;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
