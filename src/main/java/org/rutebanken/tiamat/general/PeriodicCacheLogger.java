@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat;
+package org.rutebanken.tiamat.general;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
