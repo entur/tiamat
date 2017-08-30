@@ -70,12 +70,7 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
     @Test
     public void testTerminateAndReopenStopPlace() {
 
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new EmbeddableMultilingualString("Name"));
-
-        //Saving two versions to verify that both are deleted
-        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         String stopPlaceNetexId = savedStopPlace.getNetexId();
 
         StopPlace fetchedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
@@ -97,7 +92,7 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         assertThat(terminatedStopPlace.getVersion()).isGreaterThan(latestVersion);
         assertThat(terminatedStopPlace.getVersionComment()).isEqualTo(terminatedVersionComment);
         assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
-        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isAfterOrEqualTo(timeOfTermination);
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isEqualTo(timeOfTermination);
 
 
         String reopenedVersionComment = "Reopened StopPlace";
@@ -105,7 +100,7 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         assertThat(reopenedStopPlace).isNotNull();
         assertThat(reopenedStopPlace.getVersion()).isGreaterThan(terminatedStopPlace.getVersion());
         assertThat(reopenedStopPlace.getVersionComment()).isEqualTo(reopenedVersionComment);
-        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isAfterOrEqualTo(timeOfTermination);
+        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isEqualTo(timeOfTermination);
         assertThat(reopenedStopPlace.getValidBetween().getToDate()).isNull();
     }
 
