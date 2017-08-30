@@ -78,6 +78,16 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
     }
 
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateAfterToDate() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        Instant now = Instant.now();
+        stopPlace.setValidBetween(new ValidBetween(now, now.minusSeconds(10)));
+
+        validityUpdater.updateValidBetween(stopPlace, now);
+    }
+
     @Test
     public void newTerminatedVersionShouldHaveValidBetween() {
         StopPlace oldVersion = new StopPlace();

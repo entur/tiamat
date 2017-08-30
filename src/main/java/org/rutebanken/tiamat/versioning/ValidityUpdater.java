@@ -29,6 +29,9 @@ public class ValidityUpdater {
         } else if (newVersion.getValidBetween().getFromDate() == null) {
             logger.warn("From date is not set for the new version of {}. Using default value: {}", newVersion.getNetexId(), defaultFromTime);
             newVersion.getValidBetween().setFromDate(defaultFromTime);
+        } else if(newVersion.getValidBetween().getToDate() != null
+                && (newVersion.getValidBetween().getFromDate().isAfter(newVersion.getValidBetween().getToDate()))) {
+            throw new IllegalArgumentException("Entity " + newVersion.getNetexId() + " has from date " + newVersion.getValidBetween().getFromDate() + " after to date " + newVersion.getValidBetween().getToDate());
         }
 
         return newVersion.getValidBetween().getFromDate();
