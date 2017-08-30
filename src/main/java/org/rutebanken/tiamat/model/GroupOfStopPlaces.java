@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,10 +11,8 @@ import java.util.Set;
 
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
-
-    private String publicCode;
-
-    @OneToMany
+    
+    @ManyToMany
     private Set<StopPlace> members = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -24,14 +23,6 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     }
 
     public GroupOfStopPlaces() {
-    }
-
-    public String getPublicCode() {
-        return publicCode;
-    }
-
-    public void setPublicCode(String value) {
-        this.publicCode = value;
     }
 
     public Set<StopPlace> getMembers() {
