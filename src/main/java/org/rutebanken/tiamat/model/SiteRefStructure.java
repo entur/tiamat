@@ -12,4 +12,8 @@ public class SiteRefStructure
         super(ref, version);
     }
 
+    public SiteRefStructure(String ref) {
+        super(ref);
+    }
+
 }

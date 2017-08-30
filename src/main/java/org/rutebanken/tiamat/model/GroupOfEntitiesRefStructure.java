@@ -12,4 +12,8 @@ public abstract class GroupOfEntitiesRefStructure extends VersionOfObjectRefStru
     public GroupOfEntitiesRefStructure(String ref, String version) {
         super(ref, version);
     }
+
+    public GroupOfEntitiesRefStructure(String ref) {
+        super(ref);
+    }
 }
