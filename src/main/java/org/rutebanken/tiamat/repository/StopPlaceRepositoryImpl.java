@@ -54,6 +54,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     protected static final String SQL_LEFT_JOIN_PARENT_STOP =
             "LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) ";
 
+    /**
+     * When selecting stop places and there are multiple versions of the same stop place, and you only need the highest version by number.
+     */
+    protected static final String SQL_MAX_VERSION_OF_STOP_PLACE = "s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id) ";
+
     @Autowired
     private EntityManager entityManager;
 
@@ -88,7 +93,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                         "AND (:ignoreStopPlaceId IS NULL OR s.netex_id != :ignoreStopPlaceId) ";
         if (pointInTime != null) {
             queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+        } else {
+            // If no point in time is set, use max version to only get one version per stop place
+            queryString += "AND " + SQL_MAX_VERSION_OF_STOP_PLACE;
         }
+
+        logger.debug("finding stops within bounding box with query: {}", queryString);
 
         final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
