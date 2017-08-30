@@ -34,6 +34,9 @@ public abstract class TiamatIntegrationTest {
     private static Logger logger = LoggerFactory.getLogger(TiamatIntegrationTest.class);
 
     @Autowired
+    protected GroupOfStopPlacesRepository groupOfStopPlacesRepository;
+
+    @Autowired
     protected StopPlaceRepository stopPlaceRepository;
 
     @Autowired
@@ -78,6 +81,9 @@ public abstract class TiamatIntegrationTest {
     @Before
     @After
     public void clearRepositories() {
+
+        groupOfStopPlacesRepository.flush();
+        groupOfStopPlacesRepository.deleteAll();
 
         stopPlaceRepository.flush();
 
