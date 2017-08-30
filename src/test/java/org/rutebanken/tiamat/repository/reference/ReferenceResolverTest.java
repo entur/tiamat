@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.reference;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
