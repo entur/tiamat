@@ -8,6 +8,8 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 
 @Component
 public class StopPlaceQuayDeleter {
+
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceQuayDeleter.class);
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -65,14 +69,19 @@ public class StopPlaceQuayDeleter {
 
         if (stopPlace != null) {
 
+            // TODO: Assert that version of stop place is not currently "open"
+
             StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+
+            if(nextVersionStopPlace.getValidBetween().getToDate() != null) {
+                logger.debug("Using previous version's to date as from date in new reopened version of stop place {}", stopPlace.getNetexId());
+                nextVersionStopPlace.getValidBetween().setFromDate(nextVersionStopPlace.getValidBetween().getToDate());
+            }
             nextVersionStopPlace.getValidBetween().setToDate(null);
 
             nextVersionStopPlace.setVersionComment(versionComment);
 
-            stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
-
-            return nextVersionStopPlace;
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
         }
         return stopPlace;
     }
