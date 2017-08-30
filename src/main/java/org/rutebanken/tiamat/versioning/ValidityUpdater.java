@@ -24,7 +24,7 @@ public class ValidityUpdater {
     protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
 
         if (newVersion.getValidBetween() == null) {
-            logger.warn("Validity not set for new version of {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+            logger.warn("Validity not set for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
             newVersion.setValidBetween(new ValidBetween(defaultFromTime));
         } else if (newVersion.getValidBetween().getFromDate() == null) {
             logger.warn("From date is not set for the new version of {}. Using default value: {}", newVersion.getNetexId(), defaultFromTime);
@@ -50,7 +50,7 @@ public class ValidityUpdater {
             throw new IllegalArgumentException("Cannot terminate version for null object");
         }
 
-        logger.debug("Version {} of {} will be invalid at {}", versionToTerminate.getVersion(), versionToTerminate.getNetexId(), terminateAt);
+        logger.info("Version {} of {} will be invalid at {}", versionToTerminate.getVersion(), versionToTerminate.getNetexId(), terminateAt);
         if (versionToTerminate.getValidBetween() != null ) {
             versionToTerminate.getValidBetween().setToDate(terminateAt);
         } else {
