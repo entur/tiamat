@@ -31,6 +31,8 @@ public class VersionCreator {
     private static final String VERSION_COMMENT_FIELD = "versionComment";
     private static final String CHANGED_BY_FIELD = "changedBy";
 
+    private static final String VALID_BETWEEN = "validBetween";
+
     private final VersionIncrementor versionIncrementor;
 
     private final MapperFacade defaultMapperFacade;
@@ -69,6 +71,7 @@ public class VersionCreator {
                 .exclude(ID_FIELD)
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
+                .exclude(VALID_BETWEEN)
                 .byDefault()
                 .register();
 
@@ -85,6 +88,7 @@ public class VersionCreator {
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
                 .exclude(ID_FIELD)
+                .exclude(VALID_BETWEEN)
                 .byDefault()
                 .register());
 

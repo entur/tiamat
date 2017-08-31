@@ -23,18 +23,25 @@ public class ValidityUpdater {
      */
     protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
 
-        if (newVersion.getValidBetween() == null) {
-            logger.warn("Validity not set for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
-            newVersion.setValidBetween(new ValidBetween(defaultFromTime));
-        } else if (newVersion.getValidBetween().getFromDate() == null) {
-            logger.warn("From date is not set for the new version of {}. Using default value: {}", newVersion.getNetexId(), defaultFromTime);
-            newVersion.getValidBetween().setFromDate(defaultFromTime);
-        } else if(newVersion.getValidBetween().getToDate() != null
-                && (newVersion.getValidBetween().getFromDate().isAfter(newVersion.getValidBetween().getToDate()))) {
+        instantiateValidBetween(newVersion);;
+        if(newVersion.getValidBetween().getFromDate() != null
+                && newVersion.getValidBetween().getToDate() != null
+                && newVersion.getValidBetween().getFromDate().isAfter(newVersion.getValidBetween().getToDate())) {
             throw new IllegalArgumentException("Entity " + newVersion.getNetexId() + " has from date " + newVersion.getValidBetween().getFromDate() + " after to date " + newVersion.getValidBetween().getToDate());
         }
 
+        if(newVersion.getValidBetween().getFromDate() == null) {
+            logger.info("Validity not set, or from date equal to old version for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+            newVersion.getValidBetween().setFromDate(defaultFromTime);
+        }
+
         return newVersion.getValidBetween().getFromDate();
+    }
+
+    private void instantiateValidBetween(EntityInVersionStructure entity) {
+        if(entity != null && entity.getValidBetween() == null) {
+            entity.setValidBetween(new ValidBetween());
+        }
     }
 
     /**

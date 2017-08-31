@@ -100,7 +100,8 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
         assertThat(reopenedStopPlace).isNotNull();
         assertThat(reopenedStopPlace.getVersion()).isGreaterThan(terminatedStopPlace.getVersion());
         assertThat(reopenedStopPlace.getVersionComment()).isEqualTo(reopenedVersionComment);
-        assertThat(reopenedStopPlace.getValidBetween().getFromDate()).isEqualTo(timeOfTermination);
+        assertThat(reopenedStopPlace.getValidBetween().getFromDate())
+                .as("Reopened stop place from date").isAfterOrEqualTo(timeOfTermination);
         assertThat(reopenedStopPlace.getValidBetween().getToDate()).isNull();
     }
 
