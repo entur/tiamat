@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.exporter;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -11,12 +10,10 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -45,14 +42,19 @@ public class AsyncPublicationDeliveryExporter {
 
     private final ExportTimeZone exportTimeZone;
 
+    private final String localExportPath;
+
     @Autowired
     public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
-                                                       BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery,
-                                                       ExportTimeZone exportTimeZone) {
+                                            BlobStoreService blobStoreService,
+                                            StreamingPublicationDelivery streamingPublicationDelivery,
+                                            ExportTimeZone exportTimeZone,
+                                            @Value("${async.export.path:/deployments/date}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.exportTimeZone = exportTimeZone;
+        this.localExportPath = localExportPath;
     }
 
     /**
@@ -62,6 +64,8 @@ public class AsyncPublicationDeliveryExporter {
      */
     public ExportJob startExportJob(ExportParams exportParams) {
 
+
+
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
         exportJobRepository.save(exportJob);
@@ -69,16 +73,17 @@ public class AsyncPublicationDeliveryExporter {
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
         exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
         exportJobRepository.save(exportJob);
-        
+
+        final String localExportFile = localExportPath + File.pathSeparator + exportJob.getFileName();
+
         exportService.submit(() -> {
                 try {
                     logger.info("Started export job {}", exportJob);
 
-                    final PipedInputStream in = new PipedInputStream();
-                    final PipedOutputStream out = new PipedOutputStream(in);
+                    final FileOutputStream fileOutputStream = new FileOutputStream(localExportFile);
 
                     Thread outputStreamThread = new Thread(() -> {
-                        final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+                        final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
                         try {
                             logger.info("Streaming output thread running");
@@ -106,9 +111,13 @@ public class AsyncPublicationDeliveryExporter {
 
                     outputStreamThread.setName("outstream-" + exportJob.getId());
                     outputStreamThread.start();
-
-                    blobStoreService.upload(exportJob.getFileName(), in);
                     outputStreamThread.join();
+
+                    logger.info("{} written to disk", localExportFile);
+
+                    logger.info("{} uploading to gcp", exportJob.getFileName());
+                    FileInputStream fileInputStream = new FileInputStream(localExportFile);
+                    blobStoreService.upload(exportJob.getFileName(), fileInputStream);
 
                     if (!exportJob.getStatus().equals(JobStatus.FAILED)) {
                         exportJob.setStatus(JobStatus.FINISHED);
