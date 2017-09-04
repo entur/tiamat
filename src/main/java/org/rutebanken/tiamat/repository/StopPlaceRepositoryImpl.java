@@ -89,8 +89,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString = "SELECT s.* FROM stop_place s " +
                                      SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE ST_within(s.centroid, :filter) = true " +
-                                        "AND (:ignoreStopPlaceId IS NULL OR s.netex_id != :ignoreStopPlaceId) ";
+                                     "WHERE ST_within(s.centroid, :filter) = true ";
+
         if (pointInTime != null) {
             queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
         } else {
@@ -98,11 +98,19 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             queryString += "AND " + SQL_MAX_VERSION_OF_STOP_PLACE;
         }
 
+        if(ignoreStopPlaceId != null) {
+            queryString += "AND s.netex_id != :ignoreStopPlaceId ";
+
+        }
+
         logger.debug("finding stops within bounding box with query: {}", queryString);
 
         final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
-        query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+
+        if(ignoreStopPlaceId != null) {
+            query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+        }
 
         if (pointInTime != null) {
             query.setParameter("pointInTime", Date.from(pointInTime));
