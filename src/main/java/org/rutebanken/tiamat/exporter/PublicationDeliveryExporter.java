@@ -53,8 +53,12 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
+        logger.info("Finding changed stop places with search params: {}", search);
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        logger.debug("Found {} changed stop places", stopPlacePage.getTotalElements());
+        PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        logger.debug("Returning publication delivery structure: {}", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
