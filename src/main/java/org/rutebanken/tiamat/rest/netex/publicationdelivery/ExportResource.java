@@ -65,9 +65,11 @@ public class ExportResource {
                 publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
 
         if (resultPage.totalElements == 0) {
+            logger.debug("Returning no content. No stops changed in period.");
             return Response.noContent().build();
         }
 
+        logger.info("Streaming {} changed stops in publication delivery structure", resultPage.totalElements);
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
