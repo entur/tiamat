@@ -880,8 +880,13 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String versionComment = "Stop place not valid anymore";
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
 
-        String fromDate = dateTimeFormatter.format(stopPlace.getValidBetween().getFromDate().atZone(exportTimeZone.getDefaultTimeZone()));
-        String toDate = dateTimeFormatter.format(Instant.now().atZone(exportTimeZone.getDefaultTimeZone()));
+        Instant now = Instant.now();
+
+        // Mutate stop place. The new version should have valid from now.
+        String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZone()));
+
+        // The new version should be terminated in the future.
+        String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZone()));
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +

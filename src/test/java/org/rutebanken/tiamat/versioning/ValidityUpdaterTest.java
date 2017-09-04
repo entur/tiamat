@@ -20,9 +20,6 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
     @Autowired
     private ValidityUpdater validityUpdater;
 
-    @Autowired
-    private VersionCreator versionCreator;
-
     @Test
     public void terminateVersionsWithoutValidBetween() {
         StopPlace stopPlace = new StopPlace();
@@ -86,33 +83,6 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
         stopPlace.setValidBetween(new ValidBetween(now, now.minusSeconds(10)));
 
         validityUpdater.updateValidBetween(stopPlace, now);
-    }
-
-    @Test
-    public void newTerminatedVersionShouldHaveValidBetween() {
-        StopPlace oldVersion = new StopPlace();
-        oldVersion.setVersion(1L);
-
-        Quay quay = new Quay();
-        quay.setVersion(1L);
-
-        oldVersion.getQuays().add(quay);
-
-        Instant oldVersionFromDate = Instant.now().minus(2, ChronoUnit.DAYS);
-        oldVersion.setValidBetween(new ValidBetween(oldVersionFromDate));
-
-        oldVersion = stopPlaceRepository.save(oldVersion);
-
-        Instant terminatedAt = Instant.now();
-
-        StopPlace newVersion = versionCreator.createCopy(oldVersion, StopPlace.class);
-
-        validityUpdater.terminateVersion(newVersion, terminatedAt);
-
-        ValidBetween validBetween = newVersion.getValidBetween();
-        assertThat(validBetween).as("valid between new version").isNotNull();
-        assertThat(validBetween.getFromDate()).as("from date").isEqualTo(oldVersionFromDate);
-        assertThat(validBetween.getToDate()).as("to date").isEqualTo(terminatedAt);
     }
 
 }

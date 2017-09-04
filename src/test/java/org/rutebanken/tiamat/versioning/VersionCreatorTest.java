@@ -45,6 +45,19 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void validbetweenShouldNotBeCopied() {
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.setValidBetween(new ValidBetween(Instant.EPOCH, Instant.now()));
+
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
+        assertThat(newVersion.getValidBetween()).isNull();
+    }
+
+
+    @Test
     public void createCopyOfStopWithGeometry() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setVersion(1L);

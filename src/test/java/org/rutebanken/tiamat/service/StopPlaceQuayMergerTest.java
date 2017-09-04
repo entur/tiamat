@@ -27,6 +27,8 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
     @Transactional
     public void testMergeStopPlaces() {
 
+        Instant atTestStart = Instant.now();
+
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
         fromStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
@@ -65,6 +67,9 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
         toStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.11, 60.11)));
         toStopPlace.getOriginalIds().add("TEST:StopPlace:4321");
         toStopPlace.getOriginalIds().add("TEST:StopPlace:8765");
+        // Old version of toStopPlace
+        Instant toStopPlaceOriginalFromDate = Instant.EPOCH;
+        toStopPlace.setValidBetween(new ValidBetween(toStopPlaceOriginalFromDate));
 
         Quay toQuay = new Quay();
         toQuay.setCompassBearing(new Float(90));
@@ -76,6 +81,7 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
+        // Act
         StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
 
         assertThat(mergedStopPlace).isNotNull();
@@ -123,6 +129,26 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
                 fail("Unknown Quay has been added");
             }
         });
+
+        StopPlace stopPlaceBeforeMerging = stopPlaceRepository.findFirstByNetexIdAndVersion(toStopPlace.getNetexId(), toStopPlace.getVersion());
+
+        assertThat(mergedStopPlace.getValidBetween().getFromDate())
+                .as("merged stop place from date")
+                .isEqualTo(stopPlaceBeforeMerging.getValidBetween().getToDate());
+
+        assertThat(mergedStopPlace.getValidBetween().getFromDate())
+                .as("merged stop place from date should have version from date after test started")
+                .isAfterOrEqualTo(atTestStart);
+
+        assertThat(stopPlaceBeforeMerging.getValidBetween().getFromDate())
+                .as("old version of to-stopplace should not have changed from date")
+                .isEqualTo(toStopPlaceOriginalFromDate);
+
+        assertThat(stopPlaceBeforeMerging.getValidBetween().getToDate())
+                .as("old version of to-stopplace should have its to date updated")
+                .isAfterOrEqualTo(atTestStart);
+
+
     }
 
     @Test
@@ -493,8 +519,8 @@ public class StopPlaceQuayMergerTest extends AbstractGraphQLResourceIntegrationT
 
         assertThat(firstVersion).isNotNull();
         assertThat(secondVersion).isNotNull();
-        assertThat(firstVersion.getValidBetween().getToDate()).isBefore(Instant.now());
-        assertThat(secondVersion.getValidBetween().getToDate()).isNull();
+        assertThat(firstVersion.getValidBetween().getToDate()).as("first version to date should be after after from date").isAfter(firstVersion.getValidBetween().getFromDate());
+        assertThat(secondVersion.getValidBetween().getToDate()).as("second version to date").isNull();
         assertThat(firstVersion.getQuays()).hasSize(3);
         assertThat(secondVersion.getQuays()).hasSize(2);
 

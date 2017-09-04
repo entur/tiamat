@@ -5,6 +5,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
@@ -72,13 +73,6 @@ public class StopPlaceQuayDeleter {
             // TODO: Assert that version of stop place is not currently "open"
 
             StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-
-            if(nextVersionStopPlace.getValidBetween().getToDate() != null) {
-                logger.debug("Using previous version's to date as from date in new reopened version of stop place {}", stopPlace.getNetexId());
-                nextVersionStopPlace.getValidBetween().setFromDate(nextVersionStopPlace.getValidBetween().getToDate());
-            }
-            nextVersionStopPlace.getValidBetween().setToDate(null);
-
             nextVersionStopPlace.setVersionComment(versionComment);
 
             return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
