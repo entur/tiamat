@@ -38,9 +38,12 @@ public class TagKeyValuesMapperTest {
         Set<Tag> tags = Sets.newHashSet(tag);
         when(tagRepository.findByIdReference("NSR:StopPlace:1")).thenReturn(tags);
 
+        org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        tiamatStopPlace.setNetexId("NSR:StopPlace:1");
+
         StopPlace stopPlace = new StopPlace();
         stopPlace.withKeyList(new KeyListStructure());
-        tagKeyValuesMapper.mapTagsToProperties("NSR:StopPlace:1", stopPlace);
+        tagKeyValuesMapper.mapTagsToProperties(tiamatStopPlace, stopPlace);
 
 
 
@@ -78,21 +81,25 @@ public class TagKeyValuesMapperTest {
 
     @Test
     public void mapForthAndBack() throws Exception {
+        String netexReference = "NSR:StopPlace:2";
         Tag tag = new Tag();
         tag.setCreated(Instant.now());
         tag.setName("name");
         tag.setCreatedBy("also me");
-        tag.setIdreference("NSR:StopPlace:1");
+        tag.setIdreference(netexReference);
         tag.setRemovedBy("me");
         tag.setRemoved(Instant.now());
         tag.setComment("comment");
 
         Set<Tag> tags = Sets.newHashSet(tag);
-        when(tagRepository.findByIdReference("NSR:StopPlace:1")).thenReturn(tags);
+        when(tagRepository.findByIdReference(netexReference)).thenReturn(tags);
+
+        org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        tiamatStopPlace.setNetexId(netexReference);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.withKeyList(new KeyListStructure());
-        tagKeyValuesMapper.mapTagsToProperties("NSR:StopPlace:1", stopPlace);
+        tagKeyValuesMapper.mapTagsToProperties(tiamatStopPlace, stopPlace);
 
 
         Set<Tag> actual = tagKeyValuesMapper.mapPropertiesToTag(stopPlace.getKeyList());

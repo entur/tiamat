@@ -116,7 +116,7 @@ public class GraphQLNames {
     public static final String TAG = "tag";
     public static final String TAG_DESCRIPTION = "A tag for an entity like StopPlace";
     public static final String TAG_ID_REFERENCE = "idReference";
-    public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1";
+    public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1. Types supported: StopPlace, Quay";
     public static final String TAGS = "tags";
     public static final String TAGS_DESCRIPTION = "Fetches already used tags by name distinctively";
     public static final String TAG_COMMENT = "comment";

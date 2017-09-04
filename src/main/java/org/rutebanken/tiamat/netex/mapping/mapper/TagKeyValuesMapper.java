@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static org.rutebanken.tiamat.service.TagCreator.SUPPORTED_TAGGABLE_TYPES;
 
 @Component
 public class TagKeyValuesMapper {
@@ -43,8 +43,19 @@ public class TagKeyValuesMapper {
     }
 
 
-    public void mapTagsToProperties(String idReference, DataManagedObjectStructure netexEntity) {
-        Set<Tag> tags = tagRepository.findByIdReference(idReference);
+    public void mapTagsToProperties(org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, DataManagedObjectStructure netexEntity) {
+
+        if(tiamatEntity.getNetexId() == null) {
+            logger.trace("ID reference is null. Cannot continue mapping tags");
+            return;
+        }
+
+        if(!SUPPORTED_TAGGABLE_TYPES.contains(tiamatEntity.getClass())) {
+            logger.trace("Ignoring tag mapping for class {} as it's not supported", tiamatEntity.getClass());
+            return;
+        }
+
+        Set<Tag> tags = tagRepository.findByIdReference(tiamatEntity.getNetexId());
 
         if (tags == null || tags.isEmpty()) {
             return;
