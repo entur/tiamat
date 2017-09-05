@@ -91,9 +91,9 @@ public class PublicationDeliveryExporter {
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 
-        boolean relevantTariffZones = exportParams.getTariffZoneExportMode() == null || ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
+        boolean relevantTariffZones = ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
 
-        if(!relevantTariffZones) {
+        if(!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
         }
 
@@ -103,8 +103,14 @@ public class PublicationDeliveryExporter {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if(relevantTariffZones && convertedSiteFrame.getStopPlaces() != null) {
-            tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+        if(convertedSiteFrame.getStopPlaces() != null) {
+            if (relevantTariffZones) {
+                tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+            } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace().stream()
+                        .forEach(convertedStop -> convertedStop.setTariffZones(null));
+            }
         }
 
         if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())){
