@@ -34,8 +34,8 @@ public class ExportResource {
 
     @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          PublicationDeliveryExporter publicationDeliveryExporter,
-                          ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
+                                 PublicationDeliveryExporter publicationDeliveryExporter,
+                                 ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -55,12 +55,12 @@ public class ExportResource {
     @Produces(MediaType.APPLICATION_XML)
     @Path("changed")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
-                                                                 @BeanParam ExportParams exportParams,
-                                                                 @Context UriInfo uriInfo)
+                                                                        @BeanParam ExportParams exportParams,
+                                                                        @Context UriInfo uriInfo)
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
-        logger.info("Exporting stop places. Search: {}, export mode: {}", search, exportParams.getTopographicPlaceExportMode());
+        logger.info("Exporting stop places. Search: {}, topographic export mode: {}", search, exportParams.getTopographicPlaceExportMode());
         PublicationDeliveryStructurePage resultPage =
                 publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
 
@@ -73,17 +73,18 @@ public class ExportResource {
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {
-            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopographicPlaceExportMode(), uriInfo), "next");
+            rsp.link(createLinkToNextPage(searchDTO.from, searchDTO.to, search.getPageable().getPageNumber() + 1, search.getPageable().getPageSize(), exportParams.getTopographicPlaceExportMode(), exportParams.getTariffZoneExportMode(), uriInfo), "next");
         }
 
         return rsp.build();
     }
 
-    private URI createLinkToNextPage(String from, String to, int page, int perPage, ExportParams.ExportMode includeTopographicPlaces, UriInfo uriInfo) {
+    private URI createLinkToNextPage(String from, String to, int page, int perPage, ExportParams.ExportMode topographicPlaceExportMode, ExportParams.ExportMode tariffZoneExportMode, UriInfo uriInfo) {
         UriBuilder linkBuilder = uriInfo.getAbsolutePathBuilder()
-                .queryParam("page", page)
-                .queryParam("per_page", perPage)
-                .queryParam("include_topographic_places", includeTopographicPlaces);
+                                         .queryParam("page", page)
+                                         .queryParam("per_page", perPage)
+                                         .queryParam("topographicPlaceExportMode", topographicPlaceExportMode)
+                                         .queryParam("tariffZoneExportMode", tariffZoneExportMode);
 
         if (from != null) linkBuilder.queryParam("from", from);
         if (to != null) linkBuilder.queryParam("to", to);
