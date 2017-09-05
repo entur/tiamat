@@ -44,6 +44,7 @@ public class PublicationDeliveryExporter {
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
     }
 
+    @Transactional(readOnly = true)
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
         if (exportParams.getStopPlaceSearch().isEmpty()) {
             return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()).getContent(), exportParams);

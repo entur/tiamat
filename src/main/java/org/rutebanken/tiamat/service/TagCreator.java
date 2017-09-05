@@ -29,7 +29,7 @@ public class TagCreator {
 
     private static final String TAG_NAME_REGEX = "^[\\w\\dæøåÆØÅ]*$";
     private static final Pattern TAG_PATTERN = Pattern.compile(TAG_NAME_REGEX, Pattern.UNICODE_CASE);
-    public static final List<Class> SUPPORTED_TAGGABLE_TYPES = ImmutableList.of(StopPlace.class, Quay.class);
+    public static final List<Class> SUPPORTED_TAGGABLE_TYPES = ImmutableList.of(StopPlace.class);
 
     @Autowired
     private TagRepository tagRepository;
