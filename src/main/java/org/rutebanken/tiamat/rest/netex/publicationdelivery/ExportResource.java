@@ -69,7 +69,7 @@ public class ExportResource {
             return Response.noContent().build();
         }
 
-        logger.info("Streaming {} changed stops in publication delivery structure", resultPage.totalElements);
+        logger.info("Streaming {} changed stops in publication delivery structure", resultPage.size);
         Response.ResponseBuilder rsp = Response.ok(publicationDeliveryStreamingOutput.stream(resultPage.publicationDeliveryStructure));
 
         if (resultPage.hasNext) {

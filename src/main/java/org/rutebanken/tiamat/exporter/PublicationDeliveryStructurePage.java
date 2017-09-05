@@ -5,15 +5,18 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 
 public class PublicationDeliveryStructurePage {
 
+    public final int size;
+
     public PublicationDeliveryStructure publicationDeliveryStructure;
 
     public long totalElements;
 
     public boolean hasNext;
 
-    public PublicationDeliveryStructurePage(PublicationDeliveryStructure publicationDeliveryStructure, long totalElements, boolean hasNext) {
+    public PublicationDeliveryStructurePage(PublicationDeliveryStructure publicationDeliveryStructure, int size, long totalElements, boolean hasNext) {
         this.publicationDeliveryStructure = publicationDeliveryStructure;
         this.totalElements = totalElements;
+        this.size = size;
         this.hasNext = hasNext;
     }
 
@@ -23,6 +26,7 @@ public class PublicationDeliveryStructurePage {
                 .add("publicationDeliveryStructure", publicationDeliveryStructure)
                 .add("totalElements", totalElements)
                 .add("hasNext", hasNext)
+                .add("size", size)
                 .toString();
     }
 }
