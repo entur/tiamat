@@ -1,6 +1,9 @@
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.*;
+
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +11,14 @@ import java.util.List;
 @MappedSuperclass
 public abstract class SiteElement extends AddressablePlace {
 
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
+
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
+
     @Transient
     protected List<AccessModeEnumeration> accessModes;
     @Transient

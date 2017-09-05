@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import java.util.List;
 
 
@@ -13,6 +15,7 @@ public class AccessibilityAssessment_VersionedChildStructure
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess;
 
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL)
     protected List<AccessibilityLimitation> limitations;
 
