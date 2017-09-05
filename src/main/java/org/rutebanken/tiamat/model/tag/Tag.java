@@ -1,12 +1,16 @@
 package org.rutebanken.tiamat.model.tag;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
 import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @IdClass(TagPK.class)
 public class Tag implements Serializable {
 
