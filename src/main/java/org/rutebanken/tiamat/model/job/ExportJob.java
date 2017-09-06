@@ -1,10 +1,12 @@
 package org.rutebanken.tiamat.model.job;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
@@ -25,6 +27,9 @@ public class ExportJob {
     private Instant finished;
 
     private  JobStatus status;
+
+    @Transient
+    private ExportParams exportParams;
 
     public ExportJob() {
     }
@@ -101,5 +106,13 @@ public class ExportJob {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setExportParams(ExportParams exportParams) {
+        this.exportParams = exportParams;
+    }
+
+    public ExportParams getExportParams() {
+        return exportParams;
     }
 }

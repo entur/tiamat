@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.exporter;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.rutebanken.tiamat.exporter.async.ExportJobWorker;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -19,8 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Service
 public class AsyncPublicationDeliveryExporter {
@@ -29,7 +28,7 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
-    private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+    private static final ExecutorService exportService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
@@ -49,7 +48,7 @@ public class AsyncPublicationDeliveryExporter {
                                             BlobStoreService blobStoreService,
                                             StreamingPublicationDelivery streamingPublicationDelivery,
                                             ExportTimeZone exportTimeZone,
-                                            @Value("${async.export.path:/deployments/date}") String localExportPath) {
+                                            @Value("${async.export.path:/deployments/data/}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
@@ -64,75 +63,18 @@ public class AsyncPublicationDeliveryExporter {
      */
     public ExportJob startExportJob(ExportParams exportParams) {
 
-
-
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
+        exportJob.setExportParams(exportParams);
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
         exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
         exportJobRepository.save(exportJob);
 
-        final String localExportFile = localExportPath + File.pathSeparator + exportJob.getFileName();
-
-        exportService.submit(() -> {
-                try {
-                    logger.info("Started export job {}", exportJob);
-
-                    final FileOutputStream fileOutputStream = new FileOutputStream(localExportFile);
-
-                    Thread outputStreamThread = new Thread(() -> {
-                        final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-
-                        try {
-                            logger.info("Streaming output thread running");
-                            zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                            streamingPublicationDelivery.stream(exportParams, zipOutputStream);
-                            zipOutputStream.closeEntry();
-                        } catch (Exception e) {
-                            exportJob.setStatus(JobStatus.FAILED);
-                            String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
-                            logger.error(message + " " + exportJob, e);
-                            exportJob.setMessage(message);
-                            if (e instanceof InterruptedException) {
-                                Thread.currentThread().interrupt();
-                            }
-                        } finally {
-
-                            try {
-                                zipOutputStream.close();
-                            } catch (IOException e) {
-                                logger.warn("Could not close stream", e);
-                            }
-                        }
-                    }
-                    );
-
-                    outputStreamThread.setName("outstream-" + exportJob.getId());
-                    outputStreamThread.start();
-                    outputStreamThread.join();
-
-                    logger.info("{} written to disk", localExportFile);
-
-                    logger.info("{} uploading to gcp", exportJob.getFileName());
-                    FileInputStream fileInputStream = new FileInputStream(localExportFile);
-                    blobStoreService.upload(exportJob.getFileName(), fileInputStream);
-
-                    if (!exportJob.getStatus().equals(JobStatus.FAILED)) {
-                        exportJob.setStatus(JobStatus.FINISHED);
-                        exportJob.setFinished(Instant.now());
-                        logger.info("Export job {} done", exportJob);
-                    }
-                } catch (Exception e) {
-                    logger.error("Error while exporting asynchronously", e);
-                    exportJob.setStatus(JobStatus.FAILED);
-                    exportJob.setMessage(e.getMessage());
-                } finally {
-                    exportJobRepository.save(exportJob);
-                }
-            });
-        logger.info("Returning export job {}", exportJob);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
+        exportService.submit(exportJobWorker);
+        logger.info("Returning started export job {}", exportJob);
         return exportJob;
     }
 
