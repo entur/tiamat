@@ -12,6 +12,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalField;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -69,9 +73,12 @@ public class ExportJobWorker implements Runnable {
     }
 
     private void uploadToGcp(File localExportFile) throws FileNotFoundException {
-        logger.info("Uploading to gcp: {}", exportJob.getFileName());
+        Instant now = Instant.now();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
+        logger.info("Uploading to gcp: {} in folder: {}", exportJob.getFileName(), gcpSubfolder);
         FileInputStream fileInputStream = new FileInputStream(localExportFile);
-        blobStoreService.upload(exportJob.getFileName(), fileInputStream);
+        blobStoreService.upload(gcpSubfolder + "/" + exportJob.getFileName(), fileInputStream);
     }
 
     private void exportToLocalZipFile(File localExportFile) throws IOException, InterruptedException, JAXBException, XMLStreamException {
