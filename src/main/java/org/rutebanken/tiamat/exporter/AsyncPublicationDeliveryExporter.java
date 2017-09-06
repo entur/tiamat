@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -66,6 +68,8 @@ public class AsyncPublicationDeliveryExporter {
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
         exportJob.setExportParams(exportParams);
+        exportJob.setSubFolder(generateSubFolderName());
+
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
@@ -87,12 +91,16 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {
-        return blobStoreService.download(exportJob.getFileName());
+        return blobStoreService.download(exportJob.getSubFolder() + "/" + exportJob.getFileName());
     }
 
     public Collection<ExportJob> getJobs() {
         return exportJobRepository.findAll();
     }
 
-
+    private String generateSubFolderName() {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
+        return gcpSubfolder;
+    }
 }

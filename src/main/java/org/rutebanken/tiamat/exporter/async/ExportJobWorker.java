@@ -73,12 +73,9 @@ public class ExportJobWorker implements Runnable {
     }
 
     private void uploadToGcp(File localExportFile) throws FileNotFoundException {
-        Instant now = Instant.now();
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
-        logger.info("Uploading to gcp: {} in folder: {}", exportJob.getFileName(), gcpSubfolder);
+        logger.info("Uploading to gcp: {} in folder: {}", exportJob.getFileName(), exportJob.getSubFolder());
         FileInputStream fileInputStream = new FileInputStream(localExportFile);
-        blobStoreService.upload(gcpSubfolder + "/" + exportJob.getFileName(), fileInputStream);
+        blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
     private void exportToLocalZipFile(File localExportFile) throws IOException, InterruptedException, JAXBException, XMLStreamException {

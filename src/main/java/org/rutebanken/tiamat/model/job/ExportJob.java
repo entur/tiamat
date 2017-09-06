@@ -21,12 +21,15 @@ public class ExportJob {
     private String jobUrl;
     private String fileName;
 
+    private String subFolder;
+
     private String message;
 
     private Instant started;
+
     private Instant finished;
 
-    private  JobStatus status;
+    private JobStatus status;
 
     @Transient
     private ExportParams exportParams;
@@ -46,6 +49,7 @@ public class ExportJob {
                 .add("status", status)
                 .add("jobUrl", jobUrl)
                 .add("fileName", fileName)
+                .add("subFolder", subFolder)
                 .add("started", started)
                 .add("finished", finished)
                 .add("message", message)
@@ -114,5 +118,13 @@ public class ExportJob {
 
     public ExportParams getExportParams() {
         return exportParams;
+    }
+
+    public String getSubFolder() {
+        return subFolder;
+    }
+
+    public void setSubFolder(String subFolder) {
+        this.subFolder = subFolder;
     }
 }
