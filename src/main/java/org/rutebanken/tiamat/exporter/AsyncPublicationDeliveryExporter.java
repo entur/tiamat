@@ -56,6 +56,17 @@ public class AsyncPublicationDeliveryExporter {
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
+
+        File exportFolder = new File(localExportPath);
+        if(!exportFolder.exists() && !exportFolder.mkdirs()) {
+            throw new RuntimeException("Cannot find or create export directory from path: " + localExportPath +
+                    ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
+        }
+        if(!exportFolder.canWrite()) {
+            throw new RuntimeException("Cannot write to path: " + localExportPath +
+                    ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
+        }
+        logger.info("Verified local export path {}", localExportPath);
     }
 
     /**
