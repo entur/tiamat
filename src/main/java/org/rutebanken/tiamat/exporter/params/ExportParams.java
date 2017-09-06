@@ -20,14 +20,17 @@ public class ExportParams {
 
     public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE}
 
+    public static final ExportMode DEFAULT_TARIFF_ZONE_EXPORT_MODE = ExportMode.RELEVANT;
+
+    public static final ExportMode DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE = ExportMode.RELEVANT;
+
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topographicPlaceExportMode")
-    private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
+    private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
 
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
-    private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
-
+    private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -88,8 +91,8 @@ public class ExportParams {
     }
 
     public static class Builder {
-        private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
-        private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
+        private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
+        private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;

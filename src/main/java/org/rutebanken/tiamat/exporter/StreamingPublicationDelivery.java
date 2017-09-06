@@ -38,7 +38,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
  * Stream data objects inside already serialized publication delivery.
  * To be able to export many stop places wihtout keeping them all in memory.
  */
-@Transactional
+@Transactional(readOnly = true)
 @Component
 public class StreamingPublicationDelivery {
 
@@ -81,6 +81,7 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.pathLinkRepository = pathLinkRepository;
     }
+
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);

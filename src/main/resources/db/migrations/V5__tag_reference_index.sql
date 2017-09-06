@@ -1,0 +1,1 @@
+create index if not exists netex_reference_index on tag(netex_reference);

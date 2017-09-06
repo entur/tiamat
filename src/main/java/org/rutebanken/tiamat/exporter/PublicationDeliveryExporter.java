@@ -44,6 +44,7 @@ public class PublicationDeliveryExporter {
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
     }
 
+    @Transactional(readOnly = true)
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
         if (exportParams.getStopPlaceSearch().isEmpty()) {
             return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()).getContent(), exportParams);
@@ -52,9 +53,14 @@ public class PublicationDeliveryExporter {
         }
     }
 
+    @Transactional(readOnly = true)
     public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
+        logger.info("Finding changed stop places with search params: {}", search);
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
-        return new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        logger.debug("Found {} changed stop places", stopPlacePage.getSize());
+        PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getSize(), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        logger.debug("Returning publication delivery structure: {}", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
@@ -85,9 +91,9 @@ public class PublicationDeliveryExporter {
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 
-        boolean relevantTariffZones = exportParams.getTariffZoneExportMode() == null || ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
+        boolean relevantTariffZones = ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
 
-        if(!relevantTariffZones) {
+        if(!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
         }
 
@@ -97,8 +103,14 @@ public class PublicationDeliveryExporter {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if(relevantTariffZones && convertedSiteFrame.getStopPlaces() != null) {
-            tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+        if(convertedSiteFrame.getStopPlaces() != null) {
+            if (relevantTariffZones) {
+                tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+            } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace().stream()
+                        .forEach(convertedStop -> convertedStop.setTariffZones(null));
+            }
         }
 
         if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())){
