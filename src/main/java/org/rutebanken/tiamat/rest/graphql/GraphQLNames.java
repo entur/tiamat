@@ -316,6 +316,7 @@ public class GraphQLNames {
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";
+    public static final String STOP_PLACE_IDS = "stopPlaceIds";
     public static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
     public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
     public static final String FROM_QUAY_ID = "fromQuayId";
