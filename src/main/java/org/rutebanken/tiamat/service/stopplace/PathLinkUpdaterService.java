@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import graphql.GraphQLException;
 import org.rutebanken.helper.organisation.AuthorizationConstants;

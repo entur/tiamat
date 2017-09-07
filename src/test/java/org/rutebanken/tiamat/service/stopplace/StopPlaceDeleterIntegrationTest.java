@@ -1,26 +1,19 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class StopPlaceDeleterIntegrationTest extends TiamatIntegrationTest {
 

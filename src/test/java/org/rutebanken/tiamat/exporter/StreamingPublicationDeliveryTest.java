@@ -10,7 +10,7 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.*;
-import org.rutebanken.tiamat.service.ParentStopPlacesFetcher;
+import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;

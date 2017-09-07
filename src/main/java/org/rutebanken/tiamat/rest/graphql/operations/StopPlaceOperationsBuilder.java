@@ -4,10 +4,9 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.service.*;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+import org.rutebanken.tiamat.service.stopplace.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

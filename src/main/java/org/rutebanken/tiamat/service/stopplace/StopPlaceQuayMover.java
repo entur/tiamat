@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.geo.CentroidComputer;

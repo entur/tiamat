@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.rest.topographic_place;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.StopPlaceTopographicRefUpdater;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceTopographicRefUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

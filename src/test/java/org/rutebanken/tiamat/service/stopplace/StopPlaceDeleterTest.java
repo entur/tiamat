@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
 
 import java.util.Arrays;
 

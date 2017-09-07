@@ -1,9 +1,10 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;

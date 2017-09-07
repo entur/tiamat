@@ -1,13 +1,13 @@
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
