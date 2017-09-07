@@ -33,41 +33,6 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private ReflectionAuthorizationService authorizationService;
 
-    @Autowired
-    private ValidityUpdater validityUpdater;
-
-
-    // TODO: Not related to deleting quays.
-    public StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
-        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
-
-        if (stopPlace != null) {
-            StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-
-            nextVersionStopPlace.setVersionComment(versionComment);
-
-            validityUpdater.terminateVersion(nextVersionStopPlace, timeOfTermination);
-
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
-        }
-        return stopPlace;
-    }
-
-    // TODO: Not related to deleting quays.
-    public StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
-        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
-
-        if (stopPlace != null) {
-
-            // TODO: Assert that version of stop place is not currently "open"
-
-            StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-            nextVersionStopPlace.setVersionComment(versionComment);
-
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
-        }
-        return stopPlace;
-    }
 
     public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
@@ -87,7 +52,4 @@ public class StopPlaceQuayDeleter {
 
         return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
     }
-
-
-
 }

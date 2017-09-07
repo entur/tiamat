@@ -6,6 +6,9 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.Before;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.model.StopPlace;
+
+import javax.transaction.Transactional;
 
 import static io.restassured.RestAssured.given;
 
@@ -38,6 +41,11 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatInteg
                 .assertThat();
     }
 
-
-
+    /*
+    * Wrapping save-operation in separate method to complete transaction before GraphQL-request is called
+    */
+    @Transactional
+    protected StopPlace saveStopPlaceTransactional(StopPlace stopPlace) {
+        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+    }
 }
