@@ -1,28 +1,27 @@
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.rutebanken.tiamat.changelog.EntityChangedEvent;
-import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.time.ExportTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.vividsolutions.jts.geom.Coordinate
+import com.vividsolutions.jts.geom.Point
+import org.hamcrest.Matchers
+import org.junit.Before
+import org.junit.Test
+import org.rutebanken.tiamat.changelog.EntityChangedEvent
+import org.rutebanken.tiamat.changelog.EntityChangedJMSListener
+import org.rutebanken.tiamat.model.*
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper
+import org.rutebanken.tiamat.time.ExportTimeZone
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.math.BigInteger;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
+import static org.assertj.core.api.Assertions.assertThat
+import static org.hamcrest.Matchers.*
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
+import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.CREATE_MULTI_MODAL_STOP_PLACE_INPUT
+import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN
 
-public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     private EntityChangedJMSListener entityChangedJMSListener;
@@ -747,49 +746,51 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue();
     }
 
-
     @Test
-    public void testCreateMultimodalStop() throws Exception {
-
-        StopPlace bus = new StopPlace();
+    void "Create parent stop place"() {
+        def bus = new StopPlace();
         bus.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         bus.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         stopPlaceVersionedSaverService.saveNewVersion(bus);
 
-        StopPlace tram = new StopPlace();
+        def tram = new StopPlace();
         tram.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
         tram.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
         stopPlaceVersionedSaverService.saveNewVersion(tram);
 
-        String parentStopPlaceName = "Super stop place name";
+        def parentStopPlaceName = "Super stop place name";
+        def versionComment = "VersionComment";
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                " stopPlace: " + GraphQLNames.CREATE_MULTIMODAL_STOPPLACE + " (" +
-                "          stopPlaceId:[\\\"" + bus.getNetexId() + "\\\",\\\"" + tram.getNetexId() + "\\\"]" +
-                "          name: { value:\\\"" + parentStopPlaceName + "\\\" } " +
-                "       ) { " +
-                "  id " +
-                "  name { value } " +
-                "  children {" +
-                "   id name { value } stopPlaceType version " +
-                "  } " +
-                "  validBetween { fromDate toDate } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
-        
-        executeGraphQL(graphQlJsonQuery)
-            .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
-            .body("data.stopPlace.stopPlaceType", nullValue())
-            .root("data.stopPlace.children.find { it.id == '" + tram.getNetexId() + "'}")
+        def graphQlJsonQuery = """mutation {
+                 stopPlace: ${GraphQLNames.CREATE_MULTIMODAL_STOPPLACE} (${CREATE_MULTI_MODAL_STOP_PLACE_INPUT}: {
+                          stopPlaceIds:["${bus.getNetexId()}" ,"${tram.getNetexId()}"]
+                          name: { value: "${parentStopPlaceName}" }
+                          validBetween: { fromDate:"2017-04-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
+                          versionComment:"${versionComment}"
+                       }) {
+                          id
+                          name { value }
+                          children {
+                           id name { value } stopPlaceType version
+                          }
+                          validBetween { fromDate toDate }
+                          versionComment
+                       }
+                  } """;
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
+                .body("data.stopPlace.stopPlaceType", nullValue())
+                .body("data.stopPlace.versionComment", equalTo(versionComment))
+                .root("data.stopPlace.children.find { it.id == '" + tram.getNetexId() + "'}")
                 .body("version", equalTo(String.valueOf(tram.getVersion()+1)))
                 .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                 .body("name", nullValue())
-            .root("data.stopPlace.children.find { it.id == '" + bus.getNetexId() + "'}")
+                .root("data.stopPlace.children.find { it.id == '" + bus.getNetexId() + "'}")
                 .body("name", nullValue())
                 .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
                 .body("version", equalTo(String.valueOf(bus.getVersion()+1)));
-}
+    }
 
     @Test
     public void testSimpleMutationUpdateStopPlace() throws Exception {
