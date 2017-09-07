@@ -23,7 +23,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embedd
 public class MultiModalityOperationsBuilder {
 
     @Autowired
-    private MultiModalStopPlaceEditor parentStopPlaceCreator;
+    private MultiModalStopPlaceEditor parentStopPlaceEditor;
 
     public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType parentStopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -34,7 +34,7 @@ public class MultiModalityOperationsBuilder {
                 .description("Creates a new multimodal parent StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
                 .argument(newArgument().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
-                .dataFetcher(environment -> parentStopPlaceCreator.createMultiModalParentStopPlace(environment.getArgument(STOP_PLACE_ID), getEmbeddableString((Map) environment.getArgument(NAME))))
+                .dataFetcher(environment -> parentStopPlaceEditor.createMultiModalParentStopPlace(environment.getArgument(STOP_PLACE_ID), getEmbeddableString((Map) environment.getArgument(NAME))))
                 .build());
 
         operations.add(newFieldDefinition()
@@ -43,7 +43,7 @@ public class MultiModalityOperationsBuilder {
                 .description("Adds a StopPlace to an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
-                .dataFetcher(environment -> parentStopPlaceCreator.addToMultiModalParentStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
+                .dataFetcher(environment -> parentStopPlaceEditor.addToMultiModalParentStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
                 .build());
 
         operations.add(newFieldDefinition()
@@ -52,7 +52,7 @@ public class MultiModalityOperationsBuilder {
                 .description("Removes a StopPlace from an existing ParentStopPlace")
                 .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
-                .dataFetcher(environment -> parentStopPlaceCreator.removeFromMultiModalStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
+                .dataFetcher(environment -> parentStopPlaceEditor.removeFromMultiModalStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
                 .build());
 
         return operations;
