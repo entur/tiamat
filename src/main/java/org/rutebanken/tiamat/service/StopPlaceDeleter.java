@@ -41,7 +41,7 @@ public class StopPlaceDeleter {
         logger.warn("About to delete stop place by ID {}. User: {}", stopPlaceId, usernameForAuthenticatedUser);
 
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
-
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
         stopPlaceRepository.delete(stopPlaces);
         notifyDeleted(stopPlaces);
 
@@ -58,7 +58,6 @@ public class StopPlaceDeleter {
 
         Preconditions.checkArgument((stopPlaces != null && !stopPlaces.isEmpty()), "Attempting to fetch StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
         return stopPlaces;
     }
 
