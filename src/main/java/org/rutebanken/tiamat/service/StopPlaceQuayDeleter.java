@@ -34,19 +34,8 @@ public class StopPlaceQuayDeleter {
     private ReflectionAuthorizationService authorizationService;
 
     @Autowired
-    private EntityChangedListener entityChangedListener;
-
-    @Autowired
     private ValidityUpdater validityUpdater;
 
-    // TODO: Not related to deleting quays.
-    public boolean deleteStopPlace(String stopPlaceId) {
-        List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
-
-        stopPlaceRepository.delete(stopPlaces);
-        notifyDeleted(stopPlaces);
-        return true;
-    }
 
     // TODO: Not related to deleting quays.
     public StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
@@ -99,23 +88,6 @@ public class StopPlaceQuayDeleter {
         return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
     }
 
-    // TODO: Not related to deleting quays.
-    private List<StopPlace> getAllVersionsOfStopPlace(String stopPlaceId) {
-        List<String> idList = new ArrayList<>();
-        idList.add(stopPlaceId);
 
-        List<StopPlace> stopPlaces = stopPlaceRepository.findAll(idList);
 
-        Preconditions.checkArgument((stopPlaces != null && !stopPlaces.isEmpty()), "Attempting to fetch StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
-
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
-        return stopPlaces;
-    }
-
-    private void notifyDeleted(List<StopPlace> stopPlaces) {
-        Collections.sort(stopPlaces,
-                (o1, o2) -> Long.compare(o1.getVersion(), o2.getVersion()));
-        StopPlace newest = stopPlaces.get(stopPlaces.size() - 1);
-        entityChangedListener.onDelete(newest);
-    }
 }

@@ -4,11 +4,13 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.tiamat.service.StopPlaceDeleter;
 import org.rutebanken.tiamat.service.StopPlaceQuayDeleter;
 import org.rutebanken.tiamat.service.StopPlaceQuayMerger;
 import org.rutebanken.tiamat.service.StopPlaceQuayMover;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,7 +35,10 @@ public class StopPlaceOperationsBuilder {
     private StopPlaceQuayDeleter stopPlaceQuayDeleter;
 
     @Autowired
-    DateScalar dateScalar;
+    private DateScalar dateScalar;
+
+    @Autowired
+    private StopPlaceDeleter stopPlaceDeleter;
 
     public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
@@ -87,7 +92,7 @@ public class StopPlaceOperationsBuilder {
                 .name(DELETE_STOP_PLACE)
                 .description("!!! Deletes all versions of StopPlace from database - use with caution !!!")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
-                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
+                .dataFetcher(environment -> stopPlaceDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
                 .build());
 
         //Terminate StopPlace
