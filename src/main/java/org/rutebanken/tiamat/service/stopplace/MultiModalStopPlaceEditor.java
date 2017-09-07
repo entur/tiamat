@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
@@ -37,6 +39,10 @@ public class MultiModalStopPlaceEditor {
 
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
+        return createMultiModalParentStopPlace(childStopPlaceIds, name, null, null, null);
+    }
+
+    public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
 
         logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
 
@@ -48,6 +54,9 @@ public class MultiModalStopPlaceEditor {
         logger.info("Creating first version of parent stop place {}", name);
         final StopPlace parentStopPlace = new StopPlace(name);
         parentStopPlace.setParentStopPlace(true);
+        parentStopPlace.setValidBetween(validBetween);
+        parentStopPlace.setVersionComment(versionComment);
+        parentStopPlace.setCentroid(geoJsonPoint);
 
         Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace);
 
