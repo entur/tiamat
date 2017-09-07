@@ -26,6 +26,9 @@ public class GeometryMapper {
     }
 
     public Point createGeoJsonPoint(Map map) {
+        if(map == null) {
+            return null;
+        }
         if (map.get("type") != null && map.get("coordinates") != null) {
             if ("Point".equals(map.get("type"))) {
                 Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
