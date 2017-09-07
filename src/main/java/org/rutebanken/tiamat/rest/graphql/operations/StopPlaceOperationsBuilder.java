@@ -22,6 +22,9 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 public class StopPlaceOperationsBuilder {
 
     @Autowired
+    private StopPlaceMerger stopPlaceMerger;
+
+    @Autowired
     private StopPlaceQuayMover stopPlaceQuayMover;
 
     @Autowired
@@ -55,7 +58,7 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
-                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)))
+                .dataFetcher(environment -> stopPlaceMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)))
                 .build());
 
         //Merge two quays on a StopPlace
