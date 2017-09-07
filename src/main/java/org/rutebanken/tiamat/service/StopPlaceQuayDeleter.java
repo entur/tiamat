@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.service;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -33,8 +34,13 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private ReflectionAuthorizationService authorizationService;
 
+    @Autowired
+    private UsernameFetcher usernameFetcher;
 
     public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
+
+        logger.warn("{} is deleting quay {} from stop place {} with comment {}", usernameFetcher.getUserNameForAuthenticatedUser(), quayId, stopPlaceId, versionComment);
+
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
         Preconditions.checkArgument(stopPlace != null, "Attempting to delete StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
