@@ -22,18 +22,21 @@ public class StopPlaceDeleter {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceDeleter.class);
 
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository;
+    private final StopPlaceRepository stopPlaceRepository;
+
+    private final EntityChangedListener entityChangedListener;
+
+    private final ReflectionAuthorizationService authorizationService;
+
+    private final UsernameFetcher usernameFetcher;
 
     @Autowired
-    private EntityChangedListener entityChangedListener;
-
-    @Autowired
-    private ReflectionAuthorizationService authorizationService;
-
-    @Autowired
-    private UsernameFetcher usernameFetcher;
-
+    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, ReflectionAuthorizationService authorizationService, UsernameFetcher usernameFetcher) {
+        this.stopPlaceRepository = stopPlaceRepository;
+        this.entityChangedListener = entityChangedListener;
+        this.authorizationService = authorizationService;
+        this.usernameFetcher = usernameFetcher;
+    }
 
     public boolean deleteStopPlace(String stopPlaceId) {
 
@@ -41,6 +44,11 @@ public class StopPlaceDeleter {
         logger.warn("About to delete stop place by ID {}. User: {}", stopPlaceId, usernameForAuthenticatedUser);
 
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
+
+        if (stopPlaces.stream().anyMatch(stopPlace -> stopPlace.isParentStopPlace())) {
+            throw new IllegalArgumentException("Deleting parent stop place is not accepted: " + stopPlaceId);
+        }
+
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
         stopPlaceRepository.delete(stopPlaces);
         notifyDeleted(stopPlaces);

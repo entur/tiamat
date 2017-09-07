@@ -22,52 +22,6 @@ public class StopPlaceQuayDeleterTest extends AbstractGraphQLResourceIntegration
 
     @Transactional
     @Test
-    public void testDeleteStopPlace() {
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setName(new EmbeddableMultilingualString("Name"));
-        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
-        stopPlace.getOriginalIds().add("TEST:StopPlace:1234");
-        stopPlace.getOriginalIds().add("TEST:StopPlace:5678");
-
-        Quay quay = new Quay();
-        quay.setName(new EmbeddableMultilingualString("testQuay"));
-        stopPlace.getQuays().add(quay);
-
-        //Saving two versions to verify that both are deleted
-        StopPlace tmpStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(tmpStopPlace,
-                stopPlaceVersionedSaverService.createCopy(tmpStopPlace, StopPlace.class));
-
-        assertThat(tmpStopPlace.getNetexId()).isEqualTo(savedStopPlace.getNetexId());
-        assertThat(tmpStopPlace.getVersion()).isLessThan(savedStopPlace.getVersion());
-
-        String stopPlaceNetexId = savedStopPlace.getNetexId();
-        String quayNetexId = stopPlace.getQuays().iterator().next().getNetexId();
-
-        StopPlace fetchedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
-
-        assertThat(fetchedStopPlace).isNotNull();
-        assertThat(fetchedStopPlace.getQuays()).isNotNull();
-        assertThat(fetchedStopPlace.getQuays()).hasSize(1);
-
-        Quay fetchedQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayNetexId);
-        assertThat(fetchedQuay).isNotNull();
-
-        boolean isDeleted = stopPlaceQuayDeleter.deleteStopPlace(stopPlaceNetexId);
-
-        assertThat(isDeleted);
-
-        StopPlace deletedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
-        assertThat(deletedStopPlace).isNull();
-
-        Quay deletedQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayNetexId);
-        // Verify that associated quay is also deleted
-        assertThat(deletedQuay).isNull();
-    }
-
-    @Transactional
-    @Test
     public void testTerminateAndReopenStopPlace() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
