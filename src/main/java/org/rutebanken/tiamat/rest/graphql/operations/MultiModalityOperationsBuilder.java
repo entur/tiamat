@@ -1,9 +1,11 @@
 package org.rutebanken.tiamat.rest.graphql.operations;
 
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
+import com.vividsolutions.jts.geom.Point;
+import graphql.schema.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,26 +17,63 @@ import java.util.Map;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
+import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
+import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 
 @Component
 public class MultiModalityOperationsBuilder {
 
+    public static final String CREATE_MULTI_MODAL_STOP_PLACE_INPUT = "createMultiModalStopPlaceInput";
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceEditor;
 
-    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType parentStopPlaceObjectType) {
+    @Autowired
+    private ValidBetweenMapper validBetweenMapper;
+
+    @Autowired
+    private GeometryMapper geometryMapper;
+
+    public List<GraphQLFieldDefinition> getMultiModalityOperations(GraphQLObjectType parentStopPlaceObjectType,
+                                                                   GraphQLInputObjectType validBetweenInputObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
+
+        List<GraphQLInputObjectField> createMultiModalStopPlaceFields = new ArrayList<>();
+
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(STOP_PLACE_IDS).type(new GraphQLNonNull(new GraphQLList(GraphQLString))).build());
 
         operations.add(newFieldDefinition()
                 .type(parentStopPlaceObjectType)
                 .name(CREATE_MULTIMODAL_STOPPLACE)
                 .description("Creates a new multimodal parent StopPlace")
-                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
-                .argument(newArgument().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
-                .dataFetcher(environment -> parentStopPlaceEditor.createMultiModalParentStopPlace(environment.getArgument(STOP_PLACE_ID), getEmbeddableString((Map) environment.getArgument(NAME))))
+                .argument(newArgument()
+                        .name(CREATE_MULTI_MODAL_STOP_PLACE_INPUT)
+                        .type(newInputObject()
+                                .name("inputfields")
+                                .fields(createMultiModalStopPlaceFields).build())
+                        .build())
+                .dataFetcher(environment -> {
+                    Map input = environment.getArgument(CREATE_MULTI_MODAL_STOP_PLACE_INPUT);
+
+                    ValidBetween validBetween = validBetweenMapper.map((Map) input.get(VALID_BETWEEN));
+                    String versionComment = (String) input.get(VERSION_COMMENT);
+                    Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY));
+                    EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
+
+                    @SuppressWarnings("unchecked")
+                    List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
+
+                    return parentStopPlaceEditor.createMultiModalParentStopPlace(stopPlaceIds, name, validBetween, versionComment, geoJsonPoint);
+                })
                 .build());
 
         operations.add(newFieldDefinition()

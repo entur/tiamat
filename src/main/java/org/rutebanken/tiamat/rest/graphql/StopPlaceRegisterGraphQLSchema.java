@@ -304,7 +304,7 @@ StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(parkingUpdater))
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
-                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType))
+                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
