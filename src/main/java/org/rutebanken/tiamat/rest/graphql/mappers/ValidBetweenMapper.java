@@ -21,6 +21,11 @@ public class ValidBetweenMapper {
     }
 
     public ValidBetween map(Map input) {
+
+        if(input == null) {
+            return null;
+        }
+
         ValidBetween validBetween = new ValidBetween();
 
         if(input.get(VALID_BETWEEN_FROM_DATE) != null) {
