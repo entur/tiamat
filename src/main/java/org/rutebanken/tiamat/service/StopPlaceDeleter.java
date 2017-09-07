@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.service;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -30,17 +31,21 @@ public class StopPlaceDeleter {
     @Autowired
     private ReflectionAuthorizationService authorizationService;
 
+    @Autowired
+    private UsernameFetcher usernameFetcher;
+
 
     public boolean deleteStopPlace(String stopPlaceId) {
 
-        logger.warn("About to delete stop place by ID {}", stopPlaceId);
+        String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
+        logger.warn("About to delete stop place by ID {}. User: {}", stopPlaceId, usernameForAuthenticatedUser);
 
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
         stopPlaceRepository.delete(stopPlaces);
         notifyDeleted(stopPlaces);
 
-        logger.warn("All versions ({}) of stop place {} deleted", stopPlaces.size(), stopPlaceId);
+        logger.warn("All versions ({}) of stop place {} deleted by user {}", stopPlaces.size(), stopPlaceId, usernameForAuthenticatedUser);
 
         return true;
     }
