@@ -56,13 +56,7 @@ public class StopPlaceMerger {
         StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
         StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
 
-        Preconditions.checkArgument(fromStopPlace != null, "Attempting merge from StopPlace [id = %s], but StopPlace does not exist.", fromStopPlaceId);
-        Preconditions.checkArgument(toStopPlace != null, "Attempting merge to StopPlace [id = %s], but StopPlace does not exist.", toStopPlaceId);
-
-        Preconditions.checkArgument(!fromStopPlace.isParentStopPlace(), "Cannot merge parent stop places. From stop place: [id = %s].", fromStopPlaceId);
-        Preconditions.checkArgument(!toStopPlace.isParentStopPlace(), "Cannot merge parent stop places. To stop place: [id = %s].", toStopPlace);
-
-        Preconditions.checkArgument(!(fromStopPlace.getParentSiteRef() != null && fromStopPlace.getParentSiteRef().getRef() != null), "Cannot merge from childs of multi modal stop places [id = %s].", fromStopPlaceId);
+        validateArguments(fromStopPlace, toStopPlace);
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
 
@@ -92,14 +86,7 @@ public class StopPlaceMerger {
             mergedStopPlace = stopPlaceVersionedSaverService.createCopy(toStopPlace, StopPlace.class);
         }
 
-        if(mergedStopPlaceParent.isPresent()) {
-            mergedStopPlaceParent.get().setVersionComment(toVersionComment);
-        } else {
-            mergedStopPlace.setVersionComment(toVersionComment);
-        }
-
-        executeMerge(fromStopPlaceToTerminate, mergedStopPlace, fromVersionComment, toVersionComment, mergedStopPlaceParent.isPresent());
-
+        executeMerge(fromStopPlaceToTerminate, mergedStopPlace, fromVersionComment, toVersionComment, mergedStopPlaceParent);
 
         if (!isDryRun) {
             //Terminate validity of from-StopPlace
@@ -118,6 +105,14 @@ public class StopPlaceMerger {
         return mergedStopPlace;
     }
 
+    private void validateArguments(StopPlace fromStopPlace, StopPlace toStopPlace) {
+        Preconditions.checkArgument(fromStopPlace != null, "Attempting merge from StopPlace [id = %s], but StopPlace does not exist.", fromStopPlace.getNetexId());
+        Preconditions.checkArgument(toStopPlace != null, "Attempting merge to StopPlace [id = %s], but StopPlace does not exist.", toStopPlace.getNetexId());
+        Preconditions.checkArgument(!fromStopPlace.isParentStopPlace(), "Cannot merge parent stop places. From stop place: [id = %s].", fromStopPlace.getNetexId());
+        Preconditions.checkArgument(!toStopPlace.isParentStopPlace(), "Cannot merge parent stop places. To stop place: [id = %s].", toStopPlace);
+        Preconditions.checkArgument(!(fromStopPlace.getParentSiteRef() != null && fromStopPlace.getParentSiteRef().getRef() != null), "Cannot merge from childs of multi modal stop places [id = %s].", fromStopPlace.getNetexId());
+    }
+
     private StopPlace resolveChildFromParent(StopPlace parentStopPlace, String childNetexId, long childVersion) {
         return parentStopPlace.getChildren()
                 .stream()
@@ -126,7 +121,7 @@ public class StopPlaceMerger {
                 .get();
     }
 
-    private void executeMerge(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace, String fromVersionComment, String toVersionComment, boolean isMergingToChildOfMultiModalStopPlace) {
+    private void executeMerge(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace, String fromVersionComment, String toVersionComment, Optional<StopPlace> mergedStopPlaceParent) {
         transferQuays(fromStopPlaceToTerminate, mergedStopPlace);
         removeQuaysFromFromStopPlace(fromStopPlaceToTerminate, fromVersionComment);
 
@@ -144,16 +139,26 @@ public class StopPlaceMerger {
             );
         }
 
-        if (fromStopPlaceToTerminate.getTariffZones() != null && !isMergingToChildOfMultiModalStopPlace) {
-            fromStopPlaceToTerminate.getTariffZones().forEach(tz -> {
-                TariffZoneRef tariffZoneRef = new TariffZoneRef();
-                ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
-                mergedStopPlace.getTariffZones().add(tariffZoneRef);
-            });
-        }
+        if(mergedStopPlaceParent.isPresent()) {
+            // Set the version comment on the parent if it is present
+            // Avoid setting tariff zones and alternative names, as we are merging to a child of parent.
+            // Childs does not have names or tariff zones.
 
-        if (fromStopPlaceToTerminate.getAlternativeNames() != null && !isMergingToChildOfMultiModalStopPlace) {
-            alternativeNamesMerger.mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
+            mergedStopPlaceParent.get().setVersionComment(toVersionComment);
+        } else {
+            mergedStopPlace.setVersionComment(toVersionComment);
+
+            if (fromStopPlaceToTerminate.getTariffZones() != null) {
+                fromStopPlaceToTerminate.getTariffZones().forEach(tz -> {
+                    TariffZoneRef tariffZoneRef = new TariffZoneRef();
+                    ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
+                    mergedStopPlace.getTariffZones().add(tariffZoneRef);
+                });
+            }
+
+            if (fromStopPlaceToTerminate.getAlternativeNames() != null) {
+                alternativeNamesMerger.mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
+            }
         }
     }
 
