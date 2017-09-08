@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
@@ -48,7 +49,6 @@ public class StopPlaceMerger {
     @Autowired
     private AlternativeNamesMerger alternativeNamesMerger;
 
-
     public StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
 
         logger.info("About to merge stop place {} into stop place {} with from comment {} and to comment {} ", fromStopPlaceId, toStopPlaceId, fromVersionComment, toVersionComment);
@@ -62,24 +62,75 @@ public class StopPlaceMerger {
         Preconditions.checkArgument(!fromStopPlace.isParentStopPlace(), "Cannot merge parent stop places. From stop place: [id = %s].", fromStopPlaceId);
         Preconditions.checkArgument(!toStopPlace.isParentStopPlace(), "Cannot merge parent stop places. To stop place: [id = %s].", toStopPlace);
 
+        Preconditions.checkArgument(!(fromStopPlace.getParentSiteRef() != null && fromStopPlace.getParentSiteRef().getRef() != null), "Cannot merge from childs of multi modal stop places [id = %s].", fromStopPlaceId);
+
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
 
         StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
 
+
         //New version of merged StopPlace
-        final StopPlace mergedStopPlace = stopPlaceVersionedSaverService.createCopy(toStopPlace, StopPlace.class);
+        final StopPlace mergedStopPlace;
+        final Optional<StopPlace> mergedStopPlaceParent;
+        final Optional<StopPlace> existingStopPlaceParent;
 
-        //Transfer quays
-        fromStopPlaceToTerminate.getQuays().stream()
-                .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
+        if(toStopPlace.getParentSiteRef() != null && toStopPlace.getParentSiteRef().getRef() != null) {
+            logger.info("The stop place being merged to ({}) is a child of parent: {}", toStopPlace.getNetexId(), toStopPlace.getParentSiteRef());
 
-        //Remove quays from from-StopPlace
-        fromStopPlaceToTerminate.getQuays().clear();
-        fromStopPlaceToTerminate.setVersionComment(fromVersionComment);
+            StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(toStopPlace.getParentSiteRef().getRef(),
+                    Long.parseLong(toStopPlace.getParentSiteRef().getVersion()));
+
+            existingStopPlaceParent = Optional.of(parent);
+
+            StopPlace parentCopy = stopPlaceVersionedSaverService.createCopy(parent, StopPlace.class);
+            mergedStopPlace = resolveChildFromParent(parentCopy, toStopPlace.getNetexId(), toStopPlace.getVersion());
+
+            mergedStopPlaceParent = Optional.of(parentCopy);
+        } else {
+            mergedStopPlaceParent = Optional.empty();
+            existingStopPlaceParent = Optional.empty();
+            mergedStopPlace = stopPlaceVersionedSaverService.createCopy(toStopPlace, StopPlace.class);
+        }
+
+        if(mergedStopPlaceParent.isPresent()) {
+            mergedStopPlaceParent.get().setVersionComment(toVersionComment);
+        } else {
+            mergedStopPlace.setVersionComment(toVersionComment);
+        }
+
+        executeMerge(fromStopPlaceToTerminate, mergedStopPlace, fromVersionComment, toVersionComment, mergedStopPlaceParent.isPresent());
+
+
+        if (!isDryRun) {
+            //Terminate validity of from-StopPlace
+            terminateEntity(fromStopPlaceToTerminate);
+            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
+
+            if(mergedStopPlaceParent.isPresent()) {
+                logger.info("Saving parent stop place first {}. Returning parent of child: {}", mergedStopPlaceParent.get().getNetexId(), mergedStopPlace.getNetexId());
+
+                return stopPlaceVersionedSaverService.saveNewVersion(existingStopPlaceParent.get(), mergedStopPlaceParent.get());
+
+            } else {
+                return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
+            }
+        }
+        return mergedStopPlace;
+    }
+
+    private StopPlace resolveChildFromParent(StopPlace parentStopPlace, String childNetexId, long childVersion) {
+        return parentStopPlace.getChildren()
+                .stream()
+                .filter(child -> child.getNetexId().equals(childNetexId) && child.getVersion() == childVersion)
+                .findFirst()
+                .get();
+    }
+
+    private void executeMerge(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace, String fromVersionComment, String toVersionComment, boolean isMergingToChildOfMultiModalStopPlace) {
+        transferQuays(fromStopPlaceToTerminate, mergedStopPlace);
+        removeQuaysFromFromStopPlace(fromStopPlaceToTerminate, fromVersionComment);
 
         ObjectMerger.copyPropertiesNotNull(fromStopPlaceToTerminate, mergedStopPlace, IGNORE_PROPERTIES_ON_MERGE);
-
-        mergedStopPlace.setVersionComment(toVersionComment);
 
         if (fromStopPlaceToTerminate.getKeyValues() != null) {
             keyValuesMerger.mergeKeyValues(fromStopPlaceToTerminate.getKeyValues(), mergedStopPlace.getKeyValues());
@@ -93,8 +144,7 @@ public class StopPlaceMerger {
             );
         }
 
-
-        if (fromStopPlaceToTerminate.getTariffZones() != null) {
+        if (fromStopPlaceToTerminate.getTariffZones() != null && !isMergingToChildOfMultiModalStopPlace) {
             fromStopPlaceToTerminate.getTariffZones().forEach(tz -> {
                 TariffZoneRef tariffZoneRef = new TariffZoneRef();
                 ObjectMerger.copyPropertiesNotNull(tz, tariffZoneRef);
@@ -102,20 +152,20 @@ public class StopPlaceMerger {
             });
         }
 
-        if (fromStopPlaceToTerminate.getAlternativeNames() != null) {
+        if (fromStopPlaceToTerminate.getAlternativeNames() != null && !isMergingToChildOfMultiModalStopPlace) {
             alternativeNamesMerger.mergeAlternativeNames(fromStopPlaceToTerminate.getAlternativeNames(), mergedStopPlace.getAlternativeNames());
         }
-
-
-        if (!isDryRun) {
-            //Terminate validity of from-StopPlace
-            terminateEntity(fromStopPlaceToTerminate);
-            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
-            return stopPlaceVersionedSaverService.saveNewVersion(toStopPlace, mergedStopPlace);
-        }
-        return mergedStopPlace;
     }
 
+    private void removeQuaysFromFromStopPlace(StopPlace fromStopPlaceToTerminate, String fromVersionComment) {
+        fromStopPlaceToTerminate.getQuays().clear();
+        fromStopPlaceToTerminate.setVersionComment(fromVersionComment);
+    }
+
+    private void transferQuays(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace) {
+        fromStopPlaceToTerminate.getQuays().stream()
+                .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
+    }
 
     private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
         // Terminate validity for "from"-stopPlace

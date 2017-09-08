@@ -4,22 +4,23 @@ import com.vividsolutions.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 
 public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
     @Autowired
-    private StopPlaceMerger stopPlaceQuayMerger;
+    private StopPlaceMerger stopPlaceMerger;
+
+    @Autowired
+    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
     @Test
     @Transactional
@@ -80,7 +81,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
         // Act
-        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
 
         assertThat(mergedStopPlace).isNotNull();
 
@@ -107,7 +108,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         assertThat(equipment).hasSize(1);
         assertThat(equipment).doesNotContain(generalSign); // Result from merge does not contain same object
         assertThat(equipment.get(0)).isInstanceOf(GeneralSign.class);
-        assertThat(((GeneralSign)equipment.get(0)).getSignContentType()).isEqualTo(SignContentEnumeration.TRANSPORT_MODE);
+        assertThat(((GeneralSign) equipment.get(0)).getSignContentType()).isEqualTo(SignContentEnumeration.TRANSPORT_MODE);
 
         // assertQuays
         assertThat(mergedStopPlace.getQuays()).hasSize(2);
@@ -118,7 +119,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
                 assertThat(quay.getVersion()).isEqualTo(1 + fromQuay.getVersion());
                 assertThat(quay.equals(fromQuay));
 
-            } else if (quay.getNetexId().equals(toQuay.getNetexId())){
+            } else if (quay.getNetexId().equals(toQuay.getNetexId())) {
 
                 assertThat(quay.getVersion()).isEqualTo(1 + toQuay.getVersion());
                 assertThat(quay.equals(toQuay));
@@ -155,7 +156,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
-        
+
         Set<TariffZoneRef> fromTzSet = new HashSet<>();
         TariffZoneRef fromTz = new TariffZoneRef();
         fromTz.setRef("NSR:TZ:1");
@@ -177,7 +178,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
 
         assertThat(mergedStopPlace.getTariffZones()).hasSize(2);
 
@@ -203,7 +204,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
 
         assertThat(mergedStopPlace.getValidBetween()).isNotNull();
         assertThat(mergedStopPlace.getValidBetween().getFromDate()).isNotNull();
@@ -246,10 +247,52 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
         stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
 
-        StopPlace mergedStopPlace = stopPlaceQuayMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
 
         //AlternativeName
         assertThat(mergedStopPlace.getAlternativeNames()).isNotNull();
         assertThat(mergedStopPlace.getAlternativeNames()).hasSize(2);
+    }
+
+    @Test
+    @Transactional
+    public void testMergeStopPlaceChildrenThrowsException() {
+        StopPlace fromChild = createChildWithParent("first");
+        StopPlace toChild = createChildWithParent("second");
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> stopPlaceMerger.mergeStopPlaces(fromChild.getNetexId(), toChild.getNetexId(), null, null, false));
+    }
+
+    /**
+     * Test merge monomodal stop place with child of multimodal stop place
+     */
+    @Test
+    @Transactional
+    public void testMergeMonoModalStopPlaceWithMultiModalChild() {
+
+        StopPlace fromStopPlace = new StopPlace();
+        stopPlaceRepository.save(fromStopPlace);
+
+        StopPlace toChild = createChildWithParent("second");
+        String toVersionComment = "to version comment should be placed on the parent of the destination child";
+        StopPlace parentOfMergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toChild.getNetexId(), null, toVersionComment, false);
+
+        assertThat(parentOfMergedStopPlace).as("merged stop place").isNotNull();
+        assertThat(parentOfMergedStopPlace.getNetexId()).as("parent merged stop place netex id").isEqualTo(toChild.getParentSiteRef().getRef());
+        assertThat(parentOfMergedStopPlace.getVersionComment()).as("parent merged stop place version comment").isEqualTo(toVersionComment);
+
+        StopPlace actualChild = parentOfMergedStopPlace.getChildren().stream().filter(child -> child.getNetexId().equals(toChild.getNetexId())).findFirst().get();
+
+        assertThat(actualChild).as("Child of parent").isNotNull();
+        assertThat(actualChild.getParentSiteRef()).as("merged stop place parent site ref").isNotNull();
+        assertThat(actualChild.getParentSiteRef().getRef()).isEqualTo(toChild.getParentSiteRef().getRef());
+        assertThat(actualChild.getParentSiteRef().getVersion()).as("parent version").isEqualTo("2");
+        assertThat(actualChild.getVersion()).isEqualTo(toChild.getVersion()+1);
+    }
+
+    private StopPlace createChildWithParent(String name) {
+        StopPlace child = new StopPlace();
+        stopPlaceRepository.save(child);
+        return multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(name)).getChildren().iterator().next();
+
     }
 }
