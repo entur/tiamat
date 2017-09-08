@@ -21,14 +21,16 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonInputType;
 
 @Component
 public class MultiModalityOperationsBuilder {
 
     public static final String CREATE_MULTI_MODAL_STOP_PLACE_INPUT = "createMultiModalStopPlaceInput";
+
+    public static final String ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT = "addToMultiModalStopPlaceInput";
+
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceEditor;
 
@@ -59,10 +61,15 @@ public class MultiModalityOperationsBuilder {
                         .name(CREATE_MULTI_MODAL_STOP_PLACE_INPUT)
                         .type(newInputObject()
                                 .name("inputfields")
-                                .fields(createMultiModalStopPlaceFields).build())
+                                .fields(createMultiModalStopPlaceFields)
+                                .build())
                         .build())
                 .dataFetcher(environment -> {
                     Map input = environment.getArgument(CREATE_MULTI_MODAL_STOP_PLACE_INPUT);
+
+                    if(input == null) {
+                        throw new IllegalArgumentException(CREATE_MULTI_MODAL_STOP_PLACE_INPUT + " is not specified");
+                    }
 
                     ValidBetween validBetween = validBetweenMapper.map((Map) input.get(VALID_BETWEEN));
                     String versionComment = (String) input.get(VERSION_COMMENT);
@@ -76,13 +83,47 @@ public class MultiModalityOperationsBuilder {
                 })
                 .build());
 
+        List<GraphQLInputObjectField> addOrRemoveChildMultiModalStopPlaceFields = new ArrayList<>();
+        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(PARENT_SITE_REF).type(GraphQLString).build());
+        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString).build());
+        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType).build());
+        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(STOP_PLACE_IDS).type(new GraphQLNonNull(new GraphQLList(GraphQLString))).build());
+
         operations.add(newFieldDefinition()
                 .type(parentStopPlaceObjectType)
                 .name(ADD_TO_MULTIMODAL_STOPPLACE)
                 .description("Adds a StopPlace to an existing ParentStopPlace")
-                .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
-                .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
-                .dataFetcher(environment -> parentStopPlaceEditor.addToMultiModalParentStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
+                .argument(newArgument()
+                        .name(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT)
+                        .type(newInputObject()
+                                .name("infputfields")
+                                .fields(addOrRemoveChildMultiModalStopPlaceFields)
+                                .build())
+                        .build())
+                .dataFetcher(environment -> {
+                    Map input = environment.getArgument(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT);
+
+                    if(input == null) {
+                        throw new IllegalArgumentException(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT+ " is not specified");
+                    }
+
+                    if(input.get(PARENT_SITE_REF) == null) {
+                        throw new IllegalArgumentException("Parent site ref cannot be null for this operation" + ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT);
+                    }
+
+                    String parentSiteRef = (String) input.get(PARENT_SITE_REF);
+
+                    ValidBetween validBetween = validBetweenMapper.map((Map) input.get(VALID_BETWEEN));
+                    String versionComment = (String) input.get(VERSION_COMMENT);
+
+                    if(input.get(STOP_PLACE_IDS) == null) {
+                        throw new IllegalArgumentException("List of " + STOP_PLACE_IDS + "cannot be null");
+                    }
+                    @SuppressWarnings("unchecked")
+                    List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
+
+                    return parentStopPlaceEditor.addToMultiModalParentStopPlace(parentSiteRef, stopPlaceIds, validBetween, versionComment);
+                })
                 .build());
 
         operations.add(newFieldDefinition()
@@ -96,5 +137,6 @@ public class MultiModalityOperationsBuilder {
 
         return operations;
     }
+
 
 }

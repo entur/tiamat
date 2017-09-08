@@ -9,8 +9,10 @@ import org.rutebanken.tiamat.changelog.EntityChangedEvent
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener
 import org.rutebanken.tiamat.model.*
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper
+import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor
 import org.rutebanken.tiamat.time.ExportTimeZone
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -18,6 +20,7 @@ import java.time.format.DateTimeFormatter
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.*
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
+import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT
 import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.CREATE_MULTI_MODAL_STOP_PLACE_INPUT
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN
 
@@ -790,6 +793,75 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("name", nullValue())
                 .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
                 .body("version", equalTo(String.valueOf(bus.getVersion()+1)));
+    }
+
+
+    @Transactional
+    def createParentInTransaction(def existingChild, def newChild, EmbeddableMultilingualString parentStopPlaceName) {
+
+        existingChild = stopPlaceVersionedSaverService.saveNewVersion(existingChild);
+        newChild = stopPlaceVersionedSaverService.saveNewVersion(newChild);
+
+        return multiModalStopPlaceEditor.createMultiModalParentStopPlace([existingChild.getNetexId()], parentStopPlaceName);
+    }
+
+    @Autowired
+    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Test
+    void "Add child to parent stop place"() {
+        def existingChild = new StopPlace();
+
+        existingChild.setStopPlaceType(StopTypeEnumeration.HARBOUR_PORT)
+
+        def newChild = new StopPlace(new EmbeddableMultilingualString("new child"))
+        newChild.setVersion(10L)
+        newChild.setStopPlaceType(StopTypeEnumeration.LIFT_STATION);
+
+        println "tariff zones new child: ${newChild.tariffZones}"
+
+        def parentStopPlaceName = "parent stop place name";
+
+        def parent = createParentInTransaction(existingChild, newChild, new EmbeddableMultilingualString(parentStopPlaceName));
+
+        def versionComment = "VersionComment";
+
+        def graphQlJsonQuery = """mutation {
+                 stopPlace: ${ADD_TO_MULTIMODAL_STOPPLACE} (${ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT}: {
+                          ${PARENT_SITE_REF}: "${parent.getNetexId()}"
+                          ${STOP_PLACE_IDS}:["${newChild.getNetexId()}"]
+                          validBetween: { fromDate:"2017-07-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
+                          versionComment:"${versionComment}"
+                       }) {
+                          id
+                          name { value }
+                          children {
+                           id name { value } stopPlaceType version
+                          }
+                          validBetween { fromDate toDate }
+                          version
+                          versionComment
+                       }
+                  } """;
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
+                .body("data.stopPlace.stopPlaceType", nullValue())
+                .body("data.stopPlace.versionComment", equalTo(versionComment))
+                .body("data.stopPlace.version", equalTo("2"))
+
+                .root("data.stopPlace.children.find { it.id == '${existingChild.getNetexId()}'}")
+
+                    .body("name", nullValue())
+                    // version 3 expected. 1: created, 2: added to parent stop, 3: new child added to parent stop
+                    .body("version", equalTo("${existingChild.getVersion()+2}".toString()))
+                    .body("stopPlaceType", equalTo(existingChild.getStopPlaceType().value()))
+
+                .root("data.stopPlace.children.find { it.id == '${newChild.getNetexId()}'}".toString())
+                    .body("name", nullValue())
+                    .body("version", equalTo("${newChild.getVersion()+1}".toString()))
+                    .body("stopPlaceType", equalTo(newChild.getStopPlaceType().value()))
+
     }
 
     @Test

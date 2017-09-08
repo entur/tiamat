@@ -65,9 +65,18 @@ public class MultiModalStopPlaceEditor {
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
+        return addToMultiModalParentStopPlace(parentStopPlaceId, childStopPlaceIds, null, null);
+    }
+
+    public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds, ValidBetween validBetween, String versionComment) {
         logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
+
+        if(parentStopPlace == null) {
+            throw new IllegalArgumentException("Cannot fetch parent stop place from ID: "+parentStopPlaceId);
+        }
+
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
 
         List<String> alreadyAdded = childStopPlaceIds
@@ -82,6 +91,9 @@ public class MultiModalStopPlaceEditor {
         }
 
         StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+
+        parentStopPlaceCopy.setValidBetween(validBetween);
+        parentStopPlaceCopy.setVersionComment(versionComment);
 
         List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
