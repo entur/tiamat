@@ -41,6 +41,8 @@ public class StopPlaceQuayDeleter {
 
         Preconditions.checkArgument(stopPlace != null, "Attempting to delete StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
+        Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent stop place: [id = %s].", stopPlaceId);
+
         Optional<Quay> optionalQuay = stopPlace.getQuays().stream().filter(quay -> quay.getNetexId().equals(quayId)).findFirst();
         Preconditions.checkArgument(optionalQuay.isPresent(), "Attempting to delete Quay [id = %s], but Quay does not exist on StopPlace [id = %s].", quayId, stopPlaceId);
 

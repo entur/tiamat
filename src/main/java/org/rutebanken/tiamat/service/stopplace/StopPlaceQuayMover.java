@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.google.api.client.util.Preconditions;
 import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.model.Quay;
