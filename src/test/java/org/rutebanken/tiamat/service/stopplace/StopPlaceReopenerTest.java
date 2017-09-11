@@ -19,7 +19,7 @@ public class StopPlaceReopenerTest extends TiamatIntegrationTest {
 
     @Transactional
     @Test
-    public void testTerminateAndReopenStopPlace() {
+    public void testReopenStopPlace() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         String stopPlaceNetexId = savedStopPlace.getNetexId();
