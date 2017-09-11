@@ -158,6 +158,30 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void findStopPlacesWithinParent() throws Exception {
+
+        double southEastLatitude = 59.875649;
+        double southEastLongitude = 10.500340;
+
+        double northWestLatitude = 59.875924;
+        double northWestLongitude = 10.500699;
+
+        StopPlace parent = createStopPlace(59.875679, 10.500430);
+        parent.setParentStopPlace(true);
+        stopPlaceRepository.save(parent);
+
+        StopPlace child = new StopPlace();
+        child.setParentStopPlace(false);
+        child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        stopPlaceRepository.save(child);
+
+        Pageable pageable = new PageRequest(0, 10);
+
+        Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
+        assertThat(result.getContent()).extracting(EntityStructure::getNetexId).contains(child.getNetexId());
+    }
+
+    @Test
     public void findStopPlacesWithinMaxVersion() throws Exception {
 
         double southEastLatitude = 59.875649;

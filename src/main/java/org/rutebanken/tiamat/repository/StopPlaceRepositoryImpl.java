@@ -59,6 +59,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      */
     protected static final String SQL_MAX_VERSION_OF_STOP_PLACE = "s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id) ";
 
+    protected static final String SQL_CHILD_OR_PARENT_WITHIN = "(ST_within(s.centroid, :filter) = true OR ST_within(p.centroid, :filter) = true) ";
+
     @Autowired
     private EntityManager entityManager;
 
@@ -89,7 +91,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString = "SELECT s.* FROM stop_place s " +
                                      SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE ST_within(s.centroid, :filter) = true ";
+                                     "WHERE " +
+                                        SQL_CHILD_OR_PARENT_WITHIN +
+                                        "AND s.parent_stop_place = false ";
 
         if (pointInTime != null) {
             queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
