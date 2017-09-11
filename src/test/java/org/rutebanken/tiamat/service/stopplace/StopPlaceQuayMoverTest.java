@@ -84,6 +84,42 @@ public class StopPlaceQuayMoverTest extends TiamatIntegrationTest {
 
     }
 
+    @Test
+    public void moveQuayBetweenChildStops() {
+
+        StopPlace sourceStopPlace = new StopPlace();
+        Quay quayToMove = new Quay();
+        quayToMove.setPublicCode("1");
+        sourceStopPlace.getQuays().add(quayToMove);
+        StopPlace sourceParentStopPlace = new StopPlace(new EmbeddableMultilingualString("parent from stop place"));
+        sourceParentStopPlace.getChildren().add(sourceStopPlace);
+        sourceParentStopPlace = stopPlaceVersionedSaverService.saveNewVersion(sourceParentStopPlace);
+
+        StopPlace destinationStopPlace = new StopPlace();
+        Quay existingQuay = new Quay();
+        existingQuay.setPublicCode("2");
+        destinationStopPlace.getQuays().add(existingQuay);
+        StopPlace parentDestinationStopPlace = new StopPlace(new EmbeddableMultilingualString("destination parent stop place"));
+        parentDestinationStopPlace.getChildren().add(destinationStopPlace);
+        parentDestinationStopPlace = stopPlaceVersionedSaverService.saveNewVersion(parentDestinationStopPlace);
+
+
+        StopPlace actualParentDestinationStopPlace = stopPlaceQuayMover.moveQuays(Arrays.asList(quayToMove.getNetexId()), destinationStopPlace.getNetexId(), "from comment", "to comment");
+
+
+        assertThat(actualParentDestinationStopPlace).isNotNull();
+        assertThat(actualParentDestinationStopPlace.getNetexId()).isEqualTo(parentDestinationStopPlace.getNetexId());
+
+        assertThat(actualParentDestinationStopPlace.getChildren()).hasSize(1);
+
+        StopPlace actualDestinationStopPlace = actualParentDestinationStopPlace.getChildren().iterator().next();
+
+        assertThat(actualDestinationStopPlace.getNetexId()).isEqualTo(destinationStopPlace.getNetexId());
+        assertThat(actualDestinationStopPlace.getQuays())
+                .hasSize(2)
+                .extracting(quay -> quay.getNetexId()).contains(quayToMove.getNetexId());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void doNotAcceptInvalidQuayId() {
         stopPlaceQuayMover.moveQuays(Arrays.asList("NSR:Quay:99999999"), null, null, null);
