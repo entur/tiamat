@@ -6,7 +6,9 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.versioning.CopiedEntity;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.util.StopPlaceCopyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class StopPlaceQuayDeleter {
     private UsernameFetcher usernameFetcher;
 
     @Autowired
-    private ChildFromParentResolver childFromParentResolver;
+    private StopPlaceCopyHelper stopPlaceCopyHelper;
 
     public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
 
@@ -51,40 +53,22 @@ public class StopPlaceQuayDeleter {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
-        final Optional<StopPlace> parentStopPlace;
-        final StopPlace existingParentStopPlace;
-        final StopPlace nextVersionStopPlace;
+        CopiedEntity<StopPlace> copiedStopPlace = stopPlaceCopyHelper.createCopies(stopPlace);
 
-        if(stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
+        copiedStopPlace.getCopiedEntity().getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
 
-            existingParentStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(),
-                    Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
-
-            StopPlace parentCopy = stopPlaceVersionedSaverService.createCopy(existingParentStopPlace, StopPlace.class);
-            nextVersionStopPlace = childFromParentResolver.resolveChildFromParent(parentCopy, stopPlace.getNetexId(), stopPlace.getVersion());
-
-            parentStopPlace = Optional.of(parentCopy);
+        if(copiedStopPlace.hasParent()) {
+            copiedStopPlace.getCopiedParent().setVersionComment(versionComment);
         } else {
-            parentStopPlace = Optional.empty();
-            existingParentStopPlace = null;
-            nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+            copiedStopPlace.getCopiedEntity().setVersionComment(versionComment);
         }
 
 
-        nextVersionStopPlace.getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
-
-        if(parentStopPlace.isPresent()) {
-            parentStopPlace.get().setVersionComment(versionComment);
+        if(copiedStopPlace.hasParent()) {
+            logger.info("Saving parent stop place {}. Returning parent of child: {}", copiedStopPlace.getCopiedParent().getNetexId(), stopPlace.getNetexId());
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedStopPlace.getExistingParent(), copiedStopPlace.getCopiedParent());
         } else {
-            nextVersionStopPlace.setVersionComment(versionComment);
-        }
-
-
-        if(parentStopPlace.isPresent()) {
-            logger.info("Saving parent stop place {}. Returning parent of child: {}", parentStopPlace.get().getNetexId(), stopPlace.getNetexId());
-            return stopPlaceVersionedSaverService.saveNewVersion(existingParentStopPlace, parentStopPlace.get());
-        } else {
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedStopPlace.getExistingEntity(), copiedStopPlace.getCopiedEntity());
         }
     }
 }
