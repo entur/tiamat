@@ -45,8 +45,8 @@ public class StopPlaceDeleter {
 
         List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
-        if (stopPlaces.stream().anyMatch(stopPlace -> stopPlace.isParentStopPlace())) {
-            throw new IllegalArgumentException("Deleting parent stop place is not accepted: " + stopPlaceId);
+        if (stopPlaces.stream().anyMatch(stopPlace -> stopPlace.isParentStopPlace() || stopPlace.getParentSiteRef() != null)) {
+            throw new IllegalArgumentException("Deleting parent stop place or childs of parent stop place is not allowed: " + stopPlaceId);
         }
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
