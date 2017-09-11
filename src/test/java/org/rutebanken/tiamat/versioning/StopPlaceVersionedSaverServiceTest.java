@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
@@ -391,4 +392,12 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
 
+    @Test
+    public void savingChildStopsShouldNotBeAllowed() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setParentStopPlace(false);
+        stopPlace.setParentSiteRef(new SiteRefStructure("ref", "1"));
+
+        assertThatThrownBy(() -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace)).isInstanceOf(IllegalArgumentException.class);
+    }
 }

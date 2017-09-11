@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
-import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.SiteElement;
@@ -62,6 +61,13 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion) {
 
         super.validate(existingVersion, newVersion);
+
+        if (newVersion.getParentSiteRef() != null && !newVersion.isParentStopPlace()) {
+            throw new IllegalArgumentException("StopPlace " +
+                    newVersion.getNetexId() +
+                    " seems to be a child stop. Save the parent stop place instead: "
+                    + newVersion.getParentSiteRef());
+        }
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
 
