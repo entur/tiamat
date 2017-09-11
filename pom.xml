@@ -58,6 +58,7 @@
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
         <activemq-client.version>5.15.0</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <flyway-core.version>4.2.0</flyway-core.version>
 
         <logstash-logback.version>4.11</logstash-logback.version>
         <kubernetes-client.version>2.6.1</kubernetes-client.version>
@@ -131,6 +132,13 @@
 
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway-core.version}</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.vividsolutions/jts -->
         <dependency>
             <groupId>com.vividsolutions</groupId>
