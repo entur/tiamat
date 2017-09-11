@@ -85,4 +85,15 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
         validityUpdater.updateValidBetween(stopPlace, now);
     }
 
+    @Test
+    public void doNotSetEndDateOnPreviousVersionIfAlreadySet() {
+        StopPlace oldVersion = new StopPlace();
+        oldVersion.setVersion(1L);
+        oldVersion.setValidBetween(new ValidBetween(Instant.EPOCH, Instant.EPOCH));
+
+        validityUpdater.terminateVersion(oldVersion, Instant.now());
+
+        assertThat(oldVersion.getValidBetween().getToDate()).isEqualTo(Instant.EPOCH);
+    }
+
 }

@@ -57,12 +57,14 @@ public class ValidityUpdater {
             throw new IllegalArgumentException("Cannot terminate version for null object");
         }
 
-        logger.info("Version {} of {} will be invalid at {}", versionToTerminate.getVersion(), versionToTerminate.getNetexId(), terminateAt);
-        if (versionToTerminate.getValidBetween() != null ) {
-            versionToTerminate.getValidBetween().setToDate(terminateAt);
-        } else {
+        if(versionToTerminate.getValidBetween() == null) {
             logger.warn("Entity {} does not have valid between. Setting toDate.", versionToTerminate.getNetexId());
             versionToTerminate.setValidBetween(new ValidBetween(null, terminateAt));
+        } else if (versionToTerminate.getValidBetween().getToDate() == null) {
+            // Only terminate if to date not already set.
+            versionToTerminate.getValidBetween().setToDate(terminateAt);
         }
+
+        logger.info("Version {} of {} will be invalid at {}", versionToTerminate.getVersion(), versionToTerminate.getNetexId(), terminateAt);
     }
 }
