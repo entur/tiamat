@@ -37,6 +37,10 @@ public class StopPlaceTerminator {
 
         // Stop Place Saver service should always check that the user is authorized
 
+        if(!stopPlace.isParentStopPlace() && stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
+            throw new IllegalArgumentException("Cannot terminate child stop of multi modal stop place: "+stopPlaceId);
+        }
+
         if (stopPlace != null) {
             StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
