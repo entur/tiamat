@@ -49,18 +49,40 @@ public class StopPlaceQuayMerger {
     @Autowired
     private UsernameFetcher usernameFetcher;
 
-    public StopPlace mergeQuays(String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
+    @Autowired
+    private ChildFromParentResolver childFromParentResolver;
+
+    public StopPlace mergeQuays(final String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
 
         logger.info("{} is about to merge quays {} -> {} of stop place {}", usernameFetcher.getUserNameForAuthenticatedUser(), fromQuayId, toQuayId, stopPlaceId);
 
-        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+        final StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
         Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
         Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
 
-        StopPlace updatedStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        // Check if there are any parent stop place
+        final Optional<StopPlace> parentStopPlace;
+        final StopPlace existingParentStopPlace;
+        final StopPlace updatedStopPlace;
+
+        if(stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
+            logger.info("The stop place having its quays merged ({}) is a child of parent: {}", stopPlace.getNetexId(), stopPlace.getParentSiteRef());
+
+            existingParentStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(),
+                    Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
+
+            StopPlace parentCopy = stopPlaceVersionedSaverService.createCopy(existingParentStopPlace, StopPlace.class);
+            updatedStopPlace = childFromParentResolver.resolveChildFromParent(parentCopy, stopPlace.getNetexId(), stopPlace.getVersion());
+
+            parentStopPlace = Optional.of(parentCopy);
+        } else {
+            parentStopPlace = Optional.empty();
+            existingParentStopPlace = null;
+            updatedStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        }
 
         Optional<Quay> fromQuayOpt = updatedStopPlace.getQuays().stream().filter(quay -> quay.getNetexId().equals(fromQuayId)).findFirst();
         Optional<Quay> toQuayOpt = updatedStopPlace.getQuays().stream().filter(quay -> quay.getNetexId().equals(toQuayId)).findFirst();
@@ -71,6 +93,36 @@ public class StopPlaceQuayMerger {
         Quay fromQuay = fromQuayOpt.get();
         Quay toQuay = toQuayOpt.get();
 
+        executeQuayMerge(fromQuay, toQuay);
+
+        updatedStopPlace.getQuays()
+                .removeIf(quay -> quay.getNetexId().equals(fromQuayId));
+
+        if(parentStopPlace.isPresent()) {
+            parentStopPlace.get().setVersionComment(versionComment);
+        } else {
+            updatedStopPlace.setVersionComment(versionComment);
+        }
+
+
+        logger.info("Saving stop place after merging: {}", stopPlace.getNetexId());
+        if(parentStopPlace.isPresent()) {
+            if(!isDryRun) {
+                logger.info("Saving parent stop place {}. Returning parent of child: {}", parentStopPlace.get().getNetexId(), stopPlace.getNetexId());
+                return stopPlaceVersionedSaverService.saveNewVersion(existingParentStopPlace, parentStopPlace.get());
+            } else {
+                return parentStopPlace.get();
+            }
+        } else {
+            if(!isDryRun) {
+                return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, updatedStopPlace);
+            } else {
+                return updatedStopPlace;
+            }
+        }
+    }
+
+    private void executeQuayMerge(Quay fromQuay, Quay toQuay) {
         ObjectMerger.copyPropertiesNotNull(fromQuay, toQuay, IGNORE_PROPERTIES_ON_MERGE);
         //Copy attributes to to-quay
 
@@ -87,17 +139,5 @@ public class StopPlaceQuayMerger {
         if (fromQuay.getAlternativeNames() != null) {
             alternativeNamesMerger.mergeAlternativeNames(fromQuay.getAlternativeNames(), toQuay.getAlternativeNames());
         }
-
-        updatedStopPlace.getQuays()
-                .removeIf(quay -> quay.getNetexId().equals(fromQuayId));
-
-        updatedStopPlace.setVersionComment(versionComment);
-
-        if (!isDryRun) {
-            //Save updated StopPlace
-            updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, updatedStopPlace);
-        }
-
-        return updatedStopPlace;
     }
 }

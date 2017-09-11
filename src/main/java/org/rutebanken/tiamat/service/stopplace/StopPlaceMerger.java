@@ -49,6 +49,9 @@ public class StopPlaceMerger {
     @Autowired
     private AlternativeNamesMerger alternativeNamesMerger;
 
+    @Autowired
+    private ChildFromParentResolver childFromParentResolver;
+
     public StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
 
         logger.info("About to merge stop place {} into stop place {} with from comment {} and to comment {} ", fromStopPlaceId, toStopPlaceId, fromVersionComment, toVersionComment);
@@ -77,7 +80,7 @@ public class StopPlaceMerger {
             existingStopPlaceParent = Optional.of(parent);
 
             StopPlace parentCopy = stopPlaceVersionedSaverService.createCopy(parent, StopPlace.class);
-            mergedStopPlace = resolveChildFromParent(parentCopy, toStopPlace.getNetexId(), toStopPlace.getVersion());
+            mergedStopPlace = childFromParentResolver.resolveChildFromParent(parentCopy, toStopPlace.getNetexId(), toStopPlace.getVersion());
 
             mergedStopPlaceParent = Optional.of(parentCopy);
         } else {
@@ -94,7 +97,7 @@ public class StopPlaceMerger {
             stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
 
             if(mergedStopPlaceParent.isPresent()) {
-                logger.info("Saving parent stop place first {}. Returning parent of child: {}", mergedStopPlaceParent.get().getNetexId(), mergedStopPlace.getNetexId());
+                logger.info("Saving parent stop place {}. Returning parent of child: {}", mergedStopPlaceParent.get().getNetexId(), mergedStopPlace.getNetexId());
 
                 return stopPlaceVersionedSaverService.saveNewVersion(existingStopPlaceParent.get(), mergedStopPlaceParent.get());
 
@@ -113,13 +116,7 @@ public class StopPlaceMerger {
         Preconditions.checkArgument(!(fromStopPlace.getParentSiteRef() != null && fromStopPlace.getParentSiteRef().getRef() != null), "Cannot merge from childs of multi modal stop places [id = %s].", fromStopPlace.getNetexId());
     }
 
-    private StopPlace resolveChildFromParent(StopPlace parentStopPlace, String childNetexId, long childVersion) {
-        return parentStopPlace.getChildren()
-                .stream()
-                .filter(child -> child.getNetexId().equals(childNetexId) && child.getVersion() == childVersion)
-                .findFirst()
-                .get();
-    }
+
 
     private void executeMerge(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace, String fromVersionComment, String toVersionComment, Optional<StopPlace> mergedStopPlaceParent) {
         transferQuays(fromStopPlaceToTerminate, mergedStopPlace);
