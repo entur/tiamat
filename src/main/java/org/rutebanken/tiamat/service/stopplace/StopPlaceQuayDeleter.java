@@ -33,6 +33,9 @@ public class StopPlaceQuayDeleter {
     @Autowired
     private UsernameFetcher usernameFetcher;
 
+    @Autowired
+    private ChildFromParentResolver childFromParentResolver;
+
     public StopPlace deleteQuay(String stopPlaceId, String quayId, String versionComment) {
 
         logger.warn("{} is deleting quay {} from stop place {} with comment {}", usernameFetcher.getUserNameForAuthenticatedUser(), quayId, stopPlaceId, versionComment);
@@ -48,12 +51,40 @@ public class StopPlaceQuayDeleter {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
-        StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        final Optional<StopPlace> parentStopPlace;
+        final StopPlace existingParentStopPlace;
+        final StopPlace nextVersionStopPlace;
+
+        if(stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
+
+            existingParentStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(),
+                    Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
+
+            StopPlace parentCopy = stopPlaceVersionedSaverService.createCopy(existingParentStopPlace, StopPlace.class);
+            nextVersionStopPlace = childFromParentResolver.resolveChildFromParent(parentCopy, stopPlace.getNetexId(), stopPlace.getVersion());
+
+            parentStopPlace = Optional.of(parentCopy);
+        } else {
+            parentStopPlace = Optional.empty();
+            existingParentStopPlace = null;
+            nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+        }
+
 
         nextVersionStopPlace.getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
 
-        nextVersionStopPlace.setVersionComment(versionComment);
+        if(parentStopPlace.isPresent()) {
+            parentStopPlace.get().setVersionComment(versionComment);
+        } else {
+            nextVersionStopPlace.setVersionComment(versionComment);
+        }
 
-        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+
+        if(parentStopPlace.isPresent()) {
+            logger.info("Saving parent stop place {}. Returning parent of child: {}", parentStopPlace.get().getNetexId(), stopPlace.getNetexId());
+            return stopPlaceVersionedSaverService.saveNewVersion(existingParentStopPlace, parentStopPlace.get());
+        } else {
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+        }
     }
 }

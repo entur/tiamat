@@ -63,7 +63,7 @@ public class StopPlaceQuayMerger {
 
         Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
 
-        // Check if there are any parent stop place
+        // Check if there is any parent stop place
         final Optional<StopPlace> parentStopPlace;
         final StopPlace existingParentStopPlace;
         final StopPlace updatedStopPlace;

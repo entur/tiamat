@@ -11,12 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StopPlaceQuayDeleterTest extends TiamatIntegrationTest {
 
     @Autowired
     StopPlaceQuayDeleter stopPlaceQuayDeleter;
+
+    @Autowired
+    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Autowired
+    private ChildFromParentResolver childFromParentResolver;
 
     @Transactional
     @Test
@@ -59,4 +67,28 @@ public class StopPlaceQuayDeleterTest extends TiamatIntegrationTest {
         assertThat(updated.getVersionComment()).isEqualTo(versionComment);
 
     }
+
+    @Transactional
+    @Test
+    public void testDeleteQuayOfChildStop() {
+        StopPlace child = new StopPlace();
+        Quay quay = new Quay();
+        child.getQuays().add(quay);
+
+        stopPlaceRepository.save(child);
+
+        multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString("die")).getChildren().iterator().next();
+
+        StopPlace parentStopPlace = stopPlaceQuayDeleter.deleteQuay(child.getNetexId(), quay.getNetexId(), "Delete quay");
+
+        StopPlace actualChild = childFromParentResolver.resolveChildFromParent(parentStopPlace, child.getNetexId(), 0);
+
+
+        assertThat(actualChild.getQuays()).isEmpty();
+        assertThat(actualChild.getVersion()).isEqualTo(child.getVersion()+2);
+
+
+
+    }
+
 }
