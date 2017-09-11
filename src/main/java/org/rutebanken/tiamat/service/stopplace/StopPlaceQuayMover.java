@@ -1,8 +1,6 @@
 package org.rutebanken.tiamat.service.stopplace;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.geo.CentroidComputer;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
@@ -107,9 +104,9 @@ public class StopPlaceQuayMover {
      */
     private StopPlace save(CopiedEntity<StopPlace> copiedEntity) {
         if(copiedEntity.hasParent()) {
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getParent(), copiedEntity.getCopiedParent());
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingParent(), copiedEntity.getCopiedParent());
         } else
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getEntity(), copiedEntity.getCopiedEntity());
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingEntity(), copiedEntity.getCopiedEntity());
     }
 
     private void verifySize(List<String> quayIds, Set<StopPlace> sourceStopPlaces) {

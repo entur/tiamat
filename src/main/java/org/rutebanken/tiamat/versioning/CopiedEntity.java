@@ -10,28 +10,28 @@ import org.rutebanken.tiamat.model.EntityInVersionStructure;
  */
 public class CopiedEntity<T extends EntityInVersionStructure> {
 
-    private T entity;
+    private T existingEntity;
     private T copiedEntity;
-    private T parent;
+    private T existingParent;
     private T copiedParent;
 
-    public CopiedEntity(T entity, T copiedEntity, T parent, T copiedParent) {
-        this.entity = entity;
+    public CopiedEntity(T existingEntity, T copiedEntity, T existingParent, T copiedParent) {
+        this.existingEntity = existingEntity;
         this.copiedEntity = copiedEntity;
-        this.parent = parent;
+        this.existingParent = existingParent;
         this.copiedParent = copiedParent;
     }
 
-    public T getEntity() {
-        return entity;
+    public T getExistingEntity() {
+        return existingEntity;
     }
 
     public T getCopiedEntity() {
         return copiedEntity;
     }
 
-    public T getParent() {
-        return parent;
+    public T getExistingParent() {
+        return existingParent;
     }
 
     public T getCopiedParent() {
@@ -39,6 +39,6 @@ public class CopiedEntity<T extends EntityInVersionStructure> {
     }
 
     public boolean hasParent() {
-        return parent != null;
+        return existingParent != null;
     }
 }
