@@ -53,22 +53,22 @@ public class StopPlaceQuayDeleter {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
-        CopiedEntity<StopPlace> copiedStopPlace = stopPlaceCopyHelper.createCopies(stopPlace);
+        CopiedEntity<StopPlace> stopPlaceCopies = stopPlaceCopyHelper.createCopies(stopPlace);
 
-        copiedStopPlace.getCopiedEntity().getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
+        stopPlaceCopies.getCopiedEntity().getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
 
-        if(copiedStopPlace.hasParent()) {
-            copiedStopPlace.getCopiedParent().setVersionComment(versionComment);
+        if(stopPlaceCopies.hasParent()) {
+            stopPlaceCopies.getCopiedParent().setVersionComment(versionComment);
         } else {
-            copiedStopPlace.getCopiedEntity().setVersionComment(versionComment);
+            stopPlaceCopies.getCopiedEntity().setVersionComment(versionComment);
         }
 
 
-        if(copiedStopPlace.hasParent()) {
-            logger.info("Saving parent stop place {}. Returning parent of child: {}", copiedStopPlace.getCopiedParent().getNetexId(), stopPlace.getNetexId());
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedStopPlace.getExistingParent(), copiedStopPlace.getCopiedParent());
+        if(stopPlaceCopies.hasParent()) {
+            logger.info("Saving parent stop place {}. Returning parent of child: {}", stopPlaceCopies.getCopiedParent().getNetexId(), stopPlace.getNetexId());
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent());
         } else {
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedStopPlace.getExistingEntity(), copiedStopPlace.getCopiedEntity());
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingEntity(), stopPlaceCopies.getCopiedEntity());
         }
     }
 }
