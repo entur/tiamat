@@ -31,6 +31,8 @@ public class MultiModalityOperationsBuilder {
 
     public static final String ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT = "addToMultiModalStopPlaceInput";
 
+    private static final String INPUT = "input";
+
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceEditor;
 
@@ -58,17 +60,17 @@ public class MultiModalityOperationsBuilder {
                 .name(CREATE_MULTI_MODAL_STOPPLACE)
                 .description("Creates a new multimodal parent StopPlace")
                 .argument(newArgument()
-                        .name("input")
+                        .name(INPUT)
                         .type(newInputObject()
                                 .name(CREATE_MULTI_MODAL_STOP_PLACE_INPUT)
                                 .fields(createMultiModalStopPlaceFields)
                                 .build())
                         .build())
                 .dataFetcher(environment -> {
-                    Map input = environment.getArgument(CREATE_MULTI_MODAL_STOP_PLACE_INPUT);
+                    Map input = environment.getArgument(INPUT);
 
                     if(input == null) {
-                        throw new IllegalArgumentException(CREATE_MULTI_MODAL_STOP_PLACE_INPUT + " is not specified");
+                        throw new IllegalArgumentException(INPUT + " is not specified");
                     }
 
                     ValidBetween validBetween = validBetweenMapper.map((Map) input.get(VALID_BETWEEN));
@@ -94,17 +96,17 @@ public class MultiModalityOperationsBuilder {
                 .name(ADD_TO_MULTIMODAL_STOPPLACE)
                 .description("Adds a StopPlace to an existing ParentStopPlace")
                 .argument(newArgument()
-                        .name("input")
+                        .name(INPUT)
                         .type(newInputObject()
                                 .name(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT)
                                 .fields(addOrRemoveChildMultiModalStopPlaceFields)
                                 .build())
                         .build())
                 .dataFetcher(environment -> {
-                    Map input = environment.getArgument(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT);
+                    Map input = environment.getArgument(INPUT);
 
                     if(input == null) {
-                        throw new IllegalArgumentException(ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT+ " is not specified");
+                        throw new IllegalArgumentException(INPUT + " is not specified");
                     }
 
                     if(input.get(PARENT_SITE_REF) == null) {

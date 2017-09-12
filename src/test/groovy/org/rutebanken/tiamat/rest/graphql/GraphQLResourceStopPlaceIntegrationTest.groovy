@@ -20,8 +20,7 @@ import java.time.format.DateTimeFormatter
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.*
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
-import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT
-import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.CREATE_MULTI_MODAL_STOP_PLACE_INPUT
+import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.INPUT
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN
 
 def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
@@ -765,7 +764,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         def versionComment = "VersionComment";
 
         def graphQlJsonQuery = """mutation {
-                 stopPlace: ${GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE} (${CREATE_MULTI_MODAL_STOP_PLACE_INPUT}: {
+                 stopPlace: ${GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE} (${INPUT}: {
                           stopPlaceIds:["${bus.getNetexId()}" ,"${tram.getNetexId()}"]
                           name: { value: "${parentStopPlaceName}" }
                           validBetween: { fromDate:"2017-04-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
@@ -827,7 +826,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         def versionComment = "VersionComment";
 
         def graphQlJsonQuery = """mutation {
-                 stopPlace: ${ADD_TO_MULTIMODAL_STOPPLACE} (${ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT}: {
+                 stopPlace: ${ADD_TO_MULTIMODAL_STOPPLACE} (${INPUT}: {
                           ${PARENT_SITE_REF}: "${parent.getNetexId()}"
                           ${STOP_PLACE_IDS}:["${newChild.getNetexId()}"]
                           validBetween: { fromDate:"2017-07-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
