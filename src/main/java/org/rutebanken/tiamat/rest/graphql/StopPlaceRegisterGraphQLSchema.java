@@ -206,7 +206,7 @@ StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceObjectType))
+                        .type(new GraphQLList(stopPlaceInterface))
                         .name(FIND_STOPPLACE_BY_BBOX)
                         .description("Find StopPlaces within given BoundingBox.")
                         .argument(createBboxArguments())
