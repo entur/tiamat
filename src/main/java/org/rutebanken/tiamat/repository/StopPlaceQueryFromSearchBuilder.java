@@ -20,6 +20,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
 
 /**
  * Builds query from stop place search params
@@ -177,7 +178,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         }
 
         operators.add("and");
-        wheres.add("s.parent_stop_place = false");
+        wheres.add(SQL_NOT_PARENT_STOP_PLACE);
 
         addWheres(queryString, wheres, operators);
 
