@@ -28,7 +28,7 @@ public class ParentStopPlacesFetcher {
     public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds) {
 
 
-        if (stopPlaceList == null) {
+        if (stopPlaceList == null || stopPlaceList.stream().noneMatch(sp -> sp != null)) {
             return stopPlaceList;
         }
 
@@ -44,11 +44,11 @@ public class ParentStopPlacesFetcher {
                 if (parent != null) {
                     logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
 
-                    if(result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
-                            && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
+                    if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
+                                                                       && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
                         result.add(parent);
                     }
-                    if(keepChilds) {
+                    if (keepChilds) {
                         result.add(nonParentStop);
                     }
                 } else {
