@@ -69,6 +69,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      */
     protected static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = false ";
 
+    /**
+     * Ignore netex id for both stop place and its parent
+     */
+    protected static final String SQL_IGNORE_STOP_PLACE_ID = "(s.netex_id != :ignoreStopPlaceId AND p.netex_id != :ignoreStopPlaceId) ";
+
     @Autowired
     private EntityManager entityManager;
 
@@ -112,7 +117,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         if(ignoreStopPlaceId != null) {
-            queryString += "AND s.netex_id != :ignoreStopPlaceId ";
+            queryString += SQL_IGNORE_STOP_PLACE_ID;
 
         }
 
