@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hazelcast.core.HazelcastInstance;
+import io.swagger.annotations.Api;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
@@ -59,6 +60,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_ADMIN_PATH;
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
@@ -67,7 +70,8 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.Runnabl
  */
 @Component
 @Produces("application/xml")
-@Path("/publication_delivery")
+@Api
+@Path("netex")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RestoringImportResource {
 

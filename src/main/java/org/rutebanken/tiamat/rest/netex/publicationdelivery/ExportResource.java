@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import io.swagger.annotations.Api;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
@@ -34,9 +35,13 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URI;
 
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
+
 @Component
+@Api
 @Produces("application/xml")
-@Path("/publication_delivery")
+@Path("netex")
 public class ExportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ExportResource.class);
@@ -68,7 +73,7 @@ public class ExportResource {
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    @Path("changed")
+    @Path("changed_in_period")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
                                                                         @BeanParam ExportParams exportParams,
                                                                         @Context UriInfo uriInfo)

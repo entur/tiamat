@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ReproduceDuplicateKeysException {
 
-    private static final String TIAMAT_URL = "http://localhost:1997/jersey/publication_delivery";
+    private static final String TIAMAT_URL = "http://localhost:1997/services/stop_places/netex";
 
     @SuppressWarnings("unchecked")
     @Ignore

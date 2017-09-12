@@ -37,12 +37,11 @@ import static org.mockito.Mockito.*;
 public class DtoQuayResourceTest {
 
     private QuayRepository quayRepository = mock(QuayRepository.class);
-    private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private DtoQuayResource dtoQuayResource;
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource(quayRepository, stopPlaceRepository);
+        dtoQuayResource = new DtoQuayResource(quayRepository);
     }
 
     @Test

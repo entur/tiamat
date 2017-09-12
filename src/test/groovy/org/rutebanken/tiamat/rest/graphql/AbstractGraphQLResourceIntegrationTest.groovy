@@ -26,11 +26,11 @@ import org.rutebanken.tiamat.model.StopPlace;
 import javax.transaction.Transactional;
 
 import static io.restassured.RestAssured.given;
-
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 
 public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
 
-    protected static final String BASE_URI_GRAPHQL = "/jersey/graphql/";
+    protected static final String BASE_URI_GRAPHQL = SERVICES_STOP_PLACE_PATH + "/graphql/";
 
     @Before
     public void configureRestAssured() {

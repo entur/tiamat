@@ -38,10 +38,10 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
+
 @Service
 public class AsyncPublicationDeliveryExporter {
-
-    public static final String ASYNC_JOB_URL = "async/job";
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
@@ -99,7 +99,7 @@ public class AsyncPublicationDeliveryExporter {
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
-        exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
+        exportJob.setJobUrl(ASYNC_JOB_PATH + '/' + exportJob.getId());
         exportJobRepository.save(exportJob);
 
         ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);

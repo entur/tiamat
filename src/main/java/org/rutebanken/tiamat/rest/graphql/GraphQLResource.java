@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
 import graphql.language.SourceLocation;
+import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +44,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
+
 @Component
-@Path("/graphql")
+@Api
+@Path("graphql")
+@Transactional
 public class GraphQLResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQLResource.class);

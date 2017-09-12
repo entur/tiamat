@@ -114,6 +114,7 @@
 
         <groovy-all.version>2.4.12</groovy-all.version>
         <jaxb-version>2.2.11</jaxb-version>
+        <swagger-jersey2.version>1.5.16</swagger-jersey2.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
@@ -193,6 +194,12 @@
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
             <version>${com.vividsolutions.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jersey2-jaxrs</artifactId>
+            <version>${swagger-jersey2.version}</version>
         </dependency>
 
         <dependency>
