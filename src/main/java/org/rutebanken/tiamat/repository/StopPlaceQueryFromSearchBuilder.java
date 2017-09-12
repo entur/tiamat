@@ -57,7 +57,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     // Seems like we are searching for tags
                     String hashRemoved = stopPlaceSearch.getQuery().substring(1);
                     parameters.put("query", hashRemoved);
-                    wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name = :query)");
+                    wheres.add("s.netex_id in (select t.netex_reference from tag t where (t.netex_reference = s.netex_id or t.netex_reference = p.netex_id) and t.name = :query)");
                 } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
                     String netexId = stopPlaceSearch.getQuery();
 
