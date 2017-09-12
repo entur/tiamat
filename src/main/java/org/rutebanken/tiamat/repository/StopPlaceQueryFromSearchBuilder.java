@@ -112,7 +112,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             }
 
             if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
-                wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name in :tags)");
+                wheres.add("s.netex_id in (select t.netex_reference from tag t where (t.netex_reference = s.netex_id or t.netex_reference = p.netex_id) and t.name in :tags)");
                 parameters.put("tags", stopPlaceSearch.getTags());
                 operators.add("and");
             }
