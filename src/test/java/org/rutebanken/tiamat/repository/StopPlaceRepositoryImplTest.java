@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.Instant;
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.setRemoveAssertJRelatedElementsFromStackTrace;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
@@ -35,6 +37,9 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Test
     public void scrollableResult() throws InterruptedException {
@@ -1096,6 +1101,213 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         List<String> idMapping = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdPosix, now.minusSeconds(20));
         assertThat(idMapping).doesNotContain(childStop.getNetexId());
+    }
+
+    @Test
+    public void findByTagHashQuery() {
+
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        stopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(stopPlace);
+
+        Tag tag = new Tag();
+        tag.setName("tagname");
+        tag.setIdreference(stopPlace.getNetexId());
+        tag = tagRepository.save(tag);
+        tagRepository.flush();
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setQuery("#"+tag.getName())
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).extracting(s -> s.getNetexId()).contains(stopPlace.getNetexId());
+    }
+
+    @Test
+    public void findByParentTagHashQuery() {
+
+        StopPlace parentStopPlace = new StopPlace();
+        parentStopPlace.setParentStopPlace(true);
+        parentStopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        parentStopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(parentStopPlace);
+
+        StopPlace childStopPlace = new StopPlace();
+        childStopPlace.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
+
+        stopPlaceRepository.save(childStopPlace);
+
+        Tag tag = new Tag();
+        tag.setName("followup");
+        tag.setIdreference(childStopPlace.getNetexId());
+        tag = tagRepository.save(tag);
+        tagRepository.flush();
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setQuery("#"+tag.getName())
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).extracting(s -> s.getNetexId()).contains(childStopPlace.getNetexId());
+    }
+
+    @Test
+    public void findByParentTagParam() {
+
+        StopPlace parentStopPlace = new StopPlace();
+        parentStopPlace.setParentStopPlace(true);
+        parentStopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        parentStopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(parentStopPlace);
+
+        StopPlace childStopPlace = new StopPlace();
+        childStopPlace.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
+
+        stopPlaceRepository.save(childStopPlace);
+
+        Tag tag = new Tag();
+        tag.setName("followup");
+        tag.setIdreference(childStopPlace.getNetexId());
+        tag = tagRepository.save(tag);
+        tagRepository.flush();
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setTags(Arrays.asList(tag.getName()))
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).extracting(s -> s.getNetexId()).contains(childStopPlace.getNetexId());
+    }
+
+    @Test
+    public void findByTagParam() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        stopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(stopPlace);
+
+        Tag tag = new Tag();
+        tag.setName("tagname");
+        tag.setIdreference(stopPlace.getNetexId());
+        tag = tagRepository.save(tag);
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setQuery("#"+tag.getName())
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).extracting(s -> s.getNetexId()).contains(stopPlace.getNetexId());
+    }
+
+    @Test
+    public void doNotFindStopPlacesByRemovedTagsHashQuery() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        stopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(stopPlace);
+
+        Tag removedTag = new Tag();
+        removedTag.setName("tagname");
+        removedTag.setIdreference(stopPlace.getNetexId());
+        removedTag.setRemoved(now);
+        removedTag.setRemovedBy("me");
+
+        removedTag = tagRepository.save(removedTag);
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setQuery("#"+removedTag.getName())
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).as("search result").isEmpty();
+    }
+
+    @Test
+    public void doNotFindStopPlacesByRemovedTagsParams() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        stopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(stopPlace);
+
+        Tag removedTag = new Tag();
+        removedTag.setName("tagname");
+        removedTag.setIdreference(stopPlace.getNetexId());
+        removedTag.setRemoved(now);
+        removedTag.setRemovedBy("me");
+
+        removedTag = tagRepository.save(removedTag);
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setTags(Arrays.asList(removedTag.getName()))
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).as("search result").isEmpty();
+    }
+
+
+    @Test
+    public void doNotFindParentStopPlacesByRemovedTagsParams() {
+
+        StopPlace parentStopPlace = new StopPlace();
+        parentStopPlace.setParentStopPlace(true);
+        parentStopPlace.setVersion(2L);
+
+        Instant now = Instant.now();
+
+        parentStopPlace.setValidBetween(new ValidBetween(now.minusSeconds(10)));
+
+        stopPlaceRepository.save(parentStopPlace);
+
+        StopPlace childStopPlace = new StopPlace();
+        childStopPlace.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
+
+        stopPlaceRepository.save(childStopPlace);
+
+        Tag removedTag = new Tag();
+        removedTag.setName("tagname");
+        removedTag.setIdreference(parentStopPlace.getNetexId());
+        removedTag.setRemoved(now);
+        removedTag.setRemovedBy("me");
+
+        removedTag = tagRepository.save(removedTag);
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setTags(Arrays.asList(removedTag.getName()))
+                .build();
+
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+        assertThat(searchResult.getContent()).as("search result").isEmpty();
     }
 
     @Test

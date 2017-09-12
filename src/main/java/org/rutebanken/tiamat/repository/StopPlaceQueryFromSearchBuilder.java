@@ -20,6 +20,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
 
 /**
@@ -30,13 +31,23 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceQueryFromSearchBuilder.class);
 
+    /**
+     * If searching for single tag in the query parameter, prefixed by #
+     */
+    public static final String SQL_SINGLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name = :query and t.removed is null)";
+
+    /**
+     * If using a list of tags as stop place search argument
+     */
+    public static final String SQL_MULTIPLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name in :tags and t.removed is null)";
+
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
-        queryString.append("left join stop_place p on s.parent_site_ref = p.netex_id and s.parent_site_ref_version = cast(p.version as text) ");
+        queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
@@ -57,7 +68,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     // Seems like we are searching for tags
                     String hashRemoved = stopPlaceSearch.getQuery().substring(1);
                     parameters.put("query", hashRemoved);
-                    wheres.add("s.netex_id in (select t.netex_reference from tag t where (t.netex_reference = s.netex_id or t.netex_reference = p.netex_id) and t.name = :query)");
+                    wheres.add("(s." + SQL_SINGLE_TAG_QUERY + " OR p." + SQL_SINGLE_TAG_QUERY + ")");
+
                 } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
                     String netexId = stopPlaceSearch.getQuery();
 
@@ -112,7 +124,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             }
 
             if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
-                wheres.add("s.netex_id in (select t.netex_reference from tag t where (t.netex_reference = s.netex_id or t.netex_reference = p.netex_id) and t.name in :tags)");
+                wheres.add("(s." + SQL_MULTIPLE_TAG_QUERY + " OR p." + SQL_MULTIPLE_TAG_QUERY + ")");
                 parameters.put("tags", stopPlaceSearch.getTags());
                 operators.add("and");
             }
@@ -194,9 +206,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         final String generatedSql = basicFormatter.format(queryString.toString());
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
-        }
+
+            logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+
         return Pair.of(generatedSql, parameters);
     }
 
