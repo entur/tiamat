@@ -48,7 +48,7 @@ public class TagCreator {
         if(!TAG_PATTERN.matcher(tagName).matches()) {
             throw new IllegalArgumentException("Tag name not valid. Should not contain spaces or special characters. Only characters and or numbers: " + TAG_NAME_REGEX);
         }
-        tagName = tagName.toLowerCase();
+        tagName = tagName.toLowerCase().trim();
 
         Tag tag = tagRepository.findByNameAndIdReference(tagName, idReference);
         boolean brandNew = false;
