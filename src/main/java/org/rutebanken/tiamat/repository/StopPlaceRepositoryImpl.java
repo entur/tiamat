@@ -117,7 +117,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         if(ignoreStopPlaceId != null) {
-            queryString += SQL_IGNORE_STOP_PLACE_ID;
+            queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
 
         }
 
