@@ -330,7 +330,7 @@ public class GraphQLNames {
     public static final String DELETE_STOP_PLACE = "deleteStopPlace";
     public static final String DELETE_QUAY_FROM_STOP_PLACE = "deleteQuay";
 
-    public static final String CREATE_MULTIMODAL_STOPPLACE = "createMultiModalStopPlace";
+    public static final String CREATE_MULTI_MODAL_STOPPLACE = "createMultiModalStopPlace";
     public static final String ADD_TO_MULTIMODAL_STOPPLACE = "addToMultiModalStopPlace";
     public static final String REMOVE_FROM_MULTIMODAL_STOPPLACE = "removeFromMultiModalStopPlace";
 }

@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +90,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             } else {
                 Preconditions.checkArgument(!mutateParent,
-                        "Cannot create new parent stop place. Use mutation %s", CREATE_MULTIMODAL_STOPPLACE);
+                        "Cannot create new parent stop place. Use mutation %s", CREATE_MULTI_MODAL_STOPPLACE);
 
                 logger.info("Creating new StopPlace");
                 updatedStopPlace = new StopPlace();

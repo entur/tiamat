@@ -765,7 +765,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         def versionComment = "VersionComment";
 
         def graphQlJsonQuery = """mutation {
-                 stopPlace: ${GraphQLNames.CREATE_MULTIMODAL_STOPPLACE} (${CREATE_MULTI_MODAL_STOP_PLACE_INPUT}: {
+                 stopPlace: ${GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE} (${CREATE_MULTI_MODAL_STOP_PLACE_INPUT}: {
                           stopPlaceIds:["${bus.getNetexId()}" ,"${tram.getNetexId()}"]
                           name: { value: "${parentStopPlaceName}" }
                           validBetween: { fromDate:"2017-04-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
