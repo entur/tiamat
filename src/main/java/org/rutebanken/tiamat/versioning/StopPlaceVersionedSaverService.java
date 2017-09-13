@@ -122,7 +122,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         nearbyStopPlaceFinder.update(newVersion);
         newVersion.getChildren().forEach(nearbyStopPlaceFinder::update);
         entityChangedListener.onChange(newVersion);
-        newVersion.getChildren().forEach(entityChangedListener::onChange);
+
         return newVersion;
     }
 
