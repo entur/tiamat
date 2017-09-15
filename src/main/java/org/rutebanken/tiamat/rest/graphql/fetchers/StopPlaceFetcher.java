@@ -82,7 +82,7 @@ class StopPlaceFetcher implements DataFetcher {
         if (environment.getArgument(POINT_IN_TIME) != null) {
             pointInTime = environment.getArgument(POINT_IN_TIME);
         } else {
-            pointInTime = Instant.now();
+            pointInTime = null;
         }
 
         if (netexId != null && !netexId.isEmpty()) {
