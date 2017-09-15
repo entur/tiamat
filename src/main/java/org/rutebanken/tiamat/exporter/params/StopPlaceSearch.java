@@ -43,6 +43,9 @@ public class StopPlaceSearch {
     @QueryParam(value = "withoutLocationOnly")
     private boolean withoutLocationOnly;
 
+    @QueryParam(value = "withoutQuaysOnly")
+    private boolean withoutQuaysOnly;
+
     @QueryParam(value = "version")
     private Long version;
 
@@ -58,6 +61,7 @@ public class StopPlaceSearch {
                             List<String> netexIdList,
                             boolean allVersions,
                             boolean withoutLocationOnly,
+                            boolean withoutQuaysOnly,
                             Instant pointInTime,
                             Long version,
                             ExportParams.VersionValidity versionValidity,
@@ -68,6 +72,7 @@ public class StopPlaceSearch {
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
         this.withoutLocationOnly = withoutLocationOnly;
+        this.withoutQuaysOnly = withoutQuaysOnly;
         this.pointInTime = pointInTime;
         this.version = version;
         this.versionValidity = versionValidity;
@@ -102,6 +107,10 @@ public class StopPlaceSearch {
 
     public boolean isWithoutLocationOnly() {
         return withoutLocationOnly;
+    }
+
+    public boolean isWithoutQuaysOnly() {
+        return withoutQuaysOnly;
     }
 
     public Instant getPointInTime() {
@@ -149,6 +158,7 @@ public class StopPlaceSearch {
         private List<String> idList;
         private boolean allVersions;
         private boolean withoutLocationOnly;
+        private boolean withoutQuaysOnly;
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
@@ -194,6 +204,11 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setWithoutQuaysOnly(boolean withoutQuaysOnly) {
+            this.withoutQuaysOnly = withoutQuaysOnly;
+            return this;
+        }
+
         public Builder setVersion(Long version) {
             this.version = version;
             return this;
@@ -215,7 +230,7 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, versionValidity, tags, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, withoutQuaysOnly, pointInTime, version, versionValidity, tags, page, size);
         }
 
     }

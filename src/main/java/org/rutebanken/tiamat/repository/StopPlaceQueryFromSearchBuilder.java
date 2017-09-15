@@ -189,6 +189,11 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             wheres.add("(s.centroid IS NULL or (p.id IS NOT NULL AND p.centroid IS NULL))");
         }
 
+        if (stopPlaceSearch.isWithoutQuaysOnly()) {
+            operators.add("and");
+            wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
+        }
+
         operators.add("and");
         wheres.add(SQL_NOT_PARENT_STOP_PLACE);
 

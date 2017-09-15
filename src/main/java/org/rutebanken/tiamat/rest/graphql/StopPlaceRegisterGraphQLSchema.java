@@ -433,6 +433,12 @@ StopPlaceRegisterGraphQLSchema {
                 .description("Set to true to only return objects that do not have coordinates.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(WITHOUT_QUAYS_ONLY)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return stop place that does not have quays.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
                 .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
@@ -68,15 +69,9 @@ class StopPlaceFetcher implements DataFetcher {
         String key = environment.getArgument(KEY);
         List<String> values = environment.getArgument(VALUES);
 
-        Boolean allVersions = environment.getArgument(ALL_VERSIONS);
-        if(allVersions != null) {
-            stopPlaceSearchBuilder.setAllVersions(allVersions);
-        }
-
-        Boolean withoutLocationOnly = environment.getArgument(WITHOUT_LOCATION_ONLY);
-        if (withoutLocationOnly != null) {
-            stopPlaceSearchBuilder.setWithoutLocationOnly(withoutLocationOnly);
-        }
+        Boolean allVersions = setIfNonNull(environment, ALL_VERSIONS, stopPlaceSearchBuilder::setAllVersions);
+        setIfNonNull(environment, WITHOUT_LOCATION_ONLY, stopPlaceSearchBuilder::setWithoutLocationOnly);
+        setIfNonNull(environment, WITHOUT_QUAYS_ONLY, stopPlaceSearchBuilder::setWithoutQuaysOnly);
 
         Instant pointInTime ;
         if (environment.getArgument(POINT_IN_TIME) != null) {
@@ -156,10 +151,7 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
-                List<String> tags = environment.getArgument(TAGS);
-                if(tags != null && !tags.isEmpty()) {
-                    stopPlaceSearchBuilder.setTags(tags);
-                }
+                setIfNonNull(environment, TAGS, stopPlaceSearchBuilder::setTags);
 
                 stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
             }
@@ -197,5 +189,14 @@ class StopPlaceFetcher implements DataFetcher {
 
         List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlacesPage.getContent(), KEEP_CHILDS);
         return new PageImpl<>(parentsResolved, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), parentsResolved.size());
+    }
+
+    private <T> T setIfNonNull(DataFetchingEnvironment environment, String argumentName, Consumer<T> consumer) {
+        if(environment.getArgument(argumentName) != null) {
+            T value = environment.getArgument(argumentName);
+            consumer.accept(value);
+            return value;
+        }
+        return null;
     }
 }

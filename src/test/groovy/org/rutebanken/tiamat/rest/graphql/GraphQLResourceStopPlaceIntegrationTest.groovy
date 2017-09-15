@@ -472,6 +472,30 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("data.stopPlace", Matchers.hasSize(0));
     }
 
+    @Test
+    public void searchForStopsWithoutQuays() {
+
+        String name = "fuscator";
+        StopPlace stopPlaceWithoutQuays = new StopPlace(new EmbeddableMultilingualString(name));
+        stopPlaceWithoutQuays.setValidBetween(new ValidBetween(Instant.now().minusMillis(10000)));
+        stopPlaceRepository.save(stopPlaceWithoutQuays);
+
+        StopPlace stopPlaceWithQuays = new StopPlace(new EmbeddableMultilingualString(name));
+        stopPlaceWithQuays.setValidBetween(new ValidBetween(Instant.now().minusMillis(10000)));
+        stopPlaceWithQuays.getQuays().add(new Quay());
+        stopPlaceRepository.save(stopPlaceWithQuays);
+
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${name}", ${WITHOUT_QUAYS_ONLY}:true) {
+                            id
+                            name {value}
+                        }
+                    }""";
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace", Matchers.hasSize(1))
+                .body("data.stopPlace[0].id", equalTo(stopPlaceWithoutQuays.getNetexId()));
+    }
+
 
     @Test
     public void searchForTramStopWithMunicipalityAndCounty() {
