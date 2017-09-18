@@ -132,6 +132,19 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	}
 
 	@Test
+	public void doNotFindHistoricStopPlaceWithoutParentForCurrentAndFutureVersion() {
+		StopPlace historicVersion = new StopPlace();
+		historicVersion.setVersion(1L);
+		historicVersion.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		stopPlaceRepository.save(historicVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
 	public void findFutureStopPlaceVersion() {
 		StopPlace futureVersion = new StopPlace();
 		futureVersion.setVersion(1L);

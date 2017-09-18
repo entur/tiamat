@@ -179,7 +179,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 wheres.add("("+ formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
             } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
                 String futureQuery = "s.to_date >= now() OR s.to_date IS NULL";
-                String parentFutureQuery = "p.to_date >= now() OR p.to_date IS NULL";
+                String parentFutureQuery = "p.netex_id is not null and (p.to_date >= now() OR p.to_date IS NULL)";
                 wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
             }
         }
