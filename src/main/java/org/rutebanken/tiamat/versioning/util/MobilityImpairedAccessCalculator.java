@@ -48,6 +48,11 @@ public class MobilityImpairedAccessCalculator {
             }
 
             assessment.setMobilityImpairedAccess(mobilityImpairedStatus);
+        } else {
+            /**
+             * Do not accept null values for mobility impaired access. This breaks netex export.
+             */
+            assessment.setMobilityImpairedAccess(LimitationStatusEnumeration.UNKNOWN);
         }
     }
 }

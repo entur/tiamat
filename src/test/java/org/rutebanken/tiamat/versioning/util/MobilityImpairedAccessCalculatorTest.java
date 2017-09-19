@@ -3,7 +3,10 @@ package org.rutebanken.tiamat.versioning.util;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 
+import java.util.ArrayList;
+
 import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.*;
 
 public class MobilityImpairedAccessCalculatorTest {
@@ -135,5 +138,13 @@ public class MobilityImpairedAccessCalculatorTest {
         accessibilityAssessment = AccessibilityAssessmentOptimizerTest.createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, PARTIAL);
         MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess(accessibilityAssessment);
         assertEquals(PARTIAL, accessibilityAssessment.getMobilityImpairedAccess());
+    }
+
+    @Test
+    public void testDefaultUnknown() {
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setLimitations(new ArrayList<>());
+        MobilityImpairedAccessCalculator.calculateAndSetMobilityImpairedAccess(accessibilityAssessment);
+        assertThat(accessibilityAssessment.getMobilityImpairedAccess()).isNotNull();
     }
 }
