@@ -38,7 +38,7 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
 
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
         accessibilityLimitations.forEach(limitation -> {
-            limitationsRelStructure.getAccessibilityLimitation().add(
+            limitationsRelStructure.setAccessibilityLimitation(
                     mapperFacade.map(limitation, org.rutebanken.netex.model.AccessibilityLimitation.class)
             );
         });
@@ -53,13 +53,9 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
         List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
 
         if(accessibilityLimitations_relStructure.getAccessibilityLimitation() != null) {
-            accessibilityLimitations_relStructure.getAccessibilityLimitation().stream()
-                    .filter(object -> object instanceof org.rutebanken.netex.model.AccessibilityLimitation)
-                    .map(accessibilityLimitation -> {
-                        AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
-                        return tiamatLimitation;
-                    })
-                    .forEach(limitation -> accessibilityLimitations.add(limitation));
+            org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = accessibilityLimitations_relStructure.getAccessibilityLimitation();
+            AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
+            accessibilityLimitations.add(tiamatLimitation);
         }
 
         return accessibilityLimitations;

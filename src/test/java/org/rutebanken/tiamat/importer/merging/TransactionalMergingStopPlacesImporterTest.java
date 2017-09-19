@@ -108,9 +108,6 @@ public class TransactionalMergingStopPlacesImporterTest extends TiamatIntegratio
         limitations.add(limitation);
 
         aa.setLimitations(limitations);
-
-
-        aa.setLimitations(limitations);
         stopPlace.setAccessibilityAssessment(aa);
 
         List<StopPlace> sp = new ArrayList<>();
@@ -126,8 +123,7 @@ public class TransactionalMergingStopPlacesImporterTest extends TiamatIntegratio
         assertThat(importedStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
-        assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).hasSize(1);
-        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().get(0);
+        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation();
 
         assertThat(accessibilityLimitation).isNotNull();
         assertThat(accessibilityLimitation.getWheelchairAccess()).isNotNull();

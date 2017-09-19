@@ -408,9 +408,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
         accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
-        List<org.rutebanken.netex.model.AccessibilityLimitation> limitations = new ArrayList<>();
-        limitations.add(accessibilityLimitation);
-        limitationsRelStructure.getAccessibilityLimitation().addAll(limitations);
+
+
+        limitationsRelStructure.setAccessibilityLimitation(accessibilityLimitation);
         accessibilityAssessment.setLimitations(limitationsRelStructure);
         return accessibilityAssessment;
     }
@@ -429,7 +429,6 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
-        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotEmpty();
     }
 
     @Test
