@@ -17,11 +17,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.rutebanken.superpom</groupId>
-        <artifactId>superpom</artifactId>
-        <version>0.0.6</version>
-    </parent>
 
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -30,6 +25,30 @@
 
     <name>Tiamat</name>
     <description>Stop place register / holdeplassregister</description>
+
+    <licenses>
+        <license>
+            <name>EUPL-1.2 with modifications</name>
+            <url>https://joinup.ec.europa.eu/software/page/eupl</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <prerequisites>
+        <maven>3.2.3</maven>
+    </prerequisites>
+
+    <organization>
+        <name>Entur AS</name>
+        <url>http://www.entur.org/</url>
+    </organization>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>Nexus</id>
+            <url>https://nexus.rutebanken.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <scm>
         <connection>scm:git:ssh://git@github.com:rutebanken/tiamat.git</connection>
@@ -507,9 +526,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
                 <configuration>
                     <systemPropertyVariables combine.children="override">
                         <spring.output.ansi.enabled>ALWAYS</spring.output.ansi.enabled>
+                        <env>dev</env>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

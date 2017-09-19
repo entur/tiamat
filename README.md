@@ -5,6 +5,9 @@ Module also known as the backend for "Stoppestedsregisteret"
 ## Build
 `mvn clean install`
 
+You need the directory `/deployments/data` with rights for the user who
+performs the build.
+
 ## Run with in-memory GeoDB (H2)
 ```
 mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
