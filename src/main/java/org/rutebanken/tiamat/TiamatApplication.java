@@ -35,9 +35,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class TiamatApplication {
 
     public static void main(String[] args) {
-        // Server webServer = Server.createWebServer("-web", "-webAllowOthers", "-webPort","9876").start();
-        // Server server = Server.createTcpServer("-tcp","-tcpAllowOthers","-tcpPort","9875").start();
-
         SpringApplication.run(TiamatApplication.class, args);
     }
 }
