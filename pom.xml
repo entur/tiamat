@@ -115,6 +115,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>io.fabric8</groupId>
                 <artifactId>fabric8-project</artifactId>
@@ -122,11 +123,25 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
-                <groupId>org.rutebanken.helpers</groupId>
+                <groupId>org.entur.helpers</groupId>
                 <artifactId>hazelcast-helper</artifactId>
                 <version>${hazelcast-helper.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.entur.helpers</groupId>
+                <artifactId>organisation</artifactId>
+                <version>${rutebanken-organisation.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.entur.helpers</groupId>
+                <artifactId>gcp-storage</artifactId>
+                <version>${rutebanken-gcp-storage.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -164,14 +179,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.rutebanken.helpers</groupId>
+            <groupId>org.entur.helpers</groupId>
             <artifactId>hazelcast-helper</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.rutebanken.helpers</groupId>
+            <groupId>org.entur.helpers</groupId>
             <artifactId>organisation</artifactId>
-            <version>${rutebanken-organisation.version}</version>
         </dependency>
 
         <dependency>
@@ -214,9 +228,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.rutebanken.helpers</groupId>
+            <groupId>org.entur.helpers</groupId>
             <artifactId>gcp-storage</artifactId>
-            <version>${rutebanken-gcp-storage.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
