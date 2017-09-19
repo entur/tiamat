@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.data.domain.Page;
@@ -152,6 +153,24 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		historicVersion.setVersion(1L);
 		historicVersion.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
 		stopPlaceRepository.save(historicVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	public void doNotFindHistoricStopPlaceWithParentForCurrentAndFutureVersion() {
+		StopPlace historicParent = new StopPlace();
+		historicParent.setVersion(1L);
+		historicParent.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		stopPlaceRepository.save(historicParent);
+
+		StopPlace historicChild=new StopPlace();
+		historicChild.setVersion(1L);
+		historicChild.setParentSiteRef(new SiteRefStructure(historicParent.getNetexId(), String.valueOf(historicParent.getVersion())));
+		stopPlaceRepository.save(historicChild);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
 

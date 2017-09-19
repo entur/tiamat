@@ -27,7 +27,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
 /**
  * Builds query from stop place search params
@@ -188,13 +191,14 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
-            if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
-
-                String currentQuery = "(%s.from_date <= now() AND (%s.to_date >= now() or %s.to_date IS NULL))";
-                wheres.add("("+ formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
-            } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
-                String futureQuery = "s.to_date >= now() OR s.to_date IS NULL";
-                String parentFutureQuery = "p.netex_id is not null and (p.to_date >= now() OR p.to_date IS NULL)";
+            if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+                parameters.put("pointInTime", Date.from(Instant.now()));
+                String currentQuery = "(%s.from_date <= :pointInTime AND (%s.to_date >= :pointInTime or %s.to_date IS NULL))";
+                wheres.add("(" + formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
+            } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
+                parameters.put("pointInTime", Date.from(Instant.now()));
+                String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
+                String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
                 wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
             }
         }
