@@ -84,6 +84,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
+            newVersion.setChanged(now);
             validityUpdater.terminateVersion(existingVersion, newVersionValidFrom);
             getRepository().save(existingVersion);
         }
