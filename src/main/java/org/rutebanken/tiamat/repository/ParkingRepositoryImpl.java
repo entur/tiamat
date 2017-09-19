@@ -42,6 +42,11 @@ import java.util.*;
 @Transactional
 public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
+    /**
+     * When selecting parkings and there are multiple versions of the same parking by netex_id, and you only need the highest version by number.
+     */
+    protected static final String SQL_MAX_VERSION_OF_PARKING = "p.version = (select max(pv.version) from parking pv where pv.netex_id = p.netex_id) ";
+
 
     @Autowired
     private EntityManager entityManager;
@@ -155,15 +160,16 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
                 "           AND ( Cast(sp.version AS TEXT) = " +
                 "                   p2.parent_site_ref_version " +
                 "                 OR p2.parent_site_ref_version IS NULL ) " +
-                "           WHERE sp.id in (");
+                "      WHERE sp.id in (");
 
         sql.append(StringUtils.join(stopPlaceIds, ','));
         sql.append(')');
-
-        sql.append("   GROUP  BY p2.id) p2 " +
-                "JOIN parking p " +
-                "      ON p2.id = p.id " +
-                "ORDER BY p.netex_id, p.version");
+        sql.append("   GROUP  BY p2.id) p2 ")
+                .append("JOIN parking p ")
+                .append("ON p2.id = p.id ")
+                .append("WHERE ")
+                .append(SQL_MAX_VERSION_OF_PARKING)
+                .append("ORDER BY p.netex_id, p.version");
 
         return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }
