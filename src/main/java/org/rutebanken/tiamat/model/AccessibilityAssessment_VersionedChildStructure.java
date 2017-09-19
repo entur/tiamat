@@ -30,6 +30,13 @@ public class AccessibilityAssessment_VersionedChildStructure
     @Enumerated(EnumType.STRING)
     protected LimitationStatusEnumeration mobilityImpairedAccess = LimitationStatusEnumeration.UNKNOWN;
 
+    /**
+     * The netex model now only support one AccessibilityLimitation.
+     * This change came in NeTEx-XML 1.07.
+     * So this means that we should only operate with one element in this list.
+     * It could be refactored to OneToOne.
+     * NRP-2076
+     */
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL)
     protected List<AccessibilityLimitation> limitations;
