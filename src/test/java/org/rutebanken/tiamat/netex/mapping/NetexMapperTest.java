@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
@@ -28,17 +29,20 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexMapperTest extends TiamatIntegrationTest {
@@ -426,6 +430,24 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotEmpty();
+    }
+
+    @Test
+    public void mapQuayAccessibilityAccessmentAssertNotNull() {
+        Quay quay = new Quay();
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setMobilityImpairedAccess(null);
+
+        quay.setAccessibilityAssessment(accessibilityAssessment);
+        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(quay);
+
+        assertThat(netexQuay.getAccessibilityAssessment()).isNotNull();
+        assertThat(netexQuay.getAccessibilityAssessment().getMobilityImpairedAccess())
+                .as("mobilityImpairedAccess")
+                .isNotNull()
+                .isEqualByComparingTo(org.rutebanken.netex.model.LimitationStatusEnumeration.UNKNOWN);
+
     }
 
     protected AccessibilityAssessment createAccessibilityAssessment() {

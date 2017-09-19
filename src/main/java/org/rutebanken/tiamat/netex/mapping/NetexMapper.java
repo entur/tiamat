@@ -38,8 +38,8 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
-                       NetexIdMapper netexIdMapper,
-                       PublicationDeliveryHelper publicationDeliveryHelper) {
+                       PublicationDeliveryHelper publicationDeliveryHelper,
+                       AccessibilityAssessmentMapper accessibilityAssessmentMapper) {
 
         logger.info("Setting up netexMapper with DI");
 
@@ -145,19 +145,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(AccessibilityAssessment.class, org.rutebanken.tiamat.model.AccessibilityAssessment.class)
-                .customize(new CustomMapper<AccessibilityAssessment, org.rutebanken.tiamat.model.AccessibilityAssessment>() {
-                    @Override
-                    public void mapAtoB(AccessibilityAssessment accessibilityAssessment, org.rutebanken.tiamat.model.AccessibilityAssessment accessibilityAssessment2, MappingContext context) {
-                        super.mapAtoB(accessibilityAssessment, accessibilityAssessment2, context);
-                        netexIdMapper.toTiamatModel(accessibilityAssessment, accessibilityAssessment2);
-                    }
-
-                    @Override
-                    public void mapBtoA(org.rutebanken.tiamat.model.AccessibilityAssessment accessibilityAssessment, AccessibilityAssessment accessibilityAssessment2, MappingContext context) {
-                        super.mapBtoA(accessibilityAssessment, accessibilityAssessment2, context);
-                        netexIdMapper.toNetexModel(accessibilityAssessment, accessibilityAssessment2);
-                    }
-                })
+                .customize(accessibilityAssessmentMapper)
                 .exclude("id")
                 .byDefault()
                 .register();
@@ -180,8 +168,8 @@ public class NetexMapper {
         this(getDefaultConverters(),
                 new KeyListToKeyValuesMapMapper(),
                 new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(), new TagKeyValuesMapper(tagRepository)),
-                new NetexIdMapper(),
-                new PublicationDeliveryHelper());
+                new PublicationDeliveryHelper(),
+                new AccessibilityAssessmentMapper());
         logger.info("Setting up netexMapper without DI");
     }
 
