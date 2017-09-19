@@ -51,8 +51,8 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:rutebanken/tiamat.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:rutebanken/tiamat.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com:entur/tiamat.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:entur/tiamat.git</developerConnection>
     </scm>
 
     <properties>
