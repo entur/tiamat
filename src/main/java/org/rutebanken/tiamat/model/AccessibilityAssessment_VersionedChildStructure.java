@@ -28,7 +28,7 @@ public class AccessibilityAssessment_VersionedChildStructure
         extends VersionedChildStructure {
 
     @Enumerated(EnumType.STRING)
-    protected LimitationStatusEnumeration mobilityImpairedAccess;
+    protected LimitationStatusEnumeration mobilityImpairedAccess = LimitationStatusEnumeration.UNKNOWN;
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL)
