@@ -60,7 +60,7 @@ public class StopPlaceOperationsBuilder {
     @Autowired
     private StopPlaceReopener stopPlaceReopener;
 
-    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
+    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType, GraphQLObjectType parentStopPlaceObjectType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
         //Merge two StopPlaces
@@ -117,7 +117,7 @@ public class StopPlaceOperationsBuilder {
 
         //Terminate StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(TERMINATE_STOP_PLACE)
                 .description("StopPlace will be terminated and no longer be active after the given date.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -129,7 +129,7 @@ public class StopPlaceOperationsBuilder {
 
         //Reopen StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(parentStopPlaceObjectType)
                 .name(REOPEN_STOP_PLACE)
                 .description("StopPlace will be reopened and immidiately active.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
