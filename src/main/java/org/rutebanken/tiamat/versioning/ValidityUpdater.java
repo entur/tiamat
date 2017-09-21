@@ -66,7 +66,7 @@ public class ValidityUpdater {
 
     private void validateNewVersionDateAfter(String description, Instant previousVersionDate, Instant newVersionFromDate) {
         if(previousVersionDate != null && newVersionFromDate.isBefore(previousVersionDate)) {
-            throw new IllegalArgumentException(description + previousVersionDate + " is after to fromdate" + newVersionFromDate);
+            throw new IllegalArgumentException(description + " " + previousVersionDate + " is after new version's fromdate " + newVersionFromDate);
         }
     }
 
