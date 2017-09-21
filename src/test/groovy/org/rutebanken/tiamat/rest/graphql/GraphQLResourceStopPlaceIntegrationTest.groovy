@@ -859,8 +859,8 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         def versionComment = "VersionComment";
 
-        // Use old previous
-        def fromDate = existingChild.getValidBetween().getFromDate().plusSeconds(1000);
+        // Make sure dates are after privous version of parent stop place
+        def fromDate = parent.getValidBetween().getFromDate().plusSeconds(1000);
         def toDate = fromDate.plusSeconds(70000);
 
         def graphQlJsonQuery = """mutation {
