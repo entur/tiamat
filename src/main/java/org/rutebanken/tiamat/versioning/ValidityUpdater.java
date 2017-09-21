@@ -51,7 +51,7 @@ public class ValidityUpdater {
         }
 
         if(newVersion.getValidBetween().getFromDate() == null) {
-            logger.info("Validity not set, or from date equal to old version for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+            logger.info("From date not set for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
             newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
 
@@ -65,7 +65,7 @@ public class ValidityUpdater {
     }
 
     private void validateNewVersionDateAfter(String description, Instant previousVersionDate, Instant newVersionFromDate) {
-        if(previousVersionDate != null && newVersionFromDate.isBefore(previousVersionDate)) {
+        if(previousVersionDate != null && previousVersionDate.isAfter(newVersionFromDate)) {
             throw new IllegalArgumentException(description + " " + previousVersionDate + " is after new version's fromdate " + newVersionFromDate);
         }
     }
