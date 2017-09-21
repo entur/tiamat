@@ -41,7 +41,7 @@ public class StopPlaceReopenerTest extends TiamatIntegrationTest {
 
         long latestVersion = savedStopPlace.getVersion();
 
-        Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusMillis(1);
+        Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusSeconds(10);
 
         String terminatedVersionComment = "Terminating Stop";
         StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, terminatedVersionComment);
