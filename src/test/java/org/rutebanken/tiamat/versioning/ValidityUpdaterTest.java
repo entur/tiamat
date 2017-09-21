@@ -100,6 +100,36 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
         validityUpdater.updateValidBetween(stopPlace, now);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionEndDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+        Instant now = Instant.now();
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), now));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getToDate().minusSeconds(10)));
+
+        validityUpdater.updateValidBetween(previousVersion, newVersion, now);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionFromDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+        Instant now = Instant.now();
+
+        // No to date
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), null));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getFromDate().minusSeconds(10)));
+
+        validityUpdater.updateValidBetween(previousVersion, newVersion, now);
+    }
+
     @Test
     public void doNotSetEndDateOnPreviousVersionIfAlreadySet() {
         StopPlace oldVersion = new StopPlace();

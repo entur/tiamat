@@ -28,6 +28,10 @@ public class ValidityUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidityUpdater.class);
 
+    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
+        return updateValidBetween(null, newVersion, defaultFromTime);
+    }
+
     /**
      * Updates the validity of the new version.
      * If validity or validbetween from date not set, a default value will be set.
@@ -36,9 +40,10 @@ public class ValidityUpdater {
      * @param defaultFromTime
      * @return the new version's valid from date
      */
-    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
+    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T existingVersion, T newVersion, Instant defaultFromTime) {
 
-        instantiateValidBetween(newVersion);;
+        instantiateValidBetween(newVersion);
+
         if(newVersion.getValidBetween().getFromDate() != null
                 && newVersion.getValidBetween().getToDate() != null
                 && newVersion.getValidBetween().getFromDate().isAfter(newVersion.getValidBetween().getToDate())) {
@@ -50,7 +55,19 @@ public class ValidityUpdater {
             newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
 
+        if(existingVersion != null) {
+            String entityString = existingVersion.getNetexId() + " " +existingVersion.getVersion();
+            validateNewVersionDateAfter("Existing version " + entityString + " to date", existingVersion.getValidBetween().getToDate(), newVersion.getValidBetween().getFromDate());
+            validateNewVersionDateAfter("Existing version " + entityString + " from date", existingVersion.getValidBetween().getFromDate(), newVersion.getValidBetween().getFromDate());
+        }
+
         return newVersion.getValidBetween().getFromDate();
+    }
+
+    private void validateNewVersionDateAfter(String description, Instant previousVersionDate, Instant newVersionFromDate) {
+        if(previousVersionDate != null && newVersionFromDate.isBefore(previousVersionDate)) {
+            throw new IllegalArgumentException(description + previousVersionDate + " is after to fromdate" + newVersionFromDate);
+        }
     }
 
     private void instantiateValidBetween(EntityInVersionStructure entity) {
