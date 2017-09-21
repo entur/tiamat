@@ -55,7 +55,7 @@ public class ValidityUpdater {
             newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
 
-        if(existingVersion != null) {
+        if(existingVersion != null && existingVersion.getValidBetween() != null) {
             String entityString = existingVersion.getNetexId() + " " +existingVersion.getVersion();
             validateNewVersionDateAfter("Existing version " + entityString + " to date", existingVersion.getValidBetween().getToDate(), newVersion.getValidBetween().getFromDate());
             validateNewVersionDateAfter("Existing version " + entityString + " from date", existingVersion.getValidBetween().getFromDate(), newVersion.getValidBetween().getFromDate());
