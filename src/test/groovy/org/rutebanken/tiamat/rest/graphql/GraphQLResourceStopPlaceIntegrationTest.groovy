@@ -859,11 +859,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         def versionComment = "VersionComment";
 
+        // Use old previous
+        def fromDate = existingChild.getValidBetween().getFromDate().plusSeconds(1000);
+        def toDate = fromDate.plusSeconds(70000);
+
         def graphQlJsonQuery = """mutation {
                  stopPlace: ${ADD_TO_MULTIMODAL_STOPPLACE} (${INPUT}: {
                           ${PARENT_SITE_REF}: "${parent.getNetexId()}"
                           ${STOP_PLACE_IDS}:["${newChild.getNetexId()}"]
-                          validBetween: { fromDate:"2017-07-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
+                          validBetween: { fromDate:"${fromDate}", toDate:"${toDate}" }
                           versionComment:"${versionComment}"
                        }) {
                           id
