@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
@@ -40,8 +41,9 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         String stopPlaceNetexId = savedStopPlace.getNetexId();
 
-        Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusMillis(1);
+        Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusSeconds(30);
 
+        System.out.println("Terminate at " + timeOfTermination);
         StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop");
 
         assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
@@ -57,5 +59,24 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
         String stopPlaceNetexId = savedStopPlace.getNetexId();
 
         assertThatThrownBy(() -> stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, Instant.now(), "Terminating Stop")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    /**
+     * When attempting to terminate stop place that is already terminated, expect exception.
+     */
+    @Transactional
+    @Test(expected = IllegalArgumentException.class)
+    public void testTerminateStopPlaceWithFromDate() {
+
+        Instant now = Instant.now();
+
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("LIAB")));
+        stopPlaceRepository.save(savedStopPlace);
+        savedStopPlace.setValidBetween(new ValidBetween(now, now.plusSeconds(10)));
+        String stopPlaceNetexId = savedStopPlace.getNetexId();
+
+        Instant terminateDate = now.plusSeconds(20);
+        System.out.println(terminateDate);
+        stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, terminateDate, "Terminating Stop");
     }
 }

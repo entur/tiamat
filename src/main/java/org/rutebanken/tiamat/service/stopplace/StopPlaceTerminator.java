@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
@@ -30,7 +31,7 @@ import java.time.Instant;
 @Service
 public class StopPlaceTerminator {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceQuayDeleter.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceTerminator.class);
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -39,34 +40,44 @@ public class StopPlaceTerminator {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private ValidityUpdater validityUpdater;
-
-    @Autowired
     private UsernameFetcher usernameFetcher;
 
     public StopPlace terminateStopPlace(String stopPlaceId, Instant timeOfTermination, String versionComment) {
 
-        logger.info("User {} is terminating stop {} at {} with comment {}", usernameFetcher, stopPlaceId, timeOfTermination, versionComment);
+        logger.info("User {} is terminating stop {} at {} with comment '{}'", usernameFetcher.getUserNameForAuthenticatedUser(), stopPlaceId, timeOfTermination, versionComment);
 
         StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
-        // Stop Place Saver service should always check that the user is authorized
-
-        if(!stopPlace.isParentStopPlace() && stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
-            throw new IllegalArgumentException("Cannot terminate child stop of multi modal stop place: "+stopPlaceId);
-        }
-
         if (stopPlace != null) {
+
+            // Stop Place Saver service should always check that the user is authorized
+
+            if(!stopPlace.isParentStopPlace() && stopPlace.getParentSiteRef() != null && stopPlace.getParentSiteRef().getRef() != null) {
+                throw new IllegalArgumentException("Cannot terminate child stop of multi modal stop place: "+stopPlaceId);
+            }
+
+            if(stopPlace.getValidBetween() != null && stopPlace.getValidBetween().getToDate() != null) {
+                throw new IllegalArgumentException("The stop place " + stopPlaceId + ", version " + stopPlace.getVersion() + " is already terminated at " + stopPlace.getValidBetween().getToDate());
+            }
+
+            Instant now = Instant.now();
+
+            if(timeOfTermination.isBefore(now)) {
+                throw new IllegalArgumentException("Termination date " + timeOfTermination + " cannot be before now " + now);
+            }
+
             StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
 
-            nextVersionStopPlace.setVersionComment(versionComment);
+            logger.debug("End previous version {} of stop place {} at {} (now)", stopPlace.getVersion(), stopPlace.getNetexId(), now);
+            stopPlace.getValidBetween().setToDate(now);
 
-            validityUpdater.terminateVersion(nextVersionStopPlace, timeOfTermination);
+            nextVersionStopPlace.setValidBetween(new ValidBetween(now, timeOfTermination));
+            logger.debug("Set valid betwen to {} for new version of stop place {}", nextVersionStopPlace.getValidBetween(), nextVersionStopPlace.getNetexId());
+            nextVersionStopPlace.setVersionComment(versionComment);
 
             return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
         } else {
-            logger.warn("Cannot find stop place to terminate: {}. No changes executed.", stopPlaceId);
+            throw new IllegalArgumentException("Cannot find stop place to terminate: " + stopPlaceId + ". No changes executed.");
         }
-        return stopPlace;
     }
 }
