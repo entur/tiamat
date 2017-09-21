@@ -174,6 +174,26 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         stopPlaceVersionedSaverService.saveNewVersion(existingVersion, newVersion);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionFromDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+
+        stopPlaceRepository.save(previousVersion);
+
+        Instant now = Instant.now();
+
+        // No to date
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), null));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getFromDate().minusSeconds(10)));
+        newVersion.setNetexId(previousVersion.getNetexId());
+
+        stopPlaceVersionedSaverService.saveNewVersion(previousVersion, newVersion);
+    }
+
     @Test
     public void saveStopPlaceWithQuayVerifyValuesSet() {
         Quay quay1 = new Quay();

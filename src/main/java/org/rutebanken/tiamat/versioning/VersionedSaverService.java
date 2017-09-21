@@ -64,7 +64,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         validate(existingVersion, newVersion);
 
         Instant now = Instant.now();
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if(existingVersion == null) {
             if (newVersion.getNetexId() != null) {

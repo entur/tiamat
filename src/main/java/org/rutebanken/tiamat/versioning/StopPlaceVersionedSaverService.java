@@ -91,7 +91,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
         Instant now = Instant.now();
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
