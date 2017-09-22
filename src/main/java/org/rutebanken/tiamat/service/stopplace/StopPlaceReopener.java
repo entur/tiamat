@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class StopPlaceReopener {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceQuayDeleter.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceReopener.class);
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
