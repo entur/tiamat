@@ -1248,18 +1248,20 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         String versionComment = "moving quays";
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + MOVE_QUAYS_TO_STOP + " ("+QUAY_IDS+": \\\""+quay.getNetexId()+"\\\" " + TO_VERSION_COMMENT + ":\\\"" + versionComment + "\\\") { " +
-                "  id " +
-                "    quays {" +
-                "      id " +
-                "    } " +
-                "    versionComment " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """mutation {
+                    stopPlace: ${MOVE_QUAYS_TO_STOP} (${QUAY_IDS}: "${quay.getNetexId()}", ${TO_VERSION_COMMENT}: "${versionComment}") {
+                        id
+                        ...on StopPlace {
+                            quays {
+                                id
+                            }
+                        }
+                        versionComment
+                    }
+                }
+              """
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.id", not(comparesEqualTo(stopPlace.getNetexId())))
                 .body("data.stopPlace.versionComment", equalTo(versionComment))
                 .root("data.stopPlace.quays[0]")
