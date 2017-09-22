@@ -41,7 +41,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID
 @Service
 public class StopPlaceMerger {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceQuayMerger.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceMerger.class);
 
     /**
      * Properties to ignore on merge.
