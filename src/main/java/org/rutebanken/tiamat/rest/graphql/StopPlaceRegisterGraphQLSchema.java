@@ -315,7 +315,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(tagOperationsBuilder.getTagOperations())
-                .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType, parentStopPlaceObjectType))
+                .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
                 .build();
 

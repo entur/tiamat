@@ -15,10 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.operations;
 
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
+import graphql.schema.*;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.service.stopplace.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,12 +57,12 @@ public class StopPlaceOperationsBuilder {
     @Autowired
     private StopPlaceReopener stopPlaceReopener;
 
-    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType, GraphQLObjectType parentStopPlaceObjectType) {
+    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLInterfaceType stopPlaceInterfaceType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
         //Merge two StopPlaces
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MERGE_STOP_PLACES)
                 .description("Merges two StopPlaces by terminating 'from'-StopPlace, and copying quays/values into 'to'-StopPlace")
                 .argument(newArgument().name(FROM_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -78,7 +75,7 @@ public class StopPlaceOperationsBuilder {
 
         //Merge two quays on a StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MERGE_QUAYS)
                 .description("Merges two Quays on a StopPlace.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -90,7 +87,7 @@ public class StopPlaceOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MOVE_QUAYS_TO_STOP)
                 .description("Moves one or more quays to a new or existing stop place. Returns the destination stop place.")
                 .argument(newArgument()
@@ -117,7 +114,7 @@ public class StopPlaceOperationsBuilder {
 
         //Terminate StopPlace
         operations.add(newFieldDefinition()
-                .type(parentStopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(TERMINATE_STOP_PLACE)
                 .description("StopPlace will be terminated and no longer be active after the given date.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -129,7 +126,7 @@ public class StopPlaceOperationsBuilder {
 
         //Reopen StopPlace
         operations.add(newFieldDefinition()
-                .type(parentStopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(REOPEN_STOP_PLACE)
                 .description("StopPlace will be reopened and immidiately active.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -139,7 +136,7 @@ public class StopPlaceOperationsBuilder {
 
         //Delete Quay from StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(DELETE_QUAY_FROM_STOP_PLACE)
                 .description("Removes quay from StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
