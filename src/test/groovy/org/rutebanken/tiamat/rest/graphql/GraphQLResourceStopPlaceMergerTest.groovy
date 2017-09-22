@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.hasSize;
 public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
-    public void testMergeStopPlacesUsingGraphQL() {
+    public void mergeStopPlaces() {
 
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
@@ -84,29 +84,32 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
         toStopPlace = saveStopPlaceTransactional(toStopPlace);
 
         //Calling GraphQL-api to merge StopPlaces
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: mergeStopPlaces (" +
-                "          fromStopPlaceId:\\\"" + fromStopPlace.getNetexId() + "\\\", " +
-                "          toStopPlaceId:\\\"" + toStopPlace.getNetexId() + "\\\"" +
-                "       ) { " +
-                "  id " +
-                "  importedId " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    geometry { type coordinates } " +
-                "    compassBearing " +
-                "  } " +
-                " } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                  stopPlace: mergeStopPlaces (
+                          fromStopPlaceId: "${fromStopPlace.getNetexId()}",
+                          toStopPlaceId:"${toStopPlace.getNetexId()}"
+                       ) {
+                      id
+                      importedId
 
+                      ...on StopPlace {
+                          name { value }
+                          quays {
+                            id
+                            geometry { type coordinates }
+                            compassBearing
+                          }
+                      }
+                    }
+                }
+                """;
 
         Set<String> originalIds = new HashSet<>();
         originalIds.addAll(fromStopPlace.getOriginalIds());
         originalIds.addAll(toStopPlace.getOriginalIds());
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.id", comparesEqualTo(toStopPlace.getNetexId()))
                 .body("data.stopPlace.importedId", containsInAnyOrder(originalIds.toArray()))
                 .body("data.stopPlace.quays", hasSize(fromStopPlace.getQuays().size() + toStopPlace.getQuays().size()));
