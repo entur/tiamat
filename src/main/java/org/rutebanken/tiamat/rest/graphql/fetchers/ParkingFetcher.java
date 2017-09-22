@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("parkingFetcher")
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 class ParkingFetcher implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingFetcher.class);

@@ -41,7 +41,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 
 @Service("parkingUpdater")
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 class ParkingUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingUpdater.class);

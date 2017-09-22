@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import graphql.execution.ExecutionStrategy;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -48,8 +49,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
-public class
-StopPlaceRegisterGraphQLSchema {
+public class StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
@@ -97,9 +97,6 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
-
-    @Autowired
-    private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
     @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;

@@ -37,7 +37,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_LINK;
 
 @Service("pathLinkUpdater")
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 class PathLinkUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(PathLinkUpdater.class);

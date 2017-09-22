@@ -20,11 +20,18 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -40,8 +47,9 @@ import java.util.stream.Collectors;
 
 @Component
 @Path("/graphql")
-@Transactional
 public class GraphQLResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphQLResource.class);
 
     /**
      * Exception classes that should cause data fetching exceptions to be rethrown and mapped to corresponding HTTP status code outside transaction.
@@ -52,7 +60,13 @@ public class GraphQLResource {
     @Autowired
     private StopPlaceRegisterGraphQLSchema stopPlaceRegisterGraphQLSchema;
 
-    public GraphQLResource() {
+
+    private final TransactionTemplate transactionTemplate;
+
+
+    public GraphQLResource(PlatformTransactionManager transactionManager) {
+        org.springframework.util.Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @PostConstruct
@@ -89,19 +103,26 @@ public class GraphQLResource {
         } else {
             variables = new HashMap<>();
         }
-        return getGraphQLResponse((String) query.get("query"), variables);
+        return getGraphQLResponseInTransaction((String) query.get("query"), variables);
     }
 
     @POST
     @Consumes("application/graphql")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getGraphQL(String query) {
-
-        return getGraphQLResponse(query, new HashMap<>());
-
+        return getGraphQLResponseInTransaction(query, new HashMap<>());
     }
 
-    public Response getGraphQLResponse(String query, Map<String, Object> variables) {
+    /**
+     * Use programmatic transaction because graphql catches RuntimeExceptions.
+     * With multiple transaction interceptors (Transactional annotation), this causes the rolled back transaction (in case of errors) to be commed by the outer transaction interceptor.
+     * NRP-1992
+     */
+    private Response getGraphQLResponseInTransaction(String query, Map<String, Object> variables) {
+        return (Response) transactionTemplate.execute((transactionStatus) -> getGraphQLResponse(query, variables, transactionStatus));
+    }
+
+    private Response getGraphQLResponse(String query, Map<String, Object> variables, TransactionStatus transactionStatus) {
         Response.ResponseBuilder res = Response.status(Response.Status.OK);
         HashMap<String, Object> content = new HashMap<>();
         try {
@@ -132,18 +153,26 @@ public class GraphQLResource {
 
                 res = Response.status(status);
 
+                if (errors.stream().anyMatch(error -> error.getErrorType().equals(ErrorType.DataFetchingException))) {
+                    logger.warn("Detected DataFetchingException from errors: {} Setting transaction to rollback only", errors);
+                    transactionStatus.setRollbackOnly();
+                }
+
                 content.put("errors", errors.stream().map(error -> error.getMessage()).collect(Collectors.toList()));
             }
             if (executionResult.getData() != null) {
                 content.put("data", executionResult.getData());
             }
+
+
         } catch (GraphQLException e) {
+            logger.warn("Catched graphqlException. Setting rollback only", e);
             res = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             content.put("errors", e.getMessage());
+            transactionStatus.setRollbackOnly();
         }
         return res.entity(content).build();
     }
-
 
     private Response.Status getStatusCodeFromThrowable(Throwable e) {
         Throwable rootCause = getRootCause(e);
@@ -152,6 +181,9 @@ public class GraphQLResource {
             throw (RuntimeException) rootCause;
         }
 
+        if(IllegalArgumentException.class.isAssignableFrom(rootCause.getClass())) {
+            return Response.Status.BAD_REQUEST;
+        }
 
         return Response.Status.OK;
     }
