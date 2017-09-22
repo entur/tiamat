@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
+import graphql.language.SourceLocation;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +40,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -158,7 +156,7 @@ public class GraphQLResource {
                     transactionStatus.setRollbackOnly();
                 }
 
-                content.put("errors", errors.stream().map(error -> error.getMessage()).collect(Collectors.toList()));
+                content.put("errors", errors);
             }
             if (executionResult.getData() != null) {
                 content.put("data", executionResult.getData());
@@ -168,7 +166,7 @@ public class GraphQLResource {
         } catch (GraphQLException e) {
             logger.warn("Catched graphqlException. Setting rollback only", e);
             res = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            content.put("errors", e.getMessage());
+            content.put("errors", Arrays.asList(new ExceptionWhileDataFetching(e)));
             transactionStatus.setRollbackOnly();
         }
         return res.entity(content).build();
