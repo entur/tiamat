@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.*;
 public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
-    public void testMergeQuaysUsingGraphQL() {
+    public void mergeQuays() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Name"));
@@ -63,31 +63,34 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
         assertThat(stopPlace.getQuays()).hasSize(3);
 
         //Calling GraphQL-api to merge Quays
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: mergeQuays (" +
-                "          stopPlaceId:\\\"" + stopPlace.getNetexId() + "\\\", " +
-                "          fromQuayId:\\\"" + fromQuay.getNetexId() + "\\\"" +
-                "          toQuayId:\\\"" + toQuay.getNetexId() + "\\\"" +
-                "       ) { " +
-                "  id " +
-                "  importedId " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    geometry { type coordinates } " +
-                "    compassBearing " +
-                "    importedId " +
-                "  } " +
-                " } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                  stopPlace: mergeQuays (
+                          stopPlaceId: "${stopPlace.getNetexId()}",
+                          fromQuayId: "${fromQuay.getNetexId()}",
+                          toQuayId: "${toQuay.getNetexId()}",
+                       ) {
+                            id
+                            importedId
+                            name { value }
+                            ...on StopPlace {
+                                quays {
+                                    id
+                                    geometry { type coordinates }
+                                    compassBearing
+                                    importedId
+                                }
+                            }
+                        }
+                   }
+                 }"""
 
 
         Set<String> originalIds = new HashSet<>();
         originalIds.addAll(toQuay.getOriginalIds());
         originalIds.addAll(fromQuay.getOriginalIds());
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace.quays", hasSize(2))
                 .root("data.stopPlace.quays.find { it.id == '" +toQuay.getNetexId() + "'}")
