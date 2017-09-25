@@ -88,6 +88,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             "    AND vi2.items = vi1.items " +
             "    AND sp2.from_date <= now() AND (sp2.to_date is NULL OR sp2.to_date > now()) " +
             "    ) " +
+            "AND vi1.items != '' " +
             "GROUP By sp1.netex_id";
 
 
