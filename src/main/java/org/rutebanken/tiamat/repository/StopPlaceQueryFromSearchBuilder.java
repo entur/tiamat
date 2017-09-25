@@ -70,7 +70,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             "    ON vi1.value_id = qkv1.key_values_id " +
             "  INNER JOIN quay q1 " +
             "    ON q1.id = qkv1.quay_id " +
-            "WHERE sp1.from_date <= now() AND (sp1.to_date is NULL OR sp1.to_date > now()) " +
+            "WHERE sp1.from_date <= :pointInTime AND (sp1.to_date is NULL OR sp1.to_date > :pointInTime) " +
             "AND EXISTS (SELECT sp2.netex_id " +
             "  FROM stop_place sp2 " +
             "    INNER JOIN stop_place_quays spq2 " +
@@ -86,7 +86,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             "     (sp2.netex_id != sp1.netex_id " +
             "       OR (sp2.netex_id = sp1.netex_id AND sp2.version = sp1.version AND q2.netex_id != q1.netex_id)) " +
             "    AND vi2.items = vi1.items " +
-            "    AND sp2.from_date <= now() AND (sp2.to_date is NULL OR sp2.to_date > now()) " +
+            "    AND sp2.from_date <= :pointInTime AND (sp2.to_date is NULL OR sp2.to_date > :pointInTime) " +
             "    ) " +
             "AND vi1.items != '' " +
             "GROUP By sp1.netex_id";
@@ -247,6 +247,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
             operators.add("and");
+            if(stopPlaceSearch.getPointInTime() == null) {
+                parameters.put("pointInTime", Instant.now());
+            }
             parameters.put("originalIdKey", ORIGINAL_ID_KEY);
             wheres.add("s.netex_id IN ("+SQL_DUPLICATED_QUAY_IMPORTED_IDS +")");
         }
