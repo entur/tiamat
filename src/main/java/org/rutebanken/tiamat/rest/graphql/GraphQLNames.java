@@ -257,6 +257,7 @@ public class GraphQLNames {
     public static final String ALL_VERSIONS = "allVersions";
     public static final String WITHOUT_LOCATION_ONLY = "withoutLocationOnly";
     public static final String WITHOUT_QUAYS_ONLY = "withoutQuaysOnly";
+    public static final String WITH_DUPLICATED_QUAY_IMPORTED_IDS = "withDuplicatedQuayImportedIds";
     public static final String POINT_IN_TIME = "pointInTime";
 
     public static final String LONGITUDE_MIN = "lonMin";
