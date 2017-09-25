@@ -84,7 +84,6 @@ public class ObjectMerger extends BeanUtils {
                                 setAccessible(targetReadMethod);
                                 Object targetValue = targetReadMethod.invoke(target);
                                 if (targetValue == null |
-                                        (targetValue instanceof Enum) |
                                         ("").equals(targetValue)) {
                                     targetWriteMethod.invoke(target, sourceValue);
                                 } else if(targetValue instanceof Collection<?>) {

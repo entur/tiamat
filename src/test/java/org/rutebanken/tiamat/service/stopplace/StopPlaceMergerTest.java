@@ -48,6 +48,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         fromStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:1234");
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:5678");
+        fromStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
 
 
         PlaceEquipment fromPlaceEquipment = new PlaceEquipment();
@@ -81,6 +82,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         toStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.11, 60.11)));
         toStopPlace.getOriginalIds().add("TEST:StopPlace:4321");
         toStopPlace.getOriginalIds().add("TEST:StopPlace:8765");
+        toStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         // Old version of toStopPlace
         Instant toStopPlaceOriginalFromDate = Instant.EPOCH;
         toStopPlace.setValidBetween(new ValidBetween(toStopPlaceOriginalFromDate));
@@ -115,6 +117,8 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
         assertThat(mergedStopPlace.getVersionComment()).isNull();
         assertThat(mergedStopPlace.getTransportMode()).isEqualTo(VehicleModeEnumeration.BUS);
+
+        assertThat(mergedStopPlace.getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
 
         // Equipment
         PlaceEquipment placeEquipment = mergedStopPlace.getPlaceEquipments();
