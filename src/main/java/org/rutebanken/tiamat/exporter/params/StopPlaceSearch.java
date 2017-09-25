@@ -61,6 +61,9 @@ public class StopPlaceSearch {
     @QueryParam(value = "withoutQuaysOnly")
     private boolean withoutQuaysOnly;
 
+    @QueryParam(value = "withDuplicatedQuayImportedIds")
+    private boolean withDuplicatedQuayImportedIds;
+
     @QueryParam(value = "version")
     private Long version;
 
@@ -77,6 +80,7 @@ public class StopPlaceSearch {
                             boolean allVersions,
                             boolean withoutLocationOnly,
                             boolean withoutQuaysOnly,
+                            boolean withDuplicatedQuayImportedIds,
                             Instant pointInTime,
                             Long version,
                             ExportParams.VersionValidity versionValidity,
@@ -88,6 +92,7 @@ public class StopPlaceSearch {
         this.allVersions = allVersions;
         this.withoutLocationOnly = withoutLocationOnly;
         this.withoutQuaysOnly = withoutQuaysOnly;
+        this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
         this.pointInTime = pointInTime;
         this.version = version;
         this.versionValidity = versionValidity;
@@ -128,6 +133,10 @@ public class StopPlaceSearch {
         return withoutQuaysOnly;
     }
 
+    public boolean isWithDuplicatedQuayImportedIds() {
+        return withDuplicatedQuayImportedIds;
+    }
+
     public Instant getPointInTime() {
         return pointInTime;
     }
@@ -140,14 +149,6 @@ public class StopPlaceSearch {
         return tags;
     }
 
-    // TODO: Remove or update
-    public boolean isEmpty() {
-        return !((query != null && !query.isEmpty())
-                || (tags != null && !tags.isEmpty())
-                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty())
-                || (netexIdList != null && !netexIdList.isEmpty()));
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -156,6 +157,9 @@ public class StopPlaceSearch {
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
+                .add("withouLocationOnly", isWithoutLocationOnly())
+                .add("withoutQuaysOnly", isWithoutQuaysOnly())
+                .add("isWithDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
                 .add("tags", tags)
                 .add("page", page)
                 .add("size", size)
@@ -174,6 +178,8 @@ public class StopPlaceSearch {
         private boolean allVersions;
         private boolean withoutLocationOnly;
         private boolean withoutQuaysOnly;
+
+        private boolean withDuplicatedQuayImportedIds;
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
@@ -224,6 +230,10 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public void setWithDuplicatedQuayImportedIds(boolean withDuplicatedQuayImportedIds) {
+            this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
+        }
+
         public Builder setVersion(Long version) {
             this.version = version;
             return this;
@@ -245,7 +255,7 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, withoutQuaysOnly, pointInTime, version, versionValidity, tags, page, size);
+            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, withoutQuaysOnly, withDuplicatedQuayImportedIds, pointInTime, version, versionValidity, tags, page, size);
         }
 
     }

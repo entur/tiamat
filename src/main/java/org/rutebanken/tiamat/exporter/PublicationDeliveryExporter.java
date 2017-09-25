@@ -61,11 +61,7 @@ public class PublicationDeliveryExporter {
 
     @Transactional(readOnly = true)
     public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
-        if (exportParams.getStopPlaceSearch().isEmpty()) {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findAllByOrderByChangedDesc(exportParams.getStopPlaceSearch().getPageable()).getContent(), exportParams);
-        } else {
-            return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams).getContent(), exportParams);
-        }
+        return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams).getContent(), exportParams);
     }
 
     @Transactional(readOnly = true)

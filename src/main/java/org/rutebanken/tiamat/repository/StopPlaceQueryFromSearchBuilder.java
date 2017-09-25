@@ -59,6 +59,37 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
      */
     public static final String SQL_MULTIPLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name in :tags and t.removed is null)";
 
+    public static final String SQL_DUPLICATED_QUAY_IMPORTED_IDS = "SELECT sp1.netex_id " +
+            "FROM stop_place sp1 " +
+            "  INNER JOIN stop_place_quays spq1 " +
+            "    ON sp1.id = spq1.stop_place_id " +
+            "  INNER JOIN quay_key_values qkv1 " +
+            "    ON qkv1.quay_id = spq1.quays_id " +
+            "      AND qkv1.key_values_key = :originalIdKey " +
+            "  INNER JOIN value_items vi1 " +
+            "    ON vi1.value_id = qkv1.key_values_id " +
+            "  INNER JOIN quay q1 " +
+            "    ON q1.id = qkv1.quay_id " +
+            "WHERE sp1.from_date <= now() AND (sp1.to_date is NULL OR sp1.to_date > now()) " +
+            "AND EXISTS (SELECT sp2.netex_id " +
+            "  FROM stop_place sp2 " +
+            "    INNER JOIN stop_place_quays spq2 " +
+            "      ON sp2.id = spq2.stop_place_id " +
+            "    INNER JOIN quay_key_values qkv2 " +
+            "      ON qkv2.quay_id = spq2.quays_id " +
+            "        AND qkv2.key_values_key = :originalIdKey " +
+            "    INNER JOIN value_items vi2 " +
+            "      ON vi2.value_id = qkv2.key_values_id " +
+            "    INNER JOIN quay q2 " +
+            "      ON q2.id = qkv2.quay_id " +
+            "    WHERE " +
+            "     (sp2.netex_id != sp1.netex_id " +
+            "       OR (sp2.netex_id = sp1.netex_id AND sp2.version = sp1.version AND q2.netex_id != q1.netex_id)) " +
+            "    AND vi2.items = vi1.items " +
+            "    AND sp2.from_date <= now() AND (sp2.to_date is NULL OR sp2.to_date > now()) " +
+            "    ) " +
+            "GROUP By sp1.netex_id";
+
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
@@ -211,6 +242,12 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.isWithoutQuaysOnly()) {
             operators.add("and");
             wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
+        }
+
+        if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
+            operators.add("and");
+            parameters.put("originalIdKey", ORIGINAL_ID_KEY);
+            wheres.add("s.netex_id IN ("+SQL_DUPLICATED_QUAY_IMPORTED_IDS +")");
         }
 
         operators.add("and");
