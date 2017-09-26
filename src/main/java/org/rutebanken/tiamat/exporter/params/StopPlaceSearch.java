@@ -64,6 +64,9 @@ public class StopPlaceSearch {
     @QueryParam(value = "withDuplicatedQuayImportedIds")
     private boolean withDuplicatedQuayImportedIds;
 
+    @QueryParam(value = "withNearbySimilarDuplicates")
+    private boolean withNearbySimilarDuplicates;
+
     @QueryParam(value = "version")
     private Long version;
 
@@ -81,6 +84,7 @@ public class StopPlaceSearch {
                             boolean withoutLocationOnly,
                             boolean withoutQuaysOnly,
                             boolean withDuplicatedQuayImportedIds,
+                            boolean withNearbySimilarDuplicates,
                             Instant pointInTime,
                             Long version,
                             ExportParams.VersionValidity versionValidity,
@@ -93,6 +97,7 @@ public class StopPlaceSearch {
         this.withoutLocationOnly = withoutLocationOnly;
         this.withoutQuaysOnly = withoutQuaysOnly;
         this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
+        this.withNearbySimilarDuplicates = withNearbySimilarDuplicates;
         this.pointInTime = pointInTime;
         this.version = version;
         this.versionValidity = versionValidity;
@@ -137,6 +142,10 @@ public class StopPlaceSearch {
         return withDuplicatedQuayImportedIds;
     }
 
+    public boolean isWithNearbySimilarDuplicates() {
+        return withNearbySimilarDuplicates;
+    }
+
     public Instant getPointInTime() {
         return pointInTime;
     }
@@ -178,8 +187,8 @@ public class StopPlaceSearch {
         private boolean allVersions;
         private boolean withoutLocationOnly;
         private boolean withoutQuaysOnly;
-
         private boolean withDuplicatedQuayImportedIds;
+        private boolean withNearbySimilarDuplicates;
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
@@ -234,6 +243,10 @@ public class StopPlaceSearch {
             this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
         }
 
+        public void setWithNearbySimilarDuplicates(boolean withNearbySimilarDuplicates) {
+            this.withNearbySimilarDuplicates = withNearbySimilarDuplicates;
+        }
+
         public Builder setVersion(Long version) {
             this.version = version;
             return this;
@@ -255,7 +268,20 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, withoutQuaysOnly, withDuplicatedQuayImportedIds, pointInTime, version, versionValidity, tags, page, size);
+            return new StopPlaceSearch(query,
+                    stopTypeEnumerations,
+                    idList,
+                    allVersions,
+                    withoutLocationOnly,
+                    withoutQuaysOnly,
+                    withDuplicatedQuayImportedIds,
+                    withNearbySimilarDuplicates,
+                    pointInTime,
+                    version,
+                    versionValidity,
+                    tags,
+                    page,
+                    size);
         }
 
     }

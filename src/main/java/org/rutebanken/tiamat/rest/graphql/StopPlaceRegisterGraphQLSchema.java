@@ -457,6 +457,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description("Set to true to only return stop places that have quays with duplicated imported IDs.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(WITH_NEARBY_SIMILAR_DUPLICATES)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return stop places have nearby similar duplicates.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
                 .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")

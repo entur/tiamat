@@ -28,18 +28,13 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
-import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
 /**
  * Builds query from stop place search params
@@ -91,18 +86,47 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             "AND vi1.items != '' " +
             "GROUP By sp1.netex_id";
 
+    private static final double NEARBY_DECIMAL_DEGREES = 0.04;
+    private static final double NEARBY_NAME_SIMILARITY = 0.6;
+
+    /**
+     * It is possible to search for nearby duplicates by meters, but it has a performance impact.
+     * That's why decimal degrees is used.
+     * This join is using pointInTime. It should actually support allVersion=true and pointInTime=null.
+     */
+    public static final String SQL_INNER_JOIN_NEARBY =
+            " INNER JOIN stop_place s2 " +
+                    "  ON s2.netex_id != s.netex_id " +
+                    "  AND s2.parent_stop_place = false " +
+                    "  AND s2.stop_place_type = s.stop_place_type " +
+                    "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) " +
+                    "  AND ST_Distance(s.centroid, s2.centroid) < :nearbyThreshold " +
+                    "  AND s.name_value = s2.name_value ";
+                    // Together with distinct and nearby search, the next line slows everything down too much:
+//                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
+
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
-        queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
+
+        if(stopPlaceSearch.isWithNearbySimilarDuplicates()) {
+            if(stopPlaceSearch.getPointInTime() == null) {
+                parameters.put("pointInTime", Date.from(Instant.now()));
+            }
+            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
+//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
+            queryString.append(SQL_INNER_JOIN_NEARBY);
+        }
+
+        queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
@@ -248,11 +272,12 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
             operators.add("and");
             if(stopPlaceSearch.getPointInTime() == null) {
-                parameters.put("pointInTime", Instant.now());
+                parameters.put("pointInTime", Date.from(Instant.now()));
             }
             parameters.put("originalIdKey", ORIGINAL_ID_KEY);
-            wheres.add("s.netex_id IN ("+SQL_DUPLICATED_QUAY_IMPORTED_IDS +")");
+            wheres.add("s.netex_id IN (" + SQL_DUPLICATED_QUAY_IMPORTED_IDS + ")");
         }
+
 
         operators.add("and");
         wheres.add(SQL_NOT_PARENT_STOP_PLACE);
