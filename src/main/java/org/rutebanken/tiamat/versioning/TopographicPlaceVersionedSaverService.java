@@ -35,7 +35,7 @@ public class TopographicPlaceVersionedSaverService extends VersionedSaverService
     private TopographicPlaceLookupService topographicPlaceLookupService;
 
     @Override
-    protected TopographicPlace saveNewVersion(TopographicPlace existingVersion, TopographicPlace newVersion) {
+    public TopographicPlace saveNewVersion(TopographicPlace existingVersion, TopographicPlace newVersion) {
         TopographicPlace saved = super.saveNewVersion(existingVersion, newVersion);
         topographicPlaceLookupService.reset();
         return saved;

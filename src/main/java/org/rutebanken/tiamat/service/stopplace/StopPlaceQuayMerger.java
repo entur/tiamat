@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -80,6 +81,8 @@ public class StopPlaceQuayMerger {
 
         Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
 
+        Instant now = Instant.now();
+
         CopiedEntity<StopPlace> stopPlaceCopies = stopPlaceCopyHelper.createCopies(stopPlace);
 
 
@@ -108,13 +111,13 @@ public class StopPlaceQuayMerger {
         if(stopPlaceCopies.hasParent()) {
             if(!isDryRun) {
                 logger.info("Saving parent stop place {}. Returning parent of child: {}", stopPlaceCopies.getCopiedParent().getNetexId(), stopPlace.getNetexId());
-                return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent());
+                return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent(), now);
             } else {
                 return stopPlaceCopies.getCopiedParent();
             }
         } else {
             if(!isDryRun) {
-                return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, stopPlaceCopies.getCopiedEntity());
+                return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, stopPlaceCopies.getCopiedEntity(), now);
             } else {
                 return stopPlaceCopies.getCopiedEntity();
             }

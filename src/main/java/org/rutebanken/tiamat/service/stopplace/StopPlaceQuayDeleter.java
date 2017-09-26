@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -68,6 +69,8 @@ public class StopPlaceQuayDeleter {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
+        Instant instant = Instant.now();
+
         CopiedEntity<StopPlace> stopPlaceCopies = stopPlaceCopyHelper.createCopies(stopPlace);
 
         stopPlaceCopies.getCopiedEntity().getQuays().removeIf(quay -> quay.getNetexId().equals(quayId));
@@ -81,9 +84,9 @@ public class StopPlaceQuayDeleter {
 
         if(stopPlaceCopies.hasParent()) {
             logger.info("Saving parent stop place {}. Returning parent of child: {}", stopPlaceCopies.getCopiedParent().getNetexId(), stopPlace.getNetexId());
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent());
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent(), instant);
         } else {
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingEntity(), stopPlaceCopies.getCopiedEntity());
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingEntity(), stopPlaceCopies.getCopiedEntity(), instant);
         }
     }
 }

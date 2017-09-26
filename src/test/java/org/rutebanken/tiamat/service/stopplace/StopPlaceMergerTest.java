@@ -233,6 +233,34 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
     @Test
     @Transactional
+    public void testMergeStopPlacesWithFutureValidity() {
+
+        Instant nowPlusOneSecond = Instant.now().plusSeconds(1);
+
+        StopPlace fromStopPlace = new StopPlace();
+        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
+        fromStopPlace.setValidBetween(new ValidBetween(nowPlusOneSecond));
+
+        StopPlace toStopPlace = new StopPlace();
+        toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
+
+        ValidBetween toValidBetween = new ValidBetween(nowPlusOneSecond);
+        toStopPlace.setValidBetween(toValidBetween);
+
+
+        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
+
+        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
+
+        assertThat(mergedStopPlace.getValidBetween()).isNotNull();
+        assertThat(mergedStopPlace.getValidBetween().getFromDate()).isNotNull();
+        assertThat(mergedStopPlace.getValidBetween().getToDate()).isNull();
+
+    }
+
+    @Test
+    @Transactional
     public void testMergeStopPlacesWithAlternativeNames() {
 
         StopPlace fromStopPlace = new StopPlace();

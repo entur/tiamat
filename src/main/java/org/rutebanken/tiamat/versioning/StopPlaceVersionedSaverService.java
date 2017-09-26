@@ -73,7 +73,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     @Override
-    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion) {
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant now) {
 
         super.validate(existingVersion, newVersion);
 
@@ -90,7 +90,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant now = Instant.now();
         Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if (existingVersion == null) {

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -66,15 +67,16 @@ public class StopPlaceQuayMover {
 
         logger.debug("Found stop place to move quays {} from {}", quayIds, sourceStopPlace);
 
-        Set<Quay> quaysToMove = removeQuaysFromStop(sourceStopPlace, fromVersionComment, quayIds);
+        Instant now = Instant.now();
+        Set<Quay> quaysToMove = removeQuaysFromStop(sourceStopPlace, fromVersionComment, quayIds, now);
 
-        StopPlace response = addQuaysToDestinationStop(destinationStopPlaceId, quaysToMove, toVersionComment);
+        StopPlace response = addQuaysToDestinationStop(destinationStopPlaceId, quaysToMove, toVersionComment, now);
 
         logger.info("Moved quays: {} from stop {} to {}", quayIds, sourceStopPlace.getNetexId(), response.getNetexId());
         return response;
     }
 
-    private StopPlace addQuaysToDestinationStop(String destinationStopPlaceId, Set<Quay> quaysToMove, String toVersionComment) {
+    private StopPlace addQuaysToDestinationStop(String destinationStopPlaceId, Set<Quay> quaysToMove, String toVersionComment, Instant now) {
 
         StopPlace destinationStopPlace;
         if(destinationStopPlaceId == null) {
@@ -96,10 +98,10 @@ public class StopPlaceQuayMover {
 
         logger.debug("Saved stop place with new quays {} {}", quaysToMove.stream().map(q -> q.getNetexId()).collect(toList()), destinationStopPlace);
 
-        return save(destination);
+        return save(destination, now);
     }
 
-    private Set<Quay> removeQuaysFromStop(StopPlace sourceStopPlace, String fromVersionComment, List<String> quayIds) {
+    private Set<Quay> removeQuaysFromStop(StopPlace sourceStopPlace, String fromVersionComment, List<String> quayIds, Instant now) {
         CopiedEntity<StopPlace> source = stopPlaceCopyHelper.createCopies(sourceStopPlace);
         StopPlace stopPlaceToRemoveQuaysFrom = source.getCopiedEntity();
 
@@ -107,7 +109,7 @@ public class StopPlaceQuayMover {
         stopPlaceToRemoveQuaysFrom.getQuays().removeIf(quay -> quaysToMove.contains(quay));
         stopPlaceToRemoveQuaysFrom.setVersionComment(fromVersionComment);
 
-        save(source);
+        save(source, now);
         logger.debug("Saved stop place without quays {} {}", quayIds, stopPlaceToRemoveQuaysFrom);
         return quaysToMove;
     }
@@ -115,13 +117,14 @@ public class StopPlaceQuayMover {
     /**
      * Saves parent copy if parent exist. If not, saves monomodal stop place.
      * @param copiedEntity
+     * @param now
      * @return
      */
-    private StopPlace save(CopiedEntity<StopPlace> copiedEntity) {
+    private StopPlace save(CopiedEntity<StopPlace> copiedEntity, Instant now) {
         if(copiedEntity.hasParent()) {
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingParent(), copiedEntity.getCopiedParent());
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingParent(), copiedEntity.getCopiedParent(), now);
         } else
-            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingEntity(), copiedEntity.getCopiedEntity());
+            return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingEntity(), copiedEntity.getCopiedEntity(), now);
     }
 
     private void verifySize(List<String> quayIds, Set<StopPlace> sourceStopPlaces) {

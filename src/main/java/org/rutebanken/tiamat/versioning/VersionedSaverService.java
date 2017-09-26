@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +57,17 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     }
 
     public T saveNewVersion(T newVersion) {
-        return saveNewVersion(null, newVersion);
+        return saveNewVersion(null, newVersion, Instant.now());
     }
 
-    protected T saveNewVersion(T existingVersion, T newVersion) {
+    public T saveNewVersion(T existingVersion, T newVersion) {
+        return saveNewVersion(existingVersion, newVersion, Instant.now());
+    }
+
+    protected T saveNewVersion(T existingVersion, T newVersion, Instant now) {
 
         validate(existingVersion, newVersion);
 
-        Instant now = Instant.now();
         Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if(existingVersion == null) {
