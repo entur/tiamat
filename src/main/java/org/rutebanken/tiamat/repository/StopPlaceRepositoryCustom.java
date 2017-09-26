@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -70,4 +71,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     List<StopPlace> findAll(List<String> stopPlacesNetexIds);
 
     StopPlace findByQuay(Quay quay);
+
+    List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace();
 }

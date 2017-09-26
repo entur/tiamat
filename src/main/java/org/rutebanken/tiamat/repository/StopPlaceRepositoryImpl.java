@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -46,6 +47,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
@@ -511,6 +513,38 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         return new PageImpl<>(stopPlaces, search.getPageable(), totalCnt);
+    }
+
+    /**
+     * Return jbv code mapping for rail stations. The stop place contains jbc code mapping. The quay contains the public code.
+     * @return
+     */
+    @Override
+    public List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace() {
+        String sql = "SELECT DISTINCT vi.items, s.netex_id " +
+                "FROM stop_place_key_values skv " +
+                "   INNER JOIN stop_place s " +
+                "       ON s.id = skv.stop_place_id AND s.stop_place_type = :stopPlaceType " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "   INNER JOIN value_items vi " +
+                "       ON skv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND skv.key_values_key = :mappingIdKeys " +
+                "WHERE " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "ORDER BY items ";
+        Query nativeQuery = entityManager.createNativeQuery(sql);
+
+        nativeQuery.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
+        nativeQuery.setParameter("mappingIdKeys", Arrays.asList(JBV_CODE));
+        nativeQuery.setParameter("pointInTime", Date.from(Instant.now()));
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<JbvCodeMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new JbvCodeMappingDto(row[0].toString(), null, row[1].toString()));
+        }
+
+        return mappingResult;
     }
 
     private int countStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {

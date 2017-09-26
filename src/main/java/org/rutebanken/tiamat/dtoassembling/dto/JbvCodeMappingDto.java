@@ -30,7 +30,11 @@ public class JbvCodeMappingDto {
     }
 
     public String toCsvString() {
-        return originalId + CODE_PLATFORM_SEPARATOR + platform + SEPARATOR + netexId;
+        if (platform != null) {
+            return originalId + CODE_PLATFORM_SEPARATOR + platform + SEPARATOR + netexId;
+        } else {
+            return originalId + SEPARATOR + netexId;
+        }
     }
 
 }

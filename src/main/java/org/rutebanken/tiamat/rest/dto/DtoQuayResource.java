@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.dto;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,12 @@ public class DtoQuayResource {
     private static final Logger logger = LoggerFactory.getLogger(DtoQuayResource.class);
 
     private final QuayRepository quayRepository;
+    private final StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    public DtoQuayResource(QuayRepository quayRepository) {
+    public DtoQuayResource(QuayRepository quayRepository, StopPlaceRepository stopPlaceRepository) {
         this.quayRepository = quayRepository;
+        this.stopPlaceRepository = stopPlaceRepository;
     }
 
     @GET
@@ -92,6 +95,10 @@ public class DtoQuayResource {
             try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                     List<JbvCodeMappingDto> quayMappings = quayRepository.findJbvCodeMappingsForQuay();
                     for (JbvCodeMappingDto mapping : quayMappings) {
+                        writer.println(mapping.toCsvString());
+                    }
+                    List<JbvCodeMappingDto> stopPlaceMappings = stopPlaceRepository.findJbvCodeMappingsForStopPlace();
+                    for (JbvCodeMappingDto mapping : stopPlaceMappings) {
                         writer.println(mapping.toCsvString());
                     }
                     writer.flush();

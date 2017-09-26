@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -36,11 +37,12 @@ import static org.mockito.Mockito.*;
 public class DtoQuayResourceTest {
 
     private QuayRepository quayRepository = mock(QuayRepository.class);
+    private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private DtoQuayResource dtoQuayResource;
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource(quayRepository);
+        dtoQuayResource = new DtoQuayResource(quayRepository, stopPlaceRepository);
     }
 
     @Test

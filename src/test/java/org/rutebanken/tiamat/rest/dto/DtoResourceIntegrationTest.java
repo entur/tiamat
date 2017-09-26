@@ -19,11 +19,12 @@ import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -111,7 +112,8 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
         assertThat(response)
                 .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
                 .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
-                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n");
+                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
+                .contains(jbvCode1 + "," + stopPlace.getNetexId() + "\n");
 
     }
 
