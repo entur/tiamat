@@ -460,7 +460,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(WITH_NEARBY_SIMILAR_DUPLICATES)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("Set to true to only return stop places have nearby similar duplicates.")
+                .description("Set to true to only return stop places have nearby similar duplicates. The result will not have duplicates omitted.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
