@@ -88,16 +88,19 @@ public class StopPlaceMerger {
 
         if (!isDryRun) {
             //Terminate validity of from-StopPlace
-            terminateEntity(fromStopPlaceToTerminate);
-            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate);
+
+            Instant now = Instant.now();
+            terminateEntity(fromStopPlaceToTerminate, now);
+
+            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate, now);
 
 
             if(mergedStopPlaceCopy.hasParent()) {
                 logger.info("Saving parent stop place {}. Returning parent of child: {}", mergedStopPlaceCopy.getCopiedParent().getNetexId(), mergedStopPlaceCopy.getCopiedEntity().getNetexId());
-                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingParent(), mergedStopPlaceCopy.getCopiedParent());
+                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingParent(), mergedStopPlaceCopy.getCopiedParent(), now);
 
             } else {
-                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingEntity(), mergedStopPlaceCopy.getCopiedEntity());
+                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingEntity(), mergedStopPlaceCopy.getCopiedEntity(), now);
             }
         }
         return mergedStopPlaceCopy.getCopiedEntity();
@@ -162,12 +165,12 @@ public class StopPlaceMerger {
                 .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
     }
 
-    private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity) {
+    private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity, Instant now) {
         // Terminate validity for "from"-stopPlace
         if (entity.getValidBetween() != null) {
-            entity.getValidBetween().setToDate(Instant.now());
+            entity.getValidBetween().setToDate(now);
         } else {
-            entity.setValidBetween(new ValidBetween(null, Instant.now()));
+            entity.setValidBetween(new ValidBetween(null, now));
         }
         return entity;
     }

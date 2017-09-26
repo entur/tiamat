@@ -34,7 +34,7 @@ public class TariffZoneVersionedSaverService extends VersionedSaverService<Tarif
     private TariffZonesLookupService tariffZonesLookupService;
 
     @Override
-    protected TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
+    public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
         TariffZone saved = super.saveNewVersion(existingVersion, newVersion);
         tariffZonesLookupService.reset();
         return saved;

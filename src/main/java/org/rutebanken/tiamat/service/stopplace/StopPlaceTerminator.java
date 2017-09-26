@@ -75,7 +75,7 @@ public class StopPlaceTerminator {
             logger.debug("Set valid betwen to {} for new version of stop place {}", nextVersionStopPlace.getValidBetween(), nextVersionStopPlace.getNetexId());
             nextVersionStopPlace.setVersionComment(versionComment);
 
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace, now);
         } else {
             throw new IllegalArgumentException("Cannot find stop place to terminate: " + stopPlaceId + ". No changes executed.");
         }
