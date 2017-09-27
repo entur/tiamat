@@ -191,6 +191,30 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
                 .contains(childToKeep.getNetexId());
     }
 
+    @Test
+    public void testRemovingStopPlaceFromMultiModalParentStopPlaceKeepName() {
+        String parentStopPlaceName = "Parent StopPlace name";
+
+        String lang = "en";
+        StopPlace childToRemove = createStopPlace(parentStopPlaceName, lang);
+        childToRemove.setVersion(1L);
+        childToRemove.setCreated(Instant.now());
+        childToRemove = stopPlaceRepository.save(childToRemove);
+
+
+        StopPlace parent = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(childToRemove.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName, lang));
+        stopPlaceRepository.flush();
+
+        parent = multiModalStopPlaceEditor.removeFromMultiModalStopPlace(parent.getNetexId(), Arrays.asList(childToRemove.getNetexId()));
+
+        assertThat(parent.getChildren()).isEmpty();
+
+        StopPlace actualRemovedChild = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(childToRemove.getNetexId());
+        assertThat(actualRemovedChild.getName())
+                .isNotNull()
+                .isEqualTo(new EmbeddableMultilingualString(parentStopPlaceName, lang));
+    }
+
     @Test(expected = Exception.class)
     public void testNotAllowsChildStopWithFutureVersion() {
 

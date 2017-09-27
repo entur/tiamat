@@ -138,6 +138,12 @@ public class MultiModalStopPlaceEditor {
                 logger.info("Removing child stop place {} from parent stop place {}", stopToRemove.getNetexId(), parentStopPlace.getNetexId());
                 StopPlace stopToRemoveCopy = stopPlaceVersionedSaverService.createCopy(stopToRemove, StopPlace.class);
                 stopToRemoveCopy.setParentSiteRef(null);
+
+                if(stopToRemoveCopy.getName() == null) {
+                    logger.info("Setting name for removed child to parent's name: {} ({})", parentStopPlace.getName(), stopToRemoveCopy.getNetexId());
+                    stopToRemoveCopy.setName(parentStopPlace.getName());
+                }
+
                 stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy);
             }
         });
