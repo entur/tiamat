@@ -171,7 +171,12 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
         if(stopPlaceToSave.getChildren() == null) return;
         stopPlaceToSave.getChildren().forEach(child -> {
-            child.setName(null);
+
+            if(child.getName() != null && stopPlaceToSave.getName() != null && child.getName().equals(stopPlaceToSave.getName())) {
+                logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), child.getName(), stopPlaceToSave.getNetexId());
+                child.setName(null);
+            }
+
             child.setValidBetween(null);
             child.setTopographicPlace(null);
             child.getTariffZones().clear();

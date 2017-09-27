@@ -21,7 +21,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +66,46 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(result.getValidBetween()).isNotNull();
         assertThat(result.getNetexId()).isNotNull();
 
-        assertThatChildsAreReferencingParentAndHasNoName(childIds, result);
+        assertThatChildsAreReferencingParent(childIds, result);
+    }
+
+    @Test
+    public void testCreateMultiModalParentStopPlaceOnlyRemoveChildStopPlaceNameIfEqual() {
+
+        String equalStopPlaceName = "StopPlaceName";
+        String differentChildStopPlaceName = "StopPlaceNameChild";
+
+        String nb = "nb";
+        String en = "en";
+
+        List<StopPlace> children = new ArrayList<>();
+        children.add(createStopPlace(equalStopPlaceName, nb));
+        children.add(createStopPlace(differentChildStopPlaceName, nb));
+        children.add(createStopPlace(equalStopPlaceName, en));
+
+        List<StopPlace> savedChildren = stopPlaceRepository.save(children);
+
+        List<String> childIds = new ArrayList<>();
+        savedChildren.forEach(sp -> {
+            childIds.add(sp.getNetexId());
+        });
+
+
+        StopPlace result = multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString(equalStopPlaceName, nb));
+        assertThat(result.getName().getValue()).isEqualTo(equalStopPlaceName);
+        assertThat(result.getVersion()).isEqualTo(1L);
+        assertThat(result.getValidBetween()).isNotNull();
+        assertThat(result.getNetexId()).isNotNull();
+
+        assertThatChildsAreReferencingParent(childIds, result);
+        assertThat(result.getChildren())
+                .extracting(StopPlace::getName)
+                .containsExactlyInAnyOrder(
+                        new EmbeddableMultilingualString(differentChildStopPlaceName, nb),
+                        // Same name but different language should not have been removed:
+                        new EmbeddableMultilingualString(equalStopPlaceName, en),
+                        null)
+                .doesNotContain(new EmbeddableMultilingualString(equalStopPlaceName, nb));
     }
 
 
@@ -93,7 +131,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         String parentStopPlaceName = "Super duper StopPlace";
         StopPlace superDuperStopPlace = multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString(parentStopPlaceName));
 
-        assertThatChildsAreReferencingParentAndHasNoName(childIds, superDuperStopPlace);
+        assertThatChildsAreReferencingParent(childIds, superDuperStopPlace);
 
         StopPlace acutalFirstStopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(firstStopPlace.getNetexId(), firstStopPlace.getVersion());
         assertThat(acutalFirstStopPlace).as("First version of first stop place should not have it's version changed").isNotNull();
@@ -164,18 +202,20 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     }
 
 
-    private void assertThatChildsAreReferencingParentAndHasNoName(List<String> childIds, StopPlace parent) {
+    private void assertThatChildsAreReferencingParent(List<String> childIds, StopPlace parent) {
         childIds.forEach(id -> {
             StopPlace child = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id);
             assertThat(child.getParentSiteRef()).as("child stop " + id + " must have parent site ref").isNotNull();
             assertThat(child.getParentSiteRef().getRef()).as("child stop " + id + " must have parent site ref matching matching parent's netex id").isEqualTo(parent.getNetexId());
             assertThat(child.getParentSiteRef().getVersion()).as("child stop " + id + " must have parent site ref version").isEqualTo(String.valueOf(parent.getVersion()));
-            assertThat(child.getName()).as("Child should not have name set").isNull();
         });
     }
 
+    private StopPlace createStopPlace(String name, String lang) {
+        return new StopPlace(new EmbeddableMultilingualString(name, lang));
+    }
 
     private StopPlace createStopPlace(String name) {
-        return new StopPlace(new EmbeddableMultilingualString(name));
+        return createStopPlace(name, null);
     }
 }
