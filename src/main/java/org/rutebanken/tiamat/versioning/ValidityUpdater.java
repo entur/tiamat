@@ -52,7 +52,8 @@ public class ValidityUpdater {
         }
 
         if(newVersion.getValidBetween().getFromDate() == null) {
-            newVersion.getValidBetween().setFromDate(resolveFromDate(existingVersion, newVersion.getNetexId(), defaultFromTime));
+            logger.info("From date not set for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+            newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
 
         if(existingVersion != null && existingVersion.getValidBetween() != null) {
