@@ -36,7 +36,8 @@ public class RoleAssignmentListBuilder {
     }
 
     public RoleAssignmentListBuilder withAccessAllAreas() {
-        return withRole(AuthorizationConstants.ROLE_EDIT_STOPS, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
+        return withRole(AuthorizationConstants.ROLE_EDIT_STOPS, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES)
+                .withRole(AuthorizationConstants.ROLE_DELETE_STOPS, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
     }
 
 
