@@ -73,13 +73,14 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     public void testCreateMultiModalParentStopPlaceOnlyRemoveChildStopPlaceNameIfEqual() {
 
         String equalStopPlaceName = "StopPlaceName";
+        String equalStopPlaceNameLowerCase = equalStopPlaceName.toLowerCase();
         String differentChildStopPlaceName = "StopPlaceNameChild";
 
         String nb = "nb";
         String en = "en";
 
         List<StopPlace> children = new ArrayList<>();
-        children.add(createStopPlace(equalStopPlaceName, nb));
+        children.add(createStopPlace(equalStopPlaceNameLowerCase, nb));
         children.add(createStopPlace(differentChildStopPlaceName, nb));
         children.add(createStopPlace(equalStopPlaceName, en));
 

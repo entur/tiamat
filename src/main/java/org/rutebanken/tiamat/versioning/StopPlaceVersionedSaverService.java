@@ -172,7 +172,10 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if(stopPlaceToSave.getChildren() == null) return;
         stopPlaceToSave.getChildren().forEach(child -> {
 
-            if(child.getName() != null && stopPlaceToSave.getName() != null && child.getName().equals(stopPlaceToSave.getName())) {
+            if(child.getName() != null
+                    && stopPlaceToSave.getName() != null
+                    && child.getName().getValue().equalsIgnoreCase(stopPlaceToSave.getName().getValue())
+                    && (child.getName().getLang() == null || child.getName().getLang().equalsIgnoreCase(stopPlaceToSave.getName().getLang()))) {
                 logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), child.getName(), stopPlaceToSave.getNetexId());
                 child.setName(null);
             }
