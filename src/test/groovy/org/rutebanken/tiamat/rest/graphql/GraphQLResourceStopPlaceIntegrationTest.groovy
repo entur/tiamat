@@ -889,13 +889,13 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
                 .root("data.stopPlace.children.find { it.id == '${existingChild.getNetexId()}'}")
 
-                    .body("name.value", equalTo(newChild.getName().getValue()))
+                    .body("name.value", nullValue())
                     // version 3 expected. 1: created, 2: added to parent stop, 3: new child added to parent stop
                     .body("version", equalTo("${existingChild.getVersion()+2}".toString()))
                     .body("stopPlaceType", equalTo(existingChild.getStopPlaceType().value()))
 
                 .root("data.stopPlace.children.find { it.id == '${newChild.getNetexId()}'}".toString())
-                    .body("name", nullValue())
+                    .body("name.value", equalTo(newChild.getName().getValue()))
                     .body("version", equalTo("${newChild.getVersion()+1}".toString()))
                     .body("stopPlaceType", equalTo(newChild.getStopPlaceType().value()))
 
