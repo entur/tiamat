@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
 
 @Service
 public class StopPlaceDeleter {
@@ -64,7 +64,7 @@ public class StopPlaceDeleter {
             throw new IllegalArgumentException("Deleting parent stop place or childs of parent stop place is not allowed: " + stopPlaceId);
         }
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, stopPlaces);
+        authorizationService.assertAuthorized(ROLE_DELETE_STOPS, stopPlaces);
         stopPlaceRepository.delete(stopPlaces);
         notifyDeleted(stopPlaces);
 
