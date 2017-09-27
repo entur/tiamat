@@ -80,8 +80,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             "    WHERE " +
             "     (sp2.netex_id != sp1.netex_id " +
             "       OR (sp2.netex_id = sp1.netex_id AND sp2.version = sp1.version AND q2.netex_id != q1.netex_id)) " +
-            "    AND vi2.items = vi1.items " +
-            "    AND sp2.from_date <= :pointInTime AND (sp2.to_date is NULL OR sp2.to_date > :pointInTime) " +
+            "       AND vi2.items = vi1.items " +
+            "       AND sp2.from_date <= :pointInTime AND (sp2.to_date is NULL OR sp2.to_date > :pointInTime) " +
             "    ) " +
             "AND vi1.items != '' " +
             "GROUP By sp1.netex_id";
@@ -99,7 +99,6 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     "  ON s2.netex_id != s.netex_id " +
                     "  AND s2.parent_stop_place = false " +
                     "  AND s2.stop_place_type = s.stop_place_type " +
-                    "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) " +
                     "  AND ST_Distance(s.centroid, s2.centroid) < :nearbyThreshold " +
                     "  AND s.name_value = s2.name_value ";
                     // Together with distinct and nearby search, the next line slows everything down too much:
@@ -118,12 +117,17 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         List<String> orderByStatements = new ArrayList<>();
 
         if(stopPlaceSearch.isWithNearbySimilarDuplicates()) {
+
+            String innerJoin = SQL_INNER_JOIN_NEARBY;
             if(stopPlaceSearch.getPointInTime() == null) {
-                parameters.put("pointInTime", Date.from(Instant.now()));
+
+                innerJoin += "  AND s2.version = (select max(s3.version) from stop_place s3 where s3.netex_id = s2.netex_id) ";
+            } else {
+                innerJoin += "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) ";
             }
             parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
 //            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
-            queryString.append(SQL_INNER_JOIN_NEARBY);
+            queryString.append(innerJoin);
         }
 
         queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
@@ -272,7 +276,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
             operators.add("and");
             if(stopPlaceSearch.getPointInTime() == null) {
-                parameters.put("pointInTime", Date.from(Instant.now()));
+                throw new IllegalArgumentException("pointInTime must be set when searching for duplicated quay imported IDs");
             }
             parameters.put("originalIdKey", ORIGINAL_ID_KEY);
             wheres.add("s.netex_id IN (" + SQL_DUPLICATED_QUAY_IMPORTED_IDS + ")");
