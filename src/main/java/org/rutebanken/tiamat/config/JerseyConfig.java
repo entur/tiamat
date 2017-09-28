@@ -21,16 +21,24 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.rutebanken.tiamat.filter.LegacyLoggingFilter;
 import org.rutebanken.tiamat.rest.dto.*;
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -188,5 +196,19 @@ public class JerseyConfig {
 
         return adminServicesJersey;
     }
+
+
+    @Bean
+    public FilterRegistrationBean legacyLoggingFilterRegistration(@Autowired LegacyLoggingFilter legacyLoggingFilter) {
+
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(legacyLoggingFilter);
+        registration.addUrlPatterns("/jersey/*");
+        registration.addInitParameter("paramName", "paramValue");
+        registration.setName("someFilter");
+        registration.setOrder(1);
+        return registration;
+    }
+
 
 }
