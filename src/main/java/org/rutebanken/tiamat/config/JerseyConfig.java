@@ -203,7 +203,7 @@ public class JerseyConfig {
 
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(legacyLoggingFilter);
-        registration.addUrlPatterns("/jersey/*");
+        registration.addUrlPatterns("/jersey/*", "/tiamat/*");
         registration.addInitParameter("paramName", "paramValue");
         registration.setName("someFilter");
         registration.setOrder(1);
