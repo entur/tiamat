@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.rest.dto.*;
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
+import org.rutebanken.tiamat.rest.health.LegacyHealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,6 +183,7 @@ public class JerseyConfig {
         legacyResources.add(LegacyDtoStopPlaceResource.class);
         legacyResources.add(LegacyDtoQuayResource.class);
         legacyResources.add(LegacyDtoJbvCodeMappingResource.class);
+        legacyResources.add(LegacyHealthResource.class);
 
         legacyResources.add(GeneralExceptionMapper.class);
 
