@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
@@ -9,7 +24,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.ParentStopPlacesFetcher;
+import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +38,7 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
@@ -68,21 +84,17 @@ class StopPlaceFetcher implements DataFetcher {
         String key = environment.getArgument(KEY);
         List<String> values = environment.getArgument(VALUES);
 
-        Boolean allVersions = environment.getArgument(ALL_VERSIONS);
-        if(allVersions != null) {
-            stopPlaceSearchBuilder.setAllVersions(allVersions);
-        }
-
-        Boolean withoutLocationOnly = environment.getArgument(WITHOUT_LOCATION_ONLY);
-        if (withoutLocationOnly != null) {
-            stopPlaceSearchBuilder.setWithoutLocationOnly(withoutLocationOnly);
-        }
+        Boolean allVersions = setIfNonNull(environment, ALL_VERSIONS, stopPlaceSearchBuilder::setAllVersions);
+        setIfNonNull(environment, WITHOUT_LOCATION_ONLY, stopPlaceSearchBuilder::setWithoutLocationOnly);
+        setIfNonNull(environment, WITHOUT_QUAYS_ONLY, stopPlaceSearchBuilder::setWithoutQuaysOnly);
+        setIfNonNull(environment, WITH_DUPLICATED_QUAY_IMPORTED_IDS, stopPlaceSearchBuilder::setWithDuplicatedQuayImportedIds);
+        setIfNonNull(environment, WITH_NEARBY_SIMILAR_DUPLICATES, stopPlaceSearchBuilder::setWithNearbySimilarDuplicates);
 
         Instant pointInTime ;
         if (environment.getArgument(POINT_IN_TIME) != null) {
             pointInTime = environment.getArgument(POINT_IN_TIME);
         } else {
-            pointInTime = Instant.now();
+            pointInTime = null;
         }
 
         if (netexId != null && !netexId.isEmpty()) {
@@ -156,10 +168,7 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
-                List<String> tags = environment.getArgument(TAGS);
-                if(tags != null && !tags.isEmpty()) {
-                    stopPlaceSearchBuilder.setTags(tags);
-                }
+                setIfNonNull(environment, TAGS, stopPlaceSearchBuilder::setTags);
 
                 stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
             }
@@ -197,5 +206,14 @@ class StopPlaceFetcher implements DataFetcher {
 
         List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlacesPage.getContent(), KEEP_CHILDS);
         return new PageImpl<>(parentsResolved, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), parentsResolved.size());
+    }
+
+    private <T> T setIfNonNull(DataFetchingEnvironment environment, String argumentName, Consumer<T> consumer) {
+        if(environment.getArgument(argumentName) != null) {
+            T value = environment.getArgument(argumentName);
+            consumer.accept(value);
+            return value;
+        }
+        return null;
     }
 }

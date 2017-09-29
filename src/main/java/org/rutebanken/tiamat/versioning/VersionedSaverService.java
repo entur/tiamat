@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -5,6 +20,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +57,18 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     }
 
     public T saveNewVersion(T newVersion) {
-        return saveNewVersion(null, newVersion);
+        return saveNewVersion(null, newVersion, Instant.now());
     }
 
-    protected T saveNewVersion(T existingVersion, T newVersion) {
+    public T saveNewVersion(T existingVersion, T newVersion) {
+        return saveNewVersion(existingVersion, newVersion, Instant.now());
+    }
+
+    protected T saveNewVersion(T existingVersion, T newVersion, Instant now) {
 
         validate(existingVersion, newVersion);
 
-        Instant now = Instant.now();
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if(existingVersion == null) {
             if (newVersion.getNetexId() != null) {
@@ -69,6 +88,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
+            newVersion.setChanged(now);
             validityUpdater.terminateVersion(existingVersion, newVersionValidFrom);
             getRepository().save(existingVersion);
         }

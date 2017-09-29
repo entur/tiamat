@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.repository.search;
 
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -12,14 +27,14 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
 
 /**
  * Builds query from stop place search params
@@ -29,18 +44,93 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceQueryFromSearchBuilder.class);
 
+    /**
+     * If searching for single tag in the query parameter, prefixed by #
+     */
+    public static final String SQL_SINGLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name = :query and t.removed is null)";
+
+    /**
+     * If using a list of tags as stop place search argument
+     */
+    public static final String SQL_MULTIPLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name in :tags and t.removed is null)";
+
+    public static final String SQL_DUPLICATED_QUAY_IMPORTED_IDS = "SELECT sp1.netex_id " +
+            "FROM stop_place sp1 " +
+            "  INNER JOIN stop_place_quays spq1 " +
+            "    ON sp1.id = spq1.stop_place_id " +
+            "  INNER JOIN quay_key_values qkv1 " +
+            "    ON qkv1.quay_id = spq1.quays_id " +
+            "      AND qkv1.key_values_key = :originalIdKey " +
+            "  INNER JOIN value_items vi1 " +
+            "    ON vi1.value_id = qkv1.key_values_id " +
+            "  INNER JOIN quay q1 " +
+            "    ON q1.id = qkv1.quay_id " +
+            "WHERE sp1.from_date <= :pointInTime AND (sp1.to_date is NULL OR sp1.to_date > :pointInTime) " +
+            "AND EXISTS (SELECT sp2.netex_id " +
+            "  FROM stop_place sp2 " +
+            "    INNER JOIN stop_place_quays spq2 " +
+            "      ON sp2.id = spq2.stop_place_id " +
+            "    INNER JOIN quay_key_values qkv2 " +
+            "      ON qkv2.quay_id = spq2.quays_id " +
+            "        AND qkv2.key_values_key = :originalIdKey " +
+            "    INNER JOIN value_items vi2 " +
+            "      ON vi2.value_id = qkv2.key_values_id " +
+            "    INNER JOIN quay q2 " +
+            "      ON q2.id = qkv2.quay_id " +
+            "    WHERE " +
+            "     (sp2.netex_id != sp1.netex_id " +
+            "       OR (sp2.netex_id = sp1.netex_id AND sp2.version = sp1.version AND q2.netex_id != q1.netex_id)) " +
+            "       AND vi2.items = vi1.items " +
+            "       AND sp2.from_date <= :pointInTime AND (sp2.to_date is NULL OR sp2.to_date > :pointInTime) " +
+            "    ) " +
+            "AND vi1.items != '' " +
+            "GROUP By sp1.netex_id";
+
+    private static final double NEARBY_DECIMAL_DEGREES = 0.04;
+    private static final double NEARBY_NAME_SIMILARITY = 0.6;
+
+    /**
+     * It is possible to search for nearby duplicates by meters, but it has a performance impact.
+     * That's why decimal degrees is used.
+     * This join is using pointInTime. It should actually support allVersion=true and pointInTime=null.
+     */
+    public static final String SQL_INNER_JOIN_NEARBY =
+            " INNER JOIN stop_place s2 " +
+                    "  ON s2.netex_id != s.netex_id " +
+                    "  AND s2.parent_stop_place = false " +
+                    "  AND s2.stop_place_type = s.stop_place_type " +
+                    "  AND ST_Distance(s.centroid, s2.centroid) < :nearbyThreshold " +
+                    "  AND s.name_value = s2.name_value ";
+                    // Together with distinct and nearby search, the next line slows everything down too much:
+//                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
+
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         StringBuilder queryString = new StringBuilder("select s.* from stop_place s ");
-        queryString.append("left join stop_place p on s.parent_site_ref = p.netex_id and s.parent_site_ref_version = cast(p.version as text) ");
 
         List<String> wheres = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
+
+        if(stopPlaceSearch.isWithNearbySimilarDuplicates()) {
+
+            String innerJoin = SQL_INNER_JOIN_NEARBY;
+            if(stopPlaceSearch.getPointInTime() == null) {
+
+                innerJoin += "  AND s2.version = (select max(s3.version) from stop_place s3 where s3.netex_id = s2.netex_id) ";
+            } else {
+                innerJoin += "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) ";
+            }
+            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
+//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
+            queryString.append(innerJoin);
+        }
+
+        queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
 
@@ -56,7 +146,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                     // Seems like we are searching for tags
                     String hashRemoved = stopPlaceSearch.getQuery().substring(1);
                     parameters.put("query", hashRemoved);
-                    wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name = :query)");
+                    wheres.add("(s." + SQL_SINGLE_TAG_QUERY + " OR p." + SQL_SINGLE_TAG_QUERY + ")");
+
                 } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
                     String netexId = stopPlaceSearch.getQuery();
 
@@ -111,7 +202,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             }
 
             if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
-                wheres.add("s.netex_id in (select t.netex_reference from tag t where t.netex_reference = s.netex_id and t.name in :tags)");
+                wheres.add("(s." + SQL_MULTIPLE_TAG_QUERY + " OR p." + SQL_MULTIPLE_TAG_QUERY + ")");
                 parameters.put("tags", stopPlaceSearch.getTags());
                 operators.add("and");
             }
@@ -160,13 +251,14 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
-            if(ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
-
-                String currentQuery = "(%s.from_date <= now() AND (%s.to_date >= now() or %s.to_date IS NULL))";
-                wheres.add("("+ formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
-            } else if(ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
-                String futureQuery = "s.to_date >= now() OR s.to_date IS NULL";
-                String parentFutureQuery = "p.to_date >= now() OR p.to_date IS NULL";
+            if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+                parameters.put("pointInTime", Date.from(Instant.now()));
+                String currentQuery = "(%s.from_date <= :pointInTime AND (%s.to_date >= :pointInTime or %s.to_date IS NULL))";
+                wheres.add("(" + formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
+            } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
+                parameters.put("pointInTime", Date.from(Instant.now()));
+                String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
+                String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
                 wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
             }
         }
@@ -176,8 +268,23 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             wheres.add("(s.centroid IS NULL or (p.id IS NOT NULL AND p.centroid IS NULL))");
         }
 
+        if (stopPlaceSearch.isWithoutQuaysOnly()) {
+            operators.add("and");
+            wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
+        }
+
+        if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
+            operators.add("and");
+            if(stopPlaceSearch.getPointInTime() == null) {
+                throw new IllegalArgumentException("pointInTime must be set when searching for duplicated quay imported IDs");
+            }
+            parameters.put("originalIdKey", ORIGINAL_ID_KEY);
+            wheres.add("s.netex_id IN (" + SQL_DUPLICATED_QUAY_IMPORTED_IDS + ")");
+        }
+
+
         operators.add("and");
-        wheres.add("s.parent_stop_place = false");
+        wheres.add(SQL_NOT_PARENT_STOP_PLACE);
 
         addWheres(queryString, wheres, operators);
 
@@ -193,9 +300,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         final String generatedSql = basicFormatter.format(queryString.toString());
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
-        }
+
+            logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+
         return Pair.of(generatedSql, parameters);
     }
 

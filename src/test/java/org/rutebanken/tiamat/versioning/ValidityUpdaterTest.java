@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
@@ -19,9 +34,6 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
 
     @Autowired
     private ValidityUpdater validityUpdater;
-
-    @Autowired
-    private VersionCreator versionCreator;
 
     @Test
     public void terminateVersionsWithoutValidBetween() {
@@ -88,38 +100,45 @@ public class ValidityUpdaterTest extends TiamatIntegrationTest {
         validityUpdater.updateValidBetween(stopPlace, now);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionEndDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+        Instant now = Instant.now();
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), now));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getToDate().minusSeconds(10)));
+
+        validityUpdater.updateValidBetween(previousVersion, newVersion, now);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionFromDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+        Instant now = Instant.now();
+
+        // No to date
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), null));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getFromDate().minusSeconds(10)));
+
+        validityUpdater.updateValidBetween(previousVersion, newVersion, now);
+    }
+
     @Test
-    public void newTerminatedVersionShouldHaveValidBetween() {
+    public void doNotSetEndDateOnPreviousVersionIfAlreadySet() {
         StopPlace oldVersion = new StopPlace();
         oldVersion.setVersion(1L);
+        oldVersion.setValidBetween(new ValidBetween(Instant.EPOCH, Instant.EPOCH));
 
-        Quay quay = new Quay();
-        quay.setVersion(1L);
+        validityUpdater.terminateVersion(oldVersion, Instant.now());
 
-        oldVersion.getQuays().add(quay);
-
-        oldVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, ChronoUnit.DAYS)));
-
-        oldVersion = stopPlaceRepository.save(oldVersion);
-
-        Instant beforeCreated = Instant.now();
-        System.out.println(beforeCreated);
-
-        StopPlace newVersion = versionCreator.createCopy(oldVersion, StopPlace.class);
-
-         validityUpdater.terminateVersion(oldVersion, Instant.now());
-
-        assertThat(newVersion.getValidBetween())
-                .isNotNull();
-
-        System.out.println(oldVersion.getValidBetween().getToDate());
-        assertThat(oldVersion.getValidBetween().getToDate()).isAfterOrEqualTo(beforeCreated);
-
-
-        ValidBetween validBetween = newVersion.getValidBetween();
-        assertThat(validBetween.getFromDate()).isAfterOrEqualTo(beforeCreated);
-        assertThat(validBetween.getToDate()).isNull();
-
+        assertThat(oldVersion.getValidBetween().getToDate()).isEqualTo(Instant.EPOCH);
     }
 
 }

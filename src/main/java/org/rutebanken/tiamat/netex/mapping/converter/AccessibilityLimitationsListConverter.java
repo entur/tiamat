@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 import ma.glasnost.orika.MappingContext;
@@ -23,7 +38,7 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
 
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
         accessibilityLimitations.forEach(limitation -> {
-            limitationsRelStructure.getAccessibilityLimitation().add(
+            limitationsRelStructure.setAccessibilityLimitation(
                     mapperFacade.map(limitation, org.rutebanken.netex.model.AccessibilityLimitation.class)
             );
         });
@@ -38,13 +53,9 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
         List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
 
         if(accessibilityLimitations_relStructure.getAccessibilityLimitation() != null) {
-            accessibilityLimitations_relStructure.getAccessibilityLimitation().stream()
-                    .filter(object -> object instanceof org.rutebanken.netex.model.AccessibilityLimitation)
-                    .map(accessibilityLimitation -> {
-                        AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
-                        return tiamatLimitation;
-                    })
-                    .forEach(limitation -> accessibilityLimitations.add(limitation));
+            org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = accessibilityLimitations_relStructure.getAccessibilityLimitation();
+            AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
+            accessibilityLimitations.add(tiamatLimitation);
         }
 
         return accessibilityLimitations;

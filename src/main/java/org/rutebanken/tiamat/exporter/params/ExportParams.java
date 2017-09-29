@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
@@ -20,14 +35,17 @@ public class ExportParams {
 
     public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE}
 
+    public static final ExportMode DEFAULT_TARIFF_ZONE_EXPORT_MODE = ExportMode.RELEVANT;
+
+    public static final ExportMode DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE = ExportMode.RELEVANT;
+
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topographicPlaceExportMode")
-    private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
+    private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
 
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
-    private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
-
+    private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
 
     @QueryParam(value = "municipalityReference")
     private List<String> municipalityReferences;
@@ -88,8 +106,8 @@ public class ExportParams {
     }
 
     public static class Builder {
-        private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
-        private ExportMode topographicPlaceExportMode = ExportMode.RELEVANT;
+        private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
+        private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;

@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.rest.graphql;
 
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
@@ -116,7 +131,7 @@ public class GraphQLNames {
     public static final String TAG = "tag";
     public static final String TAG_DESCRIPTION = "A tag for an entity like StopPlace";
     public static final String TAG_ID_REFERENCE = "idReference";
-    public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1";
+    public static final String TAG_ID_REFERENCE_DESCRIPTION = "A reference to a netex ID. For instance: NSR:StopPlace:1. Types supported: StopPlace";
     public static final String TAGS = "tags";
     public static final String TAGS_DESCRIPTION = "Fetches already used tags by name distinctively";
     public static final String TAG_COMMENT = "comment";
@@ -241,6 +256,9 @@ public class GraphQLNames {
     public static final String SIZE = "size";
     public static final String ALL_VERSIONS = "allVersions";
     public static final String WITHOUT_LOCATION_ONLY = "withoutLocationOnly";
+    public static final String WITHOUT_QUAYS_ONLY = "withoutQuaysOnly";
+    public static final String WITH_DUPLICATED_QUAY_IMPORTED_IDS = "withDuplicatedQuayImportedIds";
+    public static final String WITH_NEARBY_SIMILAR_DUPLICATES = "withNearbySimilarDuplicates";
     public static final String POINT_IN_TIME = "pointInTime";
 
     public static final String LONGITUDE_MIN = "lonMin";
@@ -316,6 +334,7 @@ public class GraphQLNames {
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";
+    public static final String STOP_PLACE_IDS = "stopPlaceIds";
     public static final String FROM_STOP_PLACE_ID = "fromStopPlaceId";
     public static final String TO_STOP_PLACE_ID = "toStopPlaceId";
     public static final String FROM_QUAY_ID = "fromQuayId";
@@ -329,7 +348,7 @@ public class GraphQLNames {
     public static final String DELETE_STOP_PLACE = "deleteStopPlace";
     public static final String DELETE_QUAY_FROM_STOP_PLACE = "deleteQuay";
 
-    public static final String CREATE_MULTIMODAL_STOPPLACE = "createMultiModalStopPlace";
+    public static final String CREATE_MULTI_MODAL_STOPPLACE = "createMultiModalStopPlace";
     public static final String ADD_TO_MULTIMODAL_STOPPLACE = "addToMultiModalStopPlace";
     public static final String REMOVE_FROM_MULTIMODAL_STOPPLACE = "removeFromMultiModalStopPlace";
 }

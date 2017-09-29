@@ -1,23 +1,44 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.rest.dto;
 
 import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_ADMIN_PATH;
+import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
 import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 
 public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
+    private static final String PATH_MAPPING_STOP_PLACE = SERVICES_STOP_PLACE_PATH + "/mapping/stop_place";
+    private static final String PATH_MAPPING_QUAY = SERVICES_STOP_PLACE_PATH + "/mapping/quay";
+    private static final String PATH_MAPPING_JBV_CODE = SERVICES_ADMIN_PATH + "/jbv_code_mapping";
 
     @Autowired
     StopPlaceVersionedSaverService saverService;
@@ -54,15 +75,14 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         saverService.saveNewVersion(stopPlace, newVersion);
 
-        String url =  "/jersey/quay/id_mapping";
-        String responseWithoutStopPlaceType = getIdMapping(url);
+        String responseWithoutStopPlaceType = getIdMapping(PATH_MAPPING_QUAY);
 
         assertThat(responseWithoutStopPlaceType).contains(originalId + "," + q1.getNetexId() + "\n");
         assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + q1.getNetexId() + "\n");
         assertThat(responseWithoutStopPlaceType).contains(originalId3 + "," + q1.getNetexId() + "\n");
         assertThat(responseWithoutStopPlaceType).doesNotContain(spOrigId);
 
-        String responseWithStopPlaceType = getIdMapping(url + "?includeStopType=true");
+        String responseWithStopPlaceType = getIdMapping(PATH_MAPPING_QUAY + "?includeStopType=true");
         assertThat(responseWithStopPlaceType).contains(originalId + "," + StopTypeEnumeration.AIRPORT.value() + "," + q1.getNetexId() + "\n");
     }
 
@@ -90,19 +110,18 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         saverService.saveNewVersion(stopPlace, newVersion);
 
-        String url =  "/jersey/quay/jbv_code_mapping";
-        String response = getIdMapping(url);
+        String response = getIdMapping(PATH_MAPPING_JBV_CODE);
 
         assertThat(response)
                 .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
                 .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
-                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n");
+                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId() + "\n")
+                .contains(jbvCode1 + "," + stopPlace.getNetexId() + "\n");
 
     }
 
     @Test
     public void testStopPlaceIdMapping() {
-        String url =  "/jersey/stop_place/id_mapping";
 
         StopPlace stopPlace = new StopPlace();
         String originalId = "TST:111";
@@ -125,14 +144,14 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         stopPlace = stopPlaceRepository.save(stopPlace);
 
-        String responseWithoutStopPlaceType = getIdMapping(url);
+        String responseWithoutStopPlaceType = getIdMapping(PATH_MAPPING_STOP_PLACE);
 
         assertThat(responseWithoutStopPlaceType).contains(originalId + "," + stopPlace.getNetexId() + "\n");
         assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + stopPlace.getNetexId() + "\n");
         assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId);
         assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId2);
 
-        String responseWithStopPlaceType = getIdMapping(url+"?includeStopType=true");
+        String responseWithStopPlaceType = getIdMapping(PATH_MAPPING_STOP_PLACE +"?includeStopType=true");
 
         assertThat(responseWithStopPlaceType).contains(originalId + ",," + stopPlace.getNetexId() + "\n");
         assertThat(responseWithStopPlaceType).contains(originalId2 + ",," + stopPlace.getNetexId() + "\n");

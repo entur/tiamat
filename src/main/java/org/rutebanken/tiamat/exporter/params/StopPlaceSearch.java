@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
@@ -43,6 +58,15 @@ public class StopPlaceSearch {
     @QueryParam(value = "withoutLocationOnly")
     private boolean withoutLocationOnly;
 
+    @QueryParam(value = "withoutQuaysOnly")
+    private boolean withoutQuaysOnly;
+
+    @QueryParam(value = "withDuplicatedQuayImportedIds")
+    private boolean withDuplicatedQuayImportedIds;
+
+    @QueryParam(value = "withNearbySimilarDuplicates")
+    private boolean withNearbySimilarDuplicates;
+
     @QueryParam(value = "version")
     private Long version;
 
@@ -58,6 +82,9 @@ public class StopPlaceSearch {
                             List<String> netexIdList,
                             boolean allVersions,
                             boolean withoutLocationOnly,
+                            boolean withoutQuaysOnly,
+                            boolean withDuplicatedQuayImportedIds,
+                            boolean withNearbySimilarDuplicates,
                             Instant pointInTime,
                             Long version,
                             ExportParams.VersionValidity versionValidity,
@@ -68,6 +95,9 @@ public class StopPlaceSearch {
         this.netexIdList = netexIdList;
         this.allVersions = allVersions;
         this.withoutLocationOnly = withoutLocationOnly;
+        this.withoutQuaysOnly = withoutQuaysOnly;
+        this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
+        this.withNearbySimilarDuplicates = withNearbySimilarDuplicates;
         this.pointInTime = pointInTime;
         this.version = version;
         this.versionValidity = versionValidity;
@@ -104,6 +134,18 @@ public class StopPlaceSearch {
         return withoutLocationOnly;
     }
 
+    public boolean isWithoutQuaysOnly() {
+        return withoutQuaysOnly;
+    }
+
+    public boolean isWithDuplicatedQuayImportedIds() {
+        return withDuplicatedQuayImportedIds;
+    }
+
+    public boolean isWithNearbySimilarDuplicates() {
+        return withNearbySimilarDuplicates;
+    }
+
     public Instant getPointInTime() {
         return pointInTime;
     }
@@ -116,14 +158,6 @@ public class StopPlaceSearch {
         return tags;
     }
 
-    // TODO: Remove or update
-    public boolean isEmpty() {
-        return !((query != null && !query.isEmpty())
-                || (tags != null && !tags.isEmpty())
-                || (stopTypeEnumerations != null && !stopTypeEnumerations.isEmpty())
-                || (netexIdList != null && !netexIdList.isEmpty()));
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -132,6 +166,9 @@ public class StopPlaceSearch {
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
+                .add("withouLocationOnly", isWithoutLocationOnly())
+                .add("withoutQuaysOnly", isWithoutQuaysOnly())
+                .add("isWithDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
                 .add("tags", tags)
                 .add("page", page)
                 .add("size", size)
@@ -149,6 +186,9 @@ public class StopPlaceSearch {
         private List<String> idList;
         private boolean allVersions;
         private boolean withoutLocationOnly;
+        private boolean withoutQuaysOnly;
+        private boolean withDuplicatedQuayImportedIds;
+        private boolean withNearbySimilarDuplicates;
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
@@ -194,6 +234,19 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setWithoutQuaysOnly(boolean withoutQuaysOnly) {
+            this.withoutQuaysOnly = withoutQuaysOnly;
+            return this;
+        }
+
+        public void setWithDuplicatedQuayImportedIds(boolean withDuplicatedQuayImportedIds) {
+            this.withDuplicatedQuayImportedIds = withDuplicatedQuayImportedIds;
+        }
+
+        public void setWithNearbySimilarDuplicates(boolean withNearbySimilarDuplicates) {
+            this.withNearbySimilarDuplicates = withNearbySimilarDuplicates;
+        }
+
         public Builder setVersion(Long version) {
             this.version = version;
             return this;
@@ -215,7 +268,20 @@ public class StopPlaceSearch {
         }
 
         public StopPlaceSearch build() {
-            return new StopPlaceSearch(query, stopTypeEnumerations, idList, allVersions, withoutLocationOnly, pointInTime, version, versionValidity, tags, page, size);
+            return new StopPlaceSearch(query,
+                    stopTypeEnumerations,
+                    idList,
+                    allVersions,
+                    withoutLocationOnly,
+                    withoutQuaysOnly,
+                    withDuplicatedQuayImportedIds,
+                    withNearbySimilarDuplicates,
+                    pointInTime,
+                    version,
+                    versionValidity,
+                    tags,
+                    page,
+                    size);
         }
 
     }

@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.versioning;
 
 import com.vividsolutions.jts.geom.Point;
@@ -30,6 +45,8 @@ public class VersionCreator {
 
     private static final String VERSION_COMMENT_FIELD = "versionComment";
     private static final String CHANGED_BY_FIELD = "changedBy";
+
+    private static final String VALID_BETWEEN = "validBetween";
 
     private final VersionIncrementor versionIncrementor;
 
@@ -69,6 +86,7 @@ public class VersionCreator {
                 .exclude(ID_FIELD)
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
+                .exclude(VALID_BETWEEN)
                 .byDefault()
                 .register();
 
@@ -85,6 +103,7 @@ public class VersionCreator {
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
                 .exclude(ID_FIELD)
+                .exclude(VALID_BETWEEN)
                 .byDefault()
                 .register());
 
@@ -93,8 +112,7 @@ public class VersionCreator {
 
     /**
      * Create next version of entity (copy), before changes are made.
-     * Does not increment version. Will be done when saving.
-     * Clears valid betweens
+     * Does not increment version or valid between:  Will be done by saver service
      *
      * @param entityInVersionStructure
      * @param type extends {@link EntityInVersionStructure}
@@ -103,12 +121,8 @@ public class VersionCreator {
     public <T extends EntityInVersionStructure> T createCopy(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
         logger.debug("Create new version for entity: {}", entityInVersionStructure);
 
-        Instant newVersionValidFrom = Instant.now();
-
         EntityInVersionStructure copy = defaultMapperFacade.map(entityInVersionStructure, type);
         logger.debug("Created copy of entity: {}", copy);
-
-        copy.setValidBetween(new ValidBetween(newVersionValidFrom));
 
         return type.cast(copy);
     }

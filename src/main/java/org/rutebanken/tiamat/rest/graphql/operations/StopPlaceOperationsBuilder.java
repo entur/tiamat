@@ -1,13 +1,23 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.rest.graphql.operations;
 
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.service.StopPlaceQuayDeleter;
-import org.rutebanken.tiamat.service.StopPlaceQuayMerger;
-import org.rutebanken.tiamat.service.StopPlaceQuayMover;
+import graphql.schema.*;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+import org.rutebanken.tiamat.service.stopplace.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +34,9 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 public class StopPlaceOperationsBuilder {
 
     @Autowired
+    private StopPlaceMerger stopPlaceMerger;
+
+    @Autowired
     private StopPlaceQuayMover stopPlaceQuayMover;
 
     @Autowired
@@ -33,14 +46,23 @@ public class StopPlaceOperationsBuilder {
     private StopPlaceQuayDeleter stopPlaceQuayDeleter;
 
     @Autowired
-    DateScalar dateScalar;
+    private DateScalar dateScalar;
 
-    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLObjectType stopPlaceObjectType) {
+    @Autowired
+    private StopPlaceDeleter stopPlaceDeleter;
+
+    @Autowired
+    private StopPlaceTerminator stopPlaceTerminator;
+
+    @Autowired
+    private StopPlaceReopener stopPlaceReopener;
+
+    public List<GraphQLFieldDefinition> getStopPlaceOperations(GraphQLInterfaceType stopPlaceInterfaceType) {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
         //Merge two StopPlaces
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MERGE_STOP_PLACES)
                 .description("Merges two StopPlaces by terminating 'from'-StopPlace, and copying quays/values into 'to'-StopPlace")
                 .argument(newArgument().name(FROM_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -48,12 +70,12 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
-                .dataFetcher(environment -> stopPlaceQuayMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)))
+                .dataFetcher(environment -> stopPlaceMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)))
                 .build());
 
         //Merge two quays on a StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MERGE_QUAYS)
                 .description("Merges two Quays on a StopPlace.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
@@ -65,7 +87,7 @@ public class StopPlaceOperationsBuilder {
                 .build());
 
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(MOVE_QUAYS_TO_STOP)
                 .description("Moves one or more quays to a new or existing stop place. Returns the destination stop place.")
                 .argument(newArgument()
@@ -87,34 +109,34 @@ public class StopPlaceOperationsBuilder {
                 .name(DELETE_STOP_PLACE)
                 .description("!!! Deletes all versions of StopPlace from database - use with caution !!!")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
-                .dataFetcher(environment -> stopPlaceQuayDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
+                .dataFetcher(environment -> stopPlaceDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)))
                 .build());
 
         //Terminate StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(TERMINATE_STOP_PLACE)
-                .description("StopPlace will no longer be active after the given date.")
+                .description("StopPlace will be terminated and no longer be active after the given date.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(VALID_BETWEEN_TO_DATE).type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar())))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayDeleter.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT)))
+                .dataFetcher(environment -> stopPlaceTerminator.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT)))
                 .build());
 
 
         //Reopen StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(REOPEN_STOP_PLACE)
-                .description("StopPlace will no longer be active after the given date.")
+                .description("StopPlace will be reopened and immidiately active.")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceQuayDeleter.reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
+                .dataFetcher(environment -> stopPlaceReopener.reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)))
                 .build());
 
         //Delete Quay from StopPlace
         operations.add(newFieldDefinition()
-                .type(stopPlaceObjectType)
+                .type(stopPlaceInterfaceType)
                 .name(DELETE_QUAY_FROM_STOP_PLACE)
                 .description("Removes quay from StopPlace")
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))

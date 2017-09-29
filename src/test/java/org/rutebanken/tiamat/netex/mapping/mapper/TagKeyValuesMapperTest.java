@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import com.google.common.collect.Sets;
@@ -38,9 +53,12 @@ public class TagKeyValuesMapperTest {
         Set<Tag> tags = Sets.newHashSet(tag);
         when(tagRepository.findByIdReference("NSR:StopPlace:1")).thenReturn(tags);
 
+        org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        tiamatStopPlace.setNetexId("NSR:StopPlace:1");
+
         StopPlace stopPlace = new StopPlace();
         stopPlace.withKeyList(new KeyListStructure());
-        tagKeyValuesMapper.mapTagsToProperties("NSR:StopPlace:1", stopPlace);
+        tagKeyValuesMapper.mapTagsToProperties(tiamatStopPlace, stopPlace);
 
 
 
@@ -78,21 +96,25 @@ public class TagKeyValuesMapperTest {
 
     @Test
     public void mapForthAndBack() throws Exception {
+        String netexReference = "NSR:StopPlace:2";
         Tag tag = new Tag();
         tag.setCreated(Instant.now());
         tag.setName("name");
         tag.setCreatedBy("also me");
-        tag.setIdreference("NSR:StopPlace:1");
+        tag.setIdreference(netexReference);
         tag.setRemovedBy("me");
         tag.setRemoved(Instant.now());
         tag.setComment("comment");
 
         Set<Tag> tags = Sets.newHashSet(tag);
-        when(tagRepository.findByIdReference("NSR:StopPlace:1")).thenReturn(tags);
+        when(tagRepository.findByIdReference(netexReference)).thenReturn(tags);
+
+        org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        tiamatStopPlace.setNetexId(netexReference);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.withKeyList(new KeyListStructure());
-        tagKeyValuesMapper.mapTagsToProperties("NSR:StopPlace:1", stopPlace);
+        tagKeyValuesMapper.mapTagsToProperties(tiamatStopPlace, stopPlace);
 
 
         Set<Tag> actual = tagKeyValuesMapper.mapPropertiesToTag(stopPlace.getKeyList());

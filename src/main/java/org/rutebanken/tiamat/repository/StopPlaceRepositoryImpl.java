@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.repository;
 
 
@@ -7,6 +22,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -34,6 +50,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
@@ -54,8 +71,28 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
      */
-    protected static final String SQL_LEFT_JOIN_PARENT_STOP =
+    public static final String SQL_LEFT_JOIN_PARENT_STOP =
             "LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) ";
+
+    /**
+     * When selecting stop places and there are multiple versions of the same stop place, and you only need the highest version by number.
+     */
+    protected static final String SQL_MAX_VERSION_OF_STOP_PLACE = "s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id) ";
+
+    /**
+     * Check stop place or it's parent for match in geometry filter.
+     */
+    protected static final String SQL_CHILD_OR_PARENT_WITHIN = "(ST_within(s.centroid, :filter) = true OR ST_within(p.centroid, :filter) = true) ";
+
+    /**
+     * SQL for making sure the stop selected is not a parent stop place.
+     */
+    public static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = false ";
+
+    /**
+     * Ignore netex id for both stop place and its parent
+     */
+    protected static final String SQL_IGNORE_STOP_PLACE_ID = "(s.netex_id != :ignoreStopPlaceId AND (p.netex_id IS NULL OR p.netex_id != :ignoreStopPlaceId)) ";
 
     @Autowired
     private EntityManager entityManager;
@@ -87,15 +124,31 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString = "SELECT s.* FROM stop_place s " +
                                      SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE ST_within(s.centroid, :filter) = true " +
-                                        "AND (:ignoreStopPlaceId IS NULL OR s.netex_id != :ignoreStopPlaceId) ";
+                                     "WHERE " +
+                                        SQL_CHILD_OR_PARENT_WITHIN +
+                                        "AND "
+                                        + SQL_NOT_PARENT_STOP_PLACE;
+
         if (pointInTime != null) {
             queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+        } else {
+            // If no point in time is set, use max version to only get one version per stop place
+            queryString += "AND " + SQL_MAX_VERSION_OF_STOP_PLACE;
         }
+
+        if(ignoreStopPlaceId != null) {
+            queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
+
+        }
+
+        logger.debug("finding stops within bounding box with query: {}", queryString);
 
         final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
-        query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+
+        if(ignoreStopPlaceId != null) {
+            query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+        }
 
         if (pointInTime != null) {
             query.setParameter("pointInTime", Date.from(pointInTime));
@@ -463,6 +516,38 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         return new PageImpl<>(stopPlaces, search.getPageable(), totalCnt);
+    }
+
+    /**
+     * Return jbv code mapping for rail stations. The stop place contains jbc code mapping. The quay contains the public code.
+     * @return
+     */
+    @Override
+    public List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace() {
+        String sql = "SELECT DISTINCT vi.items, s.netex_id " +
+                "FROM stop_place_key_values skv " +
+                "   INNER JOIN stop_place s " +
+                "       ON s.id = skv.stop_place_id AND s.stop_place_type = :stopPlaceType " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "   INNER JOIN value_items vi " +
+                "       ON skv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND skv.key_values_key = :mappingIdKeys " +
+                "WHERE " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "ORDER BY items ";
+        Query nativeQuery = entityManager.createNativeQuery(sql);
+
+        nativeQuery.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
+        nativeQuery.setParameter("mappingIdKeys", Arrays.asList(JBV_CODE));
+        nativeQuery.setParameter("pointInTime", Date.from(Instant.now()));
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> result = nativeQuery.getResultList();
+
+        List<JbvCodeMappingDto> mappingResult = new ArrayList<>();
+        for (Object[] row : result) {
+            mappingResult.add(new JbvCodeMappingDto(row[0].toString(), null, row[1].toString()));
+        }
+
+        return mappingResult;
     }
 
     private int countStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {

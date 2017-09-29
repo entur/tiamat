@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
@@ -8,6 +23,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.data.domain.Page;
@@ -126,6 +142,37 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		stopPlaceRepository.save(futureVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	public void doNotFindHistoricStopPlaceWithoutParentForCurrentAndFutureVersion() {
+		StopPlace historicVersion = new StopPlace();
+		historicVersion.setVersion(1L);
+		historicVersion.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		stopPlaceRepository.save(historicVersion);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	public void doNotFindHistoricStopPlaceWithParentForCurrentAndFutureVersion() {
+		StopPlace historicParent = new StopPlace();
+		historicParent.setVersion(1L);
+		historicParent.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		stopPlaceRepository.save(historicParent);
+
+		StopPlace historicChild=new StopPlace();
+		historicChild.setVersion(1L);
+		historicChild.setParentSiteRef(new SiteRefStructure(historicParent.getNetexId(), String.valueOf(historicParent.getVersion())));
+		stopPlaceRepository.save(historicChild);
+
+		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
 
 		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
 		assertThat(results).isEmpty();

@@ -1,5 +1,21 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.rest.graphql;
 
+import graphql.execution.ExecutionStrategy;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -33,8 +49,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
 @Component
-public class
-StopPlaceRegisterGraphQLSchema {
+public class StopPlaceRegisterGraphQLSchema {
 
     private final int DEFAULT_PAGE_VALUE = 0;
     private final int DEFAULT_SIZE_VALUE = 20;
@@ -82,9 +97,6 @@ StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
-
-    @Autowired
-    private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
     @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
@@ -206,7 +218,7 @@ StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(stopPlaceFetcher))
                         //Search by BoundingBox
                 .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceObjectType))
+                        .type(new GraphQLList(stopPlaceInterface))
                         .name(FIND_STOPPLACE_BY_BBOX)
                         .description("Find StopPlaces within given BoundingBox.")
                         .argument(createBboxArguments())
@@ -303,8 +315,8 @@ StopPlaceRegisterGraphQLSchema {
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
                 .fields(tagOperationsBuilder.getTagOperations())
-                .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceObjectType))
-                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType))
+                .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
+                .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
@@ -431,6 +443,24 @@ StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
                 .description("Set to true to only return objects that do not have coordinates.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(WITHOUT_QUAYS_ONLY)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return stop place that does not have quays.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(WITH_DUPLICATED_QUAY_IMPORTED_IDS)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return stop places that have quays with duplicated imported IDs.")
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(WITH_NEARBY_SIMILAR_DUPLICATES)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("Set to true to only return stop places have nearby similar duplicates. The result will not have duplicates omitted.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)

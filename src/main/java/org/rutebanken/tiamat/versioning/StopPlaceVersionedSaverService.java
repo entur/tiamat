@@ -1,7 +1,21 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.versioning;
 
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
-import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.SiteElement;
@@ -59,9 +73,16 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     @Override
-    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion) {
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant now) {
 
         super.validate(existingVersion, newVersion);
+
+        if (newVersion.getParentSiteRef() != null && !newVersion.isParentStopPlace()) {
+            throw new IllegalArgumentException("StopPlace " +
+                    newVersion.getNetexId() +
+                    " seems to be a child stop. Save the parent stop place instead: "
+                    + newVersion.getParentSiteRef());
+        }
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
 
@@ -69,8 +90,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant now = Instant.now();
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
@@ -80,7 +100,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
-            logger.debug("Found previous version {},{}", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
+            logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom);
         }
 
@@ -116,7 +136,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         nearbyStopPlaceFinder.update(newVersion);
         newVersion.getChildren().forEach(nearbyStopPlaceFinder::update);
         entityChangedListener.onChange(newVersion);
-        newVersion.getChildren().forEach(entityChangedListener::onChange);
+
         return newVersion;
     }
 
@@ -151,10 +171,18 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
         if(stopPlaceToSave.getChildren() == null) return;
         stopPlaceToSave.getChildren().forEach(child -> {
-            child.setName(null);
+
+            if(child.getName() != null
+                    && stopPlaceToSave.getName() != null
+                    && child.getName().getValue().equalsIgnoreCase(stopPlaceToSave.getName().getValue())
+                    && (child.getName().getLang() == null || child.getName().getLang().equalsIgnoreCase(stopPlaceToSave.getName().getLang()))) {
+                logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), stopPlaceToSave.getName(), stopPlaceToSave.getNetexId());
+                child.setName(null);
+            }
+
             child.setValidBetween(null);
             child.setTopographicPlace(null);
-            child.setTariffZones(null);
+            child.getTariffZones().clear();
         });
     }
 

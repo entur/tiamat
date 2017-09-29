@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.versioning;
 
 import org.junit.Ignore;
@@ -19,6 +34,7 @@ import java.util.Map;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
@@ -156,6 +172,26 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         StopPlace existingVersion = new StopPlace();
         StopPlace newVersion = new StopPlace();
         stopPlaceVersionedSaverService.saveNewVersion(existingVersion, newVersion);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAcceptFromDateBeforePreviousVersionFromDate() {
+        StopPlace previousVersion = new StopPlace();
+        previousVersion.setVersion(1L);
+
+        stopPlaceRepository.save(previousVersion);
+
+        Instant now = Instant.now();
+
+        // No to date
+        previousVersion.setValidBetween(new ValidBetween(now.minusSeconds(1000), null));
+
+        StopPlace newVersion = new StopPlace();
+        newVersion.setVersion(2L);
+        newVersion.setValidBetween(new ValidBetween(previousVersion.getValidBetween().getFromDate().minusSeconds(10)));
+        newVersion.setNetexId(previousVersion.getNetexId());
+
+        stopPlaceVersionedSaverService.saveNewVersion(previousVersion, newVersion);
     }
 
     @Test
@@ -391,4 +427,12 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
 
+    @Test
+    public void savingChildStopsShouldNotBeAllowed() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setParentStopPlace(false);
+        stopPlace.setParentSiteRef(new SiteRefStructure("ref", "1"));
+
+        assertThatThrownBy(() -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace)).isInstanceOf(IllegalArgumentException.class);
+    }
 }

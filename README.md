@@ -5,6 +5,9 @@ Module also known as the backend for "Stoppestedsregisteret"
 ## Build
 `mvn clean install`
 
+You need the directory `/deployments/data` with rights for the user who
+performs the build.
+
 ## Run with in-memory GeoDB (H2)
 ```
 mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
@@ -113,48 +116,48 @@ publicationDeliveryUnmarshaller.validateAgainstSchema=true
 
 ## Synchronous NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
-https://api-test.entur.org/tiamat/1.0/publication_delivery
+https://api-test.entur.org/tiamat/1.0/stop_places/netex
 
 ### Query by name example:
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?q=Arne%20Garborgs%20vei
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?q=Arne%20Garborgs%20vei
 ```
 
 ### Query by ids that contains the number 3115
  ```
- https://api-test.entur.org/tiamat/1.0/publication_delivery?q=3115
+ https://api-test.entur.org/tiamat/1.0/stop_places/netex?q=3115
  ```
 
 ### Query by stop place type
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?stopPlaceType=RAIL_STATION
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?stopPlaceType=RAIL_STATION
 ```
 It is also possible with multiple types.
 
 ### Query by municipality ID
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?municipalityReference=KVE:TopographicPlace:1003
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?municipalityReference=KVE:TopographicPlace:1003
 ```
 
 ### Query by county ID 
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?countyReference=KVE:TopographicPlace:11
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?countyReference=KVE:TopographicPlace:11
 ```
 
 ### Limit size of results
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?size=1000
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?size=1000
 ```
 
 ### Page
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?page=1
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?page=1
 ```
 
 ### ID list
 You can specify a list of NSR stop place IDs to return
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
 ### All Versions
@@ -182,7 +185,7 @@ The ```versionValidity``` parameter controls what stop places to return.
 
 ### Example
 ```
-https://api-test.entur.org/tiamat/1.0/publication_delivery?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
+https://api-test.entur.org/tiamat/1.0/stop_places/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
 ```
 
 Returns stop places with current version validity now, matching the query 'Nesbru' and exists in municipality 0220. Fetches relevant tariff zones and topographic places.
@@ -195,17 +198,17 @@ When the job is finished, you can download the exported data.
 
 ### Start async export:
 ```
-curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async | xmllint --format -
+curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export/initiate | xmllint --format -
 ```
 
 ### Check job status:
 ```
-curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async/job | xmllint --format -
+curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export | xmllint --format -
 ```
 
 ### When job is done. Download it:
 ```
-curl https://api-test.entur.org/tiamat/1.0/publication_delivery/async/job/130116/content | zcat | xmllint --format - > export.xml
+curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export/130116/content | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
@@ -228,7 +231,7 @@ export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=12
 ### Import previously exported NeTEx file into emtpy Tiamat
 This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will bypass the ID sequence and insert these IDs as primary keys into the database.
 ```
-curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/jersey/publication_delivery/restoring_import
+curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/services/admin/netex/restoring_import
 ```
 
 ### Initial import from previously exported tiamat data with kubernetes
@@ -237,7 +240,7 @@ pod=`kc get pods  |grep tiamat | awk '{print $1}' | head -n1`
 kc exec -i $pod -- bash -c 'cat > /tmp/import' < tiamat-export-124268-20170313-160049.xml
 kc exec -it $pod bash
 cd /tmp
-curl -XPOST -H "Content-type: application/xml" -d@import http://localhost:8777/jersey/publication_delivery/restoring_import
+curl -XPOST -H "Content-type: application/xml" -d@import http://localhost:8777/services/admin/netex/restoring_import
 ```
 See https://github.com/rutebanken/devsetup/blob/master/docs/stolon.md#stolon-tiamat-setup
 
@@ -250,7 +253,7 @@ This NeTEx file should not contain NSR ID.
 Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original IDs will be present in key value list on each object.
 
 ```
-curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/jersey/publication_delivery
+curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/services/stop_places/netex
 ```
 
 
@@ -261,7 +264,7 @@ https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
 # GraphQL
 GraphQL endpoint is available on
 ```
-https://api-test.entur.org/tiamat/1.0/graphql
+https://api-test.entur.org/tiamat/1.0/stop_places/graphql
 ```
 
 Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/

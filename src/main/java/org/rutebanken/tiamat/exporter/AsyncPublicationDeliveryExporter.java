@@ -1,7 +1,22 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.exporter;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.exporter.async.ExportJobWorker;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -11,28 +26,26 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
 @Service
 public class AsyncPublicationDeliveryExporter {
 
-    public static final String ASYNC_JOB_URL = "async/job";
-
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
-    private static final ExecutorService exportService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+    private static final ExecutorService exportService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
@@ -45,14 +58,30 @@ public class AsyncPublicationDeliveryExporter {
 
     private final ExportTimeZone exportTimeZone;
 
+    private final String localExportPath;
+
     @Autowired
     public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
-                                                       BlobStoreService blobStoreService, StreamingPublicationDelivery streamingPublicationDelivery,
-                                                       ExportTimeZone exportTimeZone) {
+                                            BlobStoreService blobStoreService,
+                                            StreamingPublicationDelivery streamingPublicationDelivery,
+                                            ExportTimeZone exportTimeZone,
+                                            @Value("${async.export.path:/deployments/data/}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.exportTimeZone = exportTimeZone;
+        this.localExportPath = localExportPath;
+
+        File exportFolder = new File(localExportPath);
+        if(!exportFolder.exists() && !exportFolder.mkdirs()) {
+            throw new RuntimeException("Cannot find or create export directory from path: " + localExportPath +
+                    ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
+        }
+        if(!exportFolder.canWrite()) {
+            throw new RuntimeException("Cannot write to path: " + localExportPath +
+                    ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
+        }
+        logger.info("Verified local export path {}", localExportPath);
     }
 
     /**
@@ -64,71 +93,23 @@ public class AsyncPublicationDeliveryExporter {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
+        exportJob.setExportParams(exportParams);
+        exportJob.setSubFolder(generateSubFolderName());
+
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
-        exportJob.setJobUrl(ASYNC_JOB_URL + '/' + exportJob.getId());
+        exportJob.setJobUrl(ASYNC_JOB_PATH + '/' + exportJob.getId());
         exportJobRepository.save(exportJob);
-        
-        exportService.submit(() -> {
-                try {
-                    logger.info("Started export job {}", exportJob);
 
-                    final PipedInputStream in = new PipedInputStream();
-                    final PipedOutputStream out = new PipedOutputStream(in);
-
-                    Thread outputStreamThread = new Thread(() -> {
-                        final ZipOutputStream zipOutputStream = new ZipOutputStream(out);
-
-                        try {
-                            logger.info("Streaming output thread running");
-                            zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-                            streamingPublicationDelivery.stream(exportParams, zipOutputStream);
-                            zipOutputStream.closeEntry();
-                        } catch (Exception e) {
-                            exportJob.setStatus(JobStatus.FAILED);
-                            String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
-                            logger.error(message + " " + exportJob, e);
-                            exportJob.setMessage(message);
-                            if (e instanceof InterruptedException) {
-                                Thread.currentThread().interrupt();
-                            }
-                        } finally {
-
-                            try {
-                                zipOutputStream.close();
-                            } catch (IOException e) {
-                                logger.warn("Could not close stream", e);
-                            }
-                        }
-                    }
-                    );
-
-                    outputStreamThread.setName("outstream-" + exportJob.getId());
-                    outputStreamThread.start();
-
-                    blobStoreService.upload(exportJob.getFileName(), in);
-                    outputStreamThread.join();
-
-                    if (!exportJob.getStatus().equals(JobStatus.FAILED)) {
-                        exportJob.setStatus(JobStatus.FINISHED);
-                        exportJob.setFinished(Instant.now());
-                        logger.info("Export job {} done", exportJob);
-                    }
-                } catch (Exception e) {
-                    logger.error("Error while exporting asynchronously", e);
-                    exportJob.setStatus(JobStatus.FAILED);
-                    exportJob.setMessage(e.getMessage());
-                } finally {
-                    exportJobRepository.save(exportJob);
-                }
-            });
-        logger.info("Returning export job {}", exportJob);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
+        exportService.submit(exportJobWorker);
+        logger.info("Returning started export job {}", exportJob);
         return exportJob;
     }
 
     public String createFileNameWithoutExtention(long exportJobId, Instant started) {
-        return "tiamat-export-" + exportJobId + "-" + started.atZone(exportTimeZone.getDefaultTimeZone()).format(DATE_TIME_FORMATTER);
+        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZone()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
     }
 
     public ExportJob getExportJob(long exportJobId) {
@@ -136,12 +117,16 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {
-        return blobStoreService.download(exportJob.getFileName());
+        return blobStoreService.download(exportJob.getSubFolder() + "/" + exportJob.getFileName());
     }
 
     public Collection<ExportJob> getJobs() {
         return exportJobRepository.findAll();
     }
 
-
+    private String generateSubFolderName() {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
+        return gcpSubfolder;
+    }
 }

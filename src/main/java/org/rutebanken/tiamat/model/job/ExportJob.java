@@ -1,10 +1,27 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.model.job;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
@@ -19,12 +36,18 @@ public class ExportJob {
     private String jobUrl;
     private String fileName;
 
+    private String subFolder;
+
     private String message;
 
     private Instant started;
+
     private Instant finished;
 
-    private  JobStatus status;
+    private JobStatus status;
+
+    @Transient
+    private ExportParams exportParams;
 
     public ExportJob() {
     }
@@ -41,6 +64,7 @@ public class ExportJob {
                 .add("status", status)
                 .add("jobUrl", jobUrl)
                 .add("fileName", fileName)
+                .add("subFolder", subFolder)
                 .add("started", started)
                 .add("finished", finished)
                 .add("message", message)
@@ -101,5 +125,21 @@ public class ExportJob {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setExportParams(ExportParams exportParams) {
+        this.exportParams = exportParams;
+    }
+
+    public ExportParams getExportParams() {
+        return exportParams;
+    }
+
+    public String getSubFolder() {
+        return subFolder;
+    }
+
+    public void setSubFolder(String subFolder) {
+        this.subFolder = subFolder;
     }
 }

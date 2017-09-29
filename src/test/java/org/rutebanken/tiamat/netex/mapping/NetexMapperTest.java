@@ -1,5 +1,21 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.netex.mapping;
 
+import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
@@ -13,17 +29,20 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexMapperTest extends TiamatIntegrationTest {
@@ -389,9 +408,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
         accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
-        List<org.rutebanken.netex.model.AccessibilityLimitation> limitations = new ArrayList<>();
-        limitations.add(accessibilityLimitation);
-        limitationsRelStructure.getAccessibilityLimitation().addAll(limitations);
+
+
+        limitationsRelStructure.setAccessibilityLimitation(accessibilityLimitation);
         accessibilityAssessment.setLimitations(limitationsRelStructure);
         return accessibilityAssessment;
     }
@@ -410,7 +429,24 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
-        assertThat(netexStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotEmpty();
+    }
+
+    @Test
+    public void mapQuayAccessibilityAccessmentAssertNotNull() {
+        Quay quay = new Quay();
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setMobilityImpairedAccess(null);
+
+        quay.setAccessibilityAssessment(accessibilityAssessment);
+        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(quay);
+
+        assertThat(netexQuay.getAccessibilityAssessment()).isNotNull();
+        assertThat(netexQuay.getAccessibilityAssessment().getMobilityImpairedAccess())
+                .as("mobilityImpairedAccess")
+                .isNotNull()
+                .isEqualByComparingTo(org.rutebanken.netex.model.LimitationStatusEnumeration.UNKNOWN);
+
     }
 
     protected AccessibilityAssessment createAccessibilityAssessment() {

@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -28,6 +43,11 @@ import java.util.*;
 @Repository
 @Transactional
 public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
+
+    /**
+     * When selecting parkings and there are multiple versions of the same parking by netex_id, and you only need the highest version by number.
+     */
+    protected static final String SQL_MAX_VERSION_OF_PARKING = "p.version = (select max(pv.version) from parking pv where pv.netex_id = p.netex_id) ";
 
 
     @Autowired
@@ -142,15 +162,16 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
                 "           AND ( Cast(sp.version AS TEXT) = " +
                 "                   p2.parent_site_ref_version " +
                 "                 OR p2.parent_site_ref_version IS NULL ) " +
-                "           WHERE sp.id in (");
+                "      WHERE sp.id in (");
 
         sql.append(StringUtils.join(stopPlaceIds, ','));
         sql.append(')');
-
-        sql.append("   GROUP  BY p2.id) p2 " +
-                "JOIN parking p " +
-                "      ON p2.id = p.id " +
-                "ORDER BY p.netex_id, p.version");
+        sql.append("   GROUP  BY p2.id) p2 ")
+                .append("JOIN parking p ")
+                .append("ON p2.id = p.id ")
+                .append("WHERE ")
+                .append(SQL_MAX_VERSION_OF_PARKING)
+                .append("ORDER BY p.netex_id, p.version");
 
         return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }

@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import com.google.common.collect.Sets;
@@ -14,10 +29,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static org.rutebanken.tiamat.service.TagCreator.SUPPORTED_TAGGABLE_TYPES;
 
 @Component
 public class TagKeyValuesMapper {
@@ -43,8 +58,19 @@ public class TagKeyValuesMapper {
     }
 
 
-    public void mapTagsToProperties(String idReference, DataManagedObjectStructure netexEntity) {
-        Set<Tag> tags = tagRepository.findByIdReference(idReference);
+    public void mapTagsToProperties(org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, DataManagedObjectStructure netexEntity) {
+
+        if(tiamatEntity.getNetexId() == null) {
+            logger.trace("ID reference is null. Cannot continue mapping tags");
+            return;
+        }
+
+        if(!SUPPORTED_TAGGABLE_TYPES.contains(tiamatEntity.getClass())) {
+            logger.trace("Ignoring tag mapping for class {} as it's not supported", tiamatEntity.getClass());
+            return;
+        }
+
+        Set<Tag> tags = tagRepository.findByIdReference(tiamatEntity.getNetexId());
 
         if (tags == null || tags.isEmpty()) {
             return;
