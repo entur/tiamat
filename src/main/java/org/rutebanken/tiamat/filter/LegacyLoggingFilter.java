@@ -42,6 +42,8 @@ public class LegacyLoggingFilter implements Filter {
             String requestUri = httpServletRequest.getRequestURI();
             if(requestUri.contains("tiamat") || requestUri.contains("jersey")) {
                 logger.warn("Request on legacy path: {}", requestUri);
+            } else {
+                logger.info("{}", requestUri);
             }
         }
 
