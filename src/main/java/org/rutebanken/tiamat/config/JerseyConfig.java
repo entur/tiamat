@@ -204,8 +204,7 @@ public class JerseyConfig {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(legacyLoggingFilter);
         registration.addUrlPatterns("/jersey/*", "/tiamat/*");
-        registration.addInitParameter("paramName", "paramValue");
-        registration.setName("someFilter");
+        registration.setName("legacyFilter");
         registration.setOrder(1);
         return registration;
     }
