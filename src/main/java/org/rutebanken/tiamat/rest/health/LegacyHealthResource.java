@@ -20,10 +20,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 @Deprecated
+@Path("/")
 public class LegacyHealthResource extends HealthResource {
 
     @GET
-    @Path("readiness")
+    @Path("health/readiness")
     @Override
     public Response readinessProbe() {
         return super.readinessProbe();
