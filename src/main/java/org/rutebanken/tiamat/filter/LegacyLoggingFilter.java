@@ -43,7 +43,7 @@ public class LegacyLoggingFilter implements Filter {
             if(requestUri.contains("tiamat") || requestUri.contains("jersey")) {
                 logger.warn("Request on legacy path: {}", requestUri);
             } else {
-                logger.info("{}", requestUri);
+                logger.trace("Non-legacy request: {}", requestUri);
             }
         }
 
