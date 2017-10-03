@@ -86,19 +86,8 @@ public class DtoStopPlaceResource {
     @GET
     @Path("/id/stop_place")
     @Produces("text/plain")
-    public Response getIdUniqueStopPlaceIds() {
-        return Response.ok().entity((StreamingOutput) output -> {
-            try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
-                Set<String> stopPlaceIds = stopPlaceRepository.findUniqueStopPlaceIds(Instant.now());
-                for (String stopPlaceId : stopPlaceIds) {
-                    writer.println(stopPlaceId);
-                }
-                writer.flush();
-                writer.close();
-            } catch (Exception e) {
-                logger.warn("Catched exception when streaming ids for stops: {}", e.getMessage(), e);
-                throw e;
-            }
-        }).build();
+    public String getIdUniqueStopPlaceIds() {
+        return String.join("\n", stopPlaceRepository.findUniqueStopPlaceIds(Instant.now()));
+
     }
 }
