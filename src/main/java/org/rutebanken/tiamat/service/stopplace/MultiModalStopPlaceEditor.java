@@ -58,8 +58,8 @@ public class MultiModalStopPlaceEditor {
     }
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
-
         logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
+        Instant now = Instant.now();
 
         // Fetch max versions of future child stop places
         List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
@@ -74,8 +74,11 @@ public class MultiModalStopPlaceEditor {
         parentStopPlace.setCentroid(geoJsonPoint);
 
         Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace);
-
         parentStopPlace.getChildren().addAll(childCopies);
+
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, now);
+        stopPlaceRepository.save(futureChildStopPlaces);
+
         return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace);
     }
 
@@ -85,6 +88,7 @@ public class MultiModalStopPlaceEditor {
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds, ValidBetween validBetween, String versionComment) {
         logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
+        Instant now = Instant.now();
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
 
@@ -114,6 +118,8 @@ public class MultiModalStopPlaceEditor {
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
         Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace);
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, now);
+        stopPlaceRepository.save(futureChildStopPlaces);
 
         parentStopPlaceCopy.getChildren().addAll(childCopies);
         return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy);
@@ -199,5 +205,15 @@ public class MultiModalStopPlaceEditor {
                         + " is not currently valid: to date = " + potentialNewChild.getValidBetween().getToDate());
             }
         }
+    }
+
+    private void terminatePreviousVersionsOfChildren(List<StopPlace> childStopPlaces, Instant now) {
+        childStopPlaces.forEach(futureChildStopPlace -> {
+            if(futureChildStopPlace.getValidBetween() == null) {
+                futureChildStopPlace.setValidBetween(new ValidBetween(now.minusSeconds(1), now));
+            } else {
+                futureChildStopPlace.getValidBetween().setToDate(now);
+            }
+        });
     }
 }

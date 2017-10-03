@@ -67,6 +67,15 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(result.getNetexId()).isNotNull();
 
         assertThatChildsAreReferencingParent(childIds, result);
+
+        for(StopPlace actualChild : result.getChildren()) {
+            assertThat(actualChild.getValidBetween()).as("child valid between must be null").isNull();
+
+            StopPlace previousChildVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(actualChild.getNetexId(), actualChild.getVersion()-1);
+            // NRP-2234
+            assertThat(previousChildVersion.getValidBetween()).as("previous version of child stop valid between").isNotNull();
+            assertThat(previousChildVersion.getValidBetween().getToDate()).as("previous version of child stop must have to date set").isNotNull();
+        }
     }
 
     @Test
@@ -237,7 +246,10 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     }
 
     private StopPlace createStopPlace(String name, String lang) {
-        return new StopPlace(new EmbeddableMultilingualString(name, lang));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name, lang));
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(120)));
+        stopPlace.setVersion(1L);
+        return stopPlace;
     }
 
     private StopPlace createStopPlace(String name) {
