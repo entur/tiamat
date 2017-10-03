@@ -39,13 +39,13 @@ import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 
 @Deprecated
 @Path("publication_delivery")
+@Produces(MediaType.APPLICATION_XML)
 public class LegacyExportResource {
 
     @Autowired
     private ExportResource exportResource;
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
     public Response exportStopPlaces(@BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
         return exportResource.exportStopPlaces(exportParams);
     }
