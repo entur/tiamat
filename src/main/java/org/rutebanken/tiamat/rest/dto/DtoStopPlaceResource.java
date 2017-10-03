@@ -88,6 +88,5 @@ public class DtoStopPlaceResource {
     @Produces("text/plain")
     public String getIdUniqueStopPlaceIds() {
         return String.join("\n", stopPlaceRepository.findUniqueStopPlaceIds(Instant.now()));
-
     }
 }

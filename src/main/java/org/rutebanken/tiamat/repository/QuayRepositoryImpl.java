@@ -104,6 +104,34 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
         return mappingResult;
     }
 
+
+    @Override
+    public Set<String> findUniqueQuayIds(Instant pointInTime) {
+        String sql = "SELECT distinct q.netex_id " +
+                "FROM quay q " +
+                "INNER JOIN stop_place_quays spq " +
+                "   ON spq.quays_id = q.id " +
+                "INNER JOIN stop_place s " +
+                "   ON spq.stop_place_id = s.id " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE " +
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "ORDER BY q.netex_id";
+
+
+        Query nativeQuery = entityManager.createNativeQuery(sql);
+
+        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+
+        List<String> results = nativeQuery.getResultList();
+
+        Set<String> ids = new HashSet<>();
+        for(String result : results) {
+            ids.add(result);
+        }
+        return ids;
+    }
+
     private StopTypeEnumeration parseStopType(Object o) {
         if (o != null) {
             return StopTypeEnumeration.valueOf(o.toString());
