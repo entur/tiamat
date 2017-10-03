@@ -59,7 +59,9 @@ public class MultiModalStopPlaceEditor {
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
         logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
-        Instant now = Instant.now();
+
+
+        Instant fromDate = resolveFromDateOrNow(validBetween);
 
         // Fetch max versions of future child stop places
         List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
@@ -73,14 +75,15 @@ public class MultiModalStopPlaceEditor {
         parentStopPlace.setVersionComment(versionComment);
         parentStopPlace.setCentroid(geoJsonPoint);
 
-        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace);
+        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
         parentStopPlace.getChildren().addAll(childCopies);
 
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, now);
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, fromDate);
         stopPlaceRepository.save(futureChildStopPlaces);
 
-        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace);
+        return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
     }
+
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
         return addToMultiModalParentStopPlace(parentStopPlaceId, childStopPlaceIds, null, null);
@@ -88,7 +91,8 @@ public class MultiModalStopPlaceEditor {
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds, ValidBetween validBetween, String versionComment) {
         logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
-        Instant now = Instant.now();
+
+        Instant fromDate = resolveFromDateOrNow(validBetween);
 
         StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
 
@@ -117,12 +121,12 @@ public class MultiModalStopPlaceEditor {
         List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
-        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace);
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, now);
+        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, fromDate);
         stopPlaceRepository.save(futureChildStopPlaces);
 
         parentStopPlaceCopy.getChildren().addAll(childCopies);
-        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy);
+        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, fromDate);
     }
 
     public StopPlace removeFromMultiModalStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
@@ -137,6 +141,8 @@ public class MultiModalStopPlaceEditor {
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, parentStopPlace.getChildren());
 
+        Instant now = Instant.now();
+
         StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
 
         parentStopPlaceCopy.getChildren().forEach(stopToRemove -> {
@@ -150,25 +156,25 @@ public class MultiModalStopPlaceEditor {
                     stopToRemoveCopy.setName(parentStopPlace.getName());
                 }
 
-                stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy);
+                stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy, now);
             }
         });
 
         parentStopPlaceCopy.getChildren().removeIf(childStopPlace -> childStopPlaceIds.contains(childStopPlace.getNetexId()));
 
-        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy);
+        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, now);
     }
 
-    private void validate(StopPlace potentialNewChild) {
-        validateCurrentlyValid(potentialNewChild);
+    private void validate(StopPlace potentialNewChild, Instant fromDate) {
+        validateCurrentlyValid(potentialNewChild, fromDate);
         validateNotParentStopPlace(potentialNewChild);
         validateNoParentSiteRef(potentialNewChild);
     }
 
-    private Set<StopPlace> validateAndCopyPotentionalChildren(List<StopPlace> futureChildStopPlaces, StopPlace parentStopPlace) {
+    private Set<StopPlace> validateAndCopyPotentionalChildren(List<StopPlace> futureChildStopPlaces, StopPlace parentStopPlace, Instant fromDate) {
         return futureChildStopPlaces.stream()
                 .map(existingVersion -> {
-                    validate(existingVersion);
+                    validate(existingVersion, fromDate);
 
                     logger.info("Adding child stop place {} to parent stop place {}", existingVersion, parentStopPlace);
                     // Create copy to get rid of database primary keys, preparing it to be versioned under parent stop place.
@@ -190,16 +196,16 @@ public class MultiModalStopPlaceEditor {
         }
     }
 
-    private void validateCurrentlyValid(StopPlace potentialNewChild) {
+    private void validateCurrentlyValid(StopPlace potentialNewChild, Instant fromDate) {
         if (potentialNewChild.getValidBetween() != null) {
 
 
-            if (potentialNewChild.getValidBetween().getFromDate() != null && potentialNewChild.getValidBetween().getFromDate().isAfter(Instant.now())) {
+            if (potentialNewChild.getValidBetween().getFromDate() != null && potentialNewChild.getValidBetween().getFromDate().isAfter(fromDate)) {
                 throw new RuntimeException("The stop place " + potentialNewChild.getNetexId()
                         + " version " + potentialNewChild.getVersion()
                         + " is not currently valid: from date = " + potentialNewChild.getValidBetween().getFromDate());
             }
-            if (potentialNewChild.getValidBetween().getToDate() != null && potentialNewChild.getValidBetween().getToDate().isBefore(Instant.now())) {
+            if (potentialNewChild.getValidBetween().getToDate() != null && potentialNewChild.getValidBetween().getToDate().isBefore(fromDate)) {
                 throw new RuntimeException("The stop place " + potentialNewChild.getNetexId()
                         + " version " + potentialNewChild.getVersion()
                         + " is not currently valid: to date = " + potentialNewChild.getValidBetween().getToDate());
@@ -207,13 +213,22 @@ public class MultiModalStopPlaceEditor {
         }
     }
 
-    private void terminatePreviousVersionsOfChildren(List<StopPlace> childStopPlaces, Instant now) {
+    private void terminatePreviousVersionsOfChildren(List<StopPlace> childStopPlaces, Instant fromDate) {
         childStopPlaces.forEach(futureChildStopPlace -> {
             if(futureChildStopPlace.getValidBetween() == null) {
-                futureChildStopPlace.setValidBetween(new ValidBetween(now.minusSeconds(1), now));
+                futureChildStopPlace.setValidBetween(new ValidBetween(fromDate.minusSeconds(1), fromDate));
             } else {
-                futureChildStopPlace.getValidBetween().setToDate(now);
+                futureChildStopPlace.getValidBetween().setToDate(fromDate);
             }
         });
+    }
+
+    private Instant resolveFromDateOrNow(ValidBetween validBetween) {
+
+        if(validBetween != null && validBetween.getFromDate() != null) {
+            return validBetween.getFromDate();
+        } else {
+            return Instant.now();
+        }
     }
 }

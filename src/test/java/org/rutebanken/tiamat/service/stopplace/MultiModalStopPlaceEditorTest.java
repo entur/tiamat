@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -26,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,6 +111,46 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         verifyChildValidBetween(result);
     }
 
+    @Test
+    public void testCreateMultiModalParentStopPlaceWithFutureValidBetween() {
+
+        StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
+
+        Instant futureTime = Instant.now().plusSeconds(600);
+
+
+        String parentStopPlaceName = "Super Duper StopPlace";
+        String versionComment = "version comment";
+        StopPlace result = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()),
+                new EmbeddableMultilingualString(parentStopPlaceName), new ValidBetween(futureTime), versionComment, null);
+
+        assertThat(result.getValidBetween().getFromDate()).isEqualTo(futureTime);
+
+        assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
+        verifyChildValidBetween(result);
+    }
+
+    @Test
+    public void testAddToMultiModalParentStopPlaceWithFutureValidBetween() {
+
+        StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
+
+        Instant futureTime = Instant.now().plusSeconds(600);
+
+
+        String parentStopPlaceName = "Super Duper StopPlace +1";
+        StopPlace parent = new StopPlace(new EmbeddableMultilingualString(parentStopPlaceName));
+        parent.setParentStopPlace(true);
+
+        parent = stopPlaceRepository.save(parent);
+
+        StopPlace result = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(child.getNetexId()),
+                new ValidBetween(futureTime), null);
+
+        assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
+        verifyChildValidBetween(result);
+    }
+
 
     @Test
     public void testCreateMultiModalParentStopPlaceFromVersionedChild() {
@@ -169,7 +208,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
                 .contains(existingChild.getNetexId())
                 .contains(newChild.getNetexId());
 
-        verifyChildValidBetween(parent);
+        verifyChildValidBetween(parent, Sets.newHashSet(newChild.getNetexId()));
     }
 
     @Test
@@ -233,15 +272,29 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     }
 
     private void verifyChildValidBetween(StopPlace parentStopPlace) {
+        verifyChildValidBetween(parentStopPlace, Sets.newHashSet());
+    }
+
+    private void verifyChildValidBetween(StopPlace parentStopPlace, Set<String> filter) {
         for(StopPlace actualChild : parentStopPlace.getChildren()) {
+
+            if(!filter.isEmpty() && !filter.contains(actualChild)) {
+                continue;
+            }
             assertThat(actualChild.getValidBetween()).as("child valid between must be null").isNull();
 
-            StopPlace previousChildVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(actualChild.getNetexId(), actualChild.getVersion()-1);
+            StopPlace previousChildVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(actualChild.getNetexId(), 1);
+
+            String childIdAndVersion = previousChildVersion.getNetexId() + " " + previousChildVersion.getVersion();
+
             // NRP-2234
-            assertThat(previousChildVersion.getValidBetween()).as("previous version of child stop valid between").isNotNull();
-            assertThat(previousChildVersion.getValidBetween().getToDate()).as("previous version of child stop must have to date set").isNotNull();
+            assertThat(previousChildVersion.getValidBetween())
+                    .as("previous version of child stop " + childIdAndVersion + " valid between")
+                    .isNotNull();
             assertThat(previousChildVersion.getValidBetween().getToDate())
-                    .as("previous version of child stop to date")
+                    .as("previous version of child stop " + childIdAndVersion + " must have to date set").isNotNull();
+            assertThat(previousChildVersion.getValidBetween().getToDate())
+                    .as("previous version of child stop " + childIdAndVersion + " to date equal to parent stop place from date")
                     .isEqualTo(parentStopPlace.getValidBetween().getFromDate());
         }
     }
