@@ -13,33 +13,33 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql
 
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
-import org.junit.Before;
-import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.StopPlace;
+import io.restassured.RestAssured
+import io.restassured.http.ContentType
+import io.restassured.response.ValidatableResponse
+import org.junit.Before
+import org.rutebanken.tiamat.TiamatIntegrationTest
+import org.rutebanken.tiamat.model.StopPlace
 
-import javax.transaction.Transactional;
+import javax.transaction.Transactional
 
-import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 
-public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
+abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
 
-    protected static final String BASE_URI_GRAPHQL = SERVICES_STOP_PLACE_PATH + "/graphql/";
+    protected static final String BASE_URI_GRAPHQL = SERVICES_STOP_PLACE_PATH + "/graphql/"
 
     @Before
-    public void configureRestAssured() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
+    void configureRestAssured() {
+        RestAssured.baseURI = "http://localhost"
+        RestAssured.port = port
     }
 
     protected ValidatableResponse executeGraphQL(String graphQlJsonQuery) {
-        return executeGraphQL(graphQlJsonQuery,200);
+        return executeGraphQL(graphQlJsonQuery,200)
     }
 
     /**
@@ -52,9 +52,9 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatInteg
                 "\"query\":\"" +
                 query.replaceAll("\"", "\\\\\"")
                         .replaceAll("\n", "\\\\n") +
-                "\",\"variables\":\"\"}";
+                "\",\"variables\":\"\"}"
 
-        return executeGraphQL(graphQlJsonQuery);
+        return executeGraphQL(graphQlJsonQuery)
     }
 
     protected ValidatableResponse executeGraphQL(String graphQlJsonQuery,int httpStatusCode) {
@@ -68,7 +68,7 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatInteg
                 .then()
                 .log().body()
                 .statusCode(httpStatusCode)
-                .assertThat();
+                .assertThat()
     }
 
     /*
@@ -76,6 +76,6 @@ public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatInteg
     */
     @Transactional
     protected StopPlace saveStopPlaceTransactional(StopPlace stopPlace) {
-        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
     }
 }

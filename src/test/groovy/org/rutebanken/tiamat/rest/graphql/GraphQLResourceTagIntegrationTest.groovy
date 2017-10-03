@@ -13,36 +13,36 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql;
+package org.rutebanken.tiamat.rest.graphql
 
-import com.vividsolutions.jts.geom.Coordinate;
-import org.junit.Test;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.tag.Tag;
-import org.rutebanken.tiamat.repository.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.vividsolutions.jts.geom.Coordinate
+import org.junit.Test
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString
+import org.rutebanken.tiamat.model.StopPlace
+import org.rutebanken.tiamat.model.tag.Tag
+import org.rutebanken.tiamat.repository.TagRepository
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.time.Instant;
+import java.time.Instant
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.*
 
-public class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
-    private TagRepository tagRepository;
+    private TagRepository tagRepository
 
     @Test
-    public void addTagToStop() throws Exception {
+    void addTagToStop() throws Exception {
 
-        String stopPlaceName = "StopPlace";
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        String stopPlaceName = "StopPlace"
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
 
-        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        stopPlaceRepository.save(stopPlace);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
+        stopPlaceRepository.save(stopPlace)
 
-        String tagName = "followup";
-        String comment = "comment for tag";
+        String tagName = "followup"
+        String comment = "comment for tag"
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
@@ -54,7 +54,7 @@ public class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIn
                 "       removed" +
                 "       removedBy" +
                 "  } " +
-                "}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}"
 
 
         executeGraphQL(graphQlJsonQuery)
@@ -63,24 +63,24 @@ public class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIn
                 .body("data.tag.idReference", equalTo(stopPlace.getNetexId()))
                 .body("data.tag.created", notNullValue())
                 .body("data.tag.removed", nullValue())
-                .body("data.tag.removedBy", nullValue());
+                .body("data.tag.removedBy", nullValue())
     }
 
     @Test
-    public void removeTagFromStop() throws Exception {
+    void removeTagFromStop() throws Exception {
 
-        String stopPlaceName = "StopPlace";
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+        String stopPlaceName = "StopPlace"
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
 
-        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
-        stopPlaceRepository.save(stopPlace);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
+        stopPlaceRepository.save(stopPlace)
 
-        String tagName = "tagname";
-        Tag tag = new Tag();
-        tag.setName(tagName);
-        tag.setIdreference(stopPlace.getNetexId());
-        tag.setCreated(Instant.now());
-        tagRepository.save(tag);
+        String tagName = "tagname"
+        Tag tag = new Tag()
+        tag.setName(tagName)
+        tag.setIdreference(stopPlace.getNetexId())
+        tag.setCreated(Instant.now())
+        tagRepository.save(tag)
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
@@ -91,14 +91,14 @@ public class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIn
                 "       removed" +
                 "       removedBy" +
                 "  } " +
-                "}\",\"variables\":\"\"}";
+                "}\",\"variables\":\"\"}"
 
 
         executeGraphQL(graphQlJsonQuery)
                 .body("data.tag.name", equalTo(tagName))
                 .body("data.tag.idReference", equalTo(stopPlace.getNetexId()))
                 .body("data.tag.created", notNullValue())
-                .body("data.tag.removed", notNullValue());
-                // user name not available in test: .body("data.tag.removedBy", notNullValue());
+                .body("data.tag.removed", notNullValue())
+        // user name not available in test: .body("data.tag.removedBy", notNullValue());
     }
 }
