@@ -356,6 +356,38 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(stopPlace3.getTopographicPlace()).isNotNull();
     }
 
+    @Test
+    public void createNewVersionWithChilds() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setVersion(1L);
+        stopPlace.setParentStopPlace(true);
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace child = new StopPlace();
+        child.setVersion(1L);
+        child.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId(), stopPlace.getNetexId()));
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+
+        newVersion.getChildren().add(child);
+
+        newVersion = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, newVersion, Instant.now().plusSeconds(1000000005));
+
+        assertThat(newVersion.getChanged())
+                .as("new version changed date")
+                .isNotNull()
+                .isBeforeOrEqualTo(Instant.now());
+
+        newVersion.getChildren().forEach(actualChild -> {
+            assertThat(child.getChanged())
+                    .as("new version of child changed date")
+                    .isNotNull()
+                    .isBeforeOrEqualTo(Instant.now());
+        });
+    }
+
+
 
     @Test
     @Ignore

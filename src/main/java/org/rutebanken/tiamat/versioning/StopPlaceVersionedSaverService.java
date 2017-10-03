@@ -86,6 +86,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
 
+        Instant changed = Instant.now();
 
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
@@ -94,9 +95,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            newVersion.setCreated(defaultValidFrom);
+            newVersion.setCreated(changed);
         } else {
-            newVersion.setChanged(defaultValidFrom);
+            newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
@@ -115,6 +116,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         clearUnwantedChildFields(newVersion);
 
         if(newVersion.getChildren() != null) {
+            newVersion.getChildren().forEach(child -> child.setChanged(changed));
             stopPlaceRepository.save(newVersion.getChildren());
             if(logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()
