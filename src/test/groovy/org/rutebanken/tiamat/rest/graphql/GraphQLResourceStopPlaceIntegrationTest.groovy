@@ -794,6 +794,8 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         tram.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
         stopPlaceVersionedSaverService.saveNewVersion(tram);
 
+        def fromDate = Instant.now().plusSeconds(100000);
+
         def parentStopPlaceName = "Super stop place name";
         def versionComment = "VersionComment";
 
@@ -801,7 +803,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                  stopPlace: ${GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE} (${INPUT}: {
                           stopPlaceIds:["${bus.getNetexId()}" ,"${tram.getNetexId()}"]
                           name: { value: "${parentStopPlaceName}" }
-                          validBetween: { fromDate:"2017-04-23T18:25:43.511+0100", toDate:"2017-10-23T18:25:43.511+0100" }
+                          validBetween: { fromDate:"${fromDate}" }
                           versionComment:"${versionComment}"
                        }) {
                           id

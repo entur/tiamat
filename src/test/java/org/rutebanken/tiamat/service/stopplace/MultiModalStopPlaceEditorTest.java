@@ -291,11 +291,14 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
             assertThat(previousChildVersion.getValidBetween())
                     .as("previous version of child stop " + childIdAndVersion + " valid between")
                     .isNotNull();
+
+
+            Instant expectedToDate = parentStopPlace.getValidBetween().getFromDate().minusMillis(1);
+
             assertThat(previousChildVersion.getValidBetween().getToDate())
-                    .as("previous version of child stop " + childIdAndVersion + " must have to date set").isNotNull();
-            assertThat(previousChildVersion.getValidBetween().getToDate())
-                    .as("previous version of child stop " + childIdAndVersion + " to date equal to parent stop place from date")
-                    .isEqualTo(parentStopPlace.getValidBetween().getFromDate());
+                    .as("previous version of child stop " + childIdAndVersion + " to date equal to parent stop place from date plus one milli second")
+                    .isNotNull()
+                    .isEqualTo(expectedToDate);
         }
     }
 

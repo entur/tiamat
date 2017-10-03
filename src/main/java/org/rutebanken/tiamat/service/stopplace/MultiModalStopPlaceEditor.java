@@ -36,6 +36,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+import static org.rutebanken.tiamat.versioning.VersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Transactional
 @Component
@@ -78,7 +79,9 @@ public class MultiModalStopPlaceEditor {
         Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
         parentStopPlace.getChildren().addAll(childCopies);
 
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, fromDate);
+        Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
+
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
         stopPlaceRepository.save(futureChildStopPlaces);
 
         return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
@@ -122,7 +125,8 @@ public class MultiModalStopPlaceEditor {
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
         Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, fromDate);
+        Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
+        terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
         stopPlaceRepository.save(futureChildStopPlaces);
 
         parentStopPlaceCopy.getChildren().addAll(childCopies);
@@ -201,9 +205,10 @@ public class MultiModalStopPlaceEditor {
 
 
             if (potentialNewChild.getValidBetween().getFromDate() != null && potentialNewChild.getValidBetween().getFromDate().isAfter(fromDate)) {
-                throw new RuntimeException("The stop place " + potentialNewChild.getNetexId()
+                throw new RuntimeException("The potential child stop place " + potentialNewChild.getNetexId()
                         + " version " + potentialNewChild.getVersion()
-                        + " is not currently valid: from date = " + potentialNewChild.getValidBetween().getFromDate());
+                        + " is not currently valid: from date = " + potentialNewChild.getValidBetween().getFromDate()
+                        + " expected to be after "+fromDate);
             }
             if (potentialNewChild.getValidBetween().getToDate() != null && potentialNewChild.getValidBetween().getToDate().isBefore(fromDate)) {
                 throw new RuntimeException("The stop place " + potentialNewChild.getNetexId()
@@ -213,12 +218,12 @@ public class MultiModalStopPlaceEditor {
         }
     }
 
-    private void terminatePreviousVersionsOfChildren(List<StopPlace> childStopPlaces, Instant fromDate) {
+    private void terminatePreviousVersionsOfChildren(List<StopPlace> childStopPlaces, Instant terminationDate) {
         childStopPlaces.forEach(futureChildStopPlace -> {
             if(futureChildStopPlace.getValidBetween() == null) {
-                futureChildStopPlace.setValidBetween(new ValidBetween(fromDate.minusSeconds(1), fromDate));
+                futureChildStopPlace.setValidBetween(new ValidBetween(terminationDate.minusSeconds(1), terminationDate));
             } else {
-                futureChildStopPlace.getValidBetween().setToDate(fromDate);
+                futureChildStopPlace.getValidBetween().setToDate(terminationDate);
             }
         });
     }

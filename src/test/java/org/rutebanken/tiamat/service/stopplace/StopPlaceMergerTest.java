@@ -28,6 +28,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
+import static org.rutebanken.tiamat.versioning.VersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
@@ -152,9 +153,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
         assertThat(mergedStopPlace.getValidBetween().getFromDate())
                 .as("merged stop place from date")
-                .isEqualTo(stopPlaceBeforeMerging.getValidBetween().getToDate());
-
-        assertThat(mergedStopPlace.getValidBetween().getFromDate())
+                .isEqualTo(stopPlaceBeforeMerging.getValidBetween().getToDate().plusMillis(MILLIS_BETWEEN_VERSIONS))
                 .as("merged stop place from date should have version from date after test started")
                 .isAfterOrEqualTo(atTestStart);
 

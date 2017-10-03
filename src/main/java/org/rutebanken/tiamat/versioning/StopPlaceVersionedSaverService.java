@@ -73,7 +73,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     @Override
-    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant now) {
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom) {
 
         super.validate(existingVersion, newVersion);
 
@@ -90,18 +90,18 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, defaultValidFrom);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            newVersion.setCreated(now);
+            newVersion.setCreated(defaultValidFrom);
         } else {
-            newVersion.setChanged(now);
+            newVersion.setChanged(defaultValidFrom);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
             logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom);
+            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
         }
 
         // Save latest version

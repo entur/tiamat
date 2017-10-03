@@ -35,6 +35,7 @@ import java.util.Map;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.rutebanken.tiamat.versioning.VersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Transactional
 public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
@@ -93,7 +94,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(oldVersion.getValidBetween().getFromDate()).isNotNull();
         assertThat(oldVersion.getValidBetween().getToDate()).isNotNull();
 
-        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(oldVersion.getValidBetween().getToDate());
+        assertThat(newVersion.getValidBetween().getFromDate().minusMillis(MILLIS_BETWEEN_VERSIONS)).isEqualTo(oldVersion.getValidBetween().getToDate());
     }
 
     @Test
@@ -139,7 +140,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(newVersion.getValidBetween().getFromDate()).isNotNull();
 
         oldVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(oldVersion.getNetexId(), oldVersion.getVersion());
-        assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(oldVersion.getValidBetween().getToDate());
+        assertThat(newVersion.getValidBetween().getFromDate().minusMillis(MILLIS_BETWEEN_VERSIONS)).isEqualTo(oldVersion.getValidBetween().getToDate());
     }
 
     @Test
