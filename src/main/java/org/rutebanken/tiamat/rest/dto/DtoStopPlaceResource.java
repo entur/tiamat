@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.dto;
 
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
@@ -39,7 +41,7 @@ import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 @Component
 @Api
 @Produces("application/json")
-@Path("/mapping/stop_place")
+@Path("/")
 @Transactional
 public class DtoStopPlaceResource {
 
@@ -53,6 +55,7 @@ public class DtoStopPlaceResource {
     }
 
     @GET
+    @Path("/mapping/stop_place")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
                                             @QueryParam("includeStopType") boolean includeStopType) {
@@ -76,6 +79,25 @@ public class DtoStopPlaceResource {
                     if (stopPlaceMappings.isEmpty()) lastEmpty = true;
                 }
                 writer.close();
+            }
+        }).build();
+    }
+
+    @GET
+    @Path("/id/stop_place")
+    @Produces("text/plain")
+    public Response getIdUniqueStopPlaceIds() {
+        return Response.ok().entity((StreamingOutput) output -> {
+            try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
+                Set<String> stopPlaceIds = stopPlaceRepository.findUniqueStopPlaceIds(Instant.now());
+                for (String stopPlaceId : stopPlaceIds) {
+                    writer.println(stopPlaceId);
+                }
+                writer.flush();
+                writer.close();
+            } catch (Exception e) {
+                logger.warn("Catched exception when streaming ids for stops: {}", e.getMessage(), e);
+                throw e;
             }
         }).build();
     }

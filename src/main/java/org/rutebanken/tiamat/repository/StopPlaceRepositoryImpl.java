@@ -362,6 +362,27 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
 
+    @Override
+    public Set<String> findUniqueStopPlaceIds(Instant pointInTime) {
+        String sql = "SELECT DISTINCT s.netex_id FROM stop_place s " +
+                        SQL_LEFT_JOIN_PARENT_STOP +
+                        "WHERE " +
+                        SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                        "ORDER BY s.netex_id";
+
+
+        Query nativeQuery = entityManager.createNativeQuery(sql);
+
+        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+
+        List<String> results = nativeQuery.getResultList();
+
+        Set<String> ids = new HashSet<>();
+        for(String result : results) {
+            ids.add(result);
+        }
+        return ids;
+    }
 
 
     @Override
