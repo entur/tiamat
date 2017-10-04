@@ -15,12 +15,15 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
@@ -29,6 +32,8 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
     private final Iterator<StopPlace> iterator;
 
     private final StopPlaceRepository stopPlaceRepository;
+
+    private final Set<String> fetchedParents = new HashSet<>();
 
     private StopPlace parent = null;
 
@@ -54,10 +59,18 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
         StopPlace stopPlace = iterator.next();
         if(stopPlace.getParentSiteRef() != null) {
-            parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(), Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
-            logger.info("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
+            String parentRefString = refString(stopPlace.getParentSiteRef());
+            if(!fetchedParents.contains(parentRefString)) {
+                parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(), Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
+                logger.info("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
+                fetchedParents.add(parentRefString);
+            }
         }
 
         return stopPlace;
+    }
+
+    private String refString(SiteRefStructure siteRefStructure) {
+        return siteRefStructure.getRef()+"-"+siteRefStructure.getVersion();
     }
 }
