@@ -15,8 +15,10 @@
 
 package org.rutebanken.tiamat.filter;
 
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,9 @@ public class LegacyLoggingFilter implements Filter {
 
     final Logger logger = LoggerFactory.getLogger(LegacyLoggingFilter.class);
 
+    @Autowired
+    private UsernameFetcher usernameFetcher;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -40,10 +45,11 @@ public class LegacyLoggingFilter implements Filter {
 
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String requestUri = httpServletRequest.getRequestURI();
+            String userName = usernameFetcher.getUserNameForAuthenticatedUser();
             if(requestUri.contains("tiamat") || requestUri.contains("jersey")) {
-                logger.warn("Request on legacy path: {}", requestUri);
+                logger.warn("Request on legacy path: {}. Username if available: {}", requestUri, userName);
             } else {
-                logger.trace("Non-legacy request: {}", requestUri);
+                logger.trace("Non-legacy request: {}. Username if available: {}", requestUri, userName);
             }
         }
 
