@@ -99,8 +99,6 @@ public class AsyncPublicationDeliveryExporter {
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
-        exportJob.setJobUrl(ASYNC_JOB_PATH + '/' + exportJob.getId());
-        exportJobRepository.save(exportJob);
 
         ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
         exportService.submit(exportJobWorker);

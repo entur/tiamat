@@ -25,6 +25,8 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
+import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
+
 @Entity
 @XmlRootElement
 public class ExportJob {
@@ -33,7 +35,9 @@ public class ExportJob {
     @GeneratedValue
     private Long id;
 
+    @Deprecated
     private String jobUrl;
+
     private String fileName;
 
     private String subFolder;
@@ -62,7 +66,7 @@ public class ExportJob {
                 .omitNullValues()
                 .add("id", id)
                 .add("status", status)
-                .add("jobUrl", jobUrl)
+                .add("jobUrl", getJobUrl())
                 .add("fileName", fileName)
                 .add("subFolder", subFolder)
                 .add("started", started)
@@ -80,12 +84,9 @@ public class ExportJob {
     }
 
     public String getJobUrl() {
-        return jobUrl;
+        return ASYNC_JOB_PATH + '/' + getId();
     }
 
-    public void setJobUrl(String jobUrl) {
-        this.jobUrl = jobUrl;
-    }
 
     public String getFileName() {
         return fileName;
