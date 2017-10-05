@@ -19,12 +19,12 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Component
 public class LegacyLoggingFilter implements Filter {
@@ -46,14 +46,37 @@ public class LegacyLoggingFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String requestUri = httpServletRequest.getRequestURI();
             String userName = usernameFetcher.getUserNameForAuthenticatedUser();
-            if(requestUri.contains("tiamat") || requestUri.contains("jersey")) {
-                logger.warn("Request on legacy path: {}. Username if available: {}", requestUri, userName);
+            if (requestUri.contains("tiamat") || requestUri.contains("jersey")) {
+
+                String headers = headersAsString(httpServletRequest);
+                logger.warn("Request on legacy path: {}. Username if available: {}. Headers:{}", requestUri, userName, headers.toString());
             } else {
                 logger.trace("Non-legacy request: {}. Username if available: {}", requestUri, userName);
             }
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private String headersAsString(HttpServletRequest httpServletRequest) {
+        StringBuilder headers = new StringBuilder();
+        if (httpServletRequest.getHeaderNames() != null) {
+            Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
+
+            if(headerNames != null) {
+                while (headerNames.hasMoreElements()) {
+                    headers.append("\n");
+                    String headerName = headerNames.nextElement();
+                    headers.append(headerName)
+                            .append(": ");
+
+                    String headerValue = httpServletRequest.getHeader(headerName);
+                    headers.append(headerValue);
+
+                }
+            }
+        }
+        return headers.toString();
     }
 
     @Override
