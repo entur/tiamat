@@ -109,7 +109,7 @@ public class TopographicPlaceImporter {
 
         }
 
-        if(incomingTopographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST)) {
+        if(incomingTopographicPlace.getTopographicPlaceType() != null && incomingTopographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST)) {
 
             logger.info("Detected place of interest. Updating existing version of topographic place {}", incomingTopographicPlace.getNetexId());
             TopographicPlace existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingTopographicPlace.getNetexId());
