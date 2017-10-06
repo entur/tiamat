@@ -49,7 +49,7 @@ public class ExtendedHazelcastService extends HazelCastService {
      * 100 MB per map is 2.2GB used heap in total.
      *
      */
-    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 2;
+    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 1;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
