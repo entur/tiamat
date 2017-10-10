@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
 @Service
@@ -103,6 +104,7 @@ public class AsyncPublicationDeliveryExporter {
         ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
+        setJobUrl(exportJob);
         return exportJob;
     }
 
@@ -111,7 +113,12 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public ExportJob getExportJob(long exportJobId) {
-        return exportJobRepository.findOne(exportJobId);
+
+        ExportJob exportJob = exportJobRepository.findOne(exportJobId);
+        if(exportJob != null) {
+            return setJobUrl(exportJob);
+        }
+        return null;
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {
@@ -119,7 +126,16 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public Collection<ExportJob> getJobs() {
-        return exportJobRepository.findAll();
+
+        return exportJobRepository.findAll()
+                .stream()
+                .map(this::setJobUrl)
+                .collect(toList());
+    }
+
+    private ExportJob setJobUrl(ExportJob exportJobWithId) {
+        exportJobWithId.setJobUrl(ASYNC_JOB_PATH + "/" + exportJobWithId.getId());
+        return exportJobWithId;
     }
 
     private String generateSubFolderName() {

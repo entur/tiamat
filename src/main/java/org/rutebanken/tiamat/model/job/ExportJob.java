@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.model.job;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
@@ -87,6 +90,9 @@ public class ExportJob {
         return ASYNC_JOB_PATH + '/' + getId();
     }
 
+    public void setJobUrl(String jobUrl) {
+        this.jobUrl = jobUrl;
+    }
 
     public String getFileName() {
         return fileName;
