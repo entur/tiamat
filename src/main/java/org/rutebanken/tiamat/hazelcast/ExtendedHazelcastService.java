@@ -16,19 +16,14 @@
 package org.rutebanken.tiamat.hazelcast;
 
 import com.hazelcast.config.*;
-import com.hazelcast.core.EntryView;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.map.eviction.MapEvictionPolicy;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.rutebanken.tiamat.netex.id.GeneratedIdState.LAST_IDS_FOR_ENTITY;
 
@@ -41,17 +36,9 @@ public class ExtendedHazelcastService extends HazelCastService {
     private static final int DEFAULT_BACKUP_COUNT = 1;
 
     /**
-     * From Hazelcast documentation:
-     *
-     * USED_HEAP_PERCENTAGE: Maximum used heap size percentage for each JVM. If, for example,
-     * JVM is configured to have 1000 MB and this value is 10, then the map entries will be evicted when used heap size exceeds 100 MB.
-     *
-     * We have about 22 maps for the second level cache and max heap 5 GB, at the time of writing.
-     * With this value set to 2, this means that each map will have their map entries evicted when the used heap size (of the map itselv) exeeds 100MB.
-     * 100 MB per map is 2.2GB used heap in total.
-     *
+     * Evict cache when free heap percentage is below this value
      */
-    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 1;
+    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 30;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
@@ -86,7 +73,7 @@ public class ExtendedHazelcastService extends HazelCastService {
                         .setEvictionPolicy(EvictionPolicy.LFU)
                         .setTimeToLiveSeconds(604800)
                         .setMaxSizeConfig(
-                                new MaxSizeConfig(MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE, MaxSizeConfig.MaxSizePolicy.USED_HEAP_PERCENTAGE)));
+                                new MaxSizeConfig(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW, MaxSizeConfig.MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
 
         logger.info("Configured map for hibernate second level cache: {}", mapConfigs.get(1));
         return mapConfigs;
