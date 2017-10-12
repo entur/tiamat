@@ -16,8 +16,10 @@
 package org.rutebanken.tiamat.hazelcast;
 
 import com.hazelcast.config.*;
+import com.hazelcast.core.EntryView;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.eviction.MapEvictionPolicy;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -36,7 +38,7 @@ public class ExtendedHazelcastService extends HazelCastService {
 
     private static final String MAP_CONFIG_NAME_SECOND_LEVEL_CACHE = StopPlace.class.getPackage().getName() + ".*";
 
-    private static final int DEFAULT_BACKUP_COUNT = 2;
+    private static final int DEFAULT_BACKUP_COUNT = 1;
 
     /**
      * From Hazelcast documentation:
