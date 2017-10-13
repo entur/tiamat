@@ -31,5 +31,7 @@ public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStruc
 
     List<TopographicPlace> findByNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType);
 
+    Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds);
+
     List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds);
 }

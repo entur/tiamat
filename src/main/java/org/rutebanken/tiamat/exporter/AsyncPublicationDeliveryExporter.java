@@ -46,7 +46,7 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
-    private static final ExecutorService exportService = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
+    private static final ExecutorService exportService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
