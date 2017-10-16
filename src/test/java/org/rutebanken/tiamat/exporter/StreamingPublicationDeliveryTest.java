@@ -128,10 +128,8 @@ public class StreamingPublicationDeliveryTest {
         TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("TP"));
         topographicPlace.setVersion(1);
         topographicPlace.setNetexId("NSR:TopographicPlace:2");
-        when(topographicPlaceRepository.findAll()).thenReturn(Arrays.asList(topographicPlace));
-        when(topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(anySetOf(Long.class))).thenReturn(Arrays.asList(topographicPlace));
 
-        stream(stopPlaces, new ArrayList<>(), byteArrayOutputStream);
+        stream(stopPlaces, new ArrayList<>(), new ArrayList<>(), Arrays.asList(topographicPlace) , byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
 
