@@ -123,17 +123,21 @@ public class StreamingPublicationDelivery {
         } else if(exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
 
             Iterator<TopographicPlace> relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds);
-            ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
+            if(relevantTopographicPlacesIterator.hasNext()) {
+                ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
 
-            AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
-            NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount);
+                AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
+                NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
+                        netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount);
 
-            List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
+                List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
 
-            TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
-            setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
-            netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
+                TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
+                setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
+                netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
+            } else {
+                netexSiteFrame.setTopographicPlaces(null);
+            }
         }
 
         List<org.rutebanken.tiamat.model.TariffZone> tariffZones;

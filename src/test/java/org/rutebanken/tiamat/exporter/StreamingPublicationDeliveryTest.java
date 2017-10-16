@@ -209,6 +209,10 @@ public class StreamingPublicationDeliveryTest {
     }
 
     private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
+        stream(stopPlaces, parkings, pathLinks, new ArrayList<>(), byteArrayOutputStream);
+    }
+
+    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, List<TopographicPlace> topographicPlaces, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
@@ -216,6 +220,7 @@ public class StreamingPublicationDeliveryTest {
         when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
+        when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());
 
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
