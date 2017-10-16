@@ -219,6 +219,8 @@ public class StreamingPublicationDeliveryTest {
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
         when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());
+        when(tariffZoneRepository.scrollTariffZones(any())).thenReturn(new ArrayList<TariffZone>().iterator());
+        when(tariffZoneRepository.scrollTariffZones()).thenReturn(new ArrayList<TariffZone>().iterator());
 
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
