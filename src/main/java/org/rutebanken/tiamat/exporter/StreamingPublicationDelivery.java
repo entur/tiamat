@@ -125,6 +125,7 @@ public class StreamingPublicationDelivery {
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
+        //TODO: stream path links, handle export mode
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
         logger.info("Mapping site frame to netex model");
