@@ -93,6 +93,11 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		return scrollTopographicPlaces(generateTopographicPlacesFromStopPlaceIdsQuery(stopPlaceDbIds));
 	}
 
+	@Override
+	public Iterator<TopographicPlace> scrollTopographicPlaces() {
+		return scrollTopographicPlaces("SELECT t.* FROM topographic_place");
+	}
+
 	public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {
 		Session session = entityManager.unwrap(Session.class);
 		SQLQuery sqlQuery = session.createSQLQuery(sql);

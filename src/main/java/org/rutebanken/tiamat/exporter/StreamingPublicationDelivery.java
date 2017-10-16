@@ -42,10 +42,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -118,27 +115,9 @@ public class StreamingPublicationDelivery {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if(exportParams.getTopographicPlaceExportMode() == null || exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
-            topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
-        } else if(exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+        logger.info("Preparing topographic places");
+        prepareTopographicPlaces(exportParams, netexSiteFrame, stopPlacePrimaryIds);
 
-            Iterator<TopographicPlace> relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds);
-            if(relevantTopographicPlacesIterator.hasNext()) {
-                ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
-
-                AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
-                NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                        netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount);
-
-                List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
-
-                TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
-                setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
-                netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
-            } else {
-                netexSiteFrame.setTopographicPlaces(null);
-            }
-        }
 
         List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
         if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
@@ -196,6 +175,40 @@ public class StreamingPublicationDelivery {
 
         marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
         logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
+    }
+
+
+    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, Set<Long> stopPlacePrimaryIds) {
+
+        Iterator<TopographicPlace> relevantTopographicPlacesIterator;
+
+        if(exportParams.getTopographicPlaceExportMode() == null || exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
+            logger.info("Initiate scrolling for all topographic places");
+            relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces();
+
+        } else if(exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+            logger.info("Initiate scrolling relevant topographic places");
+            relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds);
+        } else {
+            logger.info("Topographic export mode is {}. Will not export topographic places", exportParams.getTopographicPlaceExportMode());
+            relevantTopographicPlacesIterator = Collections.emptyIterator();
+        }
+
+        if(relevantTopographicPlacesIterator.hasNext()) {
+            ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
+
+            AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
+            NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount);
+
+            List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
+
+            TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
+            setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
+            netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
+        } else {
+            netexSiteFrame.setTopographicPlaces(null);
+        }
     }
 
     /**
