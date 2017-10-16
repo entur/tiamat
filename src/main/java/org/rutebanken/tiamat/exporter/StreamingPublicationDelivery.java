@@ -111,14 +111,7 @@ public class StreamingPublicationDelivery {
 
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
-
-        logger.info("Mapping site frame to netex model");
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
-
-        logger.info("Preparing topographic places");
-        prepareTopographicPlaces(exportParams, netexSiteFrame, stopPlacePrimaryIds);
-
-
+        
         List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
         if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
             tariffZones = tariffZoneRepository.findAll();
@@ -136,10 +129,39 @@ public class StreamingPublicationDelivery {
 
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
+        logger.info("Mapping site frame to netex model");
+        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
+        logger.info("Preparing topographic places");
+        prepareTopographicPlaces(exportParams, netexSiteFrame, stopPlacePrimaryIds);
+
+        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame);
+        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
+        Marshaller marshaller = createMarshaller();
+
+        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+        logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
+    }
+
+    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame) {
+        int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
+        if(parkingsCount > 0) {
+            // Only set parkings if they will exist during marshalling.
+            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
+            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
+            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds), Parking.class, mappedParkingCount));
+
+            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+        } else {
+            logger.info("No parkings to export based on stop places");
+        }
+    }
+
+    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if(!stopPlacePrimaryIds.isEmpty()) {
 
@@ -157,24 +179,6 @@ public class StreamingPublicationDelivery {
         } else {
             logger.info("No stop places to export");
         }
-
-        int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
-        if(parkingsCount > 0) {
-            // Only set parkings if they will exist during marshalling.
-            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
-            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
-            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds), Parking.class, mappedParkingCount));
-
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
-            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
-        } else {
-            logger.info("No parkings to export based on stop places");
-        }
-
-        Marshaller marshaller = createMarshaller();
-
-        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-        logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
     }
 
 
