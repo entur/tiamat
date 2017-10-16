@@ -15,12 +15,14 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.hibernate.Session;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NetexMappingIterator<T extends EntityStructure, N extends org.rutebanken.netex.model.EntityStructure> implements Iterator<N> {
@@ -32,12 +34,21 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final Class<N> netexClass;
     private final long startTime = System.currentTimeMillis();
     private final AtomicInteger mappedCount;
+    private Session session;
 
     public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
+        this.netexMapper = netexMapper;
+        this.iterator = iterator;
+        this.netexClass = netexClass;
+        this.mappedCount = mappedCount;
+    }
+
+    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount, Session session) {
         this.iterator = iterator;
         this.netexMapper = netexMapper;
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
+        this.session = session;
     }
 
     @Override
@@ -47,9 +58,15 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
 
     @Override
     public N next() {
-        mappedCount.incrementAndGet();
+
         logStatus();
-        return netexMapper.getFacade().map(iterator.next(), netexClass);
+        T next = iterator.next();
+        N mapped = netexMapper.getFacade().map(next, netexClass);
+        if(session != null) {
+            session.evict(next);
+        }
+        mappedCount.incrementAndGet();
+        return mapped;
     }
 
     private void logStatus() {
