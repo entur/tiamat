@@ -84,7 +84,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	@Override
 	public Iterator<TopographicPlace> scrollTopographicPlaces() {
-		return scrollTopographicPlaces("SELECT t.* FROM topographic_place");
+		return scrollTopographicPlaces("SELECT t.* FROM topographic_place t");
 	}
 
 	public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {

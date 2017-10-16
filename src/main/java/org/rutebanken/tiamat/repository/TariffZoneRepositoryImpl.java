@@ -92,7 +92,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
 	@Override
 	public Iterator<TariffZone> scrollTariffZones() {
-		return scrollTariffZones("select tz.* from tariff_zone");
+		return scrollTariffZones("select tz.* from tariff_zone tz");
 	}
 
 	private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
