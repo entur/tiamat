@@ -270,8 +270,9 @@ public class StreamingPublicationDelivery {
         try {
             return newInstance(clazz);
         } catch (JAXBException e) {
-            logger.warn("Could not create instance of jaxb context for class " + clazz, e);
-            throw new RuntimeException(e);
+            String message = "Could not create instance of jaxb context for class " + clazz;
+            logger.warn(message, e);
+            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
         }
     }
 
