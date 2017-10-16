@@ -65,7 +65,7 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
         if (next.isPresent()) {
             T returnValue =  next.get();
             if (++counter % fetchSize == 0) {
-                logger.debug("Scrolling {}s. Counter is currently at {}", next.get().getClass().getSimpleName(), counter);
+                logger.info("Scrolling {}s. Counter is currently at {}. {}", next.get().getClass().getSimpleName(), counter, session.getStatistics());
             }
 
             next = Optional.empty();
