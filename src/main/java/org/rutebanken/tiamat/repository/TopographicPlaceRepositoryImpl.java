@@ -17,23 +17,12 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.StringType;
-import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +79,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 			return new ArrayList<TopographicPlace>().iterator();
 		}
 
-		return scrollTopographicPlaces(generateTopographicPlacesFromStopPlaceIdsQuery(stopPlaceDbIds));
+		return scrollTopographicPlaces(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
 	}
 
 	@Override
@@ -116,7 +105,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
 			return new ArrayList<>();
 		}
-		Query query = entityManager.createNativeQuery(generateTopographicPlacesFromStopPlaceIdsQuery(stopPlaceDbIds), TopographicPlace.class);
+		Query query = entityManager.createNativeQuery(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds), TopographicPlace.class);
 
 		try {
 			@SuppressWarnings("unchecked")
@@ -131,7 +120,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		}
 	}
 
-	private String generateTopographicPlacesFromStopPlaceIdsQuery(Set<Long> stopPlaceDbIds) {
+	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
 
 		StringBuilder sql = new StringBuilder("select tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
 
