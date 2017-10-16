@@ -56,8 +56,9 @@ public class ParentTreeTopographicPlaceFetchingIterator implements Iterator<Topo
         }
 
         if(next != null) {
+            TopographicPlace returnVal = next;
             next = null;
-            return next;
+            return returnVal;
         }
 
         TopographicPlace topographicPlace = iterator.next();
