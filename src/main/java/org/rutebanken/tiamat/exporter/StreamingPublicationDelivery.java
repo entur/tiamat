@@ -111,7 +111,7 @@ public class StreamingPublicationDelivery {
 
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
-        
+
         List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
         if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
             tariffZones = tariffZoneRepository.findAll();
@@ -147,6 +147,9 @@ public class StreamingPublicationDelivery {
     }
 
     private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame) {
+
+        // ExportParams could be used for parkingExportMode.
+
         int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
         if(parkingsCount > 0) {
             // Only set parkings if they will exist during marshalling.
