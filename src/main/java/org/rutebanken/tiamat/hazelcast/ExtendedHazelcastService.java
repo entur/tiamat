@@ -38,7 +38,7 @@ public class ExtendedHazelcastService extends HazelCastService {
     /**
      * Evict cache when free heap percentage is below this value
      */
-    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 30;
+    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 50;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
