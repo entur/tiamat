@@ -87,7 +87,7 @@ public class StreamingPublicationDelivery {
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
-                                        @Value("${asyncNetexExport.validateAgainstSchema:true}") boolean validateAgainstSchema) throws IOException, SAXException {
+                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
