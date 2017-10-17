@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.stopplace.ChildStopPlacesFetcher;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +50,20 @@ public class PublicationDeliveryExporter {
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
+    private final ChildStopPlacesFetcher childStopPlacesFetcher;
+
+    public enum MultiModalFetchMode {CHILDREN, PARENTS}
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, ParentStopPlacesFetcher parentStopPlacesFetcher) {
+                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, ParentStopPlacesFetcher parentStopPlacesFetcher, ChildStopPlacesFetcher childStopPlacesFetcher) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
+        this.childStopPlacesFetcher = childStopPlacesFetcher;
     }
 
     @Transactional(readOnly = true)
@@ -71,8 +76,11 @@ public class PublicationDeliveryExporter {
         logger.info("Finding changed stop places with search params: {}", search);
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
         logger.debug("Found {} changed stop places", stopPlacePage.getSize());
+
+        PublicationDeliveryStructure publicationDelivery = exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams, MultiModalFetchMode.CHILDREN);
+
         PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(
-                exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams),
+                publicationDelivery,
                 stopPlacePage.getSize(),
                 stopPlacePage.getTotalElements(),
                 stopPlacePage.hasNext());
@@ -100,9 +108,30 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams) {
+        return exportPublicationDeliveryWithStops(stopPlaces, exportParams, MultiModalFetchMode.PARENTS);
+    }
+
+
+
+    /**
+     *
+     * @param stopPlaces
+     * @param exportParams
+     * @param multiModalFetchMode if parents or children should be fetched
+     * @return
+     */
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams, MultiModalFetchMode multiModalFetchMode) {
         logger.info("Preparing publication delivery export");
 
-        stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
+        if(multiModalFetchMode == null) {
+            multiModalFetchMode = MultiModalFetchMode.PARENTS;
+        }
+
+        if(multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
+            stopPlaces = childStopPlacesFetcher.resolveChildren(stopPlaces);
+        } else if( multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)){
+            stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
+        }
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);

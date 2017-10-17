@@ -522,6 +522,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return getOneOrNull(typedQuery);
     }
 
+    /**
+     * Returns parent stops only if multi modal stops
+     * @param search
+     * @return
+     */
     public Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
         final String queryString = "select sp.* " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by sp.from_Date";
         List<StopPlace> stopPlaces = entityManager.createNativeQuery(queryString, StopPlace.class)
@@ -587,13 +592,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             " from stop_place sp INNER JOIN " +
                     "(SELECT spinner.netex_id, MAX(spinner.version) AS maxVersion " +
                     "   FROM stop_place spinner " +
-                    "     LEFT JOIN stop_place p " +
-                    "       ON spinner.parent_site_ref = p.netex_id " +
-                    "       AND spinner.parent_site_ref_version = CAST(p.version AS text) " +
                     " WHERE " +
-                    "   ((spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
-                    "       OR p.netex_id IS NOT NULL AND (p.from_date BETWEEN :from AND :to OR p.to_date BETWEEN :from AND :to )) " +
-                    "   AND spinner.parent_stop_place IS FALSE " +
+                    "   (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "   AND spinner.parent_site_ref IS NULL " +
                     " GROUP BY spinner.netex_id " +
                     ") sub " +
                     "   ON sub.netex_id = sp.netex_id " +

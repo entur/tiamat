@@ -70,6 +70,7 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
         parent.setValidBetween(new ValidBetween(now));
         parent.setParentStopPlace(true);
         parent.setNetexId("NSR:StopPlace:987");
+        parent.setVersion(1L);
         stopPlaceRepository.save(parent);
 
 
@@ -77,6 +78,9 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
         child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
         child.setNetexId("NSR:StopPlace:321321");
         stopPlaceRepository.save(child);
+
+        parent.getChildren().add(child);
+        stopPlaceRepository.save(parent);
 
 
         Pageable pageable = new PageRequest(0, 10);
