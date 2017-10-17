@@ -55,12 +55,11 @@ public class ChildStopPlacesFetcher {
 
                 Set<StopPlace> children = stopPlace.getChildren();
                 if(children.isEmpty()) {
-                    logger.warn("The parent stop place {}-{} does not have any children. Ignoring it!", stopPlace.getNetexId(), stopPlace.getVersion());
-                } else {
-                    result.add(stopPlace);
-                    logger.info("Adding {} children of parent stop {}-{}", children.size(), stopPlace.getNetexId(), stopPlace.getVersion());
-                    result.addAll(children);
+                    logger.info("The parent stop place {}-{} does not have any children.", stopPlace.getNetexId(), stopPlace.getVersion());
                 }
+                result.add(stopPlace);
+                logger.info("Adding {} children of parent stop {}-{}", children.size(), stopPlace.getNetexId(), stopPlace.getVersion());
+                result.addAll(children);
             } else {
                 if (stopPlace.getParentSiteRef() != null
                         && Strings.isNullOrEmpty(stopPlace.getParentSiteRef().getRef())
