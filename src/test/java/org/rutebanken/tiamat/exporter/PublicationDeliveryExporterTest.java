@@ -97,33 +97,4 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
         StopPlace actualChild = publicationDeliveryTestHelper.findStopPlace(publicationDeliveryStructure, child.getNetexId());
         assertThat(actualChild).as("child stop "+child.getNetexId() + " should be included").isNotNull();
     }
-
-    /**
-     * Parents should only be returned when there are children referring to them
-     * @throws JAXBException
-     */
-    @Test
-    public void exportPlacesWithEffectiveChangeInPeriodExcpectNoParentWhenNoChildren() throws JAXBException {
-
-        Instant now = Instant.now();
-
-        org.rutebanken.tiamat.model.StopPlace parent = new org.rutebanken.tiamat.model.StopPlace();
-        parent.setValidBetween(new ValidBetween(now));
-        parent.setParentStopPlace(true);
-        parent.setNetexId("NSR:StopPlace:987");
-        stopPlaceRepository.save(parent);
-
-
-        Pageable pageable = new PageRequest(0, 10);
-        ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(100), now.plusSeconds(100), pageable);
-
-        ExportParams exportParams = ExportParams.newExportParamsBuilder().build();
-
-        PublicationDeliveryStructurePage publicationDeliveryStructurePage = publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryStructurePage.publicationDeliveryStructure;
-
-        StopPlace actualParent = publicationDeliveryTestHelper.findStopPlace(publicationDeliveryStructure, parent.getNetexId(), false);
-        assertThat(actualParent).isNull();
-    }
 }
