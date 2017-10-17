@@ -258,9 +258,13 @@ public class PublicationDeliveryTestHelper {
     }
 
     public StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {
-        return extractStopPlaces(publicationDeliveryStructure).stream()
+        return findStopPlace(publicationDeliveryStructure, stopPlaceId, true);
+    }
+
+    public StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId, boolean verifyNotNull) {
+        return extractStopPlaces(publicationDeliveryStructure, verifyNotNull).stream()
                 .filter(stopPlace -> stopPlace.getId().equals(stopPlaceId))
-                .findFirst().get();
+                .findFirst().orElse(null);
     }
 
 }
