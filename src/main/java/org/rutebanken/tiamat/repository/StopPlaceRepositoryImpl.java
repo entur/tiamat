@@ -21,6 +21,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -55,6 +56,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
     private static final int SCROLL_FETCH_SIZE = 100;
+
+    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     /**
      * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.
@@ -528,6 +531,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                              .setMaxResults(search.getPageable().getPageSize())
                                              .getResultList();
 
+
+        if(logger.isDebugEnabled()) {
+            final String generatedSql = basicFormatter.format(queryString.toString());
+            logger.debug("sql: {}\nSearch object: {}", generatedSql, search);
+        }
+
         int totalCnt = stopPlaces.size();
         if (totalCnt == search.getPageable().getPageSize()) {
             totalCnt = countStopPlacesWithEffectiveChangeInPeriod(search);
@@ -582,7 +591,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     "       ON spinner.parent_site_ref = p.netex_id " +
                     "       AND spinner.parent_site_ref_version = CAST(p.version AS text) " +
                     " WHERE " +
-                    "   ((spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "   (spinner.parent_stop_place IS FALSE AND (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
                     "       OR p.netex_id IS NOT NULL AND (p.from_date BETWEEN :from AND :to OR p.to_date BETWEEN :from AND :to )) " +
                     " GROUP BY spinner.netex_id " +
                     ") sub " +
