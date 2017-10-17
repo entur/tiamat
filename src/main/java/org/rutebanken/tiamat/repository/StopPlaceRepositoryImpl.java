@@ -591,8 +591,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     "       ON spinner.parent_site_ref = p.netex_id " +
                     "       AND spinner.parent_site_ref_version = CAST(p.version AS text) " +
                     " WHERE " +
-                    "   (spinner.parent_stop_place IS FALSE AND (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "   ((spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
                     "       OR p.netex_id IS NOT NULL AND (p.from_date BETWEEN :from AND :to OR p.to_date BETWEEN :from AND :to )) " +
+                    "   AND spinner.parent_stop_place IS FALSE " +
                     " GROUP BY spinner.netex_id " +
                     ") sub " +
                     "   ON sub.netex_id = sp.netex_id " +
