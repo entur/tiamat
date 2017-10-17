@@ -151,13 +151,17 @@ public class StreamingPublicationDeliveryTest {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));
         stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
         setField(IdentifiedEntity.class, "id", stopPlace, 1L);
+        stopPlace.setVersion(1L);
 
         StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("stop place 2 in publication delivery"));
         stopPlace2.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace2));
-        setField(IdentifiedEntity.class, "id", stopPlace, 2L);
+        setField(IdentifiedEntity.class, "id", stopPlace2, 2L);
+        stopPlace2.setVersion(3L);
 
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace)), new PathLinkEnd(new AddressablePlaceRefStructure(stopPlace2)));
         setField(IdentifiedEntity.class, "id", pathLink, 1L);
+        pathLink.setNetexId("NSR:PathLink:3");
+        pathLink.setVersion(2L);
 
         List<StopPlace> stopPlaces = new ArrayList<>(2);
         stopPlaces.add(stopPlace);
@@ -204,15 +208,15 @@ public class StreamingPublicationDeliveryTest {
         unmarshaller.unmarshal(new StringReader(xml));
     }
 
-    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
+    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException, SAXException {
         stream(stopPlaces, parkings, new ArrayList<>(), byteArrayOutputStream);
     }
 
-    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
+    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException, SAXException {
         stream(stopPlaces, parkings, pathLinks, new ArrayList<>(), byteArrayOutputStream);
     }
 
-    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, List<TopographicPlace> topographicPlaces, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException {
+    private void stream(List<StopPlace> stopPlaces, List<Parking> parkings, List<PathLink> pathLinks, List<TopographicPlace> topographicPlaces, ByteArrayOutputStream byteArrayOutputStream) throws InterruptedException, IOException, XMLStreamException, JAXBException, SAXException {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());

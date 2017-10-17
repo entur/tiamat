@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -93,7 +94,7 @@ public class ExportJobWorker implements Runnable {
         blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
-    private void exportToLocalZipFile(File localExportFile) throws IOException, InterruptedException, JAXBException, XMLStreamException {
+    private void exportToLocalZipFile(File localExportFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
         final FileOutputStream fileOutputStream = new FileOutputStream(localExportFile);
         final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
