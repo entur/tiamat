@@ -574,13 +574,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                        .setParameter("to",  Date.from(search.getTo())).getSingleResult()).intValue();
     }
 
-    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from stop_place sp inner join " +
-                                                                                      "(select spinner.netex_id, max(spinner.version) as maxVersion  from stop_place spinner " +
-                                                                                      "     left join stop_place p ON spinner.parent_site_ref = p.netex_id AND spinner.parent_site_ref_version = CAST(p.version as text) " +
-                                                                                      " where ((spinner.from_date between  :from and :to or spinner.to_date between  :from and :to )" +
-                                                                                        " or p.netex_id is not null and (p.from_date between  :from and :to or p.to_date between  :from and :to ))" +
-                                                                                      " group by  spinner.netex_id" +
-                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxVersion = sp.version";
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE =
+            " from stop_place sp INNER JOIN " +
+                    "(SELECT spinner.netex_id, MAX(spinner.version) AS maxVersion " +
+                    "   FROM stop_place spinner " +
+                    "     LEFT JOIN stop_place p " +
+                    "       ON spinner.parent_site_ref = p.netex_id " +
+                    "       AND spinner.parent_site_ref_version = CAST(p.version AS text) " +
+                    " WHERE " +
+                    "   ((spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "       OR p.netex_id IS NOT NULL AND (p.from_date BETWEEN :from AND :to OR p.to_date BETWEEN :from AND :to )) " +
+                    " GROUP BY spinner.netex_id " +
+                    ") sub " +
+                    "   ON sub.netex_id = sp.netex_id " +
+                    "   AND sub.maxVersion = sp.version";
 
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {
