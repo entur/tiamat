@@ -15,12 +15,14 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +71,11 @@ public class PublicationDeliveryExporter {
         logger.info("Finding changed stop places with search params: {}", search);
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
         logger.debug("Found {} changed stop places", stopPlacePage.getSize());
-        PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams), stopPlacePage.getSize(), stopPlacePage.getTotalElements(), stopPlacePage.hasNext());
+        PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(
+                exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams),
+                stopPlacePage.getSize(),
+                stopPlacePage.getTotalElements(),
+                stopPlacePage.hasNext());
         logger.debug("Returning publication delivery structure: {}", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
@@ -104,7 +110,7 @@ public class PublicationDeliveryExporter {
 
         boolean relevantTariffZones = ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
 
-        if(!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
+        if (!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
         }
 
@@ -114,7 +120,7 @@ public class PublicationDeliveryExporter {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        if(convertedSiteFrame.getStopPlaces() != null) {
+        if (convertedSiteFrame.getStopPlaces() != null) {
             if (relevantTariffZones) {
                 tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
             } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
@@ -124,7 +130,7 @@ public class PublicationDeliveryExporter {
             }
         }
 
-        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())){
+        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())) {
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 
