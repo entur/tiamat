@@ -54,12 +54,12 @@ public class EntitiesEvictor {
         Set<Object> evictEntities = new HashSet<>();
         try {
             session.getPersistenceContext().getEntitiesByKey().forEach((key, value) -> {
-                if (evictionClasses.contains(((EntityKey) key).getEntityName())) {
+                EntityKey entityKey = (EntityKey) key;
+                if (evictionClasses.contains(entityKey.getEntityName())) {
                     evictEntities.add(value);
-                }
-                if(!(entity instanceof TariffZone)) {
+                } else if(entity instanceof StopPlace && entityKey.getEntityName().equals(TariffZone.class.getName()) ) {
                     // Stop Places can have references to tariff zones that should be evicted
-                    // Whn the entity itself is of type tariff zone, it cannot be evicted.
+                    // When the entity itself is of type tariff zone, it cannot be evicted.
                     evictEntities.add(value);
                 }
             });
