@@ -25,12 +25,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntitiesEvictor {
 
     private static final Logger logger = LoggerFactory.getLogger(EntitiesEvictor.class);
 
-    private static final Set<String> evictionClasses = Sets.newHashSet(TariffZone.class.getName(), TariffZoneRef.class.getName(), Tag.class.getName(), AccessibilityLimitation.class.getName(), Quay.class.getName(), AlternativeName.class.getName());
+    /**
+     * Object types that should be evicted every time an entity is evicted.
+     * Usually we would use CascadeType DETACH but entities like Tag is not related other than a reference string.
+     */
+    private static final Set<String> evictionClasses = Sets.newHashSet(
+            TariffZone.class.getName(),
+            Tag.class.getName()
+    );
+
 
     private final SessionImpl session;
 
@@ -38,49 +47,36 @@ public class EntitiesEvictor {
         this.session = session;
     }
 
+    private final AtomicInteger calledCount = new AtomicInteger();
+    private final AtomicInteger evictCalledCount = new AtomicInteger();
+
     @SuppressWarnings("unchecked")
     public void evictKnownEntitiesFromSession(Object entity) {
-        if(session != null) {
-
-            if(entity instanceof Site_VersionStructure) {
-                Site_VersionStructure site = ((Site_VersionStructure) entity);
-
-                if(site.getTopographicPlace() != null) {
-                    session.evict(site.getTopographicPlace());
+        Set<Object> evictEntities = new HashSet<>();
+        try {
+            session.getPersistenceContext().getEntitiesByKey().forEach((key, value) -> {
+                if (evictionClasses.contains(((EntityKey) key).getEntityName())) {
+                    evictEntities.add(value);
                 }
+            });
 
-                if(site.getKeyValues() != null) {
-                    site.getKeyValues().values().forEach(value -> session.evict(value));
-                }
+            evictEntities.forEach(this::evictNonNull);
 
-                if(site.getPolygon() != null) {
-                    session.evict(site.getPolygon());
-                }
-
-                if(site instanceof SiteElement) {
-                    SiteElement stopPlace = (SiteElement) site;
-                    session.evict(stopPlace.getAccessibilityAssessment());
-                }
-            }
-
-            Set<Object> evictEntities = new HashSet<>();
-            try {
-
-
-                session.getPersistenceContext().getEntitiesByKey().forEach((key, value) -> {
-                    if(evictionClasses.contains(((EntityKey) key).getEntityName())) {
-                        evictEntities.add(value);
-                    }
-                });
-
-//                logger.info("Evicting {} entities", evictEntities.size());
-                evictEntities.forEach(session::evict);
-
-            } catch (Exception e) {
-                logger.warn("Error evicting entities {}", evictEntities, e);
-            }
-            session.evict(entity);
+        } catch (Exception e) {
+            logger.warn("Error evicting entities {}", evictEntities, e);
         }
-//        logger.info("{}", session.getStatistics());
+        evictNonNull(entity);
+        calledCount.incrementAndGet();
+
+        if (calledCount.get() % 1000 == 0) {
+            logger.info("Status: called count: {}. Evict called count: {}. {}", calledCount.get(), evictCalledCount.get(), session.getStatistics());
+        }
+    }
+
+    private void evictNonNull(Object objectToEvict) {
+        if (objectToEvict != null) {
+            session.evict(objectToEvict);
+            evictCalledCount.incrementAndGet();
+        }
     }
 }
