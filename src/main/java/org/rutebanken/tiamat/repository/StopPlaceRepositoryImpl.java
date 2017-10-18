@@ -595,6 +595,16 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     " WHERE " +
                     "   (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
                     "   AND spinner.parent_site_ref IS NULL " +
+                    // Make sure we do not fetch stop places that have become children of parent stops in "future" versions
+                    "   AND NOT EXISTS( " +
+                    "      SELECT sp2.id FROM stop_place sp2 " +
+                    "      INNER JOIN stop_place parent " +
+                    "        ON parent.netex_id = sp2.parent_site_ref " +
+                    "          AND cast(parent.version AS TEXT) = sp2.parent_site_ref_version " +
+                    "          AND (parent.from_date BETWEEN :from AND :to OR parent.to_date BETWEEN :from AND :to ) " +
+                    "        WHERE sp2.netex_id = spinner.netex_id " +
+                    "          AND sp2.version > spinner.version " +
+                    "  )" +
                     " GROUP BY spinner.netex_id " +
                     ") sub " +
                     "   ON sub.netex_id = sp.netex_id " +
