@@ -22,9 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Resolve and fetch child stop places from parent stop places from a list of stops
@@ -36,11 +34,10 @@ public class ChildStopPlacesFetcher {
 
     /**
      * Resolve children of parent stops.
-     * Parents without children are removed.
      * Existing children are removed (as they will be added from parent stops).
      *
      * @param stopPlaceList with parent or monomodal stops. List should not already contain children
-     * @return list of stops with children of parents resolved. Other monomodal stops are retained as is
+     * @return list of stops with children of parents resolved. Other monomodal stops are kept
      */
     public List<StopPlace> resolveChildren(List<StopPlace> stopPlaceList) {
 
