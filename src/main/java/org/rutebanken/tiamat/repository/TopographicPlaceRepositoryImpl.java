@@ -93,7 +93,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 		sqlQuery.addEntity(TopographicPlace.class);
 		sqlQuery.setReadOnly(true);
-		sqlQuery.setFetchSize(100);
+		sqlQuery.setFetchSize(1000);
 		sqlQuery.setCacheable(false);
 		ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
 		ScrollableResultIterator<TopographicPlace> topographicPlaceIterator = new ScrollableResultIterator<>(results, 100, session);

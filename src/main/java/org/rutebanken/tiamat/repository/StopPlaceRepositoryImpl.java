@@ -55,7 +55,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
-    private static final int SCROLL_FETCH_SIZE = 100;
+    private static final int SCROLL_FETCH_SIZE = 1000;
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
