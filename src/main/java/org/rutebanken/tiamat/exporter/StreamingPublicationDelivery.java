@@ -105,7 +105,7 @@ public class StreamingPublicationDelivery {
         AtomicInteger mappedTariffZonesCount = new AtomicInteger();
         AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
 
-        EntitiesEvicter entitiesEvicter = instantiateEvictor();
+        EntitiesEvictor entitiesEvictor = instantiateEvictor();
 
         logger.info("Async export initiated. Export params: {}", exportParams);
 
@@ -123,10 +123,10 @@ public class StreamingPublicationDelivery {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         logger.info("Preparing scrollable iterators");
-        prepareTopographicPlaces(exportParams, netexSiteFrame, mappedTopographicPlacesCount, stopPlacePrimaryIds, entitiesEvicter);
-        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvicter);
-        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvicter);
-        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvicter);
+        prepareTopographicPlaces(exportParams, netexSiteFrame, mappedTopographicPlacesCount, stopPlacePrimaryIds, entitiesEvictor);
+        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
+        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
+        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
@@ -137,7 +137,7 @@ public class StreamingPublicationDelivery {
         logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
     }
 
-    private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
+    private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
 
 
         Iterator<org.rutebanken.tiamat.model.TariffZone> tariffZoneIterator;
@@ -170,7 +170,7 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
+    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
 
         // ExportParams could be used for parkingExportMode.
 
@@ -189,7 +189,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
+    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if (!stopPlacePrimaryIds.isEmpty()) {
 
@@ -210,7 +210,7 @@ public class StreamingPublicationDelivery {
     }
 
 
-    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, AtomicInteger mappedTopographicPlacesCount, Set<Long> stopPlacePrimaryIds, EntitiesEvicter evicter) {
+    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, AtomicInteger mappedTopographicPlacesCount, Set<Long> stopPlacePrimaryIds, EntitiesEvictor evicter) {
 
         Iterator<TopographicPlace> relevantTopographicPlacesIterator;
 
@@ -242,10 +242,10 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private EntitiesEvicter instantiateEvictor() {
+    private EntitiesEvictor instantiateEvictor() {
         if (entityManager != null) {
             Session currentSession = entityManager.unwrap(Session.class);
-            return new EntitiesEvicter((SessionImpl) currentSession);
+            return new EntitiesEvictor((SessionImpl) currentSession);
         } else {
             return null;
         }

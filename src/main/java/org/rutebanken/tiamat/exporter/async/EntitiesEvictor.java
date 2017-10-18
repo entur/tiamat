@@ -26,15 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EntitiesEvicter {
+public class EntitiesEvictor {
 
-    private static final Logger logger = LoggerFactory.getLogger(EntitiesEvicter.class);
+    private static final Logger logger = LoggerFactory.getLogger(EntitiesEvictor.class);
 
     private static final Set<String> evictionClasses = Sets.newHashSet(TariffZone.class.getName(), TariffZoneRef.class.getName(), Tag.class.getName(), AccessibilityLimitation.class.getName(), Quay.class.getName(), AlternativeName.class.getName());
 
     private final SessionImpl session;
 
-    public EntitiesEvicter(SessionImpl session) {
+    public EntitiesEvictor(SessionImpl session) {
         this.session = session;
     }
 

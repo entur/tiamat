@@ -32,22 +32,22 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final Class<N> netexClass;
     private final long startTime = System.currentTimeMillis();
     private final AtomicInteger mappedCount;
-    private final EntitiesEvicter entitiesEvicter;
+    private final EntitiesEvictor entitiesEvictor;
 
     public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
         this.netexMapper = netexMapper;
         this.iterator = iterator;
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
-        this.entitiesEvicter = null;
+        this.entitiesEvictor = null;
     }
 
-    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount, EntitiesEvicter entitiesEvicter) {
+    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount, EntitiesEvictor entitiesEvictor) {
         this.iterator = iterator;
         this.netexMapper = netexMapper;
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
-        this.entitiesEvicter = entitiesEvicter;
+        this.entitiesEvictor = entitiesEvictor;
     }
 
     @Override
@@ -61,8 +61,8 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
 
         T next = iterator.next();
         N mapped = netexMapper.getFacade().map(next, netexClass);
-        if (entitiesEvicter != null) {
-            entitiesEvicter.evictKnownEntitiesFromSession(next);
+        if (entitiesEvictor != null) {
+            entitiesEvictor.evictKnownEntitiesFromSession(next);
 
         }
         logStatus();
