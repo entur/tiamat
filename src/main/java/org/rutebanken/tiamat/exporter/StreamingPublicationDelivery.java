@@ -16,12 +16,10 @@
 package org.rutebanken.tiamat.exporter;
 
 import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.validation.NeTExValidator;
-import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
-import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
-import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
-import org.rutebanken.tiamat.exporter.async.ParentTreeTopographicPlaceFetchingIterator;
+import org.rutebanken.tiamat.exporter.async.*;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -107,12 +105,7 @@ public class StreamingPublicationDelivery {
         AtomicInteger mappedTariffZonesCount = new AtomicInteger();
         AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
 
-        Session currentSession;
-        if (entityManager != null) {
-            currentSession = entityManager.unwrap(Session.class);
-        } else {
-            currentSession = null;
-        }
+        EntitiesEvicter entitiesEvicter = instantiateEvictor();
 
         logger.info("Async export initiated. Export params: {}", exportParams);
 
@@ -130,10 +123,10 @@ public class StreamingPublicationDelivery {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         logger.info("Preparing scrollable iterators");
-        prepareTopographicPlaces(exportParams, netexSiteFrame, mappedTopographicPlacesCount, stopPlacePrimaryIds, currentSession);
-        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, currentSession);
-        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, currentSession);
-        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, currentSession);
+        prepareTopographicPlaces(exportParams, netexSiteFrame, mappedTopographicPlacesCount, stopPlacePrimaryIds, entitiesEvicter);
+        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvicter);
+        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvicter);
+        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvicter);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
@@ -144,7 +137,7 @@ public class StreamingPublicationDelivery {
         logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
     }
 
-    private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, Session currentSession) {
+    private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
 
 
         Iterator<org.rutebanken.tiamat.model.TariffZone> tariffZoneIterator;
@@ -163,7 +156,7 @@ public class StreamingPublicationDelivery {
 
         if (tariffZoneIterator.hasNext()) {
             NetexMappingIterator<org.rutebanken.tiamat.model.TariffZone, TariffZone> tariffZoneMappingIterator =
-                    new NetexMappingIterator<>(netexMapper, tariffZoneIterator, TariffZone.class, mappedTariffZonesCount, currentSession);
+                    new NetexMappingIterator<>(netexMapper, tariffZoneIterator, TariffZone.class, mappedTariffZonesCount, evicter);
 
             List<TariffZone> tariffZones = new NetexMappingIteratorList<>(() -> tariffZoneMappingIterator);
 
@@ -177,7 +170,7 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame, Session currentSession) {
+    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
 
         // ExportParams could be used for parkingExportMode.
 
@@ -187,7 +180,7 @@ public class StreamingPublicationDelivery {
             logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
-                    Parking.class, mappedParkingCount, currentSession));
+                    Parking.class, mappedParkingCount, evicter));
 
             setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
@@ -196,7 +189,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, Session session) {
+    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, EntitiesEvicter evicter) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if (!stopPlacePrimaryIds.isEmpty()) {
 
@@ -206,7 +199,7 @@ public class StreamingPublicationDelivery {
 
             // Use Listening iterator to collect stop place IDs.
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
-            NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, session);
+            NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, evicter);
 
             List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> netexMappingIterator);
             setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
@@ -217,7 +210,7 @@ public class StreamingPublicationDelivery {
     }
 
 
-    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, AtomicInteger mappedTopographicPlacesCount, Set<Long> stopPlacePrimaryIds, Session session) {
+    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, AtomicInteger mappedTopographicPlacesCount, Set<Long> stopPlacePrimaryIds, EntitiesEvicter evicter) {
 
         Iterator<TopographicPlace> relevantTopographicPlacesIterator;
 
@@ -237,7 +230,7 @@ public class StreamingPublicationDelivery {
             ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
 
             NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, session);
+                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, evicter);
 
             List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
 
@@ -246,6 +239,15 @@ public class StreamingPublicationDelivery {
             netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
         } else {
             netexSiteFrame.setTopographicPlaces(null);
+        }
+    }
+
+    private EntitiesEvicter instantiateEvictor() {
+        if (entityManager != null) {
+            Session currentSession = entityManager.unwrap(Session.class);
+            return new EntitiesEvicter((SessionImpl) currentSession);
+        } else {
+            return null;
         }
     }
 
