@@ -84,7 +84,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	@Override
 	public Iterator<TopographicPlace> scrollTopographicPlaces() {
-		return scrollTopographicPlaces("SELECT t.* FROM topographic_place");
+		return scrollTopographicPlaces("SELECT t.* FROM topographic_place t");
 	}
 
 	public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {
@@ -122,7 +122,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
 
-		StringBuilder sql = new StringBuilder("select tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
+		StringBuilder sql = new StringBuilder("select  distinct on(tp.id) tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
 
 		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
 		sql.append(String.join(",", stopPlaceStringDbIds));

@@ -21,6 +21,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.hibernate.*;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -55,6 +56,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
     private static final int SCROLL_FETCH_SIZE = 100;
+
+    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     /**
      * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.
@@ -519,6 +522,11 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return getOneOrNull(typedQuery);
     }
 
+    /**
+     * Returns parent stops only if multi modal stops
+     * @param search
+     * @return
+     */
     public Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
         final String queryString = "select sp.* " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by sp.from_Date";
         List<StopPlace> stopPlaces = entityManager.createNativeQuery(queryString, StopPlace.class)
@@ -527,6 +535,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                              .setFirstResult(search.getPageable().getOffset())
                                              .setMaxResults(search.getPageable().getPageSize())
                                              .getResultList();
+
+
+        if(logger.isDebugEnabled()) {
+            final String generatedSql = basicFormatter.format(queryString.toString());
+            logger.debug("sql: {}\nSearch object: {}", generatedSql, search);
+        }
 
         int totalCnt = stopPlaces.size();
         if (totalCnt == search.getPageable().getPageSize()) {
@@ -574,13 +588,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                        .setParameter("to",  Date.from(search.getTo())).getSingleResult()).intValue();
     }
 
-    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE = " from stop_place sp inner join " +
-                                                                                      "(select spinner.netex_id, max(spinner.version) as maxVersion  from stop_place spinner " +
-                                                                                      "     left join stop_place p ON spinner.parent_site_ref = p.netex_id AND spinner.parent_site_ref_version = CAST(p.version as text) " +
-                                                                                      " where ((spinner.from_date between  :from and :to or spinner.to_date between  :from and :to )" +
-                                                                                        " or p.netex_id is not null and (p.from_date between  :from and :to or p.to_date between  :from and :to ))" +
-                                                                                      " group by  spinner.netex_id" +
-                                                                                      ") sub on sub.netex_id=sp.netex_id and sub.maxVersion = sp.version";
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE =
+            " from stop_place sp INNER JOIN " +
+                    "(SELECT spinner.netex_id, MAX(spinner.version) AS maxVersion " +
+                    "   FROM stop_place spinner " +
+                    " WHERE " +
+                    "   (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "   AND spinner.parent_site_ref IS NULL " +
+                    " GROUP BY spinner.netex_id " +
+                    ") sub " +
+                    "   ON sub.netex_id = sp.netex_id " +
+                    "   AND sub.maxVersion = sp.version";
 
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {

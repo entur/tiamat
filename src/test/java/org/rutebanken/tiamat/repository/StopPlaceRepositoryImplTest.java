@@ -963,7 +963,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(20), now.plusSeconds(20), new PageRequest(0, 10));
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch);
-        assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(childStop.getNetexId());
+        assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(parentStop.getNetexId());
+        assertThat(result.getContent()).extracting(StopPlace::getNetexId).doesNotContain(childStop.getNetexId());
     }
 
     @Test
