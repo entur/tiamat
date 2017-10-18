@@ -145,7 +145,7 @@ public class StreamingPublicationDelivery {
 
             logger.info("Preparing to scroll all tariff zones, regardless of version");
             tariffZoneIterator = tariffZoneRepository.scrollTariffZones();
-        } else if (exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+        } else if (exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
 
             logger.info("Preparing to scroll relevant tariff zones from stop place ids");
             tariffZoneIterator = tariffZoneRepository.scrollTariffZones(stopPlacePrimaryIds);
