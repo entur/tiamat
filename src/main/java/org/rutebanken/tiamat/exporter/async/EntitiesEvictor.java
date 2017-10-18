@@ -36,7 +36,6 @@ public class EntitiesEvictor {
      * Usually we would use CascadeType DETACH but entities like Tag is not related other than a reference string.
      */
     private static final Set<String> evictionClasses = Sets.newHashSet(
-            TariffZone.class.getName(),
             Tag.class.getName()
     );
 
@@ -56,6 +55,11 @@ public class EntitiesEvictor {
         try {
             session.getPersistenceContext().getEntitiesByKey().forEach((key, value) -> {
                 if (evictionClasses.contains(((EntityKey) key).getEntityName())) {
+                    evictEntities.add(value);
+                }
+                if(!(entity instanceof TariffZone)) {
+                    // Stop Places can have references to tariff zones that should be evicted
+                    // Whn the entity itself is of type tariff zone, it cannot be evicted.
                     evictEntities.add(value);
                 }
             });
