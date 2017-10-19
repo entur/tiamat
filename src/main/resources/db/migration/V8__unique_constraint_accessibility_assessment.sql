@@ -1,0 +1,1 @@
+ALTER TABLE accessibility_assessment ADD CONSTRAINT accessibility_assessment_netex_id_version_constraint UNIQUE (netex_id, version);
