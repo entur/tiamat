@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -304,4 +306,39 @@ public class Parking
         this.vehicleEntrances = value;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("accesses", accesses)
+                .add("publicCode", publicCode)
+                .add("label", label)
+                .add("parkingPaymentProcess", parkingPaymentProcess)
+                .add("paymentMethods", paymentMethods)
+                .add("defaultCurrency", defaultCurrency)
+                .add("currenciesAccepted", currenciesAccepted)
+                .add("cardsAccepted", cardsAccepted)
+                .add("paymentByMobile", paymentByMobile)
+                .add("vehicleEntrances", vehicleEntrances)
+                .add("pathLinks", pathLinks)
+                .add("pathJunctions", pathJunctions)
+                .add("navigationPaths", navigationPaths)
+                .add("parkingType", parkingType)
+                .add("parkingVehicleTypes", parkingVehicleTypes)
+                .add("parkingLayout", parkingLayout)
+                .add("numberOfParkingLevels", numberOfParkingLevels)
+                .add("principalCapacity", principalCapacity)
+                .add("totalCapacity", totalCapacity)
+                .add("overnightParkingPermitted", overnightParkingPermitted)
+                .add("prohibitedForHazardousMaterials", prohibitedForHazardousMaterials)
+                .add("rechargingAvailable", rechargingAvailable)
+                .add("secure", secure)
+                .add("realTimeOccupancyAvailable", realTimeOccupancyAvailable)
+                .add("parkingReservation", parkingReservation)
+                .add("bookingUrl", bookingUrl)
+                .add("freeParkingOutOfHours", freeParkingOutOfHours)
+                .add("parkingProperties", parkingProperties)
+                .add("parkingAreas", parkingAreas)
+                .toString();
+    }
 }
