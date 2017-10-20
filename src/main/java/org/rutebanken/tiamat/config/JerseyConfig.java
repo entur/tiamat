@@ -21,12 +21,10 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.rutebanken.tiamat.filter.LegacyLoggingFilter;
 import org.rutebanken.tiamat.rest.dto.*;
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
-import org.rutebanken.tiamat.rest.health.LegacyHealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,49 +165,5 @@ public class JerseyConfig {
         adminServicesJersey.getInitParameters().put("swagger.config.id", ADMIN_SWAGGER_CONFIG_ID);
         return adminServicesJersey;
     }
-
-    /***
-     * See NRP-1998. These endpoints are legacy and must be removed
-     */
-    @Bean
-    @Deprecated
-    public ServletRegistrationBean legacyJersey() {
-
-        Set<Class<?>> legacyResources = new HashSet<>();
-        legacyResources.add(LegacyExportResource.class);
-        legacyResources.add(LegacyAsyncExportResource.class);
-        legacyResources.add(LegacyImportResource.class);
-        legacyResources.add(GraphQLResource.class);
-        legacyResources.add(LegacyDtoStopPlaceResource.class);
-        legacyResources.add(LegacyDtoQuayResource.class);
-        legacyResources.add(LegacyDtoJbvCodeMappingResource.class);
-        legacyResources.add(LegacyHealthResource.class);
-
-        legacyResources.add(GeneralExceptionMapper.class);
-
-
-        ResourceConfig resourceConfig = new ResourceConfig(legacyResources);
-
-        ServletRegistrationBean adminServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
-        adminServicesJersey.addUrlMappings( "/jersey/*");
-        adminServicesJersey.setName("LegacyJersey");
-
-        adminServicesJersey.setLoadOnStartup(0);
-
-        return adminServicesJersey;
-    }
-
-
-    @Bean
-    public FilterRegistrationBean legacyLoggingFilterRegistration(@Autowired LegacyLoggingFilter legacyLoggingFilter) {
-
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(legacyLoggingFilter);
-        registration.addUrlPatterns("/*");
-        registration.setName("legacyFilter");
-        registration.setOrder(1);
-        return registration;
-    }
-
 
 }
