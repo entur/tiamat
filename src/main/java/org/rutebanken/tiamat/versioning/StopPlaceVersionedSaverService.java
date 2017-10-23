@@ -181,37 +181,23 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
      * @return modified StopPlace
      */
     public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
-        versionCreator.initiateOrIncrement(stopPlace);
-        initiateOrIncrementVersionsForRelations(stopPlace);
-        return stopPlace;
-    }
+        initiateOrIncrementSiteElementVersion(stopPlace);
+        initiateOrIncrementPlaceEquipment(stopPlace.getPlaceEquipments());
 
-    private void initiateOrIncrementVersionsForRelations(StopPlace stopPlaceToSave) {
-
-        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
-
-        if (stopPlaceToSave.getAlternativeNames() != null) {
-            versionCreator.initiateOrIncrementAlternativeNamesVersion(stopPlaceToSave.getAlternativeNames());
-        }
-
-        initiateOrIncrementPlaceEquipment(stopPlaceToSave.getPlaceEquipments());
-
-        if (stopPlaceToSave.getQuays() != null) {
-            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
-            stopPlaceToSave.getQuays().forEach(quay -> {
+        if (stopPlace.getQuays() != null) {
+            logger.debug("Initiating first versions for {} quays", stopPlace.getQuays().size());
+            stopPlace.getQuays().forEach(quay -> {
                 initiateOrIncrementSiteElementVersion(quay);
                 initiateOrIncrementPlaceEquipment(quay.getPlaceEquipments());
             });
         }
 
-        if(stopPlaceToSave.getChildren() != null) {
-            logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlaceToSave.getChildren().size(), stopPlaceToSave.getNetexId());
-            stopPlaceToSave.getChildren().forEach(child -> {
-                initiateOrIncrementSiteElementVersion(child);
-                initiateOrIncrementVersionsForRelations(child);
-                initiateOrIncrementPlaceEquipment(child.getPlaceEquipments());
-            });
+        if(stopPlace.getChildren() != null) {
+            logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlace.getChildren().size(), stopPlace.getNetexId());
+            stopPlace.getChildren().forEach(this::initiateOrIncrementVersions);
         }
+
+        return stopPlace;
     }
 
     private void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {
@@ -223,8 +209,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         }
     }
 
-
-
     /**
      * Needs to be done after parent stop place has been assigned an ID
      * @param parentStopPlace saved parent stop place
@@ -234,10 +218,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if(parentStopPlace.getChildren() != null) {
             count = parentStopPlace.getChildren().stream()
                 .map(child -> {
-                    SiteRefStructure siteRefStructure = new SiteRefStructure();
-                    siteRefStructure.setRef(parentStopPlace.getNetexId());
-                    siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
-                    child.setParentSiteRef(siteRefStructure);
+                    child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
                     return child;
 
             }).count();
@@ -248,8 +229,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     private void initiateOrIncrementSiteElementVersion(SiteElement siteElement) {
         versionCreator.initiateOrIncrement(siteElement);
         versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(siteElement);
-        if (siteElement.getAlternativeNames() != null) {
-            versionCreator.initiateOrIncrementAlternativeNamesVersion(siteElement.getAlternativeNames());
-        }
+        versionCreator.initiateOrIncrementAlternativeNamesVersion(siteElement.getAlternativeNames());
     }
 }
