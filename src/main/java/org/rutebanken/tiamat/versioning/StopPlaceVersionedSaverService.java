@@ -18,9 +18,7 @@ package org.rutebanken.tiamat.versioning;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
-import org.rutebanken.tiamat.model.SiteElement;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
@@ -142,19 +140,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         return newVersion;
     }
 
-    /**
-     * Increment versions for stop place with children.
-     * The object must have their netexId set, or else they will get an initial version
-     * @param stopPlace with quays and accessibility assessment
-     * @param validFrom
-     * @return modified StopPlace
-     */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
-        versionCreator.initiateOrIncrement(stopPlace);
-        initiateOrIncrementVersionsForChildren(stopPlace);
-        return stopPlace;
-    }
-
     private void updateQuaysCache(StopPlace stopPlace) {
         if(stopPlace.getQuays() != null) {
             stopPlaceByQuayOriginalIdFinder.updateCache(stopPlace.getNetexId(),
@@ -188,7 +173,20 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         });
     }
 
-    private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
+    /**
+     * Increment versions for stop place with children.
+     * The object must have their netexId set, or else they will get an initial version
+     * @param stopPlace with quays and accessibility assessment
+     * @param validFrom
+     * @return modified StopPlace
+     */
+    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
+        versionCreator.initiateOrIncrement(stopPlace);
+        initiateOrIncrementVersionsForRelations(stopPlace);
+        return stopPlace;
+    }
+
+    private void initiateOrIncrementVersionsForRelations(StopPlace stopPlaceToSave) {
 
         versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
 
@@ -196,10 +194,13 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             versionCreator.initiateOrIncrementAlternativeNamesVersion(stopPlaceToSave.getAlternativeNames());
         }
 
+        initiateOrIncrementPlaceEquipment(stopPlaceToSave.getPlaceEquipments());
+
         if (stopPlaceToSave.getQuays() != null) {
             logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
             stopPlaceToSave.getQuays().forEach(quay -> {
                 initiateOrIncrementSiteElementVersion(quay);
+                initiateOrIncrementPlaceEquipment(quay.getPlaceEquipments());
             });
         }
 
@@ -207,10 +208,22 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlaceToSave.getChildren().size(), stopPlaceToSave.getNetexId());
             stopPlaceToSave.getChildren().forEach(child -> {
                 initiateOrIncrementSiteElementVersion(child);
-                initiateOrIncrementVersionsForChildren(child);
+                initiateOrIncrementVersionsForRelations(child);
+                initiateOrIncrementPlaceEquipment(child.getPlaceEquipments());
             });
         }
     }
+
+    private void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {
+        if(placeEquipment != null) {
+            versionCreator.initiateOrIncrement(placeEquipment);
+            if(placeEquipment.getInstalledEquipment() != null) {
+                placeEquipment.getInstalledEquipment().forEach(versionCreator::initiateOrIncrement);
+            }
+        }
+    }
+
+
 
     /**
      * Needs to be done after parent stop place has been assigned an ID
