@@ -494,25 +494,6 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(stopPlace3.getPlaceEquipments().getInstalledEquipment()).isNotNull();
     }
 
-
-    @Test
-    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setVersion(1L);
-
-        Quay quay = new Quay();
-        quay.setVersion(1L);
-
-        stopPlace.getQuays().add(quay);
-
-        stopPlaceRepository.save(stopPlace);
-
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
-        assertThat(newVersion.getQuays()).isNotEmpty();
-        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
-    }
-
     @Test
     public void savingChildStopsShouldNotBeAllowed() {
         StopPlace stopPlace = new StopPlace();

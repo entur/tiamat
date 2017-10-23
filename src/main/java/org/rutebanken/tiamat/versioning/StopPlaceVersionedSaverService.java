@@ -104,7 +104,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         }
 
         // Save latest version
-        newVersion = initiateOrIncrementVersions(newVersion);
+        newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
@@ -174,42 +174,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     /**
-     * Increment versions for stop place with children.
-     * The object must have their netexId set, or else they will get an initial version
-     * @param stopPlace with quays and accessibility assessment
-     * @param validFrom
-     * @return modified StopPlace
-     */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
-        initiateOrIncrementSiteElementVersion(stopPlace);
-        initiateOrIncrementPlaceEquipment(stopPlace.getPlaceEquipments());
-
-        if (stopPlace.getQuays() != null) {
-            logger.debug("Initiating first versions for {} quays", stopPlace.getQuays().size());
-            stopPlace.getQuays().forEach(quay -> {
-                initiateOrIncrementSiteElementVersion(quay);
-                initiateOrIncrementPlaceEquipment(quay.getPlaceEquipments());
-            });
-        }
-
-        if(stopPlace.getChildren() != null) {
-            logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlace.getChildren().size(), stopPlace.getNetexId());
-            stopPlace.getChildren().forEach(this::initiateOrIncrementVersions);
-        }
-
-        return stopPlace;
-    }
-
-    private void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {
-        if(placeEquipment != null) {
-            versionCreator.initiateOrIncrement(placeEquipment);
-            if(placeEquipment.getInstalledEquipment() != null) {
-                placeEquipment.getInstalledEquipment().forEach(versionCreator::initiateOrIncrement);
-            }
-        }
-    }
-
-    /**
      * Needs to be done after parent stop place has been assigned an ID
      * @param parentStopPlace saved parent stop place
      */
@@ -226,9 +190,5 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.info("Updated {} childs with parent site refs", count);
     }
 
-    private void initiateOrIncrementSiteElementVersion(SiteElement siteElement) {
-        versionCreator.initiateOrIncrement(siteElement);
-        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(siteElement);
-        versionCreator.initiateOrIncrementAlternativeNamesVersion(siteElement.getAlternativeNames());
-    }
+
 }

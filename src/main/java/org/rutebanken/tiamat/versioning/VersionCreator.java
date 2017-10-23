@@ -126,38 +126,4 @@ public class VersionCreator {
 
         return type.cast(copy);
     }
-
-    private <T extends EntityInVersionStructure> T initiateFirstVersion(EntityInVersionStructure entityInVersionStructure, Class<T> type) {
-        logger.debug("Initiating first version for entity {}", entityInVersionStructure.getClass().getSimpleName());
-        entityInVersionStructure.setVersion(VersionIncrementor.INITIAL_VERSION);
-        return type.cast(entityInVersionStructure);
-    }
-
-    public void initiateOrIncrementAccessibilityAssesmentVersion(SiteElement siteElement) {
-        AccessibilityAssessment accessibilityAssessment = siteElement.getAccessibilityAssessment();
-
-        if (accessibilityAssessment != null) {
-            initiateOrIncrement(accessibilityAssessment);
-
-            if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
-                AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
-                initiateOrIncrement(limitation);
-            }
-        }
-    }
-
-    public void initiateOrIncrementAlternativeNamesVersion(List<AlternativeName> alternativeNames) {
-
-        if (alternativeNames != null) {
-            alternativeNames.forEach(alternativeName -> initiateOrIncrement(alternativeName));
-        }
-    }
-
-    public void initiateOrIncrement(EntityInVersionStructure entityInVersionStructure) {
-        if(entityInVersionStructure.getNetexId() == null) {
-            initiateFirstVersion(entityInVersionStructure, EntityInVersionStructure.class);
-        } else {
-            versionIncrementor.incrementVersion(entityInVersionStructure);
-        }
-    }
 }
