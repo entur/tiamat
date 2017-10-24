@@ -94,13 +94,13 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
      * That's why decimal degrees is used.
      * This join is using pointInTime. It should actually support allVersion=true and pointInTime=null.
      */
-    public static final String SQL_INNER_JOIN_NEARBY =
-            " INNER JOIN stop_place s2 " +
-                    "  ON s2.netex_id != s.netex_id " +
-                    "  AND s2.parent_stop_place = false " +
-                    "  AND s2.stop_place_type = s.stop_place_type " +
-                    "  AND ST_Distance(s.centroid, s2.centroid) < :nearbyThreshold " +
-                    "  AND s.name_value = s2.name_value ";
+    public static final String SQL_NEARBY =
+            " SELECT nearby.id FROM stop_place nearby " +
+                    "  WHERE nearby.netex_id != s.netex_id " +
+                    "  AND nearby.parent_stop_place = false " +
+                    "  AND nearby.stop_place_type = s.stop_place_type " +
+                    "  AND ST_Distance(s.centroid, nearby.centroid) < :nearbyThreshold " +
+                    "  AND s.name_value = nearby.name_value ";
                     // Together with distinct and nearby search, the next line slows everything down too much:
 //                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
 
@@ -115,20 +115,6 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         Map<String, Object> parameters = new HashMap<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
-
-        if(stopPlaceSearch.isWithNearbySimilarDuplicates()) {
-
-            String innerJoin = SQL_INNER_JOIN_NEARBY;
-            if(stopPlaceSearch.getPointInTime() == null) {
-
-                innerJoin += "  AND s2.version = (select max(s3.version) from stop_place s3 where s3.netex_id = s2.netex_id) ";
-            } else {
-                innerJoin += "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) ";
-            }
-            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
-//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
-            queryString.append(innerJoin);
-        }
 
         queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
@@ -282,6 +268,22 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             wheres.add("s.netex_id IN (" + SQL_DUPLICATED_QUAY_IMPORTED_IDS + ")");
         }
 
+        if (stopPlaceSearch.isWithNearbySimilarDuplicates()) {
+            operators.add("and");
+
+            String sqlNearby = "exists (" + SQL_NEARBY;
+
+            if(stopPlaceSearch.getPointInTime() == null) {
+                sqlNearby += "  AND nearby.version = (select max(s3.version) from stop_place s3 where s3.netex_id = nearby.netex_id) ";
+            } else {
+                sqlNearby += "  AND nearby.from_date <= :pointInTime AND (nearby.to_date is null OR nearby.to_date >= :pointInTime) ";
+            }
+            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
+//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
+
+            wheres.add(sqlNearby + ")");
+
+        }
 
         operators.add("and");
         wheres.add(SQL_NOT_PARENT_STOP_PLACE);
