@@ -49,9 +49,7 @@ public class StopPlaceMerger {
      * Properties to ignore on merge.
      */
     public static final String[] IGNORE_PROPERTIES_ON_MERGE = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
-
-    private static final int FUTURE_SECONDS_TERMINATION = 70;
-
+    
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
@@ -95,7 +93,7 @@ public class StopPlaceMerger {
 
         if (!isDryRun) {
             //Terminate validity of from-StopPlace
-            Instant newVersionFromDate = Instant.now().plusSeconds(FUTURE_SECONDS_TERMINATION);
+            Instant newVersionFromDate = Instant.now();
             validityUpdater.terminateVersion(fromStopPlaceToTerminate, newVersionFromDate.minusMillis(MILLIS_BETWEEN_VERSIONS));
 
             stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate, newVersionFromDate);
