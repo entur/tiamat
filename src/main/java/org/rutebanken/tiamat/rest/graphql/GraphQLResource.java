@@ -50,7 +50,6 @@ import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 @Component
 @Api
 @Path("graphql")
-@Transactional
 public class GraphQLResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQLResource.class);
