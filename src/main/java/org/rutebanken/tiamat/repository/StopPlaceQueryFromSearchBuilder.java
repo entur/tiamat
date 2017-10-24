@@ -216,7 +216,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         }
 
         if (stopPlaceSearch.isWithNearbySimilarDuplicates()) {
-            createAndAddNearbyCondition(stopPlaceSearch, operators, wheres, parameters);
+            createAndAddNearbyCondition(stopPlaceSearch, operators, wheres, parameters, orderByStatements);
         }
 
         operators.add("and");
@@ -306,7 +306,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 + formatRepeatedValue(pointInTimeQueryTemplate, parentStopPlaceAlias, 5) + "))";
     }
 
-    private void createAndAddNearbyCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, List<String> wheres, Map<String, Object> parameters) {
+    private void createAndAddNearbyCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, List<String> wheres, Map<String, Object> parameters, List<String> orderByStatements) {
         operators.add("and");
 
         String sqlNearby = "exists (" + SQL_NEARBY;
@@ -323,6 +323,8 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         // parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
 
         wheres.add(sqlNearby + ")");
+        orderByStatements.add("s.name_value");
+        orderByStatements.add("s.centroid");
     }
 
     private String formatRepeatedValue(String format, String value, int repeated) {
