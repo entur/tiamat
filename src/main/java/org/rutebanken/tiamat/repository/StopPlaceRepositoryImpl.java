@@ -72,7 +72,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
      */
     protected static final String SQL_LEFT_JOIN_PARENT_STOP =
-            "LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = CAST(p.version as text) ";
+            createLeftJoinParentStopQuery("p");
+
+    protected static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
+            "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND s.parent_site_ref_version = CAST(%s.version as text) ";
+
+    protected static String createLeftJoinParentStopQuery(String parentAlias) {
+        return String.format(SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE, Collections.nCopies(3, parentAlias).toArray());
+    }
 
     /**
      * When selecting stop places and there are multiple versions of the same stop place, and you only need the highest version by number.

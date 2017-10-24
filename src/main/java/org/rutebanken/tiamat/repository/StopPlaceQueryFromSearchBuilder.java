@@ -35,6 +35,7 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.createLeftJoinParentStopQuery;
 
 /**
  * Builds query from stop place search params
@@ -95,13 +96,15 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
      * This join is using pointInTime. It should actually support allVersion=true and pointInTime=null.
      */
     public static final String SQL_NEARBY =
-            " SELECT nearby.id FROM stop_place nearby " +
-                    "  WHERE nearby.netex_id != s.netex_id " +
-                    "  AND nearby.parent_stop_place = false " +
-                    "  AND nearby.stop_place_type = s.stop_place_type " +
-                    "  AND ST_Distance(s.centroid, nearby.centroid) < :nearbyThreshold " +
-                    "  AND s.name_value = nearby.name_value ";
-                    // Together with distinct and nearby search, the next line slows everything down too much:
+            "SELECT nearby.id " +
+            "FROM stop_place nearby " +
+            createLeftJoinParentStopQuery("nearbyparent") +
+            "WHERE nearby.netex_id != s.netex_id " +
+            " AND nearby.parent_stop_place = false " +
+            " AND nearby.stop_place_type = s.stop_place_type " +
+            " AND ST_Distance(s.centroid, nearby.centroid) < :nearbyThreshold " +
+            " AND s.name_value = nearby.name_value ";
+            // Together with distinct and nearby search, the next line slows everything down too much:
 //                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
 
 
@@ -230,10 +233,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
-
-            wheres.add("((p.id IS NULL AND " + formatRepeatedValue(pointInTimeQuery, "s", 5)+ ") or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
+            String pointInTimeCondition = createPointInTimeCondition("s", "p", stopPlaceSearch.getPointInTime());
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
+            wheres.add(pointInTimeCondition);
         } else if(stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
@@ -269,20 +271,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         }
 
         if (stopPlaceSearch.isWithNearbySimilarDuplicates()) {
-            operators.add("and");
-
-            String sqlNearby = "exists (" + SQL_NEARBY;
-
-            if(stopPlaceSearch.getPointInTime() == null) {
-                sqlNearby += "  AND nearby.version = (select max(s3.version) from stop_place s3 where s3.netex_id = nearby.netex_id) ";
-            } else {
-                sqlNearby += "  AND nearby.from_date <= :pointInTime AND (nearby.to_date is null OR nearby.to_date >= :pointInTime) ";
-            }
-            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
-//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
-
-            wheres.add(sqlNearby + ")");
-
+            addNearbyCondition(stopPlaceSearch, operators, wheres, parameters);
         }
 
         operators.add("and");
@@ -302,10 +291,37 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         final String generatedSql = basicFormatter.format(queryString.toString());
 
-
-            logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+        logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
 
         return Pair.of(generatedSql, parameters);
+    }
+
+    private String createPointInTimeCondition(String stopPlaceAlias, String parentStopPlaceAlias, Instant pointInTime) {
+        String pointInTimeQueryTemplate = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
+
+        return "((p.id IS NULL AND "
+                + formatRepeatedValue(pointInTimeQueryTemplate, stopPlaceAlias, 5)
+                + ") or (p.id IS NOT NULL AND "
+                + formatRepeatedValue(pointInTimeQueryTemplate, parentStopPlaceAlias, 5)+ "))";
+    }
+
+    private void addNearbyCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, List<String> wheres, Map<String, Object> parameters) {
+        operators.add("and");
+
+        String sqlNearby = "exists (" + SQL_NEARBY;
+
+        if(stopPlaceSearch.getPointInTime() == null) {
+            sqlNearby += "  AND nearby.version = (select max(s3.version) from stop_place s3 where s3.netex_id = nearby.netex_id) ";
+        } else {
+            sqlNearby += " AND " + createPointInTimeCondition("nearby", "nearbyparent", stopPlaceSearch.getPointInTime());
+            parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
+
+        }
+        parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
+
+        // parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
+
+        wheres.add(sqlNearby + ")");
     }
 
     private String formatRepeatedValue(String format, String value, int repeated) {
