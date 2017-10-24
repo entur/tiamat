@@ -314,7 +314,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() == null) {
             sqlNearby += "  AND nearby.version = (select max(s3.version) from stop_place s3 where s3.netex_id = nearby.netex_id) ";
         } else {
-            sqlNearby += " AND " + createPointInTimeCondition("nearby", "nearbyparent", stopPlaceSearch.getPointInTime());
+            sqlNearby += " AND " + createPointInTimeCondition("nearby", "nearbyparent");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
 
         }
