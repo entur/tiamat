@@ -39,6 +39,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
+
 @Component
 @Api
 @Path("graphql")
@@ -177,14 +179,14 @@ public class GraphQLResource {
             List<GraphQLError> errors = (List<GraphQLError>) content.get("errors");
 
             try {
-                errors.forEach(graphQLError -> {
+                content.put("errors", errors.stream().map(graphQLError -> {
                     if (graphQLError instanceof ExceptionWhileDataFetching) {
-                        ExceptionWhileDataFetching exceptionWhileDataFetching = (ExceptionWhileDataFetching) graphQLError;
-                        if (exceptionWhileDataFetching.getException() != null) {
-                            exceptionWhileDataFetching.getException().setStackTrace(new StackTraceElement[0]);
-                        }
+                        return new TiamatExceptionWhileDataFetching((ExceptionWhileDataFetching) graphQLError);
                     }
-                });
+                    else {
+                        return graphQLError;
+                    }
+                }).collect(toList()));
             } catch (Exception e) {
                 logger.warn("Exception caught during stacktrace removal", e);
             }
