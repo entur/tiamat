@@ -178,7 +178,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            String pointInTimeCondition = createPointInTimeCondition("s", "p", stopPlaceSearch.getPointInTime());
+            String pointInTimeCondition = createPointInTimeCondition("s", "p");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
             wheres.add(pointInTimeCondition);
         } else if (stopPlaceSearch.getVersionValidity() != null) {
