@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,45 +54,45 @@ public class MultiModalStopPlaceEditor {
     @Autowired
     private ReflectionAuthorizationService authorizationService;
 
+    @Autowired
+    private MutateLock mutateLock;
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
         return createMultiModalParentStopPlace(childStopPlaceIds, name, null, null, null);
     }
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
-        logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
 
-        verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
+        return mutateLock.executeInLock(() -> {
 
-        Instant fromDate = resolveFromDateOrNow(validBetween);
+            logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
 
-        // Fetch max versions of future child stop places
-        List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
+            verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
+            Instant fromDate = resolveFromDateOrNow(validBetween);
 
-        logger.info("Creating first version of parent stop place {}", name);
-        final StopPlace parentStopPlace = new StopPlace(name);
-        parentStopPlace.setParentStopPlace(true);
-        parentStopPlace.setValidBetween(validBetween);
-        parentStopPlace.setVersionComment(versionComment);
-        parentStopPlace.setCentroid(geoJsonPoint);
+            // Fetch max versions of future child stop places
+            List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
 
-        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
-        parentStopPlace.getChildren().addAll(childCopies);
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
-        Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
+            logger.info("Creating first version of parent stop place {}", name);
+            final StopPlace parentStopPlace = new StopPlace(name);
+            parentStopPlace.setParentStopPlace(true);
+            parentStopPlace.setValidBetween(validBetween);
+            parentStopPlace.setVersionComment(versionComment);
+            parentStopPlace.setCentroid(geoJsonPoint);
 
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
-        stopPlaceRepository.save(futureChildStopPlaces);
+            Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
+            parentStopPlace.getChildren().addAll(childCopies);
 
-        return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
-    }
+            Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
 
-    private void verifyChildrenIdsNotNullOrEmpty(List<String> childStopPlaceIds) {
-        if(childStopPlaceIds == null || childStopPlaceIds.isEmpty()) {
-            throw new IllegalArgumentException("The list of child stop place IDs cannot be empty.");
-        }
+            terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
+            stopPlaceRepository.save(futureChildStopPlaces);
+
+            return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
+        });
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
@@ -99,82 +100,96 @@ public class MultiModalStopPlaceEditor {
     }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds, ValidBetween validBetween, String versionComment) {
-        logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
-        verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
+        return mutateLock.executeInLock(() -> {
 
-        Instant fromDate = resolveFromDateOrNow(validBetween);
+            logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
-        StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
+            verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
 
-        if(parentStopPlace == null) {
-            throw new IllegalArgumentException("Cannot fetch parent stop place from ID: "+parentStopPlaceId);
-        }
+            Instant fromDate = resolveFromDateOrNow(validBetween);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
+            StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
 
-        List<String> alreadyAdded = childStopPlaceIds
-                .stream()
-                .filter(child -> parentStopPlace.getChildren() != null
-                        && parentStopPlace.getChildren().stream()
+            if (parentStopPlace == null) {
+                throw new IllegalArgumentException("Cannot fetch parent stop place from ID: " + parentStopPlaceId);
+            }
+
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
+
+            List<String> alreadyAdded = childStopPlaceIds
+                    .stream()
+                    .filter(child -> parentStopPlace.getChildren() != null
+                            && parentStopPlace.getChildren().stream()
                             .anyMatch(existingChild -> child.equals(existingChild.getNetexId())))
-                .collect(toList());
+                    .collect(toList());
 
-        if(!alreadyAdded.isEmpty()) {
-            throw new IllegalArgumentException("Child stop place(s) " + alreadyAdded + " is already added to " + parentStopPlace);
-        }
+            if (!alreadyAdded.isEmpty()) {
+                throw new IllegalArgumentException("Child stop place(s) " + alreadyAdded + " is already added to " + parentStopPlace);
+            }
 
-        StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+            StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
 
-        parentStopPlaceCopy.setValidBetween(validBetween);
-        parentStopPlaceCopy.setVersionComment(versionComment);
+            parentStopPlaceCopy.setValidBetween(validBetween);
+            parentStopPlaceCopy.setVersionComment(versionComment);
 
-        List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
+            List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
 
-        Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
-        Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
-        terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
-        stopPlaceRepository.save(futureChildStopPlaces);
+            Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
+            Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
+            terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
+            stopPlaceRepository.save(futureChildStopPlaces);
 
-        parentStopPlaceCopy.getChildren().addAll(childCopies);
-        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, fromDate);
+            parentStopPlaceCopy.getChildren().addAll(childCopies);
+            return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, fromDate);
+        });
     }
 
     public StopPlace removeFromMultiModalStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
-        logger.info("Remove childs: {} from parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
-        StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
+        return mutateLock.executeInLock(() -> {
 
-        if(parentStopPlace.getChildren().stream().noneMatch(stopPlace -> childStopPlaceIds.contains(stopPlace.getNetexId()))) {
-            throw new IllegalArgumentException("The specified list of IDs does not match the list of parent stop place's children" + parentStopPlaceId + ". Incoming child IDs: " + childStopPlaceIds);
-        }
+            logger.info("Remove childs: {} from parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, parentStopPlace.getChildren());
+            StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
 
-        Instant now = Instant.now();
-
-        StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
-
-        parentStopPlaceCopy.getChildren().forEach(stopToRemove -> {
-            if(childStopPlaceIds.contains(stopToRemove.getNetexId())) {
-                logger.info("Removing child stop place {} from parent stop place {}", stopToRemove.getNetexId(), parentStopPlace.getNetexId());
-                StopPlace stopToRemoveCopy = stopPlaceVersionedSaverService.createCopy(stopToRemove, StopPlace.class);
-                stopToRemoveCopy.setParentSiteRef(null);
-
-                if(stopToRemoveCopy.getName() == null) {
-                    logger.info("Setting name for removed child to parent's name: {} ({})", parentStopPlace.getName(), stopToRemoveCopy.getNetexId());
-                    stopToRemoveCopy.setName(parentStopPlace.getName());
-                }
-
-                stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy, now);
+            if (parentStopPlace.getChildren().stream().noneMatch(stopPlace -> childStopPlaceIds.contains(stopPlace.getNetexId()))) {
+                throw new IllegalArgumentException("The specified list of IDs does not match the list of parent stop place's children" + parentStopPlaceId + ". Incoming child IDs: " + childStopPlaceIds);
             }
+
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, parentStopPlace.getChildren());
+
+            Instant now = Instant.now();
+
+            StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+
+            parentStopPlaceCopy.getChildren().forEach(stopToRemove -> {
+                if (childStopPlaceIds.contains(stopToRemove.getNetexId())) {
+                    logger.info("Removing child stop place {} from parent stop place {}", stopToRemove.getNetexId(), parentStopPlace.getNetexId());
+                    StopPlace stopToRemoveCopy = stopPlaceVersionedSaverService.createCopy(stopToRemove, StopPlace.class);
+                    stopToRemoveCopy.setParentSiteRef(null);
+
+                    if (stopToRemoveCopy.getName() == null) {
+                        logger.info("Setting name for removed child to parent's name: {} ({})", parentStopPlace.getName(), stopToRemoveCopy.getNetexId());
+                        stopToRemoveCopy.setName(parentStopPlace.getName());
+                    }
+
+                    stopPlaceVersionedSaverService.saveNewVersion(stopToRemove, stopToRemoveCopy, now);
+                }
+            });
+
+            parentStopPlaceCopy.getChildren().removeIf(childStopPlace -> childStopPlaceIds.contains(childStopPlace.getNetexId()));
+
+            return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, now);
         });
+    }
 
-        parentStopPlaceCopy.getChildren().removeIf(childStopPlace -> childStopPlaceIds.contains(childStopPlace.getNetexId()));
-
-        return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, now);
+    private void verifyChildrenIdsNotNullOrEmpty(List<String> childStopPlaceIds) {
+        if(childStopPlaceIds == null || childStopPlaceIds.isEmpty()) {
+            throw new IllegalArgumentException("The list of child stop place IDs cannot be empty.");
+        }
     }
 
     private void validate(StopPlace potentialNewChild, Instant fromDate) {

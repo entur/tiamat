@@ -61,6 +61,8 @@ class ParkingUpdater implements DataFetcher {
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
 
+
+
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
