@@ -23,10 +23,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public interface QuayRepositoryCustom extends DataManagedObjectStructureRepository<Quay> {
 
     List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip);
+
+    Set<String> findUniqueQuayIds(Instant pointInTime);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForQuay();
 

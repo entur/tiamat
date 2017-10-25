@@ -41,7 +41,7 @@ import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 @Component
 @Api
 @Produces("application/json")
-@Path("mapping/quay")
+@Path("/")
 public class DtoQuayResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DtoQuayResource.class);
@@ -54,6 +54,7 @@ public class DtoQuayResource {
     }
 
     @GET
+    @Path("mapping/quay")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
                                         @QueryParam("includeStopType") boolean includeStopType) {
@@ -81,5 +82,13 @@ public class DtoQuayResource {
                 throw e;
             }
         }).build();
+    }
+
+
+    @GET
+    @Path("/id/quay")
+    @Produces("text/plain")
+    public String getIdUniqueQuayIds() {
+        return String.join("\n", quayRepository.findUniqueQuayIds(Instant.now()));
     }
 }

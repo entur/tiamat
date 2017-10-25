@@ -591,7 +591,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     /**
      * Expect no result beacuse stop type is not matching.
-     * https://test.rutebanken.org/api/tiamat/1.0/stop_place/?stopPlaceType=onstreetBus&countyReference=33&municipalityReference=2&
      */
     @Test
     public void findStopPlaceByCountyAndMunicipalityAndStopPlaceType() throws Exception {
@@ -617,7 +616,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     /**
      * Expect no result because name should be anded with other parts of query
-     * https://test.rutebanken.org/api/tiamat/1.0/stop_place/?q=lomsdalen&municipalityReference=2&countyReference=33
      */
     @Test
     public void findStopPlaceByCountyAndMunicipalityAndNameExpectNoResult() throws Exception {
@@ -965,7 +963,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(20), now.plusSeconds(20), new PageRequest(0, 10));
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch);
-        assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(childStop.getNetexId());
+        assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(parentStop.getNetexId());
+        assertThat(result.getContent()).extracting(StopPlace::getNetexId).doesNotContain(childStop.getNetexId());
     }
 
     @Test

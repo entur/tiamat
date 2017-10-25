@@ -61,4 +61,45 @@ public class ParentStopFetchingIteratorTest {
         StopPlace actualParent = parentStopFetchingIterator.next();
         assertThat(actualParent.getNetexId()).isEqualTo(parent.getNetexId());
     }
+
+    @Test
+    public void testParentAvoidDuplicatedParents() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setVersion(1L);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlace2.setNetexId("NSR:StopPlace:3");
+        stopPlace2.setVersion(1L);
+
+        StopPlace parent = new StopPlace();
+        parent.setNetexId("NSR:StopPlace:2");
+        parent.setVersion(1L);
+
+        stopPlace.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        stopPlace2.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+
+        when(stopPlaceRepository.findFirstByNetexIdAndVersion(parent.getNetexId(), parent.getVersion())).thenReturn(parent);
+
+        List<StopPlace> stopPlaces = Arrays.asList(stopPlace, stopPlace2);
+
+        ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaces.iterator(), stopPlaceRepository);
+
+        assertThat(parentStopFetchingIterator.hasNext()).isTrue();
+
+        StopPlace actual = parentStopFetchingIterator.next();
+        assertThat(actual.getNetexId()).isEqualTo(stopPlace.getNetexId());
+
+        assertThat(parentStopFetchingIterator.hasNext()).isTrue();
+
+        StopPlace actualParent = parentStopFetchingIterator.next();
+        assertThat(actualParent.getNetexId()).isEqualTo(parent.getNetexId());
+
+        StopPlace actual2 = parentStopFetchingIterator.next();
+        assertThat(actual2.getNetexId()).isEqualTo(stopPlace2.getNetexId());
+
+        assertThat(parentStopFetchingIterator.hasNext()).isFalse();
+
+    }
 }

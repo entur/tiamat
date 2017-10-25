@@ -35,6 +35,8 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     private static final Logger logger = LoggerFactory.getLogger(VersionedSaverService.class);
 
+    public static final int MILLIS_BETWEEN_VERSIONS = 1;
+
     @Autowired
     protected UsernameFetcher usernameFetcher;
 
@@ -46,6 +48,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     @Autowired
     protected VersionCreator versionCreator;
+
+    @Autowired
+    protected VersionIncrementor versionIncrementor;
 
     @Autowired
     protected ReflectionAuthorizationService authorizationService;
@@ -64,11 +69,11 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         return saveNewVersion(existingVersion, newVersion, Instant.now());
     }
 
-    protected T saveNewVersion(T existingVersion, T newVersion, Instant now) {
+    protected T saveNewVersion(T existingVersion, T newVersion, Instant defaultValidFrom) {
 
         validate(existingVersion, newVersion);
 
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, defaultValidFrom);
 
         if(existingVersion == null) {
             if (newVersion.getNetexId() != null) {
@@ -82,18 +87,18 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         authorizeNewVersion(existingVersion, newVersion);
 
         if(existingVersion == null) {
-            newVersion.setCreated(now);
+            newVersion.setCreated(defaultValidFrom);
             // If the new incoming version has the version attribute set, reset it.
             // For tiamat, this is the first time this entity with this ID is saved
             newVersion.setVersion(-1L);
         } else {
             newVersion.setVersion(existingVersion.getVersion());
-            newVersion.setChanged(now);
-            validityUpdater.terminateVersion(existingVersion, newVersionValidFrom);
+            newVersion.setChanged(defaultValidFrom);
+            validityUpdater.terminateVersion(existingVersion, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
             getRepository().save(existingVersion);
         }
 
-        versionCreator.initiateOrIncrement(newVersion);
+        versionIncrementor.initiateOrIncrement(newVersion);
 
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
         if(newVersion instanceof DataManagedObjectStructure) {

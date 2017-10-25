@@ -33,8 +33,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
-import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
-import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.*;
 
 /**
  * Builds query from stop place search params
@@ -94,14 +93,16 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
      * That's why decimal degrees is used.
      * This join is using pointInTime. It should actually support allVersion=true and pointInTime=null.
      */
-    public static final String SQL_INNER_JOIN_NEARBY =
-            " INNER JOIN stop_place s2 " +
-                    "  ON s2.netex_id != s.netex_id " +
-                    "  AND s2.parent_stop_place = false " +
-                    "  AND s2.stop_place_type = s.stop_place_type " +
-                    "  AND ST_Distance(s.centroid, s2.centroid) < :nearbyThreshold " +
-                    "  AND s.name_value = s2.name_value ";
-                    // Together with distinct and nearby search, the next line slows everything down too much:
+    public static final String SQL_NEARBY =
+            "SELECT nearby.id " +
+                    "FROM stop_place nearby " +
+                    createLeftJoinParentStopQuery("nearbyparent") +
+                    "WHERE nearby.netex_id != s.netex_id " +
+                    " AND nearby.parent_stop_place = false " +
+                    " AND nearby.stop_place_type = s.stop_place_type " +
+                    " AND ST_Distance(s.centroid, nearby.centroid) < :nearbyThreshold " +
+                    " AND s.name_value = nearby.name_value ";
+    // Together with distinct and nearby search, the next line slows everything down too much:
 //                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
 
 
@@ -116,20 +117,6 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
 
-        if(stopPlaceSearch.isWithNearbySimilarDuplicates()) {
-
-            String innerJoin = SQL_INNER_JOIN_NEARBY;
-            if(stopPlaceSearch.getPointInTime() == null) {
-
-                innerJoin += "  AND s2.version = (select max(s3.version) from stop_place s3 where s3.netex_id = s2.netex_id) ";
-            } else {
-                innerJoin += "  AND s2.from_date <= :pointInTime AND (s2.to_date is null OR s2.to_date >= :pointInTime) ";
-            }
-            parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
-//            parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
-            queryString.append(innerJoin);
-        }
-
         queryString.append(SQL_LEFT_JOIN_PARENT_STOP);
 
         boolean hasIdFilter = stopPlaceSearch.getNetexIdList() != null && !stopPlaceSearch.getNetexIdList().isEmpty();
@@ -139,60 +126,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
             parameters.put("netexIdList", stopPlaceSearch.getNetexIdList());
         } else {
             if (stopPlaceSearch.getQuery() != null) {
-
-                operators.add("and");
-
-                if(stopPlaceSearch.getQuery().startsWith("#") && !stopPlaceSearch.getQuery().contains(" ")) {
-                    // Seems like we are searching for tags
-                    String hashRemoved = stopPlaceSearch.getQuery().substring(1);
-                    parameters.put("query", hashRemoved);
-                    wheres.add("(s." + SQL_SINGLE_TAG_QUERY + " OR p." + SQL_SINGLE_TAG_QUERY + ")");
-
-                } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
-                    String netexId = stopPlaceSearch.getQuery();
-
-                    String netexIdType = NetexIdHelper.extractIdType(netexId);
-                    parameters.put("query", stopPlaceSearch.getQuery());
-
-                    if (!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
-
-                        // Detect non NSR NetexId and search in original ID
-                        parameters.put("originalIdKey", ORIGINAL_ID_KEY);
-                        parameters.put("mergedIdKey", MERGED_ID_KEY);
-
-                        if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            String keyValuesQuery = "id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)";
-                            wheres.add("(s."+keyValuesQuery +" OR p."+keyValuesQuery+")");
-                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where (qkv.key_values_key = :originalIdKey OR qkv.key_values_key = :mergedIdKey) and v.items = :query)");
-                        } else {
-                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
-                        }
-                    } else {
-                        // NSR ID detected
-
-                        if (StopPlace.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("(s.netex_id = :query or p.netex_id = :query)");
-                        } else if (Quay.class.getSimpleName().equals(netexIdType)) {
-                            wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
-                        } else {
-                            logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
-                        }
-                    }
-                } else {
-                    parameters.put("query", stopPlaceSearch.getQuery());
-
-                    final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
-                    final String containsLowerMatchQuerySql =  "concat('%', lower(:query), '%') ";
-                    final String orNameMatchInParentStopSql = "or lower(p.name_value) like ";
-                    if (stopPlaceSearch.getQuery().length() <= 3) {
-                        wheres.add("(lower(s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
-                    } else {
-                        wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
-                    }
-
-                    orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
-                }
+                createAndAddQueryCondition(stopPlaceSearch, operators, parameters, wheres, orderByStatements);
             }
 
             if (stopPlaceSearch.getStopTypeEnumerations() != null && !stopPlaceSearch.getStopTypeEnumerations().isEmpty()) {
@@ -201,7 +135,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 operators.add("and");
             }
 
-            if(stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
+            if (stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
                 wheres.add("(s." + SQL_MULTIPLE_TAG_QUERY + " OR p." + SQL_MULTIPLE_TAG_QUERY + ")");
                 parameters.put("tags", stopPlaceSearch.getTags());
                 operators.add("and");
@@ -244,11 +178,10 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
-            String pointInTimeQuery = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
-
-            wheres.add("((p.id IS NULL AND " + formatRepeatedValue(pointInTimeQuery, "s", 5)+ ") or (p.id IS NOT NULL AND " + formatRepeatedValue(pointInTimeQuery, "p", 5)+ "))");
+            String pointInTimeCondition = createPointInTimeCondition("s", "p");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
-        } else if(stopPlaceSearch.getVersionValidity() != null) {
+            wheres.add(pointInTimeCondition);
+        } else if (stopPlaceSearch.getVersionValidity() != null) {
             operators.add("and");
 
             if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
@@ -259,7 +192,7 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
                 parameters.put("pointInTime", Date.from(Instant.now()));
                 String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
                 String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
-                wheres.add("((" + futureQuery + ") or (" + parentFutureQuery +"))");
+                wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
             }
         }
 
@@ -275,13 +208,16 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {
             operators.add("and");
-            if(stopPlaceSearch.getPointInTime() == null) {
+            if (stopPlaceSearch.getPointInTime() == null) {
                 throw new IllegalArgumentException("pointInTime must be set when searching for duplicated quay imported IDs");
             }
             parameters.put("originalIdKey", ORIGINAL_ID_KEY);
             wheres.add("s.netex_id IN (" + SQL_DUPLICATED_QUAY_IMPORTED_IDS + ")");
         }
 
+        if (stopPlaceSearch.isWithNearbySimilarDuplicates()) {
+            createAndAddNearbyCondition(stopPlaceSearch, operators, wheres, parameters, orderByStatements);
+        }
 
         operators.add("and");
         wheres.add(SQL_NOT_PARENT_STOP_PLACE);
@@ -300,15 +236,100 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
 
         final String generatedSql = basicFormatter.format(queryString.toString());
 
-
-            logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+        logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
 
         return Pair.of(generatedSql, parameters);
     }
 
+    private void createAndAddQueryCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, Map<String, Object> parameters, List<String> wheres, List<String> orderByStatements) {
+        operators.add("and");
+
+        if (stopPlaceSearch.getQuery().startsWith("#") && !stopPlaceSearch.getQuery().contains(" ")) {
+            // Seems like we are searching for tags
+            String hashRemoved = stopPlaceSearch.getQuery().substring(1);
+            parameters.put("query", hashRemoved);
+            wheres.add("(s." + SQL_SINGLE_TAG_QUERY + " OR p." + SQL_SINGLE_TAG_QUERY + ")");
+
+        } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
+            String netexId = stopPlaceSearch.getQuery();
+
+            String netexIdType = NetexIdHelper.extractIdType(netexId);
+            parameters.put("query", stopPlaceSearch.getQuery());
+
+            if (!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
+
+                // Detect non NSR NetexId and search in original ID
+                parameters.put("originalIdKey", ORIGINAL_ID_KEY);
+                parameters.put("mergedIdKey", MERGED_ID_KEY);
+
+                if (StopPlace.class.getSimpleName().equals(netexIdType)) {
+                    String keyValuesQuery = "id in (select spkv.stop_place_id from stop_place_key_values spkv inner join value_items v on spkv.key_values_id = v.value_id where (spkv.key_values_key = :originalIdKey OR spkv.key_values_key = :mergedIdKey) and v.items = :query)";
+                    wheres.add("(s." + keyValuesQuery + " OR p." + keyValuesQuery + ")");
+                } else if (Quay.class.getSimpleName().equals(netexIdType)) {
+                    wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where (qkv.key_values_key = :originalIdKey OR qkv.key_values_key = :mergedIdKey) and v.items = :query)");
+                } else {
+                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                }
+            } else {
+                // NSR ID detected
+
+                if (StopPlace.class.getSimpleName().equals(netexIdType)) {
+                    wheres.add("(s.netex_id = :query or p.netex_id = :query)");
+                } else if (Quay.class.getSimpleName().equals(netexIdType)) {
+                    wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
+                } else {
+                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                }
+            }
+        } else {
+            parameters.put("query", stopPlaceSearch.getQuery());
+
+            final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
+            final String containsLowerMatchQuerySql = "concat('%', lower(:query), '%') ";
+            final String orNameMatchInParentStopSql = "or lower(p.name_value) like ";
+            if (stopPlaceSearch.getQuery().length() <= 3) {
+                wheres.add("(lower(s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
+            } else {
+                wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
+            }
+
+            orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
+        }
+    }
+
+    private String createPointInTimeCondition(String stopPlaceAlias, String parentStopPlaceAlias) {
+        String pointInTimeQueryTemplate = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";
+
+        return "((p.id IS NULL AND "
+                + formatRepeatedValue(pointInTimeQueryTemplate, stopPlaceAlias, 5)
+                + ") or (p.id IS NOT NULL AND "
+                + formatRepeatedValue(pointInTimeQueryTemplate, parentStopPlaceAlias, 5) + "))";
+    }
+
+    private void createAndAddNearbyCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, List<String> wheres, Map<String, Object> parameters, List<String> orderByStatements) {
+        operators.add("and");
+
+        String sqlNearby = "exists (" + SQL_NEARBY;
+
+        if (stopPlaceSearch.getPointInTime() == null) {
+            sqlNearby += "  AND nearby.version = (select max(s3.version) from stop_place s3 where s3.netex_id = nearby.netex_id) ";
+        } else {
+            sqlNearby += " AND " + createPointInTimeCondition("nearby", "nearbyparent");
+            parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
+
+        }
+        parameters.put("nearbyThreshold", NEARBY_DECIMAL_DEGREES);
+
+        // parameters.put("similarityThreshold", NEARBY_NAME_SIMILARITY);
+
+        wheres.add(sqlNearby + ")");
+        orderByStatements.add("s.name_value");
+        orderByStatements.add("s.centroid");
+    }
+
     private String formatRepeatedValue(String format, String value, int repeated) {
         Object[] args = new Object[repeated];
-        for(int i = 0; i < repeated; i++) {
+        for (int i = 0; i < repeated; i++) {
             args[i] = value;
         }
         return String.format(format, args);

@@ -101,7 +101,7 @@ public class MultiModalityOperationsBuilder {
                 .build());
 
         List<GraphQLInputObjectField> addOrRemoveChildMultiModalStopPlaceFields = new ArrayList<>();
-        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(PARENT_SITE_REF).type(GraphQLString).build());
+        addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(PARENT_SITE_REF).type(new GraphQLNonNull(GraphQLString)).build());
         addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString).build());
         addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType).build());
         addOrRemoveChildMultiModalStopPlaceFields.add(newInputObjectField().name(STOP_PLACE_IDS).type(new GraphQLNonNull(new GraphQLList(GraphQLString))).build());
@@ -147,7 +147,7 @@ public class MultiModalityOperationsBuilder {
                 .type(parentStopPlaceObjectType)
                 .name(REMOVE_FROM_MULTIMODAL_STOPPLACE)
                 .description("Removes a StopPlace from an existing ParentStopPlace")
-                .argument(newArgument().name(PARENT_SITE_REF).type(GraphQLString))
+                .argument(newArgument().name(PARENT_SITE_REF).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLList(GraphQLString)))
                 .dataFetcher(environment -> parentStopPlaceEditor.removeFromMultiModalStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID)))
                 .build());

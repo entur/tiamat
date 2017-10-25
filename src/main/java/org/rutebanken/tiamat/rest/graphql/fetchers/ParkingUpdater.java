@@ -93,6 +93,7 @@ class ParkingUpdater implements DataFetcher {
         if (isUpdated) {
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedParking));
 
+            logger.info("Saving new version of parking {}", updatedParking);
             updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
 
             return updatedParking;
