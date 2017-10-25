@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.service.stopplace;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,22 +39,27 @@ public class StopPlaceReopener {
     @Autowired
     private UsernameFetcher usernameFetcher;
 
+    @Autowired
+    private MutateLock mutateLock;
+
     public StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
 
-        logger.info("User {} is reopening stop place {} with comment {}", usernameFetcher.getUserNameForAuthenticatedUser(), stopPlaceId, versionComment);
+        return mutateLock.executeInLock(() -> {
+            logger.info("User {} is reopening stop place {} with comment {}", usernameFetcher.getUserNameForAuthenticatedUser(), stopPlaceId, versionComment);
 
-        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+            StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
 
-        if (stopPlace != null) {
+            if (stopPlace != null) {
 
-            // TODO: Assert that version of stop place is not currently "open"
+                // TODO: Assert that version of stop place is not currently "open"
 
-            StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-            nextVersionStopPlace.setVersionComment(versionComment);
+                StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+                nextVersionStopPlace.setVersionComment(versionComment);
 
-            return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
-        }
-        return stopPlace;
+                return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);
+            }
+            return stopPlace;
+        });
     }
 
 }
