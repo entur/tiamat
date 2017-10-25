@@ -61,6 +61,7 @@ public class MultiModalStopPlaceEditor {
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
         logger.info("Create parent stop place with name {} and child stop place {}", name, childStopPlaceIds);
 
+        verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
 
         Instant fromDate = resolveFromDateOrNow(validBetween);
 
@@ -87,6 +88,11 @@ public class MultiModalStopPlaceEditor {
         return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
     }
 
+    private void verifyChildrenIdsNotNullOrEmpty(List<String> childStopPlaceIds) {
+        if(childStopPlaceIds == null || childStopPlaceIds.isEmpty()) {
+            throw new IllegalArgumentException("The list of child stop place IDs cannot be empty.");
+        }
+    }
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds) {
         return addToMultiModalParentStopPlace(parentStopPlaceId, childStopPlaceIds, null, null);
@@ -94,6 +100,8 @@ public class MultiModalStopPlaceEditor {
 
     public StopPlace addToMultiModalParentStopPlace(String parentStopPlaceId, List<String> childStopPlaceIds, ValidBetween validBetween, String versionComment) {
         logger.info("Add childs: {} to parent stop place {}", childStopPlaceIds, parentStopPlaceId);
+
+        verifyChildrenIdsNotNullOrEmpty(childStopPlaceIds);
 
         Instant fromDate = resolveFromDateOrNow(validBetween);
 
