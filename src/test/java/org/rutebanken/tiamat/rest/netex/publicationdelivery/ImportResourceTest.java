@@ -19,16 +19,9 @@ import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.PrivateCodeStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.Quays_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopTypeEnumeration;
-import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.ImportParams;
+import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
@@ -42,13 +35,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ImportResourceTest extends TiamatIntegrationTest {
@@ -661,7 +653,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
-        OffsetDateTime changedDate = actualStopPlace.getChanged();
+        LocalDateTime changedDate = actualStopPlace.getChanged();
 
         // Add a Quay to the stop place so that it will be updated.
         stopPlace.withQuays(
@@ -1002,8 +994,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
-        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        LocalDateTime firstValidFrom = LocalDateTime.now().minusDays(5);
+        LocalDateTime secondValidFrom = LocalDateTime.now().minusDays(3);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")

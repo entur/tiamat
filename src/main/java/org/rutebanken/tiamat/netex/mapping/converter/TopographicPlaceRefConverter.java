@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
@@ -72,7 +72,7 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
     @Override
     public TopographicPlaceRefStructure convertFrom(TopographicPlace topographicPlace, Type<TopographicPlaceRefStructure> type, MappingContext mappingContext) {
         TopographicPlaceRefStructure topographicPlaceRefStructure = new TopographicPlaceRefStructure()
-                .withCreated(OffsetDateTime.now())
+                .withCreated(LocalDateTime.now())
                 .withRef(topographicPlace.getNetexId())
                 .withVersion(String.valueOf(topographicPlace.getVersion()));
 

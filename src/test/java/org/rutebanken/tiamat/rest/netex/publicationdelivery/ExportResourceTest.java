@@ -36,10 +36,9 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
@@ -93,8 +92,8 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
-        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        LocalDateTime firstValidFrom = LocalDateTime.now().minusDays(5);
+        LocalDateTime secondValidFrom = LocalDateTime.now().minusDays(3);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")
@@ -126,7 +125,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void exportStopPlacesWithEffectiveChangedInPeriod() throws Exception {
-        OffsetDateTime validFrom = OffsetDateTime.now().minusDays(3);
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")

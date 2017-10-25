@@ -66,10 +66,10 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
         org.rutebanken.netex.model.ValidBetween netexValidBetween = new org.rutebanken.netex.model.ValidBetween();
 
         if (validBetween.getFromDate() != null) {
-            netexValidBetween.setFromDate(validBetween.getFromDate().atZone(exportTimeZone.getDefaultTimeZone()).toOffsetDateTime());
+            netexValidBetween.setFromDate(validBetween.getFromDate().atZone(exportTimeZone.getDefaultTimeZone()).toLocalDateTime());
         }
         if (validBetween.getToDate() != null) {
-            netexValidBetween.setToDate(validBetween.getToDate().atZone(exportTimeZone.getDefaultTimeZone()).toOffsetDateTime());
+            netexValidBetween.setToDate(validBetween.getToDate().atZone(exportTimeZone.getDefaultTimeZone()).toLocalDateTime());
         }
 
         return Arrays.asList(netexValidBetween);

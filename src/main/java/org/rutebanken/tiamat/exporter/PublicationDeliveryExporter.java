@@ -32,7 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -91,7 +91,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(ANY_VERSION)
-                .withPublicationTimestamp(OffsetDateTime.now())
+                .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
         return publicationDeliveryStructure;
     }
@@ -112,9 +112,7 @@ public class PublicationDeliveryExporter {
     }
 
 
-
     /**
-     *
      * @param stopPlaces
      * @param exportParams
      * @param multiModalFetchMode if parents or children should be fetched
@@ -123,13 +121,13 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams, MultiModalFetchMode multiModalFetchMode) {
         logger.info("Preparing publication delivery export");
 
-        if(multiModalFetchMode == null) {
+        if (multiModalFetchMode == null) {
             multiModalFetchMode = MultiModalFetchMode.PARENTS;
         }
 
-        if(multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
+        if (multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
             stopPlaces = childStopPlacesFetcher.resolveChildren(stopPlaces);
-        } else if( multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)){
+        } else if (multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)) {
             stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
         }
 
