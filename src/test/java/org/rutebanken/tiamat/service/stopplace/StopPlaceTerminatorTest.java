@@ -51,6 +51,26 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
 
     @Transactional
     @Test
+    public void testTerminateStopPlaceAdjustToNowTime() {
+
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
+        String stopPlaceNetexId = savedStopPlace.getNetexId();
+
+        // When in the past, now time should be used
+        Instant now = Instant.now();
+        Instant timeOfTermination = now.minusSeconds(20);
+
+        System.out.println("Terminate at " + timeOfTermination);
+        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop");
+
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
+        assertThat(terminatedStopPlace.getValidBetween().getToDate())
+                .isAfter(timeOfTermination)
+                .isAfterOrEqualTo(now);
+    }
+
+    @Transactional
+    @Test
     public void testCannotTerminateChild() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
