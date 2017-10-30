@@ -93,8 +93,8 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
-        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        OffsetDateTime firstValidFrom = OffsetDateTime.now().plusSeconds(10);
+        OffsetDateTime secondValidFrom = OffsetDateTime.now().plusSeconds(12);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")
