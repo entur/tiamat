@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
+import java.util.TimeZone;
+
 /**
  * Default time zone for exported dates.
  *
@@ -36,11 +38,10 @@ public class ExportTimeZone {
     private ZoneId defaultTimeZone;
 
 
-    public ZoneId getDefaultTimeZone() {
+    public ZoneId getDefaultTimeZoneId() {
         if (defaultTimeZone==null){
             defaultTimeZone=ZoneId.of(defaultTimeZoneName);
         }
         return defaultTimeZone;
     }
-
 }

@@ -38,6 +38,6 @@ public class ZonedDateTimeInstantConverter extends BidirectionalConverter<ZonedD
 
     @Override
     public ZonedDateTime convertFrom(Instant instant, Type<ZonedDateTime> type, MappingContext mappingContext) {
-        return instant.atZone(exportTimeZone.getDefaultTimeZone());
+        return instant.atZone(exportTimeZone.getDefaultTimeZoneId());
     }
 }

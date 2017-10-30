@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +41,21 @@ public class TiamatSiteFrameExporter {
     private final PathLinkRepository pathLinkRepository;
 
     @Autowired
-    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository) {
+    private final ExportTimeZone exportTimeZone;
+
+
+    @Autowired
+    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository, ExportTimeZone exportTimeZone) {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
         this.pathLinkRepository = pathLinkRepository;
+        this.exportTimeZone = exportTimeZone;
     }
 
 
     public org.rutebanken.tiamat.model.SiteFrame createTiamatSiteFrame(String description) {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
+        setFrameDefaultLocale(siteFrame);
         siteFrame.setDescription(new MultilingualStringEntity(description));
         // siteFrame.setCreated(Instant.now()); // Disabled because of OffsetDateTimeInstantConverter issues during test
         siteFrame.setVersion(1L);
@@ -92,4 +99,15 @@ public class TiamatSiteFrameExporter {
             logger.info("There are no path links to export with the current filter");
         }
     }
+
+
+    public void setFrameDefaultLocale(SiteFrame siteFrame) {
+
+        LocaleStructure localeStructure = new LocaleStructure();
+        localeStructure.setTimeZone(exportTimeZone.getDefaultTimeZoneId().toString());
+        VersionFrameDefaultsStructure versionFrameDefaultsStructure = new VersionFrameDefaultsStructure();
+        versionFrameDefaultsStructure.setDefaultLocale(localeStructure);
+        siteFrame.setFrameDefaults(versionFrameDefaultsStructure);
+    }
+
 }

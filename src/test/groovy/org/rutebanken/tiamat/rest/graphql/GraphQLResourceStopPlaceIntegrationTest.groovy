@@ -992,10 +992,10 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         Instant now = Instant.now()
 
         // Mutate stop place. The new version should have valid from now.
-        String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZone()))
+        String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZoneId()))
 
         // The new version should be terminated in the future.
-        String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZone()))
+        String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZoneId()))
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +

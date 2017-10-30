@@ -186,6 +186,7 @@ public class NetexMapper {
         converters.add(new DestinationDisplayViewsConverter());
         converters.add(new ZonedDateTimeInstantConverter());
         converters.add(new OffsetDateTimeInstantConverter());
+        converters.add(new LocalDateTimeInstantConverter());
         converters.add(new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory()));
         converters.add(new KeyValuesToKeyListConverter());
         converters.add(new AccessibilityLimitationsListConverter());

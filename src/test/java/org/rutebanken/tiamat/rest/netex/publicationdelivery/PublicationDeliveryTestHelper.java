@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public class PublicationDeliveryTestHelper {
 
     public PublicationDeliveryStructure publicationDelivery(SiteFrame siteFrame) {
         return new PublicationDeliveryStructure()
-                .withPublicationTimestamp(OffsetDateTime.now())
+                .withPublicationTimestamp(LocalDateTime.now())
                 .withVersion("1")
                 .withParticipantRef("test")
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()

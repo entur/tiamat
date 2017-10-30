@@ -39,6 +39,6 @@ public class OffsetDateTimeInstantConverter extends BidirectionalConverter<Offse
 
     @Override
     public OffsetDateTime convertFrom(Instant instant, Type<OffsetDateTime> type, MappingContext mappingContext) {
-        return instant.atZone(exportTimeZone.getDefaultTimeZone()).toOffsetDateTime();
+        return instant.atZone(exportTimeZone.getDefaultTimeZoneId()).toOffsetDateTime();
     }
 }
