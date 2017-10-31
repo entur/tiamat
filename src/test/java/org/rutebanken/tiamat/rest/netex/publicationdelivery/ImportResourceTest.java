@@ -994,8 +994,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        LocalDateTime firstValidFrom = LocalDateTime.now().minusDays(5);
-        LocalDateTime secondValidFrom = LocalDateTime.now().minusDays(3);
+        LocalDateTime firstValidFrom = LocalDateTime.now().plusSeconds(1);
+        LocalDateTime secondValidFrom = LocalDateTime.now().plusSeconds(2);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")

@@ -168,8 +168,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             }
 
             child.setValidBetween(null);
-            child.setTopographicPlace(null);
-            child.getTariffZones().clear();
         });
     }
 

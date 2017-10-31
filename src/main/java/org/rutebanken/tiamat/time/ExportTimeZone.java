@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.time;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +33,19 @@ import java.util.TimeZone;
 @Component
 public class ExportTimeZone {
 
-    @Value("${tiamat.time.zone.default:Europe/Oslo}")
-    private String defaultTimeZoneName;
+
+    private final String defaultTimeZoneName;
             
     private ZoneId defaultTimeZone;
+
+    @Autowired
+    public ExportTimeZone(@Value("${tiamat.time.zone.default:Europe/Oslo}") String defaultTimeZoneName) {
+        this.defaultTimeZoneName = defaultTimeZoneName;
+    }
+
+    public ExportTimeZone() {
+        this.defaultTimeZoneName = "Europe/Oslo";
+    }
 
 
     public ZoneId getDefaultTimeZoneId() {
