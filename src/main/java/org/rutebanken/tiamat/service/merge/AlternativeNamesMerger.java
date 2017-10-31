@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service.merge;
 
 import org.rutebanken.tiamat.model.AlternativeName;
-import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
+import org.rutebanken.tiamat.service.ObjectMerger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -55,12 +55,10 @@ public class Zone_VersionStructure
     }
 
     public void setPolygon(Polygon polygon) {
-        if (polygon != null) {
-            if (this.polygon == null) {
-                this.polygon = new PersistablePolygon();
-            }
-            this.polygon.setPolygon(polygon);
+        if (this.polygon == null) {
+            this.polygon = new PersistablePolygon();
         }
+        this.polygon.setPolygon(polygon);
     }
 
     public Zone_VersionStructure(EmbeddableMultilingualString name) {
