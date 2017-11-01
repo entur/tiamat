@@ -44,6 +44,9 @@ public class TariffZoneImporter {
 
         return tariffZones
                 .stream()
+                .peek(incomingTariffZone -> logger.info("Importing tariff zone {}, version {}, name {}. Has polygon? {}",
+                        incomingTariffZone.getNetexId(), incomingTariffZone.getVersion(),
+                        incomingTariffZone.getName(), incomingTariffZone.getPolygon().getExteriorRing() != null))
                 .map(incomingTariffZone -> tariffZoneSaverService.saveNewVersion(incomingTariffZone))
                 .map(savedTariffZone -> netexMapper.getFacade().map(savedTariffZone, TariffZone.class))
                 .collect(toList());

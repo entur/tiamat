@@ -21,6 +21,8 @@ import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.ObjectMerger;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,8 @@ import java.time.Instant;
  */
 @Component
 public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
+
+    private static final Logger logger = LoggerFactory.getLogger(TariffZoneSaverService.class);
 
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
@@ -62,6 +66,8 @@ public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
             newVersion.setVersion(1L);
             result = tariffZoneRepository.save(newVersion);
         }
+
+        logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
         tariffZonesLookupService.reset();
         return result;
