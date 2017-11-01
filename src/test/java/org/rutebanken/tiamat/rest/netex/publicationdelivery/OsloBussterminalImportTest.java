@@ -46,6 +46,11 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
             "   <Description lang=\"no\" textIdType=\"\">Publication delivery from chouette</Description>\n" +
             "   <dataObjects>\n" +
             "      <SiteFrame created=\"2017-01-26T10:55:00.262+01:00\" version=\"1\" id=\"331f175c-3cef-476b-997d-c7282270de2a\">\n" +
+            "         <FrameDefaults>\n" +
+            "            <DefaultLocale>\n" +
+            "              <TimeZone>Europe/Oslo</TimeZone>\n" +
+            "            <DefaultLanguage>no</DefaultLanguage>\n" +
+            "         </DefaultLocale>" +
             "         <stopPlaces>\n" +
             "            <StopPlace version=\"1\" id=\"RUT:StopArea:03010619\">\n" +
             "               <Name lang=\"no\" textIdType=\"\">Oslo Bussterminal</Name>\n" +

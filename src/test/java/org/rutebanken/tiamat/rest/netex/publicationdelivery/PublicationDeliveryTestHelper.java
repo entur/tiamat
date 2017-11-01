@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,10 +41,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
-
-import static javax.xml.bind.JAXBContext.newInstance;
 
 @Component
 public class PublicationDeliveryTestHelper {
@@ -53,6 +51,8 @@ public class PublicationDeliveryTestHelper {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryTestHelper.class);
 
     private static final JAXBContext jaxbContext;
+
+    private static final String defaultTimeZone = "Europe/Paris";
 
     static {
         try {
@@ -84,6 +84,10 @@ public class PublicationDeliveryTestHelper {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
         siteFrame.setId(UUID.randomUUID().toString());
+        siteFrame.setFrameDefaults(
+                new VersionFrameDefaultsStructure()
+                        .withDefaultLocale(
+                                new LocaleStructure().withTimeZone(defaultTimeZone)));
         return siteFrame;
     }
 

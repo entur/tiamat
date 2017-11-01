@@ -19,6 +19,8 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.ValidBetween;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContext;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,15 +50,16 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
             }
         }
 
+        ZoneId mappingTimeZone = NetexMappingContextThreadLocal.get().defaultTimeZone;
 
         ValidBetween netexValidBetween = validBetweens.get(0);
 
         org.rutebanken.tiamat.model.ValidBetween tiamatValidBetween = new org.rutebanken.tiamat.model.ValidBetween();
         if (netexValidBetween.getFromDate() != null) {
-            tiamatValidBetween.setFromDate(Instant.from(netexValidBetween.getFromDate()));
+            tiamatValidBetween.setFromDate(Instant.from(netexValidBetween.getFromDate().atZone(mappingTimeZone)));
         }
         if (netexValidBetween.getToDate() != null) {
-            tiamatValidBetween.setToDate(Instant.from(netexValidBetween.getToDate()));
+            tiamatValidBetween.setToDate(Instant.from(netexValidBetween.getToDate().atZone(mappingTimeZone)));
         }
 
         return tiamatValidBetween;
