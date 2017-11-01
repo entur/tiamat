@@ -20,7 +20,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
+import org.rutebanken.tiamat.service.ObjectMerger;
 import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.service.merge.AlternativeNamesMerger;
 import org.rutebanken.tiamat.service.merge.KeyValuesMerger;
