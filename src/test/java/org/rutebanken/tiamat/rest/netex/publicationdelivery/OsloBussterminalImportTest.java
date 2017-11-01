@@ -49,8 +49,9 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
             "         <FrameDefaults>\n" +
             "            <DefaultLocale>\n" +
             "              <TimeZone>Europe/Oslo</TimeZone>\n" +
-            "            <DefaultLanguage>no</DefaultLanguage>\n" +
-            "         </DefaultLocale>" +
+            "              <DefaultLanguage>no</DefaultLanguage>\n" +
+            "           </DefaultLocale>" +
+            "         </FrameDefaults> " +
             "         <stopPlaces>\n" +
             "            <StopPlace version=\"1\" id=\"RUT:StopArea:03010619\">\n" +
             "               <Name lang=\"no\" textIdType=\"\">Oslo Bussterminal</Name>\n" +
