@@ -591,6 +591,12 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 "  <ParticipantRef>XYZ</ParticipantRef>\n" +
                 "  <dataObjects>\n" +
                 "    <SiteFrame id=\"initial\" version=\"1\">\n" +
+                "       <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "              <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "      </FrameDefaults>\n" +
                 "      <stopPlaces>\n" +
                 "        <StopPlace id=\"SOF:StopPlace:14162447Bus\" version=\"1\">\n" +
                 "          <keyList>\n" +
@@ -713,6 +719,12 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 "  <ParticipantRef>ZZZ</ParticipantRef>\n" +
                 "  <dataObjects>\n" +
                 "    <SiteFrame id=\"idmatch\" version=\"1\">\n" +
+                "       <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "              <TimeZone>CET</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "      </FrameDefaults>\n" +
                 "      <stopPlaces>\n" +
                 "        <StopPlace version=\"1\" id=\"SOF:StopPlace:14162447\">\n" +
                 "          <Name lang=\"no\" textIdType=\"\">Nordeide kai</Name>\n" +

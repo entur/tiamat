@@ -950,6 +950,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "    <ParticipantRef>NHR</ParticipantRef>\n" +
                 "    <dataObjects>\n" +
                 "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
+                "            <FrameDefaults>\n" +
+                "               <DefaultLocale>\n" +
+                "                   <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "                   <DefaultLanguage>no</DefaultLanguage>\n" +
+                "               </DefaultLocale>\n" +
+                "            </FrameDefaults>\n" +
                 "            <stopPlaces>\n" +
                 "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
                 "                    <ValidBetween>\n" +
@@ -1040,6 +1046,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 " <ParticipantRef>NHR</ParticipantRef>\n" +
                 " <dataObjects>\n" +
                 "  <SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
+                "   <FrameDefaults>\n" +
+                "     <DefaultLocale>\n" +
+                "       <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "       <DefaultLanguage>no</DefaultLanguage>\n" +
+                "     </DefaultLocale>\n" +
+                "   </FrameDefaults>\n" +
                 "   <stopPlaces>\n" +
                 "    <!--===Stop=== -->\n" +
                 "    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
@@ -1079,6 +1091,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "         <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "               <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "   \n" +
                 "   \n" +
@@ -1203,6 +1221,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "         <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "             <TimeZone>CET</TimeZone>\n" +
+                "              <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
                 "               <keyList>\n" +
@@ -1299,6 +1323,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "        <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "              <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "           <StopPlace id=\"BRA:StopPlace:06021002\" version=\"1\">\n" +
                 "               <keyList>\n" +
