@@ -1,0 +1,1 @@
+UPDATE topographic_place SET topographic_place_type = 'MUNICIPALITY' WHERE topographic_place_type = 'TOWN';

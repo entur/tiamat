@@ -972,7 +972,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("weighting", equalTo(weighting.value()))
                     .body("topographicPlace.id", notNullValue())
-                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
                     .body("topographicPlace.parentTopographicPlace", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.id", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()))
@@ -1781,7 +1781,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name))
-        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
         if(county != null) {
             municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county))
         }
