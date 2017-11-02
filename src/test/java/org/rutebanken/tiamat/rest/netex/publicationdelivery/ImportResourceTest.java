@@ -1031,24 +1031,24 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
         String xml = "<PublicationDelivery\n" +
-                "\tversion=\"1.0\"\n" +
-                "\txmlns=\"http://www.netex.org.uk/netex\"\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
-                "\t<!-- Når denne dataleveransen ble generert -->\n" +
-                "\t<PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
-                "\t<ParticipantRef>NHR</ParticipantRef>\n" +
-                "\t<dataObjects>\n" +
-                "\t\t<SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
-                "\t\t\t<stopPlaces>\n" +
-                "\t\t\t\t<!--===Stop=== -->\n" +
-                "\t\t\t\t<!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
-                "\t\t\t\t<StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
-                "\t\t\t\t\t<Name lang=\"no-NO\">Krokstien</Name>\n" +
-                "\t\t\t\t</StopPlace>\n" +
-                "\t\t\t</stopPlaces>\n" +
-                "\t\t</SiteFrame>\n" +
-                "\t</dataObjects>\n" +
+                " version=\"1.0\"\n" +
+                " xmlns=\"http://www.netex.org.uk/netex\"\n" +
+                " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                " xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
+                " <!-- Når denne dataleveransen ble generert -->\n" +
+                " <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
+                " <ParticipantRef>NHR</ParticipantRef>\n" +
+                " <dataObjects>\n" +
+                "  <SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
+                "   <stopPlaces>\n" +
+                "    <!--===Stop=== -->\n" +
+                "    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
+                "    <StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
+                "     <Name lang=\"no-NO\">Krokstien</Name>\n" +
+                "    </StopPlace>\n" +
+                "   </stopPlaces>\n" +
+                "  </SiteFrame>\n" +
+                " </dataObjects>\n" +
                 "</PublicationDelivery>\n" +
                 "\n";
 
