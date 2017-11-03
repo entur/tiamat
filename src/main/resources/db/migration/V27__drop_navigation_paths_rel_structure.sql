@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS navigation_paths_rel_structure;
+DROP SEQUENCE IF EXISTS navigation_paths_rel_structure_seq;
