@@ -53,6 +53,14 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
      */
     public static final String SQL_MULTIPLE_TAG_QUERY = "netex_id in (select t.netex_reference from tag t where t.name in :tags and t.removed is null)";
 
+    /**
+     * List only tagged stops, regardless of the tag name
+     */
+    public static final String SQL_WITH_TAGS =
+            "(p.netex_id in (select t.netex_reference from tag t where t.removed is null)" +
+                    "OR (s.netex_id in (select t.netex_reference from tag t where t.removed is null)))";
+
+
     public static final String SQL_DUPLICATED_QUAY_IMPORTED_IDS = "SELECT sp1.netex_id " +
             "FROM stop_place sp1 " +
             "  INNER JOIN stop_place_quays spq1 " +
@@ -204,6 +212,11 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         if (stopPlaceSearch.isWithoutQuaysOnly()) {
             operators.add("and");
             wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
+        }
+
+        if(stopPlaceSearch.isWithTags()) {
+            operators.add("and");
+            wheres.add(SQL_WITH_TAGS);
         }
 
         if (stopPlaceSearch.isWithDuplicatedQuayImportedIds()) {

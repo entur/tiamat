@@ -467,6 +467,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(new GraphQLList(GraphQLString))
                 .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(WITH_TAGS)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description("If set to true, only stop places with valid tags are returned. If false, filter does not apply.")
+                .build());
         return arguments;
     }
 
