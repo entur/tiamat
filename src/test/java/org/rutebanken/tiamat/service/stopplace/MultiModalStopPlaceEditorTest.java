@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.junit.runner.notification.StoppedByUserException;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
@@ -41,6 +43,25 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Test
+    public void testCreateMultiModalParentStopPlaceDoNotAllowEmptyListOfStopPlace() {
+        List<String> childIds = new ArrayList<>();
+        assertThatThrownBy(() -> multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString("name")))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testAddToMultiModalParentStopPlaceDoNotAllowEmptyListOfStopPlace() {
+
+        StopPlace parent = new StopPlace();
+        parent.setParentStopPlace(true);
+        stopPlaceRepository.save(parent);
+        List<String> childIds = new ArrayList<>();
+        assertThatThrownBy(() -> multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), childIds))
+                .isInstanceOf(IllegalArgumentException.class);
+
+    }
 
     @Test
     public void testCreateMultiModalParentStopPlace() {

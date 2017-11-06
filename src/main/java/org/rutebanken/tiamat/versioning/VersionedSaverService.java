@@ -50,6 +50,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     protected VersionCreator versionCreator;
 
     @Autowired
+    protected VersionIncrementor versionIncrementor;
+
+    @Autowired
     protected ReflectionAuthorizationService authorizationService;
 
     public abstract EntityInVersionRepository<T> getRepository();
@@ -95,7 +98,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
             getRepository().save(existingVersion);
         }
 
-        versionCreator.initiateOrIncrement(newVersion);
+        versionIncrementor.initiateOrIncrement(newVersion);
 
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
         if(newVersion instanceof DataManagedObjectStructure) {

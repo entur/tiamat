@@ -141,6 +141,8 @@ public class GraphQLNames {
     public static final String TAG_REMOVED_DESCRIPTION = "When this tag was removed. If set, the tag is removed from entity it references in field '" + TAG_ID_REFERENCE + "'";
     public static final String TAG_REMOVED_BY_USER_DESCRIPTION = "Removed by username. Only set if tag has been removed";
 
+    public static final String WITH_TAGS = "withTags";
+
     public static final String REMOVE_TAG = "removeTag";
     public static final String CREATE_TAG = "createTag";
 

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
@@ -22,9 +23,11 @@ import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
+import org.rutebanken.tiamat.service.MutateLock;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Matchers.anyList;
@@ -38,7 +41,14 @@ public class StopPlaceDeleterTest {
     private EntityChangedListener entityChangedListener = mock(EntityChangedListener.class);
     private ReflectionAuthorizationService authorizationService = mock(ReflectionAuthorizationService.class);
     private UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
-    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, entityChangedListener, authorizationService, usernameFetcher);
+    private MutateLock mutateLock = new MutateLock(null) {
+        @Override
+        public <T> T executeInLock(Supplier<T> supplier) {
+            return supplier.get();
+        }
+    };
+
+    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, entityChangedListener, authorizationService, usernameFetcher, mutateLock);
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotDeleteParent() {

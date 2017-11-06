@@ -21,13 +21,9 @@ import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Entity
 public class Accesses_RelStructure
         extends ContainmentAggregationStructure {
 
-    @Column
-    @ElementCollection(targetClass = AccessRefStructure.class)
     protected List<AccessRefStructure> accessRefOrAccess;
 
     public List<AccessRefStructure> getAccessRefOrAccess() {

@@ -24,6 +24,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -51,7 +52,7 @@ public class PublicationDeliveryStreamingOutputTest {
     @Test
     public void streamValidXml() throws Exception {
         PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withPublicationTimestamp(OffsetDateTime.now())
+                .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef("participantRef");
 
         StreamingOutput streamingOutput = new PublicationDeliveryStreamingOutput().stream(publicationDelivery);

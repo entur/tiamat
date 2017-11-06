@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,9 @@ class StopPlaceUpdater implements DataFetcher {
     @Autowired
     private StopPlaceMapper stopPlaceMapper;
 
+    @Autowired
+    private MutateLock mutateLock;
+
     @Override
     public Object get(DataFetchingEnvironment environment) {
         List<Field> fields = environment.getFields();
@@ -64,14 +68,18 @@ class StopPlaceUpdater implements DataFetcher {
         StopPlace stopPlace = null;
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_STOPPLACE)) {
-                stopPlace = createOrUpdateStopPlace(environment, false);
+                stopPlace = createOrUpdateStopPlaceInLock(environment, false);
             } else if (field.getName().equals(MUTATE_PARENT_STOPPLACE)) {
-                stopPlace = createOrUpdateStopPlace(environment, true);
+                stopPlace = createOrUpdateStopPlaceInLock(environment, true);
             }
         }
         return Arrays.asList(stopPlace);
     }
 
+
+    private StopPlace createOrUpdateStopPlaceInLock(DataFetchingEnvironment environment, boolean mutateParent) {
+        return mutateLock.executeInLock(() -> createOrUpdateStopPlace(environment, mutateParent));
+    }
 
     private StopPlace createOrUpdateStopPlace(DataFetchingEnvironment environment, boolean mutateParent) {
         StopPlace updatedStopPlace;
@@ -86,6 +94,7 @@ class StopPlaceUpdater implements DataFetcher {
 
             String netexId = (String) input.get(ID);
             if (netexId != null) {
+
                 logger.info("About to update StopPlace {}", netexId);
 
                 existingVersion = findAndVerify(netexId);

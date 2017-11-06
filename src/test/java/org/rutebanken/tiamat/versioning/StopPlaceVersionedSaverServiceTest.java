@@ -44,6 +44,59 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
+
+    @Test
+    public void saveStopPlaceWithInstalledEquipment() {
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quay with place equipments"));
+        PlaceEquipment quayPlaceEquipment = new PlaceEquipment();
+        TicketingEquipment quayTicketingEquipment = new TicketingEquipment();
+        quayPlaceEquipment.getInstalledEquipment().add(quayTicketingEquipment);
+        quay.setPlaceEquipments(quayPlaceEquipment);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getQuays().add(quay);
+        TicketingEquipment ticketingEquipment1 = new TicketingEquipment();
+        PlaceEquipment stopPlacePlaceEquipment = new PlaceEquipment();
+        stopPlacePlaceEquipment.getInstalledEquipment().add(ticketingEquipment1);
+        stopPlace.setPlaceEquipments(stopPlacePlaceEquipment);
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+
+        assertThat(actualStopPlace).isNotNull();
+
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getNetexId())
+                .isNotNull();
+
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+                .isEqualTo(1L);
+
+        Quay actualQuay = actualStopPlace.getQuays().iterator().next();
+        assertThat(actualQuay.getVersion()).isEqualTo(1);
+
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getNetexId())
+                .isNotNull();
+
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+                .isEqualTo(1L);
+
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+                .isEqualTo(2L);
+
+        actualQuay = actualStopPlace.getQuays().iterator().next();
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+                .isEqualTo(2L);
+
+
+
+    }
+
     @Test
     public void newStopPlaceWithQuayVerifyVersionSet() {
         Quay quay1 = new Quay();
@@ -439,25 +492,6 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
         assertThat(stopPlace3.getPlaceEquipments().getInstalledEquipment()).isNotNull();
-    }
-
-
-    @Test
-    public void stopPlaceQuayShouldAlsoHaveItsVersionIncremented() {
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setVersion(1L);
-
-        Quay quay = new Quay();
-        quay.setVersion(1L);
-
-        stopPlace.getQuays().add(quay);
-
-        stopPlaceRepository.save(stopPlace);
-
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
-        newVersion = stopPlaceVersionedSaverService.initiateOrIncrementVersions(newVersion);
-        assertThat(newVersion.getQuays()).isNotEmpty();
-        assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(2L);
     }
 
     @Test

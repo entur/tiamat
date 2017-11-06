@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.CopiedEntity;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.util.StopPlaceCopyHelper;
@@ -57,35 +58,40 @@ public class StopPlaceQuayMover {
     @Autowired
     private StopPlaceCopyHelper stopPlaceCopyHelper;
 
+    @Autowired
+    private MutateLock mutateLock;
+
     public StopPlace moveQuays(List<String> quayIds, String destinationStopPlaceId, String fromVersionComment, String toVersionComment) {
 
-        Set<StopPlace> sourceStopPlaces = resolveSourceStopPlaces(resolveQuays(quayIds));
+        return mutateLock.executeInLock(() -> {
+            Set<StopPlace> sourceStopPlaces = resolveSourceStopPlaces(resolveQuays(quayIds));
 
-        verifySize(quayIds, sourceStopPlaces);
+            verifySize(quayIds, sourceStopPlaces);
 
-        StopPlace sourceStopPlace = sourceStopPlaces.iterator().next();
+            StopPlace sourceStopPlace = sourceStopPlaces.iterator().next();
 
-        logger.debug("Found stop place to move quays {} from {}", quayIds, sourceStopPlace);
+            logger.debug("Found stop place to move quays {} from {}", quayIds, sourceStopPlace);
 
-        Instant now = Instant.now();
-        Set<Quay> quaysToMove = removeQuaysFromStop(sourceStopPlace, fromVersionComment, quayIds, now);
+            Instant now = Instant.now();
+            Set<Quay> quaysToMove = removeQuaysFromStop(sourceStopPlace, fromVersionComment, quayIds, now);
 
-        StopPlace response = addQuaysToDestinationStop(destinationStopPlaceId, quaysToMove, toVersionComment, now);
+            StopPlace response = addQuaysToDestinationStop(destinationStopPlaceId, quaysToMove, toVersionComment, now);
 
-        logger.info("Moved quays: {} from stop {} to {}", quayIds, sourceStopPlace.getNetexId(), response.getNetexId());
-        return response;
+            logger.info("Moved quays: {} from stop {} to {}", quayIds, sourceStopPlace.getNetexId(), response.getNetexId());
+            return response;
+        });
     }
 
     private StopPlace addQuaysToDestinationStop(String destinationStopPlaceId, Set<Quay> quaysToMove, String toVersionComment, Instant now) {
 
         StopPlace destinationStopPlace;
-        if(destinationStopPlaceId == null) {
+        if (destinationStopPlaceId == null) {
             destinationStopPlace = new StopPlace();
         } else {
-          destinationStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(destinationStopPlaceId);
+            destinationStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(destinationStopPlaceId);
         }
 
-        if(destinationStopPlace == null) {
+        if (destinationStopPlace == null) {
             throw new IllegalArgumentException("Cannot resolve destination stopp place by ID " + destinationStopPlaceId);
         }
 
@@ -116,12 +122,13 @@ public class StopPlaceQuayMover {
 
     /**
      * Saves parent copy if parent exist. If not, saves monomodal stop place.
+     *
      * @param copiedEntity
      * @param now
      * @return
      */
     private StopPlace save(CopiedEntity<StopPlace> copiedEntity, Instant now) {
-        if(copiedEntity.hasParent()) {
+        if (copiedEntity.hasParent()) {
             return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingParent(), copiedEntity.getCopiedParent(), now);
         } else
             return stopPlaceVersionedSaverService.saveNewVersion(copiedEntity.getExistingEntity(), copiedEntity.getCopiedEntity(), now);

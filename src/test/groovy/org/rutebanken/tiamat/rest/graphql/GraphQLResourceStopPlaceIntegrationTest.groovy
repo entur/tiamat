@@ -972,7 +972,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.coordinates[0][1]", comparesEqualTo(updatedLat))
                     .body("weighting", equalTo(weighting.value()))
                     .body("topographicPlace.id", notNullValue())
-                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.TOWN.value()))
+                    .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
                     .body("topographicPlace.parentTopographicPlace", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.id", notNullValue())
                     .body("topographicPlace.parentTopographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.COUNTY.value()))
@@ -992,10 +992,10 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         Instant now = Instant.now()
 
         // Mutate stop place. The new version should have valid from now.
-        String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZone()))
+        String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZoneId()))
 
         // The new version should be terminated in the future.
-        String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZone()))
+        String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZoneId()))
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"mutation { " +
@@ -1781,7 +1781,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
     private TopographicPlace createMunicipalityWithCountyRef(String name, TopographicPlace county) {
         TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString(name))
-        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
         if(county != null) {
             municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county))
         }

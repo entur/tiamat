@@ -113,7 +113,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withName(municipalityName)
                 .withVersion("1")
                 .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
-                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
                 .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef(county.getId()).withVersion(county.getVersion()));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality, county);
@@ -142,7 +142,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withName(municipalityName)
                 .withVersion("1")
                 .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
-                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
                 .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef(county.getId()).withVersion(county.getVersion()));
 
 
@@ -202,7 +202,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withName(municipalityName)
                 .withVersion("1")
                 .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
-                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.TOWN)
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
                 .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef("KVE:TopographicPlace:1").withVersion(ANY_VERSION));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality);

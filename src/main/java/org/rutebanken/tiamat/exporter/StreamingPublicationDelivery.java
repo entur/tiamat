@@ -15,25 +15,27 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
-import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
-import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
+import org.rutebanken.netex.validation.NeTExValidator;
+import org.rutebanken.tiamat.exporter.async.*;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
+import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -41,7 +43,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -62,48 +64,48 @@ public class StreamingPublicationDelivery {
     private static final JAXBContext publicationDeliveryContext = createContext(PublicationDeliveryStructure.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
 
-    private final PublicationDeliveryHelper publicationDeliveryHelper;
-
-
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-    private final TopographicPlacesExporter topographicPlacesExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
-    private final PathLinkRepository pathLinkRepository;
-
+    private final NeTExValidator neTExValidator = new NeTExValidator();
+    private final boolean validateAgainstSchema;
 
     @Autowired
-    public StreamingPublicationDelivery(PublicationDeliveryHelper publicationDeliveryHelper,
-                                        StopPlaceRepository stopPlaceRepository,
+    private EntityManager entityManager;
+
+    @Autowired
+    public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
                                         PublicationDeliveryExporter publicationDeliveryExporter,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
-                                        TopographicPlacesExporter topographicPlacesExporter,
                                         NetexMapper netexMapper,
-                                        TariffZoneRepository tariffZoneRepository, TopographicPlaceRepository topographicPlaceRepository, PathLinkRepository pathLinkRepository) {
-        this.publicationDeliveryHelper = publicationDeliveryHelper;
+                                        TariffZoneRepository tariffZoneRepository,
+                                        TopographicPlaceRepository topographicPlaceRepository,
+                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
-        this.topographicPlacesExporter = topographicPlacesExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
-        this.pathLinkRepository = pathLinkRepository;
+        this.validateAgainstSchema = validateAgainstSchema;
     }
 
-    public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException {
+    public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
 
-        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame "+exportParams);
+        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
 
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
+        AtomicInteger mappedTariffZonesCount = new AtomicInteger();
+        AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
 
+        EntitiesEvictor entitiesEvictor = instantiateEvictor();
 
         logger.info("Async export initiated. Export params: {}", exportParams);
 
@@ -114,40 +116,82 @@ public class StreamingPublicationDelivery {
         final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
-        if(exportParams.getTopographicPlaceExportMode() == null || exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
-            topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode.ALL, siteFrame);
-        } else if(exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
-            List<TopographicPlace> relevantTopographicPlaces = topographicPlaceRepository.getTopographicPlacesFromStopPlaceIds(stopPlacePrimaryIds);
-            Set<TopographicPlace> target = new HashSet<>();
-            for(TopographicPlace topographicPlace : relevantTopographicPlaces) {
-                topographicPlacesExporter.gatherTopographicPlaceTree(topographicPlace, target);
-            }
-            topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(target, siteFrame);
-        }
-
-        List<org.rutebanken.tiamat.model.TariffZone> tariffZones;
-        if(exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
-            tariffZones = tariffZoneRepository.findAll();
-            tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
-            logger.info("Added all tariff zones, regardless of version: {}", tariffZones.size());
-
-        } else {
-            tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(stopPlacePrimaryIds);
-            if (tariffZones != null) {
-                logger.info("Got {} tariff zones from {} stop place ids", tariffZones.size(), stopPlacePrimaryIds.size());
-                tiamatSiteFrameExporter.addTariffZones(siteFrame, tariffZones);
-            }
-        }
-
+        //TODO: stream path links, handle export mode
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
+        logger.info("Preparing scrollable iterators");
+        prepareTopographicPlaces(exportParams, netexSiteFrame, mappedTopographicPlacesCount, stopPlacePrimaryIds, entitiesEvictor);
+        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
+        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
+        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
+
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
 
+        Marshaller marshaller = createMarshaller();
+
+        logger.info("Start marshalling publication delivery");
+        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+        logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
+    }
+
+    private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
+
+
+        Iterator<org.rutebanken.tiamat.model.TariffZone> tariffZoneIterator;
+        if (exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
+
+            logger.info("Preparing to scroll all tariff zones, regardless of version");
+            tariffZoneIterator = tariffZoneRepository.scrollTariffZones();
+        } else if (exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+
+            logger.info("Preparing to scroll relevant tariff zones from stop place ids");
+            tariffZoneIterator = tariffZoneRepository.scrollTariffZones(stopPlacePrimaryIds);
+        } else {
+            logger.info("Tariff zone export mode is {}. Will not export tariff zones", exportParams.getTariffZoneExportMode());
+            tariffZoneIterator = Collections.emptyIterator();
+        }
+
+        if (tariffZoneIterator.hasNext()) {
+            NetexMappingIterator<org.rutebanken.tiamat.model.TariffZone, TariffZone> tariffZoneMappingIterator =
+                    new NetexMappingIterator<>(netexMapper, tariffZoneIterator, TariffZone.class, mappedTariffZonesCount, evicter);
+
+            List<TariffZone> tariffZones = new NetexMappingIteratorList<>(() -> tariffZoneMappingIterator);
+
+            TariffZonesInFrame_RelStructure tariffZonesInFrame_relStructure = new TariffZonesInFrame_RelStructure();
+            setField(TariffZonesInFrame_RelStructure.class, "tariffZone", tariffZonesInFrame_relStructure, tariffZones);
+            netexSiteFrame.setTariffZones(tariffZonesInFrame_relStructure);
+        } else {
+            logger.info("No tariff zones to export");
+            netexSiteFrame.setTariffZones(null);
+        }
+
+    }
+
+    private void prepareParkings(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedParkingCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
+
+        // ExportParams could be used for parkingExportMode.
+
+        int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
+        if (parkingsCount > 0) {
+            // Only set parkings if they will exist during marshalling.
+            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
+            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
+            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
+                    Parking.class, mappedParkingCount, evicter));
+
+            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+        } else {
+            logger.info("No parkings to export based on stop places");
+        }
+    }
+
+    private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
-        if(!stopPlacePrimaryIds.isEmpty()) {
+        if (!stopPlacePrimaryIds.isEmpty()) {
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
             logger.info("There are stop places to export");
@@ -155,7 +199,7 @@ public class StreamingPublicationDelivery {
 
             // Use Listening iterator to collect stop place IDs.
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
-            NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount);
+            NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, evicter);
 
             List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> netexMappingIterator);
             setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
@@ -163,24 +207,48 @@ public class StreamingPublicationDelivery {
         } else {
             logger.info("No stop places to export");
         }
+    }
 
-        int parkingsCount = parkingRepository.countResult(stopPlacePrimaryIds);
-        if(parkingsCount > 0) {
-            // Only set parkings if they will exist during marshalling.
-            logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
-            ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
-            List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds), Parking.class, mappedParkingCount));
 
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
-            netexSiteFrame.setParkings(parkingsInFrame_relStructure);
+    private void prepareTopographicPlaces(ExportParams exportParams, SiteFrame netexSiteFrame, AtomicInteger mappedTopographicPlacesCount, Set<Long> stopPlacePrimaryIds, EntitiesEvictor evicter) {
+
+        Iterator<TopographicPlace> relevantTopographicPlacesIterator;
+
+        if (exportParams.getTopographicPlaceExportMode() == null || exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.ALL)) {
+            logger.info("Prepare scrolling for all topographic places");
+            relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces();
+
+        } else if (exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+            logger.info("Prepare scrolling relevant topographic places");
+            relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds);
         } else {
-            logger.info("No parkings to export based on stop places");
+            logger.info("Topographic export mode is {}. Will not export topographic places", exportParams.getTopographicPlaceExportMode());
+            relevantTopographicPlacesIterator = Collections.emptyIterator();
         }
 
-        Marshaller marshaller = createMarshaller();
+        if (relevantTopographicPlacesIterator.hasNext()) {
+            ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
 
-        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-        logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
+            NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, evicter);
+
+            List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
+
+            TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
+            setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
+            netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);
+        } else {
+            netexSiteFrame.setTopographicPlaces(null);
+        }
+    }
+
+    private EntitiesEvictor instantiateEvictor() {
+        if (entityManager != null) {
+            Session currentSession = entityManager.unwrap(Session.class);
+            return new EntitiesEvictor((SessionImpl) currentSession);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -192,8 +260,8 @@ public class StreamingPublicationDelivery {
             Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(instance, fieldValue);
-        } catch (IllegalAccessException|NoSuchFieldException e) {
-            throw new RuntimeException("Cannot set field "+fieldName +" of "+instance, e);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException("Cannot set field " + fieldName + " of " + instance, e);
         }
     }
 
@@ -201,16 +269,22 @@ public class StreamingPublicationDelivery {
         try {
             return newInstance(clazz);
         } catch (JAXBException e) {
-            logger.warn("Could not create instance of jaxb context for class " + clazz, e);
-            throw new RuntimeException(e);
+            String message = "Could not create instance of jaxb context for class " + clazz;
+            logger.warn(message, e);
+            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
         }
     }
 
-    private Marshaller createMarshaller() throws JAXBException {
-        Marshaller stopPlaceMarshaller = publicationDeliveryContext.createMarshaller();
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        stopPlaceMarshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
-        return stopPlaceMarshaller;
+    private Marshaller createMarshaller() throws JAXBException, IOException, SAXException {
+        Marshaller marshaller = publicationDeliveryContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
+
+        if(validateAgainstSchema) {
+            marshaller.setSchema(neTExValidator.getSchema());
+        }
+
+        return marshaller;
     }
 }

@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
 @Service
@@ -45,7 +46,7 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPublicationDeliveryExporter.class);
 
-    private static final ExecutorService exportService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
+    private static final ExecutorService exportService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
@@ -99,21 +100,25 @@ public class AsyncPublicationDeliveryExporter {
         exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
-        exportJob.setJobUrl(ASYNC_JOB_PATH + '/' + exportJob.getId());
-        exportJobRepository.save(exportJob);
 
         ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
+        setJobUrl(exportJob);
         return exportJob;
     }
 
     public String createFileNameWithoutExtention(long exportJobId, Instant started) {
-        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZone()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
+        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
     }
 
     public ExportJob getExportJob(long exportJobId) {
-        return exportJobRepository.findOne(exportJobId);
+
+        ExportJob exportJob = exportJobRepository.findOne(exportJobId);
+        if(exportJob != null) {
+            return setJobUrl(exportJob);
+        }
+        return null;
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {
@@ -121,7 +126,16 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public Collection<ExportJob> getJobs() {
-        return exportJobRepository.findAll();
+
+        return exportJobRepository.findAll()
+                .stream()
+                .map(this::setJobUrl)
+                .collect(toList());
+    }
+
+    private ExportJob setJobUrl(ExportJob exportJobWithId) {
+        exportJobWithId.setJobUrl(ASYNC_JOB_PATH + "/" + exportJobWithId.getId());
+        return exportJobWithId;
     }
 
     private String generateSubFolderName() {

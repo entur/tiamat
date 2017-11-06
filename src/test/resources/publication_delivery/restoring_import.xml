@@ -46,7 +46,7 @@
           <Descriptor>
             <Name lang="en">Vardø</Name>
           </Descriptor>
-          <TopographicPlaceType>town</TopographicPlaceType>
+          <TopographicPlaceType>municipality</TopographicPlaceType>
           <CountryRef ref="no"/>
           <ParentTopographicPlaceRef ref="KVE:TopographicPlace:20" version="1"/>
         </TopographicPlace>

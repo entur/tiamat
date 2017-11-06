@@ -1,0 +1,13 @@
+ALTER TABLE tariff_zone ADD CONSTRAINT tariff_zone_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE road_address ADD CONSTRAINT road_address_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE path_link ADD CONSTRAINT path_link_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE path_junction ADD CONSTRAINT path_junction_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE parking_properties ADD CONSTRAINT parking_properties_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE parking_capacity ADD CONSTRAINT parking_capacity_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE "level" ADD CONSTRAINT level_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE equipment_position ADD CONSTRAINT equipment_position_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE equipment_place ADD CONSTRAINT equipment_place_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE check_constraint ADD CONSTRAINT check_constraint_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE boarding_position ADD CONSTRAINT boarding_position_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE alternative_name ADD CONSTRAINT alternative_name_netex_id_version_constraint UNIQUE (netex_id, version);
+ALTER TABLE access_space ADD CONSTRAINT access_space_netex_id_version_constraint UNIQUE (netex_id, version);

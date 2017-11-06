@@ -15,11 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
+import javax.persistence.Transient;
 import java.math.BigInteger;
 
 
-@MappedSuperclass
 public class RoadAddress_VersionStructure
         extends Address_VersionStructure {
 
@@ -27,7 +26,6 @@ public class RoadAddress_VersionStructure
 
     protected String roadNumber;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected MultilingualStringEntity roadName;
 
     protected String bearingCompass;

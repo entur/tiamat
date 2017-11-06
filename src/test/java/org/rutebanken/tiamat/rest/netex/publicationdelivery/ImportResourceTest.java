@@ -19,16 +19,9 @@ import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.PrivateCodeStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.Quays_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopTypeEnumeration;
-import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.ImportParams;
+import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
@@ -42,13 +35,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ImportResourceTest extends TiamatIntegrationTest {
@@ -661,7 +653,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
-        OffsetDateTime changedDate = actualStopPlace.getChanged();
+        LocalDateTime changedDate = actualStopPlace.getChanged();
 
         // Add a Quay to the stop place so that it will be updated.
         stopPlace.withQuays(
@@ -958,6 +950,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "    <ParticipantRef>NHR</ParticipantRef>\n" +
                 "    <dataObjects>\n" +
                 "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
+                "            <FrameDefaults>\n" +
+                "               <DefaultLocale>\n" +
+                "                   <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "                   <DefaultLanguage>no</DefaultLanguage>\n" +
+                "               </DefaultLocale>\n" +
+                "            </FrameDefaults>\n" +
                 "            <stopPlaces>\n" +
                 "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
                 "                    <ValidBetween>\n" +
@@ -1002,8 +1000,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        OffsetDateTime firstValidFrom = OffsetDateTime.now().minusDays(5);
-        OffsetDateTime secondValidFrom = OffsetDateTime.now().minusDays(3);
+        LocalDateTime firstValidFrom = LocalDateTime.now().plusSeconds(1);
+        LocalDateTime secondValidFrom = LocalDateTime.now().plusSeconds(2);
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")
@@ -1039,24 +1037,30 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
         String xml = "<PublicationDelivery\n" +
-                "\tversion=\"1.0\"\n" +
-                "\txmlns=\"http://www.netex.org.uk/netex\"\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
-                "\t<!-- Når denne dataleveransen ble generert -->\n" +
-                "\t<PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
-                "\t<ParticipantRef>NHR</ParticipantRef>\n" +
-                "\t<dataObjects>\n" +
-                "\t\t<SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
-                "\t\t\t<stopPlaces>\n" +
-                "\t\t\t\t<!--===Stop=== -->\n" +
-                "\t\t\t\t<!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
-                "\t\t\t\t<StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
-                "\t\t\t\t\t<Name lang=\"no-NO\">Krokstien</Name>\n" +
-                "\t\t\t\t</StopPlace>\n" +
-                "\t\t\t</stopPlaces>\n" +
-                "\t\t</SiteFrame>\n" +
-                "\t</dataObjects>\n" +
+                " version=\"1.0\"\n" +
+                " xmlns=\"http://www.netex.org.uk/netex\"\n" +
+                " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                " xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
+                " <!-- Når denne dataleveransen ble generert -->\n" +
+                " <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
+                " <ParticipantRef>NHR</ParticipantRef>\n" +
+                " <dataObjects>\n" +
+                "  <SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
+                "   <FrameDefaults>\n" +
+                "     <DefaultLocale>\n" +
+                "       <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "       <DefaultLanguage>no</DefaultLanguage>\n" +
+                "     </DefaultLocale>\n" +
+                "   </FrameDefaults>\n" +
+                "   <stopPlaces>\n" +
+                "    <!--===Stop=== -->\n" +
+                "    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
+                "    <StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
+                "     <Name lang=\"no-NO\">Krokstien</Name>\n" +
+                "    </StopPlace>\n" +
+                "   </stopPlaces>\n" +
+                "  </SiteFrame>\n" +
+                " </dataObjects>\n" +
                 "</PublicationDelivery>\n" +
                 "\n";
 
@@ -1087,6 +1091,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "         <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "               <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "   \n" +
                 "   \n" +
@@ -1211,6 +1221,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "         <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "             <TimeZone>CET</TimeZone>\n" +
+                "              <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
                 "               <keyList>\n" +
@@ -1307,6 +1323,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
                 "            </Codespace>\n" +
                 "         </codespaces>\n" +
+                "        <FrameDefaults>\n" +
+                "           <DefaultLocale>\n" +
+                "              <TimeZone>Europe/Oslo</TimeZone>\n" +
+                "               <DefaultLanguage>no</DefaultLanguage>\n" +
+                "           </DefaultLocale>\n" +
+                "         </FrameDefaults>\n" +
                 "         <stopPlaces>\n" +
                 "           <StopPlace id=\"BRA:StopPlace:06021002\" version=\"1\">\n" +
                 "               <keyList>\n" +
