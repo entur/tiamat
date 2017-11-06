@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
-import graphql.language.SourceLocation;
 import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.slf4j.Logger;
@@ -31,26 +30,20 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.*;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
+import static java.util.stream.Collectors.toList;
 
 @Component
 @Api
 @Path("graphql")
-@Transactional
 public class GraphQLResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQLResource.class);
@@ -175,7 +168,29 @@ public class GraphQLResource {
             content.put("errors", Arrays.asList(new ExceptionWhileDataFetching(e)));
             transactionStatus.setRollbackOnly();
         }
+        removeErrorStacktraces(content);
         return res.entity(content).build();
+    }
+
+
+    private void removeErrorStacktraces(Map<String, Object> content) {
+        if (content.containsKey("errors")) {
+            @SuppressWarnings("unchecked")
+            List<GraphQLError> errors = (List<GraphQLError>) content.get("errors");
+
+            try {
+                content.put("errors", errors.stream().map(graphQLError -> {
+                    if (graphQLError instanceof ExceptionWhileDataFetching) {
+                        return new TiamatExceptionWhileDataFetching((ExceptionWhileDataFetching) graphQLError);
+                    }
+                    else {
+                        return graphQLError;
+                    }
+                }).collect(toList()));
+            } catch (Exception e) {
+                logger.warn("Exception caught during stacktrace removal", e);
+            }
+        }
     }
 
     private Response.Status getStatusCodeFromThrowable(Throwable e) {

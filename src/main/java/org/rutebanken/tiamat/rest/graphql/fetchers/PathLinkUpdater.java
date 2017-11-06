@@ -19,14 +19,13 @@ import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.PathLinkMapper;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.service.stopplace.PathLinkUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -43,45 +42,45 @@ class PathLinkUpdater implements DataFetcher {
     private static final Logger logger = LoggerFactory.getLogger(PathLinkUpdater.class);
 
     @Autowired
-    private PathLinkRepository pathLinkRepository;
-
-    @Autowired
     private PathLinkMapper pathLinkMapper;
 
     @Autowired
     private PathLinkUpdaterService pathLinkUpdaterService;
 
+    @Autowired
+    private MutateLock mutateLock;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
+        return mutateLock.executeInLock(() -> {
+            List<Field> fields = environment.getFields();
 
-        List<Field> fields = environment.getFields();
+            logger.trace("Got fields {}", fields);
 
-        logger.trace("Got fields {}", fields);
+            List<PathLink> createdOrUpdated = new ArrayList<>();
 
-        List<PathLink> createdOrUpdated = new ArrayList<>();
+            for (Field field : fields) {
+                if (field.getName().equals(MUTATE_PATH_LINK)) {
 
-        for (Field field : fields) {
-            if (field.getName().equals(MUTATE_PATH_LINK)) {
+                    if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
+                        List<Map> inputs = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
+                        for (Map input : inputs) {
 
-                if (environment.getArgument(OUTPUT_TYPE_PATH_LINK) != null) {
-                    List<Map> inputs = environment.getArgument(OUTPUT_TYPE_PATH_LINK);
-                    for(Map input : inputs) {
+                            PathLink pathLink = pathLinkMapper.map(input);
+                            logger.debug("Mapped {}", pathLink);
 
-                        PathLink pathLink = pathLinkMapper.map(input);
-                        logger.debug("Mapped {}", pathLink);
+                            PathLink createdOrUpdatedPathLink = pathLinkUpdaterService.createOrUpdatePathLink(pathLink);
+                            createdOrUpdated.add(createdOrUpdatedPathLink);
+                        }
 
-                        PathLink createdOrUpdatedPathLink = pathLinkUpdaterService.createOrUpdatePathLink(pathLink);
-                        createdOrUpdated.add(createdOrUpdatedPathLink);
+                    } else {
+                        logger.warn("Could not find argument {}", OUTPUT_TYPE_PATH_LINK);
                     }
 
-                } else {
-                    logger.warn("Could not find argument {}", OUTPUT_TYPE_PATH_LINK);
                 }
-
             }
-        }
 
-        return createdOrUpdated;
+            return createdOrUpdated;
+        });
     }
 }

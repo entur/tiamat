@@ -17,8 +17,10 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.service.ObjectMerger;
 import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Transactional
 @Component
@@ -104,7 +106,26 @@ public class TopographicPlaceImporter {
             incomingTopographicPlace.setParentTopographicPlaceRef(topographicPlaceRefStructure);
 
         }
-        incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
+
+        if(incomingTopographicPlace.getTopographicPlaceType() != null && incomingTopographicPlace.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.PLACE_OF_INTEREST)) {
+
+            logger.info("Detected place of interest. Updating existing version of topographic place {}", incomingTopographicPlace.getNetexId());
+            TopographicPlace existingTopographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingTopographicPlace.getNetexId());
+
+            if(existingTopographicPlace != null) {
+
+                ObjectMerger.copyPropertiesNotNull(incomingTopographicPlace, existingTopographicPlace, "id", "version", "validBetween");
+                existingTopographicPlace.setChanged(Instant.now());
+                existingTopographicPlace.setPolygon(incomingTopographicPlace.getPolygon());
+                incomingTopographicPlace = topographicPlaceRepository.save(existingTopographicPlace);
+            } else {
+                incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
+            }
+
+        } else {
+            incomingTopographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(incomingTopographicPlace);
+        }
+
         topographicPlacesCounter.incrementAndGet();
         return incomingTopographicPlace;
     }

@@ -28,6 +28,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
+import static org.rutebanken.tiamat.versioning.VersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
@@ -152,9 +153,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
         assertThat(mergedStopPlace.getValidBetween().getFromDate())
                 .as("merged stop place from date")
-                .isEqualTo(stopPlaceBeforeMerging.getValidBetween().getToDate());
-
-        assertThat(mergedStopPlace.getValidBetween().getFromDate())
+                .isEqualTo(stopPlaceBeforeMerging.getValidBetween().getToDate().plusMillis(MILLIS_BETWEEN_VERSIONS))
                 .as("merged stop place from date should have version from date after test started")
                 .isAfterOrEqualTo(atTestStart);
 
@@ -217,34 +216,6 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
 
         ValidBetween toValidBetween = new ValidBetween(Instant.now().minusSeconds(1800));
-        toStopPlace.setValidBetween(toValidBetween);
-
-
-        stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
-        stopPlaceVersionedSaverService.saveNewVersion(toStopPlace);
-
-        StopPlace mergedStopPlace = stopPlaceMerger.mergeStopPlaces(fromStopPlace.getNetexId(), toStopPlace.getNetexId(), null, null, false);
-
-        assertThat(mergedStopPlace.getValidBetween()).isNotNull();
-        assertThat(mergedStopPlace.getValidBetween().getFromDate()).isNotNull();
-        assertThat(mergedStopPlace.getValidBetween().getToDate()).isNull();
-
-    }
-
-    @Test
-    @Transactional
-    public void testMergeStopPlacesWithFutureValidity() {
-
-        Instant nowPlusOneSecond = Instant.now().plusSeconds(1);
-
-        StopPlace fromStopPlace = new StopPlace();
-        fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
-        fromStopPlace.setValidBetween(new ValidBetween(nowPlusOneSecond));
-
-        StopPlace toStopPlace = new StopPlace();
-        toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
-
-        ValidBetween toValidBetween = new ValidBetween(nowPlusOneSecond);
         toStopPlace.setValidBetween(toValidBetween);
 
 

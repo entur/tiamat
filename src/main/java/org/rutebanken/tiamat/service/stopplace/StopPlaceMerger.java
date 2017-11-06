@@ -17,14 +17,18 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
+import org.rutebanken.tiamat.service.ObjectMerger;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.service.merge.AlternativeNamesMerger;
 import org.rutebanken.tiamat.service.merge.KeyValuesMerger;
 import org.rutebanken.tiamat.service.merge.PlaceEquipmentMerger;
 import org.rutebanken.tiamat.versioning.CopiedEntity;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.ValidityUpdater;
 import org.rutebanken.tiamat.versioning.util.StopPlaceCopyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,7 @@ import java.util.Optional;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
+import static org.rutebanken.tiamat.versioning.VersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Service
 public class StopPlaceMerger {
@@ -47,8 +52,6 @@ public class StopPlaceMerger {
      * Properties to ignore on merge.
      */
     public static final String[] IGNORE_PROPERTIES_ON_MERGE = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames"};
-
-    private static final int FUTURE_SECONDS_TERMINATION = 70;
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -71,40 +74,48 @@ public class StopPlaceMerger {
     @Autowired
     private StopPlaceCopyHelper stopPlaceCopyHelper;
 
+    @Autowired
+    private ValidityUpdater validityUpdater;
+
+    @Autowired
+    private MutateLock mutateLock;
+
     public StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
 
-        logger.info("About to merge stop place {} into stop place {} with from comment {} and to comment {} ", fromStopPlaceId, toStopPlaceId, fromVersionComment, toVersionComment);
+        return mutateLock.executeInLock(() -> {
+            logger.info("About to merge stop place {} into stop place {} with from comment {} and to comment {} ", fromStopPlaceId, toStopPlaceId, fromVersionComment, toVersionComment);
 
-        StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
-        StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
+            StopPlace fromStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(fromStopPlaceId);
+            StopPlace toStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(toStopPlaceId);
 
-        validateArguments(fromStopPlace, toStopPlace);
+            validateArguments(fromStopPlace, toStopPlace);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
 
-        StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
+            StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
 
-        CopiedEntity<StopPlace> mergedStopPlaceCopy = stopPlaceCopyHelper.createCopies(toStopPlace);
+            CopiedEntity<StopPlace> mergedStopPlaceCopy = stopPlaceCopyHelper.createCopies(toStopPlace);
 
-        executeMerge(fromStopPlaceToTerminate, mergedStopPlaceCopy.getCopiedEntity(), fromVersionComment, toVersionComment, Optional.ofNullable(mergedStopPlaceCopy.getCopiedParent()));
+            executeMerge(fromStopPlaceToTerminate, mergedStopPlaceCopy.getCopiedEntity(), fromVersionComment, toVersionComment, Optional.ofNullable(mergedStopPlaceCopy.getCopiedParent()));
 
-        if (!isDryRun) {
-            //Terminate validity of from-StopPlace
-            Instant now = Instant.now().plusSeconds(FUTURE_SECONDS_TERMINATION);
-            terminateEntity(fromStopPlaceToTerminate, now);
+            if (!isDryRun) {
+                //Terminate validity of from-StopPlace
+                Instant newVersionFromDate = Instant.now();
+                validityUpdater.terminateVersion(fromStopPlaceToTerminate, newVersionFromDate.minusMillis(MILLIS_BETWEEN_VERSIONS));
 
-            stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate, now);
+                stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace, fromStopPlaceToTerminate, newVersionFromDate);
 
 
-            if(mergedStopPlaceCopy.hasParent()) {
-                logger.info("Saving parent stop place {}. Returning parent of child: {}", mergedStopPlaceCopy.getCopiedParent().getNetexId(), mergedStopPlaceCopy.getCopiedEntity().getNetexId());
-                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingParent(), mergedStopPlaceCopy.getCopiedParent(), now);
+                if (mergedStopPlaceCopy.hasParent()) {
+                    logger.info("Saving parent stop place {}. Returning parent of child: {}", mergedStopPlaceCopy.getCopiedParent().getNetexId(), mergedStopPlaceCopy.getCopiedEntity().getNetexId());
+                    return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingParent(), mergedStopPlaceCopy.getCopiedParent(), newVersionFromDate);
 
-            } else {
-                return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingEntity(), mergedStopPlaceCopy.getCopiedEntity(), now);
+                } else {
+                    return stopPlaceVersionedSaverService.saveNewVersion(mergedStopPlaceCopy.getExistingEntity(), mergedStopPlaceCopy.getCopiedEntity(), newVersionFromDate);
+                }
             }
-        }
-        return mergedStopPlaceCopy.getCopiedEntity();
+            return mergedStopPlaceCopy.getCopiedEntity();
+        });
     }
 
     private void validateArguments(StopPlace fromStopPlace, StopPlace toStopPlace) {
@@ -133,7 +144,7 @@ public class StopPlaceMerger {
             );
         }
 
-        if(mergedStopPlaceParent.isPresent()) {
+        if (mergedStopPlaceParent.isPresent()) {
             // Set the version comment on the parent if it is present
             // Avoid setting tariff zones and alternative names, as we are merging to a child of parent.
             // Childs does not have names or tariff zones.
@@ -166,13 +177,4 @@ public class StopPlaceMerger {
                 .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
     }
 
-    private EntityInVersionStructure terminateEntity(EntityInVersionStructure entity, Instant now) {
-        // Terminate validity for "from"-stopPlace
-        if (entity.getValidBetween() != null) {
-            entity.getValidBetween().setToDate(now);
-        } else {
-            entity.setValidBetween(new ValidBetween(null, now));
-        }
-        return entity;
-    }
 }

@@ -56,23 +56,28 @@ class ParkingFetcher implements DataFetcher {
 
         String stopPlaceId = environment.getArgument(FIND_BY_STOP_PLACE_ID);
 
-        String id = environment.getArgument(GraphQLNames.ID);
+        String parkingId = environment.getArgument(GraphQLNames.ID);
         Integer version = (Integer) environment.getArgument(VERSION);
 
-        if (id != null) {
+        if (parkingId != null) {
             List<Parking> parkingList = new ArrayList<>();
             if(version != null && version > 0) {
-                parkingList = Arrays.asList(parkingRepository.findFirstByNetexIdAndVersion(id, version));
+                logger.info("Finding parking by netexid {} and version {}", parkingId, version);
+                parkingList = Arrays.asList(parkingRepository.findFirstByNetexIdAndVersion(parkingId, version));
                 allParkings = new PageImpl<>(parkingList, pageable, 1L);
             } else {
-                parkingList.add(parkingRepository.findFirstByNetexIdOrderByVersionDesc(id));
+                logger.info("Finding first parking by netexid {} and highest version", parkingId);
+                parkingList.add(parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingId));
                 allParkings = new PageImpl<>(parkingList, pageable, 1L);
             }
         } else if (stopPlaceId != null) {
+            logger.info("Finding parkings by stop place netexid {}", stopPlaceId);
             return parkingRepository.findByStopPlaceNetexId(stopPlaceId).stream()
+                    .peek(parkingNetexId -> logger.info("Finding parking by netexid {} and highest version", parkingNetexId))
                     .map(netexId -> parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
                     .collect(Collectors.toList());
         } else {
+            logger.info("Finding all parkings regardless of version and validity");
             allParkings = parkingRepository.findAll(pageable);
         }
 

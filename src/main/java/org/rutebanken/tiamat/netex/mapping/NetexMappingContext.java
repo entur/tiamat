@@ -13,20 +13,13 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.health;
+package org.rutebanken.tiamat.netex.mapping;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
-@Deprecated
-@Path("/")
-public class LegacyHealthResource extends HealthResource {
+public class NetexMappingContext {
 
-    @GET
-    @Path("health/readiness")
-    @Override
-    public Response readinessProbe() {
-        return super.readinessProbe();
-    }
+    public ZoneId defaultTimeZone;
+
 }

@@ -20,7 +20,6 @@ import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -62,7 +61,7 @@ public class DateScalar {
             @Override
             public String serialize(Object input) {
                 if (input instanceof Instant) {
-                    return (((Instant) input)).atZone(exportTimeZone.getDefaultTimeZone()).format(FORMATTER);
+                    return (((Instant) input)).atZone(exportTimeZone.getDefaultTimeZoneId()).format(FORMATTER);
                 }
                 return null;
             }

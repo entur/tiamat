@@ -21,17 +21,20 @@ import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.rutebanken.tiamat.netex.mapping.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Service
 public class PublicationDeliveryImporter {
@@ -39,6 +42,7 @@ public class PublicationDeliveryImporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryImporter.class);
 
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
+
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
@@ -95,6 +99,8 @@ public class PublicationDeliveryImporter {
 
         String requestId = netexSiteFrame.getId();
 
+        updateMappingContext(netexSiteFrame);
+
         Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreatedOrUpdated, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
 
         try {
@@ -144,6 +150,19 @@ public class PublicationDeliveryImporter {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();
         }
+    }
+
+    private void updateMappingContext(SiteFrame netexSiteFrame) {
+        String timeZoneString = Optional.of(netexSiteFrame)
+                .map(SiteFrame::getFrameDefaults)
+                .map(VersionFrameDefaultsStructure::getDefaultLocale)
+                .map(LocaleStructure::getTimeZone)
+                .orElseThrow(() -> new NetexMappingException("Cannot resolve time zone from FrameDefaults in site frame " + netexSiteFrame.getId()));
+
+        NetexMappingContext netexMappingContext = new NetexMappingContext();
+        netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);
+        NetexMappingContextThreadLocal.set(netexMappingContext);
+        logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
     }
 
     private void validate(ImportParams importParams) {

@@ -15,7 +15,9 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.junit.runner.notification.StoppedByUserException;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -26,13 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
@@ -42,6 +43,25 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Test
+    public void testCreateMultiModalParentStopPlaceDoNotAllowEmptyListOfStopPlace() {
+        List<String> childIds = new ArrayList<>();
+        assertThatThrownBy(() -> multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString("name")))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testAddToMultiModalParentStopPlaceDoNotAllowEmptyListOfStopPlace() {
+
+        StopPlace parent = new StopPlace();
+        parent.setParentStopPlace(true);
+        stopPlaceRepository.save(parent);
+        List<String> childIds = new ArrayList<>();
+        assertThatThrownBy(() -> multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), childIds))
+                .isInstanceOf(IllegalArgumentException.class);
+
+    }
 
     @Test
     public void testCreateMultiModalParentStopPlace() {
@@ -67,6 +87,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(result.getNetexId()).isNotNull();
 
         assertThatChildsAreReferencingParent(childIds, result);
+        verifyChildValidBetween(result);
     }
 
     @Test
@@ -107,6 +128,48 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
                         new EmbeddableMultilingualString(equalStopPlaceName, en),
                         null)
                 .doesNotContain(new EmbeddableMultilingualString(equalStopPlaceName, nb));
+
+        verifyChildValidBetween(result);
+    }
+
+    @Test
+    public void testCreateMultiModalParentStopPlaceWithFutureValidBetween() {
+
+        StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
+
+        Instant futureTime = Instant.now().plusSeconds(600);
+
+
+        String parentStopPlaceName = "Super Duper StopPlace";
+        String versionComment = "version comment";
+        StopPlace result = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()),
+                new EmbeddableMultilingualString(parentStopPlaceName), new ValidBetween(futureTime), versionComment, null);
+
+        assertThat(result.getValidBetween().getFromDate()).isEqualTo(futureTime);
+
+        assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
+        verifyChildValidBetween(result);
+    }
+
+    @Test
+    public void testAddToMultiModalParentStopPlaceWithFutureValidBetween() {
+
+        StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
+
+        Instant futureTime = Instant.now().plusSeconds(600);
+
+
+        String parentStopPlaceName = "Super Duper StopPlace +1";
+        StopPlace parent = new StopPlace(new EmbeddableMultilingualString(parentStopPlaceName));
+        parent.setParentStopPlace(true);
+
+        parent = stopPlaceRepository.save(parent);
+
+        StopPlace result = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(child.getNetexId()),
+                new ValidBetween(futureTime), null);
+
+        assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
+        verifyChildValidBetween(result);
     }
 
 
@@ -156,6 +219,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
         StopPlace newChild = createStopPlace("new child");
         newChild.setVersion(1L);
+        newChild.setValidBetween(new ValidBetween(Instant.now().minusSeconds(1000)));
         newChild = stopPlaceRepository.save(newChild);
 
         parent = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(newChild.getNetexId()));
@@ -164,6 +228,8 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         assertThat(parent.getChildren()).extracting(StopPlace::getNetexId)
                 .contains(existingChild.getNetexId())
                 .contains(newChild.getNetexId());
+
+        verifyChildValidBetween(parent, Sets.newHashSet(newChild.getNetexId()));
     }
 
     @Test
@@ -226,6 +292,36 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
     }
 
+    private void verifyChildValidBetween(StopPlace parentStopPlace) {
+        verifyChildValidBetween(parentStopPlace, Sets.newHashSet());
+    }
+
+    private void verifyChildValidBetween(StopPlace parentStopPlace, Set<String> filter) {
+        for(StopPlace actualChild : parentStopPlace.getChildren()) {
+
+            if(!filter.isEmpty() && !filter.contains(actualChild)) {
+                continue;
+            }
+            assertThat(actualChild.getValidBetween()).as("child valid between must be null").isNull();
+
+            StopPlace previousChildVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(actualChild.getNetexId(), 1);
+
+            String childIdAndVersion = previousChildVersion.getNetexId() + " " + previousChildVersion.getVersion();
+
+            // NRP-2234
+            assertThat(previousChildVersion.getValidBetween())
+                    .as("previous version of child stop " + childIdAndVersion + " valid between")
+                    .isNotNull();
+
+
+            Instant expectedToDate = parentStopPlace.getValidBetween().getFromDate().minusMillis(1);
+
+            assertThat(previousChildVersion.getValidBetween().getToDate())
+                    .as("previous version of child stop " + childIdAndVersion + " to date equal to parent stop place from date plus one milli second")
+                    .isNotNull()
+                    .isEqualTo(expectedToDate);
+        }
+    }
 
     private void assertThatChildsAreReferencingParent(List<String> childIds, StopPlace parent) {
         childIds.forEach(id -> {
@@ -237,7 +333,10 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     }
 
     private StopPlace createStopPlace(String name, String lang) {
-        return new StopPlace(new EmbeddableMultilingualString(name, lang));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name, lang));
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(120)));
+        stopPlace.setVersion(1L);
+        return stopPlace;
     }
 
     private StopPlace createStopPlace(String name) {

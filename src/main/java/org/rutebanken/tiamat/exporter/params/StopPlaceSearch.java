@@ -73,6 +73,9 @@ public class StopPlaceSearch {
     @QueryParam(value = "tag")
     private List<String> tags;
 
+    @QueryParam(value = "withTags")
+    private boolean withTags;
+
     private Instant pointInTime;
 
     public StopPlaceSearch() {}
@@ -89,6 +92,7 @@ public class StopPlaceSearch {
                             Long version,
                             ExportParams.VersionValidity versionValidity,
                             List<String> tags,
+                            boolean withTags,
                             int page, int size) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
@@ -102,6 +106,7 @@ public class StopPlaceSearch {
         this.version = version;
         this.versionValidity = versionValidity;
         this.tags = tags;
+        this.withTags = withTags;
         this.page = page;
         this.size = size;
     }
@@ -146,6 +151,10 @@ public class StopPlaceSearch {
         return withNearbySimilarDuplicates;
     }
 
+    public boolean isWithTags() {
+        return withTags;
+    }
+
     public Instant getPointInTime() {
         return pointInTime;
     }
@@ -168,7 +177,8 @@ public class StopPlaceSearch {
                 .add("versionValidity", getVersionValidity())
                 .add("withouLocationOnly", isWithoutLocationOnly())
                 .add("withoutQuaysOnly", isWithoutQuaysOnly())
-                .add("isWithDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
+                .add("withDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
+                .add("withTags", tags)
                 .add("tags", tags)
                 .add("page", page)
                 .add("size", size)
@@ -189,6 +199,7 @@ public class StopPlaceSearch {
         private boolean withoutQuaysOnly;
         private boolean withDuplicatedQuayImportedIds;
         private boolean withNearbySimilarDuplicates;
+        private boolean withTags;
         private Long version;
         private Instant pointInTime;
         private ExportParams.VersionValidity versionValidity;
@@ -267,6 +278,11 @@ public class StopPlaceSearch {
             return this;
         }
 
+        public Builder setWithTags(boolean withTags) {
+            this.withTags = withTags;
+            return this;
+        }
+
         public StopPlaceSearch build() {
             return new StopPlaceSearch(query,
                     stopTypeEnumerations,
@@ -280,6 +296,7 @@ public class StopPlaceSearch {
                     version,
                     versionValidity,
                     tags,
+                    withTags,
                     page,
                     size);
         }

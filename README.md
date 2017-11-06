@@ -116,48 +116,48 @@ publicationDeliveryUnmarshaller.validateAgainstSchema=true
 
 ## Synchronous NeTEx export with query params
 It is possible to export stop places and topographic places directly to NeTEx format. This is the endpoint:
-https://api-test.entur.org/tiamat/1.0/stop_places/netex
+https://api-test.entur.org/stop_places/1.0/netex
 
 ### Query by name example:
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?q=Arne%20Garborgs%20vei
+https://api-test.entur.org/stop_places/1.0/netex?q=Arne%20Garborgs%20vei
 ```
 
 ### Query by ids that contains the number 3115
  ```
- https://api-test.entur.org/tiamat/1.0/stop_places/netex?q=3115
+ https://api-test.entur.org/stop_places/1.0/netex?q=3115
  ```
 
 ### Query by stop place type
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?stopPlaceType=RAIL_STATION
+https://api-test.entur.org/stop_places/1.0/netex?stopPlaceType=RAIL_STATION
 ```
 It is also possible with multiple types.
 
 ### Query by municipality ID
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?municipalityReference=KVE:TopographicPlace:1003
+https://api-test.entur.org/stop_places/1.0/netex?municipalityReference=KVE:TopographicPlace:1003
 ```
 
 ### Query by county ID 
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?countyReference=KVE:TopographicPlace:11
+https://api-test.entur.org/stop_places/1.0/netex?countyReference=KVE:TopographicPlace:11
 ```
 
 ### Limit size of results
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?size=1000
+https://api-test.entur.org/stop_places/1.0/netex?size=1000
 ```
 
 ### Page
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?page=1
+https://api-test.entur.org/stop_places/1.0/netex?page=1
 ```
 
 ### ID list
 You can specify a list of NSR stop place IDs to return
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+https://api-test.entur.org/stop_places/1.0/netex?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
 ### All Versions
@@ -185,7 +185,7 @@ The ```versionValidity``` parameter controls what stop places to return.
 
 ### Example
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
+https://api-test.entur.org/stop_places/1.0/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
 ```
 
 Returns stop places with current version validity now, matching the query 'Nesbru' and exists in municipality 0220. Fetches relevant tariff zones and topographic places.
@@ -198,17 +198,17 @@ When the job is finished, you can download the exported data.
 
 ### Start async export:
 ```
-curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export/initiate | xmllint --format -
+curl https://api-test.entur.org/stop_places/1.0/netex/export/initiate | xmllint --format -
 ```
 
 ### Check job status:
 ```
-curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export | xmllint --format -
+curl https://api-test.entur.org/stop_places/1.0/netex/export | xmllint --format -
 ```
 
 ### When job is done. Download it:
 ```
-curl https://api-test.entur.org/tiamat/1.0/stop_places/netex/export/130116/content | zcat | xmllint --format - > export.xml
+curl https://api-test.entur.org/stop_places/1.0/netex/export/130116/content | zcat | xmllint --format - > export.xml
 ```
 
 See also https://rutebanken.atlassian.net/browse/NRP-924
@@ -264,7 +264,7 @@ https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
 # GraphQL
 GraphQL endpoint is available on
 ```
-https://api-test.entur.org/tiamat/1.0/stop_places/graphql
+https://api-test.entur.org/stop_places/1.0/graphql
 ```
 
 Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/

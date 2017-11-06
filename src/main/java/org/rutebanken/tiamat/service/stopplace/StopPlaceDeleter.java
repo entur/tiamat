@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
 
@@ -45,32 +48,37 @@ public class StopPlaceDeleter {
 
     private final UsernameFetcher usernameFetcher;
 
+    private final MutateLock mutateLock;
+
     @Autowired
-    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, ReflectionAuthorizationService authorizationService, UsernameFetcher usernameFetcher) {
+    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, ReflectionAuthorizationService authorizationService, UsernameFetcher usernameFetcher, MutateLock mutateLock) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.entityChangedListener = entityChangedListener;
         this.authorizationService = authorizationService;
         this.usernameFetcher = usernameFetcher;
+        this.mutateLock = mutateLock;
     }
 
     public boolean deleteStopPlace(String stopPlaceId) {
 
-        String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
-        logger.warn("About to delete stop place by ID {}. User: {}", stopPlaceId, usernameForAuthenticatedUser);
+        return mutateLock.executeInLock(() -> {
+            String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
+            logger.warn("About to delete stop place by ID {}. User: {}", stopPlaceId, usernameForAuthenticatedUser);
 
-        List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
+            List<StopPlace> stopPlaces = getAllVersionsOfStopPlace(stopPlaceId);
 
-        if (stopPlaces.stream().anyMatch(stopPlace -> stopPlace.isParentStopPlace() || stopPlace.getParentSiteRef() != null)) {
-            throw new IllegalArgumentException("Deleting parent stop place or childs of parent stop place is not allowed: " + stopPlaceId);
-        }
+            if (stopPlaces.stream().anyMatch(stopPlace -> stopPlace.isParentStopPlace() || stopPlace.getParentSiteRef() != null)) {
+                throw new IllegalArgumentException("Deleting parent stop place or childs of parent stop place is not allowed: " + stopPlaceId);
+            }
 
-        authorizationService.assertAuthorized(ROLE_DELETE_STOPS, stopPlaces);
-        stopPlaceRepository.delete(stopPlaces);
-        notifyDeleted(stopPlaces);
+            authorizationService.assertAuthorized(ROLE_DELETE_STOPS, stopPlaces);
+            stopPlaceRepository.delete(stopPlaces);
+            notifyDeleted(stopPlaces);
 
-        logger.warn("All versions ({}) of stop place {} deleted by user {}", stopPlaces.size(), stopPlaceId, usernameForAuthenticatedUser);
+            logger.warn("All versions ({}) of stop place {} deleted by user {}", stopPlaces.size(), stopPlaceId, usernameForAuthenticatedUser);
 
-        return true;
+            return true;
+        });
     }
 
     private List<StopPlace> getAllVersionsOfStopPlace(String stopPlaceId) {

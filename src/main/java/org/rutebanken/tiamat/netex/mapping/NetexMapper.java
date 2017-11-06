@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.rutebanken.tiamat.repository.TagRepository;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,7 +190,10 @@ public class NetexMapper {
         converters.add(new CheckConstraintsConverter());
         converters.add(new DestinationDisplayViewsConverter());
         converters.add(new ZonedDateTimeInstantConverter());
-        converters.add(new OffsetDateTimeInstantConverter());
+
+        converters.add(new LocalDateTimeInstantConverter());
+        ExportTimeZone exportTimeZone = new ExportTimeZone();
+        converters.add(new OffsetDateTimeInstantConverter(exportTimeZone));
         converters.add(new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory()));
         converters.add(new KeyValuesToKeyListConverter());
         converters.add(new AccessibilityLimitationsListConverter());

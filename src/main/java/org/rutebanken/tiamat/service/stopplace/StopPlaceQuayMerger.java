@@ -20,7 +20,8 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
+import org.rutebanken.tiamat.service.ObjectMerger;
+import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.service.merge.AlternativeNamesMerger;
 import org.rutebanken.tiamat.service.merge.KeyValuesMerger;
 import org.rutebanken.tiamat.service.merge.PlaceEquipmentMerger;
@@ -70,58 +71,63 @@ public class StopPlaceQuayMerger {
     @Autowired
     private StopPlaceCopyHelper stopPlaceCopyHelper;
 
+    @Autowired
+    private MutateLock mutateLock;
+
     public StopPlace mergeQuays(final String stopPlaceId, String fromQuayId, String toQuayId, String versionComment, boolean isDryRun) {
 
-        logger.info("{} is about to merge quays {} -> {} of stop place {}", usernameFetcher.getUserNameForAuthenticatedUser(), fromQuayId, toQuayId, stopPlaceId);
+        return mutateLock.executeInLock(() -> {
+            logger.info("{} is about to merge quays {} -> {} of stop place {}", usernameFetcher.getUserNameForAuthenticatedUser(), fromQuayId, toQuayId, stopPlaceId);
 
-        final StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
-        Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
+            final StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+            Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
 
-        Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
+            Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
 
-        Instant now = Instant.now();
+            Instant now = Instant.now();
 
-        CopiedEntity<StopPlace> stopPlaceCopies = stopPlaceCopyHelper.createCopies(stopPlace);
-
-
-        Optional<Quay> fromQuayOpt = stopPlaceCopies.getCopiedEntity().getQuays().stream().filter(quay -> quay.getNetexId().equals(fromQuayId)).findFirst();
-        Optional<Quay> toQuayOpt = stopPlaceCopies.getCopiedEntity().getQuays().stream().filter(quay -> quay.getNetexId().equals(toQuayId)).findFirst();
-
-        Preconditions.checkArgument(fromQuayOpt.isPresent(), "Quay does not exist on StopPlace", fromQuayId);
-        Preconditions.checkArgument(toQuayOpt.isPresent(), "Quay does not exist on StopPlace", toQuayId);
-
-        Quay fromQuay = fromQuayOpt.get();
-        Quay toQuay = toQuayOpt.get();
-
-        executeQuayMerge(fromQuay, toQuay);
-
-        stopPlaceCopies.getCopiedEntity().getQuays()
-                .removeIf(quay -> quay.getNetexId().equals(fromQuayId));
-
-        if(stopPlaceCopies.hasParent()) {
-            stopPlaceCopies.getCopiedParent().setVersionComment(versionComment);
-        } else {
-            stopPlaceCopies.getCopiedEntity().setVersionComment(versionComment);
-        }
+            CopiedEntity<StopPlace> stopPlaceCopies = stopPlaceCopyHelper.createCopies(stopPlace);
 
 
-        logger.info("Saving stop place after merging: {}", stopPlace.getNetexId());
-        if(stopPlaceCopies.hasParent()) {
-            if(!isDryRun) {
-                logger.info("Saving parent stop place {}. Returning parent of child: {}", stopPlaceCopies.getCopiedParent().getNetexId(), stopPlace.getNetexId());
-                return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent(), now);
+            Optional<Quay> fromQuayOpt = stopPlaceCopies.getCopiedEntity().getQuays().stream().filter(quay -> quay.getNetexId().equals(fromQuayId)).findFirst();
+            Optional<Quay> toQuayOpt = stopPlaceCopies.getCopiedEntity().getQuays().stream().filter(quay -> quay.getNetexId().equals(toQuayId)).findFirst();
+
+            Preconditions.checkArgument(fromQuayOpt.isPresent(), "Quay does not exist on StopPlace", fromQuayId);
+            Preconditions.checkArgument(toQuayOpt.isPresent(), "Quay does not exist on StopPlace", toQuayId);
+
+            Quay fromQuay = fromQuayOpt.get();
+            Quay toQuay = toQuayOpt.get();
+
+            executeQuayMerge(fromQuay, toQuay);
+
+            stopPlaceCopies.getCopiedEntity().getQuays()
+                    .removeIf(quay -> quay.getNetexId().equals(fromQuayId));
+
+            if (stopPlaceCopies.hasParent()) {
+                stopPlaceCopies.getCopiedParent().setVersionComment(versionComment);
             } else {
-                return stopPlaceCopies.getCopiedParent();
+                stopPlaceCopies.getCopiedEntity().setVersionComment(versionComment);
             }
-        } else {
-            if(!isDryRun) {
-                return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, stopPlaceCopies.getCopiedEntity(), now);
+
+
+            logger.info("Saving stop place after merging: {}", stopPlace.getNetexId());
+            if (stopPlaceCopies.hasParent()) {
+                if (!isDryRun) {
+                    logger.info("Saving parent stop place {}. Returning parent of child: {}", stopPlaceCopies.getCopiedParent().getNetexId(), stopPlace.getNetexId());
+                    return stopPlaceVersionedSaverService.saveNewVersion(stopPlaceCopies.getExistingParent(), stopPlaceCopies.getCopiedParent(), now);
+                } else {
+                    return stopPlaceCopies.getCopiedParent();
+                }
             } else {
-                return stopPlaceCopies.getCopiedEntity();
+                if (!isDryRun) {
+                    return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, stopPlaceCopies.getCopiedEntity(), now);
+                } else {
+                    return stopPlaceCopies.getCopiedEntity();
+                }
             }
-        }
+        });
     }
 
     private void executeQuayMerge(Quay fromQuay, Quay toQuay) {

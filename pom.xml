@@ -118,7 +118,7 @@
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
-        <netex-java-model.version>1.0.7-SNAPSHOT</netex-java-model.version>
+        <netex-java-model.version>1.0.8-SNAPSHOT</netex-java-model.version>
         <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>0.0.3-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.3-SNAPSHOT</rutebanken-organisation.version>
@@ -263,7 +263,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.rutebanken</groupId>
+            <groupId>org.entur</groupId>
             <artifactId>netex-java-model</artifactId>
             <version>${netex-java-model.version}</version>
         </dependency>

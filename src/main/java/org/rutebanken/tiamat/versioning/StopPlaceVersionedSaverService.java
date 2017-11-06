@@ -18,9 +18,7 @@ package org.rutebanken.tiamat.versioning;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
-import org.rutebanken.tiamat.model.SiteElement;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
@@ -73,7 +71,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     }
 
     @Override
-    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant now) {
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom) {
 
         super.validate(existingVersion, newVersion);
 
@@ -86,26 +84,27 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
 
+        Instant changed = Instant.now();
 
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, now);
+        Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, defaultValidFrom);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
-            newVersion.setCreated(now);
+            newVersion.setCreated(changed);
         } else {
-            newVersion.setChanged(now);
+            newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
             logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom);
+            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
         }
 
         // Save latest version
-        newVersion = initiateOrIncrementVersions(newVersion);
+        newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
@@ -115,6 +114,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         clearUnwantedChildFields(newVersion);
 
         if(newVersion.getChildren() != null) {
+            newVersion.getChildren().forEach(child -> child.setChanged(changed));
             stopPlaceRepository.save(newVersion.getChildren());
             if(logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()
@@ -138,19 +138,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         entityChangedListener.onChange(newVersion);
 
         return newVersion;
-    }
-
-    /**
-     * Increment versions for stop place with children.
-     * The object must have their netexId set, or else they will get an initial version
-     * @param stopPlace with quays and accessibility assessment
-     * @param validFrom
-     * @return modified StopPlace
-     */
-    public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
-        versionCreator.initiateOrIncrement(stopPlace);
-        initiateOrIncrementVersionsForChildren(stopPlace);
-        return stopPlace;
     }
 
     private void updateQuaysCache(StopPlace stopPlace) {
@@ -181,33 +168,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             }
 
             child.setValidBetween(null);
-            child.setTopographicPlace(null);
-            child.getTariffZones().clear();
         });
-    }
-
-    private void initiateOrIncrementVersionsForChildren(StopPlace stopPlaceToSave) {
-
-        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(stopPlaceToSave);
-
-        if (stopPlaceToSave.getAlternativeNames() != null) {
-            versionCreator.initiateOrIncrementAlternativeNamesVersion(stopPlaceToSave.getAlternativeNames());
-        }
-
-        if (stopPlaceToSave.getQuays() != null) {
-            logger.debug("Initiating first versions for {} quays, accessibility assessment and limitations", stopPlaceToSave.getQuays().size());
-            stopPlaceToSave.getQuays().forEach(quay -> {
-                initiateOrIncrementSiteElementVersion(quay);
-            });
-        }
-
-        if(stopPlaceToSave.getChildren() != null) {
-            logger.debug("Initiating versions for {} child stop places. Parent: {}", stopPlaceToSave.getChildren().size(), stopPlaceToSave.getNetexId());
-            stopPlaceToSave.getChildren().forEach(child -> {
-                initiateOrIncrementSiteElementVersion(child);
-                initiateOrIncrementVersionsForChildren(child);
-            });
-        }
     }
 
     /**
@@ -219,10 +180,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if(parentStopPlace.getChildren() != null) {
             count = parentStopPlace.getChildren().stream()
                 .map(child -> {
-                    SiteRefStructure siteRefStructure = new SiteRefStructure();
-                    siteRefStructure.setRef(parentStopPlace.getNetexId());
-                    siteRefStructure.setVersion(String.valueOf(parentStopPlace.getVersion()));
-                    child.setParentSiteRef(siteRefStructure);
+                    child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
                     return child;
 
             }).count();
@@ -230,11 +188,5 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.info("Updated {} childs with parent site refs", count);
     }
 
-    private void initiateOrIncrementSiteElementVersion(SiteElement siteElement) {
-        versionCreator.initiateOrIncrement(siteElement);
-        versionCreator.initiateOrIncrementAccessibilityAssesmentVersion(siteElement);
-        if (siteElement.getAlternativeNames() != null) {
-            versionCreator.initiateOrIncrementAlternativeNamesVersion(siteElement.getAlternativeNames());
-        }
-    }
+
 }

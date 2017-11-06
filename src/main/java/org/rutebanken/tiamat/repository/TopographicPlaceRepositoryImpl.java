@@ -17,21 +17,13 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.StringType;
-import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,20 +73,40 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		return query.getResultList();
 	}
 
+	@Override
+	public Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds) {
+
+		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+			return new ArrayList<TopographicPlace>().iterator();
+		}
+
+		return scrollTopographicPlaces(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
+	}
+
+	@Override
+	public Iterator<TopographicPlace> scrollTopographicPlaces() {
+		return scrollTopographicPlaces("SELECT t.* FROM topographic_place t");
+	}
+
+	public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {
+		Session session = entityManager.unwrap(Session.class);
+		SQLQuery sqlQuery = session.createSQLQuery(sql);
+
+		sqlQuery.addEntity(TopographicPlace.class);
+		sqlQuery.setReadOnly(true);
+		sqlQuery.setFetchSize(1000);
+		sqlQuery.setCacheable(false);
+		ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+		ScrollableResultIterator<TopographicPlace> topographicPlaceIterator = new ScrollableResultIterator<>(results, 100, session);
+		return  topographicPlaceIterator;
+	}
 
 	@Override
 	public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
 		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
 			return new ArrayList<>();
 		}
-		StringBuilder sql = new StringBuilder("select tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
-
-		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
-		sql.append(String.join(",", stopPlaceStringDbIds));
-		sql.append(")");
-
-
-		Query query = entityManager.createNativeQuery(sql.toString(), TopographicPlace.class);
+		Query query = entityManager.createNativeQuery(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds), TopographicPlace.class);
 
 		try {
 			@SuppressWarnings("unchecked")
@@ -107,5 +119,15 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		} catch (NoResultException noResultException) {
 			return null;
 		}
+	}
+
+	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+
+		StringBuilder sql = new StringBuilder("select  distinct on(tp.id) tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
+
+		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
+		sql.append(String.join(",", stopPlaceStringDbIds));
+		sql.append(")");
+		return sql.toString();
 	}
 }
