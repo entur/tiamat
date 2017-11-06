@@ -25,8 +25,6 @@ import java.util.Objects;
 @MappedSuperclass
 public class VersionOfObjectRefStructure implements Serializable {
 
-    public static final String ANY_VERSION = "any";
-
     private String ref;
 
     private String version;

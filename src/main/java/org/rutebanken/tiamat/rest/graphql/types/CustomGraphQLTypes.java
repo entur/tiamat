@@ -620,7 +620,7 @@ public class CustomGraphQLTypes {
             .description(ENTITY_REF_DESCRIPTION)
             .field(newInputObjectField()
                     .name(ENTITY_REF_REF)
-                    .type(GraphQLString)
+                    .type(new GraphQLNonNull(GraphQLString))
                     .description(ENTITY_REF_REF_DESCRIPTION))
             .field(newInputObjectField()
                     .name(ENTITY_REF_VERSION)

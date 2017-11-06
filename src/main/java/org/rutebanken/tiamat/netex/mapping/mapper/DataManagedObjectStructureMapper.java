@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 import static org.rutebanken.tiamat.netex.mapping.mapper.TagKeyValuesMapper.TAG_PREFIX;
 
 @Component
@@ -83,7 +82,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
         netexIdMapper.toTiamatModel(netexEntity, tiamatEntity);
 
         if (netexEntity.getVersion() != null) {
-            if (netexEntity.getVersion().equals(ANY_VERSION)) {
+            if (netexEntity.getVersion() == null) {
                 tiamatEntity.setVersion(-1L); // Need to handle this value in import.
             } else {
                 Long longVersion = Longs.tryParse(netexEntity.getVersion());

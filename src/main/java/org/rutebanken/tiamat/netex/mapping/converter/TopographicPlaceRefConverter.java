@@ -30,8 +30,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
-
 @Component
 public class TopographicPlaceRefConverter extends BidirectionalConverter<TopographicPlaceRefStructure, TopographicPlace> {
 
@@ -48,8 +46,8 @@ public class TopographicPlaceRefConverter extends BidirectionalConverter<Topogra
     @Override
     public TopographicPlace convertTo(TopographicPlaceRefStructure topographicPlaceRefStructure, Type<TopographicPlace> type, MappingContext mappingContext) {
 
-        if(ANY_VERSION.equals(topographicPlaceRefStructure.getVersion())) {
-            logger.debug("Version is any for topographic place ref. Finding newest version. ref: {}", topographicPlaceRefStructure);
+        if(topographicPlaceRefStructure.getVersion() == null) {
+            logger.debug("Version is null for topographic place ref. Finding newest version. ref: {}", topographicPlaceRefStructure);
             TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(topographicPlaceRefStructure.getRef());
             if(topographicPlace != null) {
                 return topographicPlace;

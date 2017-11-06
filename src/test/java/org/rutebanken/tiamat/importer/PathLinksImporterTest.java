@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 public class PathLinksImporterTest extends TiamatIntegrationTest {
 
@@ -77,10 +76,10 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
 
         quayRepository.save(toQuay);
 
-        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION);
+        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, null);
         PathLinkEnd pathLinkEndFrom = new PathLinkEnd(fromPlaceRef);
 
-        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, ANY_VERSION);
+        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, null);
         PathLinkEnd pathLinkEndTo = new PathLinkEnd(toPlaceRef);
 
         PathLink pathLink = new PathLink(pathLinkEndFrom, pathLinkEndTo);

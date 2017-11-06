@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
 @Transactional
@@ -94,7 +93,7 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion(ANY_VERSION)
+                .withVersion("any")
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
         return publicationDeliveryStructure;
