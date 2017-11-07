@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.service.AlternativeNameUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,10 @@ public class SiteElementMapper {
     private static final Logger logger = LoggerFactory.getLogger(SiteElementMapper.class);
 
     @Autowired
-    private SiteElementAlternativeNameMapper siteElementAlternativeNameMapper;
+    private AlternativeNameMapper alternativeNameMapper;
+
+    @Autowired
+    private AlternativeNameUpdater alternativeNameUpdater;
 
     @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
@@ -84,7 +88,8 @@ public class SiteElementMapper {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
             for (Object alternativeNameObject : alternativeNames) {
                 Map alternativeNameInputMap = (Map) alternativeNameObject;
-                if (siteElementAlternativeNameMapper.populateAlternativeNameFromInput(entity, alternativeNameInputMap)) {
+                AlternativeName alternativeName = alternativeNameMapper.mapToAlternativeName(alternativeNameInputMap);
+                if (alternativeNameUpdater.updateAlternativeName(entity, alternativeName)) {
                     isUpdated = true;
                 } else {
                     logger.info("AlternativeName not changed");

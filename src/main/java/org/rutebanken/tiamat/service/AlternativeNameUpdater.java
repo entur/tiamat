@@ -13,43 +13,32 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql.mappers;
+package org.rutebanken.tiamat.service;
 
-import org.rutebanken.tiamat.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.SiteElement;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.util.Map;
 import java.util.Optional;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-
 @Component
-public class SiteElementAlternativeNameMapper {
+public class AlternativeNameUpdater {
 
-    private static final Logger logger = LoggerFactory.getLogger(SiteElementAlternativeNameMapper.class);
-
-    public boolean populateAlternativeNameFromInput(SiteElement entity, Map entry) {
+    public boolean updateAlternativeName(SiteElement entity, AlternativeName alternativeName) {
         boolean isUpdated = false;
         AlternativeName altName;
 
-        NameTypeEnumeration nameType = (NameTypeEnumeration) entry.getOrDefault(NAME_TYPE, NameTypeEnumeration.OTHER);
-        EmbeddableMultilingualString name = getEmbeddableString((Map) entry.get(NAME));
 
-        if (name != null) {
+        if (alternativeName.getName() != null) {
 
             Optional<AlternativeName> existing = entity.getAlternativeNames()
                     .stream()
-                    .filter(alternativeName -> alternativeName != null)
-                    .filter(alternativeName -> alternativeName.getName() != null)
-                    .filter(alternativeName -> {
+                    .filter(existingAlternativeName -> alternativeName != null)
+                    .filter(existingAlternativeName -> alternativeName.getName() != null)
+                    .filter(existingAlternativeName -> {
                         return (alternativeName.getName().getLang() != null &&
-                                alternativeName.getName().getLang().equals(name.getLang()) &&
-                                alternativeName.getNameType() != null && alternativeName.getNameType().equals(nameType));
+                                alternativeName.getName().getLang().equals(alternativeName.getName().getLang()) &&
+                                alternativeName.getNameType() != null && alternativeName.getNameType().equals(alternativeName.getNameType()));
                     })
                     .findFirst();
             if (existing.isPresent()) {
@@ -57,9 +46,9 @@ public class SiteElementAlternativeNameMapper {
             } else {
                 altName = new AlternativeName();
             }
-            if (name.getValue() != null) {
-                altName.setName(name);
-                altName.setNameType(nameType);
+            if (alternativeName.getName().getValue() != null) {
+                altName.setName(alternativeName.getName());
+                altName.setNameType(alternativeName.getNameType());
                 isUpdated = true;
             }
 
@@ -72,4 +61,5 @@ public class SiteElementAlternativeNameMapper {
 
         return isUpdated;
     }
+
 }
