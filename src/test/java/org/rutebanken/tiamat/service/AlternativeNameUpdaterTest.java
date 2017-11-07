@@ -30,6 +30,7 @@
 
 package org.rutebanken.tiamat.service;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -66,6 +67,7 @@ public class AlternativeNameUpdaterTest {
     }
 
 
+    @Ignore
     @Test
     public void doNotAllowMultipleAlternativenamesPerTranslation() {
 
