@@ -90,7 +90,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                     tiamatEntity.setVersion(longVersion);
                 } else {
                     throw new NetexMappingException("Received version in netex format. " +
-                            "But cannot parse version. Expecting a long value or the String 'any'. " +
+                            "But cannot parse version. Expecting a long value or empty value. " +
                             "Value is: " + netexEntity.getVersion() + " Object: " + netexEntity);
                 }
             }
