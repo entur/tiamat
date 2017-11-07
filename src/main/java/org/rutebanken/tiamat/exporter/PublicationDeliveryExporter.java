@@ -39,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
@@ -54,6 +56,7 @@ public class PublicationDeliveryExporter {
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
     private final ChildStopPlacesFetcher childStopPlacesFetcher;
+    private static final AtomicLong publicationDeliveryId = new AtomicLong();
 
     public enum MultiModalFetchMode {CHILDREN, PARENTS}
 
@@ -93,7 +96,7 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion("any")
+                .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
         return publicationDeliveryStructure;

@@ -202,7 +202,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withVersion("1")
                 .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(municipalityName))
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY)
-                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef("KVE:TopographicPlace:1").withVersion("any"));
+                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure().withRef("KVE:TopographicPlace:1").withVersion("1"));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(municipality);
 
