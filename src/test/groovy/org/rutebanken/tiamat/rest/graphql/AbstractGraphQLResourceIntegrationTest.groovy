@@ -57,7 +57,7 @@ abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationT
                 query.replaceAll("\"", "\\\\\"")
                         .replaceAll("\n", "\\\\n") +
                 "\",\"variables\":\"\"}"
-
+        println query
         return executeGraphQL(graphQlJsonQuery, httpStatusCode)
     }
 
@@ -66,7 +66,6 @@ abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationT
                 .port(port)
                 .contentType(ContentType.JSON)
                 .body(graphQlJsonQuery)
-                .log().body()
            .when()
                 .post(BASE_URI_GRAPHQL)
                 .then()
