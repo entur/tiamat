@@ -1037,7 +1037,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
         String xml = "<PublicationDelivery\n" +
-                " version=\"1.0\"\n" +
+                " version=\"any\"\n" +
                 " xmlns=\"http://www.netex.org.uk/netex\"\n" +
                 " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                 " xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +

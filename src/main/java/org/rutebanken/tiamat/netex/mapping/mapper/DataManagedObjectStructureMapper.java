@@ -82,7 +82,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
         netexIdMapper.toTiamatModel(netexEntity, tiamatEntity);
 
         if (netexEntity.getVersion() != null) {
-            if (netexEntity.getVersion() == null) {
+            if (netexEntity.getVersion().equals("any")) {
                 tiamatEntity.setVersion(-1L); // Need to handle this value in import.
             } else {
                 Long longVersion = Longs.tryParse(netexEntity.getVersion());
@@ -90,7 +90,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                     tiamatEntity.setVersion(longVersion);
                 } else {
                     throw new NetexMappingException("Received version in netex format. " +
-                            "But cannot parse version. Expecting a long value or empty value. " +
+                            "But cannot parse version. Expecting a long value or the String 'any'. " +
                             "Value is: " + netexEntity.getVersion() + " Object: " + netexEntity);
                 }
             }
