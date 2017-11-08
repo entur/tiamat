@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
@@ -42,31 +42,32 @@ public class AlternativeNameUpdater {
      * @return if alternative names were updated
      */
     public boolean updateAlternativeNames(SiteElement entity, List<AlternativeName> alternativeNames) {
-        boolean isUpdated = false;
+        final AtomicInteger matchedExisting = new AtomicInteger();
 
         avoidDuplicateTranslationsPerLanguage(alternativeNames);
 
-        List<AlternativeName> result = new ArrayList<>();
 
-        for (AlternativeName incomingAlternativeName : alternativeNames) {
+        List<AlternativeName> result = alternativeNames.stream()
+                .map(incomingAlternativeName -> {
+                    Optional<AlternativeName> optionalExisting = matchExisting(entity, incomingAlternativeName);
 
-            Optional<AlternativeName> optionalExisting = matchExisting(entity, incomingAlternativeName);
+                    if (optionalExisting.isPresent()) {
+                        AlternativeName existingAlternativeName = optionalExisting.get();
+                        logger.debug("Found matching alternative name on name and nametype. Keeping existing: {} incoming: {}",
+                                existingAlternativeName, incomingAlternativeName);
+                        return existingAlternativeName;
+                    } else {
+                        matchedExisting.incrementAndGet();
+                        return incomingAlternativeName;
+                    }
+                })
+                .collect(Collectors.toList());
 
-            if (optionalExisting.isPresent()) {
-                AlternativeName existingAlternativeName = optionalExisting.get();
-                logger.debug("Found matching alternative name on name and nametype. Keeping existing: {} incoming: {}",
-                        existingAlternativeName, incomingAlternativeName);
-                result.add(existingAlternativeName);
-            } else {
-                result.add(incomingAlternativeName);
-                isUpdated = true;
-            }
-        }
 
         entity.getAlternativeNames().clear();
         entity.getAlternativeNames().addAll(result);
 
-        return isUpdated;
+        return matchedExisting.get() > 0;
     }
 
     private void avoidDuplicateTranslationsPerLanguage(List<AlternativeName> alternativeNames) {
