@@ -31,6 +31,7 @@ public class AlternativeName
 
     protected String lang;
 
+    @Enumerated(EnumType.STRING)
     protected NameTypeEnumeration nameType;
 
     protected String typeOfName;
