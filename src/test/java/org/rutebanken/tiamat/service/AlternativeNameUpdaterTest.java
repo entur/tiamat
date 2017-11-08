@@ -36,7 +36,9 @@ import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.rest.graphql.mappers.AlternativeNameMapper;
+
+import java.time.Instant;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,42 +53,55 @@ public class AlternativeNameUpdaterTest {
         StopPlace stopPlace = new StopPlace();
 
         AlternativeName alias1 = new AlternativeName();
-        alias1.setName(new EmbeddableMultilingualString("Oslo lufthavn"));
+        alias1.setName(new EmbeddableMultilingualString("Oslo lufthavn", "nb"));
         alias1.setNameType(NameTypeEnumeration.ALIAS);
 
-        stopPlace.getAlternativeNames().add(alias1);
+        AlternativeName alias2 = new AlternativeName();
+        alias2.setName(new EmbeddableMultilingualString("Gardermoen lufthavn", "nb"));
+        alias2.setNameType(NameTypeEnumeration.ALIAS);
 
-        AlternativeName newAlternativeName = new AlternativeName();
-        newAlternativeName.setName(new EmbeddableMultilingualString("Oslo lufthavn"));
-        newAlternativeName.setNameType(NameTypeEnumeration.ALIAS);
-
-        alternativeNameUpdater.updateAlternativeName(stopPlace, newAlternativeName);
+        boolean isUpdated = alternativeNameUpdater.updateAlternativeNames(stopPlace, Arrays.asList(alias1, alias2));
+        assertThat(isUpdated).isTrue();
         assertThat(stopPlace.getAlternativeNames()).hasSize(2);
-
-        stopPlace.getAlternativeNames().forEach(alternativeName -> System.out.println(alternativeName));
     }
 
-
-    @Ignore
     @Test
-    public void doNotAllowMultipleAlternativenamesPerTranslation() {
+    public void keepExistingAlias() {
 
         StopPlace stopPlace = new StopPlace();
 
-        AlternativeName alias1 = new AlternativeName();
-        alias1.setName(new EmbeddableMultilingualString("Oslo lufthavn"));
-        alias1.setNameType(NameTypeEnumeration.TRANSLATION);
+        AlternativeName existingAlias = new AlternativeName();
+        existingAlias.setNetexId("NSR:AlternativeName:1");
+        existingAlias.setName(new EmbeddableMultilingualString("Oslo lufthavn", "nb"));
+        existingAlias.setNameType(NameTypeEnumeration.ALIAS);
 
-        stopPlace.getAlternativeNames().add(alias1);
+        stopPlace.getAlternativeNames().add(existingAlias);
 
-        AlternativeName newAlternativeName = new AlternativeName();
-        newAlternativeName.setName(new EmbeddableMultilingualString("new value"));
-        newAlternativeName.setNameType(NameTypeEnumeration.TRANSLATION);
+        AlternativeName incomingAlias = new AlternativeName();
+        incomingAlias.setName(new EmbeddableMultilingualString("Oslo lufthavn", "nb"));
+        incomingAlias.setNameType(NameTypeEnumeration.ALIAS);
 
-        alternativeNameUpdater.updateAlternativeName(stopPlace, newAlternativeName);
+        boolean isUpdated = alternativeNameUpdater.updateAlternativeNames(stopPlace, Arrays.asList(incomingAlias));
+        assertThat(isUpdated).isFalse();
         assertThat(stopPlace.getAlternativeNames()).hasSize(1);
+        assertThat(stopPlace.getAlternativeNames().get(0).getNetexId()).isNotNull();
 
-        stopPlace.getAlternativeNames().forEach(alternativeName -> System.out.println(alternativeName));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doNotAllowMultipleTranslationsPerLanguage() {
+
+        StopPlace stopPlace = new StopPlace();
+
+        AlternativeName translation1 = new AlternativeName();
+        translation1.setName(new EmbeddableMultilingualString("Oslo lufthavn", "nb"));
+        translation1.setNameType(NameTypeEnumeration.TRANSLATION);
+
+        AlternativeName translation2 = new AlternativeName();
+        translation2.setName(new EmbeddableMultilingualString("new value", "nb"));
+        translation2.setNameType(NameTypeEnumeration.TRANSLATION);
+
+        alternativeNameUpdater.updateAlternativeNames(stopPlace, Arrays.asList(translation1, translation2));
+
+    }
 }

@@ -15,51 +15,81 @@
 
 package org.rutebanken.tiamat.service;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.SiteElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class AlternativeNameUpdater {
 
-    public boolean updateAlternativeName(SiteElement entity, AlternativeName alternativeName) {
+    private static final Logger logger = LoggerFactory.getLogger(AlternativeName.class);
+
+    /**
+     * Saving alternative names always overwrites existing alternative names,
+     * except when the incoming alternative name matches an existing one.
+     *
+     * @param entity           with alternative names
+     * @param alternativeNames incoming alternative names
+     * @return if alternative names were updated
+     */
+    public boolean updateAlternativeNames(SiteElement entity, List<AlternativeName> alternativeNames) {
         boolean isUpdated = false;
-        AlternativeName altName;
 
+        avoidDuplicateTranslationsPerLanguage(alternativeNames);
 
-        if (alternativeName.getName() != null) {
+        List<AlternativeName> result = new ArrayList<>();
 
-            Optional<AlternativeName> existing = entity.getAlternativeNames()
-                    .stream()
-                    .filter(existingAlternativeName -> alternativeName != null)
-                    .filter(existingAlternativeName -> alternativeName.getName() != null)
-                    .filter(existingAlternativeName -> {
-                        return (alternativeName.getName().getLang() != null &&
-                                alternativeName.getName().getLang().equals(alternativeName.getName().getLang()) &&
-                                alternativeName.getNameType() != null && alternativeName.getNameType().equals(alternativeName.getNameType()));
-                    })
-                    .findFirst();
-            if (existing.isPresent()) {
-                altName = existing.get();
+        for (AlternativeName incomingAlternativeName : alternativeNames) {
+
+            Optional<AlternativeName> optionalExisting = matchExisting(entity, incomingAlternativeName);
+
+            if (optionalExisting.isPresent()) {
+                AlternativeName existingAlternativeName = optionalExisting.get();
+                logger.debug("Found matching alternative name on name and nametype. Keeping existing: {} incoming: {}",
+                        existingAlternativeName, incomingAlternativeName);
+                result.add(existingAlternativeName);
             } else {
-                altName = new AlternativeName();
-            }
-            if (alternativeName.getName().getValue() != null) {
-                altName.setName(alternativeName.getName());
-                altName.setNameType(alternativeName.getNameType());
+                result.add(incomingAlternativeName);
                 isUpdated = true;
-            }
-
-            if (altName.getName() == null || altName.getName().getValue() == null || altName.getName().getValue().isEmpty()) {
-                entity.getAlternativeNames().remove(altName);
-            } else if (isUpdated && altName.getNetexId() == null) {
-                entity.getAlternativeNames().add(altName);
             }
         }
 
+        entity.getAlternativeNames().clear();
+        entity.getAlternativeNames().addAll(result);
+
         return isUpdated;
+    }
+
+    private void avoidDuplicateTranslationsPerLanguage(List<AlternativeName> alternativeNames) {
+        // Avoid multiple translations per language
+        alternativeNames.stream()
+                .filter(a -> a.getNameType().equals(NameTypeEnumeration.TRANSLATION))
+                .collect(Collectors.groupingBy(a -> Pair.of(a.getName().getLang(), a.getNameType())))
+                .entrySet()
+                .stream()
+                .filter(pairListEntry -> pairListEntry.getValue().size() > 1)
+                .findFirst()
+                .ifPresent(entry -> {
+                    throw new IllegalArgumentException("Multiple translations with the same language and type is not permitted: "
+                            + entry.getKey() + " " + entry.getValue());
+                });
+    }
+
+    private Optional<AlternativeName> matchExisting(SiteElement entity, AlternativeName incomingAlternativeName) {
+        return entity.getAlternativeNames()
+                .stream()
+                .filter(existingAlternativeName -> existingAlternativeName.getName().equals(incomingAlternativeName.getName())
+                        && existingAlternativeName.getNameType().equals(incomingAlternativeName.getNameType()))
+                .findFirst();
     }
 
 }

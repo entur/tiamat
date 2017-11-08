@@ -86,14 +86,12 @@ public class SiteElementMapper {
 
         if (input.get(ALTERNATIVE_NAMES) != null) {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
-            for (Object alternativeNameObject : alternativeNames) {
-                Map alternativeNameInputMap = (Map) alternativeNameObject;
-                AlternativeName alternativeName = alternativeNameMapper.mapToAlternativeName(alternativeNameInputMap);
-                if (alternativeNameUpdater.updateAlternativeName(entity, alternativeName)) {
-                    isUpdated = true;
-                } else {
-                    logger.info("AlternativeName not changed");
-                }
+            List<AlternativeName> mappedAlternativeNames = alternativeNameMapper.mapAlternativeNames(alternativeNames);
+
+            if(alternativeNameUpdater.updateAlternativeNames(entity, mappedAlternativeNames)) {
+                isUpdated = true;
+            } else {
+                logger.info("AlternativeName not changed");
             }
         }
         if (input.get(GEOMETRY) != null) {

@@ -20,8 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
@@ -31,7 +35,8 @@ public class AlternativeNameMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(AlternativeNameMapper.class);
 
-    public AlternativeName mapToAlternativeName(Map entry) {
+    @SuppressWarnings("unchecked")
+    public AlternativeName mapAlternativeName(Map entry) {
         NameTypeEnumeration nameType = (NameTypeEnumeration) entry.getOrDefault(NAME_TYPE, NameTypeEnumeration.OTHER);
         EmbeddableMultilingualString name = getEmbeddableString((Map) entry.get(NAME));
         AlternativeName alternativeName = new AlternativeName();
@@ -39,4 +44,17 @@ public class AlternativeNameMapper {
         alternativeName.setName(name);
         return alternativeName;
     }
+
+    public List<AlternativeName> mapAlternativeNames(List alternativeNames) {
+        List<AlternativeName> mapped =  new ArrayList<>();
+        for(Object object : alternativeNames) {
+            if (object instanceof Map) {
+                mapped.add(mapAlternativeName((Map) object));
+            } else {
+                logger.warn("Object not instance of Map: {}", object);
+            }
+        }
+        return mapped;
+    }
+
 }
