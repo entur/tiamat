@@ -556,7 +556,7 @@ public class CustomGraphQLTypes {
                         .type(new GraphQLNonNull(nameTypeEnum)))
                 .field(newFieldDefinition()
                         .name(NAME)
-                        .type(embeddableMultilingualStringObjectType))
+                        .type(new GraphQLNonNull(embeddableMultilingualStringObjectType)))
                 .build();
 
 
