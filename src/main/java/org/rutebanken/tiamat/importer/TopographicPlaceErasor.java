@@ -48,12 +48,11 @@ public class TopographicPlaceErasor {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(idPrefix), "idPrefix must not be null or empty");
         Preconditions.checkArgument(topographicPlaceType != null, "topographicPlaceType must not be null");
 
-        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findAllByTopographicPlaceTypeAndNetexIdStartingWith(topographicPlaceType, idPrefix);
+        int count = topographicPlaceRepository.countByTopographicPlaceTypeAndNetexIdStartingWith(topographicPlaceType, idPrefix);
 
-        logger.warn("About to delete ALL topographic places ({}) with idPrefix {} and type {}.", topographicPlaces.size(), idPrefix, topographicPlaceType);
-        topographicPlaceRepository.delete(topographicPlaces);
-        logger.warn("Delted {} topographic places", topographicPlaces.size());
-
+        logger.warn("About to delete ALL topographic places ({}) with idPrefix {} and type {}.", count, idPrefix, topographicPlaceType);
+        topographicPlaceRepository.deleteAllByTopographicPlaceTypeAndNetexIdStartingWith(topographicPlaceType,idPrefix);
+        logger.warn("Deleted {} topographic places with idPrefix {} and type {}", count, idPrefix, topographicPlaceType);
     }
 
 
