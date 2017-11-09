@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
+import io.swagger.annotations.ApiParam;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import javax.ws.rs.QueryParam;
@@ -48,4 +49,8 @@ public class ImportParams {
 
     @QueryParam(value = "allowOnlyStopTypes")
     public Set<StopTypeEnumeration> allowOnlyStopTypes;
+
+    @ApiParam("Specify this to erase existing topographic places with matching id and topographic place type. Example: 'OSM;PLACE_OF_INTEREST'")
+    @QueryParam(value = "eraseTopographicPlaceWithIdPrefixAndType")
+    public String eraseTopographicPlaceWithIdPrefixAndType;
 }
