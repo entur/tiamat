@@ -53,6 +53,7 @@ public class TopographicPlaceErasor {
         logger.warn("About to delete ALL topographic places ({}) with idPrefix {} and type {}.", count, idPrefix, topographicPlaceType);
         topographicPlaceRepository.deleteAllByTopographicPlaceTypeAndNetexIdStartingWith(topographicPlaceType,idPrefix);
         logger.warn("Deleted {} topographic places with idPrefix {} and type {}", count, idPrefix, topographicPlaceType);
+        topographicPlaceRepository.flush();
     }
 
 
