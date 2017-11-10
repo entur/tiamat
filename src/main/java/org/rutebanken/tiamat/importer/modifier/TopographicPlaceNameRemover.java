@@ -63,7 +63,9 @@ public class TopographicPlaceNameRemover {
         for(String topographicPlaceName : topographicPlaceNames) {
             logger.debug("Check for match and remove {} from stop name {}", topographicPlaceName, siteVersionStructure.getName().getValue());
             String newName = siteVersionStructure.getName().getValue().replaceAll("\\s+"+topographicPlaceName + "$", "").trim();
+            String oldName = siteVersionStructure.getName().getValue();
             siteVersionStructure.getName().setValue(newName);
+            logger.warn("Changed name from '{}' to '{}' for entity {}", oldName, newName, siteVersionStructure);
         }
 
         return siteVersionStructure;

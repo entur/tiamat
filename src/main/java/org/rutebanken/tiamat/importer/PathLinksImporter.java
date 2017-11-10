@@ -35,6 +35,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -67,7 +68,7 @@ public class PathLinksImporter {
         this.authorizationService = authorizationService;
     }
 
-    public List<org.rutebanken.netex.model.PathLink> importPathLinks(List<PathLink> pathLinks) {
+    public List<org.rutebanken.netex.model.PathLink> importPathLinks(List<PathLink> pathLinks, AtomicInteger pathLinkCounter) {
 
         return pathLinks.stream()
                 .peek(pathLink -> logger.debug("Importing path link {}", pathLink))
@@ -99,6 +100,7 @@ public class PathLinksImporter {
                 })
                 .map(pathLink -> pathLinkRepository.save(pathLink))
                 .map(pathLink -> netexMapper.mapToNetexModel(pathLink))
+                .peek(pathLink -> pathLinkCounter.incrementAndGet())
                 .collect(toList());
     }
 

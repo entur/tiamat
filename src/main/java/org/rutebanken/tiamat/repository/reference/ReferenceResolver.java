@@ -31,8 +31,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
-
 /**
  * Note that: Not all references are references to DataManagedObjectStructure.
  * For instance, AccomodationRefStructure.
@@ -78,8 +76,7 @@ public class ReferenceResolver {
             netexId = ref;
         }
 
-        // TODO: Any version should not be a valid value for reference version.
-        if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
+        if (versionOfObjectRefStructure.getVersion() == null) {
             return genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
         } else {
             long version = Long.valueOf(versionOfObjectRefStructure.getVersion());

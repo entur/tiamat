@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
@@ -30,6 +31,7 @@ public class AlternativeName
 
     protected String lang;
 
+    @Enumerated(EnumType.STRING)
     protected NameTypeEnumeration nameType;
 
     protected String typeOfName;
@@ -137,4 +139,15 @@ public class AlternativeName
         this.order = value;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("lang", lang)
+                .add("nameType", nameType)
+                .add("name", name)
+                .add("shortName", shortName)
+                .add("abbreviation", abbreviation)
+                .add("order", order)
+                .toString();
+    }
 }

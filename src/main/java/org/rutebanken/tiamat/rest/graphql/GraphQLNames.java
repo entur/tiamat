@@ -49,8 +49,7 @@ public class GraphQLNames {
     public static final String ENTITY_REF_REF = "ref";
     public static final String ENTITY_REF_REF_DESCRIPTION = "The NeTEx ID of the of the referenced entity. The reference must already exist";
     public static final String ENTITY_REF_VERSION = "version";
-    public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity. Specify \"any\" to always reference the newest version";
-    public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+    public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity.";
 
     public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
     public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;

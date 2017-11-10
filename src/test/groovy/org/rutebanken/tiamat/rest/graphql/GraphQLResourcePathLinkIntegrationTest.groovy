@@ -16,11 +16,11 @@
 package org.rutebanken.tiamat.rest.graphql
 
 import com.google.common.collect.Sets
-import io.restassured.response.ValidatableResponse
 import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.geom.CoordinateSequence
 import com.vividsolutions.jts.geom.LineString
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence
+import io.restassured.response.ValidatableResponse
 import org.junit.Test
 import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor
 import org.rutebanken.tiamat.auth.RoleAssignmentListBuilder
@@ -36,18 +36,18 @@ import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSIO
 
 class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
-	@Autowired
-	private QuayRepository quayRepository
+    @Autowired
+    private QuayRepository quayRepository
 
     @Autowired
-	private StopPlaceRepository stopPlaceRepository
+    private StopPlaceRepository stopPlaceRepository
 
     @Autowired
-	private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor
 
     @Test
     void retrievePathLinkReferencingTwoQuays() throws Exception {
-		Quay firstQuay = new Quay()
+        Quay firstQuay = new Quay()
         firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
         quayRepository.save(firstQuay)
 
@@ -67,44 +67,42 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
 
         pathLinkRepository.save(pathLink)
 
-        String graphQlJsonQuery = "{" +
-				                          "\"query\":\"" +
-				                          "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (id:\\\"" + pathLink.getNetexId() + "\\\") {" +
-				                          "   id " +
-				                          "    from {" +
-				                          "      id" +
-				                          "      placeRef {" +
-				                          "        ref" +
-				                          "        version" +
-				                          "      }" +
-				                          "    }" +
-				                          "    to {" +
-				                          "      id" +
-				                          "      placeRef {" +
-				                          "        ref" +
-				                          "        version" +
-				                          "      }" +
-				                          "    }" +
-				                          "}" +
-				                          "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{ ${GraphQLNames.FIND_PATH_LINK} (id:"${pathLink.getNetexId()}") {
+                    id 
+                    from {
+                        id
+                        placeRef {
+                            ref
+                            version
+                        }
+                    }
+                    to {
+                        id
+                        placeRef {
+                            ref
+                            version
+                        }
+                    }
+                }
+              }"""
 
-        executeGraphQL(graphQlJsonQuery)
-				.root("data.pathLink[0]")
-				.body("id", comparesEqualTo(pathLink.getNetexId()))
-				.root("data.pathLink[0].from")
-				.body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
-				.body("placeRef.ref", equalTo(firstQuay.getNetexId()))
-				.body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
-				.root("data.pathLink[0].to")
-				.body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
-				.body("placeRef.ref", equalTo(secondQuay.getNetexId()))
-				.body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .root("data.pathLink[0]")
+                    .body("id", comparesEqualTo(pathLink.getNetexId()))
+                .root("data.pathLink[0].from")
+                    .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
+                    .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
+                .root("data.pathLink[0].to")
+                    .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
+                    .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
     }
 
-	@Test
+    @Test
     void findPathLinkFromStopPlaceId() throws Exception {
 
-		Quay firstQuay = new Quay()
+        Quay firstQuay = new Quay()
         firstQuay.setVersion(1L)
 
         Quay secondQuay = new Quay()
@@ -120,75 +118,75 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)))
         pathLinkRepository.save(pathLink)
 
-        String graphQlJsonQuery = "{" +
-				                          "\"query\":\"" +
-				                          "{ pathLink:" + GraphQLNames.FIND_PATH_LINK + " (stopPlaceId:\\\"" + stopPlace.getNetexId() + "\\\") {" +
-				                          "   id " +
-				                          "    from {" +
-				                          "      id" +
-				                          "      placeRef {" +
-				                          "        ref" +
-				                          "        version" +
-				                          "      }" +
-				                          "    }" +
-				                          "    to {" +
-				                          "      id" +
-				                          "      placeRef {" +
-				                          "        ref" +
-				                          "        version" +
-				                          "      }" +
-				                          "    }" +
-				                          "}" +
-				                          "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{ ${GraphQLNames.FIND_PATH_LINK} (stopPlaceId: "${stopPlace.getNetexId()}") {
+                    id
+                    from {
+                        id
+                        placeRef {
+                            ref
+                            version
+                        }
+                    }
+                    to {
+                      id
+                      placeRef {
+                        ref
+                        version
+                      }
+                    }
+                   }
+                  }
+                """
 
-        executeGraphQL(graphQlJsonQuery)
-				.root("data.pathLink[0]")
-				.body("id", comparesEqualTo(pathLink.getNetexId()))
-				.root("data.pathLink[0].from")
-				.body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
-				.body("placeRef.ref", equalTo(firstQuay.getNetexId()))
-				.body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
-				.root("data.pathLink[0].to")
-				.body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
-				.body("placeRef.ref", equalTo(secondQuay.getNetexId()))
-				.body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .root("data.pathLink[0]")
+                   .body("id", comparesEqualTo(pathLink.getNetexId()))
+                .root("data.pathLink[0].from")
+                    .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
+                    .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
+                .root("data.pathLink[0].to")
+                    .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
+                    .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
 
     }
 
 
-	@Test
+    @Test
     void createNewPathLinkByUserWithoutAuthorizationForStopPlaceType() throws Exception {
-		mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
-				RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
+                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
         PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.FERRY_STOP)
-        executeGraphQL(query.query, HttpStatus.FORBIDDEN.value())
+        executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value())
     }
 
-	@Test
+    @Test
     void createNewPathLinkByUserWithCorrectAuthorizationForStopPlaceType() throws Exception {
-		mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
-				RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
+                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
         PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.BUS_STATION)
 
-        ValidatableResponse rsp = executeGraphQL(query.query)
+        ValidatableResponse rsp = executeGraphqQLQueryOnly(query.query)
 
         rsp
-				.root("data.pathLink[0]")
-				.body("id", notNullValue())
-				.body("geometry", notNullValue())
-				.root("data.pathLink[0].from")
-				.body("id", notNullValue())
-				.body("placeRef.ref", equalTo(query.from.getNetexId()))
-				.body("placeRef.version", equalTo(String.valueOf(query.from.getVersion())))
-				.root("data.pathLink[0].to")
-				.body("id", notNullValue())
-				.body("placeRef.ref", equalTo(query.to.getNetexId()))
-				.body("placeRef.version", equalTo(ANY_VERSION))
+                .root("data.pathLink[0]")
+                    .body("id", notNullValue())
+                    .body("geometry", notNullValue())
+                .root("data.pathLink[0].from")
+                    .body("id", notNullValue())
+                    .body("placeRef.ref", equalTo(query.from.getNetexId()))
+                    .body("placeRef.version", equalTo(String.valueOf(query.from.getVersion())))
+                .root("data.pathLink[0].to")
+                    .body("id", notNullValue())
+                    .body("placeRef.ref", equalTo(query.to.getNetexId()))
+                    .body("placeRef.version", isEmptyOrNullString())
     }
 
 
-	private PathLinkQuery createNewPathLinkQuery(StopTypeEnumeration stopType) {
-		Quay firstQuay = new Quay()
+    private PathLinkQuery createNewPathLinkQuery(StopTypeEnumeration stopType) {
+        Quay firstQuay = new Quay()
         firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
         firstQuay.setVersion(INITIAL_VERSION)
 
@@ -201,105 +199,107 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
         stop.setQuays(Sets.newHashSet(firstQuay, secondQuay))
         stopPlaceRepository.save(stop)
 
-        String query = "{" +
-				               "\"query\":\"mutation { " +
-				               "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
-				               "       from: {placeRef: {ref: \\\"" + firstQuay.getNetexId() + "\\\", version:\\\"" + firstQuay.getVersion() + "\\\"}}, " +
-				               "       to: {placeRef: {ref: \\\"" + secondQuay.getNetexId() + "\\\", version:\\\"" + ANY_VERSION + "\\\"}}, " +
-				               "       geometry: {" +
-				               "           type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
-				               "       }" +
-				               "   }]) {" +
-				               "   id " +
-				               "   geometry {" +
-				               "        type" +
-				               "        coordinates" +
-				               "       }" +
-				               "    from {" +
-				               "      id" +
-				               "      placeRef {" +
-				               "        ref" +
-				               "        version" +
-//                "        quay { id }" +
-				               "      }" +
-				               "    }" +
-				               "    to {" +
-				               "      id" +
-				               "      placeRef {" +
-				               "        ref" +
-				               "        version" +
-				               "      }" +
-				               "    }" +
-				               "  }" +
-				               "}\",\"variables\":\"\"}"
+        String query = """mutation {
+                           pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
+                                    from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${
+            firstQuay.getVersion()
+        }"}},
+                                        to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
+                                        geometry: {
+                                            type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
+                                        }
+                                    }]) {
+                                    id
+                                    geometry {
+                                        type
+                                        coordinates
+                                    }
+                                    from {
+                                        id
+                                        placeRef {
+                                            ref
+                                            version
+                                        }
+                                    }
+                                    to {
+                                        id
+                                        placeRef {
+                                            ref
+                                            version
+                                        }
+                                    }
+                                }
+                            }}"""
         return new PathLinkQuery(firstQuay, secondQuay, query)
     }
 
-	// For reuse of test setup
-	private class PathLinkQuery {
-		Quay from
+    @Test
+    void updatePathLinkWithTransferDurationWithoutClearingLineString() throws Exception {
+
+        String graphQlJsonQuery = """mutation {
+                pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
+                    geometry: {
+                        type: LineString,
+                        coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
+                    }
+                    }]) {
+                    id
+                    geometry {
+                        type
+                        coordinates
+                       }
+                    }
+                }"""
+
+        String pathLinkId = executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .root("data.pathLink[0]")
+                    .body("id", notNullValue())
+                    .body("geometry", notNullValue())
+                .extract().path("data.pathLink[0].id")
+
+        System.out.println("Got path link ID: " + pathLinkId)
+
+        String secondGraphQlJsonQuery = """mutation {
+                    pathLink: ${MUTATE_PATH_LINK} (PathLink: {
+                        id: "${pathLinkId}",
+                        ${TRANSFER_DURATION}: {
+                            ${DEFAULT_DURATION}: 1,
+                            ${FREQUENT_TRAVELLER_DURATION}: 2,
+                        }
+                    }) {
+                        id
+                        geometry {
+                            type
+                            coordinates
+                        }
+                        ${TRANSFER_DURATION} {
+                            ${DEFAULT_DURATION}
+                            ${FREQUENT_TRAVELLER_DURATION}
+                        }
+                    }
+                }"""
+
+        executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
+                .root("data.pathLink[0]")
+                    .body("id", notNullValue())
+                    .body("geometry", notNullValue())
+                    .body("transferDuration", notNullValue())
+                    .body("transferDuration." + DEFAULT_DURATION, notNullValue())
+                    .body("transferDuration." + FREQUENT_TRAVELLER_DURATION, notNullValue())
+                .extract().path("id")
+
+    }
+
+    // For reuse of test setup
+    private class PathLinkQuery {
+        Quay from
         Quay to
         String query
 
         PathLinkQuery(Quay from, Quay to, String query) {
-			this.from = from
+            this.from = from
             this.to = to
             this.query = query
         }
-	}
-
-	@Test
-    void updatePathLinkWithTransferDurationWithoutClearingLineString() throws Exception {
-
-		String graphQlJsonQuery = "{" +
-				                          "\"query\":\"mutation { " +
-				                          "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: [{ " +
-				                          "       geometry: {" +
-				                          "           type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]] " +
-				                          "       }" +
-				                          "   }]) {" +
-				                          "   id " +
-				                          "   geometry {" +
-				                          "        type" +
-				                          "        coordinates" +
-				                          "       }" +
-				                          "  }" +
-				                          "}\",\"variables\":\"\"}"
-
-        String pathLinkId = executeGraphQL(graphQlJsonQuery)
-				                    .root("data.pathLink[0]")
-				                    .body("id", notNullValue())
-				                    .body("geometry", notNullValue())
-				                    .extract().path("data.pathLink[0].id")
-
-        System.out.println("Got path link ID: " + pathLinkId)
-
-        String secondGraphQlJsonQuery = "{" +
-				                                "\"query\":\"mutation { " +
-				                                "  pathLink: " + MUTATE_PATH_LINK + "(PathLink: { " +
-				                                "       id: \\\"" + pathLinkId + "\\\"," +
-				                                "       " + TRANSFER_DURATION + ": {" +
-				                                "           " + DEFAULT_DURATION + ": 1," +
-				                                "           " + FREQUENT_TRAVELLER_DURATION + ": 2" +
-				                                "       }" +
-				                                "   }) {" +
-				                                "   id " +
-				                                "   geometry {" +
-				                                "        type" +
-				                                "        coordinates" +
-				                                "       }" +
-				                                "   " + TRANSFER_DURATION + " { " + DEFAULT_DURATION + " " + FREQUENT_TRAVELLER_DURATION + " }" +
-				                                "  }" +
-				                                "}\",\"variables\":\"\"}"
-
-        executeGraphQL(secondGraphQlJsonQuery)
-				.root("data.pathLink[0]")
-				.body("id", notNullValue())
-				.body("geometry", notNullValue())
-				.body("transferDuration", notNullValue())
-				.body("transferDuration." + DEFAULT_DURATION, notNullValue())
-				.body("transferDuration." + FREQUENT_TRAVELLER_DURATION, notNullValue())
-				.extract().path("id")
-
     }
 }

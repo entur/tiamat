@@ -14,7 +14,7 @@
   ~ limitations under the Licence.
   -->
 
-<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="any">
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="1">
   <PublicationTimestamp>2017-05-19T10:24:27.227+02:00</PublicationTimestamp>
   <ParticipantRef>NSR</ParticipantRef>
   <dataObjects>

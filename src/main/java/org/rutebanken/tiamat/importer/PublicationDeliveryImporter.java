@@ -17,8 +17,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
-import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
-import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
+import org.rutebanken.tiamat.importer.handler.*;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.netex.mapping.*;
@@ -47,27 +46,27 @@ public class PublicationDeliveryImporter {
     private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final NetexMapper netexMapper;
-    private final PathLinksImporter pathLinksImporter;
-    private final TopographicPlaceImporter topographicPlaceImporter;
-    private final TariffZoneImporter tariffZoneImporter;
+    private final PathLinkImportHandler pathLinkImportHandler;
+    private final TariffZoneImportHandler tariffZoneImportHandler;
     private final StopPlaceImportHandler stopPlaceImportHandler;
     private final ParkingsImportHandler parkingsImportHandler;
+    private final TopographicPlaceImportHandler topographicPlaceImportHandler;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
                                        PublicationDeliveryExporter publicationDeliveryExporter,
-                                       PathLinksImporter pathLinksImporter,
-                                       TopographicPlaceImporter topographicPlaceImporter,
-                                       TariffZoneImporter tariffZoneImporter,
+                                       PathLinkImportHandler pathLinkImportHandler,
+                                       TopographicPlaceImportHandler topographicPlaceImportHandler,
+                                       TariffZoneImportHandler tariffZoneImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
-        this.pathLinksImporter = pathLinksImporter;
-        this.topographicPlaceImporter = topographicPlaceImporter;
-        this.tariffZoneImporter = tariffZoneImporter;
+        this.pathLinkImportHandler = pathLinkImportHandler;
+        this.topographicPlaceImportHandler = topographicPlaceImportHandler;
+        this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
     }
 
@@ -92,16 +91,20 @@ public class PublicationDeliveryImporter {
 
         logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
 
-        AtomicInteger stopPlacesCreatedOrUpdated = new AtomicInteger(0);
-        AtomicInteger parkingsCreatedOrUpdated = new AtomicInteger(0);
-        AtomicInteger topographicPlacesCounter = new AtomicInteger(0);
+        AtomicInteger stopPlaceCounter = new AtomicInteger(0);
+        AtomicInteger parkingCounter = new AtomicInteger(0);
+        AtomicInteger topographicPlaceCounter = new AtomicInteger(0);
+        AtomicInteger tariffZoneCounter = new AtomicInteger(0);
+        AtomicInteger pathLinkCounter = new AtomicInteger(0);
+
+        // Currently only supporting one site frame per publication delivery
         SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(incomingPublicationDelivery);
 
         String requestId = netexSiteFrame.getId();
 
         updateMappingContext(netexSiteFrame);
 
-        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlacesCreatedOrUpdated, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlacesCounter, netexSiteFrame.getId()));
+        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlaceCounter, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlaceCounter, netexSiteFrame.getId()));
 
         try {
             SiteFrame responseSiteframe = new SiteFrame();
@@ -111,39 +114,11 @@ public class PublicationDeliveryImporter {
 
             responseSiteframe.withId(requestId + "-response").withVersion("1");
 
-            if (publicationDeliveryHelper.hasTopographicPlaces(netexSiteFrame)) {
-                logger.info("Publication delivery contains {} topographic places for import.", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
-
-                logger.info("About to map {} topographic places to internal model", netexSiteFrame.getTopographicPlaces().getTopographicPlace().size());
-                List<org.rutebanken.tiamat.model.TopographicPlace> mappedTopographicPlaces = netexMapper.getFacade()
-                        .mapAsList(netexSiteFrame.getTopographicPlaces().getTopographicPlace(),
-                                org.rutebanken.tiamat.model.TopographicPlace.class);
-                logger.info("Mapped {} topographic places to internal model", mappedTopographicPlaces.size());
-                List<TopographicPlace> importedTopographicPlaces = topographicPlaceImporter.importTopographicPlaces(mappedTopographicPlaces, topographicPlacesCounter);
-                responseSiteframe.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure().withTopographicPlace(importedTopographicPlaces));
-                logger.info("Finished importing topographic places");
-            }
-
-            if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
-                List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
-                logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
-                List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
-                logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
-                if (!importedTariffZones.isEmpty()) {
-                    responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
-                }
-            }
-
-            stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlacesCreatedOrUpdated, responseSiteframe);
-            parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingsCreatedOrUpdated, responseSiteframe);
-
-            if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
-                List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
-                tiamatPathLinks.forEach(tiamatPathLink -> logger.debug("Received path link: {}", tiamatPathLink));
-
-                List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks);
-                responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
-            }
+            topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter ,responseSiteframe);
+            tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteframe);
+            stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteframe);
+            parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteframe);
+            pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteframe);
 
             return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
         } finally {
@@ -168,7 +143,7 @@ public class PublicationDeliveryImporter {
     private void validate(ImportParams importParams) {
         if (importParams.targetTopographicPlaces != null && importParams.onlyMatchOutsideTopographicPlaces != null) {
             if (!importParams.targetTopographicPlaces.isEmpty() && !importParams.onlyMatchOutsideTopographicPlaces.isEmpty()) {
-                throw new IllegalArgumentException("targetTopographicPlaces and targetTopographicPlaces cannot be specified at the same time!");
+                throw new IllegalArgumentException("targetTopographicPlaces and onlyMatchOutsideTopographicPlaces cannot be specified at the same time!");
             }
         }
     }

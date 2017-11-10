@@ -210,14 +210,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     }
 
     /**
-     * When sending a stop place wmultiple times with separate 'imported ids' - all 'imported ids' should be kept
+     * When sending a stop place multiple times with separate 'imported ids' - all 'imported ids' should be kept
      */
     @Test
     public void publicationDeliveryWithImportedIdUpdates() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:123")
-                .withVersion("any")
+                .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withName(new MultilingualString().withValue("Test"))
                 .withCentroid(new SimplePoint_VersionStructure()
@@ -227,7 +227,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopPlace:1234")
-                .withVersion("any")
+                .withVersion("2")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withName(new MultilingualString().withValue("Test"))
                 .withCentroid(new SimplePoint_VersionStructure()
@@ -237,7 +237,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace3 = new StopPlace()
                 .withId("RUT:StopPlace:12345")
-                .withVersion("any")
+                .withVersion("3")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withName(new MultilingualString().withValue("Test"))
                 .withCentroid(new SimplePoint_VersionStructure()
@@ -1037,7 +1037,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
         String xml = "<PublicationDelivery\n" +
-                " version=\"1.0\"\n" +
+                " version=\"any\"\n" +
                 " xmlns=\"http://www.netex.org.uk/netex\"\n" +
                 " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                 " xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
@@ -1055,7 +1055,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 "   <stopPlaces>\n" +
                 "    <!--===Stop=== -->\n" +
                 "    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
-                "    <StopPlace version=\"any\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
+                "    <StopPlace version=\"1\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
                 "     <Name lang=\"no-NO\">Krokstien</Name>\n" +
                 "    </StopPlace>\n" +
                 "   </stopPlaces>\n" +
