@@ -26,14 +26,16 @@ public class GroupOfStopPlacesTest extends TiamatIntegrationTest {
         String groupName = "group of stop places";
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName));
 
-        groupOfStopPlaces.getMembers().add(stopPlace);
-        groupOfStopPlaces.getMembers().add(stopPlace2);
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
 
         groupOfStopPlaces = groupOfStopPlacesRepository.save(groupOfStopPlaces);
 
         assertThat(groupOfStopPlaces.getName().getValue()).isEqualTo(groupName);
 
-        assertThat(groupOfStopPlaces.getMembers()).extracting(StopPlace::getNetexId).contains(stopPlace.getNetexId(), stopPlace2.getNetexId());
+        assertThat(groupOfStopPlaces.getMembers())
+                .extracting(StopPlaceReference::getRef)
+                .contains(stopPlace.getNetexId(), stopPlace2.getNetexId());
 
     }
 
@@ -46,16 +48,20 @@ public class GroupOfStopPlacesTest extends TiamatIntegrationTest {
 
         String groupName = "group of stop places 1";
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName));
-        groupOfStopPlaces.getMembers().add(stopPlace);
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlaces = groupOfStopPlacesRepository.save(groupOfStopPlaces);
 
         String groupName2 = "group of stop places 2";
         GroupOfStopPlaces groupOfStopPlaces2 = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName2));
-        groupOfStopPlaces2.getMembers().add(stopPlace);
+        groupOfStopPlaces2.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlaces2 = groupOfStopPlacesRepository.save(groupOfStopPlaces2);
 
-        assertThat(groupOfStopPlaces.getMembers()).extracting(StopPlace::getNetexId).contains(stopPlace.getNetexId());
-        assertThat(groupOfStopPlaces2.getMembers()).extracting(StopPlace::getNetexId).contains(stopPlace.getNetexId());
+        assertThat(groupOfStopPlaces.getMembers())
+                .extracting(StopPlaceReference::getRef)
+                .contains(stopPlace.getNetexId());
+        assertThat(groupOfStopPlaces2.getMembers())
+                .extracting(StopPlaceReference::getRef)
+                .contains(stopPlace.getNetexId());
     }
 
 }

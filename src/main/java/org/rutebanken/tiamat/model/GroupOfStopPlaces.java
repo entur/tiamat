@@ -27,8 +27,8 @@ import java.util.Set;
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     
-    @ManyToMany
-    private Set<StopPlace> members = new HashSet<>();
+    @OneToMany
+    private Set<StopPlaceReference> members = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
@@ -40,7 +40,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     public GroupOfStopPlaces() {
     }
 
-    public Set<StopPlace> getMembers() {
+    public Set<StopPlaceReference> getMembers() {
         return members;
     }
 
