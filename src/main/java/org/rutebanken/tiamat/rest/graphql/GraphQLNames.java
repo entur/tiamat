@@ -121,6 +121,13 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARENT_STOPPLACE = "Parent" + OUTPUT_TYPE_STOPPLACE;
     public static final String INPUT_TYPE_PARENT_STOPPLACE = OUTPUT_TYPE_PARENT_STOPPLACE + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_GROUP_OF_STOPPLACES = "GroupOfStopPlaces";
+    public static final String INPUT_TYPE_GROUP_OF_STOPPLACES = OUTPUT_TYPE_GROUP_OF_STOPPLACES + INPUT_TYPE_POSTFIX;
+
+    public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
+    public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
+
+
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
@@ -327,6 +334,7 @@ public class GraphQLNames {
     public static final String FIND_PARKING = "parking";
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
+    public static final String FIND_BY_GROUP_OF_STOP_PLACEs_ID = "groupOfStopPlacesId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";

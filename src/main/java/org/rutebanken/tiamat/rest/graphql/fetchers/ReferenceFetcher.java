@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service("referenceFetcher")
 @Transactional
-class ReferenceFetcher implements DataFetcher {
+public class ReferenceFetcher implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(ReferenceFetcher.class);
 

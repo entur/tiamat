@@ -16,10 +16,13 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.execution.ExecutionStrategy;
+import graphql.parser.antlr.GraphqlListener;
 import graphql.schema.*;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
@@ -30,6 +33,7 @@ import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -78,6 +82,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private StopPlaceObjectTypeCreator stopPlaceObjectTypeCreator;
 
     @Autowired
+    private GroupOfStopPlacesObjectTypeCreator groupOfStopPlaceObjectTypeCreator;
+
+    @Autowired
     private ParentStopPlaceObjectTypeCreator parentStopPlaceObjectTypeCreator;
 
     @Autowired
@@ -106,6 +113,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher stopPlaceFetcher;
+
+    @Autowired
+    private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
 
     @Autowired
     DataFetcher pathLinkFetcher;
@@ -190,6 +200,7 @@ public class StopPlaceRegisterGraphQLSchema {
             return null;
         });
 
+        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -261,6 +272,13 @@ public class StopPlaceRegisterGraphQLSchema {
                             .description(TAG_NAME_DESCRIPTION)
                             .type(new GraphQLNonNull(GraphQLString)))
                         .dataFetcher(tagFetcher)
+                        .build())
+                .field(newFieldDefinition()
+                        .name(GROUP_OF_STOP_PLACES)
+                        .type(new GraphQLList(groupOfStopPlacesObjectType))
+                        .description("Group of stop places")
+                        .argument(createFindGroupOfStopPlacesArguments(allVersionsArgument))
+                        .dataFetcher(groupOfStopPlacesFetcher)
                         .build())
                 .build();
 
@@ -358,6 +376,24 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(allVersionsArgument);
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments(GraphQLArgument allVersionsArgument) {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_GROUP_OF_STOP_PLACEs_ID)
                 .type(GraphQLString)
                 .build());
         arguments.add(allVersionsArgument);
