@@ -118,6 +118,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
 
     @Autowired
+    private DataFetcher<GroupOfStopPlaces> groupOfStopPlacesUpdater;
+
+    @Autowired
     DataFetcher pathLinkFetcher;
 
     @Autowired
@@ -296,6 +299,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
+        GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType(validBetweenInputObjectType);
+
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
                 .description("Create and edit stopplaces")
@@ -315,6 +320,14 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .name(OUTPUT_TYPE_PARENT_STOPPLACE)
                                 .type(parentStopPlaceInputObjectType))
                         .dataFetcher(stopPlaceUpdater))
+                .field(newFieldDefinition()
+                        .name(MUTATE_GROUP_OF_STOP_PLACES)
+                        .type(new GraphQLList(groupOfStopPlacesInputObjectType))
+                        .description("Mutate group of stop places")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
+                                .type(groupOfStopPlacesInputObjectType))
+                        .dataFetcher(groupOfStopPlacesUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name(MUTATE_PATH_LINK)
@@ -646,6 +659,23 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .build();
+    }
+
+    private GraphQLInputObjectType createGroupOfStopPlacesInputObjectType(GraphQLInputObjectType validBetweenInputObjectType) {
+        return newInputObject()
+                .name(INPUT_TYPE_GROUP_OF_STOPPLACES)
+                .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
+                .field(newInputObjectField().name(NAME).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
+                .field(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)))
+                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
+                .field(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType))
+                .field(newInputObjectField()
+                        .name(GROUP_OF_STOP_PLACES_MEMBERS)
+                .type(new GraphQLList(refInputObjectType)))
                 .build();
     }
 
