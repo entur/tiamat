@@ -29,8 +29,13 @@ import java.time.OffsetDateTime;
 public class OffsetDateTimeInstantConverter extends BidirectionalConverter<OffsetDateTime, Instant> {
 
 
+    private final ExportTimeZone exportTimeZone;
+
     @Autowired
-    private ExportTimeZone exportTimeZone;
+    public OffsetDateTimeInstantConverter(ExportTimeZone exportTimeZone) {
+        this.exportTimeZone = exportTimeZone;
+    }
+
 
     @Override
     public Instant convertTo(OffsetDateTime offsetDateTime, Type<Instant> type, MappingContext mappingContext) {
@@ -39,6 +44,6 @@ public class OffsetDateTimeInstantConverter extends BidirectionalConverter<Offse
 
     @Override
     public OffsetDateTime convertFrom(Instant instant, Type<OffsetDateTime> type, MappingContext mappingContext) {
-        return instant.atZone(exportTimeZone.getDefaultTimeZone()).toOffsetDateTime();
+        return instant.atZone(exportTimeZone.getDefaultTimeZoneId()).toOffsetDateTime();
     }
 }

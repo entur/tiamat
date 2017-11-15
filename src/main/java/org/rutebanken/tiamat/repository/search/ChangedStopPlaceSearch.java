@@ -1,3 +1,4 @@
+package org.rutebanken.tiamat.repository.search;
 /*
  * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -12,8 +13,6 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
-
-package org.rutebanken.tiamat.repository;
 
 import com.google.common.base.MoreObjects;
 import org.springframework.data.domain.Pageable;

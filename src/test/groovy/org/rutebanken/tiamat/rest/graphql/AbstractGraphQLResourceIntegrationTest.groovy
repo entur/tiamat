@@ -42,19 +42,23 @@ abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationT
         return executeGraphQL(graphQlJsonQuery,200)
     }
 
+    protected ValidatableResponse executeGraphqQLQueryOnly(String query) {
+        return executeGraphqQLQueryOnly(query, 200)
+    }
+
     /**
      * When sending empty parameters, specify 'query' directly.
      * Escapes quotes and newlines
      */
-    protected ValidatableResponse executeGraphqQLQueryOnly(String query) {
+    protected ValidatableResponse executeGraphqQLQueryOnly(String query, int httpStatusCode) {
 
         String graphQlJsonQuery = "{" +
                 "\"query\":\"" +
                 query.replaceAll("\"", "\\\\\"")
                         .replaceAll("\n", "\\\\n") +
                 "\",\"variables\":\"\"}"
-
-        return executeGraphQL(graphQlJsonQuery)
+        println query
+        return executeGraphQL(graphQlJsonQuery, httpStatusCode)
     }
 
     protected ValidatableResponse executeGraphQL(String graphQlJsonQuery,int httpStatusCode) {
@@ -62,7 +66,6 @@ abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationT
                 .port(port)
                 .contentType(ContentType.JSON)
                 .body(graphQlJsonQuery)
-                .log().body()
            .when()
                 .post(BASE_URI_GRAPHQL)
                 .then()

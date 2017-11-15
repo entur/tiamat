@@ -15,11 +15,16 @@
 
 package org.rutebanken.tiamat.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FlexibleStopPlace_VersionStructure
         extends Place {
 
     protected MultilingualStringEntity nameSuffix;
-    protected AlternativeNames_RelStructure alternativeNames;
+
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+
     protected VehicleModeEnumeration transportMode;
     protected String publicCode;
     protected Areas areas;
@@ -30,14 +35,6 @@ public class FlexibleStopPlace_VersionStructure
 
     public void setNameSuffix(MultilingualStringEntity value) {
         this.nameSuffix = value;
-    }
-
-    public AlternativeNames_RelStructure getAlternativeNames() {
-        return alternativeNames;
-    }
-
-    public void setAlternativeNames(AlternativeNames_RelStructure value) {
-        this.alternativeNames = value;
     }
 
     public VehicleModeEnumeration getTransportMode() {
@@ -64,4 +61,7 @@ public class FlexibleStopPlace_VersionStructure
         this.areas = value;
     }
 
+    public List<AlternativeName> getAlternativeNames() {
+        return alternativeNames;
+    }
 }

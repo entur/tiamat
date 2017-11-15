@@ -13,19 +13,13 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.netex.mapping;
 
-import org.rutebanken.tiamat.config.ApplicationContextProvider;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
-import javax.persistence.PrePersist;
+public class NetexMappingContext {
 
-public class IdentifiedEntityListener {
+    public ZoneId defaultTimeZone;
 
-
-    @PrePersist
-    public void assignNetexId(IdentifiedEntity identifiedEntity) {
-        // This class is not managed by Spring
-        ApplicationContextProvider.getNetexIdAssigner().assignNetexId(identifiedEntity);
-    }
 }

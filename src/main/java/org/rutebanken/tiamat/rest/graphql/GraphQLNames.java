@@ -49,8 +49,7 @@ public class GraphQLNames {
     public static final String ENTITY_REF_REF = "ref";
     public static final String ENTITY_REF_REF_DESCRIPTION = "The NeTEx ID of the of the referenced entity. The reference must already exist";
     public static final String ENTITY_REF_VERSION = "version";
-    public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity. Specify \"any\" to always reference the newest version";
-    public static final String ANY_VERSION = org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
+    public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity.";
 
     public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
     public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
@@ -122,6 +121,13 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARENT_STOPPLACE = "Parent" + OUTPUT_TYPE_STOPPLACE;
     public static final String INPUT_TYPE_PARENT_STOPPLACE = OUTPUT_TYPE_PARENT_STOPPLACE + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_GROUP_OF_STOPPLACES = "GroupOfStopPlaces";
+    public static final String INPUT_TYPE_GROUP_OF_STOPPLACES = OUTPUT_TYPE_GROUP_OF_STOPPLACES + INPUT_TYPE_POSTFIX;
+
+    public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
+    public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
+
+
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
 
@@ -140,6 +146,8 @@ public class GraphQLNames {
     public static final String TAG_COMMENT_DESCRIPTION = "A comment for this tag on this entity";
     public static final String TAG_REMOVED_DESCRIPTION = "When this tag was removed. If set, the tag is removed from entity it references in field '" + TAG_ID_REFERENCE + "'";
     public static final String TAG_REMOVED_BY_USER_DESCRIPTION = "Removed by username. Only set if tag has been removed";
+
+    public static final String WITH_TAGS = "withTags";
 
     public static final String REMOVE_TAG = "removeTag";
     public static final String CREATE_TAG = "createTag";
@@ -326,6 +334,7 @@ public class GraphQLNames {
     public static final String FIND_PARKING = "parking";
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
+    public static final String FIND_BY_GROUP_OF_STOP_PLACEs_ID = "groupOfStopPlacesId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";

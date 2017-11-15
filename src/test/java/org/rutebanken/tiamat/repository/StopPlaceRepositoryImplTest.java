@@ -28,6 +28,8 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;

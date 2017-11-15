@@ -16,10 +16,7 @@
 package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.rutebanken.tiamat.netex.id.NetexIdAssigner;
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.repository.IdentifiedEntityListener;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rutebanken.tiamat.repository.listener.IdentifiedEntityListener;
 
 import javax.persistence.*;
 

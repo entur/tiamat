@@ -43,7 +43,7 @@ public class TopographicPlaceLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceLookupService.class);
 
-    private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.TOWN, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.STATE);
+    private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.MUNICIPALITY, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.COUNTRY);
 
     private final ResettableMemoizer<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> memoizedTopographicPlaces = new ResettableMemoizer<>(getTopographicPlaceSupplier());
 

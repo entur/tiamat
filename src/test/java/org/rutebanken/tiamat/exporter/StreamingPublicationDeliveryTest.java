@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.*;
 import org.rutebanken.tiamat.service.stopplace.ChildStopPlacesFetcher;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -56,7 +57,8 @@ public class StreamingPublicationDeliveryTest {
 
     private PathLinkRepository pathLinkRepository = mock(PathLinkRepository.class);
     private TopographicPlaceRepository topographicPlaceRepository = mock(TopographicPlaceRepository.class);
-    private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class), pathLinkRepository);
+    private ExportTimeZone exportTimeZone = new ExportTimeZone();
+    private TiamatSiteFrameExporter tiamatSiteFrameExporter = new TiamatSiteFrameExporter(topographicPlaceRepository, mock(TariffZoneRepository.class), pathLinkRepository, exportTimeZone);
 
     private TagRepository tagRepository = mock(TagRepository.class);
     private NetexMapper netexMapper = new NetexMapper(tagRepository);

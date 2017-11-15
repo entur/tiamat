@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 
 @MappedSuperclass
@@ -106,4 +108,13 @@ public abstract class Equipment_VersionStructure
         this.outOfService = value;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("netexId", netexId)
+                .add("version", version)
+                .add("name", name)
+                .add("created", created)
+                .toString();
+    }
 }

@@ -26,6 +26,7 @@ import org.hibernate.Session;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

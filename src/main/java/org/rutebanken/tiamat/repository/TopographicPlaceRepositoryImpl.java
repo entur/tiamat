@@ -20,6 +20,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

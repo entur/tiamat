@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

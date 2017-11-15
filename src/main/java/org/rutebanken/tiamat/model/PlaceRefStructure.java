@@ -27,4 +27,8 @@ public class PlaceRefStructure extends GroupOfEntitiesRefStructure {
     public PlaceRefStructure(String ref, String version) {
         super(ref, version);
     }
+
+    public PlaceRefStructure(String ref) {
+        super(ref);
+    }
 }

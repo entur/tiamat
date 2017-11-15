@@ -13,22 +13,17 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.netex.mapping;
 
-import java.util.ArrayList;
-import java.util.List;
+public class NetexMappingContextThreadLocal {
 
+    private static final InheritableThreadLocal<NetexMappingContext> threadLocalMappingContext = new InheritableThreadLocal<>();
 
-public class AlternativeNames_RelStructure
-        extends StrictContainmentAggregationStructure {
-
-    protected List<AlternativeName> alternativeName;
-
-    public List<AlternativeName> getAlternativeName() {
-        if (alternativeName == null) {
-            alternativeName = new ArrayList<AlternativeName>();
-        }
-        return this.alternativeName;
+    public static void set(NetexMappingContext netexMappingContext) {
+        threadLocalMappingContext.set(netexMappingContext);
     }
 
+    public static NetexMappingContext get() {
+        return threadLocalMappingContext.get();
+    }
 }

@@ -43,4 +43,8 @@ public interface TopographicPlaceRepository extends EntityInVersionRepository<To
     @Query("select tp from TopographicPlace tp WHERE tp.version = (SELECT MAX(tpv.version) FROM TopographicPlace tpv WHERE tpv.netexId = tp.netexId)")
     List<TopographicPlace> findAllMaxVersion();
 
+    int countByTopographicPlaceTypeAndNetexIdStartingWith(TopographicPlaceTypeEnumeration topographicPlaceTypeEnumeration, String idPrefix);
+
+
+    void deleteAllByTopographicPlaceTypeAndNetexIdStartingWith(TopographicPlaceTypeEnumeration topographicPlaceTypeEnumeration, String idPrefix);
 }

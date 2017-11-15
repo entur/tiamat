@@ -13,13 +13,14 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.reference;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;

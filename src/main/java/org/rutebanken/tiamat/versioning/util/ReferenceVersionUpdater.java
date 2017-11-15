@@ -17,13 +17,12 @@ package org.rutebanken.tiamat.versioning.util;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;

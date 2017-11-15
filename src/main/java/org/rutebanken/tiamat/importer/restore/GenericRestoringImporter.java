@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.importer.restore;
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.GenericEntityInVersionRepository;
+import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

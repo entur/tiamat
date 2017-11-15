@@ -20,7 +20,7 @@ import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.helpers.ObjectMerger;
+import org.rutebanken.tiamat.service.ObjectMerger;
 import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Transactional
 @Component

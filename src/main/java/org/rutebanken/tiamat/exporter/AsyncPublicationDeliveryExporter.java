@@ -109,7 +109,7 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public String createFileNameWithoutExtention(long exportJobId, Instant started) {
-        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZone()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
+        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
     }
 
     public ExportJob getExportJob(long exportJobId) {

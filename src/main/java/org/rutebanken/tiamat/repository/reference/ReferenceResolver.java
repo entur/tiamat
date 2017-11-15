@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.repository.reference;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
@@ -23,14 +23,13 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
+import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 /**
  * Note that: Not all references are references to DataManagedObjectStructure.
@@ -77,8 +76,7 @@ public class ReferenceResolver {
             netexId = ref;
         }
 
-        // TODO: Any version should not be a valid value for reference version.
-        if (ANY_VERSION.equals(versionOfObjectRefStructure.getVersion()) || versionOfObjectRefStructure.getVersion() == null) {
+        if (versionOfObjectRefStructure.getVersion() == null) {
             return genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
         } else {
             long version = Long.valueOf(versionOfObjectRefStructure.getVersion());

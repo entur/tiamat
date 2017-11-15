@@ -52,6 +52,8 @@ public class PublicationDeliveryTestHelper {
 
     private static final JAXBContext jaxbContext;
 
+    private static final String defaultTimeZone = "Europe/Paris";
+
     static {
         try {
             jaxbContext = newInstance(PublicationDeliveryStructure.class);
@@ -82,6 +84,10 @@ public class PublicationDeliveryTestHelper {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
         siteFrame.setId(UUID.randomUUID().toString());
+        siteFrame.setFrameDefaults(
+                new VersionFrameDefaultsStructure()
+                        .withDefaultLocale(
+                                new LocaleStructure().withTimeZone(defaultTimeZone)));
         return siteFrame;
     }
 

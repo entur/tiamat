@@ -28,6 +28,9 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.repository.search.StopPlaceQueryFromSearchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,13 +74,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
      */
-    protected static final String SQL_LEFT_JOIN_PARENT_STOP =
+    public static final String SQL_LEFT_JOIN_PARENT_STOP =
             createLeftJoinParentStopQuery("p");
 
-    protected static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
+    public static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
             "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND s.parent_site_ref_version = CAST(%s.version as text) ";
 
-    protected static String createLeftJoinParentStopQuery(String parentAlias) {
+    public static String createLeftJoinParentStopQuery(String parentAlias) {
         return String.format(SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE, Collections.nCopies(3, parentAlias).toArray());
     }
 
@@ -94,7 +97,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * SQL for making sure the stop selected is not a parent stop place.
      */
-    protected static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = false ";
+    public static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = false ";
 
     /**
      * Ignore netex id for both stop place and its parent

@@ -24,7 +24,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.model.tag.Tag;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

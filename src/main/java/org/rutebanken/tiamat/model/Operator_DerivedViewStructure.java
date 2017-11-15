@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Operator_DerivedViewStructure
         extends DerivedViewStructure {
 
@@ -23,7 +26,8 @@ public class Operator_DerivedViewStructure
     protected MultilingualStringEntity shortName;
     protected MultilingualStringEntity legalName;
     protected MultilingualStringEntity tradingName;
-    protected AlternativeNames_RelStructure alternativeNames;
+
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     public OperatorRefStructure getOperatorRef() {
         return operatorRef;
@@ -65,12 +69,7 @@ public class Operator_DerivedViewStructure
         this.tradingName = value;
     }
 
-    public AlternativeNames_RelStructure getAlternativeNames() {
+    public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
-
-    public void setAlternativeNames(AlternativeNames_RelStructure value) {
-        this.alternativeNames = value;
-    }
-
 }

@@ -16,12 +16,17 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.*;
 import org.xml.sax.SAXParseException;
 
 import javax.ws.rs.core.StreamingOutput;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

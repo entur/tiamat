@@ -16,8 +16,10 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
 
 @Embeddable
+@MappedSuperclass
 public class SiteRefStructure
         extends SiteElementRefStructure {
 
@@ -25,6 +27,10 @@ public class SiteRefStructure
 
     public SiteRefStructure(String ref, String version) {
         super(ref, version);
+    }
+
+    public SiteRefStructure(String ref) {
+        super(ref);
     }
 
 }

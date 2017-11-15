@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.importer.finder;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.junit.Test;
-import org.rutebanken.tiamat.PeriodicCacheLogger;
+import org.rutebanken.tiamat.general.PeriodicCacheLogger;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.importer.AlternativeStopTypes;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;

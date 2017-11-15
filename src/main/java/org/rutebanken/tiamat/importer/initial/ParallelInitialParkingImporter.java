@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.importer.initial;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

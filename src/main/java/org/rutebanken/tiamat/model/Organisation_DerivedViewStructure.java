@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.model;
 
 import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Organisation_DerivedViewStructure
@@ -26,7 +28,9 @@ public class Organisation_DerivedViewStructure
     protected MultilingualStringEntity shortName;
     protected MultilingualStringEntity legalName;
     protected MultilingualStringEntity tradingName;
-    protected AlternativeNames_RelStructure alternativeNames;
+
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+
     protected ContactStructure contactDetails;
 
     public JAXBElement<? extends OrganisationRefStructure> getOrganisationRef() {
@@ -69,12 +73,8 @@ public class Organisation_DerivedViewStructure
         this.tradingName = value;
     }
 
-    public AlternativeNames_RelStructure getAlternativeNames() {
+    public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
-    }
-
-    public void setAlternativeNames(AlternativeNames_RelStructure value) {
-        this.alternativeNames = value;
     }
 
     public ContactStructure getContactDetails() {

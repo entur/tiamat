@@ -32,4 +32,8 @@ public class AddressablePlaceRefStructure extends PlaceRefStructure {
     public AddressablePlaceRefStructure(String ref, String version) {
         super(ref, version);
     }
+
+    public AddressablePlaceRefStructure(String ref) {
+        super(ref);
+    }
 }

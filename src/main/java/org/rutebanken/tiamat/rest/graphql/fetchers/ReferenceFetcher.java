@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
-import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service("referenceFetcher")
 @Transactional
-class ReferenceFetcher implements DataFetcher {
+public class ReferenceFetcher implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(ReferenceFetcher.class);
 

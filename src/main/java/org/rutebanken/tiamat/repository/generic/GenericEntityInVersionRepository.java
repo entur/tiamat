@@ -1,3 +1,4 @@
+package org.rutebanken.tiamat.repository.generic;
 /*
  * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -13,10 +14,10 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
-
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.repository.DataManagedObjectStructureRepository;
+import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.support.Repositories;

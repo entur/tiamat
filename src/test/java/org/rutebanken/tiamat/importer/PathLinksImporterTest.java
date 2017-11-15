@@ -25,19 +25,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 public class PathLinksImporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private PathLinksImporter pathLinksImporter;
 
+    private AtomicInteger pathLinkCounter = new AtomicInteger();
+
     @Test
     public void importPathLinks() throws Exception {
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
-        List<org.rutebanken.netex.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
+        List<org.rutebanken.netex.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
         assertThat(netexPathLinks).isNotEmpty();
         assertThat(netexPathLinks).hasSize(1);
         org.rutebanken.netex.model.PathLink actualNetexPathLink = netexPathLinks.get(0);
@@ -51,11 +53,11 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
 
         pathLink.getOriginalIds().add("originalID");
-        List<org.rutebanken.netex.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
+        List<org.rutebanken.netex.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
 
         PathLink pathLink2 = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
         pathLink2.getOriginalIds().add("originalID");
-        List<org.rutebanken.netex.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2));
+        List<org.rutebanken.netex.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2), pathLinkCounter);
 
         assertThat(firsts).hasSize(1);
         assertThat(seconds).hasSize(1);
@@ -77,15 +79,15 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
 
         quayRepository.save(toQuay);
 
-        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, ANY_VERSION);
+        AddressablePlaceRefStructure fromPlaceRef = new AddressablePlaceRefStructure(fromQuayOriginalId, null);
         PathLinkEnd pathLinkEndFrom = new PathLinkEnd(fromPlaceRef);
 
-        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, ANY_VERSION);
+        AddressablePlaceRefStructure toPlaceRef = new AddressablePlaceRefStructure(toQuayOriginalId, null);
         PathLinkEnd pathLinkEndTo = new PathLinkEnd(toPlaceRef);
 
         PathLink pathLink = new PathLink(pathLinkEndFrom, pathLinkEndTo);
 
-        List<org.rutebanken.netex.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink));
+        List<org.rutebanken.netex.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
 
         org.rutebanken.netex.model.PathLink actual = result.get(0);
         assertThat(actual.getFrom().getPlaceRef().getRef()).contains("NSR:Quay:");

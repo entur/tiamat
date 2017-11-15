@@ -18,13 +18,17 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.LocaleStructure;
+import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.ChildStopPlacesFetcher;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +39,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
-import static org.rutebanken.tiamat.model.VersionOfObjectRefStructure.ANY_VERSION;
 
 @Component
 @Transactional
@@ -51,6 +56,7 @@ public class PublicationDeliveryExporter {
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
     private final ChildStopPlacesFetcher childStopPlacesFetcher;
+    private static final AtomicLong publicationDeliveryId = new AtomicLong();
 
     public enum MultiModalFetchMode {CHILDREN, PARENTS}
 
@@ -90,7 +96,7 @@ public class PublicationDeliveryExporter {
 
     public PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion(ANY_VERSION)
+                .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(NetexIdHelper.NSR);
         return publicationDeliveryStructure;
@@ -112,7 +118,9 @@ public class PublicationDeliveryExporter {
     }
 
 
+
     /**
+     *
      * @param stopPlaces
      * @param exportParams
      * @param multiModalFetchMode if parents or children should be fetched
@@ -121,17 +129,18 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams, MultiModalFetchMode multiModalFetchMode) {
         logger.info("Preparing publication delivery export");
 
-        if (multiModalFetchMode == null) {
+        if(multiModalFetchMode == null) {
             multiModalFetchMode = MultiModalFetchMode.PARENTS;
         }
 
-        if (multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
+        if(multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
             stopPlaces = childStopPlacesFetcher.resolveChildren(stopPlaces);
-        } else if (multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)) {
+        } else if( multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)){
             stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
         }
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
+
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 

@@ -27,5 +27,8 @@ public class SiteElementRefStructure extends AddressablePlaceRefStructure {
         super(ref, version);
     }
 
+    public SiteElementRefStructure(String ref) {
+        super(ref);
+    }
 
 }

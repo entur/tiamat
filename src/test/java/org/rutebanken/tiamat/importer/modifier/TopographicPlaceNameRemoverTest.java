@@ -20,8 +20,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
-import org.rutebanken.tiamat.repository.ReferenceResolver;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
