@@ -17,15 +17,13 @@ package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlaceReference;
+import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 
 public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
@@ -34,7 +32,6 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void saveNewVersion() throws Exception {
-
 
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
@@ -58,6 +55,34 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
         assertThat(actual.getName().getValue()).isEqualTo("name changed");
         assertThat(actual.getMembers()).hasSize(1);
 
+    }
+
+    @Test
+    public void saveNewVersionDoesNotAcceptInvalidStopPlaceRefs() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NetexIdDoesNotExist");
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+
+
+        assertThatThrownBy(() -> groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void saveNewVersionDoesNotAcceptChildStopPlaceRefs() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setParentSiteRef(new SiteRefStructure("NSR:StopPlace:99999"));
+        stopPlaceRepository.save(stopPlace);
+
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+
+
+        assertThatThrownBy(() -> groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces)).isInstanceOf(IllegalArgumentException.class);
     }
 
 }

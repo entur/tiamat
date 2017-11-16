@@ -15,9 +15,12 @@
 
 package org.rutebanken.tiamat.versioning;
 
+import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -39,6 +42,9 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
 
     @Override
     public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces existingVersion, GroupOfStopPlaces newVersion) {
@@ -47,6 +53,8 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
 
     @Override
     public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces newVersion) {
+
+        validateMembers(newVersion);
 
         GroupOfStopPlaces existing = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
 
@@ -68,7 +76,15 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         return result;
     }
 
-
+    private void validateMembers(GroupOfStopPlaces groupOfStopPlaces) {
+        groupOfStopPlaces.getMembers().forEach(member -> {
+            StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef());
+            Preconditions.checkArgument(resolvedMember != null,
+                    "Member with reference " + member.getRef() + " does not exist when saving group of stop places");
+            Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
+                    "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead.");
+        });
+    }
 
     @Override
     public EntityInVersionRepository<GroupOfStopPlaces> getRepository() {
