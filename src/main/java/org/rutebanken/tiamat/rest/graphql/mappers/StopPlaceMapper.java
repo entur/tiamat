@@ -39,7 +39,7 @@ public class StopPlaceMapper {
     private QuayMapper quayMapper;
 
     @Autowired
-    private SiteElementMapper siteElementMapper;
+    private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
@@ -50,7 +50,7 @@ public class StopPlaceMapper {
      * @return true if StopPlace or any og the attached Quays are updated
      */
     public boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
-        boolean isUpdated = siteElementMapper.populate(input, stopPlace);
+        boolean isUpdated = groupOfEntitiesMapper.populate(input, stopPlace);
 
         if (input.get(STOP_PLACE_TYPE) != null) {
             stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));

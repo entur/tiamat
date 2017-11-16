@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIGN_CONTENT_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
@@ -50,56 +49,70 @@ public class SiteElementMapper {
     @Autowired
     private GeometryMapper geometryMapper;
 
+    public boolean populate(Map input, SiteElement siteElement) {
 
-    public boolean populate(Map input, SiteElement entity) {
         boolean isUpdated = false;
-
-        if (input.get(NAME) != null) {
-            entity.setName(getEmbeddableString((Map) input.get(NAME)));
-            isUpdated = true;
-        }
-        if (input.get(SHORT_NAME) != null) {
-            entity.setShortName(getEmbeddableString((Map) input.get(SHORT_NAME)));
-            isUpdated = true;
-        }
-        if (input.get(DESCRIPTION) != null) {
-            entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
-            isUpdated = true;
-        }
-
-
-        if (input.get(KEY_VALUES) != null) {
-            List<Map> keyValues = (List) input.get(KEY_VALUES);
-
-            entity.getKeyValues().clear();
-
-            keyValues.forEach(inputMap-> {
-                String key = (String)inputMap.get(KEY);
-                List<String> values = (List<String>)inputMap.get(VALUES);
-
-                Value value = new Value(values);
-                entity.getKeyValues().put(key, value);
-            });
-
-            isUpdated = true;
-        }
 
         if (input.get(ALTERNATIVE_NAMES) != null) {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
             List<AlternativeName> mappedAlternativeNames = alternativeNameMapper.mapAlternativeNames(alternativeNames);
 
-            if(alternativeNameUpdater.updateAlternativeNames(entity, mappedAlternativeNames)) {
+            if(alternativeNameUpdater.updateAlternativeNames(siteElement, mappedAlternativeNames)) {
                 isUpdated = true;
             } else {
                 logger.info("AlternativeName not changed");
             }
         }
+
         if (input.get(GEOMETRY) != null) {
-            entity.setCentroid(geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY)));
+
+            siteElement.setCentroid(geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY)));
             isUpdated = true;
         }
 
-        if (input.get(PLACE_EQUIPMENTS) != null) {
+        if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
+            AccessibilityAssessment accessibilityAssessment = siteElement.getAccessibilityAssessment();
+            if (accessibilityAssessment == null) {
+                accessibilityAssessment = new AccessibilityAssessment();
+            }
+
+            Map<String, Object> accessibilityAssessmentInput = (Map) input.get(ACCESSIBILITY_ASSESSMENT);
+            List<AccessibilityLimitation> limitations = accessibilityAssessment.getLimitations();
+            AccessibilityLimitation limitation;
+            if (limitations == null || limitations.isEmpty()) {
+                limitations = new ArrayList<>();
+                limitation = new AccessibilityLimitation();
+            } else {
+                limitation = limitations.get(0);
+            }
+
+            AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
+
+            //Only flag as updated if limitations are updated
+            if (limitationFromInput.getWheelchairAccess() != limitation.getWheelchairAccess() |
+                    limitationFromInput.getAudibleSignalsAvailable() != limitation.getAudibleSignalsAvailable() |
+                    limitationFromInput.getStepFreeAccess() != limitation.getStepFreeAccess() |
+                    limitationFromInput.getLiftFreeAccess() != limitation.getLiftFreeAccess() |
+                    limitationFromInput.getEscalatorFreeAccess() != limitation.getEscalatorFreeAccess()) {
+
+                limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
+                limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
+                limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
+                limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
+                limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
+
+
+                limitations.clear();
+                limitations.add(limitation);
+                accessibilityAssessment.setLimitations(limitations);
+
+                siteElement.setAccessibilityAssessment(accessibilityAssessment);
+
+                isUpdated = true;
+            }
+        }
+
+        if (input.get(PLACE_EQUIPMENTS) != null && siteElement instanceof Site_VersionStructure) {
             PlaceEquipment equipments = new PlaceEquipment();
 
             Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
@@ -184,58 +197,11 @@ public class SiteElementMapper {
             }
 
 
+            ((Site_VersionStructure) siteElement).setPlaceEquipments(equipments);
 
-            if (entity instanceof StopPlace) {
-                ((StopPlace)entity).setPlaceEquipments(equipments);
-            } else if (entity instanceof Quay) {
-                ((Quay)entity).setPlaceEquipments(equipments);
-            }
             isUpdated = true;
         }
 
-        if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
-            AccessibilityAssessment accessibilityAssessment = entity.getAccessibilityAssessment();
-            if (accessibilityAssessment == null) {
-                accessibilityAssessment = new AccessibilityAssessment();
-            }
-
-            Map<String, Object> accessibilityAssessmentInput = (Map) input.get(ACCESSIBILITY_ASSESSMENT);
-            List<AccessibilityLimitation> limitations = accessibilityAssessment.getLimitations();
-            AccessibilityLimitation limitation;
-            if (limitations == null || limitations.isEmpty()) {
-                limitations = new ArrayList<>();
-                limitation = new AccessibilityLimitation();
-            } else {
-                limitation = limitations.get(0);
-            }
-
-            AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
-
-            //Only flag as updated if limitations are updated
-            if (limitationFromInput.getWheelchairAccess() != limitation.getWheelchairAccess() |
-                    limitationFromInput.getAudibleSignalsAvailable() != limitation.getAudibleSignalsAvailable() |
-                    limitationFromInput.getStepFreeAccess() != limitation.getStepFreeAccess() |
-                    limitationFromInput.getLiftFreeAccess() != limitation.getLiftFreeAccess() |
-                    limitationFromInput.getEscalatorFreeAccess() != limitation.getEscalatorFreeAccess()) {
-
-                limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
-                limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
-                limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
-                limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
-                limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
-
-
-                limitations.clear();
-                limitations.add(limitation);
-                accessibilityAssessment.setLimitations(limitations);
-
-                entity.setAccessibilityAssessment(accessibilityAssessment);
-
-                isUpdated = true;
-            }
-        }
         return isUpdated;
     }
-
-
 }
