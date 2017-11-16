@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import graphql.*;
 import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
+import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class GraphQLResource {
                 variables = mapper.readValue(s, TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
             } catch (IOException e) {
                 HashMap<String, Object> content = new HashMap<>();
-                content.put("errors", e.getMessage());
+                content.put("errors", new ErrorResponseEntity(e.getMessage()));
                 return Response.status(Response.Status.BAD_REQUEST).entity(content).build();
             }
 
