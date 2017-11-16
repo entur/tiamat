@@ -30,17 +30,16 @@
 
 package org.rutebanken.tiamat.rest.graphql.fetchers;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
+import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfEntitiesMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
 import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
@@ -50,11 +49,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("groupOfStopPlacesUpdater")
@@ -77,6 +74,9 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
     @Autowired
     private StopPlaceMapper stopPlaceMapper;
+
+    @Autowired
+    private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
     private MutateLock mutateLock;
@@ -109,10 +109,14 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
                 existingVersion = findAndVerify(netexId);
 
+
+                // Create Copy, populate
+
             } else {
 
                 logger.info("Creating new GroupOfStopPlaces");
                 groupOfStopPlaces = new GroupOfStopPlaces();
+                boolean isUpdated = groupOfEntitiesMapper.populate(input, groupOfStopPlaces);
             }
 
         }
@@ -121,11 +125,11 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
     private GroupOfStopPlaces findAndVerify(String netexId) {
         GroupOfStopPlaces existingGroupOfStopPlaces = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
-        verifyStopPlaceNotNull(existingGroupOfStopPlaces, netexId);
+        verifyGroupOfStopPlacesNotNull(existingGroupOfStopPlaces, netexId);
         return existingGroupOfStopPlaces;
     }
 
-    private void verifyStopPlaceNotNull(GroupOfStopPlaces existingGroupOfStopPlaces, String netexId) {
+    private void verifyGroupOfStopPlacesNotNull(GroupOfStopPlaces existingGroupOfStopPlaces, String netexId) {
         Preconditions.checkArgument(existingGroupOfStopPlaces != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
     }
 }
