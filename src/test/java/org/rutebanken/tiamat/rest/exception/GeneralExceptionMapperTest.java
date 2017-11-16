@@ -39,7 +39,7 @@ public class GeneralExceptionMapperTest {
     public void nestedAccessDeniedExceptionYieldsForbidden() {
         Response rsp = new GeneralExceptionMapper().toResponse(new TransactionSystemException("", new AccessDeniedException("Nope")));
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), rsp.getStatus());
-        Assert.assertEquals("Nope", ((ErrorResponseEntity) rsp.getEntity()).message);
+        Assert.assertEquals("Nope", ((ErrorResponseEntity) rsp.getEntity()).errors.get(0).message);
     }
 
 
