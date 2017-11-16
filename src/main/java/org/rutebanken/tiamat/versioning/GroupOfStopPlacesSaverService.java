@@ -57,16 +57,20 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         validateMembers(newVersion);
 
         GroupOfStopPlaces existing = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+        String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
 
         GroupOfStopPlaces result;
         if(existing != null) {
             BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
             existing.setValidBetween(null);
+            existing.setChanged(Instant.now());
+            existing.setChangedBy(usernameForAuthenticatedUser);
             versionIncrementor.incrementVersion(existing);
             result = groupOfStopPlacesRepository.save(existing);
 
         } else {
             newVersion.setCreated(Instant.now());
+            newVersion.setChangedBy(usernameForAuthenticatedUser);
             versionIncrementor.incrementVersion(newVersion);
             result = groupOfStopPlacesRepository.save(newVersion);
         }
