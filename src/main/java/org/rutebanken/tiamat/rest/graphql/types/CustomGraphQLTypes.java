@@ -606,14 +606,6 @@ public class CustomGraphQLTypes {
                     .type(GraphQLInt)
                     .description(MOBILITY_RESTRICTED_TRAVELLER_DURATION_DESCRIPTION))
             .build();
-    
-    public static GraphQLInputObjectType quayIdReferenceInputObjectType = GraphQLInputObjectType
-            .newInputObject()
-            .name("Quay_id")
-            .field(newInputObjectField()
-                    .name(ID)
-                    .type(GraphQLString))
-            .build();
 
     public static GraphQLInputObjectType refInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_ENTITY_REF)
@@ -626,6 +618,18 @@ public class CustomGraphQLTypes {
                     .name(ENTITY_REF_VERSION)
                     .type(GraphQLString)
                     .description(ENTITY_REF_VERSION_DESCRIPTION))
+            .build();
+
+    /**
+     * Versionless refInputObjectType
+     */
+    public static GraphQLInputObjectType versionLessRefInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_VERSION_LESS_ENTITY_REF)
+            .description(VERSION_LESS_ENTITY_REF_DESCRIPTION)
+            .field(newInputObjectField()
+                    .name(ENTITY_REF_REF)
+                    .type(new GraphQLNonNull(GraphQLString))
+                    .description(ENTITY_REF_REF_DESCRIPTION))
             .build();
 
     public static GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()

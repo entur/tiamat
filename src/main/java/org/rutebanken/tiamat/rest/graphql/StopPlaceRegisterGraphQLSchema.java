@@ -15,15 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.execution.ExecutionStrategy;
-import graphql.parser.antlr.GraphqlListener;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
@@ -299,7 +295,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
-        GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType(validBetweenInputObjectType);
+        GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType();
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
@@ -662,7 +658,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private GraphQLInputObjectType createGroupOfStopPlacesInputObjectType(GraphQLInputObjectType validBetweenInputObjectType) {
+    private GraphQLInputObjectType createGroupOfStopPlacesInputObjectType() {
         return newInputObject()
                 .name(INPUT_TYPE_GROUP_OF_STOPPLACES)
                 .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
@@ -670,12 +666,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
-                .field(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)))
                 .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
-                .field(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType))
-                .field(newInputObjectField()
-                        .name(GROUP_OF_STOP_PLACES_MEMBERS)
-                .type(new GraphQLList(refInputObjectType)))
+                .field(newInputObjectField().name(GROUP_OF_STOP_PLACES_MEMBERS)
+                .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
     }
 
