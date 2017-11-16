@@ -21,14 +21,18 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class VersionCreatorTest extends TiamatIntegrationTest {
@@ -191,6 +195,60 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         StopPlace parentCopy = versionCreator.createCopy(parent, StopPlace.class);
         assertThat(parentCopy.getChildren()).hasSize(2);
 
+    }
+
+    /**
+     * When copying entity with place equipments, make sure the netex id and version is removed.
+     * This is because of historical reasons where we had an issue with unique constrainst, due to inconsistent place/installed equipment versions.
+     * See NRP-2348 and relevant queries for detecting this issue here: https://github.com/entur/tiamat-scripts/tree/master/fix_inconsistent_equipment
+     */
+    @Test
+    public void stopPlacePlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
+        stopPlace.setVersion(1L);
+        stopPlace.setPlaceEquipments(createPlaceEquipment());
+
+        StopPlace copy = versionCreator.createCopy(stopPlace, StopPlace.class);
+        assertPlaceEquipmentIdAndVersionIsEmpty(copy.getPlaceEquipments());
+    }
+
+    @Test
+    public void quayPlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
+        Quay quay = new Quay();
+        quay.setNetexId(NetexIdHelper.generateRandomizedNetexId(quay));
+        quay.setVersion(1L);
+        quay.setPlaceEquipments(createPlaceEquipment());
+
+        Quay copy = versionCreator.createCopy(quay, Quay.class);
+        assertPlaceEquipmentIdAndVersionIsEmpty(copy.getPlaceEquipments());
+    }
+
+    private void assertPlaceEquipmentIdAndVersionIsEmpty(PlaceEquipment placeEquipment) {
+        assertThat(placeEquipment).isNotNull();
+        assertThat(placeEquipment.getNetexId()).isNull();
+        assertThat(placeEquipment.getVersion()).isZero();
+
+        assertThat(placeEquipment.getInstalledEquipment())
+                .isNotNull()
+                .hasSize(1);
+        InstalledEquipment_VersionStructure copiedInstalledEquipment = placeEquipment.getInstalledEquipment().get(0);
+
+        assertThat(copiedInstalledEquipment.getNetexId()).isNull();
+        assertThat(copiedInstalledEquipment.getVersion()).isZero();
+    }
+
+    private PlaceEquipment createPlaceEquipment() {
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        placeEquipment.setNetexId(NetexIdHelper.generateRandomizedNetexId(placeEquipment));
+        placeEquipment.setVersion(1L);
+
+        TicketingEquipment ticketingEquipment = new TicketingEquipment();
+        ticketingEquipment.setNetexId(NetexIdHelper.generateRandomizedNetexId(ticketingEquipment));
+        ticketingEquipment.setVersion(1L);
+
+        placeEquipment.getInstalledEquipment().add(ticketingEquipment);
+        return placeEquipment;
     }
 
 }
