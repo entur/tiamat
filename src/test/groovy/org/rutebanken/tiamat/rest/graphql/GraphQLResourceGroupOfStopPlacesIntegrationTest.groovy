@@ -85,12 +85,12 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
                 .root("data.group.members.find { it.id == '" + stopPlace2.getNetexId() + "'}")
-                    .body("version", equalTo(String.valueOf(stopPlace2.getVersion()+1)))
+                    .body("version", equalTo(String.valueOf(stopPlace2.getVersion())))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("name", nullValue())
                 .root("data.group.members.find { it.id == '" + stopPlace1.getNetexId() + "'}")
                     .body("name", nullValue())
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
-                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion()+1)))
+                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())))
     }
 }
