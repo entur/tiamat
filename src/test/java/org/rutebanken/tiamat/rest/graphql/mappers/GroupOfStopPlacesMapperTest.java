@@ -53,8 +53,10 @@ public class GroupOfStopPlacesMapperTest {
 
         groupOfStopPlacesMapper.populate(input, groupOfStopPlaces);;
 
-        assertThat(groupOfStopPlaces.getMembers()).isNotEmpty();
-        assertThat(groupOfStopPlaces.getMembers()).extracting(StopPlaceReference::getRef).contains(stopPlaceRef);
+        assertThat(groupOfStopPlaces.getMembers())
+                .isNotEmpty()
+                .extracting(StopPlaceReference::getRef)
+                    .contains(stopPlaceRef);
 
     }
 
