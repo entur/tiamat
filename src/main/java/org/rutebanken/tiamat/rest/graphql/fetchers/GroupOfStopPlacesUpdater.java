@@ -102,6 +102,7 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
                     existingVersion = findAndVerify(netexId);
                     updatedGroupOfStopPlaces = groupOfStopPlacesSaverService.createCopy(existingVersion, GroupOfStopPlaces.class);
+                    updatedGroupOfStopPlaces.getMembers().clear();
 
                 } else {
                     logger.info("Creating new GroupOfStopPlaces");
