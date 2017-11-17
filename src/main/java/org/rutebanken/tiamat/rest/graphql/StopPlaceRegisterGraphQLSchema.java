@@ -668,7 +668,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
                 .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
                 .field(newInputObjectField().name(GROUP_OF_STOP_PLACES_MEMBERS)
-                .type(new GraphQLList(versionLessRefInputObjectType)))
+                        .description("References to group of stop places members. Stop place IDs.")
+                        .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
     }
 
