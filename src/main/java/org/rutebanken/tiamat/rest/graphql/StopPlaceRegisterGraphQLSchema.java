@@ -318,7 +318,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
                         .name(MUTATE_GROUP_OF_STOP_PLACES)
-                        .type(new GraphQLList(groupOfStopPlacesInputObjectType))
+                        .type(groupOfStopPlacesObjectType)
                         .description("Mutate group of stop places")
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
@@ -667,7 +667,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
                 .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
-                .field(newInputObjectField().name(GROUP_OF_STOP_PLACES_MEMBERS)
+                .field(newInputObjectField()
+                        .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .description("References to group of stop places members. Stop place IDs.")
                         .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
