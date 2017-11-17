@@ -55,27 +55,32 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
         stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2)
 
-
         def groupName = "Group name"
         def versionComment = "VersionComment"
 
         def graphQlJsonQuery = """mutation {
-                 group: ${GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES} ({
-                          members:[{ref:"${stopPlace1.getNetexId()}"} ,{ref:"${stopPlace2.getNetexId()}"}]
-                          name: { value: "${groupName}"}
-                          versionComment:"${versionComment}"
-                       }) {
-                              id
-                              name { value }
-                              members {
-                                id
-                                name { value }
-                                stopPlaceType
-                                version
-                              }
-                              versionComment
-                          }
-                  } """
+                                    group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
+                                        name: {value: "${groupName}"},
+                                        versionComment: "${versionComment}",
+                                        members: [
+                                            {ref: "${stopPlace1.getNetexId()}"},
+                                            {ref: "${stopPlace2.getNetexId()}"}],
+                                        }) {
+                                    id
+                                    version
+                                    name {
+                                      value
+                                    }
+                                    members {
+                                      id
+                                      name {
+                                        value
+                                      }
+                                      version
+                                    }
+                                  }
+                                }
+                                """
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
