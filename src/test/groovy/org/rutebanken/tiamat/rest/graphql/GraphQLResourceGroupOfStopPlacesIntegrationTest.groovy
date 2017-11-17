@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.model.*
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor
 import org.rutebanken.tiamat.time.ExportTimeZone
+import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
@@ -55,6 +56,8 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
         stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2)
 
+        saveStops(stopPlace1, stopPlace2)
+
         def groupName = "Group name"
         def versionComment = "VersionComment"
 
@@ -68,6 +71,7 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                                         }) {
                                     id
                                     version
+                                    versionComment
                                     name {
                                       value
                                     }
@@ -77,6 +81,9 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                                         value
                                       }
                                       version
+                                      ... on StopPlace {
+                                        stopPlaceType
+                                      }
                                     }
                                   }
                                 }
@@ -84,6 +91,7 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
+                .body("data.group.versionComment", equalTo(versionComment))
                 .root("data.group.members.find { it.id == '" + stopPlace2.getNetexId() + "'}")
                     .body("version", equalTo(String.valueOf(stopPlace2.getVersion())))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
