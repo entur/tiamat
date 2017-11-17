@@ -38,10 +38,12 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.TiamatExceptionWhileDataFetching;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfEntitiesMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
 import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,19 +63,13 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
     private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesUpdater.class);
 
     @Autowired
-    private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
+    private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
-
-    @Autowired
-    private ReflectionAuthorizationService authorizationService;
-
-    @Autowired
-    private StopPlaceMapper stopPlaceMapper;
 
     @Autowired
     private GroupOfEntitiesMapper groupOfEntitiesMapper;
@@ -87,42 +83,43 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
         CleanupHelper.trimValues(environment.getArguments());
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_GROUP_OF_STOP_PLACES)) {
-                return createOrUpdateGroupOfStopPlaces(environment, false);
+                return createOrUpdateGroupOfStopPlaces(environment);
             }
         }
-        return null;
+        throw new IllegalArgumentException("Could not find a field with name " + MUTATE_GROUP_OF_STOP_PLACES);
     }
 
 
-    private GroupOfStopPlaces createOrUpdateGroupOfStopPlaces(DataFetchingEnvironment environment, boolean mutateParent) {
-        GroupOfStopPlaces groupOfStopPlaces;
-        GroupOfStopPlaces existingVersion = null;
+    private GroupOfStopPlaces createOrUpdateGroupOfStopPlaces(DataFetchingEnvironment environment) {
+        return mutateLock.executeInLock(() -> {
+            GroupOfStopPlaces updatedGroupOfStopPlaces;
+            GroupOfStopPlaces existingVersion = null;
+            Map input = environment.getArgument(OUTPUT_TYPE_GROUP_OF_STOPPLACES);
 
-        Map input = environment.getArgument(OUTPUT_TYPE_GROUP_OF_STOPPLACES);
+            if (input != null) {
 
-        if (input != null) {
+                String netexId = (String) input.get(ID);
 
-            String netexId = (String) input.get(ID);
+                if (netexId != null) {
 
-            if (netexId != null) {
+                    logger.info("About to update GroupOfStopPlaces {}", netexId);
 
-                logger.info("About to update GroupOfStopPlaces {}", netexId);
+                    existingVersion = findAndVerify(netexId);
+                    updatedGroupOfStopPlaces = groupOfStopPlacesSaverService.createCopy(existingVersion, GroupOfStopPlaces.class);
 
-                existingVersion = findAndVerify(netexId);
+                } else {
+                    logger.info("Creating new GroupOfStopPlaces");
+                    updatedGroupOfStopPlaces = new GroupOfStopPlaces();
+                }
 
-                groupOfEntitiesMapper.populate(input, existingVersion);
-
-                // Create Copy, populate
-
-            } else {
-
-                logger.info("Creating new GroupOfStopPlaces");
-                groupOfStopPlaces = new GroupOfStopPlaces();
-                boolean isUpdated = groupOfEntitiesMapper.populate(input, groupOfStopPlaces);
+                boolean isUpdated = groupOfEntitiesMapper.populate(input, updatedGroupOfStopPlaces);
+                if (isUpdated) {
+                    logger.info("Saving {}", updatedGroupOfStopPlaces);
+                    return groupOfStopPlacesSaverService.saveNewVersion(existingVersion, updatedGroupOfStopPlaces);
+                }
             }
-
-        }
-        return existingVersion;
+            return existingVersion;
+        });
     }
 
     private GroupOfStopPlaces findAndVerify(String netexId) {
