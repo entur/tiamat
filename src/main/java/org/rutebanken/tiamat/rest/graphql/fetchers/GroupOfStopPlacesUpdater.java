@@ -34,17 +34,13 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.TiamatExceptionWhileDataFetching;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
-import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfEntitiesMapper;
-import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfStopPlacesMapper;
 import org.rutebanken.tiamat.service.MutateLock;
 import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
-import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +68,7 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
-    private GroupOfEntitiesMapper groupOfEntitiesMapper;
+    private GroupOfStopPlacesMapper groupOfStopPlacesMapper;
 
     @Autowired
     private MutateLock mutateLock;
@@ -112,12 +108,14 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
                     updatedGroupOfStopPlaces = new GroupOfStopPlaces();
                 }
 
-                boolean isUpdated = groupOfEntitiesMapper.populate(input, updatedGroupOfStopPlaces);
+                boolean isUpdated = groupOfStopPlacesMapper.populate(input, updatedGroupOfStopPlaces);
+
                 if (isUpdated) {
                     logger.info("Saving {}", updatedGroupOfStopPlaces);
                     return groupOfStopPlacesSaverService.saveNewVersion(existingVersion, updatedGroupOfStopPlaces);
                 }
             }
+            logger.warn("GroupOfStopPlaces was attemted mutated, but no changes were applied {}", existingVersion);
             return existingVersion;
         });
     }
