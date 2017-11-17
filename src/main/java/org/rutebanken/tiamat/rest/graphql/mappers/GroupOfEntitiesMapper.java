@@ -74,7 +74,7 @@ public class GroupOfEntitiesMapper {
 
         if(entity instanceof SiteElement) {
             SiteElement siteElement = (SiteElement) entity;
-            isUpdated = siteElementMapper.populate(input, siteElement);
+            isUpdated = isUpdated | siteElementMapper.populate(input, siteElement);
 
         }
         return isUpdated;

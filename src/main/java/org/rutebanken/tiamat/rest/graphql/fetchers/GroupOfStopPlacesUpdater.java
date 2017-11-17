@@ -103,12 +103,14 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
         if (input != null) {
 
             String netexId = (String) input.get(ID);
+
             if (netexId != null) {
 
                 logger.info("About to update GroupOfStopPlaces {}", netexId);
 
                 existingVersion = findAndVerify(netexId);
 
+                groupOfEntitiesMapper.populate(input, existingVersion);
 
                 // Create Copy, populate
 

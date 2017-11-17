@@ -50,7 +50,7 @@ public class StopPlaceMapper {
      * @return true if StopPlace or any og the attached Quays are updated
      */
     public boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
-        boolean isUpdated = groupOfEntitiesMapper.populate(input, stopPlace);
+        boolean isUpdated = false;
 
         if (input.get(STOP_PLACE_TYPE) != null) {
             stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));
@@ -91,6 +91,7 @@ public class StopPlaceMapper {
                 }
             }
         }
+        isUpdated = isUpdated | groupOfEntitiesMapper.populate(input, stopPlace);
 
         return isUpdated;
     }
