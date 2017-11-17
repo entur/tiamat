@@ -65,6 +65,7 @@ public class GroupOfStopPlacesObjectTypeCreator {
         fields.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         fields.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
         fields.add(newFieldDefinition().name(VERSION).type(GraphQLString).build());
+        fields.add(newFieldDefinition().name(VERSION_COMMENT).type(GraphQLString).build());
 
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
