@@ -75,7 +75,7 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
             result = groupOfStopPlacesRepository.save(newVersion);
         }
 
-        logger.info("Saved group of stop places {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
+        logger.info("Saved {}", result);
 
         return result;
     }
