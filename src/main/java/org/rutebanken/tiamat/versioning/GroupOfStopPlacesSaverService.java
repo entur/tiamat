@@ -84,9 +84,9 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         groupOfStopPlaces.getMembers().forEach(member -> {
             StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef());
             Preconditions.checkArgument(resolvedMember != null,
-                    "Member with reference " + member.getRef() + " does not exist when saving group of stop places");
+                    "Member with reference " + member.getRef() + " does not exist when saving group of stop places " + groupOfStopPlaces);
             Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
-                    "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead.");
+                    "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead. " + groupOfStopPlaces);
         });
     }
 
