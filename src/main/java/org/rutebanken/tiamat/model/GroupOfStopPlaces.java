@@ -26,7 +26,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "group_of_stop_place_members"
+            name = "group_of_stop_places_members"
     )
     private Set<StopPlaceReference> members = new HashSet<>();
 
