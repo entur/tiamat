@@ -55,9 +55,7 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
         stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)))
         stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2)
-
-        saveStops(stopPlace1, stopPlace2)
-
+        
         def groupName = "Group name"
         def versionComment = "VersionComment"
 
