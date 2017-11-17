@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,12 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 @Component
 public class GroupOfStopPlacesMapper {
 
+    private final GroupOfEntitiesMapper groupOfEntitiesMapper;
+
     @Autowired
-    private GroupOfEntitiesMapper groupOfEntitiesMapper;
+    public GroupOfStopPlacesMapper(GroupOfEntitiesMapper groupOfEntitiesMapper) {
+        this.groupOfEntitiesMapper = groupOfEntitiesMapper;
+    }
 
     public boolean populate(Map input, GroupOfStopPlaces entity) {
 
