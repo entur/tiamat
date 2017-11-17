@@ -196,7 +196,7 @@ public class StopPlaceRegisterGraphQLSchema {
                     return stopPlaceObjectType;
                 }
             }
-            return null;
+            throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
         });
 
         GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
