@@ -57,11 +57,6 @@ public class StopPlaceMapper {
             isUpdated = true;
         }
 
-        if (input.get(VERSION_COMMENT) != null) {
-            stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
-            isUpdated = true;
-        }
-
         if (input.get(VALID_BETWEEN) != null) {
             stopPlace.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
             isUpdated = true;

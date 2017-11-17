@@ -55,6 +55,10 @@ public class GroupOfEntitiesMapper {
             isUpdated = true;
         }
 
+        if (input.get(VERSION_COMMENT) != null) {
+            entity.setVersionComment((String) input.get(VERSION_COMMENT));
+            isUpdated = true;
+        }
 
         if (input.get(KEY_VALUES) != null) {
             List<Map> keyValues = (List) input.get(KEY_VALUES);
