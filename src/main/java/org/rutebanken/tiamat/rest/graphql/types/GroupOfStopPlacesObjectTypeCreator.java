@@ -30,12 +30,12 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
+import graphql.schema.*;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.ReferenceFetcher;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,8 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 @Component
 public class GroupOfStopPlacesObjectTypeCreator {
 
-    private ReferenceFetcher referenceFetcher;
+    @Autowired
+    private GroupOfStopPlacesMembersFetcher groupOfStopPlacesMembersFetcher;
 
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface) {
 
@@ -71,7 +72,7 @@ public class GroupOfStopPlacesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface))
-                        .dataFetcher(referenceFetcher))
+                        .dataFetcher(groupOfStopPlacesMembersFetcher))
                 .build();
     }
 }
