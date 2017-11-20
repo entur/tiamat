@@ -77,7 +77,7 @@ public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPla
 
         GroupOfStopPlacesSearch groupOfStopPlacesSearch = GroupOfStopPlacesSearch.newGroupOfStopPlacesSearchBuilder()
                 .stopPlaceId(environment.getArgument(FIND_BY_STOP_PLACE_ID))
-                .idList(environment.getArgument(ID) != null ? Arrays.asList(environment.getArgument(ID)): null)
+                .idList(environment.containsArgument(ID) ? Arrays.asList( (String) environment.getArgument(ID)) : null)
                 .query(environment.getArgument(QUERY))
                 .build();
 
