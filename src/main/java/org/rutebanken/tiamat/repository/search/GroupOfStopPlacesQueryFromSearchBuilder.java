@@ -58,6 +58,10 @@ public class GroupOfStopPlacesQueryFromSearchBuilder {
         List<String> orderByStatements = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
 
+        if(search.getStopPlaceId() != null) {
+            queryString.append(" join group_of_stop_places_members m on m.group_of_stop_places_id = g.id ");
+        }
+
         if(search == null) {
             logger.info("empty search object for group of stop places");
             return Pair.of(queryString.toString(), parameters);
@@ -74,6 +78,12 @@ public class GroupOfStopPlacesQueryFromSearchBuilder {
             operators.add("and");
             parameters.put("query", search.getQuery());
             orderByStatements.add("similarity(g.name_value, :query) desc");
+        }
+
+        if(search.getStopPlaceId() != null) {
+            wheres.add("m.ref in (:stopPlaceIds)");
+            operators.add("and");
+            parameters.put("stopPlaceIds", search.getStopPlaceId());
         }
 
         searchHelper.addWheres(queryString, wheres, operators);
