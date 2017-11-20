@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.*;
  * Builds query from stop place search params
  */
 @Component
-public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
+public class StopPlaceQueryFromSearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceQueryFromSearchBuilder.class);
 
@@ -113,6 +114,9 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
     // Together with distinct and nearby search, the next line slows everything down too much:
 //                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
 
+
+    @Autowired
+    private SearchHelper searchHelper;
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
@@ -235,21 +239,15 @@ public class StopPlaceQueryFromSearchBuilder extends SearchBuilder {
         operators.add("and");
         wheres.add(SQL_NOT_PARENT_STOP_PLACE);
 
-        addWheres(queryString, wheres, operators);
+        searchHelper.addWheres(queryString, wheres, operators);
 
         orderByStatements.add("s.netex_id, s.version asc");
-        queryString.append(" order by");
 
-        for (int i = 0; i < orderByStatements.size(); i++) {
-            if (i > 0) {
-                queryString.append(',');
-            }
-            queryString.append(' ').append(orderByStatements.get(i)).append(' ');
-        }
+        searchHelper.addOrderByStatements(queryString, orderByStatements);
 
-        final String generatedSql = basicFormatter.format(queryString.toString());
+        final String generatedSql = searchHelper.format(queryString.toString());
 
-        logger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), stopPlaceSearch);
+        searchHelper.logIfLoggable(generatedSql, parameters, stopPlaceSearch, logger);
 
         return Pair.of(generatedSql, parameters);
     }

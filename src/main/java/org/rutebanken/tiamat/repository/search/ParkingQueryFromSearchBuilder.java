@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +29,12 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class ParkingQueryFromSearchBuilder extends SearchBuilder {
+public class ParkingQueryFromSearchBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingQueryFromSearchBuilder.class);
 
+    @Autowired
+    private SearchHelper searchHelper;
 
     public Pair<String, Map<String, Object>> buildQueryFromSearch(ParkingSearch parkingSearch) {
 
@@ -63,16 +66,10 @@ public class ParkingQueryFromSearchBuilder extends SearchBuilder {
                 operators.add("and");
             }
         }
-        addWheres(queryString, wheres, operators);
+        searchHelper.addWheres(queryString, wheres, operators);
 
-        final String generatedSql = basicFormatter.format(queryString.toString());
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("{}", generatedSql);
-            logger.debug("params: {}", parameters.toString());
-        }
+        final String generatedSql = searchHelper.format(queryString.toString());
+        searchHelper.logIfLoggable(generatedSql, parameters, parkingSearch, logger);
         return Pair.of(generatedSql, parameters);
-
-
     }
 }

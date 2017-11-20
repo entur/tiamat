@@ -18,30 +18,33 @@ package org.rutebanken.tiamat.repository.search;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.rutebanken.tiamat.exporter.params.SearchObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public abstract class SearchBuilder {
+@Component
+public class SearchHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(SearchHelper.class);
 
     protected static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
-    public void addWheres(StringBuilder generatedSql, List<String> wheres, List<String> operators) {
+    public void addWheres(StringBuilder queryString, List<String> wheres, List<String> operators) {
 
         for (int i = 0; i < wheres.size(); i++) {
             if (i > 0) {
-                generatedSql.append(operators.get(i - 1));
+                queryString.append(operators.get(i - 1));
             } else {
-                generatedSql.append("where");
+                queryString.append("where");
             }
-            generatedSql.append(' ').append(wheres.get(i)).append(' ');
+            queryString.append(' ').append(wheres.get(i)).append(' ');
         }
-
     }
 
     public void addParams(SQLQuery sqlQuery, Map<String, Object> parameters) {
@@ -52,5 +55,25 @@ public abstract class SearchBuilder {
                 sqlQuery.setParameter(parameter, value);
             }
         });
+    }
+
+    public String format(String query) {
+        return basicFormatter.format(query);
+    }
+
+    public void addOrderByStatements(StringBuilder queryString, List<String> orderByStatements) {
+        queryString.append( "order by ");
+        for (int i = 0; i < orderByStatements.size(); i++) {
+            if (i > 0) {
+                queryString.append(',');
+            }
+            queryString.append(' ').append(orderByStatements.get(i)).append(' ');
+        }
+    }
+
+    public void logIfLoggable(String generatedSql, Map<String, Object> parameters, SearchObject searchObject, Logger relevantLogger) {
+        if (relevantLogger.isInfoEnabled()) {
+            relevantLogger.info("sql: {}\nparams: {}\nSearch object: {}", generatedSql, parameters.toString(), searchObject.toString());
+        }
     }
 }
