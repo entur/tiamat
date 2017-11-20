@@ -48,13 +48,17 @@ public class SearchHelper {
     }
 
     public void addParams(SQLQuery sqlQuery, Map<String, Object> parameters) {
-        parameters.forEach((parameter, value) -> {
-            if (value instanceof Collection) {
-                sqlQuery.setParameterList(parameter, (Collection) value);
-            } else {
-                sqlQuery.setParameter(parameter, value);
-            }
-        });
+        if(parameters != null && sqlQuery != null) {
+            parameters.forEach((parameter, value) -> {
+                if(value != null) {
+                    if (value instanceof Collection) {
+                        sqlQuery.setParameterList(parameter, (Collection) value);
+                    } else {
+                        sqlQuery.setParameter(parameter, value);
+                    }
+                }
+            });
+        }
     }
 
     public String format(String query) {
