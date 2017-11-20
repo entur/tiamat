@@ -62,6 +62,11 @@ public class SearchHelper {
     }
 
     public void addOrderByStatements(StringBuilder queryString, List<String> orderByStatements) {
+
+        if(orderByStatements.isEmpty()) {
+            return;
+        }
+
         queryString.append( "order by ");
         for (int i = 0; i < orderByStatements.size(); i++) {
             if (i > 0) {
