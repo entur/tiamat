@@ -58,13 +58,13 @@ public class GroupOfStopPlacesQueryFromSearchBuilder {
         List<String> orderByStatements = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
 
-        if(search.getStopPlaceId() != null) {
-            queryString.append(" join group_of_stop_places_members m on m.group_of_stop_places_id = g.id ");
-        }
-
         if(search == null) {
             logger.info("empty search object for group of stop places");
             return Pair.of(queryString.toString(), parameters);
+        }
+
+        if(search.getStopPlaceId() != null) {
+            queryString.append(" join group_of_stop_places_members m on m.group_of_stop_places_id = g.id ");
         }
 
         if(search.getIdList() != null && !search.getIdList().isEmpty()) {
