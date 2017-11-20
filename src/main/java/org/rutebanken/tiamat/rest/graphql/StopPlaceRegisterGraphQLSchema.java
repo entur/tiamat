@@ -398,8 +398,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLString)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
-                .name(VERSION)
-                .type(GraphQLInt)
+                .name(QUERY)
+                .type(GraphQLString)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
