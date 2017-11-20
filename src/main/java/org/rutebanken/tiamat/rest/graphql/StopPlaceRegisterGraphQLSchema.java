@@ -391,7 +391,7 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments(GraphQLArgument allVersionsArgument) {
+    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments() {
         List<GraphQLArgument> arguments = createPageAndSizeArguments();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
@@ -405,7 +405,6 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
                 .build());
-        arguments.add(allVersionsArgument);
         return arguments;
     }
 
