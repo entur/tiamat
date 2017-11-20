@@ -402,7 +402,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLInt)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_GROUP_OF_STOP_PLACEs_ID)
+                .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
                 .build());
         arguments.add(allVersionsArgument);
