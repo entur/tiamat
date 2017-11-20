@@ -276,7 +276,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(GROUP_OF_STOP_PLACES)
                         .type(new GraphQLList(groupOfStopPlacesObjectType))
                         .description("Group of stop places")
-                        .argument(createFindGroupOfStopPlacesArguments(allVersionsArgument))
+                        .argument(createFindGroupOfStopPlacesArguments())
                         .dataFetcher(groupOfStopPlacesFetcher)
                         .build())
                 .build();

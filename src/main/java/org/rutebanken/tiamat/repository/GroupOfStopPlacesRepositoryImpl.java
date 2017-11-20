@@ -24,6 +24,7 @@ import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.search.GroupOfStopPlacesQueryFromSearchBuilder;
 import org.rutebanken.tiamat.repository.search.SearchHelper;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import java.util.*;
 
 public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesRepositoryCustom {
 
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -51,6 +53,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
         Pair<String, Map<String, Object>> pair = groupOfStopPlacesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
         SQLQuery query = session.createSQLQuery(pair.getFirst());
+        query.addEntity(GroupOfStopPlaces.class);
 
         searchHelper.addParams(query, pair.getSecond());
 

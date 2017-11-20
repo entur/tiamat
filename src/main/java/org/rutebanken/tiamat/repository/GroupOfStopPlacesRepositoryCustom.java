@@ -16,12 +16,13 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 
 import java.util.List;
 
 public interface GroupOfStopPlacesRepositoryCustom {
 
-    List findGroupOfStopPlaces(GroupOfStopPlacesSearch search);
+    List<GroupOfStopPlaces> findGroupOfStopPlaces(GroupOfStopPlacesSearch search);
 
 }
 
