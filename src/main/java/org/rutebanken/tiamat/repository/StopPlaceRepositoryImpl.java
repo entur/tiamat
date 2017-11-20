@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.repository.search.SearchHelper;
 import org.rutebanken.tiamat.repository.search.StopPlaceQueryFromSearchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +113,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
     private StopPlaceQueryFromSearchBuilder stopPlaceQueryFromSearchBuilder;
+
+    @Autowired
+    private SearchHelper searchHelper;
 
     /**
      * Find nearby stop places that are valid 'now', specifying a bounding box.
@@ -457,7 +461,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
-        stopPlaceQueryFromSearchBuilder.addParams(sqlQuery, queryWithParams.getSecond());;
+        searchHelper.addParams(sqlQuery, queryWithParams.getSecond());;
 
         sqlQuery.addEntity(StopPlace.class);
         sqlQuery.setReadOnly(true);
@@ -476,7 +480,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
         SQLQuery query = session.createSQLQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
 
-        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+        searchHelper.addParams(query, pair.getSecond());
 
         @SuppressWarnings("unchecked")
         Set<String> result =  new HashSet<>(query.list());
@@ -489,7 +493,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
         SQLQuery query = session.createSQLQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
 
-        stopPlaceQueryFromSearchBuilder.addParams(query, pair.getSecond());
+        searchHelper.addParams(query, pair.getSecond());
 
         Set<Long> result = new HashSet<>();
         for(Object object : query.list()) {
