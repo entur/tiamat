@@ -34,6 +34,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -74,24 +75,13 @@ public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPla
     @Transactional
     public Page<GroupOfStopPlaces> get(DataFetchingEnvironment environment) {
 
-        List<GroupOfStopPlaces> groupOfStopPlaces = groupOfStopPlacesRepository.findAll();
+        GroupOfStopPlacesSearch groupOfStopPlacesSearch = GroupOfStopPlacesSearch.newGroupOfStopPlacesSearchBuilder()
+                .stopPlaceId(environment.getArgument(FIND_BY_STOP_PLACE_ID))
+                .idList(environment.getArgument(ID) != null ? Arrays.asList(environment.getArgument(ID)): null)
+                .query(environment.getArgument(QUERY))
+                .build();
 
-//        ExportParams.Builder exportParamsBuilder = newExportParamsBuilder();
-//        StopPlaceSearch.Builder stopPlaceSearchBuilder = newStopPlaceSearchBuilder();
-//
-//        logger.info("Searching for StopPlaces with arguments {}", environment.getArguments());
-//
-//        Page<StopPlace> stopPlacesPage = new PageImpl<>(new ArrayList<>());
-
-//        stopPlaceSearchBuilder.setPage(environment.getArgument(PAGE)).setSize(environment.getArgument(SIZE));
-//
-//        String netexId = environment.getArgument(ID);
-//        String importedId = environment.getArgument(IMPORTED_ID_QUERY);
-//        Integer version = environment.getArgument(VERSION);
-//
-//        String key = environment.getArgument(KEY);
-//        List<String> values = environment.getArgument(VALUES);
-
+        List<GroupOfStopPlaces> groupOfStopPlaces = groupOfStopPlacesRepository.findGroupOfStopPlaces(groupOfStopPlacesSearch);
 
         return new PageImpl<>(groupOfStopPlaces, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), groupOfStopPlaces.size());
     }
