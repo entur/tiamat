@@ -661,7 +661,7 @@ public class StopPlaceRegisterGraphQLSchema {
         return newInputObject()
                 .name(INPUT_TYPE_GROUP_OF_STOPPLACES)
                 .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
-                .field(newInputObjectField().name(NAME).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
                 .field(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
