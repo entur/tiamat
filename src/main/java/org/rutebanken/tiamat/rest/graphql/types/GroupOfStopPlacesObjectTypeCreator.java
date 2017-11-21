@@ -30,25 +30,20 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.*;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.ReferenceFetcher;
-import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 
 @Component
 public class GroupOfStopPlacesObjectTypeCreator {
@@ -58,22 +53,28 @@ public class GroupOfStopPlacesObjectTypeCreator {
 
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface) {
 
-        List<GraphQLFieldDefinition> fields = new ArrayList<>();
-
-        fields.add(netexIdFieldDefinition);
-        fields.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
-        fields.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
-        fields.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
-        fields.add(newFieldDefinition().name(VERSION).type(GraphQLString).build());
-        fields.add(newFieldDefinition().name(VERSION_COMMENT).type(GraphQLString).build());
-
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
-                .fields(fields)
+                .field(netexIdFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(SHORT_NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(DESCRIPTION)
+                        .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(VERSION_COMMENT)
+                        .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface))
                         .dataFetcher(groupOfStopPlacesMembersFetcher))
-                .build();
+                        .build();
     }
 }
