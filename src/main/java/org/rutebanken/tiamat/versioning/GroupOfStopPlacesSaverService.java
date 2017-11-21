@@ -62,6 +62,8 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         GroupOfStopPlaces result;
         if(existing != null) {
             BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
+            existing.getMembers().clear();
+            existing.getMembers().addAll(newVersion.getMembers());
             existing.setValidBetween(null);
             existing.setChanged(Instant.now());
             existing.setChangedBy(usernameForAuthenticatedUser);

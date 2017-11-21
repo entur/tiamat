@@ -85,4 +85,38 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
         assertThatThrownBy(() -> groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces)).isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    public void addMembers() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+
+        GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlaceRepository.save(stopPlace2);
+
+        GroupOfStopPlaces changed = new GroupOfStopPlaces();
+        changed.setNetexId(saved.getNetexId());
+        changed.setName(new EmbeddableMultilingualString("name"));
+        changed.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        changed.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
+
+
+        groupOfStopPlacesSaverService.saveNewVersion(changed);
+
+        List<GroupOfStopPlaces> all = groupOfStopPlacesRepository.findAll();
+        assertThat(all).hasSize(1);
+        GroupOfStopPlaces actual = all.get(0);
+        assertThat(actual.getMembers())
+                .hasSize(2)
+                .extracting(StopPlaceReference::getRef).contains(stopPlace.getNetexId(), stopPlace2.getNetexId());
+
+    }
+
+
 }
