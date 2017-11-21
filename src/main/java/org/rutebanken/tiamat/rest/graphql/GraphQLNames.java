@@ -130,6 +130,7 @@ public class GraphQLNames {
 
     public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
+    public static final String STOP_PLACE_GROUPS = "groups";
 
 
     public static final String OUTPUT_TYPE_QUAY = "Quay";
