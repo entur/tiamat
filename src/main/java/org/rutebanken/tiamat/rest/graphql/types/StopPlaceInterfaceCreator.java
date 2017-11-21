@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.*;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class StopPlaceInterfaceCreator {
 
     @Autowired
     private TagObjectTypeCreator tagObjectTypeCreator;
+
+    @Autowired
+    private DataFetcher<List<StopPlace>> stopPlaceGroupsFetcher;
 
     @Autowired
     private TagFetcher tagFetcher;
@@ -75,6 +79,11 @@ public class StopPlaceInterfaceCreator {
                 .name(TAGS)
                 .type(new GraphQLList(tagObjectTypeCreator.create()))
                 .dataFetcher(tagFetcher).build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(STOP_PLACE_GROUPS)
+                .type(new GraphQLList(new GraphQLTypeReference(GROUP_OF_STOP_PLACES)))
+                .dataFetcher(stopPlaceGroupsFetcher)
+                .build());
         return stopPlaceInterfaceFields;
     }
 
