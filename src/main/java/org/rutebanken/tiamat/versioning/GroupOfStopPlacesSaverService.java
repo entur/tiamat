@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.google.api.client.util.Preconditions;
+import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Arrays;
 
 /**
  * No history for group of stop places.
@@ -89,6 +91,8 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
                     "Member with reference " + member.getRef() + " does not exist when saving group of stop places " + groupOfStopPlaces);
             Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
                     "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead. " + groupOfStopPlaces);
+
+            authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(member));
         });
     }
 
