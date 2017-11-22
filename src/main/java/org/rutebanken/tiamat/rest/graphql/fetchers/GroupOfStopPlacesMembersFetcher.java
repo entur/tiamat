@@ -19,38 +19,22 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopPlaceReference;
-import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
+import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class GroupOfStopPlacesMembersFetcher implements DataFetcher<List<StopPlace>> {
 
     @Autowired
-    private ReferenceResolver referenceResolver;
+    private GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
 
     @Override
     public List<StopPlace> get(DataFetchingEnvironment dataFetchingEnvironment) {
         GroupOfStopPlaces groupOfStopPlaces = dataFetchingEnvironment.getSource();
-        if(groupOfStopPlaces.getMembers() != null) {
-
-            return groupOfStopPlaces.getMembers()
-                    .stream()
-                    .map(ref -> {
-                        StopPlace stopPlace = referenceResolver.resolve(ref);
-                        return stopPlace;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(toList());
-        }
-        return new ArrayList<>();
+        return groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces);
     }
 
 }

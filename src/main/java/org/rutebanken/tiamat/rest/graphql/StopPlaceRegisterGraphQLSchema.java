@@ -117,6 +117,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<GroupOfStopPlaces> groupOfStopPlacesUpdater;
 
     @Autowired
+    private DataFetcher<Boolean> groupOfStopPlacesDeleterFetcher;
+
+    @Autowired
     DataFetcher pathLinkFetcher;
 
     @Autowired
@@ -344,6 +347,14 @@ public class StopPlaceRegisterGraphQLSchema {
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
+                .field(newFieldDefinition()
+                        .type(GraphQLBoolean)
+                        .name("deleteGroupOfStopPlaces")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(ID)
+                                .type(new GraphQLNonNull(GraphQLString)))
+                        .description("Hard delete group of stop places by ID")
+                        .dataFetcher(groupOfStopPlacesDeleterFetcher))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
