@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -41,11 +40,11 @@ public class DtoQuayResourceTest {
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource(quayRepository);
+        dtoQuayResource = new DtoQuayResource(quayRepository, mock(DtoMappingSemaphore.class));
     }
 
     @Test
-    public void keyValueQuayMappingWithSize() throws IOException {
+    public void keyValueQuayMappingWithSize() throws IOException, InterruptedException {
         int keyValueMappingCount = 3;
         int size = 1;
 

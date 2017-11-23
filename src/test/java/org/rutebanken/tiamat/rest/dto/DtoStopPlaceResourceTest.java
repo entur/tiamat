@@ -40,11 +40,11 @@ public class DtoStopPlaceResourceTest {
 
     @Before
     public void setUp() {
-        dtoStopPlaceResource = new DtoStopPlaceResource(stopPlaceRepository);
+        dtoStopPlaceResource = new DtoStopPlaceResource(stopPlaceRepository, mock(DtoMappingSemaphore.class));
     }
 
     @Test
-    public void ikeyValueStopPlaceMappingWithWithSize() throws IOException {
+    public void keyValueStopPlaceMappingWithWithSize() throws IOException, InterruptedException {
         int keyValueMappingCount = 3;
         int size = 1;
 
