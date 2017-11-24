@@ -41,6 +41,7 @@ public class MutateLock {
 
     private final HazelcastInstance hazelcastInstance;
     private final int waitTimeoutSeconds;
+    public static final String LOCK_NAME = "mutate-lock";
 
 
     @Autowired
@@ -56,15 +57,14 @@ public class MutateLock {
 
     public <T> T executeInLock(Supplier<T> supplier) {
 
-        final String lockName = "mutate-lock";
-        final ILock lock = hazelcastInstance.getLock(lockName);
+        final ILock lock = hazelcastInstance.getLock(LOCK_NAME);
 
         try {
-            logger.info("Waiting for mutation lock");
+            logger.info("Waiting for mutation lock {}", LOCK_NAME);
             if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS, LOCK_MAX_LEASE_TIME_SECONDS, TimeUnit.SECONDS)) {
                 long started = System.currentTimeMillis();
                 try {
-                    logger.info("Got mutation lock");
+                    logger.info("Got mutation lock {}", LOCK_NAME);
                     return supplier.get();
                 } finally {
                     try {
@@ -72,14 +72,14 @@ public class MutateLock {
                     } catch (IllegalMonitorStateException ex) {
                         long timeSpent = System.currentTimeMillis()-started;
                         logger.warn("Could not unlock '{}'. Lease time could have been exeeded. Time spent {}ms",
-                                lockName, timeSpent, ex);
+                                LOCK_NAME, timeSpent, ex);
                     }
                 }
             } else {
-                throw new MutateLockException("Timed out waiting to aquire lock " + lockName + " after " + waitTimeoutSeconds + " seconds");
+                throw new MutateLockException("Timed out waiting to aquire lock " + LOCK_NAME + " after " + waitTimeoutSeconds + " seconds");
             }
         } catch (InterruptedException e) {
-            throw new MutateLockException("Interrupted while waiting for lock", e);
+            throw new MutateLockException("Interrupted while waiting for lock: " + LOCK_NAME, e);
         }
     }
 
