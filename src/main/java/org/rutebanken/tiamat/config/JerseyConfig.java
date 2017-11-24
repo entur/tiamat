@@ -15,29 +15,26 @@
 
 package org.rutebanken.tiamat.config;
 
-import com.google.common.collect.Sets;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.rutebanken.tiamat.rest.dto.*;
+import org.rutebanken.tiamat.rest.dto.DtoJbvCodeMappingResource;
+import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
+import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
+import org.rutebanken.tiamat.rest.exception.ErrorResponseEntityMessageBodyWriter;
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.RestoringImportResource;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.ApplicationPath;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,7 +68,9 @@ public class JerseyConfig {
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);
+
         publicResources.add(GeneralExceptionMapper.class);
+        publicResources.add(ErrorResponseEntityMessageBodyWriter.class);
 
         publicResources.add(ApiListingResource.class);
         publicResources.add(SwaggerSerializers.class);
@@ -109,6 +108,7 @@ public class JerseyConfig {
         resources.add(SwaggerSerializers.class);
 
         resources.add(GeneralExceptionMapper.class);
+        resources.add(ErrorResponseEntityMessageBodyWriter.class);
 
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean healthServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
@@ -142,6 +142,7 @@ public class JerseyConfig {
 
         adminResources.add(ApiListingResource.class);
         adminResources.add(SwaggerSerializers.class);
+        adminResources.add(ErrorResponseEntityMessageBodyWriter.class);
 
         ResourceConfig resourceConfig = new ResourceConfig(adminResources);
 

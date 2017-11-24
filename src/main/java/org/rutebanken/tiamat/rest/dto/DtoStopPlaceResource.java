@@ -56,7 +56,7 @@ public class DtoStopPlaceResource {
     @Path("/mapping/stop_place")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
-                                            @QueryParam("includeStopType") boolean includeStopType) throws InterruptedException {
+                                 @QueryParam("includeStopType") boolean includeStopType) throws InterruptedException {
 
         dtoMappingSemaphore.aquire();
         try {
@@ -81,8 +81,7 @@ public class DtoStopPlaceResource {
                     writer.close();
                 }
             }).build();
-        }
-        finally {
+        } finally {
             dtoMappingSemaphore.release();
         }
     }
