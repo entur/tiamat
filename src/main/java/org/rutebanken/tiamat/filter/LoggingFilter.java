@@ -49,16 +49,20 @@ public class LoggingFilter implements Filter {
 
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String requestUri = httpServletRequest.getRequestURI();
-            String userName = usernameFetcher.getUserNameForAuthenticatedUser();
 
-            if (logger.isTraceEnabled()) {
-                // If trace enable, log all headers.
-                String allHeaders = headersAsString(httpServletRequest);
-                logger.trace("{} User: '{}', Headers: '{}'", requestUri, userName, allHeaders.toString());
-            } else {
-                String clientName = httpServletRequest.getHeader(ET_CLIENT_NAME_HEADER);
-                String clientId = httpServletRequest.getHeader(ET_CLIENT_ID_HEADER);
-                logger.info("{}: User: '{}', Client: '{}', ID: '{}'", requestUri, userName, clientName, clientId);
+            if(!requestUri.startsWith("/health")) {
+
+                String userName = usernameFetcher.getUserNameForAuthenticatedUser();
+
+                if (logger.isTraceEnabled()) {
+                    // If trace enable, log all headers.
+                    String allHeaders = headersAsString(httpServletRequest);
+                    logger.trace("{} User: '{}', Headers: '{}'", requestUri, userName, allHeaders.toString());
+                } else {
+                    String clientName = httpServletRequest.getHeader(ET_CLIENT_NAME_HEADER);
+                    String clientId = httpServletRequest.getHeader(ET_CLIENT_ID_HEADER);
+                    logger.info("{}: User: '{}', Client: '{}', ID: '{}'", requestUri, userName, clientName, clientId);
+                }
             }
         }
 
