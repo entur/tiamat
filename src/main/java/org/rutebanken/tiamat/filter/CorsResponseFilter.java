@@ -28,6 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_ID_HEADER;
+import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_NAME_HEADER;
+
 /**
  * https://github.com/Smartling/spring-security-keycloak/issues/1
  */
@@ -43,7 +46,8 @@ public class CorsResponseFilter implements Filter {
 
         httpServletResponse.setHeader("Access-Control-Allow-Origin", "*"); //TODO: not *
         httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST, DELETE, PUT");
-        httpServletResponse.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Accept");
+        httpServletResponse.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Accept, "
+                                            + ET_CLIENT_ID_HEADER + ", " + ET_CLIENT_NAME_HEADER);
         httpServletResponse.setHeader("Access-Control-Max-Age", "3600");
         // If the call is an options call, do not return a body
         HttpServletRequest req = (HttpServletRequest)servletRequest;

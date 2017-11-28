@@ -41,6 +41,18 @@ import java.util.Set;
 @Configuration
 public class JerseyConfig {
 
+    /**
+     * Client ID header.
+     * Is used for identifiying clients calling our API
+     */
+    public static final String ET_CLIENT_ID_HEADER = "ET-Client-ID";
+
+    /**
+     * Client Name header.
+     * Is used for getting the name of clients calling our API.
+     */
+    public static final String ET_CLIENT_NAME_HEADER = "ET-Client-Name";
+
     public static final String SERVICES_PATH = "/services";
 
     public static final String SERVICES_ADMIN_PATH = SERVICES_PATH + "/admin";
