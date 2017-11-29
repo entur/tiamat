@@ -31,13 +31,13 @@ public class MetricsServiceConfig {
     private static final Logger logger = LoggerFactory.getLogger(MetricsServiceConfig.class);
 
     @Bean
-    public MetricsService metricsService(@Value("${graphite.server:}") String graphiteServerDns, @Value("${graphite.port:2003}") int graphitePort) {
+    public MetricsService metricsService(@Value("${graphite.server:}") String graphiteServerDns) {
 
         if(Strings.isNullOrEmpty(graphiteServerDns)) {
             logger.info("Not starting metrics service, as I was not supplied with graphite server dns name");
             return new DoNothingMetricsService();
         }
 
-        return new MetricsServiceImpl(graphiteServerDns, graphitePort);
+        return new MetricsServiceImpl(graphiteServerDns, 2003);
     }
 }
