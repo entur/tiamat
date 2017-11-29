@@ -53,9 +53,9 @@ public class MetricsServiceImpl implements MetricsService{
 
     private final MetricRegistry metrics = new MetricRegistry();
 
-    private GraphiteReporter reporter;
+    private final GraphiteReporter reporter;
 
-    private Graphite graphite;
+    private final Graphite graphite;
 
     public MetricsServiceImpl(String graphiteServerDns, int graphitePort) {
 
@@ -91,13 +91,14 @@ public class MetricsServiceImpl implements MetricsService{
 
     @Override
     public void registerRequestFromClient(String clientName, String clientId) {
-        metrics.counter("requests.from.client.name." + clientName).inc();
-        metrics.counter("requests.from.client.id." + clientId).inc();
+
+        metrics.meter("requests.from.client.name." + clientName).mark();
+        metrics.meter("requests.from.client.id." + clientId).mark();
     }
 
     @Override
     public void registerRequestFromUser(String userName) {
-        metrics.counter("requests.from.user.name." + userName).inc();
+        metrics.meter("requests.from.user.name." + userName).mark();
     }
 
 }
