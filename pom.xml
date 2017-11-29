@@ -122,6 +122,8 @@
         <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>0.0.3-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.3-SNAPSHOT</rutebanken-organisation.version>
+        <fabric8.version>2.3.6</fabric8.version>
+        <metrics.version>3.2.3</metrics.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -177,6 +179,18 @@
                 <version>${rutebanken-gcp-storage.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-graphite</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -218,6 +232,12 @@
             <artifactId>jaxb-xjc</artifactId>
             <version>${jaxb-version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-graphite</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.entur.helpers</groupId>
