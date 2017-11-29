@@ -79,6 +79,7 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
             result = groupOfStopPlacesRepository.save(newVersion);
         }
 
+        metricsService.registerEntitySaved(newVersion.getClass());
         logger.info("Saved {}", result);
 
         return result;

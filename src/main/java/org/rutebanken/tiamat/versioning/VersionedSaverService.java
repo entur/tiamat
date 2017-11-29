@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
+import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     @Autowired
     protected VersionIncrementor versionIncrementor;
+
+    @Autowired
+    protected MetricsService metricsService;
 
     @Autowired
     protected ReflectionAuthorizationService authorizationService;
@@ -111,6 +115,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         if(existingVersion != null) {
             tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
+        metricsService.registerEntitySaved(newVersion.getClass());
         return newVersion;
     }
 

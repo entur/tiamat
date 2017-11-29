@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.service.metrics;
 
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+
 public interface MetricsService {
 
     /**
@@ -23,4 +25,6 @@ public interface MetricsService {
     void registerRequestFromClient(String clientName, String clientId);
 
     void registerRequestFromUser(String userName);
+
+    void registerEntitySaved(Class<? extends IdentifiedEntity> entityClass);
 }

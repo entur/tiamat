@@ -30,17 +30,14 @@
 
 package org.rutebanken.tiamat.service.metrics;
 
-import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
-import com.codahale.metrics.Counter;
 import com.google.common.base.Strings;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -48,7 +45,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
-public class MetricsServiceImpl implements MetricsService{
+public class MetricsServiceImpl implements MetricsService {
     private static final Logger logger = LoggerFactory.getLogger(MetricsServiceImpl.class);
 
     private final MetricRegistry metrics = new MetricRegistry();
@@ -99,6 +96,11 @@ public class MetricsServiceImpl implements MetricsService{
     @Override
     public void registerRequestFromUser(String userName) {
         metrics.meter("requests.from.user.name." + userName).mark();
+    }
+
+    @Override
+    public void registerEntitySaved(Class<? extends IdentifiedEntity> entityClass) {
+        metrics.meter("saved." + entityClass.getSimpleName()).mark();
     }
 
 }

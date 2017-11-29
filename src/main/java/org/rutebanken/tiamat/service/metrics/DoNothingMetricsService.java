@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.service.metrics;
 
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+
 /**
  * Intentionally no implementation here.
  */
@@ -26,4 +28,9 @@ public class DoNothingMetricsService implements MetricsService {
     @Override
     public void registerRequestFromUser(String userName) {
     }
+
+    @Override
+    public void registerEntitySaved(Class<? extends IdentifiedEntity> entityClass) {
+    }
+
 }
