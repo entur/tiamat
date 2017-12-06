@@ -93,7 +93,7 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
             Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
                     "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead. " + groupOfStopPlaces);
 
-            authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(member));
+            authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(resolvedMember));
         });
     }
 
