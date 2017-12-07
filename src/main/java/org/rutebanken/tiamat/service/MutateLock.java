@@ -17,13 +17,11 @@ package org.rutebanken.tiamat.service;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -40,19 +38,28 @@ public class MutateLock {
     private static final Logger logger = LoggerFactory.getLogger(MutateLock.class);
 
     private final HazelcastInstance hazelcastInstance;
-    private final int waitTimeoutSeconds;
+    private final int waitTimeout;
     public static final String LOCK_NAME = "mutate-lock";
+    private final TimeUnit timeUnit;
 
 
     @Autowired
     public MutateLock(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
-        this.waitTimeoutSeconds = WAIT_FOR_LOCK_SECONDS;
+        this.waitTimeout = WAIT_FOR_LOCK_SECONDS;
+        timeUnit = TimeUnit.SECONDS;
     }
 
-    public MutateLock(HazelcastInstance hazelcastInstance, int waitTimeoutSeconds) {
+    public MutateLock(HazelcastInstance hazelcastInstance, int waitTimeout) {
         this.hazelcastInstance = hazelcastInstance;
-        this.waitTimeoutSeconds = waitTimeoutSeconds;
+        this.waitTimeout = waitTimeout;
+        timeUnit = TimeUnit.SECONDS;
+    }
+
+    public MutateLock(HazelcastInstance hazelcastInstance, int waitTimeout, TimeUnit timeUnit) {
+        this.hazelcastInstance = hazelcastInstance;
+        this.waitTimeout = waitTimeout;
+        this.timeUnit = timeUnit;
     }
 
     public <T> T executeInLock(Supplier<T> supplier) {
@@ -61,7 +68,7 @@ public class MutateLock {
 
         try {
             logger.info("Waiting for mutation lock {}", LOCK_NAME);
-            if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS, LOCK_MAX_LEASE_TIME_SECONDS, TimeUnit.SECONDS)) {
+            if (lock.tryLock(waitTimeout, timeUnit, LOCK_MAX_LEASE_TIME_SECONDS, TimeUnit.SECONDS)) {
                 long started = System.currentTimeMillis();
                 try {
                     logger.info("Got mutation lock {}", LOCK_NAME);
@@ -76,7 +83,7 @@ public class MutateLock {
                     }
                 }
             } else {
-                throw new MutateLockException("Timed out waiting to aquire lock " + LOCK_NAME + " after " + waitTimeoutSeconds + " seconds");
+                throw new MutateLockException("Timed out waiting to aquire lock " + LOCK_NAME + " after " + waitTimeout + " " + timeUnit);
             }
         } catch (InterruptedException e) {
             throw new MutateLockException("Interrupted while waiting for lock: " + LOCK_NAME, e);
